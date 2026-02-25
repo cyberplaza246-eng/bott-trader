@@ -328,16 +328,20 @@ class TradingBot:
     def _sync_balance(self):
         """Sync balance from broker or paper trader into the risk manager.
         
-        If relay fails, keep the last known good balance instead of
+        If relay fails, keep the last known good values instead of
         falling back to INITIAL_BALANCE ($50).
         """
         try:
             if self.mode == 'paper' and self.paper_trader:
                 self.risk_manager.sync_balance(self.paper_trader.current_balance)
             elif self.broker:
-                balance = self.broker.get_balance()
-                if balance and balance > 0:
-                    self.risk_manager.sync_balance(balance)
+                acct = self.broker.get_account_info()
+                if acct and acct.get('balance', 0) > 0:
+                    self.risk_manager.sync_balance(
+                        acct['balance'],
+                        leverage=acct.get('leverage'),
+                        free_margin=acct.get('margin_free'),
+                    )
                 else:
                     bot_logger.warning(
                         f"Balance sync returned None — keeping last known "

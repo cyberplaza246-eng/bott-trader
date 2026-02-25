@@ -148,6 +148,41 @@ class MT5Connector:
             return self.sim_balance
         account_info = mt5.account_info()
         return account_info.balance if account_info else None
+
+    def get_account_info(self):
+        """Get full account info: balance, equity, leverage, free_margin, margin."""
+        if self.relay_mode:
+            r = self._relay_get("/account")
+            if r:
+                return {
+                    'balance': r.get('balance', 0),
+                    'equity': r.get('equity', 0),
+                    'leverage': r.get('leverage', 100),
+                    'margin_free': r.get('margin_free', 0),
+                    'margin': r.get('margin', 0),
+                    'profit': r.get('profit', 0),
+                }
+            return None
+        if self.simulation_mode:
+            return {
+                'balance': self.sim_balance,
+                'equity': self.sim_equity,
+                'leverage': 100,
+                'margin_free': self.sim_balance * 0.95,
+                'margin': 0,
+                'profit': 0,
+            }
+        account_info = mt5.account_info()
+        if account_info:
+            return {
+                'balance': account_info.balance,
+                'equity': account_info.equity,
+                'leverage': account_info.leverage,
+                'margin_free': account_info.margin_free,
+                'margin': account_info.margin,
+                'profit': account_info.profit,
+            }
+        return None
     
     def get_equity(self):
         """Get current account equity"""

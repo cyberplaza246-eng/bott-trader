@@ -92,6 +92,8 @@ class RiskManager:
         self.daily_starting_balance = initial_balance
         self.open_trades = 0
         self.daily_loss = 0.0
+        self.account_leverage = 100  # Will be updated from broker
+        self.free_margin = initial_balance * 0.95  # Will be updated from broker
 
         # Set initial tier & limits (will be recalculated each cycle)
         self._current_tier_name = None
@@ -187,10 +189,14 @@ class RiskManager:
 
     # ── Balance Sync ──────────────────────────────────────────────────
 
-    def sync_balance(self, broker_balance):
-        """Sync balance from broker and refresh tier (call each cycle)."""
+    def sync_balance(self, broker_balance, leverage=None, free_margin=None):
+        """Sync balance, leverage, free margin from broker (call each cycle)."""
         if broker_balance and broker_balance > 0:
             self.current_balance = broker_balance
+            if leverage and leverage > 0:
+                self.account_leverage = leverage
+            if free_margin is not None:
+                self.free_margin = free_margin
             self._refresh_tier()
 
     def update_balance(self, new_balance):
@@ -272,21 +278,23 @@ class RiskManager:
         max_lots = self._current_tier['max_lot_size']
         position_size = max(0.01, min(position_size, max_lots))
 
-        # Apply margin safety cap: never use more than 30% of balance per trade
+        # Apply margin safety cap using ACTUAL account leverage & free margin
         # 1 lot = 100,000 units of BASE currency
         # For XXX/USD pairs (e.g. EUR/USD): margin = entry_price * 100,000 / leverage
-        # For USD/XXX pairs (e.g. USD/JPY): margin = 100,000 / leverage (fixed $1,000 at 100:1)
-        estimated_leverage = 100  # Conservative assumption
+        # For USD/XXX pairs (e.g. USD/JPY): margin = 100,000 / leverage
+        leverage = self.account_leverage
         if pair and pair.upper().startswith('USD/'):
-            margin_per_lot = 100_000 / estimated_leverage  # $1,000
+            margin_per_lot = 100_000 / leverage
         else:
-            margin_per_lot = (entry_price * 100_000) / estimated_leverage
+            margin_per_lot = (entry_price * 100_000) / leverage
         if margin_per_lot > 0:
-            max_lots_by_margin = (self.current_balance * 0.30) / margin_per_lot
+            # Use 80% of free margin (leave 20% buffer for spread/slippage)
+            usable_margin = self.free_margin * 0.80
+            max_lots_by_margin = usable_margin / margin_per_lot
             if position_size > max_lots_by_margin:
                 bot_logger.info(
                     f"Margin cap: {position_size:.2f} lots → {max_lots_by_margin:.2f} lots "
-                    f"(30% of ${self.current_balance:.2f} margin limit)"
+                    f"(free margin ${self.free_margin:.2f}, leverage {leverage}:1)"
                 )
                 position_size = max(0.01, min(position_size, max_lots_by_margin))
 
