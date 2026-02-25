@@ -132,6 +132,9 @@ class TradingBot:
                     
                     self._execute_trade(pair, signal_result, df)
                     self.last_signal_time[pair] = datetime.now()
+                    # Re-sync free margin after placing a trade so next pair
+                    # sees updated margin availability
+                    self._sync_balance()
                 
                 # Update open positions
                 self._update_positions(pair)
