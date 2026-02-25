@@ -1,0 +1,2 @@
+# Ai-bot
+trading forex
