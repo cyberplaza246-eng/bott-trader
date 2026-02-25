@@ -39,3 +39,13 @@
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed: 400 Client Error: Bad Request for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/order"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: No money (retcode=10019)'}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for EUR/USD: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: No money (retcode=10019)'}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed: 400 Client Error: Bad Request for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/order"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for EUR/USD: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: Invalid stops (retcode=10016)'}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: Invalid stops (retcode=10016)'}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}

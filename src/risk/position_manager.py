@@ -273,10 +273,14 @@ class RiskManager:
         position_size = max(0.01, min(position_size, max_lots))
 
         # Apply margin safety cap: never use more than 30% of balance per trade
-        # Assumes ~100:1 leverage, 1 lot ≈ 100,000 units
-        # margin_per_lot ≈ entry_price * 100,000 / leverage
+        # 1 lot = 100,000 units of BASE currency
+        # For XXX/USD pairs (e.g. EUR/USD): margin = entry_price * 100,000 / leverage
+        # For USD/XXX pairs (e.g. USD/JPY): margin = 100,000 / leverage (fixed $1,000 at 100:1)
         estimated_leverage = 100  # Conservative assumption
-        margin_per_lot = (entry_price * 100_000) / estimated_leverage
+        if pair and pair.upper().startswith('USD/'):
+            margin_per_lot = 100_000 / estimated_leverage  # $1,000
+        else:
+            margin_per_lot = (entry_price * 100_000) / estimated_leverage
         if margin_per_lot > 0:
             max_lots_by_margin = (self.current_balance * 0.30) / margin_per_lot
             if position_size > max_lots_by_margin:
@@ -306,7 +310,14 @@ class RiskManager:
             'max_lot_size': max_lots,
         }
 
-    def calculate_stop_loss(self, entry_price, atr, trade_type):
+    @staticmethod
+    def _price_digits(pair=None):
+        """Return decimal places for a pair (3 for JPY, 5 for others)."""
+        if pair and 'JPY' in pair.upper():
+            return 3
+        return 5
+
+    def calculate_stop_loss(self, entry_price, atr, trade_type, pair=None):
         """
         Calculate stop-loss based on ATR
 
@@ -314,18 +325,19 @@ class RiskManager:
             entry_price: Entry price
             atr: Average True Range
             trade_type: 'BUY' or 'SELL'
+            pair: Currency pair for rounding precision
 
         Returns:
-            Stop-loss price
+            Stop-loss price (rounded to broker precision)
         """
         if trade_type == 'BUY':
             stop_loss = entry_price - (atr * STOP_LOSS_MULTIPLIER)
         else:  # SELL
             stop_loss = entry_price + (atr * STOP_LOSS_MULTIPLIER)
 
-        return stop_loss
+        return round(stop_loss, self._price_digits(pair))
 
-    def calculate_take_profit(self, entry_price, stop_loss_price, trade_type):
+    def calculate_take_profit(self, entry_price, stop_loss_price, trade_type, pair=None):
         """
         Calculate take-profit based on risk:reward ratio
 
@@ -333,9 +345,10 @@ class RiskManager:
             entry_price: Entry price
             stop_loss_price: Stop-loss price
             trade_type: 'BUY' or 'SELL'
+            pair: Currency pair for rounding precision
 
         Returns:
-            Take-profit price
+            Take-profit price (rounded to broker precision)
         """
         # Risk is distance to stop-loss
         risk = abs(entry_price - stop_loss_price)
@@ -348,7 +361,7 @@ class RiskManager:
         else:  # SELL
             take_profit = entry_price - reward
 
-        return take_profit
+        return round(take_profit, self._price_digits(pair))
 
     def on_trade_opened(self):
         """Called when a new trade is opened"""

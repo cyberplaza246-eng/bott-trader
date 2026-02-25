@@ -160,8 +160,8 @@ class TradingBot:
         atr = latest.get('atr', entry_price * 0.001)  # Fallback: 0.1% of price
         
         # Calculate risk parameters
-        stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, trade_type)
-        take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, trade_type)
+        stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, trade_type, pair=pair)
+        take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, trade_type, pair=pair)
         
         position_size = self.risk_manager.calculate_position_size(entry_price, stop_loss, pair=pair)
         
