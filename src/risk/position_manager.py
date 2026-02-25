@@ -106,13 +106,42 @@ class RiskManager:
     # ── Tier Management ───────────────────────────────────────────────
 
     def _refresh_tier(self):
-        """Recalculate the account tier based on current balance."""
+        """Recalculate the account tier based on current balance.
+        
+        Uses hysteresis to prevent flapping at tier boundaries:
+        - Upgrade: balance must reach tier's min_balance
+        - Downgrade: balance must drop 2% below current tier's min_balance
+        """
         old_tier = self._current_tier_name
-        for name, tier in ACCOUNT_TIERS.items():
-            if tier['min_balance'] <= self.current_balance < tier['max_balance']:
-                self._current_tier_name = name
-                self._current_tier = tier
-                break
+        tier_order = list(ACCOUNT_TIERS.keys())
+
+        if old_tier:
+            # Apply hysteresis: require 2% drop below current tier floor to downgrade
+            current_min = self._current_tier['min_balance']
+            downgrade_threshold = current_min * 0.98  # Must drop 2% below boundary
+
+            if self.current_balance < downgrade_threshold:
+                # Need to downgrade — find the correct lower tier
+                for name, tier in ACCOUNT_TIERS.items():
+                    if tier['min_balance'] <= self.current_balance < tier['max_balance']:
+                        self._current_tier_name = name
+                        self._current_tier = tier
+                        break
+            elif self.current_balance >= self._current_tier['max_balance']:
+                # Upgrade — find the correct higher tier
+                for name, tier in ACCOUNT_TIERS.items():
+                    if tier['min_balance'] <= self.current_balance < tier['max_balance']:
+                        self._current_tier_name = name
+                        self._current_tier = tier
+                        break
+            # else: stay in current tier (within hysteresis band)
+        else:
+            # First-time initialization
+            for name, tier in ACCOUNT_TIERS.items():
+                if tier['min_balance'] <= self.current_balance < tier['max_balance']:
+                    self._current_tier_name = name
+                    self._current_tier = tier
+                    break
 
         # Recalculate daily loss limit from live balance
         self.daily_loss_limit = self.current_balance * (DAILY_LOSS_LIMIT_PERCENT / 100)
@@ -121,8 +150,12 @@ class RiskManager:
         self.min_balance_threshold = max(5.0, self.current_balance * 0.20)
 
         if old_tier and old_tier != self._current_tier_name:
+            old_idx = tier_order.index(old_tier) if old_tier in tier_order else 0
+            new_idx = tier_order.index(self._current_tier_name) if self._current_tier_name in tier_order else 0
+            direction = 'UPGRADE' if new_idx > old_idx else 'DOWNGRADE'
+            emoji = '🎯' if direction == 'UPGRADE' else '⚠️'
             bot_logger.info(
-                f"🎯 ACCOUNT TIER UPGRADE: {old_tier} → {self._current_tier_name} "
+                f"{emoji} ACCOUNT TIER {direction}: {old_tier} → {self._current_tier_name} "
                 f"| Balance: ${self.current_balance:.2f} "
                 f"| Max lots: {self._current_tier['max_lot_size']} "
                 f"| Max trades: {self._current_tier['max_concurrent_trades']}"

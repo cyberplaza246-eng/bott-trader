@@ -149,15 +149,21 @@ class EnsembleTrader:
             'ema_crossover': {'signal': ema_signal['signal'], 'confidence': ema_signal['confidence']},
         })
         
+        # Separate active models (produced a directional signal) from inactive ones
+        active_signals = {k: v for k, v in all_signals.items() if v['signal'] != 'HOLD' or v['confidence'] > 0.0}
+        inactive_signals = {k: v for k, v in all_signals.items() if v['signal'] == 'HOLD' and v['confidence'] == 0.0}
+        
         buy_votes = sum(1 for s in all_signals.values() if s['signal'] == 'BUY')
         sell_votes = sum(1 for s in all_signals.values() if s['signal'] == 'SELL')
         
         # Determine final signal
         models_agreement = max(buy_votes, sell_votes)
         total_models = len(all_signals)
+        active_model_count = len(active_signals)
         
-        # Use adaptive threshold
-        min_agreement = MIN_MODELS_AGREEMENT
+        # Use adaptive threshold — scale min_agreement by active model ratio
+        # e.g., if only 3/8 models are active, require 2 instead of 3
+        min_agreement = max(2, int(MIN_MODELS_AGREEMENT * active_model_count / total_models + 0.5))
         
         if buy_votes > sell_votes and models_agreement >= min_agreement:
             final_signal = 'BUY'
@@ -172,11 +178,21 @@ class EnsembleTrader:
         if final_signal == 'SELL' and sr_signal.get('levels', {}).get('price_zone') == 'AT_SUPPORT':
             final_signal = 'SKIP'  # Safety: don't sell at the floor
         
-        # Calculate weighted confidence
-        weighted_confidence = sum(
-            all_signals[model]['confidence'] * weights.get(model, 0)
-            for model in all_signals
-        )
+        # Calculate weighted confidence — redistribute weight from inactive models
+        # to active ones so dead models don't drag confidence to unreachable levels
+        if active_signals:
+            # Collect weights for active models only, then renormalize
+            active_weights = {m: weights.get(m, 0) for m in active_signals}
+            active_w_sum = sum(active_weights.values())
+            if active_w_sum > 0:
+                active_weights = {m: w / active_w_sum for m, w in active_weights.items()}
+            
+            weighted_confidence = sum(
+                active_signals[model]['confidence'] * active_weights.get(model, 0)
+                for model in active_signals
+            )
+        else:
+            weighted_confidence = 0.0
         
         # Generate reasoning
         reason_parts = []

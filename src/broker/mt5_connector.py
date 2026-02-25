@@ -2,10 +2,13 @@
 MT5 Broker Connection and Order Management
 
 On Windows: Uses real MetaTrader5 API
-On Linux/Mac: Uses simulation mode for paper trading and backtesting
+On Linux/Mac: Connects via HTTP relay to a Windows machine running relay_server.py
+Fallback: Simulation mode for paper trading and backtesting
 """
 import pandas as pd
 import numpy as np
+import requests
+import os
 from datetime import datetime, timedelta
 from src.utils.logger import bot_logger, error_logger, trades_logger
 from config.strategy_config import MT5_ACCOUNT, MT5_PASSWORD, MT5_SERVER, PAIRS, TRADING_MODE
@@ -17,7 +20,14 @@ try:
 except ImportError:
     MT5_AVAILABLE = False
     mt5 = None
-    bot_logger.warning("MetaTrader5 not available (Linux/Mac). Using simulation mode.")
+
+# Check for relay URL (Linux → Windows bridge)
+MT5_RELAY_URL = os.getenv('MT5_RELAY_URL', '').rstrip('/')
+MT5_RELAY_TOKEN = os.getenv('MT5_RELAY_TOKEN', '')
+RELAY_AVAILABLE = bool(MT5_RELAY_URL)
+
+if not MT5_AVAILABLE and not RELAY_AVAILABLE:
+    bot_logger.warning("MetaTrader5 not available (Linux/Mac) and no MT5_RELAY_URL set. Using simulation mode.")
 
 
 class MT5Connector:
@@ -26,14 +36,68 @@ class MT5Connector:
         self.password = MT5_PASSWORD
         self.server = MT5_SERVER
         self.connected = False
-        self.simulation_mode = not MT5_AVAILABLE or TRADING_MODE in ('paper', 'backtest')
+        self.relay_mode = RELAY_AVAILABLE and not MT5_AVAILABLE
+        self.simulation_mode = (
+            not MT5_AVAILABLE and not RELAY_AVAILABLE
+        ) or TRADING_MODE in ('paper', 'backtest')
         self.sim_balance = 50.0
         self.sim_equity = 50.0
         self.sim_positions = []
         self.initialize()
+
+    # ── Relay helpers ─────────────────────────────────────────────────
+
+    def _relay_get(self, path, params=None, timeout=10):
+        """GET request to the relay server."""
+        headers = {"Authorization": f"Bearer {MT5_RELAY_TOKEN}"} if MT5_RELAY_TOKEN else {}
+        try:
+            r = requests.get(f"{MT5_RELAY_URL}{path}", params=params, headers=headers, timeout=timeout)
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            error_logger.error(f"Relay GET {path} failed: {e}")
+            return None
+
+    def _relay_post(self, path, data, timeout=10):
+        """POST request to the relay server."""
+        headers = {"Authorization": f"Bearer {MT5_RELAY_TOKEN}"} if MT5_RELAY_TOKEN else {}
+        try:
+            r = requests.post(f"{MT5_RELAY_URL}{path}", json=data, headers=headers, timeout=timeout)
+            if r.status_code != 200:
+                try:
+                    body = r.json()
+                except Exception:
+                    body = r.text
+                error_logger.error(f"Relay POST {path} failed ({r.status_code}): {body}")
+                return None
+            return r.json()
+        except Exception as e:
+            error_logger.error(f"Relay POST {path} failed: {e}")
+            return None
     
     def initialize(self):
-        """Initialize MT5 connection or simulation mode"""
+        """Initialize MT5 connection, relay, or simulation mode"""
+        if self.relay_mode and not self.simulation_mode:
+            # Test relay connection
+            result = self._relay_get("/ping")
+            if result and result.get("mt5_connected"):
+                self.connected = True
+                acct = self._relay_get("/account")
+                if acct and "balance" in acct:
+                    bot_logger.info(
+                        f"✅ MT5 Relay Connected | Account: {acct.get('login')} | "
+                        f"Balance: {acct['balance']} | Server: {acct.get('server')}"
+                    )
+                else:
+                    bot_logger.info(f"✅ MT5 Relay Connected at {MT5_RELAY_URL}")
+                return True
+            else:
+                bot_logger.warning(
+                    f"MT5 Relay at {MT5_RELAY_URL} not reachable — falling back to simulation"
+                )
+                self.relay_mode = False
+                self.simulation_mode = True
+
         if self.simulation_mode:
             self.connected = True
             bot_logger.info(
@@ -57,6 +121,8 @@ class MT5Connector:
     
     def get_account_info(self):
         """Get current account information"""
+        if self.relay_mode:
+            return self._relay_get("/account")
         if self.simulation_mode:
             return {
                 'login': self.account or 'SIM_ACCOUNT',
@@ -75,6 +141,9 @@ class MT5Connector:
     
     def get_balance(self):
         """Get current account balance"""
+        if self.relay_mode:
+            r = self._relay_get("/balance")
+            return r.get("balance") if r else None
         if self.simulation_mode:
             return self.sim_balance
         account_info = mt5.account_info()
@@ -82,6 +151,9 @@ class MT5Connector:
     
     def get_equity(self):
         """Get current account equity"""
+        if self.relay_mode:
+            r = self._relay_get("/equity")
+            return r.get("equity") if r else None
         if self.simulation_mode:
             return self.sim_equity
         account_info = mt5.account_info()
@@ -96,6 +168,17 @@ class MT5Connector:
         
         Automatically tries both 'EUR/USD' and 'EURUSD' symbol formats.
         """
+        if self.relay_mode:
+            r = self._relay_get("/candles", {
+                "pair": pair, "timeframe": timeframe_minutes, "count": num_candles
+            }, timeout=15)
+            if r and "candles" in r:
+                df = pd.DataFrame(r["candles"])
+                df["datetime"] = pd.to_datetime(df["datetime"])
+                return df
+            error_logger.error(f"Relay candles failed for {pair}: {r}")
+            return None
+
         if self.simulation_mode:
             return self._generate_simulated_candles(pair, timeframe_minutes, num_candles)
         
@@ -204,6 +287,16 @@ class MT5Connector:
 
     def get_latest_price(self, pair):
         """Get latest bid/ask price"""
+        if self.relay_mode:
+            r = self._relay_get("/price", {"pair": pair})
+            if r and "bid" in r:
+                return {
+                    "bid": r["bid"],
+                    "ask": r["ask"],
+                    "last": r.get("last", r["bid"]),
+                    "time": datetime.now(),
+                }
+            return None
         if self.simulation_mode:
             df = self.get_candles(pair, 1, 1)
             if df is not None and len(df) > 0:
@@ -234,6 +327,24 @@ class MT5Connector:
     
     def place_order(self, pair, order_type, lot_size, entry_price, stop_loss, take_profit):
         """Place a trading order"""
+        if self.relay_mode:
+            r = self._relay_post("/order", {
+                "pair": pair,
+                "type": order_type,
+                "lot_size": lot_size,
+                "stop_loss": stop_loss,
+                "take_profit": take_profit,
+            })
+            if r and "ticket" in r:
+                trades_logger.info(
+                    f"ORDER_PLACED (RELAY) | Pair: {pair} | Type: {order_type} | "
+                    f"Lot: {lot_size} | SL: {stop_loss:.5f} | TP: {take_profit:.5f} | "
+                    f"Ticket: {r['ticket']}"
+                )
+                return r["ticket"]
+            error_logger.error(f"Relay order failed for {pair}: {r}")
+            return None
+
         if self.simulation_mode:
             ticket = int(datetime.now().timestamp() * 1000) % 1000000
             self.sim_positions.append({
@@ -295,6 +406,14 @@ class MT5Connector:
     
     def close_position(self, pair, volume):
         """Close an open position"""
+        if self.relay_mode:
+            r = self._relay_post("/close", {"pair": pair, "volume": volume})
+            if r and "ticket" in r:
+                trades_logger.info(f"POSITION_CLOSED (RELAY) | Pair: {pair} | Ticket: {r['ticket']}")
+                return r["ticket"]
+            error_logger.error(f"Relay close failed for {pair}: {r}")
+            return None
+
         if self.simulation_mode:
             for i, pos in enumerate(self.sim_positions):
                 if pos['pair'] == pair:
@@ -338,6 +457,13 @@ class MT5Connector:
     
     def get_open_positions(self, pair=None):
         """Get open positions"""
+        if self.relay_mode:
+            params = {"pair": pair} if pair else {}
+            r = self._relay_get("/positions", params)
+            if r and "positions" in r:
+                return r["positions"]
+            return []
+
         if self.simulation_mode:
             positions = self.sim_positions
             if pair:

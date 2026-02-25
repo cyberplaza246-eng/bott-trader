@@ -1,0 +1,14 @@
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.05 | SL: 1.26488 | TP: 1.26458 | Ticket: 464472"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.05 | SL: 1.26488 | TP: 1.26458 | Ticket: 464483"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.05 | SL: 150.48184 | TP: 150.43431 | Ticket: 464704"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.05 | SL: 150.48184 | TP: 150.43431 | Ticket: 464726"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: BUY | Lot: 0.05 | SL: 1.26487 | TP: 1.26517 | Ticket: 497129"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: BUY | Lot: 0.05 | SL: 1.26499 | TP: 1.26526 | Ticket: 525955"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: BUY | Lot: 0.05 | SL: 150.49757 | TP: 150.54086 | Ticket: 526204"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: EUR/USD | Type: BUY | Lot: 0.05 | SL: 1.08504 | TP: 1.08528 | Ticket: 530562"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.05 | SL: 1.26533 | TP: 1.26506 | Ticket: 530709"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: EUR/USD | Type: SELL | Lot: 0.05 | SL: 1.08472 | TP: 1.08446 | Ticket: 558141"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: EUR/USD | Type: BUY | Lot: 0.05 | SL: 1.08519 | TP: 1.08546 | Ticket: 565252"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.05 | SL: 1.26502 | TP: 1.26475 | Ticket: 565458"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: EUR/USD | Type: SELL | Lot: 0.05 | SL: 1.08528 | TP: 1.08504 | Ticket: 604484"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.05 | SL: 150.55881 | TP: 150.51138 | Ticket: 904295"}

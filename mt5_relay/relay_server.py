@@ -193,12 +193,17 @@ def positions():
 
 @app.route("/order", methods=["POST"])
 def place_order():
-    data = request.json
-    pair = data.get("pair", "EURUSD")
-    order_type = data.get("type", "BUY")
-    lot_size = float(data.get("lot_size", 0.01))
-    sl = float(data.get("stop_loss", 0))
-    tp = float(data.get("take_profit", 0))
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "No JSON payload"}), 400
+        pair = data.get("pair", "EURUSD")
+        order_type = data.get("type", "BUY")
+        lot_size = float(data.get("lot_size", 0.01))
+        sl = float(data.get("stop_loss", 0))
+        tp = float(data.get("take_profit", 0))
+    except (ValueError, TypeError) as e:
+        return jsonify({"error": f"Invalid field format: {str(e)}"}), 400
 
     # Resolve symbol
     symbol = pair.replace("/", "")
@@ -215,38 +220,56 @@ def place_order():
     action_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
     price = tick.ask if order_type == "BUY" else tick.bid
 
-    req = {
-        "action": mt5.TRADE_ACTION_DEAL,
-        "symbol": symbol,
-        "volume": lot_size,
-        "type": action_type,
-        "price": price,
-        "sl": sl,
-        "tp": tp,
-        "deviation": 20,
-        "magic": 234000,
-        "comment": "AI Trading Bot",
-        "type_time": mt5.ORDER_TIME_GTC,
-        "type_filling": mt5.ORDER_FILLING_IOC,
-    }
+    # Try multiple filling types (broker compatibility)
+    filling_types = [
+        mt5.ORDER_FILLING_IOC,
+        mt5.ORDER_FILLING_FOK,
+        mt5.ORDER_FILLING_RETURN,
+    ]
 
-    result = mt5.order_send(req)
-    if result is None:
-        return jsonify({"error": "order_send returned None", "last_error": str(mt5.last_error())}), 500
+    last_error = None
+    for filling in filling_types:
+        req = {
+            "action": mt5.TRADE_ACTION_DEAL,
+            "symbol": symbol,
+            "volume": lot_size,
+            "type": action_type,
+            "price": price,
+            "sl": sl,
+            "tp": tp,
+            "deviation": 20,
+            "magic": 234000,
+            "comment": "AI Trading Bot",
+            "type_time": mt5.ORDER_TIME_GTC,
+            "type_filling": filling,
+        }
 
-    if result.retcode != mt5.TRADE_RETCODE_DONE:
-        return jsonify({
-            "error": f"Order failed: {result.comment}",
-            "retcode": result.retcode,
-        }), 400
+        print(f"  Trying order: {symbol} {order_type} {lot_size} lots, filling={filling}")
+        result = mt5.order_send(req)
 
-    return jsonify({
-        "ticket": result.order,
-        "pair": symbol,
-        "type": order_type,
-        "volume": lot_size,
-        "price": price,
-    })
+        if result is None:
+            last_error = f"order_send returned None: {mt5.last_error()}"
+            print(f"  ❌ {last_error}")
+            continue
+
+        if result.retcode == mt5.TRADE_RETCODE_DONE:
+            print(f"  ✅ Order placed! Ticket: {result.order}")
+            return jsonify({
+                "ticket": result.order,
+                "pair": symbol,
+                "type": order_type,
+                "volume": lot_size,
+                "price": price,
+            })
+
+        last_error = f"{result.comment} (retcode={result.retcode})"
+        print(f"  ❌ {last_error}")
+
+        # Don't retry if it's not a filling type issue
+        if result.retcode not in [10030, 10033]:
+            break
+
+    return jsonify({"error": f"Order failed: {last_error}"}), 400
 
 
 @app.route("/close", methods=["POST"])

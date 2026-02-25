@@ -31,3 +31,11 @@
 {"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: object of type 'NoneType' has no len()"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed: 400 Client Error: Bad Request for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/order"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for EUR/USD: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed: 400 Client Error: Bad Request for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/order"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for GBP/USD: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed: 400 Client Error: Bad Request for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/order"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed: 400 Client Error: Bad Request for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/order"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
