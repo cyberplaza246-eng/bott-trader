@@ -135,10 +135,10 @@ class TechnicalAnalyzer:
             confidence -= 0.25
             reason_parts.append("Stochastic overbought")
         
-        # Determine final signal
-        if confidence > 0.5:
+        # Determine final signal (lowered thresholds for responsiveness)
+        if confidence > 0.25:
             signal = 'BUY'
-        elif confidence < -0.5:
+        elif confidence < -0.25:
             signal = 'SELL'
         else:
             signal = 'HOLD'

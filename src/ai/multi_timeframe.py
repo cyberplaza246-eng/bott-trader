@@ -71,12 +71,12 @@ class MultiTimeframeAnalyzer:
                 sell_score += weight * sig['confidence']
 
         # Determine direction
-        if buy_score > sell_score and buy_score > 0.3:
+        if buy_score > sell_score and buy_score > 0.10:
             final_signal = 'BUY'
-            confluence = min(buy_score / 0.7, 1.0)  # Normalise
-        elif sell_score > buy_score and sell_score > 0.3:
+            confluence = min(buy_score / 0.5, 1.0)  # Normalise
+        elif sell_score > buy_score and sell_score > 0.10:
             final_signal = 'SELL'
-            confluence = min(sell_score / 0.7, 1.0)
+            confluence = min(sell_score / 0.5, 1.0)
         else:
             final_signal = 'HOLD'
             confluence = 0.0

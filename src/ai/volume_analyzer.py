@@ -78,7 +78,22 @@ class VolumeAnalyzer:
             confidence += 0.2
             reason_parts.append("Above average recent volume")
         
-        signal = 'BUY' if confidence > 0.4 else 'HOLD'
+        # Determine direction from price action + volume
+        price_change = (latest['close'] - prev['close']) / prev['close']
+        
+        if confidence >= 0.25:
+            # Volume is significant — determine direction from price
+            if price_change > 0.0005:  # Price moving up with volume
+                signal = 'BUY'
+                reason_parts.append(f"Price up {price_change:.4f} with volume")
+            elif price_change < -0.0005:  # Price moving down with volume
+                signal = 'SELL'
+                reason_parts.append(f"Price down {price_change:.4f} with volume")
+            else:
+                signal = 'HOLD'
+        else:
+            signal = 'HOLD'
+        
         reason = " | ".join(reason_parts) if reason_parts else "Normal volume conditions"
         
         return {
