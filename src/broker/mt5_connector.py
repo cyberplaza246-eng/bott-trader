@@ -93,6 +93,8 @@ class MT5Connector:
         
         In simulation mode: generates realistic synthetic data
         In live mode: fetches from MT5
+        
+        Automatically tries both 'EUR/USD' and 'EURUSD' symbol formats.
         """
         if self.simulation_mode:
             return self._generate_simulated_candles(pair, timeframe_minutes, num_candles)
@@ -111,25 +113,31 @@ class MT5Connector:
             error_logger.error(f"Unsupported timeframe: {timeframe_minutes}")
             return None
         
-        try:
-            candles = mt5.copy_rates_from_pos(pair, tf, 0, num_candles)
-            if candles is None:
-                error_logger.error(f"Failed to fetch candles for {pair}: {mt5.last_error()}")
-                return None
-            
-            df = pd.DataFrame(candles)
-            df['time'] = pd.to_datetime(df['time'], unit='s')
-            df = df[['time', 'open', 'high', 'low', 'close', 'tick_volume', 'real_volume']]
-            df.rename(columns={
-                'time': 'datetime',
-                'tick_volume': 'volume',
-                'real_volume': 'real_volume'
-            }, inplace=True)
-            
-            return df
-        except Exception as e:
-            error_logger.error(f"Error fetching candles for {pair}: {str(e)}")
-            return None
+        # Try multiple symbol formats (brokers differ)
+        symbol_variants = [pair, pair.replace('/', '')]
+        
+        for symbol in symbol_variants:
+            try:
+                # Ensure symbol is visible in Market Watch
+                if not mt5.symbol_select(symbol, True):
+                    continue
+                
+                candles = mt5.copy_rates_from_pos(symbol, tf, 0, num_candles)
+                if candles is not None and len(candles) > 0:
+                    df = pd.DataFrame(candles)
+                    df['time'] = pd.to_datetime(df['time'], unit='s')
+                    df = df[['time', 'open', 'high', 'low', 'close', 'tick_volume', 'real_volume']]
+                    df.rename(columns={
+                        'time': 'datetime',
+                        'tick_volume': 'volume',
+                        'real_volume': 'real_volume'
+                    }, inplace=True)
+                    return df
+            except Exception:
+                continue
+        
+        error_logger.error(f"Failed to fetch candles for {pair}: {mt5.last_error()}")
+        return None
     
     def _generate_simulated_candles(self, pair, timeframe_minutes, num_candles):
         """Generate realistic simulated OHLCV candles for paper trading/backtesting"""
@@ -183,6 +191,17 @@ class MT5Connector:
         
         return pd.DataFrame(data)
     
+    def _resolve_symbol(self, pair):
+        """Find the correct symbol name in MT5 (handles EUR/USD vs EURUSD)."""
+        if self.simulation_mode:
+            return pair
+        for variant in [pair, pair.replace('/', '')]:
+            info = mt5.symbol_info(variant)
+            if info is not None:
+                mt5.symbol_select(variant, True)
+                return variant
+        return pair  # fallback
+
     def get_latest_price(self, pair):
         """Get latest bid/ask price"""
         if self.simulation_mode:
@@ -198,8 +217,9 @@ class MT5Connector:
                 }
             return None
         
+        symbol = self._resolve_symbol(pair)
         try:
-            tick = mt5.symbol_info_tick(pair)
+            tick = mt5.symbol_info_tick(symbol)
             if tick:
                 return {
                     'bid': tick.bid,
@@ -236,11 +256,12 @@ class MT5Connector:
             return ticket
         
         try:
+            symbol = self._resolve_symbol(pair)
             action = mt5.ORDER_TYPE_BUY if order_type == 'BUY' else mt5.ORDER_TYPE_SELL
             
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": pair,
+                "symbol": symbol,
                 "volume": lot_size,
                 "type": action,
                 "price": entry_price,
@@ -283,7 +304,8 @@ class MT5Connector:
             return None
         
         try:
-            positions = mt5.positions_get(symbol=pair)
+            symbol = self._resolve_symbol(pair)
+            positions = mt5.positions_get(symbol=symbol)
             if not positions:
                 bot_logger.warning(f"No open position for {pair}")
                 return None
@@ -293,7 +315,7 @@ class MT5Connector:
             
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": pair,
+                "symbol": symbol,
                 "volume": volume,
                 "type": close_type,
                 "deviation": 20,
