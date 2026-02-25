@@ -310,12 +310,25 @@ class RiskManager:
             'max_lot_size': max_lots,
         }
 
+    # Minimum stop distance per pair type (in price units)
+    # Most brokers require at least 10-20 pips; we use 15 pips as safe default
+    MIN_STOP_DISTANCE = {
+        'JPY':     0.150,    # 15 pips (3-digit pairs)
+        'DEFAULT': 0.00150,  # 15 pips (5-digit pairs)
+    }
+
     @staticmethod
     def _price_digits(pair=None):
         """Return decimal places for a pair (3 for JPY, 5 for others)."""
         if pair and 'JPY' in pair.upper():
             return 3
         return 5
+
+    def _min_stop_distance(self, pair=None):
+        """Return the minimum allowed stop distance for a pair."""
+        if pair and 'JPY' in pair.upper():
+            return self.MIN_STOP_DISTANCE['JPY']
+        return self.MIN_STOP_DISTANCE['DEFAULT']
 
     def calculate_stop_loss(self, entry_price, atr, trade_type, pair=None):
         """
@@ -330,10 +343,19 @@ class RiskManager:
         Returns:
             Stop-loss price (rounded to broker precision)
         """
+        sl_distance = atr * STOP_LOSS_MULTIPLIER
+        min_dist = self._min_stop_distance(pair)
+        if sl_distance < min_dist:
+            bot_logger.info(
+                f"SL distance widened: {sl_distance:.5f} → {min_dist:.5f} "
+                f"(minimum {min_dist / (0.01 if pair and 'JPY' in pair.upper() else 0.0001):.0f} pips)"
+            )
+            sl_distance = min_dist
+
         if trade_type == 'BUY':
-            stop_loss = entry_price - (atr * STOP_LOSS_MULTIPLIER)
+            stop_loss = entry_price - sl_distance
         else:  # SELL
-            stop_loss = entry_price + (atr * STOP_LOSS_MULTIPLIER)
+            stop_loss = entry_price + sl_distance
 
         return round(stop_loss, self._price_digits(pair))
 
