@@ -40,7 +40,11 @@ class AdaptiveLearner:
         self.model_accuracy = defaultdict(lambda: {'correct': 0, 'total': 0})
         self.pair_stats = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
         self.session_stats = defaultdict(lambda: {'wins': 0, 'losses': 0})
-        self.confidence_threshold = 0.75
+        
+        # Use config threshold, not hardcoded
+        from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
+        self.confidence_threshold = ENSEMBLE_CONFIDENCE_THRESHOLD
+        
         self.consecutive_losses = 0
         self.max_consecutive_losses = 0
 
