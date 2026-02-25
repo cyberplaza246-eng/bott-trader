@@ -1,0 +1,12 @@
+84d0379 Enforce minimum 15-pip stop distance (fixes Invalid stops retcode=10016)
+9b29f01 Fix JPY stops and margin: round SL/TP to broker precision, fix USD-base margin calc
+fad7d00 Fix 3 critical bugs blocking live trades
+102c841 Fix relay: show error body, try multiple filling types for TradersWay
+525e20e Add MT5 relay server for Linux-to-Windows bridge
+ M logs/errors.log
+ M logs/signals.log
+ M logs/trading_bot.log
+ M mt5_relay/relay_server.py
+ M src/__pycache__/bot.cpython-312.pyc
+ M src/risk/__pycache__/position_manager.cpython-312.pyc
+?? logs/git_status.txt
