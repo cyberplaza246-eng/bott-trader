@@ -1978,3 +1978,100 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 1"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "Bot running in event-driven mode. Press Ctrl+C to stop."}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "======================================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\ude80 AI-Powered Forex Trading Bot Starting..."}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "======================================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 MT5 Relay Connected | Account: 1120409 | Balance: 999.96 | Server: TradersWay-Demo"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udde0 Ensemble running with all 8 models"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $50.00 | Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 Trading Bot initialized in LIVE mode (8-model ensemble)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\ude80 Starting Trading Bot in LIVE mode"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Running initial analysis..."}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Starting analysis cycle at 22:18:43"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf ACCOUNT TIER UPGRADE: micro \u2192 mini | Balance: $999.96 | Max lots: 0.5 | Max trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sync: risk_manager had 0 open trades, broker has 1 \u2014 corrected"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "NewsAPI key not configured, skipping news sentiment"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  S/R advisory: SELL near support \u2014 proceed with caution"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nEUR/USD Analysis:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Signal: SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Confidence: 70.6%"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Models Agreement: 2/8"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Details: LSTM: SELL (93%) | Sent: HOLD (0%) | Tech: HOLD (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (71%) | Candle: SELL (80%) | EMA: HOLD (0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "SL distance widened: 0.00036 \u2192 0.00150 (minimum 15 pips)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Margin cap: 0.07 lots \u2192 0.01 lots (free margin $408.87, leverage 4:1)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [mini]: Balance $999.96 | Risk 1.0% = $10.00 | Lot: 0.01 (max 0.5)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83c\udfaf EXECUTING SELL TRADE:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Pair: EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Entry: 1.18056"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Stop Loss: 1.18206"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Take Profit: 1.17756"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Lot Size: 0.01"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Risk: $10.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 Order placed - Ticket: 27019798"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Trade opened. Open positions: 2/3 [Tier: mini]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "NewsAPI key not configured, skipping news sentiment"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  S/R advisory: SELL near support \u2014 proceed with caution"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nGBP/USD Analysis:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Signal: SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Confidence: 71.3%"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Models Agreement: 2/8"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Details: LSTM: SELL (100%) | Sent: HOLD (0%) | Tech: HOLD (0%) | Vol: HOLD (20%) | MTF: HOLD (0%) | S/R: BUY (49%) | Candle: SELL (70%) | EMA: HOLD (0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "SL distance widened: 0.00039 \u2192 0.00150 (minimum 15 pips)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Margin cap: 0.07 lots \u2192 0.01 lots (free margin $408.87, leverage 4:1)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [mini]: Balance $999.96 | Risk 1.0% = $10.00 | Lot: 0.01 (max 0.5)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83c\udfaf EXECUTING SELL TRADE:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Pair: GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Entry: 1.35512"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Stop Loss: 1.35662"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Take Profit: 1.35212"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Lot Size: 0.01"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Risk: $10.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "NewsAPI key not configured, skipping news sentiment"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY Analysis:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Signal: SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Confidence: 72.2%"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Models Agreement: 3/8"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Details: LSTM: SELL (100%) | Sent: HOLD (0%) | Tech: HOLD (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: SELL (54%) | Candle: SELL (85%) | EMA: HOLD (0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "SL distance widened: 0.07956 \u2192 0.15000 (minimum 15 pips)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Margin cap: 0.10 lots \u2192 0.01 lots (free margin $408.87, leverage 4:1)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [mini]: Balance $999.96 | Risk 1.0% = $10.00 | Lot: 0.01 (max 0.5)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83c\udfaf EXECUTING SELL TRADE:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Pair: USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Entry: 156.30600"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Stop Loss: 156.45600"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Take Profit: 156.00600"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Lot Size: 0.01"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Risk: $10.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $999.96"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Mini ($200-$1K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.5 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 1899.9% | Next tier: Standard ($1K-$5K) ($0 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Bot running in event-driven mode. Press Ctrl+C to stop."}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Starting analysis cycle at 22:23:43"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $999.94"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Mini ($200-$1K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.5 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 1899.9% | Next tier: Standard ($1K-$5K) ($0 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Starting analysis cycle at 22:28:43"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sync: risk_manager had 2 open trades, broker has 4 \u2014 corrected"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Max concurrent trades (3) reached [Tier: mini]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $999.88"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Mini ($200-$1K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.5 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 1899.8% | Next tier: Standard ($1K-$5K) ($0 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 4"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: False"}

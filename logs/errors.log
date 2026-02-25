@@ -77,3 +77,7 @@
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for GBP/USD: None"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: No money (retcode=10019)'}"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: No money (retcode=10019)'}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for GBP/USD: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: No money (retcode=10019)'}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}

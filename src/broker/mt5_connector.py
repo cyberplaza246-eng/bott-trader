@@ -439,14 +439,33 @@ class MT5Connector:
             error_logger.error(f"Error placing order for {pair}: {str(e)}")
             return None
     
-    def close_position(self, pair, volume):
-        """Close an open position"""
+    def close_position(self, pair, volume, ticket=None):
+        """Close an open position by ticket or pair."""
         if self.relay_mode:
-            r = self._relay_post("/close", {"pair": pair, "volume": volume})
-            if r and "ticket" in r:
-                trades_logger.info(f"POSITION_CLOSED (RELAY) | Pair: {pair} | Ticket: {r['ticket']}")
-                return r["ticket"]
+            payload = {"volume": volume}
+            if ticket:
+                payload["ticket"] = ticket
+            else:
+                payload["pair"] = pair
+            r = self._relay_post("/close", payload)
+            if r and "closed" in r:
+                trades_logger.info(f"POSITION_CLOSED (RELAY) | Pair: {pair} | Closed ticket: {r['closed']}")
+                return r["closed"]
             error_logger.error(f"Relay close failed for {pair}: {r}")
+            return None
+
+    def close_all_positions(self):
+        """Close ALL open positions via relay or native MT5."""
+        if self.relay_mode:
+            r = self._relay_post("/close_all", {})
+            if r and "results" in r:
+                for res in r["results"]:
+                    if res.get("closed"):
+                        trades_logger.info(f"POSITION_CLOSED (RELAY) | Ticket: {res['ticket']}")
+                    else:
+                        error_logger.error(f"Failed to close ticket {res['ticket']}: {res.get('error')}")
+                return r["results"]
+            error_logger.error(f"Relay close_all failed: {r}")
             return None
 
         if self.simulation_mode:

@@ -12,3 +12,4 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.05 | SL: 1.26502 | TP: 1.26475 | Ticket: 565458"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: EUR/USD | Type: SELL | Lot: 0.05 | SL: 1.08528 | TP: 1.08504 | Ticket: 604484"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.05 | SL: 150.55881 | TP: 150.51138 | Ticket: 904295"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (RELAY) | Pair: EUR/USD | Type: SELL | Lot: 0.01 | SL: 1.18206 | TP: 1.17756 | Ticket: 27019798"}

@@ -1,0 +1,3 @@
+5d237ff Fix 3 critical bugs: S/R double-veto, live position sync, balance fallback
+84d0379 Enforce minimum 15-pip stop distance (fixes Invalid stops retcode=10016)
+9b29f01 Fix JPY stops and margin: round SL/TP to broker precision, fix USD-base margin calc
