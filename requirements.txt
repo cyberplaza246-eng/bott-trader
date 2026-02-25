@@ -4,8 +4,8 @@ numpy>=1.24.0
 python-dotenv>=1.0.0
 requests>=2.31.0
 
-# AI / Machine Learning
-tensorflow>=2.13.0
+# AI / Machine Learning (tensorflow is optional — install manually if your Python supports it)
+# pip install tensorflow>=2.13.0
 scikit-learn>=1.3.0
 
 # Technical Analysis (pure Python - no C dependency)

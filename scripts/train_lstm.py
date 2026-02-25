@@ -4,6 +4,9 @@ Downloads data → preprocesses → trains model → saves weights
 
 Can be run standalone:
     python -m scripts.train_lstm
+
+Requires TensorFlow (Python 3.10-3.12). If TensorFlow is not installed,
+the bot still works with 7 AI models — just skip this step.
 """
 import os
 import sys
@@ -12,6 +15,13 @@ import pandas as pd
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Check TensorFlow availability early
+try:
+    import tensorflow as tf
+    TF_AVAILABLE = True
+except ImportError:
+    TF_AVAILABLE = False
 
 from src.data.historical_downloader import HistoricalDownloader
 from src.ai.lstm_predictor import LSTMPredictor
@@ -41,6 +51,17 @@ def train_lstm(
         lookback:      LSTM lookback window
         use_features:  if True, train on multiple features (close + indicators)
     """
+    if not TF_AVAILABLE:
+        print("=" * 60)
+        print("❌ TensorFlow is NOT installed.")
+        print("   LSTM training requires TensorFlow (Python 3.10-3.12).")
+        print()
+        print("   Your bot will still work with 7 AI models!")
+        print("   To enable LSTM, install Python 3.12 from:")
+        print("   https://www.python.org/downloads/release/python-31210/")
+        print("=" * 60)
+        return False
+    
     pairs = pairs or PAIRS
     downloader = HistoricalDownloader()
     technical = TechnicalAnalyzer()

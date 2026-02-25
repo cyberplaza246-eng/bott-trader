@@ -1,17 +1,33 @@
 """
 LSTM Neural Network for Price Prediction
 Pre-trained or trained from historical data
+
+TensorFlow is OPTIONAL — if not installed, a lightweight stub is used
+so the rest of the 7-model ensemble still works.
 """
 import numpy as np
 import pandas as pd
-import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout, Input
-from sklearn.preprocessing import MinMaxScaler
-import pickle
 import os
 from src.utils.logger import bot_logger, error_logger
 from config.strategy_config import LSTM_MODEL_PATH, SCALER_PATH
+
+# --- Graceful TensorFlow import ---
+try:
+    import tensorflow as tf
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import LSTM, Dense, Dropout, Input
+    TF_AVAILABLE = True
+except ImportError:
+    TF_AVAILABLE = False
+    bot_logger.warning("⚠️  TensorFlow not installed — LSTM model disabled. "
+                       "Install with: pip install tensorflow>=2.13.0 (requires Python ≤3.12)")
+
+try:
+    from sklearn.preprocessing import MinMaxScaler
+except ImportError:
+    MinMaxScaler = None
+
+import pickle
 
 
 class LSTMPredictor:
@@ -20,12 +36,18 @@ class LSTMPredictor:
     def __init__(self, lookback_window=60):
         self.lookback_window = lookback_window
         self.model = None
-        self.scaler = MinMaxScaler(feature_range=(0, 1))
+        self.scaler = MinMaxScaler(feature_range=(0, 1)) if MinMaxScaler else None
         self.scaler_fitted = False
-        self.load_or_create_model()
+        self.available = TF_AVAILABLE  # Expose availability flag
+        if TF_AVAILABLE:
+            self.load_or_create_model()
+        else:
+            bot_logger.info("LSTM predictor running in stub mode (no TensorFlow)")
     
     def load_or_create_model(self):
         """Load existing model or create new one"""
+        if not TF_AVAILABLE:
+            return
         if os.path.exists(LSTM_MODEL_PATH) and os.path.exists(SCALER_PATH):
             try:
                 self.model = tf.keras.models.load_model(LSTM_MODEL_PATH)
@@ -87,6 +109,10 @@ class LSTMPredictor:
             epochs: Training epochs
             batch_size: Batch size
         """
+        if not TF_AVAILABLE:
+            error_logger.error("Cannot train LSTM: TensorFlow not installed")
+            return False
+        
         try:
             X, y = self.prepare_data(prices)
             
@@ -126,6 +152,8 @@ class LSTMPredictor:
           - Single-feature model (close price only)
           - Multi-feature model (close + rsi + macd + bb_pos + atr + vol_ratio)
         
+        Returns HOLD with 0 confidence when TensorFlow is not installed.
+        
         Args:
             df: DataFrame with closing prices (and optionally indicators)
         
@@ -136,6 +164,13 @@ class LSTMPredictor:
                 'reason': 'explanation'
             }
         """
+        if not TF_AVAILABLE or self.model is None:
+            return {
+                'signal': 'HOLD',
+                'confidence': 0.0,
+                'reason': 'LSTM disabled (TensorFlow not installed)'
+            }
+        
         try:
             if len(df) < self.lookback_window:
                 return {

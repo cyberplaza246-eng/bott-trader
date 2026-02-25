@@ -1,7 +1,7 @@
 """
 Main Auto-Trading Bot Loop
 Runs continuously to monitor, analyze, and execute trades.
-Now with: 7-model ensemble, adaptive learning, dashboard, S/R-aware exits
+Now with: up to 8-model ensemble (LSTM optional), adaptive learning, dashboard, S/R-aware exits
 """
 import os
 import time
@@ -44,6 +44,9 @@ class TradingBot:
         self.ensemble = EnsembleTrader(newsapi_key=newsapi_key, broker=self.broker)
         self.risk_manager = RiskManager(initial_balance=INITIAL_BALANCE)
         
+        # Determine active model count
+        model_count = 8 if self.ensemble.lstm_available else 7
+        
         if self.mode == 'paper':
             self.paper_trader = PaperTradingManager(initial_balance=INITIAL_BALANCE)
         else:
@@ -52,7 +55,7 @@ class TradingBot:
         self.last_signal_time = {}  # Track last signal per pair
         self.signal_cooldown_minutes = 15  # Don't trade same pair more than every 15 mins
         
-        bot_logger.info(f"✅ Trading Bot initialized in {self.mode.upper()} mode (8-model ensemble)")
+        bot_logger.info(f"✅ Trading Bot initialized in {self.mode.upper()} mode ({model_count}-model ensemble)")
     
     def should_skip_signal(self, pair):
         """Prevent over-trading the same pair"""

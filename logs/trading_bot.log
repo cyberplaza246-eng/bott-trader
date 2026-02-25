@@ -385,3 +385,7 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 Simulation Mode Active | Balance: $50.00 | Mode: paper"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "NewsAPI key not configured, skipping news sentiment"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "LSTM predictor running in stub mode (no TensorFlow)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udde0 Ensemble running with 7 models (LSTM disabled \u2014 no TensorFlow)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "NewsAPI key not configured, skipping news sentiment"}

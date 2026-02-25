@@ -2,8 +2,11 @@
 8-Model Ensemble Trading Decision System
 Combines: LSTM, Sentiment, Technical, Volume, Multi-Timeframe, Support/Resistance, Candlestick Patterns, EMA Crossover
 Adaptive weights via learning system
+
+LSTM is optional — if TensorFlow is not installed, the ensemble
+automatically runs with 7 models and redistributes its weight.
 """
-from src.ai.lstm_predictor import LSTMPredictor
+from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
 from src.ai.sentiment_analyzer import SentimentAnalyzer
 from src.ai.technical_analyzer import TechnicalAnalyzer
 from src.ai.volume_analyzer import VolumeAnalyzer
@@ -21,6 +24,7 @@ class EnsembleTrader:
     
     def __init__(self, newsapi_key=None, broker=None):
         self.lstm = LSTMPredictor(lookback_window=60)
+        self.lstm_available = TF_AVAILABLE and self.lstm.available
         self.sentiment = SentimentAnalyzer(newsapi_key=newsapi_key)
         self.technical = TechnicalAnalyzer()
         self.volume = VolumeAnalyzer(volume_period=20)
@@ -42,6 +46,13 @@ class EnsembleTrader:
             'candlestick': 0.12,
             'ema_crossover': 0.12,
         }
+        
+        if not self.lstm_available:
+            from src.utils.logger import bot_logger
+            bot_logger.info(f"🧠 Ensemble running with 7 models (LSTM disabled — no TensorFlow)")
+        else:
+            from src.utils.logger import bot_logger
+            bot_logger.info(f"🧠 Ensemble running with all 8 models")
     
     def get_trading_signal(self, df, pair):
         """
@@ -67,6 +78,14 @@ class EnsembleTrader:
         for k, v in adaptive_weights.items():
             if k in weights:
                 weights[k] = v
+        
+        # If LSTM is disabled, remove its weight and redistribute
+        if not self.lstm_available:
+            lstm_w = weights.pop('lstm', 0)
+            if weights:
+                bonus = lstm_w / len(weights)
+                weights = {k: v + bonus for k, v in weights.items()}
+        
         # Normalise
         w_sum = sum(weights.values())
         weights = {k: v / w_sum for k, v in weights.items()}
@@ -74,9 +93,12 @@ class EnsembleTrader:
         # Calculate indicators first so all models use enriched data
         df_enriched = self.technical.calculate_indicators(df)
         
-        # === Run all 7 models ===
-        # 1. LSTM
-        lstm_signal = self.lstm.predict_direction(df_enriched)
+        # === Run all models ===
+        # 1. LSTM (only if TensorFlow is available)
+        if self.lstm_available:
+            lstm_signal = self.lstm.predict_direction(df_enriched)
+        else:
+            lstm_signal = {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'LSTM disabled (no TensorFlow)'}
         
         # 2. Sentiment
         sentiment_signal = self.sentiment.get_pair_sentiment(pair)
@@ -111,8 +133,13 @@ class EnsembleTrader:
         ema_signal = self.ema_crossover.get_signal(df_enriched)
         
         # === Vote counting ===
-        all_signals = {
-            'lstm': {'signal': lstm_signal['signal'], 'confidence': lstm_signal['confidence']},
+        all_signals = {}
+        
+        # Only include LSTM if available
+        if self.lstm_available:
+            all_signals['lstm'] = {'signal': lstm_signal['signal'], 'confidence': lstm_signal['confidence']}
+        
+        all_signals.update({
             'sentiment': {'signal': sentiment_signal_type, 'confidence': sentiment_confidence},
             'technical': {'signal': technical_signal['signal'], 'confidence': technical_signal['confidence']},
             'volume': {'signal': volume_signal['signal'], 'confidence': volume_signal['confidence']},
@@ -120,7 +147,7 @@ class EnsembleTrader:
             'support_resistance': {'signal': sr_signal['signal'], 'confidence': sr_signal['confidence']},
             'candlestick': {'signal': candle_signal['signal'], 'confidence': candle_signal['confidence']},
             'ema_crossover': {'signal': ema_signal['signal'], 'confidence': ema_signal['confidence']},
-        }
+        })
         
         buy_votes = sum(1 for s in all_signals.values() if s['signal'] == 'BUY')
         sell_votes = sum(1 for s in all_signals.values() if s['signal'] == 'SELL')
@@ -152,8 +179,10 @@ class EnsembleTrader:
         )
         
         # Generate reasoning
-        reason_parts = [
-            f"LSTM: {lstm_signal['signal']} ({lstm_signal['confidence']:.0%})",
+        reason_parts = []
+        if self.lstm_available:
+            reason_parts.append(f"LSTM: {lstm_signal['signal']} ({lstm_signal['confidence']:.0%})")
+        reason_parts.extend([
             f"Sent: {sentiment_signal_type} ({sentiment_confidence:.0%})",
             f"Tech: {technical_signal['signal']} ({technical_signal['confidence']:.0%})",
             f"Vol: {volume_signal['signal']} ({volume_signal['confidence']:.0%})",
@@ -161,7 +190,7 @@ class EnsembleTrader:
             f"S/R: {sr_signal['signal']} ({sr_signal['confidence']:.0%})",
             f"Candle: {candle_signal['signal']} ({candle_signal['confidence']:.0%})",
             f"EMA: {ema_signal['signal']} ({ema_signal['confidence']:.0%})",
-        ]
+        ])
         
         detailed_reason = " | ".join(reason_parts)
         

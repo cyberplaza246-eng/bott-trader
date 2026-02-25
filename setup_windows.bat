@@ -40,6 +40,21 @@ echo.
 echo Installing dependencies...
 pip install -r requirements.txt
 
+REM Try installing TensorFlow (optional - requires Python 3.10-3.12)
+echo.
+echo Installing TensorFlow (optional - for LSTM AI model)...
+pip install tensorflow>=2.13.0 2>nul
+if %errorlevel% neq 0 (
+    echo.
+    echo [WARNING] TensorFlow could not be installed.
+    echo           This is OK! The bot will run with 7 AI models instead of 8.
+    echo           To enable LSTM, install Python 3.12 from:
+    echo           https://www.python.org/downloads/release/python-31210/
+    echo.
+) else (
+    echo [OK] TensorFlow installed - all 8 AI models available
+)
+
 REM Install MetaTrader5 (Windows only)
 echo.
 echo Installing MetaTrader5 package...

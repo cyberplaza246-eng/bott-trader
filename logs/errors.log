@@ -30,3 +30,4 @@
 {"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: object of type 'NoneType' has no len()"}
