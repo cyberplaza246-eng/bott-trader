@@ -272,6 +272,23 @@ class RiskManager:
         max_lots = self._current_tier['max_lot_size']
         position_size = max(0.01, min(position_size, max_lots))
 
+        # Apply margin safety cap: never use more than 30% of balance per trade
+        # Assumes ~100:1 leverage, 1 lot ≈ 100,000 units
+        # margin_per_lot ≈ entry_price * 100,000 / leverage
+        estimated_leverage = 100  # Conservative assumption
+        margin_per_lot = (entry_price * 100_000) / estimated_leverage
+        if margin_per_lot > 0:
+            max_lots_by_margin = (self.current_balance * 0.30) / margin_per_lot
+            if position_size > max_lots_by_margin:
+                bot_logger.info(
+                    f"Margin cap: {position_size:.2f} lots → {max_lots_by_margin:.2f} lots "
+                    f"(30% of ${self.current_balance:.2f} margin limit)"
+                )
+                position_size = max(0.01, min(position_size, max_lots_by_margin))
+
+        # Round to 2 decimal places
+        position_size = round(position_size, 2)
+
         bot_logger.info(
             f"Position sizing [{self._current_tier_name}]: "
             f"Balance ${self.current_balance:.2f} | "

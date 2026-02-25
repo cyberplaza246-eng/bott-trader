@@ -15,7 +15,7 @@ from src.ai.support_resistance import SupportResistanceDetector
 from src.ai.candlestick_patterns import CandlestickPatternDetector
 from src.ai.ema_crossover import EMACrossoverAnalyzer
 from src.ai.adaptive_learner import AdaptiveLearner
-from src.utils.logger import TradeLogger
+from src.utils.logger import TradeLogger, bot_logger
 from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGREEMENT
 
 
@@ -172,11 +172,14 @@ class EnsembleTrader:
         else:
             final_signal = 'SKIP'
         
-        # Check S/R context: don't buy into resistance, don't sell into support
-        if final_signal == 'BUY' and sr_signal.get('levels', {}).get('price_zone') == 'AT_RESISTANCE':
-            final_signal = 'SKIP'  # Safety: don't buy at the ceiling
-        if final_signal == 'SELL' and sr_signal.get('levels', {}).get('price_zone') == 'AT_SUPPORT':
-            final_signal = 'SKIP'  # Safety: don't sell at the floor
+        # S/R context advisory (logged but no longer vetoes trades —
+        # S/R already has a weighted vote in the ensemble, double-vetoing
+        # was blocking virtually all trades)
+        price_zone = sr_signal.get('levels', {}).get('price_zone', '')
+        if final_signal == 'BUY' and price_zone == 'AT_RESISTANCE':
+            bot_logger.info(f"⚠️  S/R advisory: BUY near resistance — proceed with caution")
+        if final_signal == 'SELL' and price_zone == 'AT_SUPPORT':
+            bot_logger.info(f"⚠️  S/R advisory: SELL near support — proceed with caution")
         
         # Calculate weighted confidence — redistribute weight from inactive models
         # to active ones so dead models don't drag confidence to unreachable levels

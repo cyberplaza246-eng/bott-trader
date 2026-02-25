@@ -82,6 +82,9 @@ class TradingBot:
         # Sync balance from broker/paper trader each cycle
         self._sync_balance()
         
+        # Sync open trade count from broker (live mode)
+        self._sync_open_trades()
+        
         for pair in PAIRS:
             try:
                 # Skip if cooldown active
@@ -209,7 +212,7 @@ class TradingBot:
             self._pending_trade_signals[pair] = signal_result.get('models', {})
     
     def _update_positions(self, pair):
-        """Check and close positions if stop-loss or take-profit hit"""
+        """Sync open positions from broker (live + paper mode)"""
         if self.mode == 'paper':
             latest_price = self.broker.get_latest_price(pair)
             if not latest_price:
@@ -323,16 +326,47 @@ class TradingBot:
             bot_logger.info(f"  Return: {summary['return_percent']:.2f}%")
     
     def _sync_balance(self):
-        """Sync balance from broker or paper trader into the risk manager."""
+        """Sync balance from broker or paper trader into the risk manager.
+        
+        If relay fails, keep the last known good balance instead of
+        falling back to INITIAL_BALANCE ($50).
+        """
         try:
             if self.mode == 'paper' and self.paper_trader:
                 self.risk_manager.sync_balance(self.paper_trader.current_balance)
             elif self.broker:
                 balance = self.broker.get_balance()
-                if balance:
+                if balance and balance > 0:
                     self.risk_manager.sync_balance(balance)
+                else:
+                    bot_logger.warning(
+                        f"Balance sync returned None — keeping last known "
+                        f"${self.risk_manager.current_balance:.2f}"
+                    )
         except Exception as e:
-            bot_logger.warning(f"Balance sync failed: {e}")
+            bot_logger.warning(f"Balance sync failed (keeping ${self.risk_manager.current_balance:.2f}): {e}")
+
+    def _sync_open_trades(self):
+        """Sync open trade count from broker so the counter stays accurate.
+        
+        In live mode the risk manager's open_trades counter can drift
+        (e.g., MT5 closes a trade via SL/TP while bot is sleeping).
+        Querying the broker each cycle keeps it honest.
+        """
+        if self.mode != 'live' or not self.broker:
+            return
+        try:
+            positions = self.broker.get_open_positions()
+            if positions is not None:
+                actual = len(positions)
+                if actual != self.risk_manager.open_trades:
+                    bot_logger.info(
+                        f"Position sync: risk_manager had {self.risk_manager.open_trades} "
+                        f"open trades, broker has {actual} — corrected"
+                    )
+                    self.risk_manager.open_trades = actual
+        except Exception as e:
+            bot_logger.warning(f"Position sync failed: {e}")
 
     def reset_daily_limits(self):
         """Reset daily trading limits"""
