@@ -1,0 +1,32 @@
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: This MinMaxScaler instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: This MinMaxScaler instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: This MinMaxScaler instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "yfinance error for EUR/USD: Impersonating chrome136 is not supported"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "yfinance error for GBP/USD: Impersonating chrome136 is not supported"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: X has 1 features, but MinMaxScaler is expecting 6 features as input."}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: X has 1 features, but MinMaxScaler is expecting 6 features as input."}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error in LSTM prediction: X has 1 features, but MinMaxScaler is expecting 6 features as input."}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "NewsAPI error: 401"}
