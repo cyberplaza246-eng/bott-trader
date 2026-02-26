@@ -571,14 +571,40 @@ class MT5Connector:
             error_logger.error(f"Error closing position for {pair}: {str(e)}")
             return None
     
+    # Magic number used by the bot to tag its own orders
+    BOT_MAGIC = 234000
+
     def get_open_positions(self, pair=None):
-        """Get open positions"""
+        """Get ALL open positions (including manual trades)"""
         if self.relay_mode:
             params = {"pair": pair} if pair else {}
             r = self._relay_get("/positions", params)
             if r and "positions" in r:
                 return r["positions"]
             return []
+
+    def get_bot_positions(self, pair=None):
+        """Get only positions placed by this bot (magic=234000).
+
+        Manual trades are excluded so the bot's slot counter is independent.
+        Falls back to ALL positions if the relay doesn't provide the magic field
+        (to avoid thinking there are 0 open trades and over-trading).
+        """
+        all_positions = self.get_open_positions(pair)
+        if not all_positions:
+            return all_positions  # empty list or None
+
+        # Check if the relay provides the magic field
+        has_magic = any('magic' in p for p in all_positions)
+        if not has_magic:
+            # Relay hasn't been updated — treat ALL positions as bot positions
+            # to prevent over-trading
+            return all_positions
+
+        return [
+            p for p in all_positions
+            if p.get('magic') == self.BOT_MAGIC
+        ]
 
         if self.simulation_mode:
             positions = self.sim_positions

@@ -1,0 +1,36 @@
+services:
+  bot-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-bot-prod
+    env_file:
+      - .env
+    environment:
+      - DASHBOARD_PORT=5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./models:/app/models
+    restart: unless-stopped
+    command: ["python", "-m", "scripts.run_bot"]
+
+  bot-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-bot-dev
+    env_file:
+      - .env
+    environment:
+      - DASHBOARD_PORT=5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/app
+    restart: unless-stopped
+    command: ["python", "-m", "scripts.run_bot"]

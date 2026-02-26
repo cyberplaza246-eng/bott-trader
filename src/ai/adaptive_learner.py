@@ -54,6 +54,17 @@ class AdaptiveLearner:
 
         self._load()
 
+    @staticmethod
+    def _normalize_pair(pair: str) -> str:
+        """Normalize pair key so EURUSD and EUR/USD map to the same bucket."""
+        raw = str(pair or 'UNKNOWN').upper().strip().replace(' ', '')
+        if raw == 'UNKNOWN':
+            return raw
+        compact = raw.replace('/', '')
+        if len(compact) == 6 and compact.isalpha():
+            return f"{compact[:3]}/{compact[3:]}"
+        return raw
+
     # ------------------------------------------------------------------
     # Trade Recording
     # ------------------------------------------------------------------
@@ -83,7 +94,7 @@ class AdaptiveLearner:
             }
         """
         is_win = trade_result.get('profit_loss', 0) > 0
-        pair = trade_result.get('pair', 'UNKNOWN')
+        pair = self._normalize_pair(trade_result.get('pair', 'UNKNOWN'))
         signal = trade_result.get('signal', 'UNKNOWN')
 
         # Update pair stats
@@ -128,6 +139,7 @@ class AdaptiveLearner:
         # Store trade
         trade_record = {
             **trade_result,
+            'pair': pair,
             'timestamp': datetime.now().isoformat(),
             'session': session,
             'is_win': is_win,
@@ -243,6 +255,7 @@ class AdaptiveLearner:
 
     def get_pair_win_rate(self, pair: str) -> float:
         """Get win rate for a specific pair."""
+        pair = self._normalize_pair(pair)
         stats = self.pair_stats.get(pair, {'wins': 0, 'losses': 0})
         total = stats['wins'] + stats['losses']
         return stats['wins'] / total if total > 0 else 0.0
@@ -252,12 +265,23 @@ class AdaptiveLearner:
         Suggest skipping a pair if it has a very poor win rate
         (after sufficient trades).
         """
+        pair = self._normalize_pair(pair)
         stats = self.pair_stats.get(pair, {'wins': 0, 'losses': 0})
         total = stats['wins'] + stats['losses']
         if total < 15:
             return False  # Not enough data
         win_rate = stats['wins'] / total
         return win_rate < 0.35  # Skip if winning less than 35%
+
+    def _normalize_pair_stats(self):
+        """Merge pair stats that differ only by formatting (e.g., EURUSD vs EUR/USD)."""
+        merged = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
+        for pair, stats in dict(self.pair_stats).items():
+            key = self._normalize_pair(pair)
+            merged[key]['wins'] += stats.get('wins', 0)
+            merged[key]['losses'] += stats.get('losses', 0)
+            merged[key]['total_pnl'] += stats.get('total_pnl', 0.0)
+        self.pair_stats = merged
 
     def get_performance_summary(self) -> dict:
         """Get overall performance summary."""
@@ -311,8 +335,10 @@ class AdaptiveLearner:
             with open(LEARNING_DB_PATH, 'r') as f:
                 data = json.load(f)
 
+            from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
+
             self.model_weights = data.get('model_weights', self.model_weights)
-            self.confidence_threshold = data.get('confidence_threshold', 0.75)
+            self.confidence_threshold = data.get('confidence_threshold', ENSEMBLE_CONFIDENCE_THRESHOLD)
             self.consecutive_losses = data.get('consecutive_losses', 0)
             self.max_consecutive_losses = data.get('max_consecutive_losses', 0)
             self.trade_history = data.get('trade_history', [])
@@ -324,6 +350,11 @@ class AdaptiveLearner:
                 self.pair_stats[k] = v
             for k, v in data.get('session_stats', {}).items():
                 self.session_stats[k] = v
+
+            self._normalize_pair_stats()
+            for t in self.trade_history:
+                if 'pair' in t:
+                    t['pair'] = self._normalize_pair(t.get('pair'))
 
             bot_logger.info(
                 f"📚 Loaded learning data: {len(self.trade_history)} past trades, "

@@ -10,11 +10,13 @@ As your account grows from $50 upward, the bot automatically adjusts:
   - Minimum balance thresholds (proportional to account size)
 """
 import numpy as np
+import os
 from src.utils.logger import bot_logger, error_logger
 from config.strategy_config import (
     RISK_PER_TRADE_PERCENT,
     STOP_LOSS_MULTIPLIER,
     TAKE_PROFIT_RATIO,
+    MICRO_TAKE_PROFIT_RATIO,
     INITIAL_BALANCE,
     MAX_CONCURRENT_TRADES,
     DAILY_LOSS_LIMIT_PERCENT
@@ -27,8 +29,8 @@ ACCOUNT_TIERS = {
     'micro': {
         'min_balance': 0,
         'max_balance': 200,
-        'max_concurrent_trades': 2,
-        'max_lot_size': 0.05,
+        'max_concurrent_trades': 2,    # 2 well-chosen trades > 3 margined-out ones
+        'max_lot_size': 0.02,
         'risk_percent': 1.0,       # Conservative at small size
         'description': 'Micro ($0-$200)',
     },
@@ -36,7 +38,7 @@ ACCOUNT_TIERS = {
         'min_balance': 200,
         'max_balance': 1000,
         'max_concurrent_trades': 5,
-        'max_lot_size': 0.5,
+        'max_lot_size': 0.03,
         'risk_percent': 1.0,
         'description': 'Mini ($200-$1K)',
     },
@@ -44,7 +46,7 @@ ACCOUNT_TIERS = {
         'min_balance': 1000,
         'max_balance': 5000,
         'max_concurrent_trades': 5,
-        'max_lot_size': 2.0,
+        'max_lot_size': 0.04,
         'risk_percent': 1.5,       # Can afford slightly more risk
         'description': 'Standard ($1K-$5K)',
     },
@@ -52,7 +54,7 @@ ACCOUNT_TIERS = {
         'min_balance': 5000,
         'max_balance': 25000,
         'max_concurrent_trades': 8,
-        'max_lot_size': 5.0,
+        'max_lot_size': 0.05,
         'risk_percent': 2.0,
         'description': 'Professional ($5K-$25K)',
     },
@@ -60,7 +62,7 @@ ACCOUNT_TIERS = {
         'min_balance': 25000,
         'max_balance': float('inf'),
         'max_concurrent_trades': 10,
-        'max_lot_size': 10.0,
+        'max_lot_size': 0.05,
         'risk_percent': 2.0,
         'description': 'Elite ($25K+)',
     },
@@ -94,6 +96,8 @@ class RiskManager:
         self.daily_loss = 0.0
         self.account_leverage = 100  # Will be updated from broker
         self.free_margin = initial_balance * 0.95  # Will be updated from broker
+        self.slot3_confidence_threshold = float(os.getenv('SLOT3_CONFIDENCE_THRESHOLD', '0.65'))
+        self.slot3_min_agreement = int(os.getenv('SLOT3_MIN_AGREEMENT', '3'))
 
         # Set initial tier & limits (will be recalculated each cycle)
         self._current_tier_name = None
@@ -237,6 +241,62 @@ class RiskManager:
 
         return can_open
 
+    def can_trade_with_market(self, signal_result=None):
+        """Check if a new trade can be opened with market-aware trade capacity.
+
+        Micro accounts are capped to 3 concurrent trades (or lower if configured).
+        """
+        effective_cap, _ = self.get_trade_capacity(signal_result)
+
+        can_open = (
+            self.open_trades < effective_cap and
+            self.daily_loss < self.daily_loss_limit and
+            self.current_balance > self.min_balance_threshold
+        )
+
+        if not can_open:
+            if self.open_trades >= effective_cap:
+                bot_logger.warning(
+                    f"Max concurrent trades ({effective_cap}) reached "
+                    f"[Tier: {self._current_tier_name}]"
+                )
+            if self.daily_loss >= self.daily_loss_limit:
+                bot_logger.warning(
+                    f"Daily loss limit (${self.daily_loss_limit:.2f} / "
+                    f"{DAILY_LOSS_LIMIT_PERCENT}%) reached - pausing trades"
+                )
+            if self.current_balance <= self.min_balance_threshold:
+                bot_logger.warning(
+                    f"Balance ${self.current_balance:.2f} below minimum "
+                    f"${self.min_balance_threshold:.2f} - pausing trades"
+                )
+
+        return can_open
+
+    def get_trade_capacity(self, signal_result=None):
+        """Return (effective_cap, available_slots) for current market/account context."""
+        tier_cap = self._current_tier['max_concurrent_trades']
+        if 'micro' in (self._current_tier_name or 'micro'):
+            effective_cap = min(3, tier_cap)
+
+            # Quality gate for the 3rd slot on micro accounts
+            # If already using 2 slots, require stronger setup before opening slot #3.
+            if effective_cap >= 3 and self.open_trades >= 2:
+                confidence = (signal_result or {}).get('confidence', 0.0)
+                agreement = (signal_result or {}).get('models_agreement', 0)
+                min_required = (signal_result or {}).get('min_agreement_required', self.slot3_min_agreement)
+                strong_enough = (
+                    confidence >= self.slot3_confidence_threshold and
+                    agreement >= max(self.slot3_min_agreement, min_required)
+                )
+                if not strong_enough:
+                    effective_cap = 2
+        else:
+            effective_cap = tier_cap
+
+        available_slots = max(0, effective_cap - self.open_trades)
+        return effective_cap, available_slots
+
     # ── Position Sizing ───────────────────────────────────────────────
 
     def calculate_position_size(self, entry_price, stop_loss_price, pair=None):
@@ -276,7 +336,27 @@ class RiskManager:
 
         # Apply tier-based lot cap
         max_lots = self._current_tier['max_lot_size']
-        position_size = max(0.01, min(position_size, max_lots))
+
+        # Fixed lot size override (from env)
+        fixed_lot = float(os.getenv('FIXED_LOT_SIZE', '0'))
+        if fixed_lot > 0:
+            position_size = min(fixed_lot, max_lots)
+            bot_logger.info(
+                f"Position sizing [{self._current_tier_name}]: "
+                f"Balance ${self.current_balance:.2f} | "
+                f"FIXED lot {position_size:.2f} (max {max_lots})"
+            )
+            return {
+                'lot_size': round(position_size, 2),
+                'risk_amount': round(risk_amount, 2),
+                'risk_percent': risk_pct,
+                'pip_distance': pip_distance,
+                'pip_count': round(pip_count, 1),
+                'tier': self._current_tier_name,
+                'max_lot_size': max_lots,
+            }
+
+        position_size = max(0.02, min(position_size, max_lots))
 
         # Apply margin safety cap using ACTUAL account leverage & free margin
         # 1 lot = 100,000 units of BASE currency
@@ -296,7 +376,7 @@ class RiskManager:
                     f"Margin cap: {position_size:.2f} lots → {max_lots_by_margin:.2f} lots "
                     f"(free margin ${self.free_margin:.2f}, leverage {leverage}:1)"
                 )
-                position_size = max(0.01, min(position_size, max_lots_by_margin))
+                position_size = max(0.02, min(position_size, max_lots_by_margin))
 
         # Round to 2 decimal places
         position_size = round(position_size, 2)
@@ -351,9 +431,9 @@ class RiskManager:
         Returns:
             Stop-loss price (rounded to broker precision)
         """
-        # Tier-aware SL multiplier — tighter stops for smaller accounts
+        # Tier-aware SL multiplier — give trades room to breathe
         if 'micro' in (self._current_tier_name or 'micro'):
-            sl_mult = 1.2
+            sl_mult = STOP_LOSS_MULTIPLIER     # 1.5 — same as standard (was 1.2, too tight)
         elif 'mini' in (self._current_tier_name or ''):
             sl_mult = STOP_LOSS_MULTIPLIER     # 1.5
         else:
@@ -390,13 +470,22 @@ class RiskManager:
         # Risk is distance to stop-loss
         risk = abs(entry_price - stop_loss_price)
 
-        # Reward is risk * ratio
-        reward = risk * TAKE_PROFIT_RATIO
+        # Reward is risk * ratio (micro tier uses tighter TP)
+        if 'micro' in (self._current_tier_name or 'micro'):
+            tp_ratio = MICRO_TAKE_PROFIT_RATIO
+        else:
+            tp_ratio = TAKE_PROFIT_RATIO
+        reward = risk * tp_ratio
+
+        # TP buffer: pull TP back ~1.5 pips so the order fills before
+        # price stalls at S/R zones / round numbers and reverses.
+        pip_size = 0.01 if (pair and 'JPY' in pair.upper()) else 0.0001
+        tp_buffer = pip_size * 1.5
 
         if trade_type == 'BUY':
-            take_profit = entry_price + reward
+            take_profit = entry_price + reward - tp_buffer
         else:  # SELL
-            take_profit = entry_price - reward
+            take_profit = entry_price - reward + tp_buffer
 
         return round(take_profit, self._price_digits(pair))
 
@@ -429,6 +518,7 @@ class RiskManager:
         """Get daily trading status (includes tier info)."""
         daily_loss_percent = (self.daily_loss / max(self.daily_starting_balance, 1)) * 100
         tier_info = self.get_tier_info()
+        effective_cap, available_slots = self.get_trade_capacity()
 
         return {
             'current_balance': self.current_balance,
@@ -438,6 +528,8 @@ class RiskManager:
             'daily_loss_limit': self.daily_loss_limit,
             'open_trades': self.open_trades,
             'max_concurrent_trades': self._current_tier['max_concurrent_trades'],
+            'effective_trade_cap': effective_cap,
+            'available_trade_slots': available_slots,
             'can_trade': self.can_trade(),
             'margin_available': self.current_balance * 0.95,
             # Scaling info

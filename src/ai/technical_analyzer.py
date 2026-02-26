@@ -21,7 +21,7 @@ class TechnicalAnalyzer:
         self.bb_std = 2
         self.atr_period = 14
         self.adx_period = 14
-        self.adx_trend_threshold = 20  # ADX > 20 = trending market
+        self.adx_trend_threshold = 15  # ADX > 15 = trending market (lowered from 20)
     
     def calculate_indicators(self, df):
         """
@@ -63,6 +63,9 @@ class TechnicalAnalyzer:
             df['bb_middle'] = df['close']
             df['bb_upper'] = df['close']
         
+        # EMA 200 (macro trend filter)
+        df['ema_200'] = df['close'].ewm(span=200, adjust=False).mean()
+
         # ATR (volatility)
         df['atr'] = pta.atr(df['high'], df['low'], df['close'], length=self.atr_period)
         
@@ -154,14 +157,14 @@ class TechnicalAnalyzer:
         else:
             signal = 'HOLD'
         
-        # ADX trend filter: only allow directional signals in trending markets
+        # ADX trend filter: reduce confidence in choppy markets but don't fully silence
         adx_value = latest.get('adx', 0)
         if signal != 'HOLD' and adx_value < self.adx_trend_threshold:
-            # Demote to HOLD in choppy/ranging markets
-            reason_parts.append(f"ADX weak ({adx_value:.0f}<{self.adx_trend_threshold}) — ranging")
-            signal = 'HOLD'
-            confidence = confidence * 0.5  # Halve confidence
+            # Reduce confidence in ranging markets but still allow signal
+            reason_parts.append(f"ADX soft ({adx_value:.0f}<{self.adx_trend_threshold}) — low trend")
+            confidence = confidence * 0.6  # Reduce but don't zero out
         elif adx_value >= self.adx_trend_threshold:
+            confidence = confidence * 1.1  # Small bonus for trending
             reason_parts.append(f"ADX trending ({adx_value:.0f})")
         
         confidence = abs(confidence)  # Use absolute value for confidence score

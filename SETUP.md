@@ -121,6 +121,34 @@ Once you're confident in paper trading results:
 4. Start bot with micro lots (0.01 lot size)
 5. Monitor daily P/L in `logs/trades.log`
 
+## 24/7 Deployment (Recommended)
+
+For always-on operation when you are offline, run the bot as a `systemd` service
+on a Linux VPS/server (not Codespaces).
+
+```bash
+# from project root
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+
+# configure env
+cp .env.example .env
+# edit .env with MT5 relay + live settings
+
+# install and start service
+./scripts/install_systemd_service.sh
+
+# inspect service
+sudo systemctl status ai-bot
+sudo journalctl -u ai-bot -f
+```
+
+Service files are generated from:
+
+- `deploy/systemd/ai-bot.service.template`
+- `scripts/install_systemd_service.sh`
+
 ## Architecture
 
 ### Core Components

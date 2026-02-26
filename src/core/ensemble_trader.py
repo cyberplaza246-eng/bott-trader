@@ -6,6 +6,7 @@ Adaptive weights via learning system
 LSTM is optional — if TensorFlow is not installed, the ensemble
 automatically runs with 7 models and redistributes its weight.
 """
+import pandas as pd
 from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
 from src.ai.sentiment_analyzer import SentimentAnalyzer
 from src.ai.technical_analyzer import TechnicalAnalyzer
@@ -102,8 +103,8 @@ class EnsembleTrader:
         
         # 2. Sentiment
         sentiment_signal = self.sentiment.get_pair_sentiment(pair)
-        sentiment_signal_type = 'BUY' if sentiment_signal['sentiment_score'] > 0.2 else (
-            'SELL' if sentiment_signal['sentiment_score'] < -0.2 else 'HOLD'
+        sentiment_signal_type = 'BUY' if sentiment_signal['sentiment_score'] > 0.1 else (
+            'SELL' if sentiment_signal['sentiment_score'] < -0.1 else 'HOLD'
         )
         sentiment_confidence = abs(sentiment_signal['sentiment_score'])
         
@@ -172,6 +173,29 @@ class EnsembleTrader:
         else:
             final_signal = 'SKIP'
         
+        # ── EMA 200 Trend Gate ────────────────────────────────────
+        # Only allow BUY when price > EMA200, SELL when price < EMA200.
+        # This prevents counter-trend trades that have lower win rates.
+        ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
+        cur_price = df_enriched['close'].iloc[-1]
+        if ema_200 is not None and not pd.isna(ema_200) and final_signal != 'SKIP':
+            if final_signal == 'BUY' and cur_price < ema_200:
+                bot_logger.info(
+                    f"🚫 EMA200 gate: BUY blocked — price {cur_price:.5f} < EMA200 {ema_200:.5f} (counter-trend)"
+                )
+                final_signal = 'SKIP'
+            elif final_signal == 'SELL' and cur_price > ema_200:
+                bot_logger.info(
+                    f"🚫 EMA200 gate: SELL blocked — price {cur_price:.5f} > EMA200 {ema_200:.5f} (counter-trend)"
+                )
+                final_signal = 'SKIP'
+            else:
+                trend_dir = 'bullish' if cur_price > ema_200 else 'bearish'
+                bot_logger.info(
+                    f"✅ EMA200 gate: {final_signal} aligned with {trend_dir} trend "
+                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
+                )
+
         # S/R context advisory (logged but no longer vetoes trades —
         # S/R already has a weighted vote in the ensemble, double-vetoing
         # was blocking virtually all trades)

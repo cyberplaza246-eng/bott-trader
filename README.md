@@ -9,6 +9,24 @@ An intelligent 4-model ensemble trading bot for automatic forex trading using LS
 3. **Paper Trade**: `python -m src.bot` (test with virtual money first)
 4. **Go Live**: After 1 week of profitable paper trades, switch to live mode
 
+## Docker Run (No Local Python Setup)
+
+1. **Create env file**: `cp .env.example .env` and update credentials
+2. **Production mode (stable image)**:
+        - `docker compose --profile prod up -d --build bot-prod`
+3. **Development mode (live code mounted)**:
+        - `docker compose --profile dev up --build bot-dev`
+4. **Stop containers**:
+        - `docker compose --profile prod down`
+        - `docker compose --profile dev down`
+
+### When you update code
+
+- **Prod mode**: rebuild and restart
+  - `docker compose --profile prod up -d --build bot-prod`
+- **Dev mode**: code is mounted live; restart container if needed
+  - `docker compose --profile dev restart bot-dev`
+
 ## Key Features
 
 - ✅ **4 AI Models**: LSTM + Sentiment + Technical + Volume
@@ -17,6 +35,20 @@ An intelligent 4-model ensemble trading bot for automatic forex trading using LS
 - ✅ **Paper Trading**: Test before risking real money
 - ✅ **Backtesting**: Validate strategy on historical data
 - ✅ **Learning**: Retrains weekly on closed trades
+
+## USD/JPY Tuning
+
+If you want to keep USD/JPY enabled but reduce low-quality entries, add these to your `.env`:
+
+- `USDJPY_TUNING_ENABLED=true`
+- `USDJPY_MIN_CONFIDENCE=0.40`
+- `USDJPY_MIN_MODELS_AGREEMENT=2`
+- `USDJPY_MIN_ADX=25`
+
+To make USD/JPY stricter during choppy periods, raise:
+
+- `USDJPY_MIN_CONFIDENCE` to `0.45`
+- `USDJPY_MIN_ADX` to `30`
 
 ## Architecture
 

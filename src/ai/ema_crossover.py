@@ -30,6 +30,7 @@ class EMACrossoverAnalyzer:
             # EMAs
             ema20 = close.ewm(span=20, adjust=False).mean()
             ema50 = close.ewm(span=50, adjust=False).mean()
+            ema200 = close.ewm(span=200, adjust=False).mean()
 
             # RSI 14
             delta = close.diff()
@@ -53,8 +54,14 @@ class EMACrossoverAnalyzer:
             cur_macd = macd_line.iloc[-1]
             cur_signal = signal_line.iloc[-1]
 
-            if pd.isna(cur_rsi) or pd.isna(cur_ema50):
+            cur_ema200 = ema200.iloc[-1]
+
+            if pd.isna(cur_rsi) or pd.isna(cur_ema50) or pd.isna(cur_ema200):
                 return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Indicators warming up'}
+
+            cur_price = close.iloc[-1]
+            above_200 = cur_price > cur_ema200
+            below_200 = cur_price < cur_ema200
 
             signal = 'HOLD'
             confidence = 0.0
@@ -70,6 +77,13 @@ class EMACrossoverAnalyzer:
                 if cur_macd > cur_signal:
                     confidence += 0.15
                     reasons.append('MACD confirms bullish')
+                # EMA 200 alignment: boost if with trend, penalise if against
+                if above_200:
+                    confidence += 0.10
+                    reasons.append('Price > EMA200 — with trend')
+                else:
+                    confidence *= 0.5
+                    reasons.append('Price < EMA200 — counter-trend')
                 signal = 'BUY'
 
             # --- Bearish crossover ---
@@ -82,30 +96,55 @@ class EMACrossoverAnalyzer:
                 if cur_macd < cur_signal:
                     confidence += 0.15
                     reasons.append('MACD confirms bearish')
+                # EMA 200 alignment
+                if below_200:
+                    confidence += 0.10
+                    reasons.append('Price < EMA200 — with trend')
+                else:
+                    confidence *= 0.5
+                    reasons.append('Price > EMA200 — counter-trend')
                 signal = 'SELL'
 
             # --- Trend continuation (no crossover but clear trend) ---
             elif cur_ema20 > cur_ema50:
                 spread = (cur_ema20 - cur_ema50) / cur_ema50
-                if spread > 0.0003:
-                    confidence = 0.45
+                if spread > 0.0001:  # Lowered from 0.0003 to catch more trends
+                    confidence = 0.50
                     reasons.append(f'Uptrend (spread {spread:.4f})')
                     if cur_rsi < 65:
+                        confidence += 0.10
+                    if cur_rsi < 50:
                         confidence += 0.05
+                        reasons.append(f'RSI {cur_rsi:.0f} has room to run')
                     if cur_macd > cur_signal:
                         confidence += 0.10
                         reasons.append('MACD confirms')
+                    if above_200:
+                        confidence += 0.05
+                        reasons.append('Price > EMA200')
+                    else:
+                        confidence *= 0.5
+                        reasons.append('Price < EMA200 — counter-trend')
                     signal = 'BUY'
             elif cur_ema20 < cur_ema50:
                 spread = (cur_ema50 - cur_ema20) / cur_ema50
-                if spread > 0.0003:
-                    confidence = 0.45
+                if spread > 0.0001:  # Lowered from 0.0003 to catch more trends
+                    confidence = 0.50
                     reasons.append(f'Downtrend (spread {spread:.4f})')
                     if cur_rsi > 35:
+                        confidence += 0.10
+                    if cur_rsi > 50:
                         confidence += 0.05
+                        reasons.append(f'RSI {cur_rsi:.0f} has room to fall')
                     if cur_macd < cur_signal:
                         confidence += 0.10
                         reasons.append('MACD confirms')
+                    if below_200:
+                        confidence += 0.05
+                        reasons.append('Price < EMA200')
+                    else:
+                        confidence *= 0.5
+                        reasons.append('Price > EMA200 — counter-trend')
                     signal = 'SELL'
 
             return {

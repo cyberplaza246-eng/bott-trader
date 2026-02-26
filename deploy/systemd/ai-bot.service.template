@@ -1,0 +1,20 @@
+[Unit]
+Description=AI Forex Trading Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{USER}}
+WorkingDirectory={{WORKDIR}}
+EnvironmentFile={{ENV_FILE}}
+ExecStart={{PYTHON_BIN}} -m scripts.run_bot
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGINT
+StandardOutput=append:{{WORKDIR}}/logs/systemd_stdout.log
+StandardError=append:{{WORKDIR}}/logs/systemd_stderr.log
+
+[Install]
+WantedBy=multi-user.target

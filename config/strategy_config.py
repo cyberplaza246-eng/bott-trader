@@ -32,7 +32,7 @@ TIMEFRAMES = {
 }
 
 # AI Model Thresholds
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.55))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))
 
 # Technical Analysis Parameters
@@ -47,7 +47,15 @@ INDICATORS = {
 # Risk Management
 STOP_LOSS_MULTIPLIER = 1.5  # ATR multiplier for stop loss
 TAKE_PROFIT_RATIO = 2.0     # Risk:Reward ratio (1:2)
+MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 2.0))
+HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.70))
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
+
+# Pair-specific tuning (USD/JPY)
+USDJPY_TUNING_ENABLED = os.getenv('USDJPY_TUNING_ENABLED', 'true').lower() == 'true'
+USDJPY_MIN_CONFIDENCE = float(os.getenv('USDJPY_MIN_CONFIDENCE', 0.40))
+USDJPY_MIN_MODELS_AGREEMENT = int(os.getenv('USDJPY_MIN_MODELS_AGREEMENT', 2))
+USDJPY_MIN_ADX = float(os.getenv('USDJPY_MIN_ADX', 25.0))
 
 # Logging
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')

@@ -6,7 +6,7 @@ Now with: up to 8-model ensemble (LSTM optional), adaptive learning, dashboard, 
 import os
 import time
 import threading
-from datetime import datetime, time as dt_time, timezone
+from datetime import datetime, time as dt_time, timezone, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.broker.mt5_connector import MT5Connector
@@ -20,7 +20,12 @@ from config.strategy_config import (
     PAIRS,
     TIMEFRAMES,
     AUTOTRADING_ENABLED,
-    INITIAL_BALANCE
+    INITIAL_BALANCE,
+    HIGH_CERTAINTY_THRESHOLD,
+    USDJPY_TUNING_ENABLED,
+    USDJPY_MIN_CONFIDENCE,
+    USDJPY_MIN_MODELS_AGREEMENT,
+    USDJPY_MIN_ADX,
 )
 
 
@@ -82,7 +87,15 @@ class TradingBot:
             self.paper_trader = None
         
         self.last_signal_time = {}  # Track last signal per pair
-        self.signal_cooldown_minutes = 15  # Don't trade same pair more than every 15 mins
+        self.signal_cooldown_minutes = int(os.getenv('SIGNAL_COOLDOWN_MINUTES', '4'))
+        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '90'))
+        self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.55'))
+        self.reversal_exit_min_agreement = int(os.getenv('REVERSAL_EXIT_MIN_AGREEMENT', '2'))
+        self.enable_correlation_guard = os.getenv('ENABLE_CORRELATION_GUARD', 'false').lower() == 'true'
+        self.usdjpy_tuning_enabled = USDJPY_TUNING_ENABLED
+        self.usdjpy_min_confidence = USDJPY_MIN_CONFIDENCE
+        self.usdjpy_min_models_agreement = USDJPY_MIN_MODELS_AGREEMENT
+        self.usdjpy_min_adx = USDJPY_MIN_ADX
 
         # Live closure detection: track open tickets so we notice when MT5 closes one
         self._known_tickets = {}   # {ticket: {pair, type, entry_price, open_time}}
@@ -157,6 +170,64 @@ class TradingBot:
         
         elapsed = (datetime.now() - self.last_signal_time[pair]).total_seconds() / 60
         return elapsed < self.signal_cooldown_minutes
+
+    @staticmethod
+    def _is_usdjpy(pair):
+        return str(pair or '').replace('/', '').upper() == 'USDJPY'
+
+    @staticmethod
+    def _is_opposite(signal_a, signal_b):
+        return (signal_a, signal_b) in {('BUY', 'SELL'), ('SELL', 'BUY')}
+
+    def _passes_usdjpy_quality_filter(self, pair, signal_result):
+        """Extra quality checks for USD/JPY to reduce false positives."""
+        if not (self.usdjpy_tuning_enabled and self._is_usdjpy(pair)):
+            return True
+
+        models = signal_result.get('models', {})
+        direction = signal_result.get('signal', 'SKIP')
+        mtf_signal = models.get('multi_tf', {}).get('signal', 'HOLD')
+        if self._is_opposite(direction, mtf_signal):
+            bot_logger.info("USD/JPY filter: skipped due to opposite multi-timeframe signal")
+            return False
+
+        price_zone = signal_result.get('sr_levels', {}).get('price_zone', '')
+        if direction == 'BUY' and price_zone == 'AT_RESISTANCE':
+            bot_logger.info("USD/JPY filter: skipped BUY at resistance")
+            return False
+        if direction == 'SELL' and price_zone == 'AT_SUPPORT':
+            bot_logger.info("USD/JPY filter: skipped SELL at support")
+            return False
+
+        enriched_df = signal_result.get('enriched_df')
+        if enriched_df is not None and len(enriched_df) > 0 and 'adx' in enriched_df.columns:
+            adx = float(enriched_df.iloc[-1].get('adx', 0) or 0)
+            if adx < self.usdjpy_min_adx:
+                bot_logger.info(
+                    f"USD/JPY filter: ADX {adx:.1f} below minimum {self.usdjpy_min_adx:.1f}"
+                )
+                return False
+
+        return True
+
+    def _should_trade_pair(self, pair, signal_result):
+        """Determine if a pair should be traded, including USD/JPY-specific override."""
+        if self.ensemble.should_trade(signal_result):
+            return True
+
+        if not (self.usdjpy_tuning_enabled and self._is_usdjpy(pair)):
+            return False
+
+        signal = signal_result.get('signal', 'SKIP')
+        confidence = signal_result.get('confidence', 0.0)
+        agreement = signal_result.get('models_agreement', 0)
+        if signal == 'SKIP':
+            return False
+
+        return (
+            confidence >= self.usdjpy_min_confidence and
+            agreement >= self.usdjpy_min_models_agreement
+        )
     
     def analyze_and_trade(self):
         """
@@ -180,6 +251,11 @@ class TradingBot:
         
         # Sync open trade count from broker (live mode)
         self._sync_open_trades()
+        effective_cap, available_slots = self.risk_manager.get_trade_capacity()
+        bot_logger.info(
+            f"🎛️ Trade slots: {available_slots} available "
+            f"({self.risk_manager.open_trades}/{effective_cap} used)"
+        )
 
         # Run trailing stop updates on all tracked positions
         if self.broker:
@@ -222,6 +298,9 @@ class TradingBot:
                 bot_logger.info(f"  Confidence: {signal_result['confidence']:.1%}")
                 bot_logger.info(f"  Models Agreement: {signal_result['models_agreement']}/{signal_result.get('total_models', 7)}")
                 bot_logger.info(f"  Details: {signal_result['detailed_reason']}")
+
+                # Active position management: exit stale/reversal trades to free slots
+                self._manage_open_position(pair, signal_result)
                 
                 # Track for dashboard
                 self.signal_history.append({
@@ -236,9 +315,22 @@ class TradingBot:
                     self.signal_history = self.signal_history[-100:]
                 
                 # Execute trade if signal is strong enough
-                if self.ensemble.should_trade(signal_result):
-                    if not self.risk_manager.can_trade():
+                if self._should_trade_pair(pair, signal_result):
+                    if not self._passes_usdjpy_quality_filter(pair, signal_result):
+                        continue
+
+                    # Block duplicate: don't open another trade if bot already has one on this pair
+                    if self._has_bot_position(pair):
+                        bot_logger.info(f"⏭️ {pair}: already have open bot position — skipping")
+                        continue
+
+                    if not self.risk_manager.can_trade_with_market(signal_result):
+                        cap, available = self.risk_manager.get_trade_capacity(signal_result)
                         bot_logger.warning(f"Risk limits prevent trading {pair}")
+                        bot_logger.warning(
+                            f"No free trade slot for {pair}: "
+                            f"{self.risk_manager.open_trades}/{cap} in use (available: {available})"
+                        )
                         continue
 
                     # Adaptive learner: skip chronically losing pairs
@@ -250,8 +342,8 @@ class TradingBot:
                     if not self.is_spread_acceptable(pair):
                         continue
 
-                    # Correlation guard
-                    if self._has_correlated_position(pair, signal_result['signal']):
+                    # Correlation guard (optional)
+                    if self.enable_correlation_guard and self._has_correlated_position(pair, signal_result['signal']):
                         continue
 
                     self._execute_trade(pair, signal_result, df)
@@ -275,6 +367,10 @@ class TradingBot:
         bot_logger.info(f"  Growth: {daily_status.get('account_growth', 0):.1f}% | Next tier: {daily_status.get('next_tier', 'N/A')} (${daily_status.get('balance_to_next', 0):.0f} away)")
         bot_logger.info(f"  Daily Loss: ${daily_status['daily_loss']:.2f} ({daily_status['daily_loss_percent']:.1f}%)")
         bot_logger.info(f"  Open Trades: {daily_status['open_trades']}")
+        bot_logger.info(
+            f"  Slots Available: {daily_status.get('available_trade_slots', 0)} "
+            f"/ {daily_status.get('effective_trade_cap', daily_status.get('max_concurrent_trades', 0))}"
+        )
         bot_logger.info(f"  Can Trade: {daily_status['can_trade']}")
     
     def _execute_trade(self, pair, signal_result, df):
@@ -336,6 +432,11 @@ class TradingBot:
             return
         
         lot_size = position_size['lot_size']
+
+        # Micro-account lot policy: always use at least 0.02
+        tier_name = self.risk_manager._current_tier_name or 'micro'
+        if 'micro' in tier_name:
+            lot_size = max(0.02, lot_size)
         
         bot_logger.info(f"\n🎯 EXECUTING {trade_type} TRADE:")
         bot_logger.info(f"  Pair: {pair}")
@@ -359,7 +460,7 @@ class TradingBot:
             if order_id:
                 bot_logger.info(f"✅ Order placed - Ticket: {order_id}")
                 self.risk_manager.on_trade_opened()
-                # Register for trailing stop management
+                # Register for trailing stop management (with TP & volume for partial close)
                 self.trailing.register(
                     ticket=order_id,
                     entry_price=entry_price,
@@ -367,6 +468,8 @@ class TradingBot:
                     direction=trade_type,
                     atr=atr,
                     pair=pair,
+                    take_profit=take_profit,
+                    volume=lot_size,
                 )
         
         elif self.mode == 'paper':
@@ -418,6 +521,131 @@ class TradingBot:
                         'exit_type': exit_type,
                         'model_signals': model_signals,
                     })
+
+    @staticmethod
+    def _normalize_pair(pair):
+        """Normalize pair format (EUR/USD and EURUSD -> EURUSD)."""
+        return str(pair or '').replace('/', '').upper()
+
+    def _find_open_position(self, pair):
+        """Return the currently open position for a pair, if any."""
+        pair_key = self._normalize_pair(pair)
+
+        if self.mode == 'paper' and self.paper_trader:
+            for p in self.paper_trader.open_positions.values():
+                if self._normalize_pair(p.get('pair', '')) == pair_key:
+                    return p
+            return None
+
+        if not self.broker:
+            return None
+
+        # Only look at bot-placed positions (magic=234000)
+        positions = self.broker.get_bot_positions() or []
+        for p in positions:
+            if self._normalize_pair(p.get('pair', '')) == pair_key:
+                return p
+        return None
+
+    def _has_bot_position(self, pair):
+        """Return True if the bot already has an open position on this pair."""
+        return self._find_open_position(pair) is not None
+
+    @staticmethod
+    def _position_age_minutes(position):
+        """Estimate position age in minutes from known time fields."""
+        raw_open_time = position.get('entry_time') or position.get('open_time')
+        if not raw_open_time:
+            return None
+
+        if isinstance(raw_open_time, datetime):
+            open_time = raw_open_time
+        elif isinstance(raw_open_time, str):
+            try:
+                open_time = datetime.fromisoformat(raw_open_time.replace('Z', '+00:00'))
+            except Exception:
+                return None
+        else:
+            return None
+
+        if open_time.tzinfo is None:
+            open_time = open_time.replace(tzinfo=timezone.utc)
+
+        now_utc = datetime.now(timezone.utc)
+        return max(0.0, (now_utc - open_time).total_seconds() / 60.0)
+
+    def _manage_open_position(self, pair, signal_result):
+        """Actively close stale or strongly reversed positions to free trade slots."""
+        position = self._find_open_position(pair)
+        if not position:
+            return
+
+        position_type = str(position.get('type', '')).upper()
+        signal = signal_result.get('signal', 'SKIP')
+        confidence = signal_result.get('confidence', 0.0)
+        agreement = signal_result.get('models_agreement', 0)
+        min_required = signal_result.get('min_agreement_required', 2)
+
+        opposite_signal = signal in ('BUY', 'SELL') and signal != position_type
+        strong_reversal = (
+            opposite_signal and
+            confidence >= self.reversal_exit_confidence and
+            agreement >= max(self.reversal_exit_min_agreement, min_required)
+        )
+
+        age_minutes = self._position_age_minutes(position)
+        stale_trade = (
+            age_minutes is not None and
+            age_minutes >= self.max_trade_hold_minutes and
+            (signal == 'SKIP' or confidence < self.reversal_exit_confidence)
+        )
+
+        if not strong_reversal and not stale_trade:
+            return
+
+        if strong_reversal:
+            exit_reason = 'REVERSAL_SIGNAL'
+        else:
+            exit_reason = 'STALE_SIGNAL'
+
+        if self.mode == 'paper' and self.paper_trader:
+            latest_price = self.broker.get_latest_price(pair) if self.broker else None
+            exit_price = position.get('current_price', position.get('entry_price', 0))
+            if latest_price and latest_price.get('bid'):
+                exit_price = latest_price['bid']
+
+            closed_trade = self.paper_trader.close_position(pair, exit_price, exit_reason)
+            if not closed_trade:
+                return
+
+            self.risk_manager.on_trade_closed(closed_trade.get('profit_loss', 0.0))
+            bot_logger.info(
+                f"🔄 Active exit {pair}: {position_type} closed ({exit_reason}) "
+                f"after {age_minutes:.0f}m"
+                if age_minutes is not None
+                else f"🔄 Active exit {pair}: {position_type} closed ({exit_reason})"
+            )
+
+            model_signals = getattr(self, '_pending_trade_signals', {}).pop(pair, {})
+            self.ensemble.record_trade_result({
+                'pair': pair,
+                'signal': closed_trade.get('type', position_type),
+                'profit_loss': closed_trade.get('profit_loss', 0.0),
+                'entry_price': closed_trade.get('entry_price', 0),
+                'exit_price': closed_trade.get('exit_price', 0),
+                'exit_type': exit_reason,
+                'model_signals': model_signals,
+            })
+            return
+
+        if self.mode == 'live' and self.broker:
+            volume = float(position.get('volume', 0.01) or 0.01)
+            ticket = position.get('ticket')
+            closed = self.broker.close_position(pair=pair, volume=volume, ticket=ticket)
+            if closed:
+                bot_logger.info(
+                    f"🔄 Active exit requested for {pair} ticket={ticket} ({exit_reason})"
+                )
     
     def start(self):
         """Start the trading bot"""
@@ -670,20 +898,24 @@ class TradingBot:
         
         In live mode the risk manager's open_trades counter can drift
         (e.g., MT5 closes a trade via SL/TP while bot is sleeping).
-        Querying the broker each cycle keeps it honest.
+        Only counts bot-placed trades (magic=234000) so manual trades
+        don't consume the bot's trade slots.
         """
         if self.mode != 'live' or not self.broker:
             return
         try:
-            positions = self.broker.get_open_positions()
-            if positions is not None:
-                actual = len(positions)
-                if actual != self.risk_manager.open_trades:
+            bot_positions = self.broker.get_bot_positions()
+            all_positions = self.broker.get_open_positions()
+            if bot_positions is not None:
+                bot_count = len(bot_positions)
+                total_count = len(all_positions) if all_positions else 0
+                manual_count = total_count - bot_count
+                if bot_count != self.risk_manager.open_trades:
                     bot_logger.info(
                         f"Position sync: risk_manager had {self.risk_manager.open_trades} "
-                        f"open trades, broker has {actual} — corrected"
+                        f"bot trades, broker has {bot_count} bot + {manual_count} manual — corrected"
                     )
-                    self.risk_manager.open_trades = actual
+                    self.risk_manager.open_trades = bot_count
         except Exception as e:
             bot_logger.warning(f"Position sync failed: {e}")
 

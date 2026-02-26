@@ -1,6 +1,7 @@
 """
 Sentiment Analysis from News and Social Media
 """
+import os
 import requests
 import feedparser
 import pandas as pd
@@ -19,16 +20,26 @@ class SentimentAnalyzer:
     def __init__(self, newsapi_key=None):
         self.newsapi_key = newsapi_key
         self.base_url = 'https://newsapi.org/v2'
+        self.newsapi_rate_limit_cooldown_minutes = int(
+            os.getenv('NEWSAPI_RATE_LIMIT_COOLDOWN_MINUTES', '20')
+        )
+        self._newsapi_blocked_until = None
         
         # Sentiment keywords
         self.bullish_keywords = [
             'rally', 'surge', 'gains', 'bull', 'strong', 'positive',
-            'growth', 'upside', 'breakout', 'momentum', 'bullish'
+            'growth', 'upside', 'breakout', 'momentum', 'bullish',
+            'hawkish', 'recovery', 'rebound', 'optimism', 'soar',
+            'climb', 'advance', 'higher', 'rising', 'boost',
+            'rate hike', 'tightening', 'robust', 'resilient',
         ]
         
         self.bearish_keywords = [
             'plunge', 'decline', 'loss', 'bear', 'weak', 'negative',
-            'bearish', 'downside', 'breakdown', 'decline', 'selloff'
+            'bearish', 'downside', 'breakdown', 'selloff',
+            'dovish', 'recession', 'slump', 'tumble', 'crash',
+            'fall', 'drop', 'lower', 'sliding', 'cut',
+            'rate cut', 'easing', 'stagnation', 'contraction',
         ]
     
     def get_forex_news(self, pair, limit=10):
@@ -44,6 +55,9 @@ class SentimentAnalyzer:
         """
         if not self.newsapi_key:
             bot_logger.warning("NewsAPI key not configured, skipping news sentiment")
+            return []
+
+        if self._newsapi_blocked_until and datetime.now() < self._newsapi_blocked_until:
             return []
         
         try:
@@ -62,7 +76,17 @@ class SentimentAnalyzer:
             response = requests.get(f'{self.base_url}/everything', params=params, timeout=5)
             
             if response.status_code == 200:
+                self._newsapi_blocked_until = None
                 return response.json().get('articles', [])
+            elif response.status_code == 429:
+                self._newsapi_blocked_until = datetime.now() + timedelta(
+                    minutes=self.newsapi_rate_limit_cooldown_minutes
+                )
+                bot_logger.warning(
+                    f"NewsAPI rate-limited (429). Pausing sentiment calls until "
+                    f"{self._newsapi_blocked_until.strftime('%H:%M:%S')}"
+                )
+                return []
             else:
                 error_logger.error(f"NewsAPI error: {response.status_code}")
                 return []
@@ -127,7 +151,7 @@ class SentimentAnalyzer:
             avg_sentiment = sum(sentiments) / len(sentiments)
             confidence = min(len(sentiments) / 10.0, 1.0)  # More articles = higher confidence
             
-            sentiment_label = 'BULLISH' if avg_sentiment > 0.2 else ('BEARISH' if avg_sentiment < -0.2 else 'NEUTRAL')
+            sentiment_label = 'BULLISH' if avg_sentiment > 0.1 else ('BEARISH' if avg_sentiment < -0.1 else 'NEUTRAL')
             
             return {
                 'sentiment_score': avg_sentiment,

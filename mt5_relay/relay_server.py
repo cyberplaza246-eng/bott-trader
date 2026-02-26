@@ -163,6 +163,8 @@ def positions():
             "sl": p.sl,
             "tp": p.tp,
             "profit": p.profit,
+            "magic": p.magic,
+            "comment": p.comment,
             "open_time": datetime.utcfromtimestamp(p.time).isoformat(),
         })
     return jsonify({"positions": result})

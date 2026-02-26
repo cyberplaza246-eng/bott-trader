@@ -1,0 +1,895 @@
+[2026-02-26 11:33:53] Starting bot supervisor loop
+[2026-02-26 11:33:53] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:33:53] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:33:58] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:33:58] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:03] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:03] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:08] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:08] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:13] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:13] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:18] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:18] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:23] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:23] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:28] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:28] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:33] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:33] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:38] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:39] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:44] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:44] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:49] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:49] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:54] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:54] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:34:59] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:34:59] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:04] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:04] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:09] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:09] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:14] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:14] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:19] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:19] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:24] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:24] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:29] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:29] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:34] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:34] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:39] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:39] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:44] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:44] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:49] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:49] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:54] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:54] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:35:59] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:35:59] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:04] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:04] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:09] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:09] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:14] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:14] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:19] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:19] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:24] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:24] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:29] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:29] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:34] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:34] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:39] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:39] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:44] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:44] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:49] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:49] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:54] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:54] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:36:59] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:36:59] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:05] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:05] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:10] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:10] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:15] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:15] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:20] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:20] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:25] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:25] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:30] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:30] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:35] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:35] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:40] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:40] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:45] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:45] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:50] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:50] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:37:55] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:37:55] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:00] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:00] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:05] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:05] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:10] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:10] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:15] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:15] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:20] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:20] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:25] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:25] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:30] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:30] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:35] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:35] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:40] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:40] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:45] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:45] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:50] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:50] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:38:55] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:38:55] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:00] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:39:01] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:06] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:39:06] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:11] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:39:11] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:16] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:39:16] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:21] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:39:21] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:26] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:39:26] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:31] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 8, in <module>
+    from dotenv import load_dotenv
+ModuleNotFoundError: No module named 'dotenv'
+[2026-02-26 11:39:31] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:36] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:39:36] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:41] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:39:41] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:46] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:39:46] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:51] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:39:51] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:39:56] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:39:56] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:01] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:40:01] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:06] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:40:06] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:11] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:40:11] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:16] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:40:17] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:22] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:40:22] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:27] Launching bot...
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 10, in <module>
+    from apscheduler.schedulers.background import BackgroundScheduler
+ModuleNotFoundError: No module named 'apscheduler'
+[2026-02-26 11:40:27] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:32] Launching bot...
+2026-02-26 11:40:33 - TradingBot - WARNING - ⚠️  TensorFlow not installed — LSTM model disabled. Install with: pip install tensorflow>=2.13.0 (requires Python ≤3.12)
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspaces/Ai-bot/scripts/run_bot.py", line 13, in <module>
+    from src.bot import TradingBot
+  File "/workspaces/Ai-bot/src/bot.py", line 13, in <module>
+    from src.core.ensemble_trader import EnsembleTrader
+  File "/workspaces/Ai-bot/src/core/ensemble_trader.py", line 11, in <module>
+    from src.ai.technical_analyzer import TechnicalAnalyzer
+  File "/workspaces/Ai-bot/src/ai/technical_analyzer.py", line 6, in <module>
+    import pandas_ta as pta
+ModuleNotFoundError: No module named 'pandas_ta'
+✅ Strategy Config Loaded - Mode: live, Risk: 1.0% per trade
+[2026-02-26 11:40:36] Bot exited with code 1. Restarting in 5s...
+[2026-02-26 11:40:41] Launching bot...
+2026-02-26 11:40:42 - TradingBot - WARNING - ⚠️  TensorFlow not installed — LSTM model disabled. Install with: pip install tensorflow>=2.13.0 (requires Python ≤3.12)
+2026-02-26 11:40:44 - TradingBot - INFO - ======================================================================
+2026-02-26 11:40:44 - TradingBot - INFO - 🚀 AI-Powered Forex Trading Bot Starting...
+2026-02-26 11:40:44 - TradingBot - INFO - ======================================================================
+2026-02-26 11:40:45 - TradingBot - INFO - ✅ MT5 Relay Connected | Account: 49260 | Balance: 60.23 | Server: TradersWay-Live
+2026-02-26 11:40:45 - TradingBot - INFO - LSTM predictor running in stub mode (no TensorFlow)
+2026-02-26 11:40:45 - TradingBot - INFO - 📚 Loaded learning data: 1 past trades, threshold=0.45
+2026-02-26 11:40:45 - TradingBot - INFO - 🧠 Ensemble running with 7 models (LSTM disabled — no TensorFlow)
+2026-02-26 11:40:45 - TradingBot - INFO - RiskManager initialized: $50.00 | Tier: Micro ($0-$200)
+2026-02-26 11:40:45 - TradingBot - INFO - 📚 Trade recorded: USD/JPY SELL → LOSS ($-1.00)
+2026-02-26 11:40:45 - TradingBot - INFO - 📊 Backfilled 1 past trades from MT5 history
+2026-02-26 11:40:45 - TradingBot - INFO - ✅ Trading Bot initialized in LIVE mode (7-model ensemble)
+2026-02-26 11:40:45 - TradingBot - INFO - 🚀 Starting Trading Bot in LIVE mode
+✅ Strategy Config Loaded - Mode: live, Risk: 1.0% per trade
+
+🌐 Dashboard running at http://localhost:5000
+   Open in browser to monitor the bot
+
+ * Serving Flask app 'src.dashboard.app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.10.188:5000
+[33mPress CTRL+C to quit[0m
+2026-02-26 11:40:45 - TradingBot - INFO - Running initial analysis...
+2026-02-26 11:40:45 - TradingBot - INFO - ============================================================
+2026-02-26 11:40:45 - TradingBot - INFO - 🔍 Starting analysis cycle at 11:40:45
+2026-02-26 11:40:46 - TradingBot - INFO - Position sync: risk_manager had 0 open trades, broker has 1 — corrected
+2026-02-26 11:40:52 - TradingBot - INFO - ⚠️  S/R advisory: BUY near resistance — proceed with caution
+2026-02-26 11:40:52 - Signals - INFO - SIGNAL | Pair: EUR/USD | Type: BUY | Confidence: 34.11% | Models: 2/4 | Reason: Sent: BUY (33%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: SELL (48%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:40:52 - TradingBot - INFO - 
+EUR/USD Analysis:
+2026-02-26 11:40:52 - TradingBot - INFO -   Signal: BUY
+2026-02-26 11:40:52 - TradingBot - INFO -   Confidence: 34.1%
+2026-02-26 11:40:52 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:40:52 - TradingBot - INFO -   Details: Sent: BUY (33%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: SELL (48%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:40:53 - Signals - INFO - SIGNAL | Pair: GBP/USD | Type: BUY | Confidence: 25.56% | Models: 2/4 | Reason: Sent: HOLD (13%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (41%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:40:53 - TradingBot - INFO - 
+GBP/USD Analysis:
+2026-02-26 11:40:53 - TradingBot - INFO -   Signal: BUY
+2026-02-26 11:40:53 - TradingBot - INFO -   Confidence: 25.6%
+2026-02-26 11:40:53 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:40:53 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (41%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:40:55 - Signals - INFO - SIGNAL | Pair: USD/JPY | Type: SELL | Confidence: 29.32% | Models: 2/4 | Reason: Sent: HOLD (13%) | Tech: HOLD (12%) | Vol: HOLD (0%) | MTF: SELL (22%) | S/R: SELL (80%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:40:55 - TradingBot - INFO - 
+USD/JPY Analysis:
+2026-02-26 11:40:55 - TradingBot - INFO -   Signal: SELL
+2026-02-26 11:40:55 - TradingBot - INFO -   Confidence: 29.3%
+2026-02-26 11:40:55 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:40:55 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: HOLD (12%) | Vol: HOLD (0%) | MTF: SELL (22%) | S/R: SELL (80%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:40:55 - TradingBot - INFO - 
+📊 Daily Status:
+2026-02-26 11:40:55 - TradingBot - INFO -   Balance: $60.23
+2026-02-26 11:40:55 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-02-26 11:40:55 - TradingBot - INFO -   Max Lot: 0.02 | Max Trades: 4
+2026-02-26 11:40:55 - TradingBot - INFO -   Growth: 20.5% | Next tier: Mini ($200-$1K) ($140 away)
+2026-02-26 11:40:55 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-02-26 11:40:55 - TradingBot - INFO -   Open Trades: 1
+2026-02-26 11:40:55 - TradingBot - INFO -   Can Trade: True
+2026-02-26 11:40:55 - TradingBot - INFO - Bot running in event-driven mode. Press Ctrl+C to stop.
+2026-02-26 11:45:45 - TradingBot - INFO - ============================================================
+2026-02-26 11:45:45 - TradingBot - INFO - 🔍 Starting analysis cycle at 11:45:45
+2026-02-26 11:45:47 - TradingBot - INFO - 
+EUR/USD Analysis:
+2026-02-26 11:45:47 - TradingBot - INFO -   Signal: SKIP
+2026-02-26 11:45:47 - TradingBot - INFO -   Confidence: 43.1%
+2026-02-26 11:45:47 - TradingBot - INFO -   Models Agreement: 1/7
+2026-02-26 11:45:47 - TradingBot - INFO -   Details: Sent: BUY (33%) | Tech: HOLD (0%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: SELL (55%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:45:48 - Signals - INFO - SIGNAL | Pair: GBP/USD | Type: BUY | Confidence: 27.25% | Models: 2/4 | Reason: Sent: HOLD (13%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (47%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:45:48 - TradingBot - INFO - 
+GBP/USD Analysis:
+2026-02-26 11:45:48 - TradingBot - INFO -   Signal: BUY
+2026-02-26 11:45:48 - TradingBot - INFO -   Confidence: 27.3%
+2026-02-26 11:45:48 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:45:48 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (47%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:45:48 - TradingBot - INFO - ⚠️  S/R advisory: SELL near support — proceed with caution
+2026-02-26 11:45:48 - Signals - INFO - SIGNAL | Pair: USD/JPY | Type: SELL | Confidence: 37.18% | Models: 2/4 | Reason: Sent: HOLD (13%) | Tech: HOLD (12%) | Vol: HOLD (0%) | MTF: SELL (22%) | S/R: BUY (79%) | Candle: SELL (70%) | EMA: HOLD (0%)
+2026-02-26 11:45:48 - TradingBot - INFO - 
+USD/JPY Analysis:
+2026-02-26 11:45:48 - TradingBot - INFO -   Signal: SELL
+2026-02-26 11:45:48 - TradingBot - INFO -   Confidence: 37.2%
+2026-02-26 11:45:48 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:45:48 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: HOLD (12%) | Vol: HOLD (0%) | MTF: SELL (22%) | S/R: BUY (79%) | Candle: SELL (70%) | EMA: HOLD (0%)
+2026-02-26 11:45:48 - TradingBot - INFO - 
+📊 Daily Status:
+2026-02-26 11:45:48 - TradingBot - INFO -   Balance: $60.23
+2026-02-26 11:45:48 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-02-26 11:45:48 - TradingBot - INFO -   Max Lot: 0.02 | Max Trades: 4
+2026-02-26 11:45:48 - TradingBot - INFO -   Growth: 20.5% | Next tier: Mini ($200-$1K) ($140 away)
+2026-02-26 11:45:48 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-02-26 11:45:48 - TradingBot - INFO -   Open Trades: 1
+2026-02-26 11:45:48 - TradingBot - INFO -   Can Trade: True
+[2026-02-26 11:48:59] Bot exited with code 143. Restarting in 5s...
+[2026-02-26 11:49:04] Launching bot...
+2026-02-26 11:49:06 - TradingBot - WARNING - ⚠️  TensorFlow not installed — LSTM model disabled. Install with: pip install tensorflow>=2.13.0 (requires Python ≤3.12)
+2026-02-26 11:49:10 - TradingBot - INFO - ======================================================================
+2026-02-26 11:49:10 - TradingBot - INFO - 🚀 AI-Powered Forex Trading Bot Starting...
+2026-02-26 11:49:10 - TradingBot - INFO - ======================================================================
+2026-02-26 11:49:11 - TradingBot - INFO - ✅ MT5 Relay Connected | Account: 49260 | Balance: 60.23 | Server: TradersWay-Live
+2026-02-26 11:49:11 - TradingBot - INFO - LSTM predictor running in stub mode (no TensorFlow)
+2026-02-26 11:49:11 - TradingBot - INFO - 📚 Loaded learning data: 2 past trades, threshold=0.38
+2026-02-26 11:49:11 - TradingBot - INFO - 🧠 Ensemble running with 7 models (LSTM disabled — no TensorFlow)
+2026-02-26 11:49:11 - TradingBot - INFO - RiskManager initialized: $50.00 | Tier: Micro ($0-$200)
+2026-02-26 11:49:11 - TradingBot - INFO - 📚 Trade recorded: EUR/USD SELL → WIN ($+2.99)
+2026-02-26 11:49:11 - TradingBot - INFO - 📊 Backfilled 1 past trades from MT5 history
+2026-02-26 11:49:11 - TradingBot - INFO - ✅ Trading Bot initialized in LIVE mode (7-model ensemble)
+2026-02-26 11:49:11 - TradingBot - INFO - 🚀 Starting Trading Bot in LIVE mode
+✅ Strategy Config Loaded - Mode: live, Risk: 1.0% per trade
+
+🌐 Dashboard running at http://localhost:5000
+   Open in browser to monitor the bot
+
+ * Serving Flask app 'src.dashboard.app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.10.188:5000
+2026-02-26 11:49:12 - TradingBot - INFO - Running initial analysis...
+[33mPress CTRL+C to quit[0m
+2026-02-26 11:49:12 - TradingBot - INFO - ============================================================
+2026-02-26 11:49:12 - TradingBot - INFO - 🔍 Starting analysis cycle at 11:49:12
+2026-02-26 11:49:12 - TradingBot - INFO - Position sync: risk_manager had 0 open trades, broker has 1 — corrected
+2026-02-26 11:49:15 - TradingBot - INFO - 
+EUR/USD Analysis:
+2026-02-26 11:49:15 - TradingBot - INFO -   Signal: SKIP
+2026-02-26 11:49:15 - TradingBot - INFO -   Confidence: 47.4%
+2026-02-26 11:49:15 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:49:15 - TradingBot - INFO -   Details: Sent: BUY (33%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: SELL (51%) | Candle: SELL (85%) | EMA: HOLD (0%)
+2026-02-26 11:49:17 - Signals - INFO - SIGNAL | Pair: GBP/USD | Type: BUY | Confidence: 26.49% | Models: 2/4 | Reason: Sent: HOLD (13%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (44%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:49:17 - TradingBot - INFO - 
+GBP/USD Analysis:
+2026-02-26 11:49:17 - TradingBot - INFO -   Signal: BUY
+2026-02-26 11:49:17 - TradingBot - INFO -   Confidence: 26.5%
+2026-02-26 11:49:17 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:49:17 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (44%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:49:18 - Signals - INFO - SIGNAL | Pair: USD/JPY | Type: BUY | Confidence: 43.20% | Models: 3/4 | Reason: Sent: HOLD (13%) | Tech: HOLD (12%) | Vol: BUY (50%) | MTF: SELL (22%) | S/R: BUY (75%) | Candle: BUY (100%) | EMA: HOLD (0%)
+2026-02-26 11:49:18 - TradingBot - INFO - 
+USD/JPY Analysis:
+2026-02-26 11:49:18 - TradingBot - INFO -   Signal: BUY
+2026-02-26 11:49:18 - TradingBot - INFO -   Confidence: 43.2%
+2026-02-26 11:49:18 - TradingBot - INFO -   Models Agreement: 3/7
+2026-02-26 11:49:18 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: HOLD (12%) | Vol: BUY (50%) | MTF: SELL (22%) | S/R: BUY (75%) | Candle: BUY (100%) | EMA: HOLD (0%)
+2026-02-26 11:49:19 - TradingBot - INFO - SL distance widened: 0.04970 → 0.15000 (minimum 15 pips)
+2026-02-26 11:49:19 - TradingBot - INFO - Position sizing [micro]: Balance $60.23 | Risk 1.0% = $0.60 | Lot: 0.01 (max 0.02)
+2026-02-26 11:49:19 - TradingBot - INFO - 
+🎯 EXECUTING BUY TRADE:
+2026-02-26 11:49:19 - TradingBot - INFO -   Pair: USD/JPY
+2026-02-26 11:49:19 - TradingBot - INFO -   Entry: 156.04600
+2026-02-26 11:49:19 - TradingBot - INFO -   Stop Loss: 155.89600
+2026-02-26 11:49:19 - TradingBot - INFO -   Take Profit: 156.27100
+2026-02-26 11:49:19 - TradingBot - INFO -   Lot Size: 0.01
+2026-02-26 11:49:19 - TradingBot - INFO -   Risk: $0.60
+2026-02-26 11:49:20 - Trades - INFO - ORDER_PLACED (RELAY) | Pair: USD/JPY | Type: BUY | Lot: 0.01 | SL: 155.89600 | TP: 156.27100 | Ticket: 21078334
+2026-02-26 11:49:20 - TradingBot - INFO - ✅ Order placed - Ticket: 21078334
+2026-02-26 11:49:20 - TradingBot - INFO - Trade opened. Open positions: 2/4 [Tier: micro]
+2026-02-26 11:49:20 - TradingBot - INFO - 📌 Trailing registered: ticket=21078334 USD/JPY BUY entry=156.04600 SL=155.89600 ATR=0.04141
+2026-02-26 11:49:20 - TradingBot - INFO - 
+📊 Daily Status:
+2026-02-26 11:49:20 - TradingBot - INFO -   Balance: $60.21
+2026-02-26 11:49:20 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-02-26 11:49:20 - TradingBot - INFO -   Max Lot: 0.02 | Max Trades: 4
+2026-02-26 11:49:20 - TradingBot - INFO -   Growth: 20.4% | Next tier: Mini ($200-$1K) ($140 away)
+2026-02-26 11:49:20 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-02-26 11:49:20 - TradingBot - INFO -   Open Trades: 2
+2026-02-26 11:49:20 - TradingBot - INFO -   Can Trade: True
+2026-02-26 11:49:20 - TradingBot - INFO - Bot running in event-driven mode. Press Ctrl+C to stop.
+2026-02-26 11:54:12 - TradingBot - INFO - ============================================================
+2026-02-26 11:54:12 - TradingBot - INFO - 🔍 Starting analysis cycle at 11:54:12
+2026-02-26 11:54:13 - TradingBot - INFO - 
+EUR/USD Analysis:
+2026-02-26 11:54:13 - TradingBot - INFO -   Signal: SKIP
+2026-02-26 11:54:13 - TradingBot - INFO -   Confidence: 44.9%
+2026-02-26 11:54:13 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:54:13 - TradingBot - INFO -   Details: Sent: BUY (33%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: SELL (50%) | Candle: SELL (75%) | EMA: HOLD (0%)
+2026-02-26 11:54:14 - TradingBot - INFO - 
+GBP/USD Analysis:
+2026-02-26 11:54:14 - TradingBot - INFO -   Signal: SKIP
+2026-02-26 11:54:14 - TradingBot - INFO -   Confidence: 29.2%
+2026-02-26 11:54:14 - TradingBot - INFO -   Models Agreement: 1/7
+2026-02-26 11:54:14 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: SELL (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: BUY (54%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:54:14 - TradingBot - INFO - 
+📊 Daily Status:
+2026-02-26 11:54:14 - TradingBot - INFO -   Balance: $60.21
+2026-02-26 11:54:14 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-02-26 11:54:14 - TradingBot - INFO -   Max Lot: 0.02 | Max Trades: 4
+2026-02-26 11:54:14 - TradingBot - INFO -   Growth: 20.4% | Next tier: Mini ($200-$1K) ($140 away)
+2026-02-26 11:54:14 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-02-26 11:54:14 - TradingBot - INFO -   Open Trades: 2
+2026-02-26 11:54:14 - TradingBot - INFO -   Can Trade: True
+2026-02-26 11:59:12 - TradingBot - INFO - ============================================================
+2026-02-26 11:59:12 - TradingBot - INFO - 🔍 Starting analysis cycle at 11:59:12
+2026-02-26 11:59:13 - TradingBot - INFO - 
+EUR/USD Analysis:
+2026-02-26 11:59:13 - TradingBot - INFO -   Signal: SKIP
+2026-02-26 11:59:13 - TradingBot - INFO -   Confidence: 44.7%
+2026-02-26 11:59:13 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:59:13 - TradingBot - INFO -   Details: Sent: BUY (33%) | Tech: BUY (25%) | Vol: HOLD (0%) | MTF: HOLD (0%) | S/R: SELL (50%) | Candle: SELL (75%) | EMA: HOLD (0%)
+2026-02-26 11:59:14 - TradingBot - INFO - ⚠️  S/R advisory: SELL near support — proceed with caution
+2026-02-26 11:59:14 - Signals - INFO - SIGNAL | Pair: GBP/USD | Type: SELL | Confidence: 36.83% | Models: 2/4 | Reason: Sent: HOLD (13%) | Tech: SELL (25%) | Vol: SELL (50%) | MTF: HOLD (0%) | S/R: BUY (69%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:59:14 - TradingBot - INFO - 
+GBP/USD Analysis:
+2026-02-26 11:59:14 - TradingBot - INFO -   Signal: SELL
+2026-02-26 11:59:14 - TradingBot - INFO -   Confidence: 36.8%
+2026-02-26 11:59:14 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:59:14 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: SELL (25%) | Vol: SELL (50%) | MTF: HOLD (0%) | S/R: BUY (69%) | Candle: HOLD (0%) | EMA: HOLD (0%)
+2026-02-26 11:59:15 - Signals - INFO - SIGNAL | Pair: USD/JPY | Type: BUY | Confidence: 39.70% | Models: 2/4 | Reason: Sent: HOLD (13%) | Tech: HOLD (0%) | Vol: HOLD (20%) | MTF: SELL (22%) | S/R: BUY (69%) | Candle: BUY (75%) | EMA: HOLD (0%)
+2026-02-26 11:59:15 - TradingBot - INFO - 
+USD/JPY Analysis:
+2026-02-26 11:59:15 - TradingBot - INFO -   Signal: BUY
+2026-02-26 11:59:15 - TradingBot - INFO -   Confidence: 39.7%
+2026-02-26 11:59:15 - TradingBot - INFO -   Models Agreement: 2/7
+2026-02-26 11:59:15 - TradingBot - INFO -   Details: Sent: HOLD (13%) | Tech: HOLD (0%) | Vol: HOLD (20%) | MTF: SELL (22%) | S/R: BUY (69%) | Candle: BUY (75%) | EMA: HOLD (0%)
+2026-02-26 11:59:15 - TradingBot - INFO - 
+📊 Daily Status:
+2026-02-26 11:59:15 - TradingBot - INFO -   Balance: $60.21
+2026-02-26 11:59:15 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-02-26 11:59:15 - TradingBot - INFO -   Max Lot: 0.02 | Max Trades: 4
+2026-02-26 11:59:15 - TradingBot - INFO -   Growth: 20.4% | Next tier: Mini ($200-$1K) ($140 away)
+2026-02-26 11:59:15 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-02-26 11:59:15 - TradingBot - INFO -   Open Trades: 2
+2026-02-26 11:59:15 - TradingBot - INFO -   Can Trade: True

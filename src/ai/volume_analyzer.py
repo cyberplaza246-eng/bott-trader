@@ -33,8 +33,8 @@ class VolumeAnalyzer:
         # Volume ratio (current / average)
         df['volume_ratio'] = df['volume'] / (df['volume_sma'] + 1e-6)
         
-        # Identify volume spikes (above 1.5x average)
-        df['volume_spike'] = df['volume_ratio'] > 1.5
+        # Identify volume spikes (above 1.2x average — lowered for forex tick volume)
+        df['volume_spike'] = df['volume_ratio'] > 1.2
         
         return df
     
@@ -62,33 +62,40 @@ class VolumeAnalyzer:
         # Unusual volume spike
         if latest['volume_spike']:
             confidence += 0.3
-            reason_parts.append(f"High volume spike ({latest['volume_ratio']:.2f}x average)")
+            reason_parts.append(f"Volume spike ({latest['volume_ratio']:.2f}x avg)")
         
         # Volume increasing on momentum
         if prev['volume'] < latest['volume']:
-            # Check if price is moving (0.01% threshold for 5-min forex)
+            # Check if price is moving (relaxed for 5-min forex)
             price_change = (latest['close'] - prev['close']) / prev['close']
-            if abs(price_change) > 0.0001:  # ~1 pip on EUR/USD
+            if abs(price_change) > 0.00005:  # ~0.5 pip on EUR/USD
                 confidence += 0.3
-                reason_parts.append("Volume increasing with price move")
+                reason_parts.append("Volume rising with price move")
+        
+        # Volume trending up over last 3 candles
+        if len(df) >= 3:
+            last3_vol = df['volume'].tail(3).values
+            if last3_vol[-1] > last3_vol[-2] > last3_vol[-3]:
+                confidence += 0.15
+                reason_parts.append("3-candle volume ramp")
         
         # Recent high volume
         recent_volumes = df['volume'].tail(5).values
-        if latest['volume'] >= np.percentile(recent_volumes, 75):
+        if latest['volume'] >= np.percentile(recent_volumes, 60):
             confidence += 0.2
-            reason_parts.append("Above average recent volume")
+            reason_parts.append("Above-median recent volume")
         
         # Determine direction from price action + volume
         price_change = (latest['close'] - prev['close']) / prev['close']
         
         if confidence >= 0.15:
             # Volume is significant — determine direction from price
-            if price_change > 0.0001:  # Price moving up with volume (~1 pip)
+            if price_change > 0.00005:  # Price moving up with volume (~0.5 pip)
                 signal = 'BUY'
-                reason_parts.append(f"Price up {price_change:.4f} with volume")
-            elif price_change < -0.0001:  # Price moving down with volume (~1 pip)
+                reason_parts.append(f"Price up {price_change:.5f} with volume")
+            elif price_change < -0.00005:  # Price moving down with volume (~0.5 pip)
                 signal = 'SELL'
-                reason_parts.append(f"Price down {price_change:.4f} with volume")
+                reason_parts.append(f"Price down {price_change:.5f} with volume")
             else:
                 signal = 'HOLD'
         else:

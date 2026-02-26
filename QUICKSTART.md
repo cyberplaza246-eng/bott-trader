@@ -2,6 +2,26 @@
 
 ## 5-Minute Setup
 
+### Docker (Alternative: No local Python setup)
+```bash
+# 1) Prepare env
+cp .env.example .env
+
+# 2) Run production container (auto-restart)
+docker compose --profile prod up -d --build bot-prod
+
+# 3) View logs
+docker compose logs -f bot-prod
+
+# 4) Stop
+docker compose --profile prod down
+```
+
+For live code updates while developing:
+```bash
+docker compose --profile dev up --build bot-dev
+```
+
 ### Step 1: Install Dependencies
 ```bash
 pip install -r requirements.txt
@@ -16,6 +36,11 @@ cp .env.example .env
 # MT5_SERVER = Exness-MT5 (or your broker)
 # NEWSAPI_KEY = from https://newsapi.org
 # TRADING_MODE = paper (start with this!)
+# USD/JPY pair tuning (recommended defaults)
+# USDJPY_TUNING_ENABLED=true
+# USDJPY_MIN_CONFIDENCE=0.40
+# USDJPY_MIN_MODELS_AGREEMENT=2
+# USDJPY_MIN_ADX=25
 ```
 
 ### Step 3: Check Setup
@@ -34,6 +59,24 @@ python scripts/test_mt5.py
 ```bash
 python -m src.bot
 # Bot runs indefinitely - press Ctrl+C to stop
+```
+
+### Step 6: Run 24/7 (Always-On Server)
+Use this on a VPS or your own Linux machine (not Codespaces):
+
+```bash
+# 1) Ensure virtualenv + .env exist
+cp .env.example .env   # if not already created
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+
+# 2) Install and start systemd service
+./scripts/install_systemd_service.sh
+
+# 3) Check status and logs
+sudo systemctl status ai-bot
+sudo journalctl -u ai-bot -f
 ```
 
 ---
@@ -89,6 +132,10 @@ tail -f logs/errors.log
 ```bash
 # In .env:
 TRADING_MODE=paper  # Virtual $50 account
+USDJPY_TUNING_ENABLED=true
+USDJPY_MIN_CONFIDENCE=0.40
+USDJPY_MIN_MODELS_AGREEMENT=2
+USDJPY_MIN_ADX=25
 
 # Run and test for 1-2 weeks
 python -m src.bot
@@ -150,6 +197,14 @@ python scripts/test_mt5.py
 # 4. Try restarting MT5
 ```
 
+### Bot stopped after disconnecting from Codespaces
+Codespaces are not guaranteed 24/7 runtime. Deploy to an always-on machine and run:
+
+```bash
+./scripts/install_systemd_service.sh
+sudo systemctl enable --now ai-bot
+```
+
 ### No signals are being generated
 ```bash
 # 1. Check newsapi_key in .env is valid
@@ -170,6 +225,10 @@ RISK_PER_TRADE_PERCENT=0.5  # Lower from 1%
 
 # 3. Require more model agreement:
 MIN_MODELS_AGREEMENT=4  # All 4 models must agree
+
+# 3b. If losses are mainly USD/JPY, tighten USD/JPY filters:
+USDJPY_MIN_CONFIDENCE=0.45
+USDJPY_MIN_ADX=30
 
 # 4. Review closed trades
 # 5. Consider backtesting with different parameters

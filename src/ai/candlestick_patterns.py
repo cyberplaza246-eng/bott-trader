@@ -21,8 +21,8 @@ class CandlestickPatternDetector:
     """
 
     def __init__(self):
-        self.body_threshold = 0.3   # Body < 30% of range → small body
-        self.tail_ratio = 2.0       # Tail must be 2x body for hammer/pin
+        self.body_threshold = 0.35  # Body < 35% of range → small body (relaxed)
+        self.tail_ratio = 1.5       # Tail must be 1.5x body for hammer/pin (relaxed from 2.0)
 
     def detect_patterns(self, df: pd.DataFrame) -> list:
         """
@@ -219,10 +219,10 @@ class CandlestickPatternDetector:
 
         pattern_names = [p['pattern'] for p in patterns]
 
-        if buy_strength > sell_strength and buy_strength > 0.5:
+        if buy_strength > sell_strength and buy_strength > 0.3:
             signal = 'BUY'
             confidence = min(buy_strength, 1.0)
-        elif sell_strength > buy_strength and sell_strength > 0.5:
+        elif sell_strength > buy_strength and sell_strength > 0.3:
             signal = 'SELL'
             confidence = min(sell_strength, 1.0)
         else:
