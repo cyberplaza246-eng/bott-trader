@@ -220,7 +220,7 @@ class AdaptiveLearner:
         """
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
         base = ENSEMBLE_CONFIDENCE_THRESHOLD          # 0.45
-        ceiling = base + 0.15                          # 0.60
+        ceiling = base + 0.10                          # 0.55 max
 
         if self.consecutive_losses >= 3:
             # Increase threshold (more cautious) — small 1% bump, capped

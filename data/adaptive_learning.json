@@ -41,8 +41,8 @@
       "losses": 8
     }
   },
-  "confidence_threshold": 0.43000000000000005,
-  "consecutive_losses": 7,
+  "confidence_threshold": 0.45,
+  "consecutive_losses": 0,
   "max_consecutive_losses": 7,
   "trade_history": [
     {
