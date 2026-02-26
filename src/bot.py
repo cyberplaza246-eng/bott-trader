@@ -83,6 +83,10 @@ class TradingBot:
         
         self.last_signal_time = {}  # Track last signal per pair
         self.signal_cooldown_minutes = 15  # Don't trade same pair more than every 15 mins
+
+        # Live closure detection: track open tickets so we notice when MT5 closes one
+        self._known_tickets = {}   # {ticket: {pair, type, entry_price, open_time}}
+        self._processed_closures = set()  # position_ids already recorded
         
         bot_logger.info(f"✅ Trading Bot initialized in {self.mode.upper()} mode ({model_count}-model ensemble)")
 
@@ -167,6 +171,9 @@ class TradingBot:
         
         # Sync balance from broker/paper trader each cycle
         self._sync_balance()
+        
+        # Detect trades closed by MT5 (TP/SL hit) and record them
+        self._detect_closed_trades()
         
         # Sync open trade count from broker (live mode)
         self._sync_open_trades()
@@ -480,6 +487,90 @@ class TradingBot:
             bot_logger.info(f"  Current Balance: ${summary['current_balance']:.2f}")
             bot_logger.info(f"  Return: {summary['return_percent']:.2f}%")
     
+    def _detect_closed_trades(self):
+        """Detect trades closed by MT5 (TP/SL) and record them with adaptive learner.
+        
+        Compares current open tickets against _known_tickets.
+        Any ticket that disappeared was closed — look it up in deal history.
+        """
+        if self.mode != 'live' or not self.broker:
+            return
+
+        try:
+            positions = self.broker.get_open_positions()
+            if positions is None:
+                return
+
+            current_tickets = {p['ticket'] for p in positions}
+
+            # Update known tickets with any new positions
+            for p in positions:
+                if p['ticket'] not in self._known_tickets:
+                    self._known_tickets[p['ticket']] = {
+                        'pair': p.get('pair', ''),
+                        'type': p.get('type', ''),
+                        'entry_price': p.get('open_price', 0),
+                        'open_time': p.get('open_time', ''),
+                    }
+
+            # Find tickets that vanished (closed by MT5)
+            closed_tickets = set(self._known_tickets.keys()) - current_tickets
+            if not closed_tickets:
+                return
+
+            # Query deal history to get P/L for closed trades
+            history = self.broker.get_trade_history(hours=24)
+
+            for ticket in closed_tickets:
+                info = self._known_tickets.pop(ticket, {})
+                pair = info.get('pair', 'UNKNOWN')
+                trade_type = info.get('type', 'UNKNOWN')
+                entry_price = info.get('entry_price', 0)
+
+                # Find matching deal in history (match by position_id = ticket)
+                deal = None
+                for d in history:
+                    pos_id = d.get('position_id', d.get('ticket', 0))
+                    if pos_id == ticket:
+                        deal = d
+                        break
+
+                if deal:
+                    profit = deal.get('profit', 0) + deal.get('swap', 0) + deal.get('commission', 0)
+                    exit_price = deal.get('price', 0)
+                    is_win = profit > 0
+                    exit_type = 'TAKE_PROFIT' if is_win else 'STOP_LOSS'
+                else:
+                    # No deal found — estimate from last known state
+                    profit = 0
+                    exit_price = 0
+                    exit_type = 'UNKNOWN'
+
+                bot_logger.info(
+                    f"📊 Closed trade detected: {pair} {trade_type} | "
+                    f"P/L: ${profit:+.2f} | Exit: {exit_type}"
+                )
+
+                # Record with adaptive learner
+                self.risk_manager.on_trade_closed(profit)
+                model_signals = getattr(self, '_pending_trade_signals', {}).pop(pair, {})
+                self.ensemble.record_trade_result({
+                    'pair': pair,
+                    'signal': trade_type,
+                    'profit_loss': profit,
+                    'entry_price': entry_price,
+                    'exit_price': exit_price,
+                    'exit_type': exit_type,
+                    'model_signals': model_signals,
+                })
+
+                # Clean from trailing stop tracker too
+                if hasattr(self, 'trailing'):
+                    self.trailing._tracking.pop(ticket, None)
+
+        except Exception as e:
+            bot_logger.warning(f"Closed trade detection failed: {e}")
+
     def _sync_balance(self):
         """Sync balance from broker or paper trader into the risk manager.
         

@@ -630,3 +630,62 @@ class MT5Connector:
             mt5.shutdown()
         self.connected = False
         bot_logger.info("MT5 connection closed")
+
+    def get_trade_history(self, hours=24):
+        """
+        Get recently closed deals from MT5.
+        Returns list of dicts with position_id, pair, profit, etc.
+        """
+        # ── Relay mode ──
+        if self.relay_url:
+            try:
+                resp = self.session.get(
+                    f"{self.relay_url}/history",
+                    params={"hours": hours},
+                    headers=self._relay_headers(),
+                    timeout=15,
+                )
+                if resp.status_code == 200:
+                    return resp.json().get("deals", [])
+                else:
+                    bot_logger.warning(f"Relay /history returned {resp.status_code}")
+                    return []
+            except Exception as e:
+                bot_logger.warning(f"Relay /history failed: {e}")
+                return []
+
+        # ── Simulation mode ──
+        if self.simulation_mode:
+            return []  # no real history in sim
+
+        # ── Native MT5 ──
+        if not MT5_AVAILABLE:
+            return []
+        try:
+            from datetime import timedelta
+            now = datetime.now()
+            from_date = now - timedelta(hours=hours)
+            deals = mt5.history_deals_get(from_date, now)
+            if not deals:
+                return []
+            closed = []
+            for d in deals:
+                if d.entry != 1:
+                    continue
+                closed.append({
+                    "ticket": d.ticket,
+                    "order": d.order,
+                    "position_id": d.position_id,
+                    "pair": d.symbol,
+                    "type": "BUY" if d.type == 0 else "SELL",
+                    "volume": d.volume,
+                    "price": d.price,
+                    "profit": d.profit,
+                    "commission": d.commission,
+                    "swap": d.swap,
+                    "time": datetime.fromtimestamp(d.time).isoformat(),
+                })
+            return closed
+        except Exception as e:
+            bot_logger.warning(f"MT5 history_deals_get failed: {e}")
+            return []

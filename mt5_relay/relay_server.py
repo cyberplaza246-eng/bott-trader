@@ -10,6 +10,7 @@ Endpoints:
     GET  /candles             — OHLCV candle data
     GET  /price               — latest bid/ask
     GET  /positions           — open positions
+    GET  /history             — recently closed deals
     POST /order               — place a market order
     POST /close               — close a position by ticket (or first matching pair)
     POST /close_all           — close ALL open positions
@@ -23,7 +24,7 @@ Usage:
 
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 import MetaTrader5 as mt5
 
@@ -422,6 +423,49 @@ def modify_position():
         "sl": sl_val,
         "tp": tp_val,
     })
+
+
+# ── Trade History ─────────────────────────────────────────────────────
+
+@app.route("/history")
+def trade_history():
+    """
+    Return recently closed deals (last N hours).
+    Query params:
+        hours  — look-back window (default 24)
+    """
+    hours = int(request.args.get("hours", 24))
+    now = datetime.now()
+    from_date = now - timedelta(hours=hours)
+
+    # Get completed deals
+    deals = mt5.history_deals_get(from_date, now)
+    if deals is None:
+        return jsonify({"deals": [], "error": str(mt5.last_error())})
+
+    closed = []
+    for d in deals:
+        # Type 0=BUY, 1=SELL — entry(0) vs exit(1) deals
+        # We only want exit deals (entry=1) which represent closed trades
+        if d.entry != 1:
+            continue
+
+        closed.append({
+            "ticket": d.ticket,
+            "order": d.order,
+            "position_id": d.position_id,
+            "pair": d.symbol,
+            "type": "BUY" if d.type == 0 else "SELL",  # closing direction
+            "volume": d.volume,
+            "price": d.price,
+            "profit": d.profit,
+            "commission": d.commission,
+            "swap": d.swap,
+            "time": datetime.fromtimestamp(d.time).isoformat(),
+            "comment": d.comment,
+        })
+
+    return jsonify({"deals": closed})
 
 
 # ── Main ──────────────────────────────────────────────────────────────
