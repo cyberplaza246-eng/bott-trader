@@ -119,26 +119,6 @@ class MT5Connector:
             )
         return True
     
-    def get_account_info(self):
-        """Get current account information"""
-        if self.relay_mode:
-            return self._relay_get("/account")
-        if self.simulation_mode:
-            return {
-                'login': self.account or 'SIM_ACCOUNT',
-                'balance': self.sim_balance,
-                'equity': self.sim_equity,
-                'margin_free': self.sim_balance * 0.95,
-                'margin': self.sim_balance * 0.05,
-                'profit': self.sim_equity - self.sim_balance,
-                'leverage': 100,
-                'currency': 'USD',
-                'server': 'Simulation'
-            }
-        if not self.connected:
-            return None
-        return mt5.account_info()._asdict()
-    
     def get_balance(self):
         """Get current account balance"""
         if self.relay_mode:

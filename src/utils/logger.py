@@ -3,6 +3,7 @@ Centralized logging for the trading bot
 """
 import logging
 import os
+import sys
 from datetime import datetime
 from pythonjsonlogger import jsonlogger
 
@@ -13,8 +14,8 @@ def setup_logger(name, log_file=None, level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     
-    # Console handler
-    console_handler = logging.StreamHandler()
+    # Console handler (flush=True for real-time output)
+    console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(level)
     console_format = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',

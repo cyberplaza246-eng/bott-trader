@@ -18,12 +18,12 @@
     },
     "EUR/USD": {
       "wins": 2,
-      "losses": 2,
+      "losses": 3,
       "total_pnl": 4.08
     },
     "GBP/USD": {
       "wins": 0,
-      "losses": 1,
+      "losses": 2,
       "total_pnl": 0.0
     }
   },
@@ -38,12 +38,12 @@
     },
     "new_york": {
       "wins": 2,
-      "losses": 6
+      "losses": 8
     }
   },
-  "confidence_threshold": 0.41000000000000003,
-  "consecutive_losses": 5,
-  "max_consecutive_losses": 5,
+  "confidence_threshold": 0.43000000000000005,
+  "consecutive_losses": 7,
+  "max_consecutive_losses": 7,
   "trade_history": [
     {
       "pair": "USD/JPY",
@@ -220,7 +220,31 @@
       "timestamp": "2026-02-26T17:31:19.870088",
       "session": "new_york",
       "is_win": false
+    },
+    {
+      "pair": "GBP/USD",
+      "signal": "SELL",
+      "profit_loss": 0,
+      "entry_price": 1.34805,
+      "exit_price": 0,
+      "exit_type": "UNKNOWN",
+      "model_signals": {},
+      "timestamp": "2026-02-26T17:51:19.873555",
+      "session": "new_york",
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "signal": "SELL",
+      "profit_loss": 0,
+      "entry_price": 1.17931,
+      "exit_price": 0,
+      "exit_type": "UNKNOWN",
+      "model_signals": {},
+      "timestamp": "2026-02-26T18:06:19.971545",
+      "session": "new_york",
+      "is_win": false
     }
   ],
-  "last_updated": "2026-02-26T17:31:19.870248"
+  "last_updated": "2026-02-26T18:06:19.971817"
 }

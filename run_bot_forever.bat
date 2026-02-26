@@ -10,6 +10,9 @@ title AI Trading Bot - LIVE
 
 cd /d "%~dp0"
 
+REM Force Python to flush output in real-time
+set PYTHONUNBUFFERED=1
+
 echo.
 echo ====================================
 echo   AI Trading Bot - Starting...
