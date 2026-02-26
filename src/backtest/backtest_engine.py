@@ -1,14 +1,18 @@
 """
 Backtesting Framework
-Test trading strategy on historical data
+Test trading strategy on historical data — matches the live 8-model ensemble
+(Sentiment is skipped because it needs a live API).
 """
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from src.ai.technical_analyzer import TechnicalAnalyzer
-from src.ai.sentiment_analyzer import SentimentAnalyzer
 from src.ai.volume_analyzer import VolumeAnalyzer
 from src.ai.lstm_predictor import LSTMPredictor
+from src.ai.ema_crossover import EMACrossoverAnalyzer
+from src.ai.candlestick_patterns import CandlestickPatternDetector
+from src.ai.support_resistance import SupportResistanceDetector
+from src.ai.multi_timeframe import MultiTimeframeAnalyzer
 from src.risk.position_manager import RiskManager
 from src.utils.logger import bot_logger
 
@@ -26,9 +30,13 @@ class BacktestEngine:
         self.technical = TechnicalAnalyzer()
         self.volume = VolumeAnalyzer()
         self.lstm = LSTMPredictor()
+        self.ema_crossover = EMACrossoverAnalyzer()
+        self.candlestick = CandlestickPatternDetector()
+        self.support_resistance = SupportResistanceDetector()
+        self.multi_timeframe = MultiTimeframeAnalyzer()
         self.risk_manager = RiskManager(initial_balance=initial_balance)
     
-    def run_backtest(self, historical_data, pair, confidence_threshold=0.75, min_agreement=3):
+    def run_backtest(self, historical_data, pair, confidence_threshold=0.55, min_agreement=3):
         """
         Run backtest on historical data
         
@@ -49,33 +57,60 @@ class BacktestEngine:
         
         open_position = None
         equity_curve = [self.initial_balance]
+        total_models = 7  # LSTM, Tech, Vol, EMA, Candle, S/R, MTF (no Sentiment)
         
-        for idx in range(100, len(data)):  # Skip first 100 for indicators
+        for idx in range(200, len(data)):  # Skip first 200 for EMA200
             current_candle = data.iloc[idx]
+            current_price = current_candle['close']
             
-            # Get signals from ensemble
-            historical_subset = data.iloc[max(0, idx-60):idx]
+            # Get signals from all available models
+            historical_subset = data.iloc[max(0, idx-200):idx+1]
             
             lstm_signal = self.lstm.predict_direction(historical_subset)
             technical_signal = self.technical.get_signal(historical_subset)
             volume_signal = self.volume.get_volume_signal(historical_subset)
+            ema_signal = self.ema_crossover.get_signal(historical_subset)
+            candle_signal = self.candlestick.get_pattern_signal(historical_subset)
+            sr_signal = self.support_resistance.get_sr_signal(historical_subset)
             
-            # Count agreement
-            buy_votes = 0
-            if lstm_signal['signal'] == 'BUY':
-                buy_votes += 1
-            if technical_signal['signal'] == 'BUY':
-                buy_votes += 1
-            if volume_signal['signal'] == 'BUY':
-                buy_votes += 1
+            # MTF: resample 1h data to simulate higher timeframes
+            mtf_signal = self._get_mtf_signal(data, idx)
+            
+            all_signals = [
+                lstm_signal, technical_signal, volume_signal,
+                ema_signal, candle_signal, sr_signal, mtf_signal
+            ]
+            
+            # Count agreement like the live ensemble
+            buy_votes = sum(1 for s in all_signals if s.get('signal') == 'BUY')
+            sell_votes = sum(1 for s in all_signals if s.get('signal') == 'SELL')
+            
+            # Determine direction
+            if buy_votes >= min_agreement and buy_votes > sell_votes:
+                direction = 'BUY'
+                agreement = buy_votes
+            elif sell_votes >= min_agreement and sell_votes > buy_votes:
+                direction = 'SELL'
+                agreement = sell_votes
+            else:
+                direction = None
+                agreement = 0
+            
+            # EMA200 hard gate
+            ema200 = current_candle.get('ema_200', None)
+            if direction and ema200 is not None:
+                if direction == 'BUY' and current_price < ema200:
+                    direction = None  # Block counter-trend BUY
+                elif direction == 'SELL' and current_price > ema200:
+                    direction = None  # Block counter-trend SELL
             
             # Open position
-            if not open_position and buy_votes >= min_agreement:
-                entry_price = current_candle['close']
-                atr = current_candle['atr']
+            if not open_position and direction:
+                entry_price = current_price
+                atr = current_candle.get('atr', 0.001)
                 
-                stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, 'BUY')
-                take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, 'BUY')
+                stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, direction)
+                take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, direction)
                 
                 position_size = self.risk_manager.calculate_position_size(entry_price, stop_loss, pair=pair)
                 
@@ -86,42 +121,53 @@ class BacktestEngine:
                         'stop_loss': stop_loss,
                         'take_profit': take_profit,
                         'lot_size': position_size['lot_size'],
-                        'type': 'BUY'
+                        'type': direction
                     }
                     bot_logger.info(
-                        f"[{idx}] BUY @ {entry_price:.5f} | SL: {stop_loss:.5f} | TP: {take_profit:.5f}"
+                        f"[{idx}] {direction} @ {entry_price:.5f} | SL: {stop_loss:.5f} | TP: {take_profit:.5f}"
                     )
             
             # Close position
             if open_position:
-                current_price = current_candle['close']
+                pos_type = open_position['type']
                 
-                if current_price <= open_position['stop_loss']:
-                    # Hit stop loss
+                if pos_type == 'BUY':
+                    hit_sl = current_price <= open_position['stop_loss']
+                    hit_tp = current_price >= open_position['take_profit']
+                else:  # SELL
+                    hit_sl = current_price >= open_position['stop_loss']
+                    hit_tp = current_price <= open_position['take_profit']
+                
+                if hit_sl:
                     exit_price = open_position['stop_loss']
                     exit_type = 'STOP_LOSS'
-                elif current_price >= open_position['take_profit']:
-                    # Hit take profit
+                elif hit_tp:
                     exit_price = open_position['take_profit']
                     exit_type = 'TAKE_PROFIT'
                 else:
                     exit_price = None
                 
                 if exit_price:
-                    # Calculate P/L
-                    pips = (exit_price - open_position['entry_price']) / 0.0001
-                    profit_loss = pips * open_position['lot_size'] * 10
+                    # Calculate P/L (direction-aware)
+                    pip_size = 0.01 if 'JPY' in pair else 0.0001
+                    if pos_type == 'BUY':
+                        pips = (exit_price - open_position['entry_price']) / pip_size
+                    else:  # SELL
+                        pips = (open_position['entry_price'] - exit_price) / pip_size
+                    profit_loss = pips * open_position['lot_size'] * (1000 if 'JPY' in pair else 10)
                     
                     self.current_balance += profit_loss
                     self.equity = self.current_balance
                     equity_curve.append(self.equity)
                     
                     trade_record = {
+                        'type': pos_type,
                         'entry_price': open_position['entry_price'],
                         'exit_price': exit_price,
                         'exit_type': exit_type,
                         'profit_loss': profit_loss,
-                        'profit_loss_percent': (profit_loss / open_position['entry_price']) * 100,
+                        'pips': pips,
+                        'profit_loss_percent': (profit_loss / self.initial_balance) * 100,
                         'candles_held': idx - open_position['entry_idx']
                     }
                     
@@ -135,6 +181,31 @@ class BacktestEngine:
         
         # Generate results
         return self._generate_backtest_results(equity_curve, pair)
+    
+    def _get_mtf_signal(self, data, idx):
+        """Simulate multi-timeframe by resampling 1h data to 4h and daily"""
+        try:
+            # Use last 200 bars, resample to 4h
+            subset = data.iloc[max(0, idx - 200):idx + 1].copy()
+            if 'datetime' not in subset.columns:
+                return {'signal': 'HOLD', 'confidence': 0.0}
+            
+            subset = subset.set_index('datetime')
+            
+            # 4h resample
+            h4 = subset.resample('4h').agg({
+                'open': 'first', 'high': 'max', 'low': 'min',
+                'close': 'last', 'volume': 'sum'
+            }).dropna()
+            
+            if len(h4) < 30:
+                return {'signal': 'HOLD', 'confidence': 0.0}
+            
+            h4 = h4.reset_index()
+            h4 = self.technical.calculate_indicators(h4)
+            return self.technical.get_signal(h4)
+        except Exception:
+            return {'signal': 'HOLD', 'confidence': 0.0}
     
     def _generate_backtest_results(self, equity_curve, pair):
         """Generate backtest statistics"""

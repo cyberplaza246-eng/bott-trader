@@ -39,3 +39,5 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (RELAY) | Pair: EUR/USD | Type: SELL | Lot: 0.01 | SL: 1.18170 | TP: 1.17795 | Ticket: 21079352"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (RELAY) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 156.15100 | TP: 155.77600 | Ticket: 21079426"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (RELAY) | Pair: EUR/USD | Type: SELL | Lot: 0.01 | SL: 1.18079 | TP: 1.17500 | Ticket: 21079777"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (RELAY) | Pair: GBP/USD | Type: SELL | Lot: 0.02 | SL: 1.35057 | TP: 1.34799 | Ticket: 21080053"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (RELAY) | Pair: GBP/USD | Type: SELL | Lot: 0.02 | SL: 1.34901 | TP: 1.34619 | Ticket: 21080079"}

@@ -89,7 +89,7 @@ def run_backtest(pair, start_date, end_date, initial_balance, confidence_thresho
     bot_logger.info(f"  Period: {start_date} to {end_date}")
     bot_logger.info(f"  Initial Balance: ${initial_balance:,.2f}")
     bot_logger.info(f"  Confidence Threshold: {confidence_threshold:.0%}")
-    bot_logger.info(f"  Min Models Agreement: {min_agreement}/4")
+    bot_logger.info(f"  Min Models Agreement: {min_agreement}/7")
     bot_logger.info("=" * 70)
     
     # Fetch data

@@ -29,7 +29,7 @@ ACCOUNT_TIERS = {
     'micro': {
         'min_balance': 0,
         'max_balance': 200,
-        'max_concurrent_trades': 2,    # 2 well-chosen trades > 3 margined-out ones
+        'max_concurrent_trades': 3,    # 3 concurrent trades allowed
         'max_lot_size': 0.02,
         'risk_percent': 1.0,       # Conservative at small size
         'description': 'Micro ($0-$200)',
@@ -96,7 +96,7 @@ class RiskManager:
         self.daily_loss = 0.0
         self.account_leverage = 100  # Will be updated from broker
         self.free_margin = initial_balance * 0.95  # Will be updated from broker
-        self.slot3_confidence_threshold = float(os.getenv('SLOT3_CONFIDENCE_THRESHOLD', '0.65'))
+        self.slot3_confidence_threshold = float(os.getenv('SLOT3_CONFIDENCE_THRESHOLD', '0.58'))
         self.slot3_min_agreement = int(os.getenv('SLOT3_MIN_AGREEMENT', '3'))
 
         # Set initial tier & limits (will be recalculated each cycle)
@@ -278,19 +278,6 @@ class RiskManager:
         tier_cap = self._current_tier['max_concurrent_trades']
         if 'micro' in (self._current_tier_name or 'micro'):
             effective_cap = min(3, tier_cap)
-
-            # Quality gate for the 3rd slot on micro accounts
-            # If already using 2 slots, require stronger setup before opening slot #3.
-            if effective_cap >= 3 and self.open_trades >= 2:
-                confidence = (signal_result or {}).get('confidence', 0.0)
-                agreement = (signal_result or {}).get('models_agreement', 0)
-                min_required = (signal_result or {}).get('min_agreement_required', self.slot3_min_agreement)
-                strong_enough = (
-                    confidence >= self.slot3_confidence_threshold and
-                    agreement >= max(self.slot3_min_agreement, min_required)
-                )
-                if not strong_enough:
-                    effective_cap = 2
         else:
             effective_cap = tier_cap
 
@@ -399,10 +386,10 @@ class RiskManager:
         }
 
     # Minimum stop distance per pair type (in price units)
-    # Most brokers require at least 10-20 pips; we use 15 pips as safe default
+    # Most brokers require 3-5 pips; we use 8 pips as safe default
     MIN_STOP_DISTANCE = {
-        'JPY':     0.150,    # 15 pips (3-digit pairs)
-        'DEFAULT': 0.00150,  # 15 pips (5-digit pairs)
+        'JPY':     0.080,    # 8 pips (3-digit pairs)
+        'DEFAULT': 0.00080,  # 8 pips (5-digit pairs)
     }
 
     @staticmethod
