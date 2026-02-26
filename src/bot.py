@@ -1,7 +1,8 @@
 """
 Main Auto-Trading Bot Loop
 Runs continuously to monitor, analyze, and execute trades.
-Now with: up to 8-model ensemble (LSTM optional), adaptive learning, dashboard, S/R-aware exits
+Now with: up to 8-model ensemble (LSTM optional), adaptive learning, dashboard, S/R-aware exits,
+      cross-pair correlation signals, economic event avoidance, LSTM auto-retraining
 """
 import os
 import time
@@ -14,6 +15,8 @@ from src.core.ensemble_trader import EnsembleTrader
 from src.risk.position_manager import RiskManager
 from src.core.paper_trading import PaperTradingManager
 from src.core.trailing_stop import TrailingStopManager
+from src.ai.economic_calendar import EconomicCalendar
+from src.ai.lstm_retrainer import LSTMRetrainer
 from src.utils.logger import bot_logger, TradeLogger
 from config.strategy_config import (
     TRADING_MODE,
@@ -77,6 +80,11 @@ class TradingBot:
         self.ensemble = EnsembleTrader(newsapi_key=newsapi_key, broker=self.broker)
         self.risk_manager = RiskManager(initial_balance=INITIAL_BALANCE)
         self.trailing = TrailingStopManager(breakeven_r=1.0, trail_atr_mult=1.5)
+        self.calendar = EconomicCalendar()
+        self.lstm_retrainer = LSTMRetrainer(
+            broker=self.broker,
+            predictor=self.ensemble.lstm if self.ensemble.lstm_available else None,
+        )
         
         # Determine active model count
         model_count = 8 if self.ensemble.lstm_available else 7
@@ -264,6 +272,32 @@ class TradingBot:
             except Exception as e:
                 bot_logger.warning(f"Trailing stop update failed: {e}")
 
+        # Global hour skip — if this hour has historically terrible win rate, skip everything
+        if self.ensemble.learner.should_skip_hour():
+            from datetime import timezone as _tz
+            _h = datetime.now(_tz.utc).hour
+            bot_logger.info(f"⏰ Adaptive hour skip: UTC hour {_h:02d} has poor historical win rate — skipping cycle")
+            return
+
+        # Drawdown protection — if in active drawdown, log it clearly
+        if self.ensemble.learner.in_drawdown_protection:
+            bot_logger.warning(
+                f"🛡️ Drawdown protection ACTIVE — confidence threshold raised to "
+                f"{self.ensemble.learner.confidence_threshold:.2f}"
+            )
+
+        # Log upcoming economic events
+        try:
+            upcoming_events = self.calendar.get_upcoming_events(hours_ahead=2)
+            if upcoming_events:
+                for ev in upcoming_events[:3]:
+                    bot_logger.info(
+                        f"📅 Upcoming: {ev['name']} at {ev['time']} "
+                        f"({', '.join(ev['currencies'])}) — {ev['hours_away']}h away"
+                    )
+        except Exception:
+            pass
+
         for pair in PAIRS:
             try:
                 # Skip if outside trading session for this pair
@@ -276,6 +310,17 @@ class TradingBot:
 
                 # Skip if cooldown active
                 if self.should_skip_signal(pair):
+                    continue
+
+                # Adaptive session skip — skip pair+session combos with terrible win rates
+                if self.ensemble.learner.should_skip_session(pair):
+                    bot_logger.info(f"📉 Adaptive session skip: {pair} losing in current session")
+                    continue
+
+                # Economic event filter — avoid trading during high-impact news
+                event_blocked, event_name = self.calendar.is_event_blocked(pair)
+                if event_blocked:
+                    bot_logger.info(f"📰 Event filter: {pair} blocked — {event_name} window active")
                     continue
                 
                 # Fetch latest candle data
@@ -291,12 +336,17 @@ class TradingBot:
                 
                 # Get ensemble signal
                 signal_result = self.ensemble.get_trading_signal(df, pair)
+
+                # Feed price data to cross-pair analyzer for correlation tracking
+                self.ensemble.cross_pair.update_prices(pair, df)
                 
                 # Log detailed analysis
+                regime = signal_result.get('regime', 'unknown')
                 bot_logger.info(f"\n{pair} Analysis:")
                 bot_logger.info(f"  Signal: {signal_result['signal']}")
                 bot_logger.info(f"  Confidence: {signal_result['confidence']:.1%}")
                 bot_logger.info(f"  Models Agreement: {signal_result['models_agreement']}/{signal_result.get('total_models', 7)}")
+                bot_logger.info(f"  Market Regime: {regime}")
                 bot_logger.info(f"  Details: {signal_result['detailed_reason']}")
 
                 # Active position management: exit stale/reversal trades to free slots
@@ -348,6 +398,10 @@ class TradingBot:
 
                     self._execute_trade(pair, signal_result, df)
                     self.last_signal_time[pair] = datetime.now()
+                    # Track regime for this pair's trade (used when recording trade result)
+                    if not hasattr(self, '_last_regime'):
+                        self._last_regime = {}
+                    self._last_regime[pair] = signal_result.get('regime', 'unknown')
                     # Re-sync free margin after placing a trade so next pair
                     # sees updated margin availability
                     self._sync_balance()
@@ -520,6 +574,7 @@ class TradingBot:
                         'exit_price': closed_trade.get('exit_price', 0),
                         'exit_type': exit_type,
                         'model_signals': model_signals,
+                        'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
                     })
 
     @staticmethod
@@ -635,6 +690,7 @@ class TradingBot:
                 'exit_price': closed_trade.get('exit_price', 0),
                 'exit_type': exit_reason,
                 'model_signals': model_signals,
+                'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
             })
             return
 
@@ -692,6 +748,19 @@ class TradingBot:
             timezone='UTC'
         )
         
+        # Schedule LSTM auto-retrain every 24 hours at 03:00 UTC (low-activity period)
+        if self.lstm_retrainer.available:
+            self.scheduler.add_job(
+                self.lstm_retrainer.retrain,
+                'cron',
+                hour=3,
+                minute=0,
+                id='lstm_retrain',
+                timezone='UTC',
+                replace_existing=True,
+            )
+            bot_logger.info("🧠 LSTM auto-retraining scheduled (daily 03:00 UTC)")
+
         self.scheduler.start()
         
         # Run first analysis immediately
@@ -803,6 +872,7 @@ class TradingBot:
                     'exit_price': exit_price,
                     'exit_type': exit_type,
                     'model_signals': model_signals,
+                    'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
                 })
 
                 # Clean from trailing stop tracker too

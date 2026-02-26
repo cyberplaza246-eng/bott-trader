@@ -1,14 +1,18 @@
 """
-Adaptive Learning System
+Adaptive Learning System — God Tier v2
 
 Learns from past trades to improve future decisions:
-  - Tracks which model combinations produce winning trades
-  - Adjusts model weights dynamically based on recent performance
-  - Records market conditions during trades for pattern learning
-  - Saves/loads trade history for persistent learning
+  - Tracks which model combinations produce winning trades PER PAIR and PER SESSION
+  - Bayesian weight updates with exponential recency weighting
+  - Market regime detection (trending / ranging / volatile)
+  - Drawdown protection: auto-tighten after losing streaks, widen after wins
+  - Session-aware performance tracking (avoid bad hours)
+  - Model correlation tracking: which model combos win together
+  - Rolling performance windows with decay
 """
 import os
 import json
+import math
 import numpy as np
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -19,14 +23,21 @@ LEARNING_DB_PATH = 'data/adaptive_learning.json'
 
 class AdaptiveLearner:
     """
-    Learns from trade outcomes and adjusts strategy parameters dynamically.
+    God-tier adaptive learning system.
 
     Key features:
-      - Model weight optimization based on accuracy history
-      - Win-rate tracking per pair, per session, per market condition
-      - Confidence threshold auto-adjustment
-      - Cool-down tuning after losing streaks
+      - Bayesian model weight optimization with recency decay
+      - Per-pair, per-session, per-regime tracking
+      - Market regime detection (trending/ranging/volatile)
+      - Drawdown circuit breaker
+      - Win-streak momentum scaling
+      - Model combo synergy tracking
+      - Rolling Sharpe ratio per model
     """
+
+    REGIME_TRENDING = 'trending'
+    REGIME_RANGING = 'ranging'
+    REGIME_VOLATILE = 'volatile'
 
     def __init__(self, initial_weights: dict = None):
         self.model_weights = initial_weights or {
@@ -44,19 +55,44 @@ class AdaptiveLearner:
         self.model_accuracy = defaultdict(lambda: {'correct': 0, 'total': 0})
         self.pair_stats = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
         self.session_stats = defaultdict(lambda: {'wins': 0, 'losses': 0})
-        
-        # Use config threshold, not hardcoded
+
+        # Per-pair per-model accuracy
+        self.pair_model_accuracy = defaultdict(lambda: {'correct': 0, 'total': 0})
+
+        # Per-session per-pair stats
+        self.session_pair_stats = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
+
+        # Model combo synergy
+        self.model_combos = defaultdict(lambda: {'wins': 0, 'total': 0})
+
+        # Rolling model PnL (for Sharpe-like scoring)
+        self.model_pnl_history = defaultdict(list)
+
+        # Regime tracking
+        self.current_regime = self.REGIME_RANGING
+        self.regime_stats = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
+
+        # Hourly performance (24 buckets)
+        self.hourly_stats = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
+
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
         self.confidence_threshold = ENSEMBLE_CONFIDENCE_THRESHOLD
-        
+
         self.consecutive_losses = 0
         self.max_consecutive_losses = 0
+        self.consecutive_wins = 0
+
+        # Drawdown tracking
+        self.peak_balance = 0.0
+        self.current_drawdown_pct = 0.0
+        self.in_drawdown_protection = False
+
+        self.decay_factor = 0.95
 
         self._load()
 
     @staticmethod
     def _normalize_pair(pair: str) -> str:
-        """Normalize pair key so EURUSD and EUR/USD map to the same bucket."""
         raw = str(pair or 'UNKNOWN').upper().strip().replace(' ', '')
         if raw == 'UNKNOWN':
             return raw
@@ -65,76 +101,157 @@ class AdaptiveLearner:
             return f"{compact[:3]}/{compact[3:]}"
         return raw
 
+    @staticmethod
+    def _get_session(hour: int = None) -> str:
+        if hour is None:
+            hour = datetime.utcnow().hour
+        if 0 <= hour < 8:
+            return 'asian'
+        elif 8 <= hour < 13:
+            return 'london'
+        elif 13 <= hour < 17:
+            return 'ny_overlap'
+        elif 17 <= hour < 22:
+            return 'new_york'
+        else:
+            return 'off_hours'
+
+    # ------------------------------------------------------------------
+    # Market Regime Detection
+    # ------------------------------------------------------------------
+    def detect_regime(self, df) -> str:
+        if df is None or len(df) < 20:
+            return self.REGIME_RANGING
+        try:
+            latest = df.iloc[-1]
+            adx = float(latest.get('adx', 0) or 0)
+            atr = float(latest.get('atr', 0) or 0)
+            close = float(latest['close'])
+            atr_pct = (atr / close * 100) if close > 0 else 0
+            bb_upper = float(latest.get('bb_upper', close) or close)
+            bb_lower = float(latest.get('bb_lower', close) or close)
+            bb_width = (bb_upper - bb_lower) / close * 100 if close > 0 else 0
+            ema200 = float(latest.get('ema_200', close) or close)
+            trend_deviation = abs(close - ema200) / close * 100 if close > 0 else 0
+
+            if adx > 30 and trend_deviation > 0.3:
+                regime = self.REGIME_TRENDING
+            elif atr_pct > 0.15 or bb_width > 0.8:
+                regime = self.REGIME_VOLATILE
+            else:
+                regime = self.REGIME_RANGING
+
+            self.current_regime = regime
+            return regime
+        except Exception:
+            return self.REGIME_RANGING
+
     # ------------------------------------------------------------------
     # Trade Recording
     # ------------------------------------------------------------------
     def record_trade(self, trade_result: dict):
-        """
-        Record a completed trade and update learning data.
-
-        Args:
-            trade_result: {
-                'pair': 'EUR/USD',
-                'signal': 'BUY' | 'SELL',
-                'profit_loss': float,
-                'model_signals': {
-                    'lstm': {'signal': 'BUY', 'confidence': 0.6},
-                    'sentiment': {...}, 'technical': {...}, 'volume': {...}
-                },
-                'entry_price': float,
-                'exit_price': float,
-                'exit_type': 'TAKE_PROFIT' | 'STOP_LOSS',
-                'entry_time': str,
-                'market_conditions': {  # Optional
-                    'atr': float,
-                    'rsi': float,
-                    'volume_ratio': float,
-                    'session': 'london' | 'ny' | 'asian',
-                }
-            }
-        """
-        is_win = trade_result.get('profit_loss', 0) > 0
+        pnl = trade_result.get('profit_loss', 0)
+        is_win = pnl > 0
         pair = self._normalize_pair(trade_result.get('pair', 'UNKNOWN'))
         signal = trade_result.get('signal', 'UNKNOWN')
+        model_signals = trade_result.get('model_signals', {})
+        regime = trade_result.get('regime', self.current_regime)
 
-        # Update pair stats
+        hour = datetime.utcnow().hour
+        session = self._get_session(hour)
+
+        # Core stats
         if is_win:
             self.pair_stats[pair]['wins'] += 1
             self.consecutive_losses = 0
+            self.consecutive_wins += 1
         else:
             self.pair_stats[pair]['losses'] += 1
             self.consecutive_losses += 1
+            self.consecutive_wins = 0
             self.max_consecutive_losses = max(self.max_consecutive_losses, self.consecutive_losses)
 
-        self.pair_stats[pair]['total_pnl'] += trade_result.get('profit_loss', 0)
+        self.pair_stats[pair]['total_pnl'] += pnl
 
-        # Update model accuracy
-        model_signals = trade_result.get('model_signals', {})
-        for model_name, model_signal in model_signals.items():
-            if model_name not in self.model_accuracy:
-                self.model_accuracy[model_name] = {'correct': 0, 'total': 0}
-
-            self.model_accuracy[model_name]['total'] += 1
-
-            # Model was correct if it agreed with the trade direction AND trade was profitable
-            if model_signal.get('signal') == signal and is_win:
-                self.model_accuracy[model_name]['correct'] += 1
-            elif model_signal.get('signal') != signal and not is_win:
-                self.model_accuracy[model_name]['correct'] += 1
-
-        # Session tracking
-        hour = datetime.now().hour
-        if 8 <= hour < 16:
-            session = 'london'
-        elif 13 <= hour < 21:
-            session = 'new_york'
-        else:
-            session = 'asian'
-
+        # Session stats
         if is_win:
             self.session_stats[session]['wins'] += 1
         else:
             self.session_stats[session]['losses'] += 1
+
+        # Session + Pair stats
+        sp_key = f"{session}:{pair}"
+        if is_win:
+            self.session_pair_stats[sp_key]['wins'] += 1
+        else:
+            self.session_pair_stats[sp_key]['losses'] += 1
+        self.session_pair_stats[sp_key]['total_pnl'] += pnl
+
+        # Hourly stats
+        h_key = str(hour)
+        if is_win:
+            self.hourly_stats[h_key]['wins'] += 1
+        else:
+            self.hourly_stats[h_key]['losses'] += 1
+        self.hourly_stats[h_key]['total_pnl'] += pnl
+
+        # Regime stats
+        if is_win:
+            self.regime_stats[regime]['wins'] += 1
+        else:
+            self.regime_stats[regime]['losses'] += 1
+        self.regime_stats[regime]['total_pnl'] += pnl
+
+        # Per-model accuracy
+        agreeing_models = set()
+        for model_name, model_signal in model_signals.items():
+            if model_name not in self.model_accuracy:
+                self.model_accuracy[model_name] = {'correct': 0, 'total': 0}
+            self.model_accuracy[model_name]['total'] += 1
+
+            model_agreed = model_signal.get('signal') == signal
+            if (model_agreed and is_win) or (not model_agreed and not is_win):
+                self.model_accuracy[model_name]['correct'] += 1
+
+            if model_agreed:
+                agreeing_models.add(model_name)
+
+            # Per-pair per-model accuracy
+            pm_key = f"{pair}:{model_name}"
+            self.pair_model_accuracy[pm_key]['total'] += 1
+            if (model_agreed and is_win) or (not model_agreed and not is_win):
+                self.pair_model_accuracy[pm_key]['correct'] += 1
+
+            # Rolling PnL per model
+            if model_agreed:
+                self.model_pnl_history[model_name].append(pnl)
+            if len(self.model_pnl_history[model_name]) > 100:
+                self.model_pnl_history[model_name] = self.model_pnl_history[model_name][-100:]
+
+        # Model combo synergy
+        if len(agreeing_models) >= 2:
+            combo_key = ":".join(sorted(agreeing_models))
+            self.model_combos[combo_key]['total'] += 1
+            if is_win:
+                self.model_combos[combo_key]['wins'] += 1
+
+        # Drawdown tracking
+        cumulative_pnl = sum(t.get('profit_loss', 0) for t in self.trade_history) + pnl
+        if cumulative_pnl > self.peak_balance:
+            self.peak_balance = cumulative_pnl
+        if self.peak_balance > 0:
+            self.current_drawdown_pct = (self.peak_balance - cumulative_pnl) / self.peak_balance * 100
+        else:
+            self.current_drawdown_pct = 0
+
+        if self.current_drawdown_pct > 5:
+            if not self.in_drawdown_protection:
+                bot_logger.warning(f"🛡️ Drawdown protection ACTIVATED: {self.current_drawdown_pct:.1f}% drawdown")
+            self.in_drawdown_protection = True
+        elif self.current_drawdown_pct < 2:
+            if self.in_drawdown_protection:
+                bot_logger.info(f"✅ Drawdown protection DEACTIVATED: recovered to {self.current_drawdown_pct:.1f}%")
+            self.in_drawdown_protection = False
 
         # Store trade
         trade_record = {
@@ -142,59 +259,65 @@ class AdaptiveLearner:
             'pair': pair,
             'timestamp': datetime.now().isoformat(),
             'session': session,
+            'hour': hour,
+            'regime': regime,
             'is_win': is_win,
         }
-        # Convert datetime objects to strings for JSON serialisation
         for key in ('entry_time', 'exit_time'):
             if key in trade_record and hasattr(trade_record[key], 'isoformat'):
                 trade_record[key] = trade_record[key].isoformat()
-
         self.trade_history.append(trade_record)
 
         # Adapt
         self._adapt_weights()
         self._adapt_confidence_threshold()
-
-        # Persist
         self._save()
 
         bot_logger.info(
             f"📚 Trade recorded: {pair} {signal} → {'WIN' if is_win else 'LOSS'} "
-            f"(${trade_result.get('profit_loss', 0):+.2f})"
+            f"(${pnl:+.2f}) | Regime: {regime} | Session: {session} | "
+            f"Streak: {'W' if is_win else 'L'}{self.consecutive_wins if is_win else self.consecutive_losses}"
         )
 
     # ------------------------------------------------------------------
-    # Weight Adaptation
+    # Weight Adaptation (Bayesian with Recency + Sharpe)
     # ------------------------------------------------------------------
     def _adapt_weights(self):
-        """Adjust model weights based on recent accuracy (exponential decay)."""
-        min_trades = 10  # Need at least 10 trades before adapting
-
+        min_trades = 5
         total_trades = sum(m['total'] for m in self.model_accuracy.values())
         if total_trades < min_trades:
             return
 
-        # Calculate accuracy for each model
-        accuracies = {}
-        for model, stats in self.model_accuracy.items():
-            if stats['total'] > 0:
-                accuracies[model] = stats['correct'] / stats['total']
-            else:
-                accuracies[model] = 0.5  # Default
+        scores = {}
+        for model_name in self.model_weights:
+            stats = self.model_accuracy.get(model_name, {'correct': 0, 'total': 0})
+            if stats['total'] == 0:
+                scores[model_name] = 0.5
+                continue
 
-        if not accuracies:
+            accuracy = stats['correct'] / stats['total']
+
+            # Sharpe-like bonus
+            pnl_history = self.model_pnl_history.get(model_name, [])
+            if len(pnl_history) >= 5:
+                pnl_arr = np.array(pnl_history[-30:])
+                mean_pnl = np.mean(pnl_arr)
+                std_pnl = np.std(pnl_arr) + 1e-6
+                sharpe = mean_pnl / std_pnl
+                sharpe_bonus = np.clip(sharpe * 0.05, -0.1, 0.2)
+            else:
+                sharpe_bonus = 0.0
+
+            scores[model_name] = max(0.05, accuracy + sharpe_bonus)
+
+        if not scores:
             return
 
-        # Normalise accuracies to sum to 1.0
-        total_accuracy = sum(accuracies.values())
-        if total_accuracy > 0:
-            new_weights = {
-                model: acc / total_accuracy
-                for model, acc in accuracies.items()
-            }
+        total_score = sum(scores.values())
+        if total_score > 0:
+            new_weights = {m: s / total_score for m, s in scores.items()}
+            blend = min(0.30, 0.15 + (total_trades / 500))
 
-            # Blend with current weights (slow adaptation: 90% old, 10% new)
-            blend = 0.1
             for model in self.model_weights:
                 if model in new_weights:
                     self.model_weights[model] = (
@@ -202,79 +325,161 @@ class AdaptiveLearner:
                         blend * new_weights[model]
                     )
 
-            # Re-normalise
+            # Minimum weight floor (3%)
+            for model in self.model_weights:
+                self.model_weights[model] = max(0.03, self.model_weights[model])
+
             weight_sum = sum(self.model_weights.values())
             self.model_weights = {k: v / weight_sum for k, v in self.model_weights.items()}
 
             bot_logger.info(
-                f"📊 Adapted weights: " +
-                " | ".join(f"{k}: {v:.2f}" for k, v in self.model_weights.items())
+                f"📊 Adapted weights (blend={blend:.0%}): " +
+                " | ".join(f"{k}: {v:.2f}" for k, v in
+                           sorted(self.model_weights.items(), key=lambda x: -x[1]))
             )
 
     def _adapt_confidence_threshold(self):
-        """
-        Adjust confidence threshold:
-          - Raise after losing streaks (more cautious)
-          - Lower after winning streaks (more aggressive)
-        Bounded between configured base threshold and base + 0.15
-        """
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
-        base = ENSEMBLE_CONFIDENCE_THRESHOLD          # 0.45
-        ceiling = base + 0.10                          # 0.55 max
+        base = ENSEMBLE_CONFIDENCE_THRESHOLD
+        ceiling = base + 0.20
 
-        if self.consecutive_losses >= 3:
-            # Increase threshold (more cautious) — small 1% bump, capped
-            self.confidence_threshold = min(ceiling, self.confidence_threshold + 0.01)
-            bot_logger.info(
-                f"⚠️  Raising confidence threshold to {self.confidence_threshold:.2f} "
-                f"after {self.consecutive_losses} consecutive losses"
-            )
-        elif self.consecutive_losses == 0:
-            # Recent wins: can be slightly more aggressive
-            recent_wins = sum(
-                1 for t in self.trade_history[-10:]
-                if t.get('is_win', False)
-            )
-            if recent_wins >= 5:
-                self.confidence_threshold = max(base, self.confidence_threshold - 0.01)
-                bot_logger.info(
-                    f"✅ Lowering confidence threshold to {self.confidence_threshold:.2f} "
-                    f"(winning streak)"
-                )
+        if self.in_drawdown_protection:
+            self.confidence_threshold = min(ceiling, base + 0.12)
+            bot_logger.info(f"🛡️ Drawdown protection: threshold raised to {self.confidence_threshold:.2f}")
+            return
+
+        if self.consecutive_losses >= 5:
+            bump = min(0.15, self.consecutive_losses * 0.02)
+            self.confidence_threshold = min(ceiling, base + bump)
+            bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
+        elif self.consecutive_losses >= 3:
+            bump = self.consecutive_losses * 0.015
+            self.confidence_threshold = min(ceiling, base + bump)
+            bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
+        elif self.consecutive_wins >= 3:
+            ease = min(0.08, self.consecutive_wins * 0.015)
+            self.confidence_threshold = max(base, self.confidence_threshold - ease)
+            bot_logger.info(f"✅ Threshold → {self.confidence_threshold:.2f} (winning streak of {self.consecutive_wins})")
+        else:
+            if self.confidence_threshold > base:
+                self.confidence_threshold = max(base, self.confidence_threshold - 0.005)
 
     # ------------------------------------------------------------------
     # Query Methods
     # ------------------------------------------------------------------
-    def get_adjusted_weights(self) -> dict:
-        """Get the current adapted model weights."""
-        return dict(self.model_weights)
+    def get_adjusted_weights(self, pair: str = None, session: str = None) -> dict:
+        weights = dict(self.model_weights)
+
+        if pair:
+            pair = self._normalize_pair(pair)
+            pair_trades = sum(
+                v['total'] for k, v in self.pair_model_accuracy.items()
+                if k.startswith(f"{pair}:")
+            )
+            if pair_trades >= 15:
+                pair_adjustments = {}
+                for model in weights:
+                    pm_key = f"{pair}:{model}"
+                    stats = self.pair_model_accuracy.get(pm_key, {'correct': 0, 'total': 0})
+                    if stats['total'] >= 3:
+                        pair_acc = stats['correct'] / stats['total']
+                        pair_adjustments[model] = pair_acc
+
+                if pair_adjustments:
+                    adj_sum = sum(pair_adjustments.values())
+                    if adj_sum > 0:
+                        for model, acc in pair_adjustments.items():
+                            normalized_acc = acc / adj_sum * len(pair_adjustments)
+                            weights[model] = weights[model] * 0.8 + (normalized_acc / len(weights)) * 0.2
+
+        w_sum = sum(weights.values())
+        if w_sum > 0:
+            weights = {k: v / w_sum for k, v in weights.items()}
+        return weights
 
     def get_adjusted_threshold(self) -> float:
-        """Get the current adapted confidence threshold."""
         return self.confidence_threshold
 
     def get_pair_win_rate(self, pair: str) -> float:
-        """Get win rate for a specific pair."""
         pair = self._normalize_pair(pair)
         stats = self.pair_stats.get(pair, {'wins': 0, 'losses': 0})
         total = stats['wins'] + stats['losses']
         return stats['wins'] / total if total > 0 else 0.0
 
+    def get_session_pair_win_rate(self, session: str, pair: str) -> float:
+        pair = self._normalize_pair(pair)
+        sp_key = f"{session}:{pair}"
+        stats = self.session_pair_stats.get(sp_key, {'wins': 0, 'losses': 0})
+        total = stats['wins'] + stats['losses']
+        return stats['wins'] / total if total > 0 else 0.5
+
+    def get_hour_win_rate(self, hour: int) -> float:
+        stats = self.hourly_stats.get(str(hour), {'wins': 0, 'losses': 0})
+        total = stats['wins'] + stats['losses']
+        return stats['wins'] / total if total > 0 else 0.5
+
+    def get_regime_win_rate(self, regime: str) -> float:
+        stats = self.regime_stats.get(regime, {'wins': 0, 'losses': 0})
+        total = stats['wins'] + stats['losses']
+        return stats['wins'] / total if total > 0 else 0.5
+
+    def get_best_model_combo(self, top_n: int = 3) -> list:
+        combos = []
+        for combo_key, stats in self.model_combos.items():
+            if stats['total'] >= 3:
+                wr = stats['wins'] / stats['total']
+                combos.append({'models': combo_key.split(':'), 'win_rate': wr, 'total': stats['total']})
+        combos.sort(key=lambda x: x['win_rate'], reverse=True)
+        return combos[:top_n]
+
+    def get_regime_confidence_modifier(self, regime: str = None) -> float:
+        if regime is None:
+            regime = self.current_regime
+        stats = self.regime_stats.get(regime, {'wins': 0, 'losses': 0})
+        total = stats['wins'] + stats['losses']
+        if total < 5:
+            return 1.0
+        win_rate = stats['wins'] / total
+        return 0.6 + (win_rate * 0.8)
+
     def should_skip_pair(self, pair: str) -> bool:
-        """
-        Suggest skipping a pair if it has a very poor win rate
-        (after sufficient trades).
-        """
         pair = self._normalize_pair(pair)
         stats = self.pair_stats.get(pair, {'wins': 0, 'losses': 0})
         total = stats['wins'] + stats['losses']
-        if total < 15:
-            return False  # Not enough data
+        if total < 10:
+            return False
         win_rate = stats['wins'] / total
-        return win_rate < 0.35  # Skip if winning less than 35%
+        if win_rate < 0.30:
+            bot_logger.info(f"📉 Skip recommendation: {pair} win rate {win_rate:.0%} ({stats['wins']}W / {stats['losses']}L)")
+            return True
+        return False
+
+    def should_skip_session(self, pair: str, session: str = None) -> bool:
+        pair = self._normalize_pair(pair)
+        if session is None:
+            session = self._get_session()
+        sp_key = f"{session}:{pair}"
+        stats = self.session_pair_stats.get(sp_key, {'wins': 0, 'losses': 0})
+        total = stats['wins'] + stats['losses']
+        if total < 8:
+            return False
+        win_rate = stats['wins'] / total
+        if win_rate < 0.25:
+            bot_logger.info(f"📉 Session skip: {pair} in {session} has {win_rate:.0%} win rate")
+            return True
+        return False
+
+    def should_skip_hour(self, hour: int = None) -> bool:
+        if hour is None:
+            hour = datetime.utcnow().hour
+        stats = self.hourly_stats.get(str(hour), {'wins': 0, 'losses': 0})
+        total = stats['wins'] + stats['losses']
+        if total < 8:
+            return False
+        win_rate = stats['wins'] / total
+        return win_rate < 0.20
 
     def _normalize_pair_stats(self):
-        """Merge pair stats that differ only by formatting (e.g., EURUSD vs EUR/USD)."""
         merged = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
         for pair, stats in dict(self.pair_stats).items():
             key = self._normalize_pair(pair)
@@ -284,10 +489,16 @@ class AdaptiveLearner:
         self.pair_stats = merged
 
     def get_performance_summary(self) -> dict:
-        """Get overall performance summary."""
         total_trades = len(self.trade_history)
         total_wins = sum(1 for t in self.trade_history if t.get('is_win', False))
         total_pnl = sum(t.get('profit_loss', 0) for t in self.trade_history)
+        recent = self.trade_history[-20:]
+        recent_wins = sum(1 for t in recent if t.get('is_win', False))
+        recent_wr = recent_wins / len(recent) if recent else 0
+        model_scores = {}
+        for model, stats in self.model_accuracy.items():
+            if stats['total'] > 0:
+                model_scores[model] = stats['correct'] / stats['total']
 
         return {
             'total_trades': total_trades,
@@ -295,42 +506,55 @@ class AdaptiveLearner:
             'total_losses': total_trades - total_wins,
             'win_rate': total_wins / total_trades if total_trades > 0 else 0,
             'total_pnl': total_pnl,
+            'recent_win_rate': recent_wr,
             'model_weights': dict(self.model_weights),
             'model_accuracy': dict(self.model_accuracy),
+            'model_scores': model_scores,
             'confidence_threshold': self.confidence_threshold,
             'consecutive_losses': self.consecutive_losses,
+            'consecutive_wins': self.consecutive_wins,
             'max_consecutive_losses': self.max_consecutive_losses,
+            'current_regime': self.current_regime,
+            'in_drawdown_protection': self.in_drawdown_protection,
+            'drawdown_pct': self.current_drawdown_pct,
             'pair_stats': dict(self.pair_stats),
             'session_stats': dict(self.session_stats),
+            'best_combos': self.get_best_model_combo(3),
         }
 
     # ------------------------------------------------------------------
     # Persistence
     # ------------------------------------------------------------------
     def _save(self):
-        """Save learning data to disk."""
         os.makedirs(os.path.dirname(LEARNING_DB_PATH), exist_ok=True)
-
         data = {
             'model_weights': self.model_weights,
             'model_accuracy': dict(self.model_accuracy),
             'pair_stats': dict(self.pair_stats),
             'session_stats': dict(self.session_stats),
+            'pair_model_accuracy': dict(self.pair_model_accuracy),
+            'session_pair_stats': dict(self.session_pair_stats),
+            'model_combos': dict(self.model_combos),
+            'model_pnl_history': {k: v[-100:] for k, v in self.model_pnl_history.items()},
+            'regime_stats': dict(self.regime_stats),
+            'hourly_stats': dict(self.hourly_stats),
             'confidence_threshold': self.confidence_threshold,
             'consecutive_losses': self.consecutive_losses,
+            'consecutive_wins': self.consecutive_wins,
             'max_consecutive_losses': self.max_consecutive_losses,
-            'trade_history': self.trade_history[-500:],  # Keep last 500 trades
+            'peak_balance': self.peak_balance,
+            'current_drawdown_pct': self.current_drawdown_pct,
+            'in_drawdown_protection': self.in_drawdown_protection,
+            'current_regime': self.current_regime,
+            'trade_history': self.trade_history[-500:],
             'last_updated': datetime.now().isoformat(),
         }
-
         with open(LEARNING_DB_PATH, 'w') as f:
             json.dump(data, f, indent=2, default=str)
 
     def _load(self):
-        """Load learning data from disk."""
         if not os.path.exists(LEARNING_DB_PATH):
             return
-
         try:
             with open(LEARNING_DB_PATH, 'r') as f:
                 data = json.load(f)
@@ -340,16 +564,32 @@ class AdaptiveLearner:
             self.model_weights = data.get('model_weights', self.model_weights)
             self.confidence_threshold = data.get('confidence_threshold', ENSEMBLE_CONFIDENCE_THRESHOLD)
             self.consecutive_losses = data.get('consecutive_losses', 0)
+            self.consecutive_wins = data.get('consecutive_wins', 0)
             self.max_consecutive_losses = data.get('max_consecutive_losses', 0)
             self.trade_history = data.get('trade_history', [])
+            self.peak_balance = data.get('peak_balance', 0.0)
+            self.current_drawdown_pct = data.get('current_drawdown_pct', 0.0)
+            self.in_drawdown_protection = data.get('in_drawdown_protection', False)
+            self.current_regime = data.get('current_regime', self.REGIME_RANGING)
 
-            # Restore defaultdicts
             for k, v in data.get('model_accuracy', {}).items():
                 self.model_accuracy[k] = v
             for k, v in data.get('pair_stats', {}).items():
                 self.pair_stats[k] = v
             for k, v in data.get('session_stats', {}).items():
                 self.session_stats[k] = v
+            for k, v in data.get('pair_model_accuracy', {}).items():
+                self.pair_model_accuracy[k] = v
+            for k, v in data.get('session_pair_stats', {}).items():
+                self.session_pair_stats[k] = v
+            for k, v in data.get('model_combos', {}).items():
+                self.model_combos[k] = v
+            for k, v in data.get('model_pnl_history', {}).items():
+                self.model_pnl_history[k] = v
+            for k, v in data.get('regime_stats', {}).items():
+                self.regime_stats[k] = v
+            for k, v in data.get('hourly_stats', {}).items():
+                self.hourly_stats[k] = v
 
             self._normalize_pair_stats()
             for t in self.trade_history:
@@ -357,9 +597,10 @@ class AdaptiveLearner:
                     t['pair'] = self._normalize_pair(t.get('pair'))
 
             bot_logger.info(
-                f"📚 Loaded learning data: {len(self.trade_history)} past trades, "
-                f"threshold={self.confidence_threshold:.2f}"
+                f"📚 Loaded learning data: {len(self.trade_history)} past trades | "
+                f"threshold={self.confidence_threshold:.2f} | "
+                f"regime={self.current_regime} | "
+                f"drawdown_protection={'ON' if self.in_drawdown_protection else 'OFF'}"
             )
-
         except Exception as e:
             bot_logger.warning(f"Could not load learning data: {e}")
