@@ -88,6 +88,9 @@ class TradingBot:
         self._known_tickets = {}   # {ticket: {pair, type, entry_price, open_time}}
         self._processed_closures = set()  # position_ids already recorded
         
+        # Backfill past closed trades from MT5 history into adaptive learner
+        self._backfill_history()
+        
         bot_logger.info(f"✅ Trading Bot initialized in {self.mode.upper()} mode ({model_count}-model ensemble)")
 
     # ── Session Filter ────────────────────────────────────────────
@@ -570,6 +573,62 @@ class TradingBot:
 
         except Exception as e:
             bot_logger.warning(f"Closed trade detection failed: {e}")
+
+    def _backfill_history(self):
+        """One-time backfill: load closed deals from MT5 history into the adaptive learner.
+        
+        Only imports deals that aren't already in the learner's trade_history,
+        using position_id to deduplicate.
+        """
+        if self.mode != 'live' or not self.broker:
+            return
+        try:
+            history = self.broker.get_trade_history(hours=168)  # Last 7 days
+            if not history:
+                return
+
+            # Build set of already-known position IDs
+            existing = set()
+            for t in self.ensemble.learner.trade_history:
+                pid = t.get('position_id') or t.get('ticket', 0)
+                if pid:
+                    existing.add(pid)
+
+            imported = 0
+            for deal in history:
+                pos_id = deal.get('position_id', deal.get('ticket', 0))
+                if pos_id in existing or pos_id in self._processed_closures:
+                    continue
+
+                profit = deal.get('profit', 0) + deal.get('swap', 0) + deal.get('commission', 0)
+                # Normalise pair format: EURUSD → EUR/USD
+                raw_pair = deal.get('pair', '')
+                if len(raw_pair) == 6 and '/' not in raw_pair:
+                    pair = f"{raw_pair[:3]}/{raw_pair[3:]}"
+                else:
+                    pair = raw_pair
+                # The closing deal's type is the *exit* direction — flip for the original signal
+                exit_dir = deal.get('type', '')
+                trade_type = 'SELL' if exit_dir == 'BUY' else 'BUY'
+
+                self.ensemble.record_trade_result({
+                    'pair': pair,
+                    'signal': trade_type,
+                    'profit_loss': profit,
+                    'entry_price': 0,
+                    'exit_price': deal.get('price', 0),
+                    'exit_type': 'TAKE_PROFIT' if profit > 0 else 'STOP_LOSS',
+                    'model_signals': {},
+                    'position_id': pos_id,
+                    'timestamp': deal.get('time', ''),
+                })
+                self._processed_closures.add(pos_id)
+                imported += 1
+
+            if imported:
+                bot_logger.info(f"📊 Backfilled {imported} past trades from MT5 history")
+        except Exception as e:
+            bot_logger.warning(f"History backfill failed: {e}")
 
     def _sync_balance(self):
         """Sync balance from broker or paper trader into the risk manager.

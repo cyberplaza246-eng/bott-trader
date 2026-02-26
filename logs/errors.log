@@ -81,3 +81,17 @@
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for GBP/USD: None"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: No money (retcode=10019)'}"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for USD/JPY: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /account failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/account"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /positions failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/positions"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /candles failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/candles?pair=EUR%2FUSD&timeframe=5&count=100"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay candles failed for EUR/USD: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /candles failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/candles?pair=USD%2FJPY&timeframe=5&count=100"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay candles failed for USD/JPY: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay POST /order failed (400): {'error': 'Order failed: No money (retcode=10019)'}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay order failed for GBP/USD: None"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /account failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/account"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /positions failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/positions"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /account failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/account"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /positions failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/positions"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /account failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/account"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /positions failed: 502 Server Error: Bad Gateway for url: https://unmaddened-perkingly-reyna.ngrok-free.dev/positions"}

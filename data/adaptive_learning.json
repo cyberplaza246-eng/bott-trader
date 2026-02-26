@@ -1,0 +1,102 @@
+{
+  "model_weights": {
+    "lstm": 0.18,
+    "sentiment": 0.12,
+    "technical": 0.14,
+    "volume": 0.08,
+    "multi_tf": 0.14,
+    "support_resistance": 0.1,
+    "candlestick": 0.12,
+    "ema_crossover": 0.12
+  },
+  "model_accuracy": {},
+  "pair_stats": {
+    "EUR/USD": {
+      "wins": 0,
+      "losses": 4,
+      "total_pnl": -2.87
+    },
+    "GBP/USD": {
+      "wins": 0,
+      "losses": 1,
+      "total_pnl": -1.6
+    }
+  },
+  "session_stats": {
+    "asian": {
+      "wins": 0,
+      "losses": 5
+    }
+  },
+  "confidence_threshold": 0.51,
+  "consecutive_losses": 5,
+  "max_consecutive_losses": 5,
+  "trade_history": [
+    {
+      "pair": "EUR/USD",
+      "signal": "SELL",
+      "profit_loss": -0.5700000000000001,
+      "entry_price": 0,
+      "exit_price": 1.1811099999999999,
+      "exit_type": "STOP_LOSS",
+      "model_signals": {},
+      "position_id": 27019798,
+      "timestamp": "2026-02-26T01:07:29.036197",
+      "session": "asian",
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "signal": "BUY",
+      "profit_loss": -0.49,
+      "entry_price": 0,
+      "exit_price": 1.18061,
+      "exit_type": "STOP_LOSS",
+      "model_signals": {},
+      "position_id": 27019809,
+      "timestamp": "2026-02-26T01:07:29.037054",
+      "session": "asian",
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "signal": "BUY",
+      "profit_loss": -0.9600000000000001,
+      "entry_price": 0,
+      "exit_price": 1.18062,
+      "exit_type": "STOP_LOSS",
+      "model_signals": {},
+      "position_id": 27019808,
+      "timestamp": "2026-02-26T01:07:29.037664",
+      "session": "asian",
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "signal": "SELL",
+      "profit_loss": -0.85,
+      "entry_price": 0,
+      "exit_price": 1.1811099999999999,
+      "exit_type": "STOP_LOSS",
+      "model_signals": {},
+      "position_id": 27019375,
+      "timestamp": "2026-02-26T01:07:29.038340",
+      "session": "asian",
+      "is_win": false
+    },
+    {
+      "pair": "GBP/USD",
+      "signal": "SELL",
+      "profit_loss": -1.6,
+      "entry_price": 0,
+      "exit_price": 1.35568,
+      "exit_type": "STOP_LOSS",
+      "model_signals": {},
+      "position_id": 27019831,
+      "timestamp": "2026-02-26T01:07:29.039011",
+      "session": "asian",
+      "is_win": false
+    }
+  ],
+  "last_updated": "2026-02-26T01:07:29.039190"
+}

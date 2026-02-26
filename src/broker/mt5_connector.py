@@ -637,19 +637,13 @@ class MT5Connector:
         Returns list of dicts with position_id, pair, profit, etc.
         """
         # ── Relay mode ──
-        if self.relay_url:
+        # ── Relay mode ──
+        if self.relay_mode:
             try:
-                resp = self.session.get(
-                    f"{self.relay_url}/history",
-                    params={"hours": hours},
-                    headers=self._relay_headers(),
-                    timeout=15,
-                )
-                if resp.status_code == 200:
-                    return resp.json().get("deals", [])
-                else:
-                    bot_logger.warning(f"Relay /history returned {resp.status_code}")
-                    return []
+                result = self._relay_get("/history", params={"hours": hours})
+                if result:
+                    return result.get("deals", [])
+                return []
             except Exception as e:
                 bot_logger.warning(f"Relay /history failed: {e}")
                 return []
