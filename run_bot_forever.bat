@@ -10,9 +10,6 @@ title AI Trading Bot - LIVE
 
 cd /d "%~dp0"
 
-REM Activate virtual environment
-call venv\Scripts\activate.bat
-
 echo.
 echo ====================================
 echo   AI Trading Bot - Starting...
@@ -21,7 +18,7 @@ echo.
 
 :loop
 echo [%date% %time%] Launching bot...
-python -m scripts.run_bot >> logs\bot_supervisor.log 2>&1
+venv\Scripts\python.exe -m scripts.run_bot >> logs\bot_supervisor.log 2>&1
 echo [%date% %time%] Bot exited. Restarting in 5 seconds...
 timeout /t 5 /nobreak >nul
 goto loop
