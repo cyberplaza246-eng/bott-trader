@@ -35,7 +35,7 @@ ACCOUNT_TIERS = {
     'mini': {
         'min_balance': 200,
         'max_balance': 1000,
-        'max_concurrent_trades': 3,
+        'max_concurrent_trades': 5,
         'max_lot_size': 0.5,
         'risk_percent': 1.0,
         'description': 'Mini ($200-$1K)',

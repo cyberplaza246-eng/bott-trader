@@ -87,7 +87,7 @@ class EMACrossoverAnalyzer:
             # --- Trend continuation (no crossover but clear trend) ---
             elif cur_ema20 > cur_ema50:
                 spread = (cur_ema20 - cur_ema50) / cur_ema50
-                if spread > 0.0005:
+                if spread > 0.0003:
                     confidence = 0.45
                     reasons.append(f'Uptrend (spread {spread:.4f})')
                     if cur_rsi < 65:
@@ -98,7 +98,7 @@ class EMACrossoverAnalyzer:
                     signal = 'BUY'
             elif cur_ema20 < cur_ema50:
                 spread = (cur_ema50 - cur_ema20) / cur_ema50
-                if spread > 0.0005:
+                if spread > 0.0003:
                     confidence = 0.45
                     reasons.append(f'Downtrend (spread {spread:.4f})')
                     if cur_rsi > 35:

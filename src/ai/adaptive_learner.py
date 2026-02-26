@@ -30,10 +30,14 @@ class AdaptiveLearner:
 
     def __init__(self, initial_weights: dict = None):
         self.model_weights = initial_weights or {
-            'lstm': 0.35,
-            'sentiment': 0.30,
-            'technical': 0.20,
-            'volume': 0.15,
+            'lstm': 0.18,
+            'sentiment': 0.12,
+            'technical': 0.14,
+            'volume': 0.08,
+            'multi_tf': 0.14,
+            'support_resistance': 0.10,
+            'candlestick': 0.12,
+            'ema_crossover': 0.12,
         }
 
         self.trade_history = []

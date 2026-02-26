@@ -468,6 +468,68 @@ class MT5Connector:
             error_logger.error(f"Relay close_all failed: {r}")
             return None
 
+    def modify_position(self, ticket, sl=None, tp=None):
+        """Modify SL and/or TP on an existing position.
+        
+        Args:
+            ticket: Position ticket number
+            sl: New stop-loss price (or None to keep current)
+            tp: New take-profit price (or None to keep current)
+        
+        Returns:
+            dict with modified ticket info, or None on failure
+        """
+        if self.relay_mode:
+            payload = {"ticket": ticket}
+            if sl is not None:
+                payload["sl"] = sl
+            if tp is not None:
+                payload["tp"] = tp
+            r = self._relay_post("/modify", payload)
+            if r and "modified" in r:
+                bot_logger.info(
+                    f"Position modified (RELAY) | Ticket: {ticket} | "
+                    f"SL: {r.get('sl')} | TP: {r.get('tp')}"
+                )
+                return r
+            error_logger.error(f"Relay modify failed for ticket {ticket}: {r}")
+            return None
+
+        if self.simulation_mode:
+            for pos in self.sim_positions:
+                if pos.get('ticket') == ticket:
+                    if sl is not None:
+                        pos['sl'] = sl
+                    if tp is not None:
+                        pos['tp'] = tp
+                    return {"modified": ticket, "sl": pos['sl'], "tp": pos['tp']}
+            return None
+
+        # Native MT5
+        try:
+            req = {
+                "action": mt5.TRADE_ACTION_SLTP,
+                "position": ticket,
+            }
+            # Look up the position to get symbol and fill in current SL/TP
+            positions = mt5.positions_get(ticket=ticket)
+            if not positions:
+                error_logger.error(f"No position with ticket {ticket}")
+                return None
+            pos = positions[0]
+            req["symbol"] = pos.symbol
+            req["sl"] = sl if sl is not None else pos.sl
+            req["tp"] = tp if tp is not None else pos.tp
+
+            result = mt5.order_send(req)
+            if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                return {"modified": ticket, "sl": req["sl"], "tp": req["tp"]}
+            error_logger.error(f"Modify failed for ticket {ticket}: {result.comment if result else 'None'}")
+            return None
+        except Exception as e:
+            error_logger.error(f"Error modifying position {ticket}: {e}")
+            return None
+
         if self.simulation_mode:
             for i, pos in enumerate(self.sim_positions):
                 if pos['pair'] == pair:

@@ -67,13 +67,19 @@ DASHBOARD_HTML = """
   th { color: var(--text2); font-weight: 500; }
   .refresh-btn { background: var(--accent); color: #fff; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85em; }
   .refresh-btn:hover { opacity: 0.85; }
+  .last-update { font-size: 0.75em; color: var(--text2); margin-right: 10px; }
+  .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse-anim 2s infinite; }
+  @keyframes pulse-anim { 0%,100%{ box-shadow: 0 0 0 0 rgba(63,185,80,0.6); } 50%{ box-shadow: 0 0 0 6px rgba(63,185,80,0); } }
+  .flash { animation: flash-anim 0.4s; }
+  @keyframes flash-anim { 0%{ opacity:0.5; } 100%{ opacity:1; } }
   @media(max-width:700px) { .grid { grid-template-columns: 1fr; padding: 12px; } }
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>🤖 AI Forex Trading Bot</h1>
+  <h1><span class="pulse"></span>🤖 AI Forex Trading Bot</h1>
   <div>
+    <span class="last-update" id="last-update"></span>
     <span class="status" id="mode-badge">Loading...</span>
     <button class="refresh-btn" onclick="refresh()">↻ Refresh</button>
   </div>
@@ -105,7 +111,15 @@ async function refresh(){
     const badge=$('mode-badge');
     badge.textContent=d.mode.toUpperCase();
     badge.className='status '+ d.mode;
-  }catch(e){console.error(e);}
+    // Update timestamp
+    const now=new Date();
+    $('last-update').textContent='Updated '+now.toLocaleTimeString();
+    // Flash effect on cards
+    document.querySelectorAll('.card').forEach(c=>{c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');});
+  }catch(e){
+    $('last-update').textContent='⚠ Connection lost';
+    console.error(e);
+  }
 }
 
 function renderAccount(a){
@@ -140,8 +154,9 @@ function renderRisk(r){
 
 function renderPositions(positions){
   if(!positions||!positions.length){$('positions-card').innerHTML='<h2>Open Positions</h2><p style="color:var(--text2)">No open positions</p>';return;}
-  let rows=positions.map(p=>`<tr><td>${p.pair}</td><td><span class="signal-badge ${p.type}">${p.type}</span></td><td>${p.open_price.toFixed(5)}</td><td class="${cls(p.profit)}">${p.profit>=0?'+':''}${p.profit.toFixed(2)}</td></tr>`).join('');
-  $('positions-card').innerHTML=`<h2>Open Positions</h2><table><tr><th>Pair</th><th>Type</th><th>Entry</th><th>P/L</th></tr>${rows}</table>`;
+  let totalPnl=positions.reduce((s,p)=>s+(p.profit||0),0);
+  let rows=positions.map(p=>`<tr><td>${p.pair}</td><td><span class="signal-badge ${p.type}">${p.type}</span></td><td>${Number(p.open_price).toFixed(5)}</td><td class="${cls(p.profit)}" style="font-weight:600">${p.profit>=0?'+':''}${p.profit.toFixed(2)}</td></tr>`).join('');
+  $('positions-card').innerHTML=`<h2>Open Positions <span style="float:right;font-size:0.85em" class="${cls(totalPnl)}">Net: $${totalPnl>=0?'+':''}${totalPnl.toFixed(2)}</span></h2><table><tr><th>Pair</th><th>Type</th><th>Entry</th><th>P/L</th></tr>${rows}</table>`;
 }
 
 function renderSignals(signals){
@@ -167,7 +182,7 @@ function renderPerformance(p){
 }
 
 refresh();
-setInterval(refresh, 15000);
+setInterval(refresh, 3000);
 </script>
 </body>
 </html>

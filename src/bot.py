@@ -6,13 +6,14 @@ Now with: up to 8-model ensemble (LSTM optional), adaptive learning, dashboard, 
 import os
 import time
 import threading
-from datetime import datetime, time as dt_time
+from datetime import datetime, time as dt_time, timezone
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from src.broker.mt5_connector import MT5Connector
 from src.core.ensemble_trader import EnsembleTrader
 from src.risk.position_manager import RiskManager
 from src.core.paper_trading import PaperTradingManager
+from src.core.trailing_stop import TrailingStopManager
 from src.utils.logger import bot_logger, TradeLogger
 from config.strategy_config import (
     TRADING_MODE,
@@ -26,6 +27,32 @@ from config.strategy_config import (
 class TradingBot:
     """Main trading bot orchestrator"""
     
+    # ── Trading Session Windows (UTC hours) ────────────────────────
+    # EUR/USD & GBP/USD: London open → NY close  (08:00–22:00 UTC = 3AM–5PM ET)
+    # USD/JPY:           Asian open → NY close    (00:00–22:00 UTC = 7PM–5PM ET)
+    # ALL PAIRS BLOCKED: Daily rollover dead zone  (22:00–00:00 UTC = 5PM–7PM ET)
+    PAIR_SESSIONS = {
+        'EUR/USD': {'start': 8, 'end': 22},
+        'GBP/USD': {'start': 8, 'end': 22},
+        'USD/JPY': {'start': 0, 'end': 22},
+    }
+    DEFAULT_SESSION = {'start': 8, 'end': 22}
+
+    # ── Correlation Groups ────────────────────────────────────────
+    # Pairs that move together — block duplicate directional exposure
+    CORRELATED_PAIRS = {
+        'EUR/USD': 'GBP/USD',
+        'GBP/USD': 'EUR/USD',
+    }
+
+    # ── Spread Limits (max allowed spread in price units) ─────────
+    MAX_SPREAD = {
+        'EUR/USD': 0.00030,   # 3 pips
+        'GBP/USD': 0.00035,   # 3.5 pips
+        'USD/JPY': 0.030,     # 3 pips (JPY)
+    }
+    DEFAULT_MAX_SPREAD = 0.00030
+
     def __init__(self, newsapi_key=None, enable_dashboard=True):
         self.mode = TRADING_MODE  # 'live', 'paper', 'backtest'
         self.running = False
@@ -43,6 +70,7 @@ class TradingBot:
         
         self.ensemble = EnsembleTrader(newsapi_key=newsapi_key, broker=self.broker)
         self.risk_manager = RiskManager(initial_balance=INITIAL_BALANCE)
+        self.trailing = TrailingStopManager(breakeven_r=1.0, trail_atr_mult=1.5)
         
         # Determine active model count
         model_count = 8 if self.ensemble.lstm_available else 7
@@ -56,7 +84,64 @@ class TradingBot:
         self.signal_cooldown_minutes = 15  # Don't trade same pair more than every 15 mins
         
         bot_logger.info(f"✅ Trading Bot initialized in {self.mode.upper()} mode ({model_count}-model ensemble)")
-    
+
+    # ── Session Filter ────────────────────────────────────────────
+
+    def is_pair_in_session(self, pair):
+        """Check if the current UTC hour falls within this pair's trading window."""
+        current_hour = datetime.now(timezone.utc).hour
+        session = self.PAIR_SESSIONS.get(pair, self.DEFAULT_SESSION)
+        s, e = session['start'], session['end']
+        if s < e:
+            return s <= current_hour < e
+        else:
+            return current_hour >= s or current_hour < e
+
+    # ── Spread Filter ─────────────────────────────────────────────
+
+    def is_spread_acceptable(self, pair):
+        """Return True if the current bid/ask spread is within limits."""
+        try:
+            price = self.broker.get_latest_price(pair)
+            if not price or 'bid' not in price or 'ask' not in price:
+                return True  # Can't check → allow
+            spread = abs(price['ask'] - price['bid'])
+            limit = self.MAX_SPREAD.get(pair, self.DEFAULT_MAX_SPREAD)
+            if spread > limit:
+                pip_div = 0.01 if 'JPY' in pair else 0.0001
+                bot_logger.info(
+                    f"⛔ {pair} spread too wide: {spread/pip_div:.1f} pips "
+                    f"(max {limit/pip_div:.1f}) — skipping"
+                )
+                return False
+            return True
+        except Exception:
+            return True  # Fail-open
+
+    # ── Correlation Guard ─────────────────────────────────────────
+
+    def _has_correlated_position(self, pair, direction):
+        """Block if a correlated pair already has a position in the same direction."""
+        correlated = self.CORRELATED_PAIRS.get(pair)
+        if not correlated:
+            return False
+        try:
+            positions = self.broker.get_open_positions()
+            if not positions:
+                return False
+            for pos in positions:
+                pos_pair = pos.get('pair', '').replace('/', '')
+                corr_clean = correlated.replace('/', '')
+                if pos_pair == corr_clean and pos.get('type') == direction:
+                    bot_logger.info(
+                        f"🔗 Correlation guard: {correlated} already has {direction} open "
+                        f"— blocking {pair} {direction}"
+                    )
+                    return True
+        except Exception:
+            pass
+        return False
+
     def should_skip_signal(self, pair):
         """Prevent over-trading the same pair"""
         if pair not in self.last_signal_time:
@@ -84,9 +169,24 @@ class TradingBot:
         
         # Sync open trade count from broker (live mode)
         self._sync_open_trades()
-        
+
+        # Run trailing stop updates on all tracked positions
+        if self.broker:
+            try:
+                self.trailing.update(self.broker)
+            except Exception as e:
+                bot_logger.warning(f"Trailing stop update failed: {e}")
+
         for pair in PAIRS:
             try:
+                # Skip if outside trading session for this pair
+                if not self.is_pair_in_session(pair):
+                    session = self.PAIR_SESSIONS.get(pair, self.DEFAULT_SESSION)
+                    bot_logger.info(
+                        f"💤 {pair} outside session (UTC {session['start']:02d}:00–{session['end']:02d}:00) — skipping"
+                    )
+                    continue
+
                 # Skip if cooldown active
                 if self.should_skip_signal(pair):
                     continue
@@ -129,7 +229,20 @@ class TradingBot:
                     if not self.risk_manager.can_trade():
                         bot_logger.warning(f"Risk limits prevent trading {pair}")
                         continue
-                    
+
+                    # Adaptive learner: skip chronically losing pairs
+                    if self.ensemble.learner.should_skip_pair(pair):
+                        bot_logger.info(f"📉 Adaptive skip: {pair} win rate too low")
+                        continue
+
+                    # Spread filter
+                    if not self.is_spread_acceptable(pair):
+                        continue
+
+                    # Correlation guard
+                    if self._has_correlated_position(pair, signal_result['signal']):
+                        continue
+
                     self._execute_trade(pair, signal_result, df)
                     self.last_signal_time[pair] = datetime.now()
                     # Re-sync free margin after placing a trade so next pair
@@ -165,7 +278,36 @@ class TradingBot:
         # Calculate risk parameters
         stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, trade_type, pair=pair)
         take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, trade_type, pair=pair)
-        
+        # S/R-based dynamic TP: use nearest S/R level if it gives >= 1.5R
+        sr_levels = signal_result.get('sr_levels', {})
+        risk_distance = abs(entry_price - stop_loss)
+        if sr_levels and risk_distance > 0:
+            if trade_type == 'BUY':
+                resistances = sr_levels.get('resistance_levels', [])
+                for level in sorted(resistances):
+                    reward = level - entry_price
+                    if reward >= risk_distance * 1.5:
+                        digits = 3 if 'JPY' in pair else 5
+                        sr_tp = round(level, digits)
+                        bot_logger.info(
+                            f"🎯 S/R TP: {take_profit:.{digits}f} → {sr_tp:.{digits}f} "
+                            f"(resistance level, R:R = {reward/risk_distance:.1f})"
+                        )
+                        take_profit = sr_tp
+                        break
+            elif trade_type == 'SELL':
+                supports = sr_levels.get('support_levels', [])
+                for level in sorted(supports, reverse=True):
+                    reward = entry_price - level
+                    if reward >= risk_distance * 1.5:
+                        digits = 3 if 'JPY' in pair else 5
+                        sr_tp = round(level, digits)
+                        bot_logger.info(
+                            f"🎯 S/R TP: {take_profit:.{digits}f} → {sr_tp:.{digits}f} "
+                            f"(support level, R:R = {reward/risk_distance:.1f})"
+                        )
+                        take_profit = sr_tp
+                        break        
         position_size = self.risk_manager.calculate_position_size(entry_price, stop_loss, pair=pair)
         
         if not position_size:
@@ -196,6 +338,15 @@ class TradingBot:
             if order_id:
                 bot_logger.info(f"✅ Order placed - Ticket: {order_id}")
                 self.risk_manager.on_trade_opened()
+                # Register for trailing stop management
+                self.trailing.register(
+                    ticket=order_id,
+                    entry_price=entry_price,
+                    stop_loss=stop_loss,
+                    direction=trade_type,
+                    atr=atr,
+                    pair=pair,
+                )
         
         elif self.mode == 'paper':
             trade_id = self.paper_trader.execute_trade(

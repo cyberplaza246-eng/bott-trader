@@ -66,9 +66,9 @@ class VolumeAnalyzer:
         
         # Volume increasing on momentum
         if prev['volume'] < latest['volume']:
-            # Check if price is moving (0.03% threshold for 5-min forex)
+            # Check if price is moving (0.01% threshold for 5-min forex)
             price_change = (latest['close'] - prev['close']) / prev['close']
-            if abs(price_change) > 0.0003:  # ~3 pips on EUR/USD
+            if abs(price_change) > 0.0001:  # ~1 pip on EUR/USD
                 confidence += 0.3
                 reason_parts.append("Volume increasing with price move")
         
@@ -83,10 +83,10 @@ class VolumeAnalyzer:
         
         if confidence >= 0.15:
             # Volume is significant — determine direction from price
-            if price_change > 0.0002:  # Price moving up with volume (~2 pips)
+            if price_change > 0.0001:  # Price moving up with volume (~1 pip)
                 signal = 'BUY'
                 reason_parts.append(f"Price up {price_change:.4f} with volume")
-            elif price_change < -0.0002:  # Price moving down with volume (~2 pips)
+            elif price_change < -0.0001:  # Price moving down with volume (~1 pip)
                 signal = 'SELL'
                 reason_parts.append(f"Price down {price_change:.4f} with volume")
             else:

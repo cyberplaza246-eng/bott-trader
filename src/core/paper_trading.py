@@ -75,12 +75,13 @@ class PaperTradingManager:
         position['current_price'] = current_price
         
         # Calculate profit/loss
+        pip_size, pip_value = _pip_params(position.get('pair', ''))
         if position['type'] == 'BUY':
-            pips_move = (current_price - position['entry_price']) / 0.0001
-            profit_loss = pips_move * position['lot_size'] * 10
+            pips_move = (current_price - position['entry_price']) / pip_size
+            profit_loss = pips_move * position['lot_size'] * pip_value
         else:  # SELL
-            pips_move = (position['entry_price'] - current_price) / 0.0001
-            profit_loss = pips_move * position['lot_size'] * 10
+            pips_move = (position['entry_price'] - current_price) / pip_size
+            profit_loss = pips_move * position['lot_size'] * pip_value
         
         position['profit_loss'] = profit_loss
         position['profit_loss_percent'] = (profit_loss / position['entry_balance']) * 100
@@ -116,12 +117,13 @@ class PaperTradingManager:
         
         position = self.open_positions.pop(pair)
         
+        pip_size, pip_value = _pip_params(pair)
         if position['type'] == 'BUY':
-            pips_move = (exit_price - position['entry_price']) / 0.0001
+            pips_move = (exit_price - position['entry_price']) / pip_size
         else:
-            pips_move = (position['entry_price'] - exit_price) / 0.0001
+            pips_move = (position['entry_price'] - exit_price) / pip_size
         
-        profit_loss = pips_move * position['lot_size'] * 10
+        profit_loss = pips_move * position['lot_size'] * pip_value
         profit_loss_percent = (profit_loss / position['entry_balance']) * 100
         
         # Update balance

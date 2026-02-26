@@ -363,6 +363,67 @@ def close_all():
     return jsonify({"results": results})
 
 
+# ── Modify SL/TP ──────────────────────────────────────────────────────
+
+@app.route("/modify", methods=["POST"])
+def modify_position():
+    """
+    Modify SL and/or TP on an existing position.
+    Body: {"ticket": 12345, "sl": 1.08500, "tp": 1.09200}
+    """
+    data = request.json
+    ticket = data.get("ticket")
+    new_sl = data.get("sl")
+    new_tp = data.get("tp")
+
+    if not ticket:
+        return jsonify({"error": "ticket is required"}), 400
+
+    # Find the position
+    all_pos = mt5.positions_get()
+    pos = None
+    if all_pos:
+        for p in all_pos:
+            if p.ticket == int(ticket):
+                pos = p
+                break
+    if not pos:
+        return jsonify({"error": f"No position with ticket {ticket}"}), 404
+
+    # Use existing SL/TP if not provided
+    sl_val = float(new_sl) if new_sl is not None else pos.sl
+    tp_val = float(new_tp) if new_tp is not None else pos.tp
+
+    req = {
+        "action": mt5.TRADE_ACTION_SLTP,
+        "symbol": pos.symbol,
+        "position": pos.ticket,
+        "sl": sl_val,
+        "tp": tp_val,
+    }
+
+    print(f"\n{'='*50}")
+    print(f"MODIFY: ticket={pos.ticket} {pos.symbol} | SL={sl_val} TP={tp_val}")
+    result = mt5.order_send(req)
+
+    if result is None:
+        err = f"order_send returned None: {mt5.last_error()}"
+        print(f"  x {err}")
+        return jsonify({"error": err}), 400
+
+    if result.retcode != mt5.TRADE_RETCODE_DONE:
+        err = f"{result.comment} (retcode={result.retcode})"
+        print(f"  x {err}")
+        return jsonify({"error": err}), 400
+
+    print(f"  OK  modified ticket={pos.ticket}")
+    return jsonify({
+        "modified": pos.ticket,
+        "sl": sl_val,
+        "tp": tp_val,
+    })
+
+
 # ── Main ──────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":

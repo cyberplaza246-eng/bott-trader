@@ -12,14 +12,16 @@ class TechnicalAnalyzer:
     
     def __init__(self):
         self.rsi_period = 14
-        self.rsi_overbought = 70
-        self.rsi_oversold = 30
+        self.rsi_overbought = 65
+        self.rsi_oversold = 35
         self.macd_fast = 12
         self.macd_slow = 26
         self.macd_signal = 9
         self.bb_period = 20
         self.bb_std = 2
         self.atr_period = 14
+        self.adx_period = 14
+        self.adx_trend_threshold = 20  # ADX > 20 = trending market
     
     def calculate_indicators(self, df):
         """
@@ -63,6 +65,15 @@ class TechnicalAnalyzer:
         
         # ATR (volatility)
         df['atr'] = pta.atr(df['high'], df['low'], df['close'], length=self.atr_period)
+        
+        # ADX (trend strength)
+        adx_df = pta.adx(df['high'], df['low'], df['close'], length=self.adx_period)
+        if adx_df is not None:
+            # pandas_ta returns ADX_14, DMP_14, DMN_14
+            adx_col = [c for c in adx_df.columns if 'ADX' in c]
+            df['adx'] = adx_df[adx_col[0]].values if adx_col else 0.0
+        else:
+            df['adx'] = 0.0
         
         # Stochastic
         stoch_df = pta.stoch(df['high'], df['low'], df['close'],
@@ -127,21 +138,31 @@ class TechnicalAnalyzer:
             reason_parts.append("MACD bearish crossover")
         
         # Stochastic Oscillator
-        if latest['stoch_k'] < 20 and latest['stoch_d'] < 20:
+        if latest['stoch_k'] < 25 and latest['stoch_d'] < 25:
             confidence += 0.25
             signals_count += 1
             reason_parts.append("Stochastic oversold")
-        elif latest['stoch_k'] > 80 and latest['stoch_d'] > 80:
+        elif latest['stoch_k'] > 75 and latest['stoch_d'] > 75:
             confidence -= 0.25
             reason_parts.append("Stochastic overbought")
         
         # Determine final signal (lowered thresholds for responsiveness)
-        if confidence > 0.25:
+        if confidence > 0.20:
             signal = 'BUY'
-        elif confidence < -0.25:
+        elif confidence < -0.20:
             signal = 'SELL'
         else:
             signal = 'HOLD'
+        
+        # ADX trend filter: only allow directional signals in trending markets
+        adx_value = latest.get('adx', 0)
+        if signal != 'HOLD' and adx_value < self.adx_trend_threshold:
+            # Demote to HOLD in choppy/ranging markets
+            reason_parts.append(f"ADX weak ({adx_value:.0f}<{self.adx_trend_threshold}) — ranging")
+            signal = 'HOLD'
+            confidence = confidence * 0.5  # Halve confidence
+        elif adx_value >= self.adx_trend_threshold:
+            reason_parts.append(f"ADX trending ({adx_value:.0f})")
         
         confidence = abs(confidence)  # Use absolute value for confidence score
         reason = " | ".join(reason_parts) if reason_parts else "No clear signals"
