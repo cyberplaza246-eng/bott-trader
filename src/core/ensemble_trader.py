@@ -173,26 +173,28 @@ class EnsembleTrader:
         else:
             final_signal = 'SKIP'
         
-        # ── EMA 200 Trend Gate ────────────────────────────────────
-        # Only allow BUY when price > EMA200, SELL when price < EMA200.
-        # This prevents counter-trend trades that have lower win rates.
+        # ── EMA 200 Trend Filter (soft penalty) ─────────────────
+        # Counter-trend trades get a confidence penalty instead of
+        # being blocked outright.  Strong signals still go through;
+        # weak ones are filtered naturally by the confidence threshold.
+        EMA_COUNTER_TREND_PENALTY = 0.05          # −5 % confidence
         ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
         cur_price = df_enriched['close'].iloc[-1]
+        ema_counter_trend = False                  # flag used after confidence calc
         if ema_200 is not None and not pd.isna(ema_200) and final_signal != 'SKIP':
-            if final_signal == 'BUY' and cur_price < ema_200:
+            if (final_signal == 'BUY' and cur_price < ema_200) or \
+               (final_signal == 'SELL' and cur_price > ema_200):
+                trend_dir = 'bearish' if cur_price < ema_200 else 'bullish'
                 bot_logger.info(
-                    f"🚫 EMA200 gate: BUY blocked — price {cur_price:.5f} < EMA200 {ema_200:.5f} (counter-trend)"
+                    f"⚠️  EMA200 penalty: {final_signal} is counter-trend "
+                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) — "
+                    f"confidence will be reduced by {EMA_COUNTER_TREND_PENALTY:.0%}"
                 )
-                final_signal = 'SKIP'
-            elif final_signal == 'SELL' and cur_price > ema_200:
-                bot_logger.info(
-                    f"🚫 EMA200 gate: SELL blocked — price {cur_price:.5f} > EMA200 {ema_200:.5f} (counter-trend)"
-                )
-                final_signal = 'SKIP'
+                ema_counter_trend = True
             else:
                 trend_dir = 'bullish' if cur_price > ema_200 else 'bearish'
                 bot_logger.info(
-                    f"✅ EMA200 gate: {final_signal} aligned with {trend_dir} trend "
+                    f"✅ EMA200: {final_signal} aligned with {trend_dir} trend "
                     f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
                 )
 
@@ -220,6 +222,13 @@ class EnsembleTrader:
             )
         else:
             weighted_confidence = 0.0
+        
+        # Apply EMA200 counter-trend penalty (after confidence is calculated)
+        if ema_counter_trend and weighted_confidence > 0:
+            weighted_confidence = max(0.0, weighted_confidence - EMA_COUNTER_TREND_PENALTY)
+            bot_logger.info(
+                f"📉 Confidence after EMA200 penalty: {weighted_confidence:.1%}"
+            )
         
         # Generate reasoning
         reason_parts = []
