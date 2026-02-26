@@ -16,9 +16,13 @@ echo   AI Trading Bot - Starting...
 echo ====================================
 echo.
 
+REM Create logs directory if it doesn't exist
+if not exist logs mkdir logs
+
 :loop
 echo [%date% %time%] Launching bot...
-venv\Scripts\python.exe -m scripts.run_bot >> logs\bot_supervisor.log 2>&1
-echo [%date% %time%] Bot exited. Restarting in 5 seconds...
+REM Run bot - output to console (remove redirection to see errors)
+venv\Scripts\python.exe -m scripts.run_bot
+echo [%date% %time%] Bot exited with code %errorlevel%. Restarting in 5 seconds...
 timeout /t 5 /nobreak >nul
 goto loop
