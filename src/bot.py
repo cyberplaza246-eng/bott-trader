@@ -29,14 +29,15 @@ class TradingBot:
     
     # ── Trading Session Windows (UTC hours) ────────────────────────
     # EUR/USD & GBP/USD: London open → NY close  (08:00–22:00 UTC = 3AM–5PM ET)
-    # USD/JPY:           Asian open → NY close    (00:00–22:00 UTC = 7PM–5PM ET)
+    # ALL PAIRS:         Asian open → NY close    (00:00–22:00 UTC = 7PM–5PM ET)
     # ALL PAIRS BLOCKED: Daily rollover dead zone  (22:00–00:00 UTC = 5PM–7PM ET)
+    # Spread filter + ADX filter protect against low-liquidity overnight entries
     PAIR_SESSIONS = {
-        'EUR/USD': {'start': 8, 'end': 22},
-        'GBP/USD': {'start': 8, 'end': 22},
+        'EUR/USD': {'start': 0, 'end': 22},
+        'GBP/USD': {'start': 0, 'end': 22},
         'USD/JPY': {'start': 0, 'end': 22},
     }
-    DEFAULT_SESSION = {'start': 8, 'end': 22}
+    DEFAULT_SESSION = {'start': 0, 'end': 22}
 
     # ── Correlation Groups ────────────────────────────────────────
     # Pairs that move together — block duplicate directional exposure
