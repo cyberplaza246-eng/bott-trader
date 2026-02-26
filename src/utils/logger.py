@@ -7,6 +7,14 @@ import sys
 from datetime import datetime
 from pythonjsonlogger import jsonlogger
 
+
+class FlushStreamHandler(logging.StreamHandler):
+    """StreamHandler that flushes after every emit - ensures real-time console output"""
+    def emit(self, record):
+        super().emit(record)
+        self.flush()
+
+
 def setup_logger(name, log_file=None, level=logging.INFO):
     """
     Set up a logger with both console and file handlers
@@ -14,8 +22,8 @@ def setup_logger(name, log_file=None, level=logging.INFO):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     
-    # Console handler (flush=True for real-time output)
-    console_handler = logging.StreamHandler(sys.stdout)
+    # Console handler with auto-flush for real-time output
+    console_handler = FlushStreamHandler(sys.stdout)
     console_handler.setLevel(level)
     console_format = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
