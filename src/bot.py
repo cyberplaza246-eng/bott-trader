@@ -289,20 +289,29 @@ class TradingBot:
         # Calculate risk parameters
         stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, trade_type, pair=pair)
         take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, trade_type, pair=pair)
-        # S/R-based dynamic TP: use nearest S/R level if it gives >= 1.5R
+        # S/R-based dynamic TP: use nearest S/R level within tier R:R limits
         sr_levels = signal_result.get('sr_levels', {})
         risk_distance = abs(entry_price - stop_loss)
+        # Tier-based R:R cap — micro accounts need tighter TPs
+        tier_name = self.risk_manager._current_tier_name or 'micro'
+        if 'micro' in tier_name:
+            max_rr = 3.0
+        elif 'mini' in tier_name:
+            max_rr = 4.0
+        else:
+            max_rr = 5.0
         if sr_levels and risk_distance > 0:
             if trade_type == 'BUY':
                 resistances = sr_levels.get('resistance_levels', [])
                 for level in sorted(resistances):
                     reward = level - entry_price
-                    if reward >= risk_distance * 1.5:
+                    rr = reward / risk_distance
+                    if 1.5 <= rr <= max_rr:
                         digits = 3 if 'JPY' in pair else 5
                         sr_tp = round(level, digits)
                         bot_logger.info(
                             f"🎯 S/R TP: {take_profit:.{digits}f} → {sr_tp:.{digits}f} "
-                            f"(resistance level, R:R = {reward/risk_distance:.1f})"
+                            f"(resistance level, R:R = {rr:.1f}, max {max_rr:.0f}:1)"
                         )
                         take_profit = sr_tp
                         break
@@ -310,12 +319,13 @@ class TradingBot:
                 supports = sr_levels.get('support_levels', [])
                 for level in sorted(supports, reverse=True):
                     reward = entry_price - level
-                    if reward >= risk_distance * 1.5:
+                    rr = reward / risk_distance
+                    if 1.5 <= rr <= max_rr:
                         digits = 3 if 'JPY' in pair else 5
                         sr_tp = round(level, digits)
                         bot_logger.info(
                             f"🎯 S/R TP: {take_profit:.{digits}f} → {sr_tp:.{digits}f} "
-                            f"(support level, R:R = {reward/risk_distance:.1f})"
+                            f"(support level, R:R = {rr:.1f}, max {max_rr:.0f}:1)"
                         )
                         take_profit = sr_tp
                         break        

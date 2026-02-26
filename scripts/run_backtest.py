@@ -32,9 +32,28 @@ def parse_args():
 
 def fetch_historical_data(pair, start_date, end_date, num_candles=5000):
     """
-    Fetch historical data from MT5
-    Note: You may need to download data separately or use another source
+    Load historical data from local CSV files or MT5.
+    Tries CSV first (faster), falls back to MT5 relay if needed.
     """
+    # Try loading from CSV first
+    csv_filename = f"data/{pair.replace('/', '_')}_1h.csv"
+    
+    if os.path.exists(csv_filename):
+        try:
+            df = pd.read_csv(csv_filename)
+            df['datetime'] = pd.to_datetime(df['datetime'])
+            start = pd.to_datetime(start_date)
+            end = pd.to_datetime(end_date)
+            
+            df = df[(df['datetime'] >= start) & (df['datetime'] <= end)]
+            
+            if len(df) > 0:
+                bot_logger.info(f"✅ Loaded {len(df)} candles from {csv_filename}")
+                return df
+        except Exception as e:
+            bot_logger.warning(f"Failed to load CSV: {e}")
+    
+    # Fallback to MT5 relay
     try:
         connector = MT5Connector()
         
@@ -98,16 +117,22 @@ def run_backtest(pair, start_date, end_date, initial_balance, confidence_thresho
     print("=" * 70)
     print(f"Pair: {results['pair']}")
     print(f"Total Trades: {results['total_trades']}")
-    print(f"Winning Trades: {results['winning_trades']}")
-    print(f"Losing Trades: {results['losing_trades']}")
-    print(f"Win Rate: {results['win_rate']:.1f}%")
-    print(f"Profit Factor: {results['profit_factor']:.2f}")
-    print(f"Sharpe Ratio: {results['sharpe_ratio']:.2f}")
-    print(f"Max Drawdown: {results['max_drawdown']:.2f}%")
-    print(f"\nInitial Balance: ${results['initial_balance']:,.2f}")
-    print(f"Final Balance: ${results['final_balance']:,.2f}")
-    print(f"Total Profit: ${results['total_profit']:,.2f}")
-    print(f"Return: {results['return_percent']:.2f}%")
+    
+    if results['total_trades'] > 0:
+        print(f"Winning Trades: {results['winning_trades']}")
+        print(f"Losing Trades: {results['losing_trades']}")
+        print(f"Win Rate: {results['win_rate']:.1f}%")
+        print(f"Profit Factor: {results['profit_factor']:.2f}")
+        print(f"Sharpe Ratio: {results['sharpe_ratio']:.2f}")
+        print(f"Max Drawdown: {results['max_drawdown']:.2f}%")
+        print(f"\nInitial Balance: ${results['initial_balance']:,.2f}")
+        print(f"Final Balance: ${results['final_balance']:,.2f}")
+        print(f"Total Profit: ${results['total_profit']:,.2f}")
+        print(f"Return: {results['return_percent']:.2f}%")
+    else:
+        print(f"Initial Balance: ${results.get('initial_balance', 50):,.2f}")
+        print(f"Final Balance: ${results.get('final_balance', 50):,.2f}")
+    
     print("=" * 70)
     
     # Assessment

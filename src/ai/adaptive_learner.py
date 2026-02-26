@@ -204,10 +204,15 @@ class AdaptiveLearner:
         Adjust confidence threshold:
           - Raise after losing streaks (more cautious)
           - Lower after winning streaks (more aggressive)
+        Bounded between configured base threshold and base + 0.15
         """
+        from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
+        base = ENSEMBLE_CONFIDENCE_THRESHOLD          # 0.45
+        ceiling = base + 0.15                          # 0.60
+
         if self.consecutive_losses >= 3:
-            # Increase threshold (more cautious)
-            self.confidence_threshold = min(0.90, self.confidence_threshold + 0.02)
+            # Increase threshold (more cautious) — small 1% bump, capped
+            self.confidence_threshold = min(ceiling, self.confidence_threshold + 0.01)
             bot_logger.info(
                 f"⚠️  Raising confidence threshold to {self.confidence_threshold:.2f} "
                 f"after {self.consecutive_losses} consecutive losses"
@@ -218,8 +223,8 @@ class AdaptiveLearner:
                 1 for t in self.trade_history[-10:]
                 if t.get('is_win', False)
             )
-            if recent_wins >= 7:
-                self.confidence_threshold = max(0.65, self.confidence_threshold - 0.01)
+            if recent_wins >= 5:
+                self.confidence_threshold = max(base, self.confidence_threshold - 0.01)
                 bot_logger.info(
                     f"✅ Lowering confidence threshold to {self.confidence_threshold:.2f} "
                     f"(winning streak)"

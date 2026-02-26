@@ -351,7 +351,14 @@ class RiskManager:
         Returns:
             Stop-loss price (rounded to broker precision)
         """
-        sl_distance = atr * STOP_LOSS_MULTIPLIER
+        # Tier-aware SL multiplier — tighter stops for smaller accounts
+        if 'micro' in (self._current_tier_name or 'micro'):
+            sl_mult = 1.2
+        elif 'mini' in (self._current_tier_name or ''):
+            sl_mult = STOP_LOSS_MULTIPLIER     # 1.5
+        else:
+            sl_mult = 1.8                       # more room for larger accounts
+        sl_distance = atr * sl_mult
         min_dist = self._min_stop_distance(pair)
         if sl_distance < min_dist:
             bot_logger.info(
