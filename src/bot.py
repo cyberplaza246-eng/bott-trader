@@ -952,6 +952,10 @@ class TradingBot:
                     pair = f"{raw_pair[:3]}/{raw_pair[3:]}"
                 else:
                     pair = raw_pair
+                
+                # Skip trades for pairs we're not currently trading
+                if pair not in PAIRS:
+                    continue
                 # The closing deal's type is the *exit* direction — flip for the original signal
                 exit_dir = deal.get('type', '')
                 trade_type = 'SELL' if exit_dir == 'BUY' else 'BUY'
