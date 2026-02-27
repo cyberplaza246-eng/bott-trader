@@ -924,7 +924,14 @@ class TradingBot:
         
         Only imports deals that aren't already in the learner's trade_history,
         using position_id to deduplicate.
+        
+        Set SKIP_HISTORY_BACKFILL=true in .env to disable (recommended when starting fresh).
         """
+        # Allow disabling backfill for fresh starts with new configuration
+        if os.getenv('SKIP_HISTORY_BACKFILL', 'false').lower() in ('true', '1', 'yes'):
+            bot_logger.info("📊 History backfill disabled (SKIP_HISTORY_BACKFILL=true)")
+            return
+        
         if self.mode != 'live' or not self.broker:
             return
         try:
