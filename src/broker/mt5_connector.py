@@ -385,14 +385,14 @@ class MT5Connector:
             symbol = self._resolve_symbol(pair)
             action = mt5.ORDER_TYPE_BUY if order_type == 'BUY' else mt5.ORDER_TYPE_SELL
             
+            # Don't include SL/TP in initial order (TradersWay and some brokers reject it)
+            # We'll add them via modify_position after the order fills
             request = {
                 "action": mt5.TRADE_ACTION_DEAL,
                 "symbol": symbol,
                 "volume": lot_size,
                 "type": action,
                 "price": entry_price,
-                "sl": stop_loss,
-                "tp": take_profit,
                 "deviation": 20,
                 "magic": 234000,
                 "comment": "AI Trading Bot",
@@ -408,19 +408,40 @@ class MT5Connector:
                 )
                 return None
             
-            # Some brokers don't accept SL/TP in initial order - modify after
-            ticket = result.order
+            # Get the position ticket (may differ from order ticket)
+            # Wait briefly for position to register, then look it up
+            import time
+            time.sleep(0.5)
+            
+            # Find the position we just opened by symbol and magic
+            positions = mt5.positions_get(symbol=symbol)
+            position_ticket = None
+            if positions:
+                # Find most recent position with our magic number
+                bot_positions = [p for p in positions if p.magic == 234000]
+                if bot_positions:
+                    # Get the newest one (highest ticket)
+                    position_ticket = max(p.ticket for p in bot_positions)
+            
+            # Fallback to order ticket if position lookup fails
+            if not position_ticket:
+                position_ticket = result.order
+                bot_logger.warning(f"Could not find position, using order ticket: {position_ticket}")
+            
+            # Modify position to add SL/TP (required for brokers that reject in initial order)
             if stop_loss or take_profit:
-                import time
-                time.sleep(0.3)  # Brief delay for position to register
-                self.modify_position(ticket, sl=stop_loss, tp=take_profit)
+                modify_result = self.modify_position(position_ticket, sl=stop_loss, tp=take_profit)
+                if modify_result:
+                    bot_logger.info(f"✅ SL/TP set on position {position_ticket}")
+                else:
+                    bot_logger.warning(f"⚠️ Failed to set SL/TP on position {position_ticket}")
             
             trades_logger.info(
                 f"ORDER_PLACED | Pair: {pair} | Type: {order_type} | "
                 f"Lot: {lot_size} | SL: {stop_loss:.5f} | TP: {take_profit:.5f} | "
-                f"Ticket: {ticket}"
+                f"Ticket: {position_ticket}"
             )
-            return ticket
+            return position_ticket
         
         except Exception as e:
             error_logger.error(f"Error placing order for {pair}: {str(e)}")
