@@ -408,12 +408,19 @@ class MT5Connector:
                 )
                 return None
             
+            # Some brokers don't accept SL/TP in initial order - modify after
+            ticket = result.order
+            if stop_loss or take_profit:
+                import time
+                time.sleep(0.3)  # Brief delay for position to register
+                self.modify_position(ticket, sl=stop_loss, tp=take_profit)
+            
             trades_logger.info(
                 f"ORDER_PLACED | Pair: {pair} | Type: {order_type} | "
                 f"Lot: {lot_size} | SL: {stop_loss:.5f} | TP: {take_profit:.5f} | "
-                f"Ticket: {result.order}"
+                f"Ticket: {ticket}"
             )
-            return result.order
+            return ticket
         
         except Exception as e:
             error_logger.error(f"Error placing order for {pair}: {str(e)}")
