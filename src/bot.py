@@ -382,6 +382,14 @@ class TradingBot:
                         bot_logger.info(f"⏭️ {pair}: already have open bot position — skipping")
                         continue
 
+                    # Cross-timeframe cooldown: prevent 1M and 5M from placing duplicate orders
+                    if not hasattr(self, '_last_trade_time'):
+                        self._last_trade_time = {}
+                    last_trade = self._last_trade_time.get(pair)
+                    if last_trade and (datetime.now() - last_trade).total_seconds() < 30:
+                        bot_logger.info(f"⏭️ {pair}: cross-timeframe cooldown active — skipping")
+                        continue
+
                     if not self.risk_manager.can_trade_with_market(signal_result):
                         cap, available = self.risk_manager.get_trade_capacity(signal_result)
                         bot_logger.warning(f"Risk limits prevent trading {pair}")
@@ -405,6 +413,8 @@ class TradingBot:
                         continue
 
                     self._execute_trade(pair, signal_result, df, timeframe_key)
+                    # Set cross-timeframe cooldown (prevents 1M and 5M racing)
+                    self._last_trade_time[pair] = datetime.now()
                     cooldown_key = f"{pair}_{timeframe_key}"
                     self.last_signal_time[cooldown_key] = datetime.now()
                     # Track regime for this pair's trade (used when recording trade result)
