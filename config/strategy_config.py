@@ -82,7 +82,7 @@ SCALPING_SPREAD_LIMITS = {
 
 # Confluence bonus: both timeframes agree → boost confidence
 CONFLUENCE_BONUS = float(os.getenv('CONFLUENCE_BONUS', 0.15))   # +15%
-DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.10))  # -10%
+DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.05))  # -5% (reduced to allow more trades)
 
 # Optimal trading hours (bonus confidence during peak liquidity)
 OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
