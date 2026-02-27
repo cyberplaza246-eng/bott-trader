@@ -6,6 +6,25 @@ from datetime import datetime
 from src.utils.logger import TradeLogger, bot_logger
 
 
+# ── Pip value lookup (mirrors position_manager.PIP_VALUES) ─────────
+_PIP_VALUES = {
+    'EUR/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
+    'GBP/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
+    'USD/JPY': {'pip_size': 0.01,   'pip_value_per_lot': 6.5},
+    'AUD/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
+    'NZD/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
+    'USD/CHF': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
+    'USD/CAD': {'pip_size': 0.0001, 'pip_value_per_lot': 7.5},
+}
+_DEFAULT_PIP = {'pip_size': 0.0001, 'pip_value_per_lot': 10.0}
+
+
+def _pip_params(pair):
+    """Return (pip_size, pip_value_per_lot) for a currency pair."""
+    info = _PIP_VALUES.get(pair, _DEFAULT_PIP)
+    return info['pip_size'], info['pip_value_per_lot']
+
+
 class PaperTradingManager:
     """Simulate trades with virtual balance"""
     

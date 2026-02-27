@@ -33,7 +33,7 @@ class TrailingStopManager:
 
     # ── Registration ─────────────────────────────────────────────────
 
-    def register(self, ticket, entry_price, stop_loss, direction, atr, pair, take_profit=None, volume=None):
+    def register(self, ticket, entry_price, stop_loss, direction, atr, pair, take_profit=None, volume=None, scalping_mode=False):
         """Register a new position for trailing stop management.
 
         Args:
@@ -45,7 +45,18 @@ class TrailingStopManager:
             pair:        Currency pair (for pip rounding)
             take_profit: Take-profit price (for partial close logic)
             volume:      Position volume/lot size (for partial close)
+            scalping_mode: If True, use tighter breakeven/trail/partial settings
         """
+        # Scalping overrides: tighter stops, faster profit-taking
+        if scalping_mode:
+            effective_breakeven_r = 0.5       # Breakeven at 0.5R (instead of 1.0R)
+            effective_trail_mult = 0.8        # Trail at 0.8× ATR (instead of 1.5×)
+            effective_partial_pct = 0.60      # Partial close at 60% of TP (instead of 75%)
+        else:
+            effective_breakeven_r = self.breakeven_r
+            effective_trail_mult = self.trail_atr_mult
+            effective_partial_pct = self.partial_close_pct
+
         self._tracking[ticket] = {
             'entry': entry_price,
             'original_sl': stop_loss,
@@ -58,9 +69,14 @@ class TrailingStopManager:
             'at_breakeven': False,
             'partial_closed': False,     # True after first partial close
             'best_price': entry_price,   # Best price seen so far
+            'scalping_mode': scalping_mode,
+            'breakeven_r': effective_breakeven_r,
+            'trail_atr_mult': effective_trail_mult,
+            'partial_close_pct': effective_partial_pct,
         }
+        mode_label = " [SCALP]" if scalping_mode else ""
         bot_logger.info(
-            f"📌 Trailing registered: ticket={ticket} {pair} {direction} "
+            f"📌 Trailing registered{mode_label}: ticket={ticket} {pair} {direction} "
             f"entry={entry_price:.5f} SL={stop_loss:.5f} ATR={atr:.5f}"
         )
 
@@ -169,13 +185,16 @@ class TrailingStopManager:
         direction = info['direction']
         tp_distance = abs(tp - entry)
 
+        # Use per-position partial close threshold
+        partial_pct = info.get('partial_close_pct', self.partial_close_pct)
+
         if direction == 'BUY':
             profit_distance = current_price - entry
         else:
             profit_distance = entry - current_price
 
         # Check if price has reached the partial close threshold
-        if tp_distance > 0 and profit_distance >= tp_distance * self.partial_close_pct:
+        if tp_distance > 0 and profit_distance >= tp_distance * partial_pct:
             close_volume = round(volume / 2, 2)
             close_volume = max(0.01, close_volume)  # Broker minimum
 
@@ -185,7 +204,7 @@ class TrailingStopManager:
 
             bot_logger.info(
                 f"💰 Partial close triggered: ticket={ticket} {pair} {direction} "
-                f"price={current_price:.{digits}f} reached {self.partial_close_pct*100:.0f}% of TP "
+                f"price={current_price:.{digits}f} reached {partial_pct*100:.0f}% of TP "
                 f"({profit_distance/pip_div:.1f}/{tp_distance/pip_div:.1f} pips) — "
                 f"closing {close_volume} of {volume} lots"
             )
@@ -213,14 +232,18 @@ class TrailingStopManager:
         atr = info['atr']
         original_risk = abs(entry - info['original_sl'])
 
+        # Use per-position overrides (scalping vs swing)
+        breakeven_r = info.get('breakeven_r', self.breakeven_r)
+        trail_mult = info.get('trail_atr_mult', self.trail_atr_mult)
+
         if direction == 'BUY':
             profit_distance = current_price - entry
             # Track best price
             if current_price > info['best_price']:
                 info['best_price'] = current_price
 
-            # Phase 1: Move to breakeven after 1R profit
-            if not info['at_breakeven'] and profit_distance >= original_risk * self.breakeven_r:
+            # Phase 1: Move to breakeven after profit meets breakeven_r
+            if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
                 # Set SL to entry + small buffer (1 pip profit)
                 pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
@@ -228,7 +251,7 @@ class TrailingStopManager:
             
             # Phase 2: Trail behind the best price
             if info['at_breakeven']:
-                trail_distance = atr * self.trail_atr_mult
+                trail_distance = atr * trail_mult
                 trail_sl = info['best_price'] - trail_distance
                 # Never go below breakeven
                 pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
@@ -241,14 +264,14 @@ class TrailingStopManager:
                 info['best_price'] = current_price
 
             # Phase 1: Breakeven
-            if not info['at_breakeven'] and profit_distance >= original_risk * self.breakeven_r:
+            if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
                 pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
                 return entry - pip
 
             # Phase 2: Trail above best price
             if info['at_breakeven']:
-                trail_distance = atr * self.trail_atr_mult
+                trail_distance = atr * trail_mult
                 trail_sl = info['best_price'] + trail_distance
                 pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
                 breakeven_sl = entry - pip

@@ -434,6 +434,48 @@ class MT5Connector:
             error_logger.error(f"Relay close failed for {pair}: {r}")
             return None
 
+        elif self.simulation_mode:
+            for i, pos in enumerate(self.sim_positions):
+                if pos['pair'] == pair:
+                    closed = self.sim_positions.pop(i)
+                    trades_logger.info(f"POSITION_CLOSED (SIM) | Pair: {pair} | P/L: {closed['profit']:.2f}")
+                    return closed['ticket']
+            return None
+
+        else:
+            try:
+                symbol = self._resolve_symbol(pair)
+                positions = mt5.positions_get(symbol=symbol)
+                if not positions:
+                    bot_logger.warning(f"No open position for {pair}")
+                    return None
+
+                position = positions[0]
+                close_type = mt5.ORDER_TYPE_SELL if position.type == 0 else mt5.ORDER_TYPE_BUY
+
+                request = {
+                    "action": mt5.TRADE_ACTION_DEAL,
+                    "symbol": symbol,
+                    "volume": volume,
+                    "type": close_type,
+                    "deviation": 20,
+                    "magic": 234000,
+                    "comment": "AI Bot Position Close",
+                    "type_time": mt5.ORDER_TIME_GTC,
+                    "type_filling": mt5.ORDER_FILLING_IOC,
+                }
+
+                result = mt5.order_send(request)
+
+                if result.retcode != mt5.TRADE_RETCODE_DONE:
+                    error_logger.error(f"Failed to close {pair}: {result.comment}")
+                    return None
+                return result.order
+
+            except Exception as e:
+                error_logger.error(f"Error closing position for {pair}: {str(e)}")
+                return None
+
     def close_all_positions(self):
         """Close ALL open positions via relay or native MT5."""
         if self.relay_mode:
@@ -509,47 +551,6 @@ class MT5Connector:
         except Exception as e:
             error_logger.error(f"Error modifying position {ticket}: {e}")
             return None
-
-        if self.simulation_mode:
-            for i, pos in enumerate(self.sim_positions):
-                if pos['pair'] == pair:
-                    closed = self.sim_positions.pop(i)
-                    trades_logger.info(f"POSITION_CLOSED (SIM) | Pair: {pair} | P/L: {closed['profit']:.2f}")
-                    return closed['ticket']
-            return None
-        
-        try:
-            symbol = self._resolve_symbol(pair)
-            positions = mt5.positions_get(symbol=symbol)
-            if not positions:
-                bot_logger.warning(f"No open position for {pair}")
-                return None
-            
-            position = positions[0]
-            close_type = mt5.ORDER_TYPE_SELL if position.type == 0 else mt5.ORDER_TYPE_BUY
-            
-            request = {
-                "action": mt5.TRADE_ACTION_DEAL,
-                "symbol": symbol,
-                "volume": volume,
-                "type": close_type,
-                "deviation": 20,
-                "magic": 234000,
-                "comment": "AI Bot Position Close",
-                "type_time": mt5.ORDER_TIME_GTC,
-                "type_filling": mt5.ORDER_FILLING_IOC,
-            }
-            
-            result = mt5.order_send(request)
-            
-            if result.retcode != mt5.TRADE_RETCODE_DONE:
-                error_logger.error(f"Failed to close {pair}: {result.comment}")
-                return None
-            return result.order
-        
-        except Exception as e:
-            error_logger.error(f"Error closing position for {pair}: {str(e)}")
-            return None
     
     # Magic number used by the bot to tag its own orders
     BOT_MAGIC = 234000
@@ -562,6 +563,51 @@ class MT5Connector:
             if r and "positions" in r:
                 return r["positions"]
             return []
+
+        elif self.simulation_mode:
+            positions = self.sim_positions
+            if pair:
+                positions = [p for p in positions if p['pair'] == pair]
+            return [
+                {
+                    'ticket': p['ticket'],
+                    'pair': p['pair'],
+                    'type': p['type'],
+                    'volume': p['volume'],
+                    'open_price': p['open_price'],
+                    'current_price': p['current_price'],
+                    'profit': p['profit'],
+                    'open_time': p['open_time'],
+                }
+                for p in positions
+            ]
+
+        else:
+            try:
+                if pair:
+                    positions = mt5.positions_get(symbol=pair)
+                else:
+                    positions = mt5.positions_get()
+
+                if not positions:
+                    return []
+
+                return [
+                    {
+                        'ticket': p.ticket,
+                        'pair': p.symbol,
+                        'type': 'BUY' if p.type == 0 else 'SELL',
+                        'volume': p.volume,
+                        'open_price': p.price_open,
+                        'current_price': p.price_current,
+                        'profit': p.profit,
+                        'open_time': datetime.fromtimestamp(p.time),
+                    }
+                    for p in positions
+                ]
+            except Exception as e:
+                error_logger.error(f"Error getting positions: {str(e)}")
+                return []
 
     def get_bot_positions(self, pair=None):
         """Get only positions placed by this bot (magic=234000).
@@ -585,50 +631,6 @@ class MT5Connector:
             p for p in all_positions
             if p.get('magic') == self.BOT_MAGIC
         ]
-
-        if self.simulation_mode:
-            positions = self.sim_positions
-            if pair:
-                positions = [p for p in positions if p['pair'] == pair]
-            return [
-                {
-                    'ticket': p['ticket'],
-                    'pair': p['pair'],
-                    'type': p['type'],
-                    'volume': p['volume'],
-                    'open_price': p['open_price'],
-                    'current_price': p['current_price'],
-                    'profit': p['profit'],
-                    'open_time': p['open_time'],
-                }
-                for p in positions
-            ]
-        
-        try:
-            if pair:
-                positions = mt5.positions_get(symbol=pair)
-            else:
-                positions = mt5.positions_get()
-            
-            if not positions:
-                return []
-            
-            return [
-                {
-                    'ticket': p.ticket,
-                    'pair': p.symbol,
-                    'type': 'BUY' if p.type == 0 else 'SELL',
-                    'volume': p.volume,
-                    'open_price': p.price_open,
-                    'current_price': p.price_current,
-                    'profit': p.profit,
-                    'open_time': datetime.fromtimestamp(p.time),
-                }
-                for p in positions
-            ]
-        except Exception as e:
-            error_logger.error(f"Error getting positions: {str(e)}")
-            return []
     
     def shutdown(self):
         """Shutdown MT5 connection"""

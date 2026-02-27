@@ -16,6 +16,7 @@ from src.ai.multi_timeframe import MultiTimeframeAnalyzer
 from src.ai.support_resistance import SupportResistanceDetector
 from src.ai.candlestick_patterns import CandlestickPatternDetector
 from src.ai.ema_crossover import EMACrossoverAnalyzer
+from src.ai.scalping_analyzer import ScalpingAnalyzer
 from src.ai.adaptive_learner import AdaptiveLearner
 from src.ai.cross_pair_analyzer import CrossPairAnalyzer
 from src.utils.logger import TradeLogger, bot_logger
@@ -25,9 +26,10 @@ from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGR
 class EnsembleTrader:
     """8-model ensemble with regime awareness, conviction scaling, and adaptive learning"""
 
-    # Regime-based model weight boosts
+    # Regime-based model weight boosts (scalping-tuned)
     REGIME_BOOSTS = {
         'trending': {
+            'scalping': 1.5,
             'ema_crossover': 1.4,
             'multi_tf': 1.3,
             'technical': 1.2,
@@ -36,6 +38,7 @@ class EnsembleTrader:
             'volume': 0.9,
         },
         'ranging': {
+            'scalping': 0.6,
             'support_resistance': 1.5,
             'candlestick': 1.3,
             'technical': 1.2,  # RSI/BB work well in ranges
@@ -43,6 +46,7 @@ class EnsembleTrader:
             'multi_tf': 0.8,
         },
         'volatile': {
+            'scalping': 0.8,
             'volume': 1.4,
             'support_resistance': 1.2,
             'candlestick': 1.1,
@@ -61,25 +65,31 @@ class EnsembleTrader:
         self.sr_detector = SupportResistanceDetector()
         self.candle_detector = CandlestickPatternDetector()
         self.ema_crossover = EMACrossoverAnalyzer()
+        self.scalping = ScalpingAnalyzer()
         self.learner = AdaptiveLearner()
         self.cross_pair = CrossPairAnalyzer()
         self.broker = broker
 
+        # Scalping-tuned weights: scalping model is the heaviest
         self.model_weights = {
-            'lstm': 0.18,
-            'sentiment': 0.12,
-            'technical': 0.14,
-            'volume': 0.08,
-            'multi_tf': 0.14,
-            'support_resistance': 0.10,
-            'candlestick': 0.12,
-            'ema_crossover': 0.12,
+            'scalping': 0.22,
+            'ema_crossover': 0.14,
+            'candlestick': 0.13,
+            'technical': 0.12,
+            'volume': 0.11,
+            'multi_tf': 0.10,
+            'support_resistance': 0.06,
+            'lstm': 0.06,
+            'sentiment': 0.06,
         }
 
+        model_count = 9
         if not self.lstm_available:
-            bot_logger.info("🧠 Ensemble running with 7 models (LSTM disabled)")
+            bot_logger.info("🧠 Scalping ensemble running with 8 models (LSTM disabled)")
+            model_count = 8
         else:
-            bot_logger.info("🧠 Ensemble running with all 8 models")
+            bot_logger.info("🧠 Scalping ensemble running with all 9 models")
+        bot_logger.info(f"🔪 ScalpingAnalyzer active as primary signal (weight 0.22)")
 
     def get_trading_signal(self, df, pair):
         """
@@ -152,12 +162,20 @@ class EnsembleTrader:
         candle_signal = self.candle_detector.get_pattern_signal(df_enriched)
         ema_signal = self.ema_crossover.get_signal(df_enriched)
 
+        # Scalping signal (9th model — highest weight)
+        scalping_signal = self.scalping.get_signal(df_enriched, pair)
+        scalping_signal_type = scalping_signal.get('signal', 'HOLD')
+        if scalping_signal_type == 'SKIP':
+            scalping_signal_type = 'HOLD'
+        scalping_confidence = scalping_signal.get('confidence', 0.0)
+
         # === Build signal map ===
         all_signals = {}
         if self.lstm_available:
             all_signals['lstm'] = {'signal': lstm_signal['signal'], 'confidence': lstm_signal['confidence']}
 
         all_signals.update({
+            'scalping': {'signal': scalping_signal_type, 'confidence': scalping_confidence},
             'sentiment': {'signal': sentiment_signal_type, 'confidence': sentiment_confidence},
             'technical': {'signal': technical_signal['signal'], 'confidence': technical_signal['confidence']},
             'volume': {'signal': volume_signal['signal'], 'confidence': volume_signal['confidence']},
@@ -288,6 +306,7 @@ class EnsembleTrader:
 
         # Generate reasoning
         reason_parts = []
+        reason_parts.append(f"Scalp: {scalping_signal_type} ({scalping_confidence:.0%})")
         if self.lstm_available:
             reason_parts.append(f"LSTM: {lstm_signal['signal']} ({lstm_signal['confidence']:.0%})")
         reason_parts.extend([
@@ -313,6 +332,11 @@ class EnsembleTrader:
             'detailed_reason': detailed_reason,
             'enriched_df': df_enriched,
             'models': {
+                'scalping': {
+                    'signal': scalping_signal_type,
+                    'confidence': scalping_confidence,
+                    'setup': scalping_signal.get('setup', 'none'),
+                },
                 'lstm': lstm_signal,
                 'sentiment': {
                     'signal': sentiment_signal_type,

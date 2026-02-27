@@ -19,7 +19,8 @@ from config.strategy_config import (
     MICRO_TAKE_PROFIT_RATIO,
     INITIAL_BALANCE,
     MAX_CONCURRENT_TRADES,
-    DAILY_LOSS_LIMIT_PERCENT
+    DAILY_LOSS_LIMIT_PERCENT,
+    SCALPING_PAIRS,
 )
 
 
@@ -30,14 +31,14 @@ ACCOUNT_TIERS = {
         'min_balance': 0,
         'max_balance': 200,
         'max_concurrent_trades': 3,    # 3 concurrent trades allowed
-        'max_lot_size': 0.02,
+        'max_lot_size': 0.01,
         'risk_percent': 1.0,       # Conservative at small size
         'description': 'Micro ($0-$200)',
     },
     'mini': {
         'min_balance': 200,
         'max_balance': 1000,
-        'max_concurrent_trades': 5,
+        'max_concurrent_trades': 3,
         'max_lot_size': 0.03,
         'risk_percent': 1.0,
         'description': 'Mini ($200-$1K)',
@@ -45,7 +46,7 @@ ACCOUNT_TIERS = {
     'standard': {
         'min_balance': 1000,
         'max_balance': 5000,
-        'max_concurrent_trades': 5,
+        'max_concurrent_trades': 3,
         'max_lot_size': 0.04,
         'risk_percent': 1.5,       # Can afford slightly more risk
         'description': 'Standard ($1K-$5K)',
@@ -53,7 +54,7 @@ ACCOUNT_TIERS = {
     'professional': {
         'min_balance': 5000,
         'max_balance': 25000,
-        'max_concurrent_trades': 8,
+        'max_concurrent_trades': 3,
         'max_lot_size': 0.05,
         'risk_percent': 2.0,
         'description': 'Professional ($5K-$25K)',
@@ -61,7 +62,7 @@ ACCOUNT_TIERS = {
     'elite': {
         'min_balance': 25000,
         'max_balance': float('inf'),
-        'max_concurrent_trades': 10,
+        'max_concurrent_trades': 3,
         'max_lot_size': 0.05,
         'risk_percent': 2.0,
         'description': 'Elite ($25K+)',
@@ -343,7 +344,7 @@ class RiskManager:
                 'max_lot_size': max_lots,
             }
 
-        position_size = max(0.02, min(position_size, max_lots))
+        position_size = max(0.01, min(position_size, max_lots))
 
         # Apply margin safety cap using ACTUAL account leverage & free margin
         # 1 lot = 100,000 units of BASE currency
@@ -363,7 +364,7 @@ class RiskManager:
                     f"Margin cap: {position_size:.2f} lots → {max_lots_by_margin:.2f} lots "
                     f"(free margin ${self.free_margin:.2f}, leverage {leverage}:1)"
                 )
-                position_size = max(0.02, min(position_size, max_lots_by_margin))
+                position_size = max(0.01, min(position_size, max_lots_by_margin))
 
         # Round to 2 decimal places
         position_size = round(position_size, 2)
@@ -540,3 +541,65 @@ class RiskManager:
             f"Tier: {self._current_tier_name} | "
             f"Daily loss limit: ${self.daily_loss_limit:.2f}"
         )
+
+    # ── Scalping-Specific SL/TP ──────────────────────────────────────
+
+    def calculate_scalping_stop_loss(self, pair, timeframe_key, entry_price, trade_type):
+        """Calculate pip-based stop loss for scalping using SCALPING_PAIRS config.
+
+        Args:
+            pair: Currency pair (e.g. 'EUR/USD')
+            timeframe_key: '1m' or '5m'
+            entry_price: Entry price
+            trade_type: 'BUY' or 'SELL'
+
+        Returns:
+            Stop-loss price (rounded to 5 decimals)
+        """
+        pair_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
+        sl_pips_min = pair_config.get('sl_pips_min', 6)
+        sl_pips_max = pair_config.get('sl_pips_max', 10)
+        sl_pips = (sl_pips_min + sl_pips_max) / 2
+
+        pip_info = PIP_VALUES.get(pair, DEFAULT_PIP)
+        sl_distance = sl_pips * pip_info['pip_size']
+
+        if trade_type == 'BUY':
+            stop_loss = entry_price - sl_distance
+        else:
+            stop_loss = entry_price + sl_distance
+
+        digits = 3 if 'JPY' in pair.upper() else 5
+        return round(stop_loss, digits)
+
+    def calculate_scalping_take_profit(self, pair, timeframe_key, entry_price, stop_loss, trade_type):
+        """Calculate pip-based take profit for scalping using R:R ratios from config.
+
+        Args:
+            pair: Currency pair
+            timeframe_key: '1m' or '5m'
+            entry_price: Entry price
+            stop_loss: Stop-loss price
+            trade_type: 'BUY' or 'SELL'
+
+        Returns:
+            Take-profit price (rounded to 5 decimals)
+        """
+        pair_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
+        tp_ratios = pair_config.get('tp_ratio', [1.2, 1.5])
+        tp_ratio = tp_ratios[0]  # Use primary (tighter) target for high WR
+
+        risk_distance = abs(entry_price - stop_loss)
+        tp_distance = risk_distance * tp_ratio
+
+        # Minimal buffer (0.3 pips slippage)
+        pip_info = PIP_VALUES.get(pair, DEFAULT_PIP)
+        tp_buffer = pip_info['pip_size'] * 0.3
+
+        if trade_type == 'BUY':
+            take_profit = entry_price + tp_distance - tp_buffer
+        else:
+            take_profit = entry_price - tp_distance + tp_buffer
+
+        digits = 3 if 'JPY' in pair.upper() else 5
+        return round(take_profit, digits)

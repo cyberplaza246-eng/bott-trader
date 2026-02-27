@@ -1,8 +1,12 @@
 """
-Main Auto-Trading Bot Loop
-Runs continuously to monitor, analyze, and execute trades.
-Now with: up to 8-model ensemble (LSTM optional), adaptive learning, dashboard, S/R-aware exits,
-      cross-pair correlation signals, economic event avoidance, LSTM auto-retraining
+Dual-Timeframe Scalping Bot — 1M + 5M Confluence System
+
+Runs continuous 1-minute and 5-minute scalping cycles on EUR/USD & GBP/USD.
+Uses a 9-model ensemble (including ScalpingAnalyzer as primary signal) with:
+  - Adaptive learning, trailing stops, economic calendar
+  - S/R-aware exits, cross-pair correlation, LSTM auto-retraining
+  - Per-timeframe confluence bonuses/penalties
+  - Pip-based SL/TP from scalping config
 """
 import os
 import time
@@ -25,27 +29,22 @@ from config.strategy_config import (
     AUTOTRADING_ENABLED,
     INITIAL_BALANCE,
     HIGH_CERTAINTY_THRESHOLD,
-    USDJPY_TUNING_ENABLED,
-    USDJPY_MIN_CONFIDENCE,
-    USDJPY_MIN_MODELS_AGREEMENT,
-    USDJPY_MIN_ADX,
+    SCALPING_PAIRS,
+    SCALPING_SESSION_WINDOWS,
+    SCALPING_SPREAD_LIMITS,
+    CONFLUENCE_BONUS,
+    DIVERGENCE_PENALTY,
+    OPTIMAL_HOURS_UTC,
+    OPTIMAL_HOUR_BONUS,
 )
 
 
 class TradingBot:
     """Main trading bot orchestrator"""
     
-    # ── Trading Session Windows (UTC hours) ────────────────────────
-    # EUR/USD & GBP/USD: London open → NY close  (08:00–22:00 UTC = 3AM–5PM ET)
-    # ALL PAIRS:         Asian open → NY close    (00:00–22:00 UTC = 7PM–5PM ET)
-    # ALL PAIRS BLOCKED: Daily rollover dead zone  (22:00–00:00 UTC = 5PM–7PM ET)
-    # Spread filter + ADX filter protect against low-liquidity overnight entries
-    PAIR_SESSIONS = {
-        'EUR/USD': {'start': 0, 'end': 22},
-        'GBP/USD': {'start': 0, 'end': 22},
-        'USD/JPY': {'start': 0, 'end': 22},
-    }
-    DEFAULT_SESSION = {'start': 0, 'end': 22}
+    # ── Trading Session Windows (UTC hours) — Scalping-tight ──────
+    PAIR_SESSIONS = SCALPING_SESSION_WINDOWS
+    DEFAULT_SESSION = {'start': 7, 'end': 17}
 
     # ── Correlation Groups ────────────────────────────────────────
     # Pairs that move together — block duplicate directional exposure
@@ -54,13 +53,12 @@ class TradingBot:
         'GBP/USD': 'EUR/USD',
     }
 
-    # ── Spread Limits (max allowed spread in price units) ─────────
+    # ── Spread Limits (max allowed spread in pips) — Scalping-tight ─
     MAX_SPREAD = {
-        'EUR/USD': 0.00030,   # 3 pips
-        'GBP/USD': 0.00035,   # 3.5 pips
-        'USD/JPY': 0.030,     # 3 pips (JPY)
+        'EUR/USD': SCALPING_SPREAD_LIMITS.get('EUR/USD', 2.0) * 0.0001,
+        'GBP/USD': SCALPING_SPREAD_LIMITS.get('GBP/USD', 2.5) * 0.0001,
     }
-    DEFAULT_MAX_SPREAD = 0.00030
+    DEFAULT_MAX_SPREAD = 0.00020
 
     def __init__(self, newsapi_key=None, enable_dashboard=True):
         self.mode = TRADING_MODE  # 'live', 'paper', 'backtest'
@@ -87,23 +85,21 @@ class TradingBot:
         )
         
         # Determine active model count
-        model_count = 8 if self.ensemble.lstm_available else 7
+        model_count = 9 if self.ensemble.lstm_available else 8
         
         if self.mode == 'paper':
             self.paper_trader = PaperTradingManager(initial_balance=INITIAL_BALANCE)
         else:
             self.paper_trader = None
         
-        self.last_signal_time = {}  # Track last signal per pair
-        self.signal_cooldown_minutes = int(os.getenv('SIGNAL_COOLDOWN_MINUTES', '4'))
-        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '90'))
+        self.last_signal_time = {}  # Track last signal per pair per timeframe
+        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '20'))
         self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.55'))
         self.reversal_exit_min_agreement = int(os.getenv('REVERSAL_EXIT_MIN_AGREEMENT', '2'))
         self.enable_correlation_guard = os.getenv('ENABLE_CORRELATION_GUARD', 'false').lower() == 'true'
-        self.usdjpy_tuning_enabled = USDJPY_TUNING_ENABLED
-        self.usdjpy_min_confidence = USDJPY_MIN_CONFIDENCE
-        self.usdjpy_min_models_agreement = USDJPY_MIN_MODELS_AGREEMENT
-        self.usdjpy_min_adx = USDJPY_MIN_ADX
+
+        # Dual-timeframe confluence tracking: {pair: {'1m': signal_result, '5m': signal_result}}
+        self._last_signals = {pair: {} for pair in PAIRS}
 
         # Live closure detection: track open tickets so we notice when MT5 closes one
         self._known_tickets = {}   # {ticket: {pair, type, entry_price, open_time}}
@@ -112,7 +108,10 @@ class TradingBot:
         # Backfill past closed trades from MT5 history into adaptive learner
         self._backfill_history()
         
-        bot_logger.info(f"✅ Trading Bot initialized in {self.mode.upper()} mode ({model_count}-model ensemble)")
+        bot_logger.info(
+            f"✅ Scalping Bot initialized in {self.mode.upper()} mode "
+            f"({model_count}-model ensemble, 1M+5M dual-timeframe)"
+        )
 
     # ── Session Filter ────────────────────────────────────────────
 
@@ -171,85 +170,46 @@ class TradingBot:
             pass
         return False
 
-    def should_skip_signal(self, pair):
-        """Prevent over-trading the same pair"""
-        if pair not in self.last_signal_time:
+    def should_skip_signal(self, pair, timeframe_key='5m'):
+        """Prevent over-trading the same pair on the same timeframe"""
+        cooldown_key = f"{pair}_{timeframe_key}"
+        if cooldown_key not in self.last_signal_time:
             return False
         
-        elapsed = (datetime.now() - self.last_signal_time[pair]).total_seconds() / 60
-        return elapsed < self.signal_cooldown_minutes
-
-    @staticmethod
-    def _is_usdjpy(pair):
-        return str(pair or '').replace('/', '').upper() == 'USDJPY'
+        # Use per-timeframe cooldown from config
+        pair_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
+        cooldown_seconds = pair_config.get('cooldown_seconds', 180)
+        
+        elapsed = (datetime.now() - self.last_signal_time[cooldown_key]).total_seconds()
+        return elapsed < cooldown_seconds
 
     @staticmethod
     def _is_opposite(signal_a, signal_b):
         return (signal_a, signal_b) in {('BUY', 'SELL'), ('SELL', 'BUY')}
 
-    def _passes_usdjpy_quality_filter(self, pair, signal_result):
-        """Extra quality checks for USD/JPY to reduce false positives."""
-        if not (self.usdjpy_tuning_enabled and self._is_usdjpy(pair)):
-            return True
-
-        models = signal_result.get('models', {})
-        direction = signal_result.get('signal', 'SKIP')
-        mtf_signal = models.get('multi_tf', {}).get('signal', 'HOLD')
-        if self._is_opposite(direction, mtf_signal):
-            bot_logger.info("USD/JPY filter: skipped due to opposite multi-timeframe signal")
-            return False
-
-        price_zone = signal_result.get('sr_levels', {}).get('price_zone', '')
-        if direction == 'BUY' and price_zone == 'AT_RESISTANCE':
-            bot_logger.info("USD/JPY filter: skipped BUY at resistance")
-            return False
-        if direction == 'SELL' and price_zone == 'AT_SUPPORT':
-            bot_logger.info("USD/JPY filter: skipped SELL at support")
-            return False
-
-        enriched_df = signal_result.get('enriched_df')
-        if enriched_df is not None and len(enriched_df) > 0 and 'adx' in enriched_df.columns:
-            adx = float(enriched_df.iloc[-1].get('adx', 0) or 0)
-            if adx < self.usdjpy_min_adx:
-                bot_logger.info(
-                    f"USD/JPY filter: ADX {adx:.1f} below minimum {self.usdjpy_min_adx:.1f}"
-                )
-                return False
-
-        return True
-
     def _should_trade_pair(self, pair, signal_result):
-        """Determine if a pair should be traded, including USD/JPY-specific override."""
-        if self.ensemble.should_trade(signal_result):
-            return True
-
-        if not (self.usdjpy_tuning_enabled and self._is_usdjpy(pair)):
-            return False
-
-        signal = signal_result.get('signal', 'SKIP')
-        confidence = signal_result.get('confidence', 0.0)
-        agreement = signal_result.get('models_agreement', 0)
-        if signal == 'SKIP':
-            return False
-
-        return (
-            confidence >= self.usdjpy_min_confidence and
-            agreement >= self.usdjpy_min_models_agreement
-        )
+        """Determine if a pair should be traded."""
+        return self.ensemble.should_trade(signal_result)
     
-    def analyze_and_trade(self):
+    def analyze_and_trade(self, timeframe_key='5m'):
         """
-        Main trading loop:
-        1. Fetch latest data
-        2. Run ensemble analysis
-        3. Execute trades if signal is strong
+        Dual-timeframe scalping loop:
+        1. Fetch candles for specified timeframe (1m or 5m)
+        2. Run 9-model ensemble analysis
+        3. Apply confluence bonus/penalty from the other timeframe
+        4. Execute trades if signal is strong
         """
         if not self.broker or not self.broker.connected:
             bot_logger.error("Broker not connected, skipping analysis")
             return
         
+        timeframe_minutes = TIMEFRAMES.get(f'scalp_{"fast" if timeframe_key == "1m" else "slow"}', 5)
+        
         bot_logger.info("=" * 60)
-        bot_logger.info(f"🔍 Starting analysis cycle at {datetime.now().strftime('%H:%M:%S')}")
+        bot_logger.info(
+            f"🔍 Scalping analysis ({timeframe_key}) at "
+            f"{datetime.now().strftime('%H:%M:%S')}"
+        )
         
         # Sync balance from broker/paper trader each cycle
         self._sync_balance()
@@ -298,18 +258,22 @@ class TradingBot:
         except Exception:
             pass
 
+        # Current UTC hour for optimal-hour bonus
+        current_utc_hour = datetime.now(timezone.utc).hour
+
         for pair in PAIRS:
             try:
-                # Skip if outside trading session for this pair
+                # Skip if outside scalping session for this pair
                 if not self.is_pair_in_session(pair):
                     session = self.PAIR_SESSIONS.get(pair, self.DEFAULT_SESSION)
                     bot_logger.info(
-                        f"💤 {pair} outside session (UTC {session['start']:02d}:00–{session['end']:02d}:00) — skipping"
+                        f"💤 {pair} outside scalping session "
+                        f"(UTC {session['start']:02d}:00–{session['end']:02d}:00) — skipping"
                     )
                     continue
 
-                # Skip if cooldown active
-                if self.should_skip_signal(pair):
+                # Skip if cooldown active for this timeframe
+                if self.should_skip_signal(pair, timeframe_key):
                     continue
 
                 # Adaptive session skip — skip pair+session combos with terrible win rates
@@ -323,29 +287,64 @@ class TradingBot:
                     bot_logger.info(f"📰 Event filter: {pair} blocked — {event_name} window active")
                     continue
                 
-                # Fetch latest candle data
+                # Fetch candles for this timeframe
+                num_candles = 250 if timeframe_key == '5m' else 300
                 df = self.broker.get_candles(
                     pair,
-                    timeframe_minutes=TIMEFRAMES['fast'],
-                    num_candles=100
+                    timeframe_minutes=timeframe_minutes,
+                    num_candles=num_candles
                 )
                 
                 if df is None or len(df) < 50:
-                    bot_logger.warning(f"Insufficient data for {pair}")
+                    bot_logger.warning(f"Insufficient data for {pair} ({timeframe_key})")
                     continue
                 
                 # Get ensemble signal
                 signal_result = self.ensemble.get_trading_signal(df, pair)
+
+                # Store signal for confluence tracking
+                self._last_signals[pair][timeframe_key] = signal_result
+
+                # ── Confluence modifier ──────────────────────────────
+                other_tf = '5m' if timeframe_key == '1m' else '1m'
+                other_signal = self._last_signals[pair].get(other_tf)
+                if other_signal and other_signal.get('signal') not in ('SKIP', None):
+                    if signal_result['signal'] == other_signal['signal']:
+                        # Both timeframes agree → boost confidence
+                        old_conf = signal_result['confidence']
+                        signal_result['confidence'] = min(1.0, old_conf + CONFLUENCE_BONUS)
+                        bot_logger.info(
+                            f"🎯 Confluence bonus: {timeframe_key}+{other_tf} both {signal_result['signal']} "
+                            f"→ confidence {old_conf:.2f} → {signal_result['confidence']:.2f} (+{CONFLUENCE_BONUS:.0%})"
+                        )
+                    elif self._is_opposite(signal_result['signal'], other_signal['signal']):
+                        # Timeframes diverge → reduce confidence
+                        old_conf = signal_result['confidence']
+                        signal_result['confidence'] = max(0.0, old_conf - DIVERGENCE_PENALTY)
+                        bot_logger.info(
+                            f"⚠️ Divergence penalty: {timeframe_key}={signal_result['signal']} vs "
+                            f"{other_tf}={other_signal['signal']} "
+                            f"→ confidence {old_conf:.2f} → {signal_result['confidence']:.2f}"
+                        )
+
+                # ── Optimal hour bonus ───────────────────────────────
+                if current_utc_hour in OPTIMAL_HOURS_UTC and signal_result['signal'] != 'SKIP':
+                    old_conf = signal_result['confidence']
+                    signal_result['confidence'] = min(1.0, old_conf + OPTIMAL_HOUR_BONUS)
+                    bot_logger.info(
+                        f"⏰ Optimal hour bonus (UTC {current_utc_hour:02d}) "
+                        f"→ +{OPTIMAL_HOUR_BONUS:.0%} confidence"
+                    )
 
                 # Feed price data to cross-pair analyzer for correlation tracking
                 self.ensemble.cross_pair.update_prices(pair, df)
                 
                 # Log detailed analysis
                 regime = signal_result.get('regime', 'unknown')
-                bot_logger.info(f"\n{pair} Analysis:")
+                bot_logger.info(f"\n{pair} [{timeframe_key}] Analysis:")
                 bot_logger.info(f"  Signal: {signal_result['signal']}")
                 bot_logger.info(f"  Confidence: {signal_result['confidence']:.1%}")
-                bot_logger.info(f"  Models Agreement: {signal_result['models_agreement']}/{signal_result.get('total_models', 7)}")
+                bot_logger.info(f"  Models Agreement: {signal_result['models_agreement']}/{signal_result.get('total_models', 8)}")
                 bot_logger.info(f"  Market Regime: {regime}")
                 bot_logger.info(f"  Details: {signal_result['detailed_reason']}")
 
@@ -355,6 +354,7 @@ class TradingBot:
                 # Track for dashboard
                 self.signal_history.append({
                     'pair': pair,
+                    'timeframe': timeframe_key,
                     'signal': signal_result['signal'],
                     'confidence': signal_result['confidence'],
                     'agreement': signal_result['models_agreement'],
@@ -366,9 +366,6 @@ class TradingBot:
                 
                 # Execute trade if signal is strong enough
                 if self._should_trade_pair(pair, signal_result):
-                    if not self._passes_usdjpy_quality_filter(pair, signal_result):
-                        continue
-
                     # Block duplicate: don't open another trade if bot already has one on this pair
                     if self._has_bot_position(pair):
                         bot_logger.info(f"⏭️ {pair}: already have open bot position — skipping")
@@ -388,7 +385,7 @@ class TradingBot:
                         bot_logger.info(f"📉 Adaptive skip: {pair} win rate too low")
                         continue
 
-                    # Spread filter
+                    # Spread filter (tighter for scalping)
                     if not self.is_spread_acceptable(pair):
                         continue
 
@@ -396,8 +393,9 @@ class TradingBot:
                     if self.enable_correlation_guard and self._has_correlated_position(pair, signal_result['signal']):
                         continue
 
-                    self._execute_trade(pair, signal_result, df)
-                    self.last_signal_time[pair] = datetime.now()
+                    self._execute_trade(pair, signal_result, df, timeframe_key)
+                    cooldown_key = f"{pair}_{timeframe_key}"
+                    self.last_signal_time[cooldown_key] = datetime.now()
                     # Track regime for this pair's trade (used when recording trade result)
                     if not hasattr(self, '_last_regime'):
                         self._last_regime = {}
@@ -410,7 +408,7 @@ class TradingBot:
                 self._update_positions(pair)
                 
             except Exception as e:
-                bot_logger.error(f"Error analyzing {pair}: {str(e)}", exc_info=True)
+                bot_logger.error(f"Error analyzing {pair} [{timeframe_key}]: {str(e)}", exc_info=True)
         
         # Log risk status with tier info
         daily_status = self.risk_manager.get_daily_status()
@@ -427,41 +425,59 @@ class TradingBot:
         )
         bot_logger.info(f"  Can Trade: {daily_status['can_trade']}")
     
-    def _execute_trade(self, pair, signal_result, df):
-        """Execute actual trade"""
+    def _execute_trade(self, pair, signal_result, df, timeframe_key='5m'):
+        """Execute a scalping trade with pip-based SL/TP"""
         trade_type = signal_result['signal']
         # Use the enriched df (with indicators) from the ensemble
         enriched_df = signal_result.get('enriched_df', df)
         latest = enriched_df.iloc[-1]
         entry_price = latest['close']
         atr = latest.get('atr', entry_price * 0.001)  # Fallback: 0.1% of price
-        
-        # Calculate risk parameters
-        stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, trade_type, pair=pair)
-        take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, trade_type, pair=pair)
-        # S/R-based dynamic TP: use nearest S/R level within tier R:R limits
+
+        # ── Scalping pip-based SL/TP from config ─────────────────────
+        pair_scalp_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
+        if pair_scalp_config:
+            # Use midpoint of pip range for SL
+            sl_pips_min = pair_scalp_config.get('sl_pips_min', 6)
+            sl_pips_max = pair_scalp_config.get('sl_pips_max', 10)
+            sl_pips = (sl_pips_min + sl_pips_max) / 2
+            sl_distance = sl_pips * 0.0001  # Standard pairs only (no JPY)
+
+            if trade_type == 'BUY':
+                stop_loss = round(entry_price - sl_distance, 5)
+            else:
+                stop_loss = round(entry_price + sl_distance, 5)
+
+            # TP from config ratio
+            tp_ratios = pair_scalp_config.get('tp_ratio', [1.5, 2.0])
+            tp_ratio = tp_ratios[0]  # Use primary R:R
+            tp_distance = sl_distance * tp_ratio
+            # TP buffer (~1.5 pips) to fill before S/R stall
+            tp_buffer = 0.0001 * 1.5
+            if trade_type == 'BUY':
+                take_profit = round(entry_price + tp_distance - tp_buffer, 5)
+            else:
+                take_profit = round(entry_price - tp_distance + tp_buffer, 5)
+        else:
+            # Fallback to ATR-based
+            stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, trade_type, pair=pair)
+            take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, trade_type, pair=pair)
+
+        # S/R-based dynamic TP: use nearest S/R level within scalping R:R limits
         sr_levels = signal_result.get('sr_levels', {})
         risk_distance = abs(entry_price - stop_loss)
-        # Tier-based R:R cap — micro accounts need tighter TPs
-        tier_name = self.risk_manager._current_tier_name or 'micro'
-        if 'micro' in tier_name:
-            max_rr = 3.0
-        elif 'mini' in tier_name:
-            max_rr = 4.0
-        else:
-            max_rr = 5.0
+        max_rr = 3.0  # Scalping cap
         if sr_levels and risk_distance > 0:
             if trade_type == 'BUY':
                 resistances = sr_levels.get('resistance_levels', [])
                 for level in sorted(resistances):
                     reward = level - entry_price
                     rr = reward / risk_distance
-                    if 1.5 <= rr <= max_rr:
-                        digits = 3 if 'JPY' in pair else 5
-                        sr_tp = round(level, digits)
+                    if 1.2 <= rr <= max_rr:
+                        sr_tp = round(level, 5)
                         bot_logger.info(
-                            f"🎯 S/R TP: {take_profit:.{digits}f} → {sr_tp:.{digits}f} "
-                            f"(resistance level, R:R = {rr:.1f}, max {max_rr:.0f}:1)"
+                            f"🎯 S/R TP: {take_profit:.5f} → {sr_tp:.5f} "
+                            f"(resistance level, R:R = {rr:.1f})"
                         )
                         take_profit = sr_tp
                         break
@@ -470,15 +486,15 @@ class TradingBot:
                 for level in sorted(supports, reverse=True):
                     reward = entry_price - level
                     rr = reward / risk_distance
-                    if 1.5 <= rr <= max_rr:
-                        digits = 3 if 'JPY' in pair else 5
-                        sr_tp = round(level, digits)
+                    if 1.2 <= rr <= max_rr:
+                        sr_tp = round(level, 5)
                         bot_logger.info(
-                            f"🎯 S/R TP: {take_profit:.{digits}f} → {sr_tp:.{digits}f} "
-                            f"(support level, R:R = {rr:.1f}, max {max_rr:.0f}:1)"
+                            f"🎯 S/R TP: {take_profit:.5f} → {sr_tp:.5f} "
+                            f"(support level, R:R = {rr:.1f})"
                         )
                         take_profit = sr_tp
-                        break        
+                        break
+
         position_size = self.risk_manager.calculate_position_size(entry_price, stop_loss, pair=pair)
         
         if not position_size:
@@ -487,12 +503,10 @@ class TradingBot:
         
         lot_size = position_size['lot_size']
 
-        # Micro-account lot policy: always use at least 0.02
-        tier_name = self.risk_manager._current_tier_name or 'micro'
-        if 'micro' in tier_name:
-            lot_size = max(0.02, lot_size)
+        # Scalping: minimum lot 0.01
+        lot_size = max(0.01, lot_size)
         
-        bot_logger.info(f"\n🎯 EXECUTING {trade_type} TRADE:")
+        bot_logger.info(f"\n🔪 SCALPING {trade_type} ({timeframe_key}):")
         bot_logger.info(f"  Pair: {pair}")
         bot_logger.info(f"  Entry: {entry_price:.5f}")
         bot_logger.info(f"  Stop Loss: {stop_loss:.5f}")
@@ -514,7 +528,7 @@ class TradingBot:
             if order_id:
                 bot_logger.info(f"✅ Order placed - Ticket: {order_id}")
                 self.risk_manager.on_trade_opened()
-                # Register for trailing stop management (with TP & volume for partial close)
+                # Register for trailing stop management (scalping mode)
                 self.trailing.register(
                     ticket=order_id,
                     entry_price=entry_price,
@@ -524,6 +538,7 @@ class TradingBot:
                     pair=pair,
                     take_profit=take_profit,
                     volume=lot_size,
+                    scalping_mode=True,
                 )
         
         elif self.mode == 'paper':
@@ -729,12 +744,23 @@ class TradingBot:
             except Exception as e:
                 bot_logger.warning(f"Dashboard failed to start: {e}")
         
-        # Schedule analysis every 5 minutes
+        # Schedule dual-timeframe scalping cycles
+        # 1-minute analysis every 60 seconds
+        self.scheduler.add_job(
+            self.analyze_and_trade,
+            'interval',
+            seconds=60,
+            args=['1m'],
+            id='scalp_1m_cycle',
+            replace_existing=True
+        )
+        # 5-minute analysis every 5 minutes
         self.scheduler.add_job(
             self.analyze_and_trade,
             'interval',
             minutes=5,
-            id='trading_cycle',
+            args=['5m'],
+            id='scalp_5m_cycle',
             replace_existing=True
         )
         
@@ -763,11 +789,11 @@ class TradingBot:
 
         self.scheduler.start()
         
-        # Run first analysis immediately
-        bot_logger.info("Running initial analysis...")
-        self.analyze_and_trade()
+        # Run first analysis immediately (5m first, then 1m will follow on schedule)
+        bot_logger.info("Running initial scalping analysis...")
+        self.analyze_and_trade('5m')
         
-        bot_logger.info("Bot running in event-driven mode. Press Ctrl+C to stop.")
+        bot_logger.info("Scalping bot running (1M every 60s, 5M every 5min). Press Ctrl+C to stop.")
         
         try:
             while self.running:

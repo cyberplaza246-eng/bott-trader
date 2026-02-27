@@ -1,0 +1,535 @@
+"""
+5-Minute Scalping Bot — GBPUSD & EURUSD High-Frequency Strategy
+
+Uses: RSI(9), EMA 20/50/200, pullback entries, micro risk-reward management.
+
+Rules:
+  1. Trend Filter: EMA 50/200 defines bias. Only trade in trend direction.
+  2. Buy Setup: Price pulls back to EMA 20, RSI 50-55, bullish candle close > EMA 20
+  3. Sell Setup: Price pulls back to EMA 20, RSI 45-50, bearish candle close < EMA 20
+  4. Risk Management: 6-12 pips SL, 1-2R TP (pair-specific)
+  5. Session Filter: London session preferred (08:00-22:00 UTC)
+"""
+import pandas as pd
+import numpy as np
+from datetime import datetime, timezone, time as dt_time
+from src.utils.logger import bot_logger
+
+
+class ScalpingAnalyzer:
+    """High-frequency scalping analyzer for 5-min chart pairs"""
+
+    # Pair-specific configuration
+    PAIR_CONFIG = {
+        'GBP/USD': {
+            'min_sl_pips': 8,
+            'max_sl_pips': 12,
+            'tp_ratio': [1.5, 2.0],  # 1.5R to 2R
+            'min_rsi_for_buy': 50,
+            'max_rsi_for_buy': 55,
+            'min_rsi_for_sell': 45,
+            'max_rsi_for_sell': 50,
+        },
+        'EUR/USD': {
+            'min_sl_pips': 6,
+            'max_sl_pips': 10,
+            'tp_ratio': [1.0, 1.5],  # 1R to 1.5R (slower movement)
+            'min_rsi_for_buy': 50,
+            'max_rsi_for_buy': 55,
+            'min_rsi_for_sell': 45,
+            'max_rsi_for_sell': 50,
+        }
+    }
+
+    # Session windows (UTC)
+    LONDON_SESSION = {'start': 8, 'end': 22}  # 08:00-22:00 UTC
+    DEFAULT_SESSION = {'start': 0, 'end': 24}
+
+    def __init__(self):
+        """Initialize scalping analyzer"""
+        self.rsi_period = 9
+        self.ema_periods = {
+            'short': 20,    # Entry zone
+            'medium': 50,   # Trend direction
+            'long': 200,    # Macro bias
+        }
+        self.rsi_overbought = 70
+        self.rsi_oversold = 30
+        self.rsi_50_midline = 50  # Primary trend filter
+        
+        bot_logger.info("🔪 Scalping Analyzer initialized (RSI9, EMA20/50/200)")
+
+    def calculate_indicators(self, df):
+        """Calculate RSI(9) and EMAs for scalping.
+        
+        Args:
+            df: DataFrame with 'open', 'high', 'low', 'close', 'volume'
+            
+        Returns:
+            DataFrame with added columns: rsi, ema_20, ema_50, ema_200
+        """
+        df = df.copy()
+        
+        if len(df) < self.ema_periods['long']:
+            return df
+        
+        # RSI(9)
+        close = df['close']
+        delta = close.diff()
+        gain = delta.clip(lower=0).rolling(window=self.rsi_period).mean()
+        loss = (-delta.clip(upper=0)).rolling(window=self.rsi_period).mean()
+        rs = gain / loss.replace(0, 1e-10)
+        df['rsi'] = 100 - (100 / (1 + rs))
+        
+        # EMAs
+        df['ema_20'] = close.ewm(span=self.ema_periods['short'], adjust=False).mean()
+        df['ema_50'] = close.ewm(span=self.ema_periods['medium'], adjust=False).mean()
+        df['ema_200'] = close.ewm(span=self.ema_periods['long'], adjust=False).mean()
+        
+        return df
+
+    def is_london_session(self):
+        """Check if current time is within London session (preferred for scalping).
+        
+        Returns:
+            bool: True if in/near London session
+        """
+        now = datetime.now(timezone.utc)
+        hour = now.hour
+        return self.LONDON_SESSION['start'] <= hour < self.LONDON_SESSION['end']
+
+    def detect_trend(self, df):
+        """Detect current trend direction based on EMA alignment.
+        
+        Args:
+            df: DataFrame with calculated EMAs
+            
+        Returns:
+            dict: {
+                'direction': 'BUY', 'SELL', or 'NONE',
+                'strength': float 0-1 (how aligned are the EMAs),
+                'price_position': 'above_200', 'below_200', 'unclear',
+                'ema_50_200_alignment': 'bullish', 'bearish', 'neutral'
+            }
+        """
+        if len(df) < 1:
+            return {'direction': 'NONE', 'strength': 0.0}
+        
+        price = df['close'].iloc[-1]
+        ema_20 = df['ema_20'].iloc[-1]
+        ema_50 = df['ema_50'].iloc[-1]
+        ema_200 = df['ema_200'].iloc[-1]
+        
+        if pd.isna([price, ema_20, ema_50, ema_200]).any():
+            return {'direction': 'NONE', 'strength': 0.0}
+        
+        # Price position relative to EMA 200
+        price_position = 'above_200' if price > ema_200 else 'below_200'
+        
+        # EMA 50 vs EMA 200 alignment
+        ema_50_200_alignment = 'bullish' if ema_50 > ema_200 else 'bearish'
+        
+        # Strength based on how far apart EMAs are
+        ema_spread = abs(ema_50 - ema_200) / ema_200
+        strength = min(ema_spread * 5000, 1.0)  # Normalize to 0-1
+        
+        # Determine trend direction
+        if price > ema_200 and ema_50 > ema_200:
+            direction = 'BUY'
+        elif price < ema_200 and ema_50 < ema_200:
+            direction = 'SELL'
+        else:
+            direction = 'NONE'
+        
+        return {
+            'direction': direction,
+            'strength': strength,
+            'price_position': price_position,
+            'ema_50_200_alignment': ema_50_200_alignment,
+        }
+
+    def detect_pullback(self, df, trend_direction):
+        """Detect if price is pulling back toward EMA 20 within a trend.
+        
+        Args:
+            df: DataFrame with calculated EMAs
+            trend_direction: 'BUY', 'SELL', or 'NONE'
+            
+        Returns:
+            dict: {
+                'is_pullback': bool,
+                'distance_to_ema20': float (in pips, positive),
+                'pullback_strength': float 0-1,
+            }
+        """
+        if trend_direction == 'NONE' or len(df) < 20:
+            return {'is_pullback': False, 'distance_to_ema20': 0}
+        
+        price = df['close'].iloc[-1]
+        ema_20 = df['ema_20'].iloc[-1]
+        
+        # Get recent high/low for pullback detection
+        recent_high = df['high'].tail(20).max()
+        recent_low = df['low'].tail(20).min()
+        
+        if trend_direction == 'BUY':
+            # Price should be below recent high and near EMA 20
+            distance = (recent_high - price) * 10000  # Convert to pips (for most pairs)
+            is_pullback = (price > ema_20 - 0.0015) and (price < recent_high)
+            pullback_strength = min(distance / 30, 1.0) if distance > 0 else 0
+        else:  # SELL
+            # Price should be above recent low and near EMA 20
+            distance = (price - recent_low) * 10000  # Convert to pips
+            is_pullback = (price < ema_20 + 0.0015) and (price > recent_low)
+            pullback_strength = min(distance / 30, 1.0) if distance > 0 else 0
+        
+        return {
+            'is_pullback': is_pullback,
+            'distance_to_ema20': distance if is_pullback else 0,
+            'pullback_strength': pullback_strength,
+        }
+
+    def detect_buy_setup(self, df, pair='EUR/USD'):
+        """Detect bullish scalping setup: pullback + RSI + candle confirmation.
+        
+        Args:
+            df: DataFrame with calculated indicators
+            pair: Currency pair for RSI configuration
+            
+        Returns:
+            dict with setup details and readiness score
+        """
+        setup = {
+            'ready': False,
+            'confidence': 0.0,
+            'signals': [],
+            'details': {}
+        }
+        
+        if len(df) < 30:
+            return setup
+        
+        config = self.PAIR_CONFIG.get(pair, self.PAIR_CONFIG['EUR/USD'])
+        
+        # Get current values
+        price = df['close'].iloc[-1]
+        ema_20 = df['ema_20'].iloc[-1]
+        rsi = df['rsi'].iloc[-1]
+        
+        # Previous candle for close confirmation
+        prev_close = df['close'].iloc[-2]
+        prev_open = df['open'].iloc[-2]
+        
+        # Current candle
+        current_open = df['open'].iloc[-1]
+        
+        setup['details'] = {
+            'price': price,
+            'ema_20': ema_20,
+            'rsi': rsi,
+            'prev_close': prev_close,
+        }
+        
+        # Check 1: Trend is bullish
+        trend = self.detect_trend(df)
+        if trend['direction'] != 'BUY':
+            return setup
+        setup['signals'].append('✓ BUY trend detected (Price > EMA200, EMA50 > EMA200)')
+        setup['confidence'] += 0.25
+        
+        # Check 2: Price pulling back toward EMA 20
+        pullback = self.detect_pullback(df, 'BUY')
+        if not pullback['is_pullback']:
+            return setup
+        setup['signals'].append(f"✓ Pullback detected at {pullback['distance_to_ema20']:.1f} pips from entry zone")
+        setup['confidence'] += 0.20
+        
+        # Check 3: RSI in range 50-55 (above midline but not overly strong)
+        if config['min_rsi_for_buy'] <= rsi <= config['max_rsi_for_buy']:
+            setup['signals'].append(f"✓ RSI {rsi:.1f} in ideal range ({config['min_rsi_for_buy']}-{config['max_rsi_for_buy']})")
+            setup['confidence'] += 0.30
+        elif 45 < rsi < 60:  # Partial credit if close
+            setup['signals'].append(f"⚠ RSI {rsi:.1f} acceptable but not ideal")
+            setup['confidence'] += 0.15
+        else:
+            return setup
+        
+        # Check 4: Previous candle close shows rejection of EMA 20 (bullish)
+        # (A strong close above EMA 20 on previous candle)
+        if prev_close > ema_20 and (prev_close - prev_open) > 0:  # Bull candle
+            setup['signals'].append("✓ Previous candle shows bullish EMA20 rejection")
+            setup['confidence'] += 0.25
+        
+        # Additional confirmation: RSI not below 45 (weak)
+        if rsi >= 45:
+            setup['signals'].append(f"✓ RSI {rsi:.1f} above 45 threshold")
+            setup['confidence'] += 0.10
+        
+        # RSI divergence check: is price making higher lows but RSI making lower lows? (Good for long)
+        if len(df) >= 5:
+            recent_low_idx = df['close'].tail(5).idxmin()
+            if recent_low_idx < len(df) - 1:
+                rsi_at_low = df['rsi'].loc[recent_low_idx]
+                current_rsi = df['rsi'].iloc[-1]
+                if rsi_at_low < current_rsi:
+                    setup['signals'].append("✓ RSI divergence: price lower but RSI higher (bullish)")
+                    setup['confidence'] += 0.10
+        
+        setup['confidence'] = min(setup['confidence'], 1.0)
+        setup['ready'] = setup['confidence'] >= 0.75
+        
+        return setup
+
+    def detect_sell_setup(self, df, pair='EUR/USD'):
+        """Detect bearish scalping setup: pullback + RSI + candle confirmation.
+        
+        Args:
+            df: DataFrame with calculated indicators
+            pair: Currency pair for RSI configuration
+            
+        Returns:
+            dict with setup details and readiness score
+        """
+        setup = {
+            'ready': False,
+            'confidence': 0.0,
+            'signals': [],
+            'details': {}
+        }
+        
+        if len(df) < 30:
+            return setup
+        
+        config = self.PAIR_CONFIG.get(pair, self.PAIR_CONFIG['EUR/USD'])
+        
+        # Get current values
+        price = df['close'].iloc[-1]
+        ema_20 = df['ema_20'].iloc[-1]
+        rsi = df['rsi'].iloc[-1]
+        
+        # Previous candle for close confirmation
+        prev_close = df['close'].iloc[-2]
+        prev_open = df['open'].iloc[-2]
+        
+        setup['details'] = {
+            'price': price,
+            'ema_20': ema_20,
+            'rsi': rsi,
+            'prev_close': prev_close,
+        }
+        
+        # Check 1: Trend is bearish
+        trend = self.detect_trend(df)
+        if trend['direction'] != 'SELL':
+            return setup
+        setup['signals'].append('✓ SELL trend detected (Price < EMA200, EMA50 < EMA200)')
+        setup['confidence'] += 0.25
+        
+        # Check 2: Price pulling back toward EMA 20
+        pullback = self.detect_pullback(df, 'SELL')
+        if not pullback['is_pullback']:
+            return setup
+        setup['signals'].append(f"✓ Pullback detected at {pullback['distance_to_ema20']:.1f} pips from entry zone")
+        setup['confidence'] += 0.20
+        
+        # Check 3: RSI in range 45-50 (below midline but not overly weak)
+        if config['min_rsi_for_sell'] <= rsi <= config['max_rsi_for_sell']:
+            setup['signals'].append(f"✓ RSI {rsi:.1f} in ideal range ({config['min_rsi_for_sell']}-{config['max_rsi_for_sell']})")
+            setup['confidence'] += 0.30
+        elif 40 < rsi < 55:  # Partial credit if close
+            setup['signals'].append(f"⚠ RSI {rsi:.1f} acceptable but not ideal")
+            setup['confidence'] += 0.15
+        else:
+            return setup
+        
+        # Check 4: Previous candle close shows rejection of EMA 20 (bearish)
+        # (A strong close below EMA 20 on previous candle)
+        if prev_close < ema_20 and (prev_open - prev_close) > 0:  # Bear candle
+            setup['signals'].append("✓ Previous candle shows bearish EMA20 rejection")
+            setup['confidence'] += 0.25
+        
+        # Additional confirmation: RSI not above 55 (strong)
+        if rsi <= 55:
+            setup['signals'].append(f"✓ RSI {rsi:.1f} below 55 threshold")
+            setup['confidence'] += 0.10
+        
+        # RSI divergence check: is price making lower highs but RSI making higher highs? (Good for short)
+        if len(df) >= 5:
+            recent_high_idx = df['close'].tail(5).idxmax()
+            if recent_high_idx < len(df) - 1:
+                rsi_at_high = df['rsi'].loc[recent_high_idx]
+                current_rsi = df['rsi'].iloc[-1]
+                if rsi_at_high > current_rsi:
+                    setup['signals'].append("✓ RSI divergence: price higher but RSI lower (bearish)")
+                    setup['confidence'] += 0.10
+        
+        setup['confidence'] = min(setup['confidence'], 1.0)
+        setup['ready'] = setup['confidence'] >= 0.75
+        
+        return setup
+
+    def calculate_risk_reward(self, entry_price, direction, pair='EUR/USD', atr=None):
+        """Calculate stop loss and take profit for a scalping trade.
+        
+        Args:
+            entry_price: Entry price
+            direction: 'BUY' or 'SELL'
+            pair: Currency pair
+            atr: Optional ATR value for dynamic calculation
+            
+        Returns:
+            dict: {
+                'stop_loss': float,
+                'take_profit_1': float (1R),
+                'take_profit_2': float (2R if GBPUSD, 1.5R if EURUSD),
+                'risk_pips': float,
+                'reward_pips_1': float,
+                'reward_pips_2': float,
+            }
+        """
+        config = self.PAIR_CONFIG.get(pair, self.PAIR_CONFIG['EUR/USD'])
+        
+        # Use middle of SL range (10 pips for GBP, 8 for EUR)
+        sl_pips = (config['min_sl_pips'] + config['max_sl_pips']) / 2
+        
+        # Convert pips to price
+        if pair in ['EUR/USD', 'GBP/USD']:
+            sl_price_distance = sl_pips / 10000
+        else:
+            sl_price_distance = sl_pips / 100
+        
+        if direction == 'BUY':
+            stop_loss = entry_price - sl_price_distance
+            risk_pips = sl_pips
+            
+            # TP at 1R and at 2R (for GBPUSD) or 1.5R (for EURUSD)
+            tp_ratio_1 = config['tp_ratio'][0]
+            tp_ratio_2 = config['tp_ratio'][1]
+            
+            take_profit_1 = entry_price + (sl_price_distance * tp_ratio_1)
+            take_profit_2 = entry_price + (sl_price_distance * tp_ratio_2)
+            
+            reward_pips_1 = (take_profit_1 - entry_price) * 10000
+            reward_pips_2 = (take_profit_2 - entry_price) * 10000
+        else:  # SELL
+            stop_loss = entry_price + sl_price_distance
+            risk_pips = sl_pips
+            
+            tp_ratio_1 = config['tp_ratio'][0]
+            tp_ratio_2 = config['tp_ratio'][1]
+            
+            take_profit_1 = entry_price - (sl_price_distance * tp_ratio_1)
+            take_profit_2 = entry_price - (sl_price_distance * tp_ratio_2)
+            
+            reward_pips_1 = (entry_price - take_profit_1) * 10000
+            reward_pips_2 = (entry_price - take_profit_2) * 10000
+        
+        return {
+            'stop_loss': stop_loss,
+            'take_profit_1': take_profit_1,
+            'take_profit_2': take_profit_2,
+            'risk_pips': risk_pips,
+            'reward_pips_1': reward_pips_1,
+            'reward_pips_2': reward_pips_2,
+        }
+
+    def get_signal(self, df, pair='EUR/USD'):
+        """Generate scalping buy/sell signal.
+        
+        Args:
+            df: DataFrame with OHLCV data (ideally 200+ candles for 5-min)
+            pair: Currency pair (EUR/USD or GBP/USD)
+            
+        Returns:
+            dict: {
+                'signal': 'BUY', 'SELL', or 'SKIP',
+                'confidence': float 0-1,
+                'setup': 'buy_setup' | 'sell_setup' | 'none',
+                'entry_price': float,
+                'stop_loss': float,
+                'take_profit': float,
+                'risk_reward': dict,
+                'reasons': list,
+                'trend': dict,
+            }
+        """
+        result = {
+            'signal': 'SKIP',
+            'confidence': 0.0,
+            'setup': 'none',
+            'entry_price': 0,
+            'stop_loss': 0,
+            'take_profit': 0,
+            'risk_reward': {},
+            'reasons': [],
+            'trend': {},
+        }
+        
+        if df is None or len(df) < 200:
+            result['reasons'].append('Insufficient data (need 200+ candles)')
+            return result
+        
+        # Calculate indicators
+        df = self.calculate_indicators(df)
+        
+        # Session filter (warn if outside London)
+        if not self.is_london_session():
+            result['reasons'].append('⚠ Outside London session (lower liquidity)')
+        else:
+            result['reasons'].append('✓ London session active (good liquidity)')
+        
+        # Get current values
+        current_price = df['close'].iloc[-1]
+        
+        # Detect trend
+        trend = self.detect_trend(df)
+        result['trend'] = trend
+        
+        # Check for buy setup
+        buy_setup = self.detect_buy_setup(df, pair)
+        sell_setup = self.detect_sell_setup(df, pair)
+        
+        if buy_setup['ready'] and trend['direction'] == 'BUY':
+            result['signal'] = 'BUY'
+            result['setup'] = 'buy_setup'
+            result['confidence'] = buy_setup['confidence']
+            result['entry_price'] = current_price
+            result['reasons'].extend(buy_setup['signals'])
+            
+            # Calculate R/R
+            rr = self.calculate_risk_reward(current_price, 'BUY', pair)
+            result['stop_loss'] = rr['stop_loss']
+            result['take_profit'] = rr['take_profit_1']  # Use 1R as primary
+            result['risk_reward'] = rr
+            
+            result['reasons'].append(
+                f"Buy Entry: SL {rr['risk_pips']:.0f}p, TP {rr['reward_pips_1']:.0f}p "
+                f"({rr['reward_pips_1']/rr['risk_pips']:.2f}R)"
+            )
+        
+        elif sell_setup['ready'] and trend['direction'] == 'SELL':
+            result['signal'] = 'SELL'
+            result['setup'] = 'sell_setup'
+            result['confidence'] = sell_setup['confidence']
+            result['entry_price'] = current_price
+            result['reasons'].extend(sell_setup['signals'])
+            
+            # Calculate R/R
+            rr = self.calculate_risk_reward(current_price, 'SELL', pair)
+            result['stop_loss'] = rr['stop_loss']
+            result['take_profit'] = rr['take_profit_1']  # Use 1R as primary
+            result['risk_reward'] = rr
+            
+            result['reasons'].append(
+                f"Sell Entry: SL {rr['risk_pips']:.0f}p, TP {rr['reward_pips_1']:.0f}p "
+                f"({rr['reward_pips_1']/rr['risk_pips']:.2f}R)"
+            )
+        else:
+            result['reasons'].append(
+                f"No setup ready yet. "
+                f"Trend: {trend['direction']} (strength {trend['strength']:.2f}). "
+                f"Buy confidence: {buy_setup['confidence']:.2f}, "
+                f"Sell confidence: {sell_setup['confidence']:.2f}"
+            )
+        
+        return result

@@ -176,10 +176,13 @@ class HistoricalDownloader:
     # ------------------------------------------------------------------
     def _generate_training_data(self, pair: str, days: int, interval: str) -> pd.DataFrame:
         """
-        Generate high-quality synthetic forex data with:
-        - Trend, mean-reversion, volatility clustering (GARCH-like)
-        - Session-based volume patterns (London / NY / Asian sessions)
-        - Realistic spread and wicks
+        Generate realistic synthetic forex data with:
+        - Close-to-close continuity (open = prev close, no gaps)
+        - Slight trend persistence (AR(1) φ ≈ 0.03) matching real forex
+        - GARCH-like volatility clustering
+        - Session-based volume/volatility (London / NY / Asian)
+        - Momentum bursts and mean-reversion regimes
+        - Calibrated intraday volatility (3-5 pips/5m for EUR/USD)
         """
         base_prices = {
             'EUR/USD': 1.0850, 'GBP/USD': 1.2650, 'USD/JPY': 150.50,
@@ -197,51 +200,87 @@ class HistoricalDownloader:
         candles_per_day = 1440 / tf_min
         num_candles = int(days * candles_per_day)
 
-        np.random.seed(42)  # Reproducible training data
+        np.random.seed(42)
 
-        # Generate prices with volatility clustering
-        volatility_base = 0.0008 if not is_jpy else 0.08
-        vol_scale = np.sqrt(tf_min / 1440)
-        candle_vol = volatility_base * vol_scale
+        # ── Calibrated volatility per bar ──────────────────────────
+        pip_size = 0.01 if is_jpy else 0.0001
+        sigma_5m = 3.5 * pip_size        # ~3.5 pip σ per 5m candle
+        candle_sigma = sigma_5m * np.sqrt(tf_min / 5.0)
 
-        prices = np.zeros(num_candles)
-        prices[0] = base
-        vol = candle_vol
+        if 'GBP' in pair:
+            candle_sigma *= 1.3
+
+        # ── Generate close-to-close time series ────────────────────
+        # AR(1) process: r_t = φ * r_{t-1} + ε_t  (φ > 0 → trend persistence)
+        phi = 0.03               # slight positive serial correlation (real ≈ 0.02-0.05)
+        vol = candle_sigma
+        prev_return = 0.0
+        closes = np.zeros(num_candles)
+        closes[0] = base
+        vols = np.zeros(num_candles)
+        vols[0] = vol
+
+        # ── Regime switching: trending vs ranging ──────────────────
+        regime = 'ranging'        # start ranging
+        regime_duration = 0
+        trend_dir = 0.0           # trend bias when trending
 
         for i in range(1, num_candles):
-            # GARCH-like volatility clustering
-            vol = 0.94 * vol + 0.06 * candle_vol * abs(np.random.normal(0, 1))
-            vol = max(candle_vol * 0.3, min(vol, candle_vol * 3.0))
+            # Regime switch (average 200 bars per regime)
+            regime_duration += 1
+            if np.random.random() < 1.0 / 200:
+                if regime == 'ranging':
+                    regime = 'trending'
+                    trend_dir = np.random.choice([-1.0, 1.0]) * candle_sigma * 0.15
+                else:
+                    regime = 'ranging'
+                    trend_dir = 0.0
+                regime_duration = 0
 
-            # Mean reversion + slight trend
-            mean_revert = (base - prices[i - 1]) * 0.002
-            trend = np.random.normal(0, vol * 0.05)
-            noise = np.random.normal(mean_revert + trend, base * vol)
-            prices[i] = prices[i - 1] + noise
+            # GARCH(1,1) volatility: σ²_t = ω + α·ε²_{t-1} + β·σ²_{t-1}
+            alpha, beta = 0.08, 0.90   # α + β < 1 for stationarity
+            omega = candle_sigma * candle_sigma * (1.0 - alpha - beta)
+            vol_sq = omega + alpha * (prev_return ** 2) + beta * (vol ** 2)
+            vol = np.sqrt(max(vol_sq, (candle_sigma * 0.2) ** 2))
+            vol = min(vol, candle_sigma * 3.5)
+            vols[i] = vol
 
-        # Build OHLCV
+            # AR(1) return with regime drift
+            mean_revert = (base - closes[i - 1]) * 0.0003  # very gentle pull to base
+            innovation = np.random.normal(0, vol)
+            ret = phi * prev_return + mean_revert + trend_dir + innovation
+            prev_return = ret
+            closes[i] = closes[i - 1] + ret
+
+        # ── Build OHLCV from close series ──────────────────────────
         now = datetime.now()
         timestamps = [now - timedelta(minutes=tf_min * (num_candles - i)) for i in range(num_candles)]
 
         data = []
         for i in range(num_candles):
-            o = prices[i]
-            intra_vol = base * candle_vol * 0.5
-            c = o + np.random.normal(0, intra_vol * 0.7)
-            h = max(o, c) + abs(np.random.normal(0, intra_vol))
-            l = min(o, c) - abs(np.random.normal(0, intra_vol))
+            o = closes[i - 1] if i > 0 else closes[0]  # open = previous close
+            c = closes[i]
+            bar_vol = vols[i] if i > 0 else candle_sigma
 
-            # Session-based volume (hour of day)
+            # Session-based volatility scaling
             hour = timestamps[i].hour
-            if 8 <= hour < 16:      # London
-                vol_mult = 1.5
-            elif 13 <= hour < 21:   # NY overlap
-                vol_mult = 1.8
-            elif 0 <= hour < 8:     # Asian
-                vol_mult = 0.7
+            if 8 <= hour < 12:        # London AM
+                sess_mult = 1.3
+            elif 13 <= hour < 17:     # NY overlap
+                sess_mult = 1.4
+            elif 0 <= hour < 8:       # Asian
+                sess_mult = 0.7
             else:
-                vol_mult = 1.0
+                sess_mult = 1.0
 
+            wick_vol = bar_vol * sess_mult * 0.5
+
+            # Wicks extend beyond body
+            h = max(o, c) + abs(np.random.normal(0, wick_vol))
+            l = min(o, c) - abs(np.random.normal(0, wick_vol))
+
+            # Volume
+            vol_mult = sess_mult
             volume = max(100, int(np.random.lognormal(8, 0.8) * vol_mult))
             decimals = 3 if is_jpy else 5
 

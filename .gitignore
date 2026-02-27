@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Environment
+.env
+.env.bak
+
+# Logs
+logs/*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Data (large CSVs)
+data/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
