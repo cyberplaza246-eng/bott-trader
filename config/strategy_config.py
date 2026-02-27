@@ -89,7 +89,7 @@ OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds (tuned for scalping speed)
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.35))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))
 
 # Technical Analysis Parameters (tuned for scalping)
