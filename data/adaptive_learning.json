@@ -1,250 +1,31 @@
 {
   "model_weights": {
-    "lstm": 0.18,
-    "sentiment": 0.12,
-    "technical": 0.14,
-    "volume": 0.08,
-    "multi_tf": 0.14,
-    "support_resistance": 0.1,
-    "candlestick": 0.12,
-    "ema_crossover": 0.12
+    "scalping": 0.22,
+    "ema_crossover": 0.14,
+    "candlestick": 0.13,
+    "technical": 0.12,
+    "volume": 0.11,
+    "multi_tf": 0.10,
+    "support_resistance": 0.06,
+    "lstm": 0.06,
+    "sentiment": 0.06
   },
   "model_accuracy": {},
-  "pair_stats": {
-    "USD/JPY": {
-      "wins": 2,
-      "losses": 7,
-      "total_pnl": -1.3699999999999999
-    },
-    "EUR/USD": {
-      "wins": 2,
-      "losses": 3,
-      "total_pnl": 4.08
-    },
-    "GBP/USD": {
-      "wins": 0,
-      "losses": 2,
-      "total_pnl": 0.0
-    }
-  },
-  "session_stats": {
-    "asian": {
-      "wins": 0,
-      "losses": 1
-    },
-    "london": {
-      "wins": 2,
-      "losses": 3
-    },
-    "new_york": {
-      "wins": 2,
-      "losses": 8
-    }
-  },
-  "confidence_threshold": 0.45,
+  "pair_stats": {},
+  "session_stats": {},
+  "pair_model_accuracy": {},
+  "session_pair_stats": {},
+  "model_combos": {},
+  "model_pnl_history": {},
+  "regime_stats": {},
+  "hourly_stats": {},
+  "trade_history": [],
+  "confidence_threshold": 0.50,
   "consecutive_losses": 0,
-  "max_consecutive_losses": 7,
-  "trade_history": [
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 155.857,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T02:44:36.129515",
-      "session": "asian",
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": -1.0,
-      "entry_price": 0,
-      "exit_price": 156.01,
-      "exit_type": "STOP_LOSS",
-      "model_signals": {},
-      "position_id": 21077003,
-      "timestamp": "2026-02-26T11:40:45.591617",
-      "session": "london",
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "signal": "SELL",
-      "profit_loss": 2.9899999999999998,
-      "entry_price": 0,
-      "exit_price": 1.17974,
-      "exit_type": "TAKE_PROFIT",
-      "model_signals": {},
-      "position_id": 21076985,
-      "timestamp": "2026-02-26T11:49:11.735266",
-      "session": "london",
-      "is_win": true
-    },
-    {
-      "pair": "EUR/USD",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 1.18148,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T12:14:21.169266",
-      "session": "london",
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "signal": "SELL",
-      "profit_loss": 1.09,
-      "entry_price": 0,
-      "exit_price": 1.18037,
-      "exit_type": "TAKE_PROFIT",
-      "model_signals": {},
-      "position_id": 21077124,
-      "timestamp": "2026-02-26T14:50:51.837278",
-      "session": "london",
-      "is_win": true
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 155.842,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T15:10:27.562575",
-      "session": "london",
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 155.989,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T16:08:33.093651",
-      "session": "new_york",
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "BUY",
-      "profit_loss": 2.79,
-      "entry_price": 0,
-      "exit_price": 156.249,
-      "exit_type": "TAKE_PROFIT",
-      "model_signals": {},
-      "position_id": 21078711,
-      "timestamp": "2026-02-26T16:08:57.818862",
-      "session": "new_york",
-      "is_win": true
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "BUY",
-      "profit_loss": 1.37,
-      "entry_price": 0,
-      "exit_price": 156.249,
-      "exit_type": "TAKE_PROFIT",
-      "model_signals": {},
-      "position_id": 21078434,
-      "timestamp": "2026-02-26T16:08:57.821011",
-      "session": "new_york",
-      "is_win": true
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "BUY",
-      "profit_loss": -2.48,
-      "entry_price": 0,
-      "exit_price": 155.916,
-      "exit_type": "STOP_LOSS",
-      "model_signals": {},
-      "position_id": 21079009,
-      "timestamp": "2026-02-26T16:58:19.150794",
-      "session": "new_york",
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "BUY",
-      "profit_loss": -1.04,
-      "entry_price": 0,
-      "exit_price": 155.894,
-      "exit_type": "STOP_LOSS",
-      "model_signals": {},
-      "position_id": 21078334,
-      "timestamp": "2026-02-26T16:58:19.151939",
-      "session": "new_york",
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": -1.01,
-      "entry_price": 0,
-      "exit_price": 155.997,
-      "exit_type": "STOP_LOSS",
-      "model_signals": {},
-      "position_id": 21079101,
-      "timestamp": "2026-02-26T17:11:19.366554",
-      "session": "new_york",
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 1.34966,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T17:21:19.885630",
-      "session": "new_york",
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 1.18021,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T17:31:19.870088",
-      "session": "new_york",
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 1.34805,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T17:51:19.873555",
-      "session": "new_york",
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "signal": "SELL",
-      "profit_loss": 0,
-      "entry_price": 1.17931,
-      "exit_price": 0,
-      "exit_type": "UNKNOWN",
-      "model_signals": {},
-      "timestamp": "2026-02-26T18:06:19.971545",
-      "session": "new_york",
-      "is_win": false
-    }
-  ],
-  "last_updated": "2026-02-26T18:06:19.971817"
+  "consecutive_wins": 0,
+  "max_consecutive_losses": 0,
+  "peak_balance": 0.0,
+  "current_drawdown_pct": 0.0,
+  "in_drawdown_protection": false,
+  "current_regime": "ranging"
 }

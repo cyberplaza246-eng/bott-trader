@@ -76,7 +76,18 @@ class TradingBot:
                 self.broker = None
         
         self.ensemble = EnsembleTrader(newsapi_key=newsapi_key, broker=self.broker)
-        self.risk_manager = RiskManager(initial_balance=INITIAL_BALANCE)
+        
+        # Use actual MT5 balance when connected, fall back to config
+        actual_balance = INITIAL_BALANCE
+        if self.broker and self.broker.connected:
+            try:
+                info = self.broker.get_account_info()
+                if info and info.get('balance', 0) > 0:
+                    actual_balance = info['balance']
+                    bot_logger.info(f"💰 Using actual MT5 balance: ${actual_balance:.2f}")
+            except Exception:
+                pass
+        self.risk_manager = RiskManager(initial_balance=actual_balance)
         self.trailing = TrailingStopManager(breakeven_r=1.0, trail_atr_mult=1.5)
         self.calendar = EconomicCalendar()
         self.lstm_retrainer = LSTMRetrainer(

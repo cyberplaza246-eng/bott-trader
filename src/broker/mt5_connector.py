@@ -674,6 +674,9 @@ class MT5Connector:
             for d in deals:
                 if d.entry != 1:
                     continue
+                # Only include trades placed by this bot (magic number filter)
+                if d.magic != self.BOT_MAGIC:
+                    continue
                 closed.append({
                     "ticket": d.ticket,
                     "order": d.order,
