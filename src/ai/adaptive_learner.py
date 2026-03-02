@@ -152,6 +152,7 @@ class AdaptiveLearner:
     def record_trade(self, trade_result: dict):
         pnl = trade_result.get('profit_loss', 0)
         is_win = pnl > 0
+        is_breakeven = (pnl == 0)  # $0.00 = breakeven, not a loss
         pair = self._normalize_pair(trade_result.get('pair', 'UNKNOWN'))
         signal = trade_result.get('signal', 'UNKNOWN')
         model_signals = trade_result.get('model_signals', {})
@@ -160,11 +161,14 @@ class AdaptiveLearner:
         hour = datetime.utcnow().hour
         session = self._get_session(hour)
 
-        # Core stats
+        # Core stats — breakeven trades are neutral (don't count as win or loss)
         if is_win:
             self.pair_stats[pair]['wins'] += 1
             self.consecutive_losses = 0
             self.consecutive_wins += 1
+        elif is_breakeven:
+            # Breakeven: don't penalise streaks or pair stats
+            pass
         else:
             self.pair_stats[pair]['losses'] += 1
             self.consecutive_losses += 1
@@ -173,33 +177,37 @@ class AdaptiveLearner:
 
         self.pair_stats[pair]['total_pnl'] += pnl
 
-        # Session stats
-        if is_win:
-            self.session_stats[session]['wins'] += 1
-        else:
-            self.session_stats[session]['losses'] += 1
+        # Session stats (skip breakeven)
+        if not is_breakeven:
+            if is_win:
+                self.session_stats[session]['wins'] += 1
+            else:
+                self.session_stats[session]['losses'] += 1
 
-        # Session + Pair stats
+        # Session + Pair stats (skip breakeven)
         sp_key = f"{session}:{pair}"
-        if is_win:
-            self.session_pair_stats[sp_key]['wins'] += 1
-        else:
-            self.session_pair_stats[sp_key]['losses'] += 1
+        if not is_breakeven:
+            if is_win:
+                self.session_pair_stats[sp_key]['wins'] += 1
+            else:
+                self.session_pair_stats[sp_key]['losses'] += 1
         self.session_pair_stats[sp_key]['total_pnl'] += pnl
 
-        # Hourly stats
+        # Hourly stats (skip breakeven)
         h_key = str(hour)
-        if is_win:
-            self.hourly_stats[h_key]['wins'] += 1
-        else:
-            self.hourly_stats[h_key]['losses'] += 1
+        if not is_breakeven:
+            if is_win:
+                self.hourly_stats[h_key]['wins'] += 1
+            else:
+                self.hourly_stats[h_key]['losses'] += 1
         self.hourly_stats[h_key]['total_pnl'] += pnl
 
-        # Regime stats
-        if is_win:
-            self.regime_stats[regime]['wins'] += 1
-        else:
-            self.regime_stats[regime]['losses'] += 1
+        # Regime stats (skip breakeven)
+        if not is_breakeven:
+            if is_win:
+                self.regime_stats[regime]['wins'] += 1
+            else:
+                self.regime_stats[regime]['losses'] += 1
         self.regime_stats[regime]['total_pnl'] += pnl
 
         # Per-model accuracy

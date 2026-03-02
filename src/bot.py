@@ -265,12 +265,10 @@ class TradingBot:
             except Exception as e:
                 bot_logger.warning(f"Trailing stop update failed: {e}")
 
-        # Global hour skip — if this hour has historically terrible win rate, skip everything
-        if self.ensemble.learner.should_skip_hour():
-            from datetime import timezone as _tz
-            _h = datetime.now(_tz.utc).hour
-            bot_logger.info(f"⏰ Adaptive hour skip: UTC hour {_h:02d} has poor historical win rate — skipping cycle")
-            return
+        # NOTE: Adaptive hour skip disabled — too easily poisoned by breakeven/early trades
+        # if self.ensemble.learner.should_skip_hour():
+        #     ...
+        #     return
 
         # Drawdown protection — if in active drawdown, log it clearly
         if self.ensemble.learner.in_drawdown_protection:
