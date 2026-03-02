@@ -1,6 +1,6 @@
 """
 MT5 Relay Server — Windows-side Flask API that bridges MetaTrader5
-to a Linux/Mac bot via HTTP (exposed with ngrok).
+to the trading bot via HTTP.
 
 Endpoints:
     GET  /ping               — health check
@@ -16,14 +16,14 @@ Endpoints:
     POST /close_all           — close ALL open positions
 
 Usage:
-    1. pip install flask MetaTrader5
+    1. pip install flask MetaTrader5 waitress
     2. python relay_server.py
-    3. In another terminal: ngrok http 5555
-    4. Set MT5_RELAY_URL in your .env to the ngrok URL
+    3. Bot connects to http://127.0.0.1:5555
 """
 
 import sys
 import os
+import threading
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify
 import MetaTrader5 as mt5
@@ -32,6 +32,9 @@ app = Flask(__name__)
 
 # Optional bearer token for basic auth
 RELAY_TOKEN = os.getenv("MT5_RELAY_TOKEN", "change-me-to-a-secret")
+
+# Lock to serialise MT5 API calls (MT5 library is not thread-safe)
+_mt5_lock = threading.Lock()
 
 
 # ── Auth Middleware ───────────────────────────────────────────────────
@@ -47,9 +50,23 @@ def check_auth():
 
 # ── Health ────────────────────────────────────────────────────────────
 
+def _ensure_mt5():
+    """Re-initialize MT5 if the connection was lost (e.g. terminal restart)."""
+    with _mt5_lock:
+        if mt5.terminal_info() is not None:
+            return True
+        print("⚠️  MT5 connection lost — attempting re-init...")
+        if mt5.initialize():
+            info = mt5.account_info()
+            if info:
+                print(f"✅ MT5 re-connected | Account: {info.login} | Balance: {info.balance}")
+                return True
+        print(f"❌ MT5 re-init failed: {mt5.last_error()}")
+        return False
+
 @app.route("/ping")
 def ping():
-    connected = mt5.terminal_info() is not None
+    connected = _ensure_mt5()
     return jsonify({"status": "ok", "mt5_connected": connected})
 
 
@@ -57,7 +74,10 @@ def ping():
 
 @app.route("/account")
 def account_info():
-    info = mt5.account_info()
+    with _mt5_lock:
+        if not _ensure_mt5():
+            return jsonify({"error": "MT5 not connected"}), 503
+        info = mt5.account_info()
     if not info:
         return jsonify({"error": "Cannot read account info"}), 500
     return jsonify({
@@ -75,13 +95,15 @@ def account_info():
 
 @app.route("/balance")
 def balance():
-    info = mt5.account_info()
+    with _mt5_lock:
+        info = mt5.account_info()
     return jsonify({"balance": info.balance if info else 0})
 
 
 @app.route("/equity")
 def equity():
-    info = mt5.account_info()
+    with _mt5_lock:
+        info = mt5.account_info()
     return jsonify({"equity": info.equity if info else 0})
 
 
@@ -100,13 +122,17 @@ def candles():
     }
     mt5_tf = tf_map.get(tf, mt5.TIMEFRAME_H1)
 
-    symbol = pair.replace("/", "")
-    if not mt5.symbol_select(symbol, True):
-        symbol = pair
-        if not mt5.symbol_select(symbol, True):
-            return jsonify({"error": f"Symbol {pair} not found"}), 404
+    with _mt5_lock:
+        if not _ensure_mt5():
+            return jsonify({"error": "MT5 not connected"}), 503
 
-    rates = mt5.copy_rates_from_pos(symbol, mt5_tf, 0, count)
+        symbol = pair.replace("/", "")
+        if not mt5.symbol_select(symbol, True):
+            symbol = pair
+            if not mt5.symbol_select(symbol, True):
+                return jsonify({"error": f"Symbol {pair} not found"}), 404
+
+        rates = mt5.copy_rates_from_pos(symbol, mt5_tf, 0, count)
     if rates is None or len(rates) == 0:
         return jsonify({"error": "No candle data"}), 500
 
@@ -127,9 +153,10 @@ def candles():
 def price():
     pair = request.args.get("pair", "EURUSD")
     symbol = pair.replace("/", "")
-    tick = mt5.symbol_info_tick(symbol)
-    if not tick:
-        tick = mt5.symbol_info_tick(pair)
+    with _mt5_lock:
+        tick = mt5.symbol_info_tick(symbol)
+        if not tick:
+            tick = mt5.symbol_info_tick(pair)
     if not tick:
         return jsonify({"error": f"No tick for {pair}"}), 404
     return jsonify({"bid": tick.bid, "ask": tick.ask, "spread": tick.ask - tick.bid})
@@ -140,13 +167,14 @@ def price():
 @app.route("/positions")
 def positions():
     pair = request.args.get("pair")
-    if pair:
-        symbol = pair.replace("/", "")
-        pos = mt5.positions_get(symbol=symbol)
-        if not pos:
-            pos = mt5.positions_get(symbol=pair)
-    else:
-        pos = mt5.positions_get()
+    with _mt5_lock:
+        if pair:
+            symbol = pair.replace("/", "")
+            pos = mt5.positions_get(symbol=symbol)
+            if not pos:
+                pos = mt5.positions_get(symbol=pair)
+        else:
+            pos = mt5.positions_get()
 
     if pos is None:
         pos = []
@@ -173,7 +201,10 @@ def positions():
 # ── Shared: Multi-filling-type Order Sender ───────────────────────────
 
 def _try_order(req_base):
-    """Try placing an order with multiple filling types for broker compat."""
+    """Try placing an order with multiple filling types for broker compat.
+    
+    Caller must hold _mt5_lock.
+    """
     filling_types = [
         mt5.ORDER_FILLING_IOC,
         mt5.ORDER_FILLING_FOK,
@@ -218,36 +249,40 @@ def place_order():
     except (ValueError, TypeError) as e:
         return jsonify({"error": f"Invalid field format: {str(e)}"}), 400
 
-    symbol = pair.replace("/", "")
-    if not mt5.symbol_select(symbol, True):
-        symbol = pair
+    with _mt5_lock:
+        if not _ensure_mt5():
+            return jsonify({"error": "MT5 not connected"}), 503
+
+        symbol = pair.replace("/", "")
         if not mt5.symbol_select(symbol, True):
-            return jsonify({"error": f"Symbol {pair} not found"}), 404
+            symbol = pair
+            if not mt5.symbol_select(symbol, True):
+                return jsonify({"error": f"Symbol {pair} not found"}), 404
 
-    tick = mt5.symbol_info_tick(symbol)
-    if not tick:
-        return jsonify({"error": "Cannot get current price"}), 500
+        tick = mt5.symbol_info_tick(symbol)
+        if not tick:
+            return jsonify({"error": "Cannot get current price"}), 500
 
-    action_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
-    entry_price = tick.ask if order_type == "BUY" else tick.bid
+        action_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
+        entry_price = tick.ask if order_type == "BUY" else tick.bid
 
-    req_base = {
-        "action": mt5.TRADE_ACTION_DEAL,
-        "symbol": symbol,
-        "volume": lot_size,
-        "type": action_type,
-        "price": entry_price,
-        "sl": sl,
-        "tp": tp,
-        "deviation": 20,
-        "magic": 234000,
-        "comment": "AI Trading Bot",
-        "type_time": mt5.ORDER_TIME_GTC,
-    }
+        req_base = {
+            "action": mt5.TRADE_ACTION_DEAL,
+            "symbol": symbol,
+            "volume": lot_size,
+            "type": action_type,
+            "price": entry_price,
+            "sl": sl,
+            "tp": tp,
+            "deviation": 20,
+            "magic": 234000,
+            "comment": "AI Trading Bot",
+            "type_time": mt5.ORDER_TIME_GTC,
+        }
 
-    print(f"\n{'='*50}")
-    print(f"ORDER: {symbol} {order_type} {lot_size} lots | SL={sl} TP={tp}")
-    result = _try_order(req_base)
+        print(f"\n{'='*50}")
+        print(f"ORDER: {symbol} {order_type} {lot_size} lots | SL={sl} TP={tp}")
+        result = _try_order(req_base)
 
     if isinstance(result, str):
         return jsonify({"error": f"Order failed: {result}"}), 400
@@ -275,50 +310,51 @@ def close_position():
     pair = data.get("pair", "EURUSD")
     volume = float(data.get("volume", 0))
 
-    # Locate the position -------------------------------------------------
-    if ticket:
-        all_pos = mt5.positions_get()
-        pos = None
-        if all_pos:
-            for p in all_pos:
-                if p.ticket == int(ticket):
-                    pos = p
-                    break
-        if not pos:
-            return jsonify({"error": f"No position with ticket {ticket}"}), 404
-    else:
-        symbol = pair.replace("/", "")
-        positions = mt5.positions_get(symbol=symbol)
-        if not positions:
-            positions = mt5.positions_get(symbol=pair)
-        if not positions:
-            return jsonify({"error": f"No open position for {pair}"}), 404
-        pos = positions[0]
+    with _mt5_lock:
+        # Locate the position -------------------------------------------------
+        if ticket:
+            all_pos = mt5.positions_get()
+            pos = None
+            if all_pos:
+                for p in all_pos:
+                    if p.ticket == int(ticket):
+                        pos = p
+                        break
+            if not pos:
+                return jsonify({"error": f"No position with ticket {ticket}"}), 404
+        else:
+            symbol = pair.replace("/", "")
+            positions = mt5.positions_get(symbol=symbol)
+            if not positions:
+                positions = mt5.positions_get(symbol=pair)
+            if not positions:
+                return jsonify({"error": f"No open position for {pair}"}), 404
+            pos = positions[0]
 
-    # Build the close request ----------------------------------------------
-    close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
-    tick = mt5.symbol_info_tick(pos.symbol)
-    if not tick:
-        return jsonify({"error": f"Cannot get tick for {pos.symbol}"}), 500
-    close_price = tick.bid if pos.type == 0 else tick.ask
-    close_volume = volume if volume > 0 else pos.volume
+        # Build the close request ----------------------------------------------
+        close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
+        tick = mt5.symbol_info_tick(pos.symbol)
+        if not tick:
+            return jsonify({"error": f"Cannot get tick for {pos.symbol}"}), 500
+        close_price = tick.bid if pos.type == 0 else tick.ask
+        close_volume = volume if volume > 0 else pos.volume
 
-    req_base = {
-        "action": mt5.TRADE_ACTION_DEAL,
-        "symbol": pos.symbol,
-        "volume": close_volume,
-        "type": close_type,
-        "position": pos.ticket,          # ← critical: links to existing position
-        "price": close_price,
-        "deviation": 20,
-        "magic": 234000,
-        "comment": "AI Bot Close",
-        "type_time": mt5.ORDER_TIME_GTC,
-    }
+        req_base = {
+            "action": mt5.TRADE_ACTION_DEAL,
+            "symbol": pos.symbol,
+            "volume": close_volume,
+            "type": close_type,
+            "position": pos.ticket,          # ← critical: links to existing position
+            "price": close_price,
+            "deviation": 20,
+            "magic": 234000,
+            "comment": "AI Bot Close",
+            "type_time": mt5.ORDER_TIME_GTC,
+        }
 
-    print(f"\n{'='*50}")
-    print(f"CLOSE: ticket={pos.ticket} {pos.symbol} {close_volume} lots")
-    result = _try_order(req_base)
+        print(f"\n{'='*50}")
+        print(f"CLOSE: ticket={pos.ticket} {pos.symbol} {close_volume} lots")
+        result = _try_order(req_base)
 
     if isinstance(result, str):
         return jsonify({"error": f"Close failed: {result}"}), 400
@@ -331,37 +367,38 @@ def close_position():
 @app.route("/close_all", methods=["POST"])
 def close_all():
     """Close every open position on the account."""
-    all_positions = mt5.positions_get()
-    if not all_positions:
-        return jsonify({"message": "No positions to close", "results": []})
+    with _mt5_lock:
+        all_positions = mt5.positions_get()
+        if not all_positions:
+            return jsonify({"message": "No positions to close", "results": []})
 
-    results = []
-    for pos in all_positions:
-        close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
-        tick = mt5.symbol_info_tick(pos.symbol)
-        if not tick:
-            results.append({"ticket": pos.ticket, "error": "No tick data"})
-            continue
-        close_price = tick.bid if pos.type == 0 else tick.ask
+        results = []
+        for pos in all_positions:
+            close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
+            tick = mt5.symbol_info_tick(pos.symbol)
+            if not tick:
+                results.append({"ticket": pos.ticket, "error": "No tick data"})
+                continue
+            close_price = tick.bid if pos.type == 0 else tick.ask
 
-        req_base = {
-            "action": mt5.TRADE_ACTION_DEAL,
-            "symbol": pos.symbol,
-            "volume": pos.volume,
-            "type": close_type,
-            "position": pos.ticket,
-            "price": close_price,
-            "deviation": 20,
-            "magic": 234000,
-            "comment": "AI Bot Close All",
-            "type_time": mt5.ORDER_TIME_GTC,
-        }
+            req_base = {
+                "action": mt5.TRADE_ACTION_DEAL,
+                "symbol": pos.symbol,
+                "volume": pos.volume,
+                "type": close_type,
+                "position": pos.ticket,
+                "price": close_price,
+                "deviation": 20,
+                "magic": 234000,
+                "comment": "AI Bot Close All",
+                "type_time": mt5.ORDER_TIME_GTC,
+            }
 
-        result = _try_order(req_base)
-        if isinstance(result, str):
-            results.append({"ticket": pos.ticket, "error": result})
-        else:
-            results.append({"ticket": pos.ticket, "closed": True, "order": result.order})
+            result = _try_order(req_base)
+            if isinstance(result, str):
+                results.append({"ticket": pos.ticket, "error": result})
+            else:
+                results.append({"ticket": pos.ticket, "closed": True, "order": result.order})
 
     return jsonify({"results": results})
 
@@ -382,32 +419,33 @@ def modify_position():
     if not ticket:
         return jsonify({"error": "ticket is required"}), 400
 
-    # Find the position
-    all_pos = mt5.positions_get()
-    pos = None
-    if all_pos:
-        for p in all_pos:
-            if p.ticket == int(ticket):
-                pos = p
-                break
-    if not pos:
-        return jsonify({"error": f"No position with ticket {ticket}"}), 404
+    with _mt5_lock:
+        # Find the position
+        all_pos = mt5.positions_get()
+        pos = None
+        if all_pos:
+            for p in all_pos:
+                if p.ticket == int(ticket):
+                    pos = p
+                    break
+        if not pos:
+            return jsonify({"error": f"No position with ticket {ticket}"}), 404
 
-    # Use existing SL/TP if not provided
-    sl_val = float(new_sl) if new_sl is not None else pos.sl
-    tp_val = float(new_tp) if new_tp is not None else pos.tp
+        # Use existing SL/TP if not provided
+        sl_val = float(new_sl) if new_sl is not None else pos.sl
+        tp_val = float(new_tp) if new_tp is not None else pos.tp
 
-    req = {
-        "action": mt5.TRADE_ACTION_SLTP,
-        "symbol": pos.symbol,
-        "position": pos.ticket,
-        "sl": sl_val,
-        "tp": tp_val,
-    }
+        req = {
+            "action": mt5.TRADE_ACTION_SLTP,
+            "symbol": pos.symbol,
+            "position": pos.ticket,
+            "sl": sl_val,
+            "tp": tp_val,
+        }
 
-    print(f"\n{'='*50}")
-    print(f"MODIFY: ticket={pos.ticket} {pos.symbol} | SL={sl_val} TP={tp_val}")
-    result = mt5.order_send(req)
+        print(f"\n{'='*50}")
+        print(f"MODIFY: ticket={pos.ticket} {pos.symbol} | SL={sl_val} TP={tp_val}")
+        result = mt5.order_send(req)
 
     if result is None:
         err = f"order_send returned None: {mt5.last_error()}"
@@ -441,7 +479,8 @@ def trade_history():
     from_date = now - timedelta(hours=hours)
 
     # Get completed deals
-    deals = mt5.history_deals_get(from_date, now)
+    with _mt5_lock:
+        deals = mt5.history_deals_get(from_date, now)
     if deals is None:
         return jsonify({"deals": [], "error": str(mt5.last_error())})
 
@@ -482,7 +521,15 @@ if __name__ == "__main__":
     print(f"Connected to MT5 | Account: {info.login} | "
           f"Balance: {info.balance} | Leverage: {info.leverage}:1")
     print(f"Relay server starting on http://0.0.0.0:5555")
-    print(f"  Expose with: ngrok http 5555")
-    print(f"  Then set MT5_RELAY_URL in your .env")
 
-    app.run(host="0.0.0.0", port=5555, debug=False)
+    # Use waitress (production WSGI server) if available, otherwise
+    # fall back to Flask's threaded dev server.  Either way the server
+    # handles concurrent requests so one slow MT5 call can't block /ping.
+    try:
+        from waitress import serve
+        print("Using waitress (multi-threaded production server)")
+        serve(app, host="0.0.0.0", port=5555, threads=4)
+    except ImportError:
+        print("waitress not installed — using Flask threaded mode")
+        print("  (pip install waitress for better performance)")
+        app.run(host="0.0.0.0", port=5555, debug=False, threaded=True)

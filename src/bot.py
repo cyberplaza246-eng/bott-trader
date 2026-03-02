@@ -210,9 +210,20 @@ class TradingBot:
         3. Apply confluence bonus/penalty from the other timeframe
         4. Execute trades if signal is strong
         """
-        if not self.broker or not self.broker.connected:
-            bot_logger.error("Broker not connected, skipping analysis")
+        if not self.broker:
+            bot_logger.error("Broker not initialized, skipping analysis")
             return
+        # Use recovery-aware check instead of hard self.broker.connected
+        # This lets the bot resume after transient relay outages
+        if not self.broker.connected:
+            if hasattr(self.broker, 'is_connected_or_recover'):
+                if not self.broker.is_connected_or_recover():
+                    bot_logger.warning("Broker disconnected — waiting for relay recovery")
+                    return
+                # Recovery succeeded — continue with analysis
+            else:
+                bot_logger.error("Broker not connected, skipping analysis")
+                return
         
         timeframe_minutes = TIMEFRAMES.get(f'scalp_{"fast" if timeframe_key == "1m" else "slow"}', 5)
         

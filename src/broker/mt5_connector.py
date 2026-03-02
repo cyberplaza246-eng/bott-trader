@@ -601,7 +601,9 @@ class MT5Connector:
             r = self._relay_get("/positions", params)
             if r and "positions" in r:
                 return r["positions"]
-            return []
+            # Return None (not []) on relay failure so callers can
+            # distinguish "relay down" from "no open positions"
+            return None if r is None else []
 
         elif self.simulation_mode:
             positions = self.sim_positions
@@ -656,8 +658,10 @@ class MT5Connector:
         (to avoid thinking there are 0 open trades and over-trading).
         """
         all_positions = self.get_open_positions(pair)
+        if all_positions is None:
+            return None  # Relay failure — propagate None, don't return []
         if not all_positions:
-            return all_positions  # empty list or None
+            return all_positions  # genuinely empty list
 
         # Check if the relay provides the magic field
         has_magic = any('magic' in p for p in all_positions)

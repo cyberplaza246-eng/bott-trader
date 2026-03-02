@@ -9,6 +9,7 @@ Single terminal needed — no manual relay setup required.
 import os
 import sys
 import time
+import threading
 import subprocess
 import requests
 
@@ -90,8 +91,13 @@ import src.broker.mt5_connector as mt5mod
 from src.utils.logger import bot_logger, trades_logger, error_logger
 
 class RelayMT5Connector(mt5mod.MT5Connector):
-    """MT5Connector that ALWAYS uses relay mode."""
-    
+    """MT5Connector that ALWAYS uses relay mode with circuit-breaker protection."""
+
+    # Circuit-breaker states
+    CB_CLOSED = 'closed'       # Normal operation
+    CB_OPEN = 'open'           # Relay down — skip calls, return None instantly
+    CB_HALF_OPEN = 'half_open' # Probing — allow one test call
+
     def __init__(self):
         self.account = None
         self.password = None
@@ -103,9 +109,18 @@ class RelayMT5Connector(mt5mod.MT5Connector):
         self.sim_balance = 50.0
         self.sim_equity = 50.0
         self.sim_positions = []
+
+        # ── Circuit-breaker state ─────────────────────────────────
         self._consecutive_failures = 0
         self._max_failures_before_reconnect = 3
-        
+        self._cb_state = self.CB_CLOSED
+        self._cb_lock = threading.Lock()
+        self._cb_cooldown = 60          # seconds before retrying after OPEN
+        self._cb_max_cooldown = 300     # max backoff cap
+        self._cb_last_fail_time = 0.0   # monotonic timestamp of last failed reconnect
+        self._cb_backoff_multiplier = 1 # doubles on each consecutive failure cycle
+        self._cb_suppressed_calls = 0   # count of calls short-circuited while open
+
         result = self._relay_get("/ping")
         if result and result.get("mt5_connected"):
             self.connected = True
@@ -117,59 +132,170 @@ class RelayMT5Connector(mt5mod.MT5Connector):
                 )
         else:
             raise Exception(f"Relay at {RELAY_URL} not reachable")
-    
-    def _auto_reconnect(self):
-        """Try to reconnect to relay after failures."""
-        bot_logger.warning("🔄 Attempting relay reconnect...")
-        for attempt in range(5):
-            time.sleep(3)
-            try:
-                r = requests.get(f"{RELAY_URL}/ping", timeout=5)
-                data = r.json()
-                if data.get('mt5_connected'):
-                    self.connected = True
-                    self._consecutive_failures = 0
-                    bot_logger.info(f"✅ Relay reconnected (attempt {attempt+1})")
-                    return True
-            except:
-                bot_logger.warning(f"   Reconnect attempt {attempt+1}/5 failed...")
-        bot_logger.error("❌ Relay reconnect failed after 5 attempts — will retry next cycle")
+
+    # ── Circuit-breaker helpers ───────────────────────────────────
+
+    def _cb_current_cooldown(self):
+        """Cooldown with exponential back-off, capped."""
+        return min(self._cb_cooldown * self._cb_backoff_multiplier, self._cb_max_cooldown)
+
+    def _cb_should_skip(self):
+        """Return True if the circuit is open and cooldown hasn't elapsed."""
+        if self._cb_state == self.CB_CLOSED:
+            return False
+        if self._cb_state == self.CB_OPEN:
+            elapsed = time.monotonic() - self._cb_last_fail_time
+            cooldown = self._cb_current_cooldown()
+            if elapsed >= cooldown:
+                # Transition to half-open: allow one probe call
+                self._cb_state = self.CB_HALF_OPEN
+                bot_logger.info(
+                    f"🔌 Circuit half-open — probing relay after {int(elapsed)}s cooldown"
+                )
+                return False
+            # Still in cooldown — suppress silently
+            self._cb_suppressed_calls += 1
+            if self._cb_suppressed_calls % 50 == 1:
+                remaining = int(cooldown - elapsed)
+                bot_logger.warning(
+                    f"⏳ Relay circuit OPEN — skipping calls "
+                    f"({self._cb_suppressed_calls} suppressed, ~{remaining}s until retry)"
+                )
+            return True
+        # HALF_OPEN — let the call through
         return False
 
+    def _cb_record_success(self):
+        """Reset circuit to closed on a successful relay call."""
+        was_disconnected = not self.connected or self._cb_state != self.CB_CLOSED
+        self._cb_state = self.CB_CLOSED
+        self._consecutive_failures = 0
+        self._cb_backoff_multiplier = 1
+        self._cb_suppressed_calls = 0
+        self.connected = True  # Always restore connected flag
+        if was_disconnected:
+            bot_logger.info("✅ Relay back online — circuit CLOSED, broker marked connected")
+
+    def _cb_record_failure(self):
+        """Track failure; open circuit if threshold reached."""
+        self._consecutive_failures += 1
+        if self._cb_state == self.CB_HALF_OPEN:
+            # Probe failed — go straight back to open with increased backoff
+            self._cb_backoff_multiplier = min(self._cb_backoff_multiplier * 2, 8)
+            self._cb_state = self.CB_OPEN
+            self._cb_last_fail_time = time.monotonic()
+            cooldown = self._cb_current_cooldown()
+            bot_logger.warning(
+                f"⚡ Relay probe failed — circuit OPEN (next retry in {cooldown}s)"
+            )
+        elif self._consecutive_failures >= self._max_failures_before_reconnect:
+            self._try_reconnect()
+
+    # ── Reconnect (with lock to prevent concurrent attempts) ──────
+
+    def _try_reconnect(self):
+        """Attempt reconnect; only one thread may run this at a time."""
+        if not self._cb_lock.acquire(blocking=False):
+            # Another thread is already reconnecting — don't pile up
+            return
+        try:
+            if self._cb_state == self.CB_OPEN:
+                return  # Already open, cooldown handles retries
+            bot_logger.warning("🔄 Attempting relay reconnect (3 quick probes)...")
+            for attempt in range(1, 4):
+                time.sleep(2)
+                try:
+                    r = requests.get(f"{RELAY_URL}/ping", timeout=5)
+                    data = r.json()
+                    if data.get('mt5_connected'):
+                        self.connected = True
+                        self._cb_record_success()
+                        bot_logger.info(f"✅ Relay reconnected (attempt {attempt})")
+                        return
+                except Exception:
+                    pass
+            # All probes failed — open the circuit
+            self._cb_state = self.CB_OPEN
+            self._cb_last_fail_time = time.monotonic()
+            self._cb_backoff_multiplier = min(self._cb_backoff_multiplier * 2, 8)
+            cooldown = self._cb_current_cooldown()
+            bot_logger.error(
+                f"❌ Relay reconnect failed — circuit OPEN "
+                f"(will retry in {cooldown}s)"
+            )
+        finally:
+            self._cb_lock.release()
+
+    # ── Relay HTTP wrappers ───────────────────────────────────────
+
     def _relay_get(self, path, params=None, timeout=10):
+        if self._cb_should_skip():
+            return None
         headers = {"Authorization": f"Bearer {RELAY_TOKEN}"}
         try:
             r = requests.get(f"{RELAY_URL}{path}", params=params, headers=headers, timeout=timeout)
             r.raise_for_status()
-            self._consecutive_failures = 0
+            self._cb_record_success()
             return r.json()
         except Exception as e:
-            self._consecutive_failures = getattr(self, '_consecutive_failures', 0) + 1
-            error_logger.error(f"Relay GET {path} failed ({self._consecutive_failures}x): {e}")
-            # Auto-reconnect after repeated failures
-            if self._consecutive_failures >= self._max_failures_before_reconnect:
-                self._auto_reconnect()
+            self._cb_record_failure()
+            # Log at reduced frequency when circuit is open
+            if self._consecutive_failures <= self._max_failures_before_reconnect:
+                error_logger.error(f"Relay GET {path} failed ({self._consecutive_failures}x): {e}")
             return None
 
     def _relay_post(self, path, data, timeout=10):
+        if self._cb_should_skip():
+            return None
         headers = {"Authorization": f"Bearer {RELAY_TOKEN}"}
         try:
             r = requests.post(f"{RELAY_URL}{path}", json=data, headers=headers, timeout=timeout)
             if r.status_code != 200:
                 try:
                     body = r.json()
-                except:
+                except Exception:
                     body = r.text
                 error_logger.error(f"Relay POST {path} failed ({r.status_code}): {body}")
                 return None
-            self._consecutive_failures = 0
+            self._cb_record_success()
             return r.json()
         except Exception as e:
-            self._consecutive_failures = getattr(self, '_consecutive_failures', 0) + 1
-            error_logger.error(f"Relay POST {path} failed ({self._consecutive_failures}x): {e}")
-            if self._consecutive_failures >= self._max_failures_before_reconnect:
-                self._auto_reconnect()
+            self._cb_record_failure()
+            if self._consecutive_failures <= self._max_failures_before_reconnect:
+                error_logger.error(f"Relay POST {path} failed ({self._consecutive_failures}x): {e}")
             return None
+
+    def is_connected_or_recover(self):
+        """Check if connected; if not, try a quick probe to recover.
+        
+        Called by bot.analyze_and_trade instead of a hard self.connected check.
+        This prevents the bot from being permanently stuck after a transient outage.
+        """
+        if self.connected and self._cb_state == self.CB_CLOSED:
+            return True
+        # Circuit is open or half-open — check if cooldown has elapsed
+        if self._cb_state == self.CB_OPEN:
+            elapsed = time.monotonic() - self._cb_last_fail_time
+            cooldown = self._cb_current_cooldown()
+            if elapsed < cooldown:
+                return False  # Still in cooldown, skip gracefully
+            # Cooldown elapsed — try a probe
+            self._cb_state = self.CB_HALF_OPEN
+        # Attempt a lightweight probe
+        try:
+            r = requests.get(f"{RELAY_URL}/ping", timeout=5)
+            data = r.json()
+            if data.get('mt5_connected'):
+                self._cb_record_success()
+                bot_logger.info("✅ Relay probe succeeded — resuming trading")
+                return True
+        except Exception:
+            pass
+        # Probe failed
+        self._cb_state = self.CB_OPEN
+        self._cb_last_fail_time = time.monotonic()
+        self._cb_backoff_multiplier = min(self._cb_backoff_multiplier * 2, 8)
+        return False
 
 # Replace the class
 mt5mod.MT5Connector = RelayMT5Connector
