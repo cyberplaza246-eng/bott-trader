@@ -226,73 +226,61 @@ class EnsembleTrader:
             final_signal = 'SKIP'
 
         # === Conviction Scoring ===
-        # Instead of just counting votes, calculate conviction based on:
-        # 1. Number of agreeing models (more = stronger)
-        # 2. Average confidence of agreeing models (higher = stronger)
-        # 3. Whether high-weight models agree (weighted conviction)
+        # Use average confidence of agreeing models as the base score,
+        # scaled by agreement ratio for confluence.
         if final_signal != 'SKIP' and active_signals:
             direction = final_signal
             agreeing = {k: v for k, v in active_signals.items() if v['signal'] == direction}
             opposing = {k: v for k, v in active_signals.items() if v['signal'] != direction and v['signal'] != 'HOLD'}
 
-            # Weighted conviction: sum of (weight * confidence) for agreeing models
-            agreeing_conviction = sum(
-                weights.get(m, 0) * v['confidence'] for m, v in agreeing.items()
-            )
-            opposing_conviction = sum(
-                weights.get(m, 0) * v['confidence'] for m, v in opposing.items()
-            )
-
-            # Net conviction (positive = signal is strong)
-            net_conviction = agreeing_conviction - opposing_conviction * 0.5
-
-            # Confluence bonus: stronger signal when more models agree
-            agreement_ratio = len(agreeing) / max(active_model_count, 1)
-            confluence_bonus = 0.0
-            if agreement_ratio >= 0.75:  # 75%+ models agree
-                confluence_bonus = 0.10
-                bot_logger.info(f"🎯 Strong confluence: {len(agreeing)}/{active_model_count} models agree ({agreement_ratio:.0%})")
-            elif agreement_ratio >= 0.60:
-                confluence_bonus = 0.05
-
-            # Average confidence of agreeing models
+            # Average confidence of agreeing models (0.0-1.0 range)
             avg_agreeing_conf = sum(v['confidence'] for v in agreeing.values()) / max(len(agreeing), 1)
 
-            # Final weighted confidence
-            weighted_confidence = net_conviction + confluence_bonus
+            # Agreement ratio bonus: more models agreeing = stronger signal
+            agreement_ratio = len(agreeing) / max(active_model_count, 1)
+            confluence_bonus = 0.0
+            if agreement_ratio >= 0.75:
+                confluence_bonus = 0.15
+                bot_logger.info(f"🎯 Strong confluence: {len(agreeing)}/{active_model_count} models agree ({agreement_ratio:.0%})")
+            elif agreement_ratio >= 0.50:
+                confluence_bonus = 0.10
+            elif agreement_ratio >= 0.30:
+                confluence_bonus = 0.05
+
+            # Opposing penalty: reduce by fraction of opposing strength
+            opposing_avg = sum(v['confidence'] for v in opposing.values()) / max(len(opposing), 1) if opposing else 0
+            opposing_penalty = opposing_avg * 0.15 * len(opposing) / max(active_model_count, 1)
+
+            # Final confidence = average agreeing confidence + confluence - opposing penalty
+            weighted_confidence = avg_agreeing_conf + confluence_bonus - opposing_penalty
 
             # Regime confidence modifier from learner
             regime_modifier = self.learner.get_regime_confidence_modifier(regime)
             weighted_confidence *= regime_modifier
 
+            net_conviction = weighted_confidence  # For logging compatibility
+
         else:
             weighted_confidence = 0.0
             net_conviction = 0.0
 
-        # === EMA 200 Trend Filter ===
-        EMA_COUNTER_TREND_PENALTY = 0.12  # Strong penalty for counter-trend trades
+        # === EMA 200 Trend Filter (advisory only — no hard penalty) ===
         ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
         cur_price = df_enriched['close'].iloc[-1]
-        ema_counter_trend = False
         if ema_200 is not None and not pd.isna(ema_200) and final_signal != 'SKIP':
             if (final_signal == 'BUY' and cur_price < ema_200) or \
                (final_signal == 'SELL' and cur_price > ema_200):
-                trend_dir = 'bearish' if cur_price < ema_200 else 'bullish'
                 bot_logger.info(
-                    f"⚠️  EMA200 penalty: {final_signal} counter-trend "
+                    f"⚠️  EMA200 advisory: {final_signal} counter-trend "
                     f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
                 )
-                ema_counter_trend = True
+                weighted_confidence *= 0.90  # Soft 10% reduction
             else:
-                # Trend-aligned bonus
                 weighted_confidence *= 1.05
                 bot_logger.info(
                     f"✅ EMA200 aligned: {final_signal} with trend "
                     f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) +5% confidence"
                 )
-
-        if ema_counter_trend and weighted_confidence > 0:
-            weighted_confidence = max(0.0, weighted_confidence - EMA_COUNTER_TREND_PENALTY)
 
         # === High-Weight Model Disagreement Filter ===
         # If a heavy model (scalping, LSTM, technical) STRONGLY opposes the signal, penalize
@@ -307,12 +295,12 @@ class EnsembleTrader:
                     f"with {m['signal']} ({m['confidence']:.0%})"
                 )
         if strong_opposition_count >= 2:
-            weighted_confidence *= 0.60  # -40% if 2+ heavy models oppose
-            bot_logger.warning(
-                f"🚫 {strong_opposition_count} heavy models oppose {final_signal} — confidence heavily reduced"
+            weighted_confidence *= 0.85  # -15% if 2+ heavy models oppose
+            bot_logger.info(
+                f"⚠️ {strong_opposition_count} heavy models oppose {final_signal} — slight reduction"
             )
         elif strong_opposition_count == 1:
-            weighted_confidence *= 0.80  # -20% if 1 heavy model opposes
+            weighted_confidence *= 0.95  # -5% if 1 heavy model opposes
 
         # === S/R Context Advisory ===
         price_zone = sr_signal.get('levels', {}).get('price_zone', '')
