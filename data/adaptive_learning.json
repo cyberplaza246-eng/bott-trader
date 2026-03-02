@@ -20,7 +20,7 @@
   "regime_stats": {},
   "hourly_stats": {},
   "trade_history": [],
-  "confidence_threshold": 0.25,
+  "confidence_threshold": 0.12,
   "consecutive_losses": 0,
   "consecutive_wins": 0,
   "max_consecutive_losses": 0,

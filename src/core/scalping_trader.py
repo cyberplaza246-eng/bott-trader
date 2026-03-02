@@ -110,8 +110,8 @@ class ScalpingTrader:
         """
         validation = {'valid': True, 'reasons': []}
         
-        # 1. Confidence threshold (lowered for quick_wins mode)
-        min_conf = 0.40 if self.profit_mode == 'quick_wins' else 0.70
+        # 1. Confidence threshold (aggressive for quick_wins mode)
+        min_conf = 0.12 if self.profit_mode == 'quick_wins' else 0.70
         if signal['confidence'] < min_conf:
             validation['valid'] = False
             validation['reasons'].append(f"Confidence {signal['confidence']:.2f} below {min_conf}")

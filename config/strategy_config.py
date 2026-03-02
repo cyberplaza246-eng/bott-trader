@@ -88,8 +88,8 @@ DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.05))  # -5% (reduce
 OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
-# AI Model Thresholds (tuned for scalping speed — lowered for quick_wins)
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.25))
+# AI Model Thresholds (aggressive for quick_wins scalping)
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.12))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))
 
 # Technical Analysis Parameters (tuned for scalping)

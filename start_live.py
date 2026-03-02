@@ -13,14 +13,14 @@ os.environ['TRADING_MODE'] = 'live'
 if not os.getenv('MT5_RELAY_URL'):
     os.environ['MT5_RELAY_URL'] = 'http://127.0.0.1:5555'
 
-# Lower thresholds for quick_wins scalping
-os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.25')
-os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.40')
+# Aggressive thresholds for quick_wins scalping
+os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.12')
+os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.20')
 
 print(f"🔧 TRADING_MODE = {os.environ['TRADING_MODE']}")
 print(f"🔧 MT5_RELAY_URL = {os.environ['MT5_RELAY_URL']}")
 print(f"🔧 ENSEMBLE_THRESHOLD = {os.environ['ENSEMBLE_CONFIDENCE_THRESHOLD']}")
-print(f"🔧 QUICK_WINS mode — lower thresholds active")
+print(f"🔧 QUICK_WINS mode — aggressive thresholds active")
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
