@@ -414,16 +414,10 @@ class EnsembleTrader:
     def should_trade(self, signal_result):
         """
         Determine if signal is strong enough to trade.
-        Uses adaptive confidence threshold + regime awareness + session check.
+        Uses adaptive confidence threshold + regime awareness.
+        Session filtering is handled by the bot's is_pair_in_session() check.
         """
-        from datetime import datetime, timezone
         threshold = self.learner.get_adjusted_threshold()
-
-        # Session filter: only trade during London/NY hours (7-17 UTC)
-        hour = datetime.now(timezone.utc).hour
-        if hour < 7 or hour >= 17:
-            bot_logger.info(f"🕐 Outside trading hours ({hour}:00 UTC) — skipping")
-            return False
 
         # Minimum 3 models must agree
         if signal_result['models_agreement'] < MIN_MODELS_AGREEMENT:

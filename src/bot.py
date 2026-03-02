@@ -134,6 +134,8 @@ class TradingBot:
         current_hour = datetime.now(timezone.utc).hour
         session = self.PAIR_SESSIONS.get(pair, self.DEFAULT_SESSION)
         s, e = session['start'], session['end']
+        if s == e:
+            return True  # Same start/end means all hours allowed
         if s < e:
             return s <= current_hour < e
         else:
