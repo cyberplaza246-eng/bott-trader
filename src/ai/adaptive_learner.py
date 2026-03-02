@@ -87,6 +87,11 @@ class AdaptiveLearner:
         self.current_drawdown_pct = 0.0
         self.in_drawdown_protection = False
 
+        # Loss pattern tracking — learn WHY trades fail
+        self.loss_patterns = defaultdict(lambda: {'count': 0, 'total_loss': 0.0})
+        # Recent trade tracker for cooldown logic
+        self.recent_trades_window = []  # last N trades for fast reaction
+
         self.decay_factor = 0.95
 
         self._load()
@@ -252,11 +257,12 @@ class AdaptiveLearner:
         else:
             self.current_drawdown_pct = 0
 
-        if self.current_drawdown_pct > 5:
+        # Activate drawdown protection at 3% (was 5% — too late for small accounts)
+        if self.current_drawdown_pct > 3:
             if not self.in_drawdown_protection:
                 bot_logger.warning(f"🛡️ Drawdown protection ACTIVATED: {self.current_drawdown_pct:.1f}% drawdown")
             self.in_drawdown_protection = True
-        elif self.current_drawdown_pct < 2:
+        elif self.current_drawdown_pct < 1.5:
             if self.in_drawdown_protection:
                 bot_logger.info(f"✅ Drawdown protection DEACTIVATED: recovered to {self.current_drawdown_pct:.1f}%")
             self.in_drawdown_protection = False
@@ -275,6 +281,19 @@ class AdaptiveLearner:
             if key in trade_record and hasattr(trade_record[key], 'isoformat'):
                 trade_record[key] = trade_record[key].isoformat()
         self.trade_history.append(trade_record)
+
+        # Update recent trades window (last 10 trades for fast reaction)
+        self.recent_trades_window.append({
+            'pair': pair, 'session': session, 'hour': hour,
+            'regime': regime, 'is_win': is_win, 'pnl': pnl,
+            'timestamp': datetime.now().isoformat(),
+        })
+        if len(self.recent_trades_window) > 10:
+            self.recent_trades_window = self.recent_trades_window[-10:]
+
+        # ── Loss pattern analysis ───────────────────────────────────
+        if not is_win and not is_breakeven:
+            self._record_loss_pattern(pair, session, hour, regime, pnl, model_signals, signal)
 
         # Adapt
         self._adapt_weights()
@@ -349,28 +368,114 @@ class AdaptiveLearner:
     def _adapt_confidence_threshold(self):
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
         base = ENSEMBLE_CONFIDENCE_THRESHOLD
-        ceiling = base + 0.15  # Max threshold never exceeds base + 15%
+        ceiling = base + 0.20  # Wider ceiling for stronger protection
+
+        # ── Recent-loss fast reaction ────────────────────────────────
+        # If 3+ of last 5 trades are losses, react immediately
+        recent_5 = self.recent_trades_window[-5:] if len(self.recent_trades_window) >= 3 else []
+        recent_loss_count = sum(1 for t in recent_5 if not t.get('is_win', True))
+        recent_loss_ratio = recent_loss_count / len(recent_5) if recent_5 else 0
 
         if self.in_drawdown_protection:
-            self.confidence_threshold = min(ceiling, base + 0.08)
+            self.confidence_threshold = min(ceiling, base + 0.10)
             bot_logger.info(f"🛡️ Drawdown protection: threshold raised to {self.confidence_threshold:.2f}")
             return
 
+        if recent_loss_ratio >= 0.80:
+            # 4-5 of last 5 trades lost — very aggressive tightening
+            self.confidence_threshold = min(ceiling, base + 0.12)
+            bot_logger.warning(
+                f"🔴 HEAVY LOSSES: {recent_loss_count}/{len(recent_5)} recent trades lost → "
+                f"threshold {self.confidence_threshold:.2f}"
+            )
+            return
+
         if self.consecutive_losses >= 5:
-            bump = min(0.10, self.consecutive_losses * 0.015)
+            bump = min(0.12, self.consecutive_losses * 0.02)
             self.confidence_threshold = min(ceiling, base + bump)
             bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
         elif self.consecutive_losses >= 3:
-            bump = self.consecutive_losses * 0.01
+            bump = self.consecutive_losses * 0.015
             self.confidence_threshold = min(ceiling, base + bump)
             bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
+        elif recent_loss_ratio >= 0.60:
+            # 3 of last 5 — moderate tightening
+            self.confidence_threshold = min(ceiling, base + 0.06)
+            bot_logger.info(f"⚠️  Recent loss rate {recent_loss_ratio:.0%} → threshold {self.confidence_threshold:.2f}")
         elif self.consecutive_wins >= 3:
-            ease = min(0.08, self.consecutive_wins * 0.015)
+            ease = min(0.06, self.consecutive_wins * 0.01)
             self.confidence_threshold = max(base, self.confidence_threshold - ease)
             bot_logger.info(f"✅ Threshold → {self.confidence_threshold:.2f} (winning streak of {self.consecutive_wins})")
         else:
             if self.confidence_threshold > base:
-                self.confidence_threshold = max(base, self.confidence_threshold - 0.005)
+                self.confidence_threshold = max(base, self.confidence_threshold - 0.003)
+
+    # ------------------------------------------------------------------
+    # Loss Pattern Analysis
+    # ------------------------------------------------------------------
+    def _record_loss_pattern(self, pair, session, hour, regime, pnl, model_signals, signal):
+        """Categorise and record loss patterns so the bot avoids repeating mistakes."""
+        # Pattern keys: pair+session, pair+regime, pair+hour, model combos
+        patterns = [
+            f"pair:{pair}",
+            f"session:{session}",
+            f"pair_session:{pair}:{session}",
+            f"pair_regime:{pair}:{regime}",
+            f"hour:{hour}",
+            f"signal:{signal}",
+        ]
+        # Which models agreed with the losing signal?
+        for model_name, ms in model_signals.items():
+            if ms.get('signal') == signal:
+                patterns.append(f"model_loss:{model_name}")
+
+        for pattern in patterns:
+            self.loss_patterns[pattern]['count'] += 1
+            self.loss_patterns[pattern]['total_loss'] += abs(pnl)
+
+        # Log the top recurring loss patterns
+        top_patterns = sorted(
+            self.loss_patterns.items(),
+            key=lambda x: x[1]['count'],
+            reverse=True
+        )[:5]
+        if top_patterns and top_patterns[0][1]['count'] >= 3:
+            bot_logger.warning(
+                "🔍 Top loss patterns: " +
+                " | ".join(f"{k}: {v['count']}x (${v['total_loss']:.2f})" for k, v in top_patterns)
+            )
+
+    def should_skip_loss_pattern(self, pair: str, session: str = None, regime: str = None) -> bool:
+        """Check if current conditions match a known heavy-loss pattern."""
+        pair = self._normalize_pair(pair)
+        if session is None:
+            session = self._get_session()
+        if regime is None:
+            regime = self.current_regime
+
+        # Check pair+session pattern
+        ps_key = f"pair_session:{pair}:{session}"
+        ps_stats = self.loss_patterns.get(ps_key, {'count': 0})
+        if ps_stats['count'] >= 5:
+            bot_logger.info(f"🚫 Loss pattern block: {pair} in {session} has {ps_stats['count']} losses")
+            return True
+
+        # Check pair+regime pattern
+        pr_key = f"pair_regime:{pair}:{regime}"
+        pr_stats = self.loss_patterns.get(pr_key, {'count': 0})
+        if pr_stats['count'] >= 5:
+            bot_logger.info(f"🚫 Loss pattern block: {pair} in {regime} regime has {pr_stats['count']} losses")
+            return True
+
+        return False
+
+    def get_recent_win_rate(self, n: int = 10) -> float:
+        """Win rate over last n trades — for fast reaction to losing streaks."""
+        recent = self.recent_trades_window[-n:]
+        if not recent:
+            return 0.5
+        wins = sum(1 for t in recent if t.get('is_win', False))
+        return wins / len(recent)
 
     # ------------------------------------------------------------------
     # Query Methods
@@ -555,6 +660,8 @@ class AdaptiveLearner:
             'in_drawdown_protection': self.in_drawdown_protection,
             'current_regime': self.current_regime,
             'trade_history': self.trade_history[-500:],
+            'loss_patterns': dict(self.loss_patterns),
+            'recent_trades_window': self.recent_trades_window[-10:],
             'last_updated': datetime.now().isoformat(),
         }
         with open(LEARNING_DB_PATH, 'w') as f:
@@ -600,6 +707,9 @@ class AdaptiveLearner:
                 self.regime_stats[k] = v
             for k, v in data.get('hourly_stats', {}).items():
                 self.hourly_stats[k] = v
+            for k, v in data.get('loss_patterns', {}).items():
+                self.loss_patterns[k] = v
+            self.recent_trades_window = data.get('recent_trades_window', [])
 
             self._normalize_pair_stats()
             for t in self.trade_history:

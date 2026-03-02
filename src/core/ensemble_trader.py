@@ -19,6 +19,7 @@ from src.ai.ema_crossover import EMACrossoverAnalyzer
 from src.ai.scalping_analyzer import ScalpingAnalyzer
 from src.ai.adaptive_learner import AdaptiveLearner
 from src.ai.cross_pair_analyzer import CrossPairAnalyzer
+from src.ai.ml_trade_scorer import MLTradeScorer
 from src.utils.logger import TradeLogger, bot_logger
 from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGREEMENT
 
@@ -68,6 +69,7 @@ class EnsembleTrader:
         self.scalping = ScalpingAnalyzer()
         self.learner = AdaptiveLearner()
         self.cross_pair = CrossPairAnalyzer()
+        self.ml_scorer = MLTradeScorer()
         self.broker = broker
 
         # Scalping-tuned weights: scalping model is the heaviest
@@ -378,6 +380,18 @@ class EnsembleTrader:
             signal_result['confidence'] >= threshold and
             signal_result['models_agreement'] >= MIN_MODELS_AGREEMENT
         )
+
+    def get_ml_win_probability(self, signal_result: dict, pair: str) -> float:
+        """Get ML model's predicted win probability for this trade setup."""
+        return self.ml_scorer.predict_win_probability(signal_result, pair, self.learner)
+
+    def capture_ml_features(self, signal_result: dict, pair: str) -> list:
+        """Capture feature snapshot at trade entry time for later training."""
+        return MLTradeScorer.extract_features(signal_result, pair, self.learner)
+
+    def record_ml_trade(self, features: list, is_win: bool):
+        """Record a completed trade's features + outcome for ML training."""
+        self.ml_scorer.record_trade(features, is_win)
 
     def record_trade_result(self, trade_data: dict):
         """Pass trade result to adaptive learner."""

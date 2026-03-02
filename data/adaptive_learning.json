@@ -5,7 +5,7 @@
     "candlestick": 0.13,
     "technical": 0.12,
     "volume": 0.11,
-    "multi_tf": 0.10,
+    "multi_tf": 0.1,
     "support_resistance": 0.06,
     "lstm": 0.06,
     "sentiment": 0.06
@@ -20,6 +20,8 @@
   "regime_stats": {},
   "hourly_stats": {},
   "trade_history": [],
+  "loss_patterns": {},
+  "recent_trades_window": [],
   "confidence_threshold": 0.12,
   "consecutive_losses": 0,
   "consecutive_wins": 0,
@@ -28,5 +30,4 @@
   "current_drawdown_pct": 0.0,
   "in_drawdown_protection": false,
   "current_regime": "ranging"
-}
 }

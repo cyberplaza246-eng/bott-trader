@@ -200,7 +200,37 @@ class TradingBot:
         return (signal_a, signal_b) in {('BUY', 'SELL'), ('SELL', 'BUY')}
 
     def _should_trade_pair(self, pair, signal_result):
-        """Determine if a pair should be traded."""
+        """Determine if a pair should be traded, factoring in adaptive + ML learning."""
+        # During a recent losing streak, require higher confidence
+        recent_wr = self.ensemble.learner.get_recent_win_rate(5)
+        if recent_wr < 0.20 and len(self.ensemble.learner.recent_trades_window) >= 3:
+            # Only allow trades with very high confidence during cold streaks
+            if signal_result.get('confidence', 0) < 0.30:
+                bot_logger.info(
+                    f"⏸️ Cooldown active (recent WR {recent_wr:.0%}): "
+                    f"blocking {pair} with confidence {signal_result['confidence']:.2%} < 30%"
+                )
+                return False
+
+        # ── ML Trade Scorer gate ─────────────────────────────────────
+        # If the ML model is trained, use it to predict win probability
+        ml_win_prob = self.ensemble.get_ml_win_probability(signal_result, pair)
+        ml_status = self.ensemble.ml_scorer.get_status()
+        if ml_status['is_trained']:
+            # Block trades the ML model predicts will likely lose
+            ML_MIN_WIN_PROB = 0.40  # Require at least 40% predicted win prob
+            if ml_win_prob < ML_MIN_WIN_PROB:
+                bot_logger.info(
+                    f"🧠 ML gate BLOCKED {pair}: predicted win prob {ml_win_prob:.1%} "
+                    f"< {ML_MIN_WIN_PROB:.0%} (model v{ml_status['model_version']})"
+                )
+                return False
+            else:
+                bot_logger.info(
+                    f"🧠 ML gate OK {pair}: predicted win prob {ml_win_prob:.1%} "
+                    f"(model v{ml_status['model_version']})"
+                )
+
         return self.ensemble.should_trade(signal_result)
     
     def analyze_and_trade(self, timeframe_key='5m'):
@@ -311,6 +341,18 @@ class TradingBot:
                 if self.ensemble.learner.should_skip_session(pair):
                     bot_logger.info(f"📉 Adaptive session skip: {pair} losing in current session")
                     continue
+
+                # Loss pattern guard — skip if current conditions match a known heavy-loss pattern
+                if self.ensemble.learner.should_skip_loss_pattern(pair):
+                    bot_logger.info(f"🚫 Loss pattern guard: {pair} matches a recurring loss pattern — skipping")
+                    continue
+
+                # Recent performance cooldown — if last 5 trades are mostly losses, slow down
+                recent_wr = self.ensemble.learner.get_recent_win_rate(5)
+                if recent_wr < 0.20 and len(self.ensemble.learner.recent_trades_window) >= 3:
+                    bot_logger.warning(
+                        f"⏸️ Recent win rate {recent_wr:.0%} — cooling down, only high-confidence trades"
+                    )
 
                 # Economic event filter — avoid trading during high-impact news
                 event_blocked, event_name = self.calendar.is_event_blocked(pair)
@@ -475,6 +517,21 @@ class TradingBot:
                 f"/ {daily_status.get('effective_trade_cap', daily_status.get('max_concurrent_trades', 0))}"
             )
             bot_logger.info(f"  Can Trade: {daily_status['can_trade']}")
+
+            # ML Scorer status
+            ml_status = self.ensemble.ml_scorer.get_status()
+            if ml_status['is_trained']:
+                bot_logger.info(
+                    f"  🧠 ML Scorer: v{ml_status['model_version']} | "
+                    f"accuracy={ml_status['last_accuracy']:.1%} | "
+                    f"cv={ml_status['last_cv_score']:.1%} | "
+                    f"samples={ml_status['training_samples']} | "
+                    f"next retrain in {ml_status['retrain_interval'] - ml_status['trades_since_retrain']} trades"
+                )
+            else:
+                bot_logger.info(
+                    f"  🧠 ML Scorer: collecting data ({ml_status['training_samples']}/{ml_status['min_required']} trades)"
+                )
         except Exception as e:
             bot_logger.warning(f"Daily status logging failed: {e}")
     
@@ -605,11 +662,22 @@ class TradingBot:
             )
             bot_logger.info(f"✅ Paper trade executed - ID: {trade_id}")
             self.risk_manager.on_trade_opened()
-            
-            # Store model signals for adaptive learning when trade closes
-            if not hasattr(self, '_pending_trade_signals'):
-                self._pending_trade_signals = {}
-            self._pending_trade_signals[pair] = signal_result.get('models', {})
+
+        # Store model signals for adaptive learning when trade closes
+        # (works for BOTH live and paper mode so the learner always knows
+        #  which models contributed to each trade)
+        if not hasattr(self, '_pending_trade_signals'):
+            self._pending_trade_signals = {}
+        self._pending_trade_signals[pair] = signal_result.get('models', {})
+
+        # ── ML Scorer: capture feature snapshot at entry time ────────
+        if not hasattr(self, '_pending_ml_features'):
+            self._pending_ml_features = {}
+        try:
+            ml_features = self.ensemble.capture_ml_features(signal_result, pair)
+            self._pending_ml_features[pair] = ml_features
+        except Exception as e:
+            bot_logger.warning(f"🧠 ML feature capture failed: {e}")
     
     def _update_positions(self, pair):
         """Sync open positions from broker (live + paper mode)"""
@@ -645,10 +713,30 @@ class TradingBot:
                         'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
                     })
 
+                    # Record with ML Trade Scorer
+                    self._record_ml_outcome(pair, closed_trade['profit_loss'])
+
     @staticmethod
     def _normalize_pair(pair):
         """Normalize pair format (EUR/USD and EURUSD -> EURUSD)."""
         return str(pair or '').replace('/', '').upper()
+
+    def _record_ml_outcome(self, pair: str, pnl: float):
+        """Feed a closed trade's features + outcome to the ML Trade Scorer."""
+        try:
+            if pnl == 0:
+                return  # Skip breakeven trades — not informative
+            features = getattr(self, '_pending_ml_features', {}).pop(pair, None)
+            if features is not None:
+                is_win = pnl > 0
+                self.ensemble.record_ml_trade(features, is_win)
+                bot_logger.info(
+                    f"🧠 ML recorded: {pair} {'WIN' if is_win else 'LOSS'} "
+                    f"(${pnl:+.2f}) — "
+                    f"{self.ensemble.ml_scorer.get_status()['training_samples']} total samples"
+                )
+        except Exception as e:
+            bot_logger.warning(f"🧠 ML outcome recording failed: {e}")
 
     def _find_open_position(self, pair):
         """Return the currently open position for a pair, if any."""
@@ -760,6 +848,9 @@ class TradingBot:
                 'model_signals': model_signals,
                 'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
             })
+
+            # Record with ML Trade Scorer
+            self._record_ml_outcome(pair, closed_trade.get('profit_loss', 0.0))
             return
 
         if self.mode == 'live' and self.broker:
@@ -974,6 +1065,9 @@ class TradingBot:
                     'model_signals': model_signals,
                     'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
                 })
+
+                # Record with ML Trade Scorer
+                self._record_ml_outcome(pair, profit)
 
                 # Clean from trailing stop tracker too
                 if hasattr(self, 'trailing'):

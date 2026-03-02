@@ -41,13 +41,13 @@ SCALPING_PAIRS = {
     'EUR/USD': {
         '1m': {
             'sl_pips_min': 3, 'sl_pips_max': 5,
-            'tp_ratio': [0.8, 1.0],       # Quick profit — small TP
+            'tp_ratio': [1.5, 2.0],       # Minimum 1.5:1 R:R — covers spread + ensures edge
             'max_hold_seconds': 300,       # 5 minutes max
             'cooldown_seconds': 30,
         },
         '5m': {
             'sl_pips_min': 4, 'sl_pips_max': 6,
-            'tp_ratio': [0.8, 1.0],       # Quick profit
+            'tp_ratio': [1.5, 2.0],       # 1.5:1 R:R minimum
             'max_hold_seconds': 900,       # 15 minutes max
             'cooldown_seconds': 60,
         },
@@ -55,13 +55,13 @@ SCALPING_PAIRS = {
     'GBP/USD': {
         '1m': {
             'sl_pips_min': 4, 'sl_pips_max': 6,
-            'tp_ratio': [0.8, 1.0],       # Quick profit
+            'tp_ratio': [1.5, 2.0],       # 1.5:1 R:R minimum
             'max_hold_seconds': 300,       # 5 minutes max
             'cooldown_seconds': 30,
         },
         '5m': {
             'sl_pips_min': 5, 'sl_pips_max': 8,
-            'tp_ratio': [0.8, 1.0],       # Quick profit
+            'tp_ratio': [1.5, 2.0],       # 1.5:1 R:R minimum
             'max_hold_seconds': 900,       # 15 minutes max
             'cooldown_seconds': 60,
         },
