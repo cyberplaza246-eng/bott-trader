@@ -21,10 +21,12 @@ except ImportError:
     MT5_AVAILABLE = False
     mt5 = None
 
-# Check for relay URL (Linux → Windows bridge)
+# Check for relay URL (Linux → Windows bridge, or forced relay on Windows)
 MT5_RELAY_URL = os.getenv('MT5_RELAY_URL', '').rstrip('/')
 MT5_RELAY_TOKEN = os.getenv('MT5_RELAY_TOKEN', '')
 RELAY_AVAILABLE = bool(MT5_RELAY_URL)
+# Force relay mode when URL is set (even on Windows where MT5 is available)
+FORCE_RELAY = RELAY_AVAILABLE and os.getenv('MT5_RELAY_URL')  # Explicitly set = use relay
 
 if not MT5_AVAILABLE and not RELAY_AVAILABLE:
     bot_logger.warning("MetaTrader5 not available (Linux/Mac) and no MT5_RELAY_URL set. Using simulation mode.")
@@ -36,7 +38,8 @@ class MT5Connector:
         self.password = MT5_PASSWORD
         self.server = MT5_SERVER
         self.connected = False
-        self.relay_mode = RELAY_AVAILABLE and not MT5_AVAILABLE
+        # Prefer relay when explicitly configured, even on Windows
+        self.relay_mode = RELAY_AVAILABLE and (FORCE_RELAY or not MT5_AVAILABLE)
         self.simulation_mode = (
             not MT5_AVAILABLE and not RELAY_AVAILABLE
         ) or TRADING_MODE in ('paper', 'backtest')
