@@ -103,6 +103,8 @@ class RelayMT5Connector(mt5mod.MT5Connector):
         self.sim_balance = 50.0
         self.sim_equity = 50.0
         self.sim_positions = []
+        self._consecutive_failures = 0
+        self._max_failures_before_reconnect = 3
         
         result = self._relay_get("/ping")
         if result and result.get("mt5_connected"):
@@ -116,14 +118,37 @@ class RelayMT5Connector(mt5mod.MT5Connector):
         else:
             raise Exception(f"Relay at {RELAY_URL} not reachable")
     
+    def _auto_reconnect(self):
+        """Try to reconnect to relay after failures."""
+        bot_logger.warning("🔄 Attempting relay reconnect...")
+        for attempt in range(5):
+            time.sleep(3)
+            try:
+                r = requests.get(f"{RELAY_URL}/ping", timeout=5)
+                data = r.json()
+                if data.get('mt5_connected'):
+                    self.connected = True
+                    self._consecutive_failures = 0
+                    bot_logger.info(f"✅ Relay reconnected (attempt {attempt+1})")
+                    return True
+            except:
+                bot_logger.warning(f"   Reconnect attempt {attempt+1}/5 failed...")
+        bot_logger.error("❌ Relay reconnect failed after 5 attempts — will retry next cycle")
+        return False
+
     def _relay_get(self, path, params=None, timeout=10):
         headers = {"Authorization": f"Bearer {RELAY_TOKEN}"}
         try:
             r = requests.get(f"{RELAY_URL}{path}", params=params, headers=headers, timeout=timeout)
             r.raise_for_status()
+            self._consecutive_failures = 0
             return r.json()
         except Exception as e:
-            error_logger.error(f"Relay GET {path} failed: {e}")
+            self._consecutive_failures = getattr(self, '_consecutive_failures', 0) + 1
+            error_logger.error(f"Relay GET {path} failed ({self._consecutive_failures}x): {e}")
+            # Auto-reconnect after repeated failures
+            if self._consecutive_failures >= self._max_failures_before_reconnect:
+                self._auto_reconnect()
             return None
 
     def _relay_post(self, path, data, timeout=10):
@@ -137,9 +162,13 @@ class RelayMT5Connector(mt5mod.MT5Connector):
                     body = r.text
                 error_logger.error(f"Relay POST {path} failed ({r.status_code}): {body}")
                 return None
+            self._consecutive_failures = 0
             return r.json()
         except Exception as e:
-            error_logger.error(f"Relay POST {path} failed: {e}")
+            self._consecutive_failures = getattr(self, '_consecutive_failures', 0) + 1
+            error_logger.error(f"Relay POST {path} failed ({self._consecutive_failures}x): {e}")
+            if self._consecutive_failures >= self._max_failures_before_reconnect:
+                self._auto_reconnect()
             return None
 
 # Replace the class
