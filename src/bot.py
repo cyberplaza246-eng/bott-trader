@@ -29,6 +29,7 @@ from config.strategy_config import (
     AUTOTRADING_ENABLED,
     INITIAL_BALANCE,
     HIGH_CERTAINTY_THRESHOLD,
+    MIN_MODELS_AGREEMENT,
     SCALPING_PAIRS,
     SCALPING_SESSION_WINDOWS,
     SCALPING_SPREAD_LIMITS,
@@ -210,6 +211,16 @@ class TradingBot:
         3. Apply confluence bonus/penalty from the other timeframe
         4. Execute trades if signal is strong
         """
+        try:
+            self._analyze_and_trade_inner(timeframe_key)
+        except Exception as e:
+            bot_logger.error(
+                f"💥 CRITICAL: analyze_and_trade({timeframe_key}) crashed: {e}",
+                exc_info=True,
+            )
+
+    def _analyze_and_trade_inner(self, timeframe_key='5m'):
+        """Inner analysis loop — wrapped by analyze_and_trade for safety."""
         if not self.broker:
             bot_logger.error("Broker not initialized, skipping analysis")
             return
@@ -387,6 +398,12 @@ class TradingBot:
                     self.signal_history = self.signal_history[-100:]
                 
                 # Execute trade if signal is strong enough
+                threshold = self.ensemble.learner.get_adjusted_threshold()
+                bot_logger.info(
+                    f"  🔑 Trade gate: confidence={signal_result['confidence']:.2%} vs threshold={threshold:.2%} | "
+                    f"agreement={signal_result['models_agreement']}/{MIN_MODELS_AGREEMENT} needed | "
+                    f"signal={signal_result['signal']} | drawdown_prot={'ON' if self.ensemble.learner.in_drawdown_protection else 'OFF'}"
+                )
                 if self._should_trade_pair(pair, signal_result):
                     # Block duplicate: don't open another trade if bot already has one on this pair
                     if self._has_bot_position(pair):
@@ -435,6 +452,14 @@ class TradingBot:
                     # Re-sync free margin after placing a trade so next pair
                     # sees updated margin availability
                     self._sync_balance()
+                else:
+                    # Log why the signal didn't pass
+                    if signal_result['signal'] == 'SKIP':
+                        bot_logger.info(f"  ❌ {pair}: signal is SKIP — no trade")
+                    elif signal_result['confidence'] < threshold:
+                        bot_logger.info(f"  ❌ {pair}: confidence {signal_result['confidence']:.2%} < threshold {threshold:.2%}")
+                    elif signal_result['models_agreement'] < MIN_MODELS_AGREEMENT:
+                        bot_logger.info(f"  ❌ {pair}: only {signal_result['models_agreement']} models agree (need {MIN_MODELS_AGREEMENT})")
                 
                 # Update open positions
                 self._update_positions(pair)
@@ -443,19 +468,22 @@ class TradingBot:
                 bot_logger.error(f"Error analyzing {pair} [{timeframe_key}]: {str(e)}", exc_info=True)
         
         # Log risk status with tier info
-        daily_status = self.risk_manager.get_daily_status()
-        bot_logger.info(f"\n📊 Daily Status:")
-        bot_logger.info(f"  Balance: ${daily_status['current_balance']:.2f}")
-        bot_logger.info(f"  Tier: {daily_status.get('tier_description', 'N/A')}")
-        bot_logger.info(f"  Max Lot: {daily_status.get('max_lot_size', 'N/A')} | Max Trades: {daily_status.get('max_concurrent_trades', 'N/A')}")
-        bot_logger.info(f"  Growth: {daily_status.get('account_growth', 0):.1f}% | Next tier: {daily_status.get('next_tier', 'N/A')} (${daily_status.get('balance_to_next', 0):.0f} away)")
-        bot_logger.info(f"  Daily Loss: ${daily_status['daily_loss']:.2f} ({daily_status['daily_loss_percent']:.1f}%)")
-        bot_logger.info(f"  Open Trades: {daily_status['open_trades']}")
-        bot_logger.info(
-            f"  Slots Available: {daily_status.get('available_trade_slots', 0)} "
-            f"/ {daily_status.get('effective_trade_cap', daily_status.get('max_concurrent_trades', 0))}"
-        )
-        bot_logger.info(f"  Can Trade: {daily_status['can_trade']}")
+        try:
+            daily_status = self.risk_manager.get_daily_status()
+            bot_logger.info(f"\n📊 Daily Status:")
+            bot_logger.info(f"  Balance: ${daily_status['current_balance']:.2f}")
+            bot_logger.info(f"  Tier: {daily_status.get('tier_description', 'N/A')}")
+            bot_logger.info(f"  Max Lot: {daily_status.get('max_lot_size', 'N/A')} | Max Trades: {daily_status.get('max_concurrent_trades', 'N/A')}")
+            bot_logger.info(f"  Growth: {daily_status.get('account_growth', 0):.1f}% | Next tier: {daily_status.get('next_tier', 'N/A')} (${daily_status.get('balance_to_next', 0):.0f} away)")
+            bot_logger.info(f"  Daily Loss: ${daily_status['daily_loss']:.2f} ({daily_status['daily_loss_percent']:.1f}%)")
+            bot_logger.info(f"  Open Trades: {daily_status['open_trades']}")
+            bot_logger.info(
+                f"  Slots Available: {daily_status.get('available_trade_slots', 0)} "
+                f"/ {daily_status.get('effective_trade_cap', daily_status.get('max_concurrent_trades', 0))}"
+            )
+            bot_logger.info(f"  Can Trade: {daily_status['can_trade']}")
+        except Exception as e:
+            bot_logger.warning(f"Daily status logging failed: {e}")
     
     def _execute_trade(self, pair, signal_result, df, timeframe_key='5m'):
         """Execute a scalping trade with pip-based SL/TP"""
@@ -819,6 +847,20 @@ class TradingBot:
             )
             bot_logger.info("🧠 LSTM auto-retraining scheduled (daily 03:00 UTC)")
 
+        # Add listener to log APScheduler job errors visibly
+        def _job_error_listener(event):
+            if event.exception:
+                bot_logger.error(
+                    f"💥 Scheduler job {event.job_id} crashed: {event.exception}",
+                    exc_info=True,
+                )
+
+        try:
+            from apscheduler.events import EVENT_JOB_ERROR
+            self.scheduler.add_listener(_job_error_listener, EVENT_JOB_ERROR)
+        except Exception:
+            pass
+
         self.scheduler.start()
         
         # Run first analysis immediately (5m first, then 1m will follow on schedule)
@@ -860,6 +902,10 @@ class TradingBot:
         
         Compares current open tickets against _known_tickets.
         Any ticket that disappeared was closed — look it up in deal history.
+        
+        NOTE: Does NOT call risk_manager.on_trade_closed() for balance adjustment
+        because _sync_balance() already synced the authoritative broker balance.
+        Only decrements the open_trades counter and records the trade for the learner.
         """
         if self.mode != 'live' or not self.broker:
             return
@@ -919,8 +965,11 @@ class TradingBot:
                     f"P/L: ${profit:+.2f} | Exit: {exit_type}"
                 )
 
-                # Record with adaptive learner
-                self.risk_manager.on_trade_closed(profit)
+                # Decrement open_trades counter (balance is synced from broker
+                # by _sync_balance — do NOT double-count P/L here)
+                self.risk_manager.open_trades = max(0, self.risk_manager.open_trades - 1)
+
+                # Record with adaptive learner (for weight adaptation only)
                 model_signals = getattr(self, '_pending_trade_signals', {}).pop(pair, {})
                 self.ensemble.record_trade_result({
                     'pair': pair,
@@ -948,9 +997,10 @@ class TradingBot:
         
         Set SKIP_HISTORY_BACKFILL=true in .env to disable (recommended when starting fresh).
         """
-        # Allow disabling backfill for fresh starts with new configuration
-        if os.getenv('SKIP_HISTORY_BACKFILL', 'false').lower() in ('true', '1', 'yes'):
-            bot_logger.info("📊 History backfill disabled (SKIP_HISTORY_BACKFILL=true)")
+        # Backfill disabled by default — old trades from a different strategy
+        # should not influence the adaptive learner.  Set SKIP_HISTORY_BACKFILL=false to enable.
+        if os.getenv('SKIP_HISTORY_BACKFILL', 'true').lower() not in ('false', '0', 'no'):
+            bot_logger.info("📊 History backfill skipped (set SKIP_HISTORY_BACKFILL=false to enable)")
             return
         
         if self.mode != 'live' or not self.broker:

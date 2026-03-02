@@ -103,8 +103,12 @@ class TrailingStopManager:
             List of modification results
         """
         positions = broker.get_open_positions()
+        if positions is None:
+            # Relay/broker failure — do NOT clear tracking; positions may still be open
+            bot_logger.warning("Trailing: broker returned None — skipping update (keeping tracking)")
+            return []
         if not positions:
-            # All positions may have closed — clean up tracking
+            # Genuinely no open positions — clean up tracking
             if self._tracking:
                 closed_tickets = list(self._tracking.keys())
                 for t in closed_tickets:
