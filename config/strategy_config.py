@@ -88,8 +88,8 @@ DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.05))  # -5% (reduce
 OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
-# AI Model Thresholds (tuned for scalping speed)
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.30))
+# AI Model Thresholds (tuned for scalping speed — lowered for quick_wins)
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.25))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))
 
 # Technical Analysis Parameters (tuned for scalping)
@@ -105,7 +105,7 @@ INDICATORS = {
 STOP_LOSS_MULTIPLIER = 1.5  # ATR multiplier for stop loss
 TAKE_PROFIT_RATIO = 2.0     # Risk:Reward ratio (1:2)
 MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 2.0))
-HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.70))
+HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.40))
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
 
 # Logging

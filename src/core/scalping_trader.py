@@ -110,21 +110,23 @@ class ScalpingTrader:
         """
         validation = {'valid': True, 'reasons': []}
         
-        # 1. Confidence threshold
-        if signal['confidence'] < 0.70:
+        # 1. Confidence threshold (lowered for quick_wins mode)
+        min_conf = 0.40 if self.profit_mode == 'quick_wins' else 0.70
+        if signal['confidence'] < min_conf:
             validation['valid'] = False
-            validation['reasons'].append(f"Confidence {signal['confidence']:.2f} below 0.70")
+            validation['reasons'].append(f"Confidence {signal['confidence']:.2f} below {min_conf}")
             return validation
         
         validation['reasons'].append(f"✓ Confidence {signal['confidence']:.2f} meets threshold")
         
-        # 2. Risk/reward ratio acceptable
+        # 2. Risk/reward ratio acceptable (lowered for quick_wins)
+        min_rr = 0.5 if self.profit_mode == 'quick_wins' else 1.0
         if signal['risk_reward']:
             rr = signal['risk_reward']
             ratio = rr['reward_pips_1'] / (rr['risk_pips'] + 0.001)
-            if ratio < 1.0:
+            if ratio < min_rr:
                 validation['valid'] = False
-                validation['reasons'].append(f"Risk/Reward {ratio:.2f} too unfavorable")
+                validation['reasons'].append(f"Risk/Reward {ratio:.2f} below {min_rr}")
                 return validation
             validation['reasons'].append(f"✓ Risk/Reward ratio {ratio:.2f}R acceptable")
         
