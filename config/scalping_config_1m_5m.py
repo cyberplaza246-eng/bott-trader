@@ -21,35 +21,25 @@ class MultiTimeframeScalpingConfig:
         'description': 'Confluence only — highest probability trades',
         
         # Trading Rules
-        'confluence_required': True,  # Only trade when both TF agree
-        'min_1m_confidence': 0.80,    # Stricter than default
+        'confluence_required': True,
+        'min_1m_confidence': 0.80,
         'min_5m_confidence': 0.75,
+        'entry_threshold': 0.75,        # Tighter than default 0.70
         
         # Position Management
-        'max_concurrent_scalps': 1,   # One position at a time
-        'max_total_loss_daily': 100,  # Stop trading if down this much
+        'max_concurrent_scalps': 1,
+        'max_total_loss_daily': 100,
         
-        # 1-Minute Settings
+        # ATR-based settings (no fixed pip SL)
         '1m_enabled': True,
-        '1m_candles_history': 100,
-        '1m_max_hold_seconds': 480,   # 8 minutes max
-        '1m_gbpusd_sl_min': 5,
-        '1m_gbpusd_sl_max': 8,
-        '1m_eurusd_sl_min': 4,
-        '1m_eurusd_sl_max': 6,
-        
-        # 5-Minute Settings
+        '1m_candles_history': 200,
+        '1m_max_hold_candles': 6,       # Tighter time exit
         '5m_enabled': True,
-        '5m_candles_history': 200,
-        '5m_max_hold_seconds': 1200,  # 20 minutes max
-        '5m_gbpusd_sl_min': 8,
-        '5m_gbpusd_sl_max': 12,
-        '5m_eurusd_sl_min': 6,
-        '5m_eurusd_sl_max': 10,
+        '5m_candles_history': 250,
         
         # Account Risk
-        'account_risk_percent': 1.0,  # Risk 1% per trade
-        'account_tier': 'mini',       # micro/mini/standard/professional
+        'account_risk_percent': 1.0,
+        'account_tier': 'mini',
     }
     
     # =========================================================================
@@ -62,31 +52,21 @@ class MultiTimeframeScalpingConfig:
         'description': 'Trade any confident setup on either TF',
         
         # Trading Rules
-        'confluence_required': False,  # Trade single TF if confident enough
-        'min_1m_confidence': 0.75,     # Standard for 1M
-        'min_5m_confidence': 0.70,     # Standard for 5M
+        'confluence_required': False,
+        'min_1m_confidence': 0.75,
+        'min_5m_confidence': 0.70,
+        'entry_threshold': 0.70,        # Default ATR entry threshold
         
         # Position Management
-        'max_concurrent_scalps': 2,   # Two positions allowed
+        'max_concurrent_scalps': 2,
         'max_total_loss_daily': 200,
         
-        # 1-Minute Settings
+        # ATR-based settings
         '1m_enabled': True,
-        '1m_candles_history': 100,
-        '1m_max_hold_seconds': 480,
-        '1m_gbpusd_sl_min': 5,
-        '1m_gbpusd_sl_max': 8,
-        '1m_eurusd_sl_min': 4,
-        '1m_eurusd_sl_max': 6,
-        
-        # 5-Minute Settings
+        '1m_candles_history': 200,
+        '1m_max_hold_candles': 8,       # Standard time exit
         '5m_enabled': True,
-        '5m_candles_history': 200,
-        '5m_max_hold_seconds': 1200,
-        '5m_gbpusd_sl_min': 8,
-        '5m_gbpusd_sl_max': 12,
-        '5m_eurusd_sl_min': 6,
-        '5m_eurusd_sl_max': 10,
+        '5m_candles_history': 250,
         
         # Account Risk
         'account_risk_percent': 1.5,
@@ -99,21 +79,21 @@ class MultiTimeframeScalpingConfig:
     # =========================================================================
     
     QUICK_WINS = {
-        'tp_ratios': [0.5, 0.8],       # 0.5R-0.8R (quick ~5-8 pip targets)
-        'breakeven_r': 0.3,             # Move SL to breakeven at 0.3R profit
-        'partial_close_pct': 0.40,      # Partial close at 40% of TP distance
-        'trail_atr_mult': 0.5,          # Trail very tight at 0.5× ATR
-        'max_hold_multiplier': 0.6,     # 60% of normal hold time
-        'description': 'Take small wins fast — higher win rate, smaller targets',
+        'tp_ratios': [1.3, 1.3],       # Flat 1.3R for all regimes
+        'breakeven_r': 0.8,             # Move SL to breakeven at 0.8R profit
+        'partial_close_pct': 0.50,      # Partial close 50% at 1.0R
+        'trail_atr_mult': 0.8,          # Trail at 0.8× ATR
+        'max_hold_multiplier': 1.0,     # Full ATR-calculated hold time
+        'description': 'ATR-adaptive quick wins — breakeven fast, trail remainder',
     }
     
     NORMAL_PROFITS = {
-        'tp_ratios': [1.0, 1.5],        # 1R-1.5R (standard targets)
-        'breakeven_r': 0.5,             # Move SL to breakeven at 0.5R profit
-        'partial_close_pct': 0.60,      # Partial close at 60% of TP distance
+        'tp_ratios': [1.3, 1.3],        # Flat 1.3R for all regimes
+        'breakeven_r': 0.8,             # Move SL to breakeven at 0.8R profit
+        'partial_close_pct': 0.50,      # Partial close at 50% of TP distance
         'trail_atr_mult': 0.8,          # Trail at 0.8× ATR
         'max_hold_multiplier': 1.0,     # Normal hold time
-        'description': 'Standard profit targets',
+        'description': 'ATR-adaptive standard targets',
     }
     
     # =========================================================================
@@ -127,31 +107,21 @@ class MultiTimeframeScalpingConfig:
         
         # Trading Rules
         'confluence_required': False,
-        'min_1m_confidence': 0.70,     # Lower threshold
+        'min_1m_confidence': 0.70,
         'min_5m_confidence': 0.65,
-        'allow_divergent_trades': True,  # Trade even if 1M & 5M disagree
+        'entry_threshold': 0.65,        # Lower entry threshold
+        'allow_divergent_trades': True,
         
         # Position Management
-        'max_concurrent_scalps': 3,   # Three positions allowed
+        'max_concurrent_scalps': 3,
         'max_total_loss_daily': 300,
         
-        # 1-Minute Settings
+        # ATR-based settings
         '1m_enabled': True,
-        '1m_candles_history': 100,
-        '1m_max_hold_seconds': 480,
-        '1m_gbpusd_sl_min': 5,
-        '1m_gbpusd_sl_max': 8,
-        '1m_eurusd_sl_min': 4,
-        '1m_eurusd_sl_max': 6,
-        
-        # 5-Minute Settings
+        '1m_candles_history': 200,
+        '1m_max_hold_candles': 10,      # Wider time exit
         '5m_enabled': True,
-        '5m_candles_history': 200,
-        '5m_max_hold_seconds': 1200,
-        '5m_gbpusd_sl_min': 8,
-        '5m_gbpusd_sl_max': 12,
-        '5m_eurusd_sl_min': 6,
-        '5m_eurusd_sl_max': 10,
+        '5m_candles_history': 250,
         
         # Account Risk
         'account_risk_percent': 2.0,
@@ -166,44 +136,31 @@ class MultiTimeframeScalpingConfig:
         'GBP/USD': {
             'enabled': True,
             'base_lot_size': 0.1,
+            'session_atr_min': 0.00055,     # Min ATR to trade (~5.5 pips)
+            'spread_sim': 0.00020,          # Simulated spread (2 pips)
+            'pip_size': 0.0001,
             
-            # 1-Minute specific
-            '1m_sl_range': [5, 8],           # pips
-            '1m_tp_ratio': [1.0, 1.5],       # 1R, 1.5R
-            '1m_max_hold': 480,              # seconds (8 min)
-            '1m_cooldown': 120,              # seconds (2 min)
-            
-            # 5-Minute specific
-            '5m_sl_range': [8, 12],
-            '5m_tp_ratio': [1.5, 2.0],
-            '5m_max_hold': 1200,             # seconds (20 min)
-            '5m_cooldown': 300,              # seconds (5 min)
+            # Hold limits (candle-based, not second-based)
+            'max_hold_candles': 8,          # Time-exit after 8 candles
+            'cooldown_seconds': 30,
             
             # Session filters
             'trading_sessions': ['london', 'newyork'],
-            'avoid_times': ['05:00-08:00'],  # Avoid low-volume Asian
         },
         
         'EUR/USD': {
             'enabled': True,
-            'base_lot_size': 0.15,  # Slightly larger (slower moves)
+            'base_lot_size': 0.15,
+            'session_atr_min': 0.00040,     # Min ATR to trade (~4 pips)
+            'spread_sim': 0.00015,          # Simulated spread (1.5 pips)
+            'pip_size': 0.0001,
             
-            # 1-Minute specific (tighter for slow EUR)
-            '1m_sl_range': [4, 6],
-            '1m_tp_ratio': [0.8, 1.2],
-            '1m_max_hold': 480,
-            '1m_cooldown': 120,
-            '1m_extra_confirmation': True,  # Wait for RSI divergence
-            
-            # 5-Minute specific
-            '5m_sl_range': [6, 10],
-            '5m_tp_ratio': [1.0, 1.5],
-            '5m_max_hold': 1200,
-            '5m_cooldown': 300,
+            # Hold limits (candle-based)
+            'max_hold_candles': 8,
+            'cooldown_seconds': 30,
             
             # Session filters
             'trading_sessions': ['london', 'overlap'],
-            'avoid_times': ['03:00-08:00'],  # Avoid quiet Asian
         },
     }
     
@@ -214,24 +171,55 @@ class MultiTimeframeScalpingConfig:
     INDICATORS = {
         # RSI (Relative Strength Index)
         'rsi': {
-            'period': 9,
+            'period': 14,         # RSI(14) per ATR strategy
             'overbought': 70,
             'oversold': 30,
-            'midpoint': 50,
+            'entry_low': 40,      # Pre-expansion zone lower
+            'entry_high': 60,     # Pre-expansion zone upper
         },
         
         # EMA (Exponential Moving Averages)
         'ema': {
             'fast': 20,      # Pullback target
-            'medium': 50,    # Trend filter
+            'medium': 50,    # 5M bias filter
             'slow': 200,     # Major trend
+        },
+        
+        # ATR (Average True Range) — drives everything
+        'atr': {
+            'period': 14,
+            'sma_period': 5,           # Rolling ATR average
+            'sl_multiplier': 0.8,      # SL = 0.8 x ATR (grid-search optimal)
+            'tp_base_ratio': 1.3,      # TP = 1.3 x SL (flat)
+            'tp_expanding': 1.3,       # Flat — regime variance removed
+            'tp_contracting': 1.3,     # Flat — contracting regime skipped
+            'exhaustion_mult': 2.0,    # Reject if candle > 2x ATR
+            'spread_max_pct': 0.20,    # Spread must be < 20% of ATR
+        },
+        
+        # ADX (Trend strength)
+        'adx': {
+            'period': 14,
+            'strong_threshold': 25,
+            'preferred_threshold': 18,
+        },
+        
+        # Volume
+        'volume': {
+            'period': 20,
+            'spike_threshold': 1.2,    # Volume > 1.2x average
+        },
+        
+        # Micro-structure
+        'structure': {
+            'lookback': 5,             # 5-candle structure break
         },
         
         # Confluence filtering
         'confluence': {
-            'score_weight_1m': 0.4,   # 40% weight on 1M signal
-            'score_weight_5m': 0.6,   # 60% weight on 5M signal
-            'require_alignment': True, # Both TF must align for buy/sell
+            'score_weight_1m': 0.4,
+            'score_weight_5m': 0.6,
+            'require_alignment': True,
         },
     }
     
@@ -290,15 +278,25 @@ class MultiTimeframeScalpingConfig:
     
     @classmethod
     def get_1m_sl_range(cls, pair):
-        """Get 1-minute stop loss range for pair"""
+        """Get ATR-based SL config for pair (no fixed pip range)."""
         cfg = cls.PAIRS.get(pair)
-        return cfg['1m_sl_range'] if cfg else [5, 8]
+        if cfg:
+            return {
+                'atr_multiplier': 0.8,
+                'session_atr_min': cfg.get('session_atr_min', 0.00040),
+            }
+        return {'atr_multiplier': 0.8, 'session_atr_min': 0.00040}
     
     @classmethod
     def get_5m_sl_range(cls, pair):
-        """Get 5-minute stop loss range for pair"""
+        """Get ATR-based SL config for pair (no fixed pip range)."""
         cfg = cls.PAIRS.get(pair)
-        return cfg['5m_sl_range'] if cfg else [8, 12]
+        if cfg:
+            return {
+                'atr_multiplier': 0.8,
+                'session_atr_min': cfg.get('session_atr_min', 0.00040),
+            }
+        return {'atr_multiplier': 0.8, 'session_atr_min': 0.00040}
     
     # =========================================================================
     # RECOMMENDED PRESETS

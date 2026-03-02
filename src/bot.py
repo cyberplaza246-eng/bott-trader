@@ -188,9 +188,9 @@ class TradingBot:
         if cooldown_key not in self.last_signal_time:
             return False
         
-        # Use per-timeframe cooldown from config
-        pair_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
-        cooldown_seconds = pair_config.get('cooldown_seconds', 180)
+        # Use per-pair cooldown from config (ATR-based config has no nested timeframe)
+        pair_config = SCALPING_PAIRS.get(pair, {})
+        cooldown_seconds = pair_config.get('cooldown_seconds', 30)
         
         elapsed = (datetime.now() - self.last_signal_time[cooldown_key]).total_seconds()
         return elapsed < cooldown_seconds
@@ -536,7 +536,7 @@ class TradingBot:
             bot_logger.warning(f"Daily status logging failed: {e}")
     
     def _execute_trade(self, pair, signal_result, df, timeframe_key='5m'):
-        """Execute a scalping trade with pip-based SL/TP"""
+        """Execute a scalping trade with ATR-based SL/TP from signal"""
         trade_type = signal_result['signal']
         # Use the enriched df (with indicators) from the ensemble
         enriched_df = signal_result.get('enriched_df', df)
@@ -544,34 +544,54 @@ class TradingBot:
         entry_price = latest['close']
         atr = latest.get('atr', entry_price * 0.001)  # Fallback: 0.1% of price
 
-        # ── Scalping pip-based SL/TP from config ─────────────────────
-        pair_scalp_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
-        if pair_scalp_config:
-            # Use midpoint of pip range for SL
-            sl_pips_min = pair_scalp_config.get('sl_pips_min', 6)
-            sl_pips_max = pair_scalp_config.get('sl_pips_max', 10)
-            sl_pips = (sl_pips_min + sl_pips_max) / 2
-            sl_distance = sl_pips * 0.0001  # Standard pairs only (no JPY)
+        # ── ATR-based SL/TP from ScalpingAnalyzer signal ─────────────
+        # The scalping analyzer calculates SL = 0.8×ATR, TP = ratio×SL
+        scalping_rr = signal_result.get('scalping_risk_reward', {})
+        if scalping_rr and scalping_rr.get('stop_loss') and scalping_rr.get('take_profit'):
+            # Use ATR-derived SL/TP from the scalping analyzer
+            stop_loss = scalping_rr['stop_loss']
+            take_profit = scalping_rr['take_profit']
+            sl_distance = scalping_rr.get('sl_distance', abs(entry_price - stop_loss))
+            tp_ratio = scalping_rr.get('tp_ratio_used', 1.4)
+
+            bot_logger.info(
+                f"📐 ATR-based SL/TP: SL={scalping_rr.get('risk_pips', 0):.1f}p "
+                f"({scalping_rr.get('atr_sl_mult', 0.8)}×ATR), "
+                f"TP={scalping_rr.get('reward_pips_1', 0):.1f}p ({tp_ratio:.1f}R)"
+            )
+        else:
+            # Fallback: calculate ATR-based SL/TP if signal didn't provide it
+            pair_config = SCALPING_PAIRS.get(pair, {})
+            sl_mult = 0.8  # Default ATR multiplier
+            sl_distance = atr * sl_mult
 
             if trade_type == 'BUY':
                 stop_loss = round(entry_price - sl_distance, 5)
             else:
                 stop_loss = round(entry_price + sl_distance, 5)
 
-            # TP from config ratio
-            tp_ratios = pair_scalp_config.get('tp_ratio', [1.5, 2.0])
-            tp_ratio = tp_ratios[0]  # Use primary R:R
+            # TP from ATR regime
+            atr_regime = signal_result.get('atr_regime', 'neutral')
+            tp_ratio_map = {'expanding': 1.8, 'contracting': 1.2, 'neutral': 1.4}
+            tp_ratio = tp_ratio_map.get(atr_regime, 1.4)
             tp_distance = sl_distance * tp_ratio
-            # TP buffer (~1.5 pips) to fill before S/R stall
-            tp_buffer = 0.0001 * 1.5
+
             if trade_type == 'BUY':
-                take_profit = round(entry_price + tp_distance - tp_buffer, 5)
+                take_profit = round(entry_price + tp_distance, 5)
             else:
-                take_profit = round(entry_price - tp_distance + tp_buffer, 5)
-        else:
-            # Fallback to ATR-based
-            stop_loss = self.risk_manager.calculate_stop_loss(entry_price, atr, trade_type, pair=pair)
-            take_profit = self.risk_manager.calculate_take_profit(entry_price, stop_loss, trade_type, pair=pair)
+                take_profit = round(entry_price - tp_distance, 5)
+
+            bot_logger.info(
+                f"📐 ATR fallback SL/TP: SL={sl_distance/0.0001:.1f}p "
+                f"({sl_mult}×ATR), TP={tp_distance/0.0001:.1f}p ({tp_ratio:.1f}R)"
+            )
+
+        # Record SL value for adaptive learner median tracking
+        try:
+            sl_dist = abs(entry_price - stop_loss)
+            self.ensemble.learner.record_sl_outcome(pair, sl_dist, True)  # outcome recorded on close
+        except Exception:
+            pass
 
         # S/R-based dynamic TP: use nearest S/R level within scalping R:R limits
         sr_levels = signal_result.get('sr_levels', {})

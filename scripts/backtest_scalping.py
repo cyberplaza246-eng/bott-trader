@@ -294,10 +294,10 @@ def main():
     # Look for historical data files
     data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
     
-    # Try to find data files
+    # Try to find data files (use 5m for scalping, with 1m available)
     data_files = {
-        'EUR/USD': os.path.join(data_dir, 'EUR_USD_1h.csv'),
-        'GBP/USD': os.path.join(data_dir, 'GBP_USD_1h.csv'),
+        'EUR/USD': os.path.join(data_dir, 'EUR_USD_5m.csv'),
+        'GBP/USD': os.path.join(data_dir, 'GBP_USD_5m.csv'),
     }
     
     backtester = ScalpingBacktester(initial_balance=1000)

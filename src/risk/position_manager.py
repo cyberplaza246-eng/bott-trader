@@ -544,25 +544,31 @@ class RiskManager:
 
     # ── Scalping-Specific SL/TP ──────────────────────────────────────
 
-    def calculate_scalping_stop_loss(self, pair, timeframe_key, entry_price, trade_type):
-        """Calculate pip-based stop loss for scalping using SCALPING_PAIRS config.
+    def calculate_scalping_stop_loss(self, pair, timeframe_key, entry_price, trade_type,
+                                     atr_value=None):
+        """Calculate ATR-based stop loss for scalping.
+
+        Uses 0.8 × ATR(14) when atr_value is provided; otherwise falls back to
+        a conservative default based on the pair's pip_size from SCALPING_PAIRS.
 
         Args:
             pair: Currency pair (e.g. 'EUR/USD')
             timeframe_key: '1m' or '5m'
             entry_price: Entry price
             trade_type: 'BUY' or 'SELL'
+            atr_value: Current ATR(14) value (preferred)
 
         Returns:
             Stop-loss price (rounded to 5 decimals)
         """
-        pair_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
-        sl_pips_min = pair_config.get('sl_pips_min', 6)
-        sl_pips_max = pair_config.get('sl_pips_max', 10)
-        sl_pips = (sl_pips_min + sl_pips_max) / 2
-
+        pair_config = SCALPING_PAIRS.get(pair, {})
         pip_info = PIP_VALUES.get(pair, DEFAULT_PIP)
-        sl_distance = sl_pips * pip_info['pip_size']
+
+        if atr_value and atr_value > 0:
+            sl_distance = 0.8 * atr_value
+        else:
+            # Conservative fallback: 8 pips
+            sl_distance = 8 * pip_info['pip_size']
 
         if trade_type == 'BUY':
             stop_loss = entry_price - sl_distance
@@ -573,7 +579,7 @@ class RiskManager:
         return round(stop_loss, digits)
 
     def calculate_scalping_take_profit(self, pair, timeframe_key, entry_price, stop_loss, trade_type):
-        """Calculate pip-based take profit for scalping using R:R ratios from config.
+        """Calculate take profit for scalping using R:R ratio from config.
 
         Args:
             pair: Currency pair
@@ -585,9 +591,8 @@ class RiskManager:
         Returns:
             Take-profit price (rounded to 5 decimals)
         """
-        pair_config = SCALPING_PAIRS.get(pair, {}).get(timeframe_key, {})
-        tp_ratios = pair_config.get('tp_ratio', [1.2, 1.5])
-        tp_ratio = tp_ratios[0]  # Use primary (tighter) target for high WR
+        pair_config = SCALPING_PAIRS.get(pair, {})
+        tp_ratio = 1.4  # ATR base TP ratio
 
         risk_distance = abs(entry_price - stop_loss)
         tp_distance = risk_distance * tp_ratio

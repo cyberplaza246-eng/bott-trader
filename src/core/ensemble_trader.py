@@ -27,32 +27,34 @@ from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGR
 class EnsembleTrader:
     """8-model ensemble with regime awareness, conviction scaling, and adaptive learning"""
 
-    # Regime-based model weight boosts (scalping-tuned)
+    # Regime-based model weight boosts (ATR-centric scalping)
     REGIME_BOOSTS = {
         'trending': {
-            'scalping': 1.5,
-            'ema_crossover': 1.4,
-            'multi_tf': 1.3,
+            'scalping': 1.5,       # ATR-pullback thrives in trends
+            'ema_crossover': 1.3,  # EMA alignment confirms
             'technical': 1.2,
-            'lstm': 1.1,
-            'support_resistance': 0.7,  # S/R less useful in trends
-            'volume': 0.9,
+            'volume': 1.1,
+            'multi_tf': 1.2,
+            'lstm': 1.0,
+            'support_resistance': 0.6,  # S/R less useful in trends
+            'candlestick': 0.9,
         },
         'ranging': {
-            'scalping': 0.6,
+            'scalping': 0.5,       # ATR too low in ranges
             'support_resistance': 1.5,
             'candlestick': 1.3,
-            'technical': 1.2,  # RSI/BB work well in ranges
-            'ema_crossover': 0.6,  # Crossovers whipsaw in ranges
-            'multi_tf': 0.8,
+            'technical': 1.2,
+            'volume': 1.0,
+            'ema_crossover': 0.5,  # Crossovers whipsaw in ranges
+            'multi_tf': 0.7,
         },
         'volatile': {
-            'scalping': 0.8,
+            'scalping': 1.3,       # ATR expanding = scalping loves it
             'volume': 1.4,
-            'support_resistance': 1.2,
+            'technical': 0.9,
+            'ema_crossover': 0.6,
+            'support_resistance': 1.1,
             'candlestick': 1.1,
-            'ema_crossover': 0.5,  # Crossovers unreliable
-            'technical': 0.8,
         },
     }
 
@@ -72,26 +74,26 @@ class EnsembleTrader:
         self.ml_scorer = MLTradeScorer()
         self.broker = broker
 
-        # Scalping-tuned weights: scalping model is the heaviest
+        # ATR-centric weights: scalping analyzer is the dominant signal
         self.model_weights = {
-            'scalping': 0.22,
-            'ema_crossover': 0.14,
-            'candlestick': 0.13,
-            'technical': 0.12,
-            'volume': 0.11,
-            'multi_tf': 0.10,
-            'support_resistance': 0.06,
-            'lstm': 0.06,
-            'sentiment': 0.06,
+            'scalping': 0.28,         # Primary ATR-pullback signal
+            'technical': 0.18,        # Multi-indicator confirmation
+            'volume': 0.14,           # Volume spike confirmation
+            'ema_crossover': 0.12,    # EMA alignment + ATR momentum
+            'candlestick': 0.10,      # Candle pattern confirmation
+            'multi_tf': 0.08,         # 5M timeframe alignment
+            'support_resistance': 0.04,
+            'lstm': 0.03,
+            'sentiment': 0.03,
         }
 
         model_count = 9
         if not self.lstm_available:
-            bot_logger.info("🧠 Scalping ensemble running with 8 models (LSTM disabled)")
+            bot_logger.info("🧠 ATR-centric ensemble running with 8 models (LSTM disabled)")
             model_count = 8
         else:
-            bot_logger.info("🧠 Scalping ensemble running with all 9 models")
-        bot_logger.info(f"🔪 ScalpingAnalyzer active as primary signal (weight 0.22)")
+            bot_logger.info("🧠 ATR-centric ensemble running with all 9 models")
+        bot_logger.info(f"🔪 ScalpingAnalyzer active as primary ATR signal (weight 0.28)")
 
     def get_trading_signal(self, df, pair):
         """
@@ -164,8 +166,25 @@ class EnsembleTrader:
         candle_signal = self.candle_detector.get_pattern_signal(df_enriched)
         ema_signal = self.ema_crossover.get_signal(df_enriched)
 
-        # Scalping signal (9th model — highest weight)
-        scalping_signal = self.scalping.get_signal(df_enriched, pair)
+        # Scalping signal (9th model — heaviest weight, ATR-centric)
+        # Pass 5M data and spread if available
+        df_5m = None
+        broker_spread = None
+        if self.broker:
+            try:
+                df_5m = self.broker.get_candles(pair, '5m', count=250)
+            except Exception:
+                pass
+            try:
+                broker_spread = self.broker.get_spread(pair)
+            except Exception:
+                pass
+
+        scalping_signal = self.scalping.get_signal(
+            df_enriched, pair,
+            df_5m=df_5m,
+            spread=broker_spread,
+        )
         scalping_signal_type = scalping_signal.get('signal', 'HOLD')
         if scalping_signal_type == 'SKIP':
             scalping_signal_type = 'HOLD'
@@ -251,7 +270,7 @@ class EnsembleTrader:
             net_conviction = 0.0
 
         # === EMA 200 Trend Filter ===
-        EMA_COUNTER_TREND_PENALTY = 0.08  # Increased from 0.05
+        EMA_COUNTER_TREND_PENALTY = 0.12  # Strong penalty for counter-trend trades
         ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
         cur_price = df_enriched['close'].iloc[-1]
         ema_counter_trend = False
@@ -274,6 +293,26 @@ class EnsembleTrader:
 
         if ema_counter_trend and weighted_confidence > 0:
             weighted_confidence = max(0.0, weighted_confidence - EMA_COUNTER_TREND_PENALTY)
+
+        # === High-Weight Model Disagreement Filter ===
+        # If a heavy model (scalping, LSTM, technical) STRONGLY opposes the signal, penalize
+        heavy_models = ['scalping', 'lstm', 'technical', 'ema_crossover']
+        strong_opposition_count = 0
+        for model_name in heavy_models:
+            m = all_signals.get(model_name)
+            if m and m['signal'] != 'HOLD' and m['signal'] != final_signal and m['confidence'] >= 0.50:
+                strong_opposition_count += 1
+                bot_logger.info(
+                    f"⚠️  Heavy model {model_name} opposes {final_signal} "
+                    f"with {m['signal']} ({m['confidence']:.0%})"
+                )
+        if strong_opposition_count >= 2:
+            weighted_confidence *= 0.60  # -40% if 2+ heavy models oppose
+            bot_logger.warning(
+                f"🚫 {strong_opposition_count} heavy models oppose {final_signal} — confidence heavily reduced"
+            )
+        elif strong_opposition_count == 1:
+            weighted_confidence *= 0.80  # -20% if 1 heavy model opposes
 
         # === S/R Context Advisory ===
         price_zone = sr_signal.get('levels', {}).get('price_zone', '')
@@ -355,6 +394,10 @@ class EnsembleTrader:
             },
             'sr_levels': sr_signal.get('levels', {}),
             'patterns': candle_signal.get('patterns', []),
+            # ATR-centric fields
+            'atr_regime': scalping_signal.get('atr_regime', 'neutral'),
+            'atr_tp_ratio': scalping_signal.get('atr_tp_ratio', 1.4),
+            'scalping_risk_reward': scalping_signal.get('risk_reward', {}),
         }
 
         if final_signal != 'SKIP':
@@ -371,9 +414,24 @@ class EnsembleTrader:
     def should_trade(self, signal_result):
         """
         Determine if signal is strong enough to trade.
-        Uses adaptive confidence threshold + regime awareness.
+        Uses adaptive confidence threshold + regime awareness + session check.
         """
+        from datetime import datetime, timezone
         threshold = self.learner.get_adjusted_threshold()
+
+        # Session filter: only trade during London/NY hours (7-17 UTC)
+        hour = datetime.now(timezone.utc).hour
+        if hour < 7 or hour >= 17:
+            bot_logger.info(f"🕐 Outside trading hours ({hour}:00 UTC) — skipping")
+            return False
+
+        # Minimum 3 models must agree
+        if signal_result['models_agreement'] < MIN_MODELS_AGREEMENT:
+            bot_logger.info(
+                f"📊 Only {signal_result['models_agreement']} models agree "
+                f"(need {MIN_MODELS_AGREEMENT}) — skipping"
+            )
+            return False
 
         return (
             signal_result['signal'] != 'SKIP' and

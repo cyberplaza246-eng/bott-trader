@@ -20,9 +20,13 @@ from datetime import datetime, timedelta, timezone
 from src.utils.logger import bot_logger
 
 
-# ── Buffer minutes before/after high-impact events ──────────────
-PRE_EVENT_BUFFER = int(os.getenv('EVENT_PRE_BUFFER_MINUTES', '30'))
-POST_EVENT_BUFFER = int(os.getenv('EVENT_POST_BUFFER_MINUTES', '30'))
+# ── Tiered buffer minutes before/after events ──────────────────
+# High impact (FOMC, NFP, CPI, ECB, BOE, BOJ): wider buffer
+PRE_EVENT_BUFFER_HIGH = int(os.getenv('EVENT_PRE_BUFFER_HIGH_MINUTES', '30'))
+POST_EVENT_BUFFER_HIGH = int(os.getenv('EVENT_POST_BUFFER_HIGH_MINUTES', '30'))
+# Medium impact (PPI, Retail Sales): tighter buffer
+PRE_EVENT_BUFFER_MEDIUM = int(os.getenv('EVENT_PRE_BUFFER_MEDIUM_MINUTES', '15'))
+POST_EVENT_BUFFER_MEDIUM = int(os.getenv('EVENT_POST_BUFFER_MEDIUM_MINUTES', '15'))
 
 
 # ── Static recurring schedule (UTC times) ───────────────────────
@@ -148,8 +152,10 @@ class EconomicCalendar:
     """
 
     def __init__(self):
-        self.pre_buffer = timedelta(minutes=PRE_EVENT_BUFFER)
-        self.post_buffer = timedelta(minutes=POST_EVENT_BUFFER)
+        self.pre_buffer_high = timedelta(minutes=PRE_EVENT_BUFFER_HIGH)
+        self.post_buffer_high = timedelta(minutes=POST_EVENT_BUFFER_HIGH)
+        self.pre_buffer_medium = timedelta(minutes=PRE_EVENT_BUFFER_MEDIUM)
+        self.post_buffer_medium = timedelta(minutes=POST_EVENT_BUFFER_MEDIUM)
         self._event_cache = {}
         self._cache_date = None
 
@@ -185,9 +191,18 @@ class EconomicCalendar:
                 datetime.min.time().replace(hour=event['hour'], minute=event['minute']),
             ).replace(tzinfo=timezone.utc)
 
+            # Tiered buffer based on impact level
+            impact = event.get('impact', 'high')
+            if impact == 'high':
+                pre_buf = self.pre_buffer_high
+                post_buf = self.post_buffer_high
+            else:  # medium or low
+                pre_buf = self.pre_buffer_medium
+                post_buf = self.post_buffer_medium
+
             # Check if we're in the danger window
-            window_start = event_time - self.pre_buffer
-            window_end = event_time + self.post_buffer
+            window_start = event_time - pre_buf
+            window_end = event_time + post_buf
 
             if window_start <= now <= window_end:
                 return True, event['name']

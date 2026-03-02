@@ -15,7 +15,7 @@ MT5_SERVER = os.getenv('MT5_SERVER', 'Exness-MT5')
 # Trading Parameters
 RISK_PER_TRADE_PERCENT = float(os.getenv('RISK_PER_TRADE_PERCENT', 1.0))
 MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 3))
-DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 10))
+DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 5))
 INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', 50))
 
 # Trading Mode
@@ -36,42 +36,30 @@ TIMEFRAMES = {
 
 # ── Scalping-Specific Configuration ────────────────────────────────
 
-# Per-pair per-timeframe scalping parameters
+# Per-pair ATR-based scalping parameters (no fixed pips)
+# SL/TP are fully derived from ATR at trade time
 SCALPING_PAIRS = {
     'EUR/USD': {
-        '1m': {
-            'sl_pips_min': 3, 'sl_pips_max': 5,
-            'tp_ratio': [1.5, 2.0],       # Minimum 1.5:1 R:R — covers spread + ensures edge
-            'max_hold_seconds': 300,       # 5 minutes max
-            'cooldown_seconds': 30,
-        },
-        '5m': {
-            'sl_pips_min': 4, 'sl_pips_max': 6,
-            'tp_ratio': [1.5, 2.0],       # 1.5:1 R:R minimum
-            'max_hold_seconds': 900,       # 15 minutes max
-            'cooldown_seconds': 60,
-        },
+        'session_atr_min': 0.00040,    # Min ATR to trade (~4 pips)
+        'spread_sim': 0.00015,         # Simulated spread (1.5 pips)
+        'pip_size': 0.0001,
+        'cooldown_seconds': 30,
+        'max_hold_candles': 8,         # Time-exit: 8 candles max
     },
     'GBP/USD': {
-        '1m': {
-            'sl_pips_min': 4, 'sl_pips_max': 6,
-            'tp_ratio': [1.5, 2.0],       # 1.5:1 R:R minimum
-            'max_hold_seconds': 300,       # 5 minutes max
-            'cooldown_seconds': 30,
-        },
-        '5m': {
-            'sl_pips_min': 5, 'sl_pips_max': 8,
-            'tp_ratio': [1.5, 2.0],       # 1.5:1 R:R minimum
-            'max_hold_seconds': 900,       # 15 minutes max
-            'cooldown_seconds': 60,
-        },
+        'session_atr_min': 0.00055,    # Min ATR to trade (~5.5 pips)
+        'spread_sim': 0.00020,         # Simulated spread (2 pips)
+        'pip_size': 0.0001,
+        'cooldown_seconds': 30,
+        'max_hold_candles': 8,
     },
 }
 
-# Session windows for scalping (tighter than swing)
+# Session windows for scalping — only trade during liquid sessions
+# London open (07:00) through NY close (17:00 UTC)
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 0, 'end': 24},   # 24/7 trading enabled
-    'GBP/USD': {'start': 0, 'end': 24},   # 24/7 trading enabled
+    'EUR/USD': {'start': 7, 'end': 17},   # London + NY overlap only
+    'GBP/USD': {'start': 7, 'end': 17},   # London + NY overlap only
 }
 
 # Spread limits for scalping (pips — tighter than swing)
@@ -88,26 +76,32 @@ DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.05))  # -5% (reduce
 OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
-# AI Model Thresholds (aggressive for quick_wins scalping)
-# Cap at 0.15 — scalping signals are inherently lower-confidence
-# because many models return HOLD during ranging markets.
-_raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.12))
-ENSEMBLE_CONFIDENCE_THRESHOLD = min(_raw_threshold, 0.15)
-MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))
+# AI Model Thresholds
+# 0.35 = require at least 35% weighted confidence before trading
+# Higher threshold = fewer but better quality trades
+_raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.35))
+ENSEMBLE_CONFIDENCE_THRESHOLD = _raw_threshold  # No cap — let the threshold work
+MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))
 
-# Technical Analysis Parameters (tuned for scalping)
+# Technical Analysis Parameters (ATR-centric scalping)
 INDICATORS = {
-    'RSI': {'period': 9, 'overbought': 70, 'oversold': 30},
+    'RSI': {'period': 14, 'overbought': 70, 'oversold': 30},   # RSI 14 per strategy
     'MACD': {'fast': 12, 'slow': 26, 'signal': 9},
     'BOLLINGER_BANDS': {'period': 20, 'std_dev': 2},
     'ATR': {'period': 14},
+    'ADX': {'period': 14, 'trend_threshold': 18},
+    'EMA': {'short': 20, 'medium': 50, 'long': 200},
     'VOLUME_PERIOD': 20,
+    'VOLUME_SPIKE_THRESHOLD': 1.2,   # Volume > 1.2x average
 }
 
-# Risk Management
-STOP_LOSS_MULTIPLIER = 1.5  # ATR multiplier for stop loss
-TAKE_PROFIT_RATIO = 2.0     # Risk:Reward ratio (1:2)
-MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 2.0))
+# Risk Management (ATR-based — no fixed pips)
+STOP_LOSS_MULTIPLIER = 0.8   # SL = 0.8 x ATR(14) (grid-search optimal)
+TAKE_PROFIT_RATIO = 1.3      # TP = 1.3 x SL (flat across all regimes)
+TP_EXPANDING = 1.3            # Flat TP — regime variance removed
+TP_CONTRACTING = 1.3          # Flat TP — contracting regime skipped
+MIN_RISK_REWARD_RATIO = 1.3   # Minimum R:R to enter
+MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 1.4))
 HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.40))
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
 

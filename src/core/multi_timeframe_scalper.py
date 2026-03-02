@@ -1,11 +1,9 @@
 """
-Multi-Timeframe Scalping Bot — 1M & 5M High-Frequency Strategy
+Multi-Timeframe Scalping Bot — ATR-Centric 1M & 5M Strategy
 
-Extends the scalping analyzer to support multiple timeframes:
-  - 1M (1-minute): Tight scalps, 4-8 pips SL, 0.8-1.5R TP
-  - 5M (5-minute): Standard scalps, 5-12 pips SL, 1-2R TP
-
-Same core strategy (RSI9 + EMA pullbacks) with timeframe-specific parameters.
+Uses separate ScalpingAnalyzer instances for each timeframe.
+5M provides directional bias (EMA 20/50), 1M provides entry signals.
+All SL/TP are ATR-derived — no fixed pips anywhere.
 """
 import pandas as pd
 import numpy as np
@@ -21,318 +19,198 @@ except ImportError:
 
 
 class MultiTimeframeScalpingAnalyzer:
-    """Multi-timeframe scalping analyzer (1M & 5M support)"""
-    
-    # Timeframe-specific configuration
-    TIMEFRAME_CONFIG = {
-        'M1': {
-            'name': '1-Minute',
-            'candles_history': 100,  # Less history for 1M
-            'PAIR_CONFIG': {
-                'GBP/USD': {
-                    'min_sl_pips': 5,
-                    'max_sl_pips': 8,
-                    'tp_ratio': [1.0, 1.5],      # 1R to 1.5R (tighter)
-                    'min_rsi_for_buy': 50,
-                    'max_rsi_for_buy': 55,
-                    'min_rsi_for_sell': 45,
-                    'max_rsi_for_sell': 50,
-                    'max_hold_minutes': 5,       # Very short holds
-                    'min_rsi_confirmation': 45,  # Stricter RSI filter
-                },
-                'EUR/USD': {
-                    'min_sl_pips': 4,
-                    'max_sl_pips': 6,
-                    'tp_ratio': [0.8, 1.2],      # 0.8R to 1.2R (tight)
-                    'min_rsi_for_buy': 50,
-                    'max_rsi_for_buy': 55,
-                    'min_rsi_for_sell': 45,
-                    'max_rsi_for_sell': 50,
-                    'max_hold_minutes': 8,
-                    'min_rsi_confirmation': 45,
-                    'extra_confirmation_required': True,  # EUR slower, need extra
-                }
-            }
-        },
-        'M5': {
-            'name': '5-Minute',
-            'candles_history': 200,  # Standard history for 5M
-            'PAIR_CONFIG': {
-                'GBP/USD': {
-                    'min_sl_pips': 8,
-                    'max_sl_pips': 12,
-                    'tp_ratio': [1.5, 2.0],
-                    'min_rsi_for_buy': 50,
-                    'max_rsi_for_buy': 55,
-                    'min_rsi_for_sell': 45,
-                    'max_rsi_for_sell': 50,
-                    'max_hold_minutes': 15,
-                    'min_rsi_confirmation': 40,
-                },
-                'EUR/USD': {
-                    'min_sl_pips': 6,
-                    'max_sl_pips': 10,
-                    'tp_ratio': [1.0, 1.5],
-                    'min_rsi_for_buy': 50,
-                    'max_rsi_for_buy': 55,
-                    'min_rsi_for_sell': 45,
-                    'max_rsi_for_sell': 50,
-                    'max_hold_minutes': 20,
-                    'min_rsi_confirmation': 40,
-                    'extra_confirmation_required': True,
-                }
-            }
-        }
-    }
-    
+    """Multi-timeframe scalping analyzer with separate 1M/5M instances.
+
+    Flow:
+      1. 5M analyzer detects directional bias (EMA 20/50 + ADX)
+      2. 1M analyzer detects pullback entry within bias direction
+      3. All SL/TP come from ScalpingAnalyzer.calculate_risk_reward()
+    """
+
     def __init__(self, profit_mode=None):
-        """Initialize multi-timeframe analyzer
-        
-        Args:
-            profit_mode: 'quick_wins' or 'normal' (defaults to config)
-        """
+        """Initialize with separate analyzers for each timeframe."""
         mode = profit_mode if profit_mode else PROFIT_MODE
-        self.analyzer_5m = ScalpingAnalyzer(profit_mode=mode)
-        self.timeframe_config = self.TIMEFRAME_CONFIG
+
+        # Separate instances — each manages its own ATR/indicator state
+        self.analyzer_1m = ScalpingAnalyzer(profit_mode=mode, timeframe='1m')
+        self.analyzer_5m = ScalpingAnalyzer(profit_mode=mode, timeframe='5m')
         self.profit_mode = mode
-        
+
         mode_label = "QUICK_WINS" if mode == 'quick_wins' else "NORMAL"
-        bot_logger.info(f"🔪 Multi-Timeframe Scalping Analyzer initialized (1M & 5M) [{mode_label} mode]")
-    
-    def get_config_for_pair(self, pair, timeframe='M5'):
-        """Get configuration for specific pair and timeframe.
-        
+        bot_logger.info(
+            f"🔪 Multi-TF Scalping Analyzer initialized (ATR-centric, 1M & 5M) [{mode_label} mode]"
+        )
+
+    def get_signal_1m(self, df_1m, pair='EUR/USD', df_5m=None, spread=None,
+                      recent_sl_values=None):
+        """Generate 1-minute scalping signal with 5M bias.
+
+        This is the primary entry path: 5M provides bias, 1M provides timing.
+
         Args:
-            pair: Currency pair (EUR/USD or GBP/USD)
-            timeframe: M1 or M5
-            
-        Returns:
-            dict: Configuration for this pair/timeframe
-        """
-        tf_config = self.TIMEFRAME_CONFIG.get(timeframe)
-        if not tf_config:
-            return self.TIMEFRAME_CONFIG['M5']['PAIR_CONFIG'].get(pair)
-        
-        return tf_config['PAIR_CONFIG'].get(pair)
-    
-    def get_signal_1m(self, df, pair='EUR/USD'):
-        """Generate 1-minute scalping signal.
-        
-        Args:
-            df: DataFrame with OHLCV data
+            df_1m: 1M candle DataFrame (200+ rows)
             pair: Currency pair
-            
+            df_5m: 5M candle DataFrame for bias detection
+            spread: Actual broker spread
+            recent_sl_values: Recent SL values for median check
+
         Returns:
-            dict: Trading signal (modified for 1M timeframe)
+            dict: Full signal with ATR-based SL/TP
         """
-        signal = self.analyzer_5m.get_signal(df, pair)
-        
-        if signal['signal'] == 'SKIP':
-            return signal
-        
-        # Get 1M-specific config
-        config = self.get_config_for_pair(pair, 'M1')
-        
-        # For 1M: Stricter requirements
-        # 1. Higher confidence threshold
-        if signal['confidence'] < 0.75:
-            signal['signal'] = 'SKIP'
-            signal['reasons'].append(
-                f"1M timeframe: Confidence {signal['confidence']:.2f} below 0.75 threshold"
-            )
-            return signal
-        
-        # 2. Recalculate R:R for 1M
-        current_price = df['close'].iloc[-1]
-        sl_pips = (config['min_sl_pips'] + config['max_sl_pips']) / 2
-        
-        if pair in ['EUR/USD', 'GBP/USD']:
-            sl_price_distance = sl_pips / 10000
-        else:
-            sl_price_distance = sl_pips / 100
-        
-        if signal['signal'] == 'BUY':
-            sl = current_price - sl_price_distance
-            tp1 = current_price + (sl_price_distance * config['tp_ratio'][0])
-            tp2 = current_price + (sl_price_distance * config['tp_ratio'][1])
-        else:  # SELL
-            sl = current_price + sl_price_distance
-            tp1 = current_price - (sl_price_distance * config['tp_ratio'][0])
-            tp2 = current_price - (sl_price_distance * config['tp_ratio'][1])
-        
-        signal['stop_loss'] = sl
-        signal['take_profit'] = tp1
-        signal['risk_reward'] = {
-            'risk_pips': sl_pips,
-            'reward_pips_1': abs(tp1 - current_price) * 10000,
-            'reward_pips_2': abs(tp2 - current_price) * 10000,
-        }
-        
+        signal = self.analyzer_1m.get_signal(
+            df_1m, pair, timeframe='1m',
+            df_5m=df_5m, spread=spread,
+            recent_sl_values=recent_sl_values,
+        )
         signal['timeframe'] = '1M'
-        signal['reasons'].append(f"1M scalp: SL {sl_pips:.0f}p, TP1 {signal['risk_reward']['reward_pips_1']:.0f}p")
-        
         return signal
-    
-    def get_signal_5m(self, df, pair='EUR/USD'):
-        """Generate 5-minute scalping signal.
-        
+
+    def get_signal_5m(self, df_5m, pair='EUR/USD', spread=None,
+                      recent_sl_values=None):
+        """Generate 5-minute scalping signal (standalone).
+
+        Used when no 1M data is available or for 5M-only mode.
+
         Args:
-            df: DataFrame with OHLCV data
+            df_5m: 5M candle DataFrame (200+ rows)
             pair: Currency pair
-            
+            spread: Actual broker spread
+            recent_sl_values: Recent SL values for median check
+
         Returns:
-            dict: Trading signal (standard 5M)
+            dict: Full signal with ATR-based SL/TP
         """
-        signal = self.analyzer_5m.get_signal(df, pair)
+        signal = self.analyzer_5m.get_signal(
+            df_5m, pair, timeframe='5m',
+            spread=spread,
+            recent_sl_values=recent_sl_values,
+        )
         signal['timeframe'] = '5M'
         return signal
-    
-    def get_signal(self, df, pair='EUR/USD', timeframe='M5'):
+
+    def get_signal(self, df, pair='EUR/USD', timeframe='M5', df_5m=None,
+                   spread=None, recent_sl_values=None):
         """Generate trading signal for specified timeframe.
-        
+
         Args:
-            df: DataFrame with OHLCV data
+            df: OHLCV DataFrame for the primary timeframe
             pair: Currency pair
             timeframe: 'M1' or 'M5'
-            
+            df_5m: Optional 5M data for M1 bias detection
+            spread: Actual broker spread
+            recent_sl_values: Recent SL values for median check
+
         Returns:
-            dict: Trading signal with timeframe-specific parameters
+            dict: Trading signal with ATR-based SL/TP
         """
         if timeframe == 'M1':
-            return self.get_signal_1m(df, pair)
+            return self.get_signal_1m(df, pair, df_5m=df_5m, spread=spread,
+                                      recent_sl_values=recent_sl_values)
         else:
-            return self.get_signal_5m(df, pair)
+            return self.get_signal_5m(df, pair, spread=spread,
+                                      recent_sl_values=recent_sl_values)
 
 
 class MultiTimeframeScalpingTrader:
-    """Trade execution for multiple timeframes"""
-    
+    """Trade execution for multiple timeframes — ATR-centric."""
+
     def __init__(self, broker=None, risk_manager=None, profit_mode=None):
-        """Initialize multi-timeframe trader.
-        
-        Args:
-            broker: MT5Connector instance
-            risk_manager: RiskManager instance
-            profit_mode: 'quick_wins' or 'normal' (defaults to config)
-        """
         from src.core.scalping_trader import ScalpingTrader
-        
+
         mode = profit_mode if profit_mode else PROFIT_MODE
-        
+
         self.broker = broker
         self.risk_manager = risk_manager
         self.profit_mode = mode
         self.analyzer = MultiTimeframeScalpingAnalyzer(profit_mode=mode)
         self.trader_1m = ScalpingTrader(broker=broker, risk_manager=risk_manager, profit_mode=mode)
         self.trader_5m = ScalpingTrader(broker=broker, risk_manager=risk_manager, profit_mode=mode)
-        
+
         # Track active trades by timeframe
         self.active_trades_1m = {}
         self.active_trades_5m = {}
-        
+
         mode_label = "QUICK_WINS" if mode == 'quick_wins' else "NORMAL"
-        bot_logger.info(f"🔪 Multi-Timeframe Scalping Trader initialized (1M & 5M) [{mode_label} mode]")
-    
+        bot_logger.info(
+            f"🔪 Multi-TF Scalping Trader initialized (ATR-centric, 1M & 5M) [{mode_label} mode]"
+        )
+
     def set_profit_mode(self, mode):
-        """Switch profit mode at runtime for all traders.
-        
-        Args:
-            mode: 'quick_wins' or 'normal'
-        """
+        """Switch profit mode at runtime."""
         self.profit_mode = mode
         self.analyzer.profit_mode = mode
+        self.analyzer.analyzer_1m.profit_mode = mode
         self.analyzer.analyzer_5m.profit_mode = mode
         self.trader_1m.set_profit_mode(mode)
         self.trader_5m.set_profit_mode(mode)
-        
+
         mode_label = "QUICK_WINS" if mode == 'quick_wins' else "NORMAL"
         bot_logger.info(f"🔄 Multi-TF profit mode changed to [{mode_label}]")
-    
-    def analyze_pair_multi_tf(self, df_1m, df_5m, pair):
+
+    def analyze_pair_multi_tf(self, df_1m, df_5m, pair, spread=None,
+                               recent_sl_values=None):
         """Analyze pair on both timeframes.
-        
-        Args:
-            df_1m: 1-minute OHLCV DataFrame
-            df_5m: 5-minute OHLCV DataFrame
-            pair: Currency pair
-            
-        Returns:
-            dict: Signals from both timeframes
+
+        Primary flow: 5M bias → 1M entry (ATR-based SL/TP)
         """
-        signal_1m = self.analyzer.get_signal(df_1m, pair, 'M1')
-        signal_5m = self.analyzer.get_signal(df_5m, pair, 'M5')
-        
+        # 1M signal with 5M bias
+        signal_1m = self.analyzer.get_signal_1m(
+            df_1m, pair, df_5m=df_5m, spread=spread,
+            recent_sl_values=recent_sl_values,
+        )
+        # 5M standalone (backup)
+        signal_5m = self.analyzer.get_signal_5m(
+            df_5m, pair, spread=spread,
+            recent_sl_values=recent_sl_values,
+        )
+
         return {
             'signal_1m': signal_1m,
             'signal_5m': signal_5m,
             'pair': pair,
             'confluence': self._check_confluence(signal_1m, signal_5m),
         }
-    
+
     def _check_confluence(self, signal_1m, signal_5m):
-        """Check if both timeframes agree on direction.
-        
-        Args:
-            signal_1m: 1M signal
-            signal_5m: 5M signal
-            
-        Returns:
-            dict: Confluence analysis
-        """
-        confluence = {
-            'both_buy': signal_1m['signal'] == 'BUY' and signal_5m['signal'] == 'BUY',
-            'both_sell': signal_1m['signal'] == 'SELL' and signal_5m['signal'] == 'SELL',
-            'divergent': (signal_1m['signal'] in ['BUY', 'SELL'] and 
-                         signal_5m['signal'] in ['BUY', 'SELL'] and 
-                         signal_1m['signal'] != signal_5m['signal']),
-            'score': 0.0,
+        """Check if both timeframes agree on direction."""
+        s1 = signal_1m.get('signal', 'SKIP')
+        s5 = signal_5m.get('signal', 'SKIP')
+
+        both_buy = s1 == 'BUY' and s5 == 'BUY'
+        both_sell = s1 == 'SELL' and s5 == 'SELL'
+        divergent = (
+            s1 in ('BUY', 'SELL') and s5 in ('BUY', 'SELL') and s1 != s5
+        )
+
+        score = 1.0 if (both_buy or both_sell) else (0.0 if divergent else 0.5)
+
+        return {
+            'both_buy': both_buy,
+            'both_sell': both_sell,
+            'divergent': divergent,
+            'score': score,
         }
-        
-        if confluence['both_buy'] or confluence['both_sell']:
-            confluence['score'] = 1.0
-        elif confluence['divergent']:
-            confluence['score'] = 0.0
-        
-        return confluence
-    
-    def process_candles_multi_tf(self, df_gbp_1m, df_eur_1m, df_gbp_5m, df_eur_5m):
-        """Process new candles across all timeframes.
-        
-        Args:
-            df_gbp_1m: GBP/USD 1M
-            df_eur_1m: EUR/USD 1M
-            df_gbp_5m: GBP/USD 5M
-            df_eur_5m: EUR/USD 5M
-            
-        Returns:
-            list: New trades opened
-        """
+
+    def process_candles_multi_tf(self, df_gbp_1m, df_eur_1m, df_gbp_5m, df_eur_5m,
+                                  spread_gbp=None, spread_eur=None):
+        """Process new candles across all timeframes."""
         new_trades = []
-        
-        # GBP/USD analysis
-        gbp_analysis = self.analyze_pair_multi_tf(df_gbp_1m, df_gbp_5m, 'GBP/USD')
-        
-        # EUR/USD analysis
-        eur_analysis = self.analyze_pair_multi_tf(df_eur_1m, df_eur_5m, 'EUR/USD')
-        
-        # Priority: Trade on confluence > 5M only > 1M only
-        # (But be cautious of divergence)
-        
-        # Execute based on confluence
-        results = {
+
+        gbp_analysis = self.analyze_pair_multi_tf(
+            df_gbp_1m, df_gbp_5m, 'GBP/USD', spread=spread_gbp,
+        )
+        eur_analysis = self.analyze_pair_multi_tf(
+            df_eur_1m, df_eur_5m, 'EUR/USD', spread=spread_eur,
+        )
+
+        return {
             'gbp_analysis': gbp_analysis,
             'eur_analysis': eur_analysis,
             'trades_opened': new_trades,
         }
-        
-        return results
-    
+
     def get_summary(self):
-        """Get current trading status across timeframes.
-        
-        Returns:
-            dict: Summary of active trades by timeframe
-        """
+        """Get current trading status across timeframes."""
         return {
             'active_1m': len(self.active_trades_1m),
             'active_5m': len(self.active_trades_5m),

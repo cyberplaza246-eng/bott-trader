@@ -15,14 +15,14 @@ from src.utils.logger import bot_logger
 class TrailingStopManager:
     """Track and update trailing stops for open positions."""
 
-    def __init__(self, breakeven_r=1.0, trail_atr_mult=1.5, partial_close_pct=0.75):
+    def __init__(self, breakeven_r=0.8, trail_atr_mult=0.8, partial_close_pct=0.50):
         """
         Args:
             breakeven_r:      Move SL to breakeven after price moves this many R
-                              (1.0 = once profit equals the original risk distance).
+                              (0.8 = once profit equals 80% of the original risk).
             trail_atr_mult:   Once at breakeven, trail SL at this × ATR behind price.
             partial_close_pct: Close half the position when price reaches this fraction
-                               of the TP distance (0.75 = 75% of the way to TP).
+                               of the TP distance (0.50 = 50% = 1.0R on a 1.4R target).
         """
         self.breakeven_r = breakeven_r
         self.trail_atr_mult = trail_atr_mult
@@ -48,16 +48,16 @@ class TrailingStopManager:
             scalping_mode: If True, use tighter breakeven/trail/partial settings
             quick_wins:  If True, use ULTRA tight settings (takes small wins fast)
         """
-        # Quick wins mode: VERY tight stops, grab small profits immediately
+        # Quick wins mode: ATR-adaptive tight management
         if quick_wins:
-            effective_breakeven_r = 0.3       # Breakeven at 0.3R (lock in profit early)
-            effective_trail_mult = 0.5        # Trail VERY tight at 0.5× ATR
-            effective_partial_pct = 0.40      # Partial close at 40% of TP distance
-        # Scalping overrides: tighter stops, faster profit-taking
+            effective_breakeven_r = 0.8       # Breakeven at 0.8R
+            effective_trail_mult = 0.8        # Trail at 0.8× ATR
+            effective_partial_pct = 0.50      # Partial close at 50% of TP (= 1.0R)
+        # Scalping overrides: same ATR parameters for consistency
         elif scalping_mode:
-            effective_breakeven_r = 0.5       # Breakeven at 0.5R (instead of 1.0R)
-            effective_trail_mult = 0.8        # Trail at 0.8× ATR (instead of 1.5×)
-            effective_partial_pct = 0.60      # Partial close at 60% of TP (instead of 75%)
+            effective_breakeven_r = 0.8       # Breakeven at 0.8R
+            effective_trail_mult = 0.8        # Trail at 0.8× ATR
+            effective_partial_pct = 0.50      # Partial close at 50% of TP
         else:
             effective_breakeven_r = self.breakeven_r
             effective_trail_mult = self.trail_atr_mult

@@ -1,14 +1,14 @@
 {
   "model_weights": {
-    "scalping": 0.22,
-    "ema_crossover": 0.14,
-    "candlestick": 0.13,
-    "technical": 0.12,
-    "volume": 0.11,
-    "multi_tf": 0.1,
-    "support_resistance": 0.06,
-    "lstm": 0.06,
-    "sentiment": 0.06
+    "scalping": 0.28,
+    "technical": 0.18,
+    "volume": 0.14,
+    "ema_crossover": 0.12,
+    "candlestick": 0.10,
+    "multi_tf": 0.08,
+    "support_resistance": 0.04,
+    "lstm": 0.03,
+    "sentiment": 0.03
   },
   "model_accuracy": {},
   "pair_stats": {},
@@ -22,12 +22,19 @@
   "trade_history": [],
   "loss_patterns": {},
   "recent_trades_window": [],
-  "confidence_threshold": 0.12,
+  "confidence_threshold": 0.35,
   "consecutive_losses": 0,
   "consecutive_wins": 0,
   "max_consecutive_losses": 0,
   "peak_balance": 0.0,
   "current_drawdown_pct": 0.0,
   "in_drawdown_protection": false,
-  "current_regime": "ranging"
+  "current_regime": "neutral",
+  "session_atr_profiles": {},
+  "spread_tracking": {},
+  "recent_sl_values": {},
+  "sl_multiplier_by_pair": {},
+  "time_exit_candles": 8,
+  "time_exit_outcomes": [],
+  "atr_regime": "neutral"
 }

@@ -41,14 +41,15 @@ class AdaptiveLearner:
 
     def __init__(self, initial_weights: dict = None):
         self.model_weights = initial_weights or {
-            'lstm': 0.18,
-            'sentiment': 0.12,
-            'technical': 0.14,
-            'volume': 0.08,
-            'multi_tf': 0.14,
-            'support_resistance': 0.10,
-            'candlestick': 0.12,
+            'scalping': 0.28,
+            'technical': 0.18,
+            'volume': 0.14,
             'ema_crossover': 0.12,
+            'candlestick': 0.10,
+            'multi_tf': 0.08,
+            'support_resistance': 0.04,
+            'lstm': 0.03,
+            'sentiment': 0.03,
         }
 
         self.trade_history = []
@@ -92,6 +93,24 @@ class AdaptiveLearner:
         # Recent trade tracker for cooldown logic
         self.recent_trades_window = []  # last N trades for fast reaction
 
+        # ── ATR-Centric Adaptive Features ────────────────────────────
+        # 1. Session-pair ATR profiling: avg ATR per session per pair
+        self.session_atr_profiles = defaultdict(lambda: {'atr_values': [], 'avg_atr': 0.0})
+
+        # 2. Spread-cost tracking: actual spreads seen per pair
+        self.spread_tracking = defaultdict(lambda: {'spreads': [], 'avg_spread': 0.0})
+
+        # 3. SL effectiveness auto-tuning
+        self.recent_sl_values = defaultdict(list)   # per-pair list of SL distances
+        self.sl_multiplier_by_pair = {}             # pair → ATR multiplier (0.6 to 1.2)
+
+        # 4. Time-exit optimization
+        self.time_exit_candles = 8   # default: exit after 8 candles
+        self.time_exit_outcomes = []  # list of {candles_held, is_win, pnl}
+
+        # 5. ATR regime state (expanding / contracting / neutral)
+        self.atr_regime = 'neutral'
+
         self.decay_factor = 0.95
 
         self._load()
@@ -125,6 +144,11 @@ class AdaptiveLearner:
     # Market Regime Detection
     # ------------------------------------------------------------------
     def detect_regime(self, df) -> str:
+        """Detect market regime using ATR-centric logic.
+
+        Enhanced: uses ATR trend (expanding/contracting) + ADX for classification.
+        Also updates self.atr_regime for other components to query.
+        """
         if df is None or len(df) < 20:
             return self.REGIME_RANGING
         try:
@@ -133,15 +157,25 @@ class AdaptiveLearner:
             atr = float(latest.get('atr', 0) or 0)
             close = float(latest['close'])
             atr_pct = (atr / close * 100) if close > 0 else 0
-            bb_upper = float(latest.get('bb_upper', close) or close)
-            bb_lower = float(latest.get('bb_lower', close) or close)
-            bb_width = (bb_upper - bb_lower) / close * 100 if close > 0 else 0
+
+            # ATR trend: check consecutive rises/falls
+            atr_rise_streak = int(latest.get('atr_rise_streak', 0) or 0)
+            atr_fall_streak = int(latest.get('atr_fall_streak', 0) or 0)
+
+            # ATR regime classification
+            if atr_rise_streak >= 5:
+                self.atr_regime = 'expanding'
+            elif atr_fall_streak >= 5:
+                self.atr_regime = 'contracting'
+            else:
+                self.atr_regime = 'neutral'
+
             ema200 = float(latest.get('ema_200', close) or close)
             trend_deviation = abs(close - ema200) / close * 100 if close > 0 else 0
 
-            if adx > 30 and trend_deviation > 0.3:
+            if adx > 22 and trend_deviation > 0.15:
                 regime = self.REGIME_TRENDING
-            elif atr_pct > 0.15 or bb_width > 0.8:
+            elif atr_pct > 0.12 or self.atr_regime == 'expanding':
                 regime = self.REGIME_VOLATILE
             else:
                 regime = self.REGIME_RANGING
@@ -368,7 +402,7 @@ class AdaptiveLearner:
     def _adapt_confidence_threshold(self):
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
         base = ENSEMBLE_CONFIDENCE_THRESHOLD
-        ceiling = base + 0.20  # Wider ceiling for stronger protection
+        ceiling = base + 0.25  # Can go up to 0.60 during heavy losses
 
         # ── Recent-loss fast reaction ────────────────────────────────
         # If 3+ of last 5 trades are losses, react immediately
@@ -476,6 +510,170 @@ class AdaptiveLearner:
             return 0.5
         wins = sum(1 for t in recent if t.get('is_win', False))
         return wins / len(recent)
+
+    # ------------------------------------------------------------------
+    # ATR-Centric Adaptive Methods
+    # ------------------------------------------------------------------
+
+    def record_session_atr(self, pair: str, session: str, atr_value: float):
+        """Track ATR values per session per pair for profiling.
+
+        Called each cycle to build a rolling profile of typical
+        ATR levels during each session for each pair.
+        """
+        pair = self._normalize_pair(pair)
+        key = f"{session}:{pair}"
+        profile = self.session_atr_profiles[key]
+        profile['atr_values'].append(atr_value)
+        # Keep last 200 readings
+        if len(profile['atr_values']) > 200:
+            profile['atr_values'] = profile['atr_values'][-200:]
+        if profile['atr_values']:
+            profile['avg_atr'] = sum(profile['atr_values']) / len(profile['atr_values'])
+
+    def get_session_atr_threshold(self, pair: str, session: str = None) -> float:
+        """Get learned ATR threshold for this pair in this session.
+
+        Returns 0 if insufficient data (use static config default).
+        """
+        pair = self._normalize_pair(pair)
+        if session is None:
+            session = self._get_session()
+        key = f"{session}:{pair}"
+        profile = self.session_atr_profiles.get(key, {})
+        if len(profile.get('atr_values', [])) < 20:
+            return 0.0  # Not enough data
+        # Threshold = 50th percentile of session ATR values
+        return float(np.percentile(profile['atr_values'], 50))
+
+    def record_spread(self, pair: str, spread: float):
+        """Track actual spreads seen for cost analysis."""
+        pair = self._normalize_pair(pair)
+        tracker = self.spread_tracking[pair]
+        tracker['spreads'].append(spread)
+        if len(tracker['spreads']) > 200:
+            tracker['spreads'] = tracker['spreads'][-200:]
+        if tracker['spreads']:
+            tracker['avg_spread'] = sum(tracker['spreads']) / len(tracker['spreads'])
+
+    def get_avg_spread(self, pair: str) -> float:
+        """Get average observed spread for a pair."""
+        pair = self._normalize_pair(pair)
+        tracker = self.spread_tracking.get(pair, {})
+        return tracker.get('avg_spread', 0.0)
+
+    def record_sl_outcome(self, pair: str, sl_distance: float, is_win: bool):
+        """Record SL distance and outcome for auto-tuning.
+
+        Over time, this learns whether 0.8×ATR is too tight or too wide.
+        """
+        pair = self._normalize_pair(pair)
+        self.recent_sl_values[pair].append(sl_distance)
+        if len(self.recent_sl_values[pair]) > 100:
+            self.recent_sl_values[pair] = self.recent_sl_values[pair][-100:]
+
+        # Track win/loss per SL bucket for multiplier tuning
+        # This is a simple approach: adjust multiplier toward winning SL distances
+        if len(self.recent_sl_values[pair]) >= 20:
+            # Get recent trade outcomes paired with SL values
+            # Use a simple heuristic: if win rate low and SL tight, widen; if high and SL wide, tighten
+            recent_trades = [t for t in self.recent_trades_window[-20:] if self._normalize_pair(t.get('pair', '')) == pair]
+            if len(recent_trades) >= 10:
+                wins = sum(1 for t in recent_trades if t.get('is_win', False))
+                wr = wins / len(recent_trades)
+                current_mult = self.sl_multiplier_by_pair.get(pair, 0.8)
+
+                if wr < 0.35:
+                    # Too many losses — widen SL slightly
+                    new_mult = min(1.2, current_mult + 0.05)
+                    self.sl_multiplier_by_pair[pair] = new_mult
+                    bot_logger.info(
+                        f"📐 SL auto-tune {pair}: widened to {new_mult:.2f}×ATR "
+                        f"(win rate {wr:.0%} too low)"
+                    )
+                elif wr > 0.55:
+                    # Winning well — tighten SL slightly for better R/R
+                    new_mult = max(0.6, current_mult - 0.05)
+                    self.sl_multiplier_by_pair[pair] = new_mult
+                    bot_logger.info(
+                        f"📐 SL auto-tune {pair}: tightened to {new_mult:.2f}×ATR "
+                        f"(win rate {wr:.0%} healthy)"
+                    )
+
+    def get_sl_multiplier(self, pair: str) -> float:
+        """Get the auto-tuned SL multiplier for a pair (0.6 to 1.2×ATR)."""
+        pair = self._normalize_pair(pair)
+        return self.sl_multiplier_by_pair.get(pair, 0.8)
+
+    def get_recent_sl_values(self, pair: str) -> list:
+        """Get recent SL distance values for median check."""
+        pair = self._normalize_pair(pair)
+        return list(self.recent_sl_values.get(pair, []))
+
+    def record_time_exit(self, candles_held: int, is_win: bool, pnl: float):
+        """Record how long a trade was held vs outcome for time-exit tuning.
+
+        Used to learn optimal max hold duration (4-8 candles).
+        """
+        self.time_exit_outcomes.append({
+            'candles_held': candles_held,
+            'is_win': is_win,
+            'pnl': pnl,
+        })
+        if len(self.time_exit_outcomes) > 200:
+            self.time_exit_outcomes = self.time_exit_outcomes[-200:]
+
+        # Auto-tune time exit after enough data
+        if len(self.time_exit_outcomes) >= 30:
+            self._tune_time_exit()
+
+    def _tune_time_exit(self):
+        """Auto-tune the time-exit candle threshold.
+
+        Analyzes win rates by hold duration buckets and sets
+        the exit threshold where win rate drops below 35%.
+        """
+        # Group outcomes by candle buckets: 1-3, 4-6, 7-8, 9+
+        buckets = {
+            '1-3': [], '4-6': [], '7-8': [], '9+': [],
+        }
+        for outcome in self.time_exit_outcomes:
+            c = outcome['candles_held']
+            if c <= 3:
+                buckets['1-3'].append(outcome)
+            elif c <= 6:
+                buckets['4-6'].append(outcome)
+            elif c <= 8:
+                buckets['7-8'].append(outcome)
+            else:
+                buckets['9+'].append(outcome)
+
+        # Find optimal cutoff
+        best_cutoff = 8
+        for bucket_name, max_candles in [('1-3', 3), ('4-6', 6), ('7-8', 8), ('9+', 12)]:
+            trades = buckets.get(bucket_name, [])
+            if len(trades) >= 5:
+                wr = sum(1 for t in trades if t['is_win']) / len(trades)
+                if wr < 0.35:
+                    best_cutoff = max_candles
+                    break
+
+        # Update if changed
+        if best_cutoff != self.time_exit_candles:
+            old = self.time_exit_candles
+            self.time_exit_candles = max(4, min(8, best_cutoff))
+            if old != self.time_exit_candles:
+                bot_logger.info(
+                    f"⏱️ Time-exit auto-tuned: {old} → {self.time_exit_candles} candles"
+                )
+
+    def get_time_exit_candles(self) -> int:
+        """Get the current auto-tuned max hold duration in candles."""
+        return self.time_exit_candles
+
+    def get_atr_regime(self) -> str:
+        """Get the current ATR regime (expanding/contracting/neutral)."""
+        return self.atr_regime
 
     # ------------------------------------------------------------------
     # Query Methods
@@ -662,6 +860,16 @@ class AdaptiveLearner:
             'trade_history': self.trade_history[-500:],
             'loss_patterns': dict(self.loss_patterns),
             'recent_trades_window': self.recent_trades_window[-10:],
+            # ATR-centric adaptive data
+            'session_atr_profiles': {k: {'atr_values': v['atr_values'][-100:], 'avg_atr': v['avg_atr']}
+                                     for k, v in self.session_atr_profiles.items()},
+            'spread_tracking': {k: {'spreads': v['spreads'][-100:], 'avg_spread': v['avg_spread']}
+                                for k, v in self.spread_tracking.items()},
+            'recent_sl_values': {k: v[-100:] for k, v in self.recent_sl_values.items()},
+            'sl_multiplier_by_pair': self.sl_multiplier_by_pair,
+            'time_exit_candles': self.time_exit_candles,
+            'time_exit_outcomes': self.time_exit_outcomes[-100:],
+            'atr_regime': self.atr_regime,
             'last_updated': datetime.now().isoformat(),
         }
         with open(LEARNING_DB_PATH, 'w') as f:
@@ -710,6 +918,18 @@ class AdaptiveLearner:
             for k, v in data.get('loss_patterns', {}).items():
                 self.loss_patterns[k] = v
             self.recent_trades_window = data.get('recent_trades_window', [])
+
+            # ATR-centric adaptive data
+            for k, v in data.get('session_atr_profiles', {}).items():
+                self.session_atr_profiles[k] = v
+            for k, v in data.get('spread_tracking', {}).items():
+                self.spread_tracking[k] = v
+            for k, v in data.get('recent_sl_values', {}).items():
+                self.recent_sl_values[k] = v
+            self.sl_multiplier_by_pair = data.get('sl_multiplier_by_pair', {})
+            self.time_exit_candles = data.get('time_exit_candles', 8)
+            self.time_exit_outcomes = data.get('time_exit_outcomes', [])
+            self.atr_regime = data.get('atr_regime', 'neutral')
 
             self._normalize_pair_stats()
             for t in self.trade_history:

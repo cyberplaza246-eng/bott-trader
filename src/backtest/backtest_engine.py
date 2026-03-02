@@ -274,17 +274,23 @@ class BacktestEngine:
 
             # ── Open position ─────────────────────────────────────
             entry_price = current_price
+
+            # Use ATR for SL if available in the dataframe
+            atr_value = None
+            if 'atr' in df.columns:
+                atr_value = float(df['atr'].iloc[i]) if not pd.isna(df['atr'].iloc[i]) else None
+
             stop_loss = self.risk_manager.calculate_scalping_stop_loss(
-                pair, timeframe_key, entry_price, signal
+                pair, timeframe_key, entry_price, signal,
+                atr_value=atr_value
             )
             take_profit = self.risk_manager.calculate_scalping_take_profit(
                 pair, timeframe_key, entry_price, stop_loss, signal
             )
 
-            # Widen SL if below minimum
+            # Sanity check: ensure minimum SL distance of 4 pips
             pip_info = PIP_VALUES.get(pair, DEFAULT_PIP)
-            min_sl_pips = pair_config.get('sl_pips_min', 6)
-            min_sl_distance = min_sl_pips * pip_info['pip_size']
+            min_sl_distance = 4 * pip_info['pip_size']
             sl_distance = abs(entry_price - stop_loss)
             if sl_distance < min_sl_distance:
                 sl_distance = min_sl_distance
