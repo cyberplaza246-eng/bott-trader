@@ -562,7 +562,9 @@ class AdaptiveLearner:
             from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
 
             self.model_weights = data.get('model_weights', self.model_weights)
-            self.confidence_threshold = data.get('confidence_threshold', ENSEMBLE_CONFIDENCE_THRESHOLD)
+            # Never load a saved threshold higher than current config base
+            saved_threshold = data.get('confidence_threshold', ENSEMBLE_CONFIDENCE_THRESHOLD)
+            self.confidence_threshold = min(saved_threshold, ENSEMBLE_CONFIDENCE_THRESHOLD)
             self.consecutive_losses = data.get('consecutive_losses', 0)
             self.consecutive_wins = data.get('consecutive_wins', 0)
             self.max_consecutive_losses = data.get('max_consecutive_losses', 0)
