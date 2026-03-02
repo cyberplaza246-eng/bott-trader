@@ -62,11 +62,12 @@ SCALPING_PAIRS = {
     },
 }
 
-# Session windows for scalping — extended to allow evening trading
+# Session windows for scalping — extended to cover all trading hours
+# end=0 means midnight (wraps around), effectively 07:00–23:59 UTC
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 7, 'end': 23},   # London open through late evening
-    'GBP/USD': {'start': 7, 'end': 23},   # London open through late evening
-    'USD/JPY': {'start': 0, 'end': 23},   # Asian through late evening
+    'EUR/USD': {'start': 0, 'end': 0},   # All hours (24/7)
+    'GBP/USD': {'start': 0, 'end': 0},   # All hours (24/7)
+    'USD/JPY': {'start': 0, 'end': 0},   # All hours (24/7)
 }
 
 # Spread limits for scalping (pips — tighter than swing)
