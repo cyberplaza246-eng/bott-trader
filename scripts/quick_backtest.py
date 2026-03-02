@@ -18,7 +18,7 @@ TP_BASE_RATIO    = 1.3
 TP_EXPANDING     = 1.3
 TP_CONTRACTING   = 1.3
 ENTRY_THRESHOLD  = 0.70
-SPREAD_SIM       = {'EUR/USD': 0.00012, 'GBP/USD': 0.00016}
+SPREAD_SIM       = {'EUR/USD': 0.00012, 'GBP/USD': 0.00016, 'USD/JPY': 0.020}
 COOLDOWN_BARS    = 10
 MAX_HOLD_BARS    = 15
 VOL_SPIKE_MULT   = 1.2
@@ -30,6 +30,13 @@ EMA_LONG         = 50
 EMA_TREND        = 200
 ADX_PERIOD       = 14
 VOL_PERIOD       = 20
+
+# Session windows per pair (UTC hours)
+SESSION_WINDOWS = {
+    'EUR/USD': (7, 17),
+    'GBP/USD': (7, 17),
+    'USD/JPY': (0, 17),   # Asian + London + NY
+}
 
 
 def compute_indicators(df):
@@ -169,13 +176,17 @@ def run_backtest(filepath, pair, initial_balance=1000):
         if regime == 'contracting':
             continue
 
-        # Session filter (London 7-12, NY 13-17 UTC)
-        # Prefer London overlap 10-12 and NY open 13-15 (best liquidity)
+        # Session filter — per-pair windows
+        session_start, session_end = SESSION_WINDOWS.get(pair, (7, 17))
         if 'datetime' in df.columns:
             hr = row['datetime'].hour
-            if not (7 <= hr <= 12 or 13 <= hr <= 17):
-                continue
-            # Require higher score outside peak hours
+            if session_start <= session_end:
+                if not (session_start <= hr <= session_end):
+                    continue
+            else:  # Wraps midnight (e.g. 22-6)
+                if not (hr >= session_start or hr <= session_end):
+                    continue
+            # Prefer peak liquidity hours for scoring bonus
             peak_hours = (10 <= hr <= 12) or (13 <= hr <= 15)
         else:
             peak_hours = True
@@ -249,11 +260,17 @@ def run_backtest(filepath, pair, initial_balance=1000):
             exit_price = df['close'].iloc[exit_idx]
             exit_reason = 'TIME'
 
-        # P&L (standard lot = 100k units)
+        # P&L — standard lot (100k units). For JPY pairs: divide by rate to get USD P&L
         if direction == 'BUY':
-            pnl = (exit_price - entry_price - spread) * 100_000
+            raw_pnl = (exit_price - entry_price - spread) * 100_000
         else:
-            pnl = (entry_price - exit_price - spread) * 100_000
+            raw_pnl = (entry_price - exit_price - spread) * 100_000
+
+        # JPY pairs: raw P&L is in JPY, convert to USD
+        if 'JPY' in pair:
+            pnl = raw_pnl / entry_price  # approximate USD conversion
+        else:
+            pnl = raw_pnl
 
         pips = abs(exit_price - entry_price) / pip_size
         r_multiple = ((exit_price - entry_price) / sl_distance) if direction == 'BUY' else ((entry_price - exit_price) / sl_distance)
@@ -334,7 +351,7 @@ def print_results(pair, trades, balance, initial):
     print(f"  Total P&L:        ${sum(t['pnl'] for t in trades):.2f}")
     print(f"  Avg win:          ${avg_win:.2f}   Avg loss: ${avg_loss:.2f}")
     print(f"  Avg R-multiple:   {avg_r:.2f}R")
-    print(f"  Avg hold time:    {avg_hold:.1f} bars ({avg_hold*5:.0f} min)")
+    print(f"  Avg hold time:    {avg_hold:.1f} bars")
     print(f"  Max drawdown:     {max_dd*100:.1f}%")
     print(f"  Final balance:    ${balance:.2f}  ({(balance-initial)/initial*100:+.1f}%)")
 
@@ -359,6 +376,7 @@ def main():
     pairs = {
         'EUR/USD': os.path.join(data_dir, 'EUR_USD_5m.csv'),
         'GBP/USD': os.path.join(data_dir, 'GBP_USD_5m.csv'),
+        'USD/JPY': os.path.join(data_dir, 'USD_JPY_1h.csv'),  # 1h data (no 5m available)
     }
 
     grand_trades = []
