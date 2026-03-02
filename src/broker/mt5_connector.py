@@ -40,14 +40,14 @@ class MT5Connector:
         self.connected = False
         
         # Re-check env var at runtime (not module load time)
-        relay_url = os.getenv('MT5_RELAY_URL', '').rstrip('/')
-        relay_available = bool(relay_url)
+        self.relay_url = os.getenv('MT5_RELAY_URL', '').rstrip('/')
+        relay_available = bool(self.relay_url)
         
         # Prefer relay when explicitly configured, even on Windows
         self.relay_mode = relay_available
         self.simulation_mode = TRADING_MODE in ('paper', 'backtest')
         
-        bot_logger.info(f"🔌 Broker mode: relay_url={relay_url}, relay_mode={self.relay_mode}, sim_mode={self.simulation_mode}")
+        bot_logger.info(f"🔌 Broker mode: relay_url={self.relay_url}, relay_mode={self.relay_mode}, sim_mode={self.simulation_mode}")
         
         self.sim_balance = 50.0
         self.sim_equity = 50.0
@@ -58,9 +58,10 @@ class MT5Connector:
 
     def _relay_get(self, path, params=None, timeout=10):
         """GET request to the relay server."""
+        url = getattr(self, 'relay_url', MT5_RELAY_URL)
         headers = {"Authorization": f"Bearer {MT5_RELAY_TOKEN}"} if MT5_RELAY_TOKEN else {}
         try:
-            r = requests.get(f"{MT5_RELAY_URL}{path}", params=params, headers=headers, timeout=timeout)
+            r = requests.get(f"{url}{path}", params=params, headers=headers, timeout=timeout)
             r.raise_for_status()
             return r.json()
         except Exception as e:
@@ -69,9 +70,10 @@ class MT5Connector:
 
     def _relay_post(self, path, data, timeout=10):
         """POST request to the relay server."""
+        url = getattr(self, 'relay_url', MT5_RELAY_URL)
         headers = {"Authorization": f"Bearer {MT5_RELAY_TOKEN}"} if MT5_RELAY_TOKEN else {}
         try:
-            r = requests.post(f"{MT5_RELAY_URL}{path}", json=data, headers=headers, timeout=timeout)
+            r = requests.post(f"{url}{path}", json=data, headers=headers, timeout=timeout)
             if r.status_code != 200:
                 try:
                     body = r.json()
@@ -98,11 +100,11 @@ class MT5Connector:
                         f"Balance: {acct['balance']} | Server: {acct.get('server')}"
                     )
                 else:
-                    bot_logger.info(f"✅ MT5 Relay Connected at {MT5_RELAY_URL}")
+                    bot_logger.info(f"✅ MT5 Relay Connected at {self.relay_url}")
                 return True
             else:
                 bot_logger.warning(
-                    f"MT5 Relay at {MT5_RELAY_URL} not reachable — falling back to simulation"
+                    f"MT5 Relay at {self.relay_url} not reachable — falling back to simulation"
                 )
                 self.relay_mode = False
                 self.simulation_mode = True

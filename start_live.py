@@ -31,14 +31,18 @@ import src.broker.mt5_connector as mt5mod
 _OrigInit = mt5mod.MT5Connector.__init__
 
 def _patched_init(self):
-    _OrigInit(self)
     relay_url = os.getenv('MT5_RELAY_URL', '').rstrip('/')
-    if relay_url and not self.connected:
-        # Force relay mode
-        self.relay_mode = True
-        self.simulation_mode = False
+    # Pre-set module-level vars BEFORE original init runs
+    if relay_url:
         mt5mod.MT5_RELAY_URL = relay_url
         mt5mod.RELAY_AVAILABLE = True
+        mt5mod.FORCE_RELAY = True
+    _OrigInit(self)
+    # Force relay mode even if original init fell back to simulation
+    if relay_url and self.simulation_mode:
+        self.relay_mode = True
+        self.simulation_mode = False
+        self.connected = False
         print(f"🔌 Forcing relay mode -> {relay_url}")
         self.initialize()
 
