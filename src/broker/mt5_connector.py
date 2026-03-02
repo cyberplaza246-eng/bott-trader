@@ -47,6 +47,12 @@ class MT5Connector:
         self.relay_mode = relay_available
         self.simulation_mode = TRADING_MODE in ('paper', 'backtest')
         
+        # Track whether we fell back from relay so we can auto-reconnect
+        self._relay_fallback = False
+        self._original_relay_url = self.relay_url  # remember for reconnect
+        self._last_reconnect_attempt = 0  # timestamp of last retry
+        self._reconnect_interval = 30  # seconds between retries
+        
         bot_logger.info(f"🔌 Broker mode: relay_url={self.relay_url}, relay_mode={self.relay_mode}, sim_mode={self.simulation_mode}")
         
         self.sim_balance = 50.0
@@ -93,19 +99,22 @@ class MT5Connector:
             result = self._relay_get("/ping")
             if result and result.get("mt5_connected"):
                 self.connected = True
+                self._relay_fallback = False
                 acct = self._relay_get("/account")
                 if acct and "balance" in acct:
                     bot_logger.info(
                         f"✅ MT5 Relay Connected | Account: {acct.get('login')} | "
-                        f"Balance: {acct['balance']} | Server: {acct.get('server')}"
+                        f"Balance: ${acct['balance']:.2f} | Server: {acct.get('server')}"
                     )
                 else:
                     bot_logger.info(f"✅ MT5 Relay Connected at {self.relay_url}")
                 return True
             else:
                 bot_logger.warning(
-                    f"MT5 Relay at {self.relay_url} not reachable — falling back to simulation"
+                    f"MT5 Relay at {self.relay_url} not reachable — falling back to simulation "
+                    f"(will auto-reconnect every {self._reconnect_interval}s)"
                 )
+                self._relay_fallback = True
                 self.relay_mode = False
                 self.simulation_mode = True
 
@@ -130,8 +139,41 @@ class MT5Connector:
             )
         return True
     
+    def _try_relay_reconnect(self):
+        """Periodically retry connecting to relay when in fallback simulation mode."""
+        if not self._relay_fallback or not self._original_relay_url:
+            return False
+        
+        import time as _time
+        now = _time.time()
+        if now - self._last_reconnect_attempt < self._reconnect_interval:
+            return False
+        self._last_reconnect_attempt = now
+        
+        try:
+            headers = {"Authorization": f"Bearer {MT5_RELAY_TOKEN}"} if MT5_RELAY_TOKEN else {}
+            r = requests.get(f"{self._original_relay_url}/ping", headers=headers, timeout=3)
+            data = r.json()
+            if data.get("mt5_connected"):
+                # Relay is back! Switch out of simulation
+                self.relay_url = self._original_relay_url
+                self.relay_mode = True
+                self.simulation_mode = False
+                self._relay_fallback = False
+                acct = self._relay_get("/account")
+                bal = acct.get('balance', '?') if acct else '?'
+                bot_logger.info(
+                    f"🔄 MT5 Relay reconnected! | Balance: ${bal} | "
+                    f"Switching from simulation to LIVE relay mode"
+                )
+                return True
+        except Exception:
+            pass
+        return False
+
     def get_balance(self):
         """Get current account balance"""
+        self._try_relay_reconnect()
         if self.relay_mode:
             r = self._relay_get("/balance")
             return r.get("balance") if r else None
@@ -142,6 +184,7 @@ class MT5Connector:
 
     def get_account_info(self):
         """Get full account info: balance, equity, leverage, free_margin, margin."""
+        self._try_relay_reconnect()
         if self.relay_mode:
             r = self._relay_get("/account")
             if r:
@@ -177,6 +220,7 @@ class MT5Connector:
     
     def get_equity(self):
         """Get current account equity"""
+        self._try_relay_reconnect()
         if self.relay_mode:
             r = self._relay_get("/equity")
             return r.get("equity") if r else None
@@ -194,6 +238,7 @@ class MT5Connector:
         
         Automatically tries both 'EUR/USD' and 'EURUSD' symbol formats.
         """
+        self._try_relay_reconnect()
         if self.relay_mode:
             r = self._relay_get("/candles", {
                 "pair": pair, "timeframe": timeframe_minutes, "count": num_candles
