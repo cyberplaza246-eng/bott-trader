@@ -17,8 +17,8 @@ import requests
 os.environ['TRADING_MODE'] = 'live'
 if not os.getenv('MT5_RELAY_URL'):
     os.environ['MT5_RELAY_URL'] = 'http://127.0.0.1:5555'
-os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.12')
-os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.20')
+os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.70')
+os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.70')
 # Match the relay server's default token
 os.environ.setdefault('MT5_RELAY_TOKEN', 'change-me-to-a-secret')
 

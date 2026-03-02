@@ -26409,3 +26409,99 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  Slots Available: 3 / 3"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  \ud83e\udde0 ML Scorer: collecting data (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "======================================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\ude80 AI-Powered Forex Trading Bot Starting..."}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "======================================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0c Broker mode: relay_url=http://127.0.0.1:5555, relay_mode=True, sim_mode=False"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "MT5 Relay at http://127.0.0.1:5555 not reachable \u2014 falling back to simulation (will auto-reconnect every 30s)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 Simulation Mode Active | Balance: $50.00 | Mode: live"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 0 past trades | threshold=0.35 | regime=neutral | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udde0 ML Trade Scorer: waiting (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udde0 ATR-centric ensemble running with all 9 models"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a ScalpingAnalyzer active as primary ATR signal (weight 0.28)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcb0 Using actual MT5 balance: $50.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $50.00 | Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca History backfill skipped (set SKIP_HISTORY_BACKFILL=false to enable)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 Scalping Bot initialized in LIVE mode (9-model ensemble, 1M+5M dual-timeframe)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\ude80 Starting Trading Bot in LIVE mode"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udde0 LSTM auto-retraining scheduled (daily 03:00 UTC)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Running initial scalping analysis..."}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Scalping analysis (5m) at 22:14:30"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udf9b\ufe0f Trade slots: 3 available (0/3 used)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 EUR/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 GBP/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $50.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.01 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 0"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Slots Available: 3 / 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  \ud83e\udde0 ML Scorer: collecting data (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Scalping bot running (1M every 60s, 5M every 5min). Press Ctrl+C to stop."}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Scalping analysis (1m) at 22:15:30"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udf9b\ufe0f Trade slots: 3 available (0/3 used)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 EUR/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 GBP/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $50.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.01 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 0"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Slots Available: 3 / 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  \ud83e\udde0 ML Scorer: collecting data (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Scalping analysis (1m) at 22:16:30"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udf9b\ufe0f Trade slots: 3 available (0/3 used)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 EUR/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 GBP/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $50.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.01 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 0"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Slots Available: 3 / 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  \ud83e\udde0 ML Scorer: collecting data (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Scalping analysis (1m) at 22:17:30"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udf9b\ufe0f Trade slots: 3 available (0/3 used)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 EUR/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 GBP/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $50.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.01 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 0"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Slots Available: 3 / 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  \ud83e\udde0 ML Scorer: collecting data (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "============================================================"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Scalping analysis (1m) at 22:18:30"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udf9b\ufe0f Trade slots: 3 available (0/3 used)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 EUR/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca4 GBP/USD outside scalping session (UTC 07:00\u201317:00) \u2014 skipping"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\n\ud83d\udcca Daily Status:"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Balance: $50.00"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Max Lot: 0.01 | Max Trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Daily Loss: $0.00 (0.0%)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Open Trades: 0"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Slots Available: 3 / 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  \ud83e\udde0 ML Scorer: collecting data (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 0 past trades | threshold=0.70 | regime=neutral | drawdown_protection=OFF"}

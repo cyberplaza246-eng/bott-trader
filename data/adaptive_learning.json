@@ -22,7 +22,7 @@
   "trade_history": [],
   "loss_patterns": {},
   "recent_trades_window": [],
-  "confidence_threshold": 0.35,
+  "confidence_threshold": 0.70,
   "consecutive_losses": 0,
   "consecutive_wins": 0,
   "max_consecutive_losses": 0,

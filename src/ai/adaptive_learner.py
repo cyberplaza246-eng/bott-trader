@@ -411,13 +411,13 @@ class AdaptiveLearner:
         recent_loss_ratio = recent_loss_count / len(recent_5) if recent_5 else 0
 
         if self.in_drawdown_protection:
-            self.confidence_threshold = min(ceiling, base + 0.10)
+            self.confidence_threshold = max(0.85, min(ceiling, base + 0.10))
             bot_logger.info(f"🛡️ Drawdown protection: threshold raised to {self.confidence_threshold:.2f}")
             return
 
         if recent_loss_ratio >= 0.80:
             # 4-5 of last 5 trades lost — very aggressive tightening
-            self.confidence_threshold = min(ceiling, base + 0.12)
+            self.confidence_threshold = max(0.85, min(ceiling, base + 0.12))
             bot_logger.warning(
                 f"🔴 HEAVY LOSSES: {recent_loss_count}/{len(recent_5)} recent trades lost → "
                 f"threshold {self.confidence_threshold:.2f}"
@@ -709,7 +709,8 @@ class AdaptiveLearner:
         return weights
 
     def get_adjusted_threshold(self) -> float:
-        return self.confidence_threshold
+        # Hard floor: never let adaptive logic drop below 0.70 (grid-search optimal)
+        return max(self.confidence_threshold, 0.70)
 
     def get_pair_win_rate(self, pair: str) -> float:
         pair = self._normalize_pair(pair)

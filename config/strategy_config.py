@@ -77,10 +77,10 @@ OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
-# 0.35 = require at least 35% weighted confidence before trading
+# 0.70 = require at least 70% weighted confidence before trading (grid-search optimal)
 # Higher threshold = fewer but better quality trades
-_raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.35))
-ENSEMBLE_CONFIDENCE_THRESHOLD = _raw_threshold  # No cap — let the threshold work
+_raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.70))
+ENSEMBLE_CONFIDENCE_THRESHOLD = max(_raw_threshold, 0.70)  # Hard floor: never below 70%
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))
 
 # Technical Analysis Parameters (ATR-centric scalping)

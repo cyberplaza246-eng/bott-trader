@@ -205,10 +205,10 @@ class TradingBot:
         recent_wr = self.ensemble.learner.get_recent_win_rate(5)
         if recent_wr < 0.20 and len(self.ensemble.learner.recent_trades_window) >= 3:
             # Only allow trades with very high confidence during cold streaks
-            if signal_result.get('confidence', 0) < 0.30:
+            if signal_result.get('confidence', 0) < 0.80:
                 bot_logger.info(
                     f"⏸️ Cooldown active (recent WR {recent_wr:.0%}): "
-                    f"blocking {pair} with confidence {signal_result['confidence']:.2%} < 30%"
+                    f"blocking {pair} with confidence {signal_result['confidence']:.2%} < 80%"
                 )
                 return False
 
