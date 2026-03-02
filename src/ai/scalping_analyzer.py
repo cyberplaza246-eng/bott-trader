@@ -44,8 +44,8 @@ class ScalpingAnalyzer:
     # Quick wins mode overrides (take small profits fast)
     QUICK_WINS_TP_RATIO = [0.5, 0.8]  # 0.5R-0.8R targets (~5-8 pips)
 
-    # Session windows (UTC)
-    LONDON_SESSION = {'start': 8, 'end': 22}  # 08:00-22:00 UTC
+    # Session windows (UTC) - 24/7 trading enabled
+    LONDON_SESSION = {'start': 0, 'end': 24}  # 24/7 trading
     DEFAULT_SESSION = {'start': 0, 'end': 24}
 
     def __init__(self, profit_mode='quick_wins'):

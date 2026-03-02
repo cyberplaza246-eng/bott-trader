@@ -70,8 +70,8 @@ SCALPING_PAIRS = {
 
 # Session windows for scalping (tighter than swing)
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 7, 'end': 22},   # Extended: London through NY close
-    'GBP/USD': {'start': 7, 'end': 22},   # Extended: London through NY close
+    'EUR/USD': {'start': 0, 'end': 24},   # 24/7 trading enabled
+    'GBP/USD': {'start': 0, 'end': 24},   # 24/7 trading enabled
 }
 
 # Spread limits for scalping (pips — tighter than swing)
