@@ -156,6 +156,19 @@ def main():
     newsapi_key = os.getenv('NEWSAPI_KEY')
     bot = TradingBot(newsapi_key=newsapi_key, enable_dashboard=True)
 
+    # Reset adaptive learner stats so old sim data doesn't block trades
+    if hasattr(bot, 'ensemble') and hasattr(bot.ensemble, 'learner'):
+        learner = bot.ensemble.learner
+        learner.pair_stats.clear()
+        learner.session_pair_stats.clear()
+        learner.hourly_stats.clear()
+        learner.trade_history.clear()
+        learner.consecutive_losses = 0
+        learner.consecutive_wins = 0
+        learner.in_drawdown_protection = False
+        learner.confidence_threshold = 0.12
+        bot_logger.info("🔄 Adaptive learner RESET — no skip rules from old data")
+
     try:
         bot.start()
     except KeyboardInterrupt:
