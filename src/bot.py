@@ -405,16 +405,11 @@ class TradingBot:
                     f"signal={signal_result['signal']} | drawdown_prot={'ON' if self.ensemble.learner.in_drawdown_protection else 'OFF'}"
                 )
                 if self._should_trade_pair(pair, signal_result):
-                    # Block duplicate: don't open another trade if bot already has one on this pair
-                    if self._has_bot_position(pair):
-                        bot_logger.info(f"⏭️ {pair}: already have open bot position — skipping")
-                        continue
-
                     # Cross-timeframe cooldown: prevent 1M and 5M from placing duplicate orders
                     if not hasattr(self, '_last_trade_time'):
                         self._last_trade_time = {}
                     last_trade = self._last_trade_time.get(pair)
-                    if last_trade and (datetime.now() - last_trade).total_seconds() < 30:
+                    if last_trade and (datetime.now() - last_trade).total_seconds() < 15:
                         bot_logger.info(f"⏭️ {pair}: cross-timeframe cooldown active — skipping")
                         continue
 

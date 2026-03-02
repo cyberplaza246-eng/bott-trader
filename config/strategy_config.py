@@ -40,30 +40,30 @@ TIMEFRAMES = {
 SCALPING_PAIRS = {
     'EUR/USD': {
         '1m': {
-            'sl_pips_min': 4, 'sl_pips_max': 6,
-            'tp_ratio': [1.0, 1.2],       # 1:1 R:R — needs >50% WR
-            'max_hold_seconds': 600,       # 10 minutes
-            'cooldown_seconds': 60,
+            'sl_pips_min': 3, 'sl_pips_max': 5,
+            'tp_ratio': [0.8, 1.0],       # Quick profit — small TP
+            'max_hold_seconds': 300,       # 5 minutes max
+            'cooldown_seconds': 30,
         },
         '5m': {
-            'sl_pips_min': 5, 'sl_pips_max': 8,
-            'tp_ratio': [1.0, 1.2],       # 1:1 R:R — needs >50% WR
-            'max_hold_seconds': 2400,      # 40 minutes (8 bars)
-            'cooldown_seconds': 180,
+            'sl_pips_min': 4, 'sl_pips_max': 6,
+            'tp_ratio': [0.8, 1.0],       # Quick profit
+            'max_hold_seconds': 900,       # 15 minutes max
+            'cooldown_seconds': 60,
         },
     },
     'GBP/USD': {
         '1m': {
-            'sl_pips_min': 5, 'sl_pips_max': 8,
-            'tp_ratio': [1.0, 1.2],
-            'max_hold_seconds': 600,
-            'cooldown_seconds': 60,
+            'sl_pips_min': 4, 'sl_pips_max': 6,
+            'tp_ratio': [0.8, 1.0],       # Quick profit
+            'max_hold_seconds': 300,       # 5 minutes max
+            'cooldown_seconds': 30,
         },
         '5m': {
-            'sl_pips_min': 6, 'sl_pips_max': 10,
-            'tp_ratio': [1.0, 1.2],
-            'max_hold_seconds': 3000,      # 50 minutes (10 bars)
-            'cooldown_seconds': 180,
+            'sl_pips_min': 5, 'sl_pips_max': 8,
+            'tp_ratio': [0.8, 1.0],       # Quick profit
+            'max_hold_seconds': 900,       # 15 minutes max
+            'cooldown_seconds': 60,
         },
     },
 }
