@@ -341,19 +341,19 @@ class AdaptiveLearner:
     def _adapt_confidence_threshold(self):
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
         base = ENSEMBLE_CONFIDENCE_THRESHOLD
-        ceiling = base + 0.20
+        ceiling = base + 0.15  # Max threshold never exceeds base + 15%
 
         if self.in_drawdown_protection:
-            self.confidence_threshold = min(ceiling, base + 0.12)
+            self.confidence_threshold = min(ceiling, base + 0.08)
             bot_logger.info(f"🛡️ Drawdown protection: threshold raised to {self.confidence_threshold:.2f}")
             return
 
         if self.consecutive_losses >= 5:
-            bump = min(0.15, self.consecutive_losses * 0.02)
+            bump = min(0.10, self.consecutive_losses * 0.015)
             self.confidence_threshold = min(ceiling, base + bump)
             bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
         elif self.consecutive_losses >= 3:
-            bump = self.consecutive_losses * 0.015
+            bump = self.consecutive_losses * 0.01
             self.confidence_threshold = min(ceiling, base + bump)
             bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
         elif self.consecutive_wins >= 3:
