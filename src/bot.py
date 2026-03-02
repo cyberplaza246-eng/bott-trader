@@ -52,12 +52,14 @@ class TradingBot:
     CORRELATED_PAIRS = {
         'EUR/USD': 'GBP/USD',
         'GBP/USD': 'EUR/USD',
+        # USD/JPY has negative correlation — no block needed
     }
 
     # ── Spread Limits (max allowed spread in pips) — Scalping-tight ─
     MAX_SPREAD = {
         'EUR/USD': SCALPING_SPREAD_LIMITS.get('EUR/USD', 2.0) * 0.0001,
         'GBP/USD': SCALPING_SPREAD_LIMITS.get('GBP/USD', 2.5) * 0.0001,
+        'USD/JPY': SCALPING_SPREAD_LIMITS.get('USD/JPY', 2.5) * 0.01,
     }
     DEFAULT_MAX_SPREAD = 0.00020
 

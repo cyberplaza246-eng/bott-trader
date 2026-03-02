@@ -51,6 +51,12 @@ class ScalpingAnalyzer:
             'pip_size': 0.0001,
             'pip_value_label': 'pips',
         },
+        'USD/JPY': {
+            'session_atr_min': 0.060,     # Min ATR to trade (~6 pips in JPY)
+            'spread_sim': 0.020,          # Simulated spread (2 pips)
+            'pip_size': 0.01,
+            'pip_value_label': 'pips',
+        },
     }
 
     # -- ATR risk parameters (universal) -----------------------------

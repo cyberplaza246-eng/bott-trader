@@ -23,7 +23,7 @@ TRADING_MODE = os.getenv('TRADING_MODE', 'paper')  # 'live', 'paper', 'backtest'
 AUTOTRADING_ENABLED = TRADING_MODE == 'live'
 
 # Currency Pairs to Trade (scalping focus)
-PAIRS = ['EUR/USD', 'GBP/USD']
+PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY']
 
 # Timeframes (in minutes) — dual-timeframe scalping
 TIMEFRAMES = {
@@ -53,6 +53,13 @@ SCALPING_PAIRS = {
         'cooldown_seconds': 30,
         'max_hold_candles': 8,
     },
+    'USD/JPY': {
+        'session_atr_min': 0.060,      # Min ATR to trade (~6 pips in JPY terms)
+        'spread_sim': 0.020,           # Simulated spread (2 pips)
+        'pip_size': 0.01,
+        'cooldown_seconds': 30,
+        'max_hold_candles': 8,
+    },
 }
 
 # Session windows for scalping — only trade during liquid sessions
@@ -60,12 +67,14 @@ SCALPING_PAIRS = {
 SCALPING_SESSION_WINDOWS = {
     'EUR/USD': {'start': 7, 'end': 17},   # London + NY overlap only
     'GBP/USD': {'start': 7, 'end': 17},   # London + NY overlap only
+    'USD/JPY': {'start': 0, 'end': 17},   # Asian (00:00) through NY close (17:00 UTC)
 }
 
 # Spread limits for scalping (pips — tighter than swing)
 SCALPING_SPREAD_LIMITS = {
     'EUR/USD': 2.0,   # Max 2.0 pips
     'GBP/USD': 2.5,   # Max 2.5 pips
+    'USD/JPY': 2.5,   # Max 2.5 pips
 }
 
 # Confluence bonus: both timeframes agree → boost confidence
