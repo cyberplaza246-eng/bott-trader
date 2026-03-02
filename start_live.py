@@ -3,11 +3,13 @@
 Quick-start live trading with relay mode forced ON.
 Usage: python start_live.py
 
-This script forces relay mode regardless of what mt5_connector.py does locally.
-No git pull needed — it patches everything at runtime.
+Automatically starts the relay server as a subprocess, then starts the bot.
+Single terminal needed — no manual relay setup required.
 """
 import os
 import sys
+import time
+import subprocess
 import requests
 
 # Force environment BEFORE any imports
@@ -18,33 +20,70 @@ os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.12')
 os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.20')
 
 RELAY_URL = os.environ['MT5_RELAY_URL'].rstrip('/')
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 print(f"🔧 TRADING_MODE = live")
 print(f"🔧 MT5_RELAY_URL = {RELAY_URL}")
 print(f"🔧 QUICK_WINS mode — aggressive thresholds active")
 
-# Test relay BEFORE starting bot
-print(f"\n🔌 Testing relay at {RELAY_URL}...")
+# ── Auto-start relay if not already running ──────────────────────────
+def is_relay_running():
+    try:
+        r = requests.get(f"{RELAY_URL}/ping", timeout=3)
+        return r.json().get('mt5_connected', False)
+    except:
+        return False
+
+relay_proc = None
+if not is_relay_running():
+    print(f"\n🔌 Relay not running — starting it automatically...")
+    relay_script = os.path.join(PROJECT_ROOT, 'mt5_relay', 'relay_server.py')
+    relay_proc = subprocess.Popen(
+        [sys.executable, relay_script],
+        cwd=PROJECT_ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        creationflags=getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0),
+    )
+    # Wait for relay to start
+    for i in range(15):
+        time.sleep(1)
+        if is_relay_running():
+            print(f"✅ Relay started (PID {relay_proc.pid})")
+            break
+        print(f"   Waiting for relay... ({i+1}s)")
+    else:
+        # Read output to show any errors
+        try:
+            output = relay_proc.stdout.read(2000).decode('utf-8', errors='replace')
+            print(f"❌ Relay failed to start. Output:\n{output}")
+        except:
+            print(f"❌ Relay failed to start after 15 seconds")
+        sys.exit(1)
+else:
+    print(f"\n✅ Relay already running at {RELAY_URL}")
+
+# Test relay connection
+print(f"🔌 Testing relay...")
 try:
     r = requests.get(f"{RELAY_URL}/ping", timeout=5)
     data = r.json()
     if data.get('mt5_connected'):
-        print(f"✅ Relay OK — MT5 connected")
+        acct = requests.get(f"{RELAY_URL}/account", timeout=5).json()
+        print(f"✅ MT5 Connected | Account: {acct.get('login')} | Balance: {acct.get('balance')} | Leverage: {acct.get('leverage')}:1")
     else:
-        print(f"❌ Relay responded but MT5 not connected: {data}")
+        print(f"❌ Relay running but MT5 not connected: {data}")
         sys.exit(1)
 except Exception as e:
-    print(f"❌ Cannot reach relay at {RELAY_URL}: {e}")
-    print(f"   Make sure relay_server.py is running in another terminal!")
+    print(f"❌ Cannot reach relay: {e}")
     sys.exit(1)
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
 
-# Import and completely replace MT5Connector.__init__ to force relay
+# Import and replace MT5Connector with relay-only version
 import src.broker.mt5_connector as mt5mod
 from src.utils.logger import bot_logger, trades_logger, error_logger
-from datetime import datetime
 
 class RelayMT5Connector(mt5mod.MT5Connector):
     """MT5Connector that ALWAYS uses relay mode."""
@@ -61,7 +100,6 @@ class RelayMT5Connector(mt5mod.MT5Connector):
         self.sim_equity = 50.0
         self.sim_positions = []
         
-        # Test and connect via relay
         result = self._relay_get("/ping")
         if result and result.get("mt5_connected"):
             self.connected = True
@@ -71,8 +109,6 @@ class RelayMT5Connector(mt5mod.MT5Connector):
                     f"✅ MT5 Relay Connected | Account: {acct.get('login')} | "
                     f"Balance: {acct['balance']} | Server: {acct.get('server')}"
                 )
-            else:
-                bot_logger.info(f"✅ MT5 Relay Connected at {RELAY_URL}")
         else:
             raise Exception(f"Relay at {RELAY_URL} not reachable")
     
@@ -99,7 +135,7 @@ class RelayMT5Connector(mt5mod.MT5Connector):
             if r.status_code != 200:
                 try:
                     body = r.json()
-                except Exception:
+                except:
                     body = r.text
                 error_logger.error(f"Relay POST {path} failed ({r.status_code}): {body}")
                 return None
@@ -108,10 +144,10 @@ class RelayMT5Connector(mt5mod.MT5Connector):
             error_logger.error(f"Relay POST {path} failed: {e}")
             return None
 
-# Replace the class entirely so TradingBot uses our relay version
+# Replace the class
 mt5mod.MT5Connector = RelayMT5Connector
 
-# Now start the bot
+# Start the bot
 from src.bot import TradingBot
 
 def main():
@@ -130,6 +166,10 @@ def main():
     except Exception as e:
         bot_logger.error(f"Fatal error: {str(e)}", exc_info=True)
         bot.stop()
+    finally:
+        if relay_proc:
+            print("Stopping relay server...")
+            relay_proc.terminate()
 
 if __name__ == '__main__':
     main()
