@@ -38,11 +38,17 @@ class MT5Connector:
         self.password = MT5_PASSWORD
         self.server = MT5_SERVER
         self.connected = False
+        
+        # Re-check env var at runtime (not module load time)
+        relay_url = os.getenv('MT5_RELAY_URL', '').rstrip('/')
+        relay_available = bool(relay_url)
+        
         # Prefer relay when explicitly configured, even on Windows
-        self.relay_mode = RELAY_AVAILABLE and (FORCE_RELAY or not MT5_AVAILABLE)
-        self.simulation_mode = (
-            not MT5_AVAILABLE and not RELAY_AVAILABLE
-        ) or TRADING_MODE in ('paper', 'backtest')
+        self.relay_mode = relay_available
+        self.simulation_mode = TRADING_MODE in ('paper', 'backtest')
+        
+        bot_logger.info(f"🔌 Broker mode: relay_url={relay_url}, relay_mode={self.relay_mode}, sim_mode={self.simulation_mode}")
+        
         self.sim_balance = 50.0
         self.sim_equity = 50.0
         self.sim_positions = []
