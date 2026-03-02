@@ -34,7 +34,8 @@ app = Flask(__name__)
 RELAY_TOKEN = os.getenv("MT5_RELAY_TOKEN", "change-me-to-a-secret")
 
 # Lock to serialise MT5 API calls (MT5 library is not thread-safe)
-_mt5_lock = threading.Lock()
+# Use RLock (reentrant) so _ensure_mt5() can be called inside a locked block
+_mt5_lock = threading.RLock()
 
 
 # ── Auth Middleware ───────────────────────────────────────────────────
