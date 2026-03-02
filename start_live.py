@@ -18,6 +18,8 @@ if not os.getenv('MT5_RELAY_URL'):
     os.environ['MT5_RELAY_URL'] = 'http://127.0.0.1:5555'
 os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.12')
 os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.20')
+# Match the relay server's default token
+os.environ.setdefault('MT5_RELAY_TOKEN', 'change-me-to-a-secret')
 
 RELAY_URL = os.environ['MT5_RELAY_URL'].rstrip('/')
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -64,12 +66,14 @@ else:
     print(f"\n✅ Relay already running at {RELAY_URL}")
 
 # Test relay connection
+RELAY_TOKEN = os.environ.get('MT5_RELAY_TOKEN', 'change-me-to-a-secret')
+AUTH_HEADERS = {"Authorization": f"Bearer {RELAY_TOKEN}"}
 print(f"🔌 Testing relay...")
 try:
     r = requests.get(f"{RELAY_URL}/ping", timeout=5)
     data = r.json()
     if data.get('mt5_connected'):
-        acct = requests.get(f"{RELAY_URL}/account", timeout=5).json()
+        acct = requests.get(f"{RELAY_URL}/account", headers=AUTH_HEADERS, timeout=5).json()
         print(f"✅ MT5 Connected | Account: {acct.get('login')} | Balance: {acct.get('balance')} | Leverage: {acct.get('leverage')}:1")
     else:
         print(f"❌ Relay running but MT5 not connected: {data}")
@@ -113,10 +117,7 @@ class RelayMT5Connector(mt5mod.MT5Connector):
             raise Exception(f"Relay at {RELAY_URL} not reachable")
     
     def _relay_get(self, path, params=None, timeout=10):
-        headers = {}
-        token = os.getenv('MT5_RELAY_TOKEN', '')
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
+        headers = {"Authorization": f"Bearer {RELAY_TOKEN}"}
         try:
             r = requests.get(f"{RELAY_URL}{path}", params=params, headers=headers, timeout=timeout)
             r.raise_for_status()
@@ -126,10 +127,7 @@ class RelayMT5Connector(mt5mod.MT5Connector):
             return None
 
     def _relay_post(self, path, data, timeout=10):
-        headers = {}
-        token = os.getenv('MT5_RELAY_TOKEN', '')
-        if token:
-            headers["Authorization"] = f"Bearer {token}"
+        headers = {"Authorization": f"Bearer {RELAY_TOKEN}"}
         try:
             r = requests.post(f"{RELAY_URL}{path}", json=data, headers=headers, timeout=timeout)
             if r.status_code != 200:
