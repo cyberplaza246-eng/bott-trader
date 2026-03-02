@@ -110,6 +110,12 @@ class RelayMT5Connector(mt5mod.MT5Connector):
         self.sim_equity = 50.0
         self.sim_positions = []
 
+        # ── Relay reconnect state (inherited methods need these) ──
+        self._relay_fallback = False
+        self._original_relay_url = self.relay_url
+        self._last_reconnect_attempt = 0
+        self._reconnect_interval = 30
+
         # ── Circuit-breaker state ─────────────────────────────────
         self._consecutive_failures = 0
         self._max_failures_before_reconnect = 3
