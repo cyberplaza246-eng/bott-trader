@@ -89,9 +89,10 @@ OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds (aggressive for quick_wins scalping)
-# Cap at 0.25 — higher values prevent the bot from ever trading
+# Cap at 0.15 — scalping signals are inherently lower-confidence
+# because many models return HOLD during ranging markets.
 _raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.12))
-ENSEMBLE_CONFIDENCE_THRESHOLD = min(_raw_threshold, 0.25)
+ENSEMBLE_CONFIDENCE_THRESHOLD = min(_raw_threshold, 0.15)
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))
 
 # Technical Analysis Parameters (tuned for scalping)
