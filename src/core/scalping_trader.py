@@ -24,19 +24,24 @@ class ScalpingTrader:
         'EUR/USD': 20,  # EUR scalps may take slightly longer
     }
     
+    # Quick wins mode multiplier (0.6 = 60% of normal hold time)
+    QUICK_WINS_HOLD_MULTIPLIER = 0.6
+    
     # Min time between signals for same pair (cooldown)
     SIGNAL_COOLDOWN_MINUTES = 2
     
-    def __init__(self, broker=None, risk_manager=None):
+    def __init__(self, broker=None, risk_manager=None, profit_mode='quick_wins'):
         """Initialize scalping trader.
         
         Args:
             broker: MT5Connector instance
             risk_manager: RiskManager instance
+            profit_mode: 'quick_wins' for small fast wins, 'normal' for standard targets
         """
         self.broker = broker
         self.risk_manager = risk_manager
-        self.analyzer = ScalpingAnalyzer()
+        self.profit_mode = profit_mode
+        self.analyzer = ScalpingAnalyzer(profit_mode=profit_mode)
         self.trade_logger = TradeLogger()
         
         # Track recent signals per pair (to avoid overtrading)
@@ -45,7 +50,26 @@ class ScalpingTrader:
         # Track active scalp trades
         self.active_scalp_trades = {}  # {ticket: trade_data}
         
-        bot_logger.info("🔪 Scalping Trader initialized (GBPUSD/EURUSD)")
+        mode_label = "QUICK_WINS" if profit_mode == 'quick_wins' else "NORMAL"
+        bot_logger.info(f"🔪 Scalping Trader initialized (GBPUSD/EURUSD) [{mode_label} mode]")
+    
+    def set_profit_mode(self, mode):
+        """Switch profit mode at runtime.
+        
+        Args:
+            mode: 'quick_wins' or 'normal'
+        """
+        if mode not in ['quick_wins', 'normal']:
+            bot_logger.warning(f"Invalid profit mode '{mode}', using 'quick_wins'")
+            mode = 'quick_wins'
+        
+        old_mode = self.profit_mode
+        self.profit_mode = mode
+        self.analyzer.profit_mode = mode
+        
+        mode_label = "QUICK_WINS" if mode == 'quick_wins' else "NORMAL"
+        bot_logger.info(f"🔄 Profit mode changed: {old_mode} → {mode} [{mode_label}]")
+        return mode
     
     def analyze_pair(self, df, pair):
         """Analyze a pair for scalping setup.
@@ -293,9 +317,13 @@ class ScalpingTrader:
                 del self.active_scalp_trades[ticket]
                 continue
             
-            # Check hold time limit
+            # Check hold time limit (shorter in quick_wins mode)
             hold_time = (now - trade['entry_time']).total_seconds() / 60
             max_hold = self.MAX_HOLD_MINUTES.get(trade['pair'], 15)
+            
+            # Apply quick_wins multiplier (60% of normal hold time)
+            if self.profit_mode == 'quick_wins':
+                max_hold = max_hold * self.QUICK_WINS_HOLD_MULTIPLIER
             
             if hold_time > max_hold:
                 bot_logger.warning(

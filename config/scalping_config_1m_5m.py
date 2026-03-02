@@ -9,6 +9,7 @@ class MultiTimeframeScalpingConfig:
     # =========================================================================
     
     MODE = "balanced"  # Options: "conservative", "balanced", "aggressive"
+    PROFIT_MODE = "quick_wins"  # Options: "normal", "quick_wins" (take small wins fast)
     
     # =========================================================================
     # CONSERVATIVE MODE
@@ -90,6 +91,29 @@ class MultiTimeframeScalpingConfig:
         # Account Risk
         'account_risk_percent': 1.5,
         'account_tier': 'mini',
+    }
+    
+    # =========================================================================
+    # QUICK WINS PROFIT MODE
+    # Take small profits quickly — higher win rate, smaller average wins
+    # =========================================================================
+    
+    QUICK_WINS = {
+        'tp_ratios': [0.5, 0.8],       # 0.5R-0.8R (quick ~5-8 pip targets)
+        'breakeven_r': 0.3,             # Move SL to breakeven at 0.3R profit
+        'partial_close_pct': 0.40,      # Partial close at 40% of TP distance
+        'trail_atr_mult': 0.5,          # Trail very tight at 0.5× ATR
+        'max_hold_multiplier': 0.6,     # 60% of normal hold time
+        'description': 'Take small wins fast — higher win rate, smaller targets',
+    }
+    
+    NORMAL_PROFITS = {
+        'tp_ratios': [1.0, 1.5],        # 1R-1.5R (standard targets)
+        'breakeven_r': 0.5,             # Move SL to breakeven at 0.5R profit
+        'partial_close_pct': 0.60,      # Partial close at 60% of TP distance
+        'trail_atr_mult': 0.8,          # Trail at 0.8× ATR
+        'max_hold_multiplier': 1.0,     # Normal hold time
+        'description': 'Standard profit targets',
     }
     
     # =========================================================================
@@ -238,7 +262,7 @@ class MultiTimeframeScalpingConfig:
     # =========================================================================
     
     EXECUTION = {
-        'live_trading_enabled': False,  # Start with paper trading!
+        'live_trading_enabled': True,    # LIVE TRADING ENABLED
         'send_alerts': True,             # Alert on confluent signals
         'alert_destinations': ['log', 'console'],  # Where to send alerts
         'log_all_signals': True,         # Log every signal (even skipped)

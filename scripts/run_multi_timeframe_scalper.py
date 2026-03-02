@@ -25,6 +25,7 @@ from src.core.multi_timeframe_scalper import MultiTimeframeScalpingAnalyzer, Mul
 from src.risk.position_manager import RiskManager
 from src.utils.logger import bot_logger
 from config.strategy_config import TRADING_MODE, INITIAL_BALANCE
+from config.scalping_config_1m_5m import MultiTimeframeScalpingConfig
 
 
 class MultiTimeframeScalpingBot:
@@ -66,11 +67,15 @@ class MultiTimeframeScalpingBot:
             self.broker = None
         
         self.risk_manager = RiskManager(initial_balance=INITIAL_BALANCE)
-        self.analyzer = MultiTimeframeScalpingAnalyzer()
-        self.trader = MultiTimeframeScalpingTrader(broker=self.broker, risk_manager=self.risk_manager)
+        
+        # Get profit mode from config (default: 'quick_wins')
+        profit_mode = getattr(MultiTimeframeScalpingConfig, 'PROFIT_MODE', 'quick_wins')
+        self.analyzer = MultiTimeframeScalpingAnalyzer(profit_mode=profit_mode)
+        self.trader = MultiTimeframeScalpingTrader(broker=self.broker, risk_manager=self.risk_manager, profit_mode=profit_mode)
         
         bot_logger.info(f"Initial Balance: ${INITIAL_BALANCE:.2f}")
         bot_logger.info(f"Risk Mode: {mode}")
+        bot_logger.info(f"Profit Mode: {profit_mode.upper()}")
         bot_logger.info("Bot initialized and ready.\n")
     
     def fetch_candles(self, pair, timeframe, count):

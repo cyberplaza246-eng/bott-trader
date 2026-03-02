@@ -33,7 +33,7 @@ class TrailingStopManager:
 
     # ── Registration ─────────────────────────────────────────────────
 
-    def register(self, ticket, entry_price, stop_loss, direction, atr, pair, take_profit=None, volume=None, scalping_mode=False):
+    def register(self, ticket, entry_price, stop_loss, direction, atr, pair, take_profit=None, volume=None, scalping_mode=False, quick_wins=False):
         """Register a new position for trailing stop management.
 
         Args:
@@ -46,9 +46,15 @@ class TrailingStopManager:
             take_profit: Take-profit price (for partial close logic)
             volume:      Position volume/lot size (for partial close)
             scalping_mode: If True, use tighter breakeven/trail/partial settings
+            quick_wins:  If True, use ULTRA tight settings (takes small wins fast)
         """
+        # Quick wins mode: VERY tight stops, grab small profits immediately
+        if quick_wins:
+            effective_breakeven_r = 0.3       # Breakeven at 0.3R (lock in profit early)
+            effective_trail_mult = 0.5        # Trail VERY tight at 0.5× ATR
+            effective_partial_pct = 0.40      # Partial close at 40% of TP distance
         # Scalping overrides: tighter stops, faster profit-taking
-        if scalping_mode:
+        elif scalping_mode:
             effective_breakeven_r = 0.5       # Breakeven at 0.5R (instead of 1.0R)
             effective_trail_mult = 0.8        # Trail at 0.8× ATR (instead of 1.5×)
             effective_partial_pct = 0.60      # Partial close at 60% of TP (instead of 75%)
@@ -70,11 +76,12 @@ class TrailingStopManager:
             'partial_closed': False,     # True after first partial close
             'best_price': entry_price,   # Best price seen so far
             'scalping_mode': scalping_mode,
+            'quick_wins': quick_wins,
             'breakeven_r': effective_breakeven_r,
             'trail_atr_mult': effective_trail_mult,
             'partial_close_pct': effective_partial_pct,
         }
-        mode_label = " [SCALP]" if scalping_mode else ""
+        mode_label = " [QUICK_WINS]" if quick_wins else (" [SCALP]" if scalping_mode else "")
         bot_logger.info(
             f"📌 Trailing registered{mode_label}: ticket={ticket} {pair} {direction} "
             f"entry={entry_price:.5f} SL={stop_loss:.5f} ATR={atr:.5f}"

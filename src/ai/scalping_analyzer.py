@@ -24,7 +24,7 @@ class ScalpingAnalyzer:
         'GBP/USD': {
             'min_sl_pips': 8,
             'max_sl_pips': 12,
-            'tp_ratio': [1.5, 2.0],  # 1.5R to 2R
+            'tp_ratio': [1.5, 2.0],  # 1.5R to 2R (default)
             'min_rsi_for_buy': 50,
             'max_rsi_for_buy': 55,
             'min_rsi_for_sell': 45,
@@ -33,20 +33,27 @@ class ScalpingAnalyzer:
         'EUR/USD': {
             'min_sl_pips': 6,
             'max_sl_pips': 10,
-            'tp_ratio': [1.0, 1.5],  # 1R to 1.5R (slower movement)
+            'tp_ratio': [1.0, 1.5],  # 1R to 1.5R (default, slower movement)
             'min_rsi_for_buy': 50,
             'max_rsi_for_buy': 55,
             'min_rsi_for_sell': 45,
             'max_rsi_for_sell': 50,
         }
     }
+    
+    # Quick wins mode overrides (take small profits fast)
+    QUICK_WINS_TP_RATIO = [0.5, 0.8]  # 0.5R-0.8R targets (~5-8 pips)
 
     # Session windows (UTC)
     LONDON_SESSION = {'start': 8, 'end': 22}  # 08:00-22:00 UTC
     DEFAULT_SESSION = {'start': 0, 'end': 24}
 
-    def __init__(self):
-        """Initialize scalping analyzer"""
+    def __init__(self, profit_mode='quick_wins'):
+        """Initialize scalping analyzer
+        
+        Args:
+            profit_mode: 'quick_wins' for small fast wins (0.5-0.8R), 'normal' for standard (1-2R)
+        """
         self.rsi_period = 9
         self.ema_periods = {
             'short': 20,    # Entry zone
@@ -57,7 +64,11 @@ class ScalpingAnalyzer:
         self.rsi_oversold = 30
         self.rsi_50_midline = 50  # Primary trend filter
         
-        bot_logger.info("🔪 Scalping Analyzer initialized (RSI9, EMA20/50/200)")
+        # Profit mode: 'quick_wins' or 'normal'
+        self.profit_mode = profit_mode
+        
+        mode_label = "QUICK_WINS" if profit_mode == 'quick_wins' else "NORMAL"
+        bot_logger.info(f"🔪 Scalping Analyzer initialized (RSI9, EMA20/50/200) [{mode_label} mode]")
 
     def calculate_indicators(self, df):
         """Calculate RSI(9) and EMAs for scalping.
@@ -402,9 +413,13 @@ class ScalpingAnalyzer:
             stop_loss = entry_price - sl_price_distance
             risk_pips = sl_pips
             
-            # TP at 1R and at 2R (for GBPUSD) or 1.5R (for EURUSD)
-            tp_ratio_1 = config['tp_ratio'][0]
-            tp_ratio_2 = config['tp_ratio'][1]
+            # TP ratios: use quick_wins if enabled, else pair config
+            if self.profit_mode == 'quick_wins':
+                tp_ratio_1 = self.QUICK_WINS_TP_RATIO[0]
+                tp_ratio_2 = self.QUICK_WINS_TP_RATIO[1]
+            else:
+                tp_ratio_1 = config['tp_ratio'][0]
+                tp_ratio_2 = config['tp_ratio'][1]
             
             take_profit_1 = entry_price + (sl_price_distance * tp_ratio_1)
             take_profit_2 = entry_price + (sl_price_distance * tp_ratio_2)
@@ -415,8 +430,13 @@ class ScalpingAnalyzer:
             stop_loss = entry_price + sl_price_distance
             risk_pips = sl_pips
             
-            tp_ratio_1 = config['tp_ratio'][0]
-            tp_ratio_2 = config['tp_ratio'][1]
+            # TP ratios: use quick_wins if enabled, else pair config
+            if self.profit_mode == 'quick_wins':
+                tp_ratio_1 = self.QUICK_WINS_TP_RATIO[0]
+                tp_ratio_2 = self.QUICK_WINS_TP_RATIO[1]
+            else:
+                tp_ratio_1 = config['tp_ratio'][0]
+                tp_ratio_2 = config['tp_ratio'][1]
             
             take_profit_1 = entry_price - (sl_price_distance * tp_ratio_1)
             take_profit_2 = entry_price - (sl_price_distance * tp_ratio_2)

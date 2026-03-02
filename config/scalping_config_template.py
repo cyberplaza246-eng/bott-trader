@@ -132,6 +132,9 @@ FILTERS = {
 # ═══════════════════════════════════════════════════════════════════════════
 
 EXIT_RULES = {
+    # Profit mode: 'normal' or 'quick_wins' (take small wins fast)
+    'profit_mode': 'quick_wins',  # Change to 'normal' for standard targets
+    
     # Take profit levels
     'tp_management': 'two_level',  # 'single' or 'two_level' scale-out
     
@@ -155,6 +158,17 @@ EXIT_RULES = {
 
 # Choose a mode based on market conditions
 OPTIMIZATION_MODES = {
+    'quick_wins': {
+        'description': 'Take small wins fast — higher win rate, smaller targets',
+        'min_confidence': 0.70,
+        'tp_ratios': [0.5, 0.8],        # 0.5R-0.8R (~5-8 pips)
+        'max_sl_pips': 10,
+        'require_divergence': False,
+        'breakeven_r': 0.3,             # Breakeven at 0.3R
+        'partial_close_pct': 0.40,      # Partial close at 40% of TP
+        'trail_atr_mult': 0.5,          # Trail tight at 0.5× ATR
+        'max_hold_multiplier': 0.6,     # 60% of normal hold time
+    },
     'conservative': {
         'description': 'High win rate, smaller profits',
         'min_confidence': 0.80,         # Higher threshold

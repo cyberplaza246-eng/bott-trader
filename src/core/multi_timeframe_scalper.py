@@ -12,6 +12,13 @@ import numpy as np
 from src.ai.scalping_analyzer import ScalpingAnalyzer
 from src.utils.logger import bot_logger
 
+# Import profit mode config (with fallback)
+try:
+    from config.scalping_config_1m_5m import MultiTimeframeScalpingConfig
+    PROFIT_MODE = getattr(MultiTimeframeScalpingConfig, 'PROFIT_MODE', 'quick_wins')
+except ImportError:
+    PROFIT_MODE = 'quick_wins'
+
 
 class MultiTimeframeScalpingAnalyzer:
     """Multi-timeframe scalping analyzer (1M & 5M support)"""
@@ -78,12 +85,19 @@ class MultiTimeframeScalpingAnalyzer:
         }
     }
     
-    def __init__(self):
-        """Initialize multi-timeframe analyzer"""
-        self.analyzer_5m = ScalpingAnalyzer()
-        self.timeframe_config = self.TIMEFRAME_CONFIG
+    def __init__(self, profit_mode=None):
+        """Initialize multi-timeframe analyzer
         
-        bot_logger.info("🔪 Multi-Timeframe Scalping Analyzer initialized (1M & 5M)")
+        Args:
+            profit_mode: 'quick_wins' or 'normal' (defaults to config)
+        """
+        mode = profit_mode if profit_mode else PROFIT_MODE
+        self.analyzer_5m = ScalpingAnalyzer(profit_mode=mode)
+        self.timeframe_config = self.TIMEFRAME_CONFIG
+        self.profit_mode = mode
+        
+        mode_label = "QUICK_WINS" if mode == 'quick_wins' else "NORMAL"
+        bot_logger.info(f"🔪 Multi-Timeframe Scalping Analyzer initialized (1M & 5M) [{mode_label} mode]")
     
     def get_config_for_pair(self, pair, timeframe='M5'):
         """Get configuration for specific pair and timeframe.
@@ -193,26 +207,46 @@ class MultiTimeframeScalpingAnalyzer:
 class MultiTimeframeScalpingTrader:
     """Trade execution for multiple timeframes"""
     
-    def __init__(self, broker=None, risk_manager=None):
+    def __init__(self, broker=None, risk_manager=None, profit_mode=None):
         """Initialize multi-timeframe trader.
         
         Args:
             broker: MT5Connector instance
             risk_manager: RiskManager instance
+            profit_mode: 'quick_wins' or 'normal' (defaults to config)
         """
         from src.core.scalping_trader import ScalpingTrader
         
+        mode = profit_mode if profit_mode else PROFIT_MODE
+        
         self.broker = broker
         self.risk_manager = risk_manager
-        self.analyzer = MultiTimeframeScalpingAnalyzer()
-        self.trader_1m = ScalpingTrader(broker=broker, risk_manager=risk_manager)
-        self.trader_5m = ScalpingTrader(broker=broker, risk_manager=risk_manager)
+        self.profit_mode = mode
+        self.analyzer = MultiTimeframeScalpingAnalyzer(profit_mode=mode)
+        self.trader_1m = ScalpingTrader(broker=broker, risk_manager=risk_manager, profit_mode=mode)
+        self.trader_5m = ScalpingTrader(broker=broker, risk_manager=risk_manager, profit_mode=mode)
         
         # Track active trades by timeframe
         self.active_trades_1m = {}
         self.active_trades_5m = {}
         
-        bot_logger.info("🔪 Multi-Timeframe Scalping Trader initialized (1M & 5M)")
+        mode_label = "QUICK_WINS" if mode == 'quick_wins' else "NORMAL"
+        bot_logger.info(f"🔪 Multi-Timeframe Scalping Trader initialized (1M & 5M) [{mode_label} mode]")
+    
+    def set_profit_mode(self, mode):
+        """Switch profit mode at runtime for all traders.
+        
+        Args:
+            mode: 'quick_wins' or 'normal'
+        """
+        self.profit_mode = mode
+        self.analyzer.profit_mode = mode
+        self.analyzer.analyzer_5m.profit_mode = mode
+        self.trader_1m.set_profit_mode(mode)
+        self.trader_5m.set_profit_mode(mode)
+        
+        mode_label = "QUICK_WINS" if mode == 'quick_wins' else "NORMAL"
+        bot_logger.info(f"🔄 Multi-TF profit mode changed to [{mode_label}]")
     
     def analyze_pair_multi_tf(self, df_1m, df_5m, pair):
         """Analyze pair on both timeframes.
