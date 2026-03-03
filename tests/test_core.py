@@ -512,6 +512,232 @@ class TestIntegrationSmoke:
         assert TRADING_MODE in ('live', 'paper', 'backtest')
         assert 'EUR/USD' in SCALPING_PAIRS
 
+    def test_config_threshold_reads_env(self):
+        """Threshold should read from env, not be hard-coded."""
+        from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
+        # With .env ENSEMBLE_CONFIDENCE_THRESHOLD=0.70, it should be 0.70
+        # Without .env, default should be 0.45 (not 0.30)
+        assert ENSEMBLE_CONFIDENCE_THRESHOLD >= 0.45, (
+            f"Threshold is {ENSEMBLE_CONFIDENCE_THRESHOLD}, expected >= 0.45"
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  LiquiditySweepAnalyzer Tests
+# ═══════════════════════════════════════════════════════════════════
+
+def make_sweep_data(n=100, direction='BUY', include_sweep=True):
+    """Generate OHLCV data with an embedded liquidity sweep event.
+
+    For BUY sweeps: creates a 5-candle range, then a candle that dips
+    below the range low and closes back above it, followed by a strong
+    bullish displacement candle.
+    """
+    np.random.seed(42)
+    base = 1.1000
+    data = {
+        'open': [], 'high': [], 'low': [], 'close': [],
+        'volume': [],
+    }
+
+    price = base
+    for i in range(n):
+        vol = np.random.randint(500, 2000)
+
+        if include_sweep and i == n - 3:
+            # Sweep candle: dips below prior range then closes above
+            if direction == 'BUY':
+                sweep_low = price - 0.0020  # Dips 20 pips below
+                data['open'].append(price)
+                data['high'].append(price + 0.0002)
+                data['low'].append(sweep_low)
+                data['close'].append(price - 0.0003)  # Closes near open (above sweep low)
+                data['volume'].append(int(vol * 0.8))
+            else:
+                sweep_high = price + 0.0020
+                data['open'].append(price)
+                data['high'].append(sweep_high)
+                data['low'].append(price - 0.0002)
+                data['close'].append(price + 0.0003)
+                data['volume'].append(int(vol * 0.8))
+        elif include_sweep and i == n - 2:
+            # Displacement candle: strong move in sweep direction
+            if direction == 'BUY':
+                data['open'].append(price - 0.0002)
+                data['high'].append(price + 0.0015)
+                data['low'].append(price - 0.0003)
+                data['close'].append(price + 0.0014)
+                data['volume'].append(int(vol * 2.5))  # High volume
+            else:
+                data['open'].append(price + 0.0002)
+                data['high'].append(price + 0.0003)
+                data['low'].append(price - 0.0015)
+                data['close'].append(price - 0.0014)
+                data['volume'].append(int(vol * 2.5))
+        elif include_sweep and i == n - 1:
+            # Continuation candle
+            if direction == 'BUY':
+                data['open'].append(price + 0.0012)
+                data['high'].append(price + 0.0018)
+                data['low'].append(price + 0.0010)
+                data['close'].append(price + 0.0016)
+                data['volume'].append(vol)
+            else:
+                data['open'].append(price - 0.0012)
+                data['high'].append(price - 0.0010)
+                data['low'].append(price - 0.0018)
+                data['close'].append(price - 0.0016)
+                data['volume'].append(vol)
+        else:
+            change = np.random.normal(0, 0.0003)
+            c = price + change
+            h = max(price, c) + abs(np.random.normal(0, 0.0002))
+            l = min(price, c) - abs(np.random.normal(0, 0.0002))
+            data['open'].append(price)
+            data['high'].append(h)
+            data['low'].append(l)
+            data['close'].append(c)
+            data['volume'].append(vol)
+            price = c
+
+    dates = pd.date_range('2024-01-01', periods=n, freq='1min')
+    return pd.DataFrame({
+        'datetime': dates,
+        'open': data['open'],
+        'high': data['high'],
+        'low': data['low'],
+        'close': data['close'],
+        'volume': data['volume'],
+    })
+
+
+class TestLiquiditySweepAnalyzer:
+    """Tests for src.ai.liquidity_sweep.LiquiditySweepAnalyzer"""
+
+    def setup_method(self):
+        from src.ai.liquidity_sweep import LiquiditySweepAnalyzer
+        self.analyzer = LiquiditySweepAnalyzer()
+
+    def test_instantiation(self):
+        """Should create analyzer without errors."""
+        assert self.analyzer is not None
+        assert self.analyzer.SWEEP_LOOKBACK == 5
+
+    def test_calculate_indicators(self):
+        """Should add all required indicator columns."""
+        df = make_ohlcv(200, freq='1min')
+        result = self.analyzer.calculate_indicators(df)
+        for col in ['ema_20', 'ema_50', 'ema_200', 'atr', 'rsi', 'adx',
+                     'volume_ratio', 'body_ratio', 'liq_low', 'liq_high']:
+            assert col in result.columns, f"Missing column: {col}"
+
+    def test_detect_regime_insufficient_data(self):
+        """Should return unknown regime with too little data."""
+        df = make_ohlcv(10, freq='5min')
+        df = self.analyzer.calculate_indicators(df)
+        regime = self.analyzer.detect_regime(df)
+        assert regime['regime'] == 'unknown'
+        assert regime['bias'] is None
+
+    def test_detect_regime_with_data(self):
+        """Should classify regime with sufficient data."""
+        df = make_ohlcv(200, freq='5min')
+        df = self.analyzer.calculate_indicators(df)
+        regime = self.analyzer.detect_regime(df)
+        assert regime['regime'] in ('trend_up', 'trend_down', 'range',
+                                     'high_volatility', 'low_volatility', 'unknown')
+
+    def test_detect_sweep_no_data(self):
+        """Should return not-detected with insufficient data."""
+        result = self.analyzer.detect_sweep(None, 'BUY')
+        assert result['detected'] is False
+
+    def test_check_market_conditions(self):
+        """Market condition gate should work."""
+        df = make_ohlcv(200, freq='1min')
+        df = self.analyzer.calculate_indicators(df)
+        ok, reason = self.analyzer.check_market_conditions(df, 'EUR/USD')
+        assert isinstance(ok, bool)
+        assert isinstance(reason, str)
+
+    def test_risk_reward_calculation(self):
+        """Should calculate valid SL/TP from sweep event."""
+        sweep_result = {
+            'detected': True,
+            'direction': 'BUY',
+            'sweep_wick': 1.0980,
+            'swept_level': 1.0985,
+        }
+        displacement_result = {
+            'confirmed': True,
+            'entry_price': 1.1005,
+        }
+        regime_info = {
+            'regime': 'trend_up',
+            'atr': 0.0010,
+        }
+        rr = self.analyzer.calculate_risk_reward(
+            sweep_result, displacement_result, regime_info, 'EUR/USD'
+        )
+        assert rr is not None
+        assert rr['stop_loss'] < rr['entry_price']
+        assert rr['take_profit'] > rr['entry_price']
+        assert rr['rr_ratio'] == 1.5  # trend_up → 1.5R
+
+    def test_risk_reward_high_vol(self):
+        """High volatility regime should use 2.0R."""
+        sweep_result = {
+            'detected': True,
+            'direction': 'BUY',
+            'sweep_wick': 1.0980,
+            'swept_level': 1.0985,
+        }
+        displacement_result = {
+            'confirmed': True,
+            'entry_price': 1.1005,
+        }
+        regime_info = {'regime': 'high_volatility', 'atr': 0.0010}
+        rr = self.analyzer.calculate_risk_reward(
+            sweep_result, displacement_result, regime_info, 'EUR/USD'
+        )
+        assert rr['rr_ratio'] == 2.0
+
+    def test_risk_reward_range(self):
+        """Range regime should use 1.2R."""
+        sweep_result = {
+            'detected': True,
+            'direction': 'SELL',
+            'sweep_wick': 1.1020,
+            'swept_level': 1.1015,
+        }
+        displacement_result = {
+            'confirmed': True,
+            'entry_price': 1.0995,
+        }
+        regime_info = {'regime': 'range', 'atr': 0.0010}
+        rr = self.analyzer.calculate_risk_reward(
+            sweep_result, displacement_result, regime_info, 'EUR/USD'
+        )
+        assert rr['rr_ratio'] == 1.2
+        assert rr['stop_loss'] > rr['entry_price']  # SELL SL above entry
+
+    def test_get_signal_returns_skip_no_bias(self):
+        """Should SKIP when 5M data has no directional bias."""
+        df_1m = make_ohlcv(200, freq='1min')
+        # Use short 5M data to trigger 'unknown' regime
+        df_5m = make_ohlcv(30, freq='5min')
+        result = self.analyzer.get_signal(df_1m, 'EUR/USD', df_5m=df_5m)
+        assert result['signal'] == 'SKIP'
+        assert result['confidence'] == 0.0
+
+    def test_pair_config_coverage(self):
+        """All traded pairs should have config."""
+        for pair in ['EUR/USD', 'GBP/USD', 'USD/JPY']:
+            assert pair in self.analyzer.PAIR_CONFIG
+            cfg = self.analyzer.PAIR_CONFIG[pair]
+            assert 'pip_size' in cfg
+            assert 'session_atr_min' in cfg
+
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--tb=short'])

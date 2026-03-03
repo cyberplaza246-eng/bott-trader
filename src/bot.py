@@ -299,6 +299,14 @@ class TradingBot:
             except Exception as e:
                 bot_logger.warning(f"Trailing stop update failed: {e}")
 
+            # ── 3-Candle Time Stop ────────────────────────────────────
+            # If a trade hasn't moved in our favor after 3 candle cycles,
+            # close it at market to prevent slow bleeds.
+            try:
+                self._check_time_stop()
+            except Exception as e:
+                bot_logger.warning(f"Time stop check failed: {e}")
+
         # NOTE: Adaptive hour skip disabled — too easily poisoned by breakeven/early trades
         # if self.ensemble.learner.should_skip_hour():
         #     ...
@@ -445,6 +453,45 @@ class TradingBot:
                     f"agreement={signal_result['models_agreement']}/{MIN_MODELS_AGREEMENT} needed | "
                     f"signal={signal_result['signal']} | drawdown_prot={'ON' if self.ensemble.learner.in_drawdown_protection else 'OFF'}"
                 )
+
+                # ── Signal Confirmation (2-cycle persistence) ─────────
+                # Only act on a signal if the SAME direction appeared on the
+                # previous cycle too. This filters single-bar noise.
+                if not hasattr(self, '_signal_confirmation'):
+                    self._signal_confirmation = {}   # {pair: {direction, count, time}}
+                confirm_key = pair
+                cur_dir = signal_result['signal']
+                prev = self._signal_confirmation.get(confirm_key, {})
+                if cur_dir in ('BUY', 'SELL'):
+                    if prev.get('direction') == cur_dir:
+                        self._signal_confirmation[confirm_key] = {
+                            'direction': cur_dir,
+                            'count': prev.get('count', 1) + 1,
+                            'time': datetime.now(),
+                        }
+                    else:
+                        # Direction changed — reset counter
+                        self._signal_confirmation[confirm_key] = {
+                            'direction': cur_dir,
+                            'count': 1,
+                            'time': datetime.now(),
+                        }
+                    if self._signal_confirmation[confirm_key]['count'] < 2:
+                        bot_logger.info(
+                            f"  ⏳ Signal confirmation: {pair} {cur_dir} — "
+                            f"wait 1 more cycle (count={self._signal_confirmation[confirm_key]['count']})"
+                        )
+                        self._update_positions(pair)
+                        continue
+                    else:
+                        bot_logger.info(
+                            f"  ✅ Signal confirmed: {pair} {cur_dir} — "
+                            f"2 consecutive cycles"
+                        )
+                else:
+                    # SKIP — reset confirmation
+                    self._signal_confirmation[confirm_key] = {}
+
                 if self._should_trade_pair(pair, signal_result):
                     # Cross-timeframe cooldown: prevent 1M and 5M from placing duplicate orders
                     if not hasattr(self, '_last_trade_time'):
@@ -596,10 +643,23 @@ class TradingBot:
         entry_price = latest['close']
         atr = latest.get('atr', entry_price * 0.001)  # Fallback: 0.1% of price
 
-        # ── ATR-based SL/TP from ScalpingAnalyzer signal ─────────────
-        # The scalping analyzer calculates SL = 0.8×ATR, TP = ratio×SL
+        # ── SL/TP Priority: Sweep > Scalping > ATR Fallback ──────────
+        sweep_rr = signal_result.get('sweep_sl_tp')
         scalping_rr = signal_result.get('scalping_risk_reward', {})
-        if scalping_rr and scalping_rr.get('stop_loss') and scalping_rr.get('take_profit'):
+
+        if sweep_rr and sweep_rr.get('stop_loss') and sweep_rr.get('take_profit'):
+            # PREFERRED: Use sweep-wick anchored SL/TP
+            stop_loss = sweep_rr['stop_loss']
+            take_profit = sweep_rr['take_profit']
+            sl_distance = sweep_rr.get('sl_distance', abs(entry_price - stop_loss))
+            tp_ratio = sweep_rr.get('tp_ratio_used', 1.5)
+
+            bot_logger.info(
+                f"💧 Sweep SL/TP: SL={sweep_rr.get('risk_pips', 0):.1f}p "
+                f"(wick+0.2×ATR), "
+                f"TP={sweep_rr.get('reward_pips', 0):.1f}p ({tp_ratio:.1f}R)"
+            )
+        elif scalping_rr and scalping_rr.get('stop_loss') and scalping_rr.get('take_profit'):
             # Use ATR-derived SL/TP from the scalping analyzer
             stop_loss = scalping_rr['stop_loss']
             take_profit = scalping_rr['take_profit']
@@ -811,6 +871,82 @@ class TradingBot:
 
                     # Record with RL Agent
                     self._record_rl_outcome(pair, closed_trade['profit_loss'], exit_type)
+
+    def _check_time_stop(self):
+        """Close positions that haven't moved into profit after 3 candle cycles.
+
+        For sweep-based entries this prevents slow bleed losses.
+        Tracked via _trade_cycle_counts: {ticket: {entry_price, direction, cycles}}.
+        """
+        if not hasattr(self, '_trade_cycle_counts'):
+            self._trade_cycle_counts = {}
+
+        TIME_STOP_CYCLES = 3  # Close after 3 cycles with no profit
+
+        try:
+            positions = self.broker.get_positions()
+        except Exception:
+            return
+
+        if not positions:
+            # Clean stale tracking
+            self._trade_cycle_counts.clear()
+            return
+
+        active_tickets = set()
+        for pos in positions:
+            ticket = pos.get('ticket')
+            if not ticket:
+                continue
+            active_tickets.add(ticket)
+
+            entry_price = float(pos.get('price_open', 0) or pos.get('entry_price', 0))
+            current_price = float(pos.get('price_current', 0) or 0)
+            direction = 'BUY' if pos.get('type', 0) == 0 else 'SELL'
+            pair = pos.get('symbol', '')
+
+            if ticket not in self._trade_cycle_counts:
+                self._trade_cycle_counts[ticket] = {
+                    'entry_price': entry_price,
+                    'direction': direction,
+                    'pair': pair,
+                    'cycles': 0,
+                }
+
+            info = self._trade_cycle_counts[ticket]
+            info['cycles'] += 1
+
+            # Check if trade is in profit
+            if direction == 'BUY':
+                in_profit = current_price > entry_price
+            else:
+                in_profit = current_price < entry_price
+
+            if in_profit:
+                # Reset cycle counter — trade is working
+                info['cycles'] = 0
+            elif info['cycles'] >= TIME_STOP_CYCLES:
+                # Time stop triggered — close at market
+                pnl = pos.get('profit', 0)
+                bot_logger.warning(
+                    f"⏰ TIME STOP: {pair} ticket {ticket} — "
+                    f"no profit after {TIME_STOP_CYCLES} cycles "
+                    f"(entry={entry_price:.5f}, current={current_price:.5f}, P/L=${pnl:.2f})"
+                )
+                try:
+                    result = self.broker.close_position(ticket)
+                    if result:
+                        bot_logger.info(f"⏰ TIME STOP closed ticket {ticket}")
+                        self.risk_manager.on_trade_closed(pnl)
+                        self._record_ml_outcome(pair, pnl)
+                        self._record_rl_outcome(pair, pnl, 'time_stop')
+                except Exception as e:
+                    bot_logger.warning(f"Time stop close failed for {ticket}: {e}")
+
+        # Clean tracking for positions that no longer exist
+        stale = [t for t in self._trade_cycle_counts if t not in active_tickets]
+        for t in stale:
+            del self._trade_cycle_counts[t]
 
     @staticmethod
     def _normalize_pair(pair):

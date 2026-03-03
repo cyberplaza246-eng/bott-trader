@@ -18,6 +18,7 @@ from src.ai.support_resistance import SupportResistanceDetector
 from src.ai.candlestick_patterns import CandlestickPatternDetector
 from src.ai.ema_crossover import EMACrossoverAnalyzer
 from src.ai.scalping_analyzer import ScalpingAnalyzer
+from src.ai.liquidity_sweep import LiquiditySweepAnalyzer
 from src.ai.adaptive_learner import AdaptiveLearner
 from src.ai.cross_pair_analyzer import CrossPairAnalyzer
 from src.ai.ml_trade_scorer import MLTradeScorer
@@ -76,32 +77,34 @@ class EnsembleTrader:
         self.candle_detector = CandlestickPatternDetector()
         self.ema_crossover = EMACrossoverAnalyzer()
         self.scalping = ScalpingAnalyzer()
+        self.sweep = LiquiditySweepAnalyzer()
         self.learner = AdaptiveLearner()
         self.cross_pair = CrossPairAnalyzer()
         self.ml_scorer = MLTradeScorer()
         self.broker = broker
 
-        # ATR-centric weights: scalping analyzer is the dominant signal
-        # VolumeAnalyzer demoted from 0.14→0.03 (direction from 1-candle noise)
+        # ATR-centric weights: liquidity sweep is the dominant signal,
+        # scalping analyzer demoted to confirmation role
         self.model_weights = {
-            'scalping': 0.30,         # Primary ATR-pullback signal (was 0.28)
-            'technical': 0.22,        # Multi-indicator confirmation (was 0.18)
-            'ema_crossover': 0.15,    # EMA alignment + ATR momentum (was 0.12)
-            'candlestick': 0.10,      # Candle pattern confirmation
-            'multi_tf': 0.08,         # 5M timeframe alignment
-            'support_resistance': 0.05,
-            'volume': 0.03,           # Demoted: 1-candle direction = noise
-            'lstm': 0.03,
-            'sentiment': 0.04,
+            'sweep': 0.35,            # Primary: liquidity sweep entry model
+            'scalping': 0.15,         # Demoted: ATR-pullback confirmation
+            'technical': 0.15,        # Multi-indicator confirmation
+            'ema_crossover': 0.12,    # EMA alignment + ATR momentum
+            'candlestick': 0.08,      # Candle pattern confirmation
+            'multi_tf': 0.05,         # 5M timeframe alignment
+            'support_resistance': 0.04,
+            'volume': 0.02,           # Demoted: 1-candle direction = noise
+            'lstm': 0.02,
+            'sentiment': 0.02,
         }
 
-        model_count = 9
+        model_count = 10
         if not self.lstm_available:
-            bot_logger.info("🧠 ATR-centric ensemble running with 8 models (LSTM disabled)")
-            model_count = 8
+            bot_logger.info("\U0001f9e0 Sweep-primary ensemble running with 9 models (LSTM disabled)")
+            model_count = 9
         else:
-            bot_logger.info("🧠 ATR-centric ensemble running with all 9 models")
-        bot_logger.info(f"🔪 ScalpingAnalyzer active as primary ATR signal (weight 0.28)")
+            bot_logger.info("\U0001f9e0 Sweep-primary ensemble running with all 10 models")
+        bot_logger.info(f"\U0001f4a7 LiquiditySweepAnalyzer active as primary entry model (weight 0.35)")
 
     def get_trading_signal(self, df, pair):
         """
@@ -174,8 +177,7 @@ class EnsembleTrader:
         candle_signal = self.candle_detector.get_pattern_signal(df_enriched)
         ema_signal = self.ema_crossover.get_signal(df_enriched)
 
-        # Scalping signal (9th model — heaviest weight, ATR-centric)
-        # Pass 5M data and spread if available
+        # Fetch 5M data and spread (shared by scalping + sweep)
         df_5m = None
         broker_spread = None
         if self.broker:
@@ -188,6 +190,7 @@ class EnsembleTrader:
             except Exception:
                 pass
 
+        # Scalping signal (ATR-pullback confirmation)
         scalping_signal = self.scalping.get_signal(
             df_enriched, pair,
             df_5m=df_5m,
@@ -195,8 +198,20 @@ class EnsembleTrader:
         )
         scalping_signal_type = scalping_signal.get('signal', 'HOLD')
         scalping_confidence = scalping_signal.get('confidence', 0.0)
+
+        # ── Liquidity Sweep signal (PRIMARY entry model) ─────────────
+        sweep_signal = self.sweep.get_signal(
+            df_enriched, pair,
+            df_5m=df_5m,
+            spread=broker_spread,
+        )
+        sweep_signal_type = sweep_signal.get('signal', 'HOLD')
+        sweep_confidence = sweep_signal.get('confidence', 0.0)
+        if sweep_signal_type == 'SKIP':
+            sweep_signal_type = 'HOLD'  # SKIP → neutral, not opposing
+            sweep_confidence = 0.0
         # When scalping says SKIP, treat it as opposing the majority direction
-        # instead of silencing it to neutral HOLD. The 30%-weight model's
+        # instead of silencing it to neutral HOLD. The model's
         # rejection should actively fight the trade.
         if scalping_signal_type == 'SKIP':
             scalping_signal_type = 'SKIP_OPPOSE'  # Handled below as opposing
@@ -208,6 +223,7 @@ class EnsembleTrader:
             all_signals['lstm'] = {'signal': lstm_signal['signal'], 'confidence': lstm_signal['confidence']}
 
         all_signals.update({
+            'sweep': {'signal': sweep_signal_type, 'confidence': sweep_confidence},
             'scalping': {'signal': scalping_signal_type, 'confidence': scalping_confidence},
             'sentiment': {'signal': sentiment_signal_type, 'confidence': sentiment_confidence},
             'technical': {'signal': technical_signal['signal'], 'confidence': technical_signal['confidence']},
@@ -296,18 +312,19 @@ class EnsembleTrader:
             weighted_confidence = 0.0
             net_conviction = 0.0
 
-        # === EMA 200 Trend Filter — block counter-trend trades ===
+        # === EMA 200 Trend Filter — HARD BLOCK counter-trend trades ===
         ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
         cur_price = df_enriched['close'].iloc[-1]
         if ema_200 is not None and not pd.isna(ema_200) and final_signal != 'SKIP':
             if (final_signal == 'BUY' and cur_price < ema_200) or \
                (final_signal == 'SELL' and cur_price > ema_200):
-                # Penalize counter-trend trades instead of blocking them
-                weighted_confidence *= 0.65
+                # HARD BLOCK: counter-trend trade = SKIP
                 bot_logger.info(
-                    f"⚠️ EMA200 counter-trend: {final_signal} "
-                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) — confidence ×0.65"
+                    f"🚫 EMA200 counter-trend BLOCKED: {final_signal} "
+                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
                 )
+                final_signal = 'SKIP'
+                weighted_confidence = 0.0
             else:
                 # EMA200 alignment logged but NOT boosted — ema_crossover model
                 # already accounts for EMA200 alignment in its confidence score
@@ -369,7 +386,9 @@ class EnsembleTrader:
 
         # Generate reasoning (use resolved scalping signal, not raw SKIP_OPPOSE)
         resolved_scalp = all_signals.get('scalping', {})
+        resolved_sweep = all_signals.get('sweep', {})
         reason_parts = []
+        reason_parts.append(f"Sweep: {resolved_sweep.get('signal', sweep_signal_type)} ({resolved_sweep.get('confidence', sweep_confidence):.0%})")
         reason_parts.append(f"Scalp: {resolved_scalp.get('signal', scalping_signal_type)} ({resolved_scalp.get('confidence', scalping_confidence):.0%})")
         if self.lstm_available:
             reason_parts.append(f"LSTM: {lstm_signal['signal']} ({lstm_signal['confidence']:.0%})")
@@ -396,6 +415,12 @@ class EnsembleTrader:
             'detailed_reason': detailed_reason,
             'enriched_df': df_enriched,
             'models': {
+                'sweep': {
+                    'signal': resolved_sweep.get('signal', sweep_signal_type),
+                    'confidence': resolved_sweep.get('confidence', sweep_confidence),
+                    'regime': sweep_signal.get('regime', 'unknown'),
+                    'bias': sweep_signal.get('bias'),
+                },
                 'scalping': {
                     'signal': resolved_scalp.get('signal', scalping_signal_type),
                     'confidence': resolved_scalp.get('confidence', scalping_confidence),
@@ -421,6 +446,8 @@ class EnsembleTrader:
             'atr_regime': scalping_signal.get('atr_regime', 'neutral'),
             'atr_tp_ratio': scalping_signal.get('atr_tp_ratio', 1.4),
             'scalping_risk_reward': scalping_signal.get('risk_reward', {}),
+            # Sweep SL/TP (preferred when available)
+            'sweep_sl_tp': sweep_signal.get('sweep_sl_tp'),
         }
 
         if final_signal != 'SKIP':
@@ -438,7 +465,7 @@ class EnsembleTrader:
         """
         Determine if signal is strong enough to trade.
         Uses adaptive confidence threshold + regime awareness.
-        Requires at least one core model (scalping, technical, or EMA) to agree.
+        REQUIRES at least one core model (sweep, scalping, technical, or EMA) to agree.
         """
         threshold = self.learner.get_adjusted_threshold()
 
@@ -450,8 +477,8 @@ class EnsembleTrader:
             )
             return False
 
-        # Core model check — penalty instead of hard block
-        core_models = ['scalping', 'technical', 'ema_crossover']
+        # Core model check — HARD BLOCK if no core model agrees
+        core_models = ['sweep', 'scalping', 'technical', 'ema_crossover']
         models = signal_result.get('models', {})
         direction = signal_result['signal']
         core_agrees = any(
@@ -460,12 +487,15 @@ class EnsembleTrader:
         )
         effective_confidence = signal_result['confidence']
         if not core_agrees and direction != 'SKIP':
-            # Apply 15% penalty but allow trade if confidence is still high
-            effective_confidence *= 0.85
-            bot_logger.info(
-                f"📊 No core model agrees with {direction} — confidence penalty "
-                f"{signal_result['confidence']:.2%} → {effective_confidence:.2%}"
+            core_summary = ', '.join(
+                f"{m}={models.get(m, {}).get('signal', 'N/A')}"
+                for m in core_models
             )
+            bot_logger.info(
+                f"🚫 No core model agrees with {direction} — BLOCKED "
+                f"(core: {core_summary})"
+            )
+            return False
 
         return (
             signal_result['signal'] != 'SKIP' and

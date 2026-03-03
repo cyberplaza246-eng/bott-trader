@@ -86,11 +86,10 @@ OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
-# Ensemble conviction scores typically range 0.15–0.60
-# 0.30 = minimum confidence to enter a trade (lowered to allow more volume)
-# NOTE: ignores .env overrides to prevent stale values from blocking trades
-ENSEMBLE_CONFIDENCE_THRESHOLD = 0.30  # Hard-coded — do NOT use .env override
-MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))  # Lowered to 2 (quality comes from fixed signals)
+# With the liquidity-sweep entry model, signals arrive pre-qualified at ~0.80+
+# so a 0.45 floor is conservative. Reads from .env so tuning doesn't need a code change.
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
+MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))  # At least 3 models must agree
 
 # Technical Analysis Parameters (ATR-centric scalping)
 INDICATORS = {
