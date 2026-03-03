@@ -27413,3 +27413,54 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  Slots Available: 3 / 3"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  Can Trade: True"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "  \ud83e\udde0 ML Scorer: collecting data (0/20 trades)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 0 past trades | threshold=0.70 | regime=neutral | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $50.00 | Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Starting 9-model scalping backtest for EUR/USD | tf_key=5m | bar=5m | candles=17280 | confluence=1M"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  max_hold=4 candles (1200s), cooldown=1 candles (180s)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  1M confluence data: 43200 candles"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 0 past trades | threshold=0.70 | regime=neutral | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $50.00 | Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Starting 9-model scalping backtest for GBP/USD | tf_key=5m | bar=5m | candles=17280 | confluence=1M"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  max_hold=4 candles (1200s), cooldown=1 candles (180s)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  1M confluence data: 43200 candles"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 0 past trades | threshold=0.70 | regime=neutral | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $50.00 | Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Starting 9-model scalping backtest for EUR/USD | tf_key=5m | bar=5m | candles=17280 | confluence=off"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  max_hold=4 candles (1200s), cooldown=1 candles (180s)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 LSTM model loaded from models/lstm_model.h5"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 0 past trades | threshold=0.70 | regime=neutral | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $50.00 | Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}

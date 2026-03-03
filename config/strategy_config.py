@@ -86,10 +86,10 @@ OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
-# Ensemble conviction scores typicallsy range 0.10–0.40
-# 0.15 = minimum confidence to enter a trade
-_raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.15))
-ENSEMBLE_CONFIDENCE_THRESHOLD = max(_raw_threshold, 0.15)  # Hard floor: 15%
+# Ensemble conviction scores typically range 0.10–0.70
+# 0.45 = minimum confidence to enter a trade (meaningful filter)
+_raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
+ENSEMBLE_CONFIDENCE_THRESHOLD = max(_raw_threshold, 0.45)  # Hard floor: 45%
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))
 
 # Technical Analysis Parameters (ATR-centric scalping)

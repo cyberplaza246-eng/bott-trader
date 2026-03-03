@@ -695,8 +695,8 @@ class AdaptiveLearner:
         return weights
 
     def get_adjusted_threshold(self) -> float:
-        # Floor at 0.15 — ensemble weighted-conviction scores are typically 0.10–0.40
-        return max(self.confidence_threshold, 0.15)
+        # Floor at 0.45 — only trade when meaningfully confident
+        return max(self.confidence_threshold, 0.45)
 
     def get_pair_win_rate(self, pair: str) -> float:
         pair = self._normalize_pair(pair)

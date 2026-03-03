@@ -230,29 +230,27 @@ class EnsembleTrader:
         # scaled by agreement ratio for confluence.
         if final_signal != 'SKIP' and active_signals:
             direction = final_signal
-            agreeing = {k: v for k, v in active_signals.items() if v['signal'] == direction}
-            opposing = {k: v for k, v in active_signals.items() if v['signal'] != direction and v['signal'] != 'HOLD'}
+            agreeing = {k: v for k, v in all_signals.items() if v['signal'] == direction}
+            opposing = {k: v for k, v in all_signals.items() if v['signal'] != direction and v['signal'] != 'HOLD'}
 
-            # Average confidence of agreeing models (0.0-1.0 range)
-            avg_agreeing_conf = sum(v['confidence'] for v in agreeing.values()) / max(len(agreeing), 1)
+            # Weighted confidence: use model weights × individual confidence
+            weighted_agree = sum(weights.get(k, 0) * v['confidence'] for k, v in agreeing.items())
+            weighted_oppose = sum(weights.get(k, 0) * v['confidence'] for k, v in opposing.items())
 
-            # Agreement ratio bonus: more models agreeing = stronger signal
-            agreement_ratio = len(agreeing) / max(active_model_count, 1)
+            # Agreement ratio based on ALL models (not just active ones)
+            agreement_ratio = len(agreeing) / max(total_models, 1)
             confluence_bonus = 0.0
-            if agreement_ratio >= 0.75:
-                confluence_bonus = 0.15
-                bot_logger.info(f"🎯 Strong confluence: {len(agreeing)}/{active_model_count} models agree ({agreement_ratio:.0%})")
-            elif agreement_ratio >= 0.50:
+            if agreement_ratio >= 0.60:
                 confluence_bonus = 0.10
-            elif agreement_ratio >= 0.30:
+                bot_logger.info(f"🎯 Strong confluence: {len(agreeing)}/{total_models} models agree ({agreement_ratio:.0%})")
+            elif agreement_ratio >= 0.40:
                 confluence_bonus = 0.05
 
-            # Opposing penalty: reduce by fraction of opposing strength
-            opposing_avg = sum(v['confidence'] for v in opposing.values()) / max(len(opposing), 1) if opposing else 0
-            opposing_penalty = opposing_avg * 0.15 * len(opposing) / max(active_model_count, 1)
+            # Opposing penalty: stronger penalty for weighted opposition
+            opposing_penalty = weighted_oppose * 0.5
 
-            # Final confidence = average agreeing confidence + confluence - opposing penalty
-            weighted_confidence = avg_agreeing_conf + confluence_bonus - opposing_penalty
+            # Final confidence = weighted agreement + confluence - opposing penalty
+            weighted_confidence = weighted_agree + confluence_bonus - opposing_penalty
 
             # Regime confidence modifier from learner
             regime_modifier = self.learner.get_regime_confidence_modifier(regime)
@@ -404,7 +402,7 @@ class EnsembleTrader:
         """
         Determine if signal is strong enough to trade.
         Uses adaptive confidence threshold + regime awareness.
-        Session filtering is handled by the bot's is_pair_in_session() check.
+        Requires at least one core model (scalping, technical, or EMA) to agree.
         """
         threshold = self.learner.get_adjusted_threshold()
 
@@ -413,6 +411,20 @@ class EnsembleTrader:
             bot_logger.info(
                 f"📊 Only {signal_result['models_agreement']} models agree "
                 f"(need {MIN_MODELS_AGREEMENT}) — skipping"
+            )
+            return False
+
+        # At least one core model must agree with the direction
+        core_models = ['scalping', 'technical', 'ema_crossover']
+        models = signal_result.get('models', {})
+        direction = signal_result['signal']
+        core_agrees = any(
+            models.get(m, {}).get('signal') == direction
+            for m in core_models
+        )
+        if not core_agrees and direction != 'SKIP':
+            bot_logger.info(
+                f"📊 No core model (scalping/technical/EMA) agrees with {direction} — skipping"
             )
             return False
 
