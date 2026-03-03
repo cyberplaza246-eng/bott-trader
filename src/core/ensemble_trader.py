@@ -360,9 +360,10 @@ class EnsembleTrader:
         # Cap confidence at 1.0
         weighted_confidence = min(1.0, max(0.0, weighted_confidence))
 
-        # Generate reasoning
+        # Generate reasoning (use resolved scalping signal, not raw SKIP_OPPOSE)
+        resolved_scalp = all_signals.get('scalping', {})
         reason_parts = []
-        reason_parts.append(f"Scalp: {scalping_signal_type} ({scalping_confidence:.0%})")
+        reason_parts.append(f"Scalp: {resolved_scalp.get('signal', scalping_signal_type)} ({resolved_scalp.get('confidence', scalping_confidence):.0%})")
         if self.lstm_available:
             reason_parts.append(f"LSTM: {lstm_signal['signal']} ({lstm_signal['confidence']:.0%})")
         reason_parts.extend([
@@ -389,8 +390,8 @@ class EnsembleTrader:
             'enriched_df': df_enriched,
             'models': {
                 'scalping': {
-                    'signal': scalping_signal_type,
-                    'confidence': scalping_confidence,
+                    'signal': resolved_scalp.get('signal', scalping_signal_type),
+                    'confidence': resolved_scalp.get('confidence', scalping_confidence),
                     'setup': scalping_signal.get('setup', 'none'),
                 },
                 'lstm': lstm_signal,
