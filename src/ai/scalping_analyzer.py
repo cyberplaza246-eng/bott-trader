@@ -254,10 +254,9 @@ class ScalpingAnalyzer:
         else:
             hour = datetime.now(timezone.utc).hour
 
-        # Accept London through NY overlap (7-17 UTC) — peak liquidity
-        in_session = 7 <= hour < 17
-        if not in_session:
-            return False, f"🚫 Outside trading sessions (UTC {hour}:00) - need 07-17 UTC"
+        # Session filter disabled — trade all forex hours
+        # (bot.py handles per-pair session gating via SCALPING_SESSION_WINDOWS)
+        # Peak liquidity bonus applied separately via OPTIMAL_HOURS_UTC
 
         # 2. ATR floor
         session_atr_min = config['session_atr_min']

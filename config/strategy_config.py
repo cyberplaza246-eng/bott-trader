@@ -63,11 +63,11 @@ SCALPING_PAIRS = {
 }
 
 # Session windows for scalping (UTC hours)
-# start <= hour < end.  Use start=0, end=24 for 24/7.
+# start <= hour < end.  start == end means 24/7.
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 7, 'end': 17},   # London open → NY overlap
-    'GBP/USD': {'start': 7, 'end': 17},   # London open → NY overlap
-    'USD/JPY': {'start': 0, 'end': 17},   # Asian + London + NY
+    'EUR/USD': {'start': 0, 'end': 0},    # 24/7 (all forex hours)
+    'GBP/USD': {'start': 0, 'end': 0},    # 24/7 (all forex hours)
+    'USD/JPY': {'start': 0, 'end': 0},    # 24/7 (all forex hours)
 }
 
 # Spread limits for scalping (pips — tighter than swing)
