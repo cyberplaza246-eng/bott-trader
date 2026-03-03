@@ -226,19 +226,25 @@ class EnsembleTrader:
             final_signal = 'SKIP'
 
         # === Conviction Scoring ===
-        # Use average confidence of agreeing models as the base score,
-        # scaled by agreement ratio for confluence.
+        # Average conviction of agreeing models (weighted), scaled by agreement breadth.
+        # HOLD models are neutral — they don't drag down the score.
         if final_signal != 'SKIP' and active_signals:
             direction = final_signal
             agreeing = {k: v for k, v in all_signals.items() if v['signal'] == direction}
             opposing = {k: v for k, v in all_signals.items() if v['signal'] != direction and v['signal'] != 'HOLD'}
 
-            # Weighted confidence: use model weights × individual confidence
+            # Weighted confidence of agreeing models
             weighted_agree = sum(weights.get(k, 0) * v['confidence'] for k, v in agreeing.items())
+            weight_agree_sum = sum(weights.get(k, 0) for k in agreeing)
             weighted_oppose = sum(weights.get(k, 0) * v['confidence'] for k, v in opposing.items())
 
-            # Agreement ratio based on ALL models (not just active ones)
+            # Average conviction: how confident are the agreeing models? (0-1)
+            avg_conviction = weighted_agree / weight_agree_sum if weight_agree_sum > 0 else 0.0
+
+            # Agreement breadth: what fraction of ALL models agree? (0-1)
             agreement_ratio = len(agreeing) / max(total_models, 1)
+
+            # Confluence bonus for broad agreement
             confluence_bonus = 0.0
             if agreement_ratio >= 0.60:
                 confluence_bonus = 0.10
@@ -246,11 +252,13 @@ class EnsembleTrader:
             elif agreement_ratio >= 0.40:
                 confluence_bonus = 0.05
 
-            # Opposing penalty: stronger penalty for weighted opposition
+            # Opposing penalty (from models that actively disagree)
             opposing_penalty = weighted_oppose * 0.5
 
-            # Final confidence = weighted agreement + confluence - opposing penalty
-            weighted_confidence = weighted_agree + confluence_bonus - opposing_penalty
+            # Final confidence = avg conviction × (base + agreement scaling) + bonus - penalty
+            # Base 0.5 ensures 3 models at decent conviction can still clear threshold
+            # Scaling 0.5 rewards broader agreement
+            weighted_confidence = avg_conviction * (0.5 + 0.5 * agreement_ratio) + confluence_bonus - opposing_penalty
 
             # Regime confidence modifier from learner
             regime_modifier = self.learner.get_regime_confidence_modifier(regime)

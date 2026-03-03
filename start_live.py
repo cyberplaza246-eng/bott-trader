@@ -17,8 +17,8 @@ import requests
 os.environ['TRADING_MODE'] = 'live'
 if not os.getenv('MT5_RELAY_URL'):
     os.environ['MT5_RELAY_URL'] = 'http://127.0.0.1:5555'
-os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.45')
-os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.40')
+os.environ.setdefault('ENSEMBLE_CONFIDENCE_THRESHOLD', '0.35')
+os.environ.setdefault('HIGH_CERTAINTY_THRESHOLD', '0.35')
 # Match the relay server's default token
 os.environ.setdefault('MT5_RELAY_TOKEN', 'change-me-to-a-secret')
 
@@ -327,7 +327,7 @@ def main():
         learner.consecutive_losses = 0
         learner.consecutive_wins = 0
         learner.in_drawdown_protection = False
-        learner.confidence_threshold = 0.45
+        learner.confidence_threshold = 0.35
         bot_logger.info("🔄 Adaptive learner RESET — no skip rules from old data")
 
     try:
