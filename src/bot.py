@@ -559,7 +559,8 @@ class TradingBot:
         else:
             # Fallback: calculate ATR-based SL/TP if signal didn't provide it
             pair_config = SCALPING_PAIRS.get(pair, {})
-            sl_mult = 1.2  # Wider ATR multiplier for breathing room
+            pip_size = pair_config.get('pip_size', 0.0001)
+            sl_mult = 0.8  # Match ScalpingAnalyzer.SL_ATR_MULT (was 1.2 — too wide for scalping)
             sl_distance = atr * sl_mult
 
             if trade_type == 'BUY':
@@ -579,8 +580,8 @@ class TradingBot:
                 take_profit = round(entry_price - tp_distance, 5)
 
             bot_logger.info(
-                f"📐 ATR fallback SL/TP: SL={sl_distance/0.0001:.1f}p "
-                f"({sl_mult}×ATR), TP={tp_distance/0.0001:.1f}p ({tp_ratio:.1f}R)"
+                f"📐 ATR fallback SL/TP: SL={sl_distance/pip_size:.1f}p "
+                f"({sl_mult}×ATR), TP={tp_distance/pip_size:.1f}p ({tp_ratio:.1f}R)"
             )
 
         # Record SL value for adaptive learner median tracking

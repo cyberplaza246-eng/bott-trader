@@ -105,7 +105,7 @@ INDICATORS = {
 }
 
 # Risk Management (ATR-based — no fixed pips)
-STOP_LOSS_MULTIPLIER = 1.2   # SL = 1.2 x ATR(14) — wider for breathing room
+STOP_LOSS_MULTIPLIER = 0.8    # SL = 0.8 x ATR(14) — matches ScalpingAnalyzer.SL_ATR_MULT
 TAKE_PROFIT_RATIO = 1.8      # TP = 1.8 x SL — better R:R
 TP_EXPANDING = 2.0            # Wider TP in expanding volatility
 TP_CONTRACTING = 1.5          # Tighter TP in contracting volatility
