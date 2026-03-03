@@ -153,8 +153,8 @@ class RiskManager:
         # Recalculate daily loss limit from live balance
         self.daily_loss_limit = self.current_balance * (DAILY_LOSS_LIMIT_PERCENT / 100)
 
-        # Minimum balance to keep trading (20% of current balance, floor $5)
-        self.min_balance_threshold = max(5.0, self.current_balance * 0.20)
+        # Minimum balance to keep trading (20% of current balance, floor $1)
+        self.min_balance_threshold = max(1.0, self.current_balance * 0.20)
 
         if old_tier and old_tier != self._current_tier_name:
             old_idx = tier_order.index(old_tier) if old_tier in tier_order else 0
