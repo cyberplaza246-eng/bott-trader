@@ -1,17 +1,15 @@
 """
-Elite 1M / 5M Liquidity Sweep Entry Model
-
-Structure + Liquidity + Momentum Alignment
+Elite 1M / 5M Structure-Based Liquidity Sweep Entry Model  (v2)
 
 Architecture:
-  Layer 1 — 5M Market Regime & Bias  (trend_up / trend_down / range / high_vol / low_vol)
-  Layer 2 — 1M Liquidity Sweep Event (stop-hunt detection)
-  Layer 3 — 1M Displacement Candle   (momentum confirmation)
-
-Entry only when ALL THREE layers align within a 3-candle window.
+  Layer 1 — 5M True Swing Structure & Bias
+             N-bar pivot swing detection → HH/HL = bullish, LH/LL = bearish
+  Layer 2 — 1M Liquidity Sweep of swing-based levels + 5M invalidation gate
+  Layer 3 — Market Structure Shift (MSS) — break of internal LH/HL after sweep
+  Layer 4 — Entry (retest of broken structure *or* aggressive at displacement close)
 
 SL = sweep wick extreme ± 0.2 × ATR buffer
-TP = 1.5R default, 2R in high-volatility impulse, 1.2R in range
+TP = 1.5R default | 2R high-volatility | 1.2R range  (+ liquidity pool TP option)
 Time stop = exit if not positive after 3 candles
 """
 
@@ -22,7 +20,12 @@ from src.utils.logger import bot_logger
 
 
 class LiquiditySweepAnalyzer:
-    """Detects liquidity sweeps and generates high-probability entry signals."""
+    """Structure-based liquidity sweep entry model (v2).
+
+    Detects proper swing points, validates market structure sequences,
+    identifies liquidity sweeps at swing levels, confirms Market Structure
+    Shifts, and generates high-probability entry signals.
+    """
 
     # ── Pair Configuration ──────────────────────────────────────────
     PAIR_CONFIG = {
@@ -43,17 +46,32 @@ class LiquiditySweepAnalyzer:
         },
     }
 
-    # ── Thresholds (tuned for quality over volume) ──────────────────
-    SWEEP_LOOKBACK = 5              # Candles to define liquidity level
-    ADX_MIN_BIAS = 18               # Minimum ADX for directional bias
-    VOLUME_CONFIRMATION = 1.30      # Volume > 1.3× 10-candle average
-    BODY_RATIO_MIN = 0.60           # Displacement candle body ≥ 60% of range
-    RSI_SWEEP_LONG_MAX = 40         # RSI must dip below this during bullish sweep
-    RSI_SWEEP_SHORT_MIN = 60        # RSI must spike above this during bearish sweep
-    ATR_HIGH_VOL_MULT = 1.30        # ATR > 1.3× 20-period mean = high vol
-    ATR_LOW_VOL_MULT = 0.70         # ATR < 0.7× 20-period mean = low vol
-    CONFIRMATION_WINDOW = 3         # Candles after sweep to get displacement
-    SL_ATR_BUFFER = 0.20            # SL = sweep wick ± 0.2×ATR
+    # ── Swing Detection ─────────────────────────────────────────────
+    SWEEP_LOOKBACK = 5               # Backward compat alias for SWING_LOOKBACK
+    SWING_LOOKBACK = 5               # N bars each side for pivot identification
+    SWING_MIN_POINTS = 4             # Minimum swing points to establish structure
+
+    # ── Bias / Regime ───────────────────────────────────────────────
+    ADX_MIN_BIAS = 18                # ADX floor for directional bias
+    ATR_HIGH_VOL_MULT = 1.30         # ATR > 1.3× 20-period mean = high vol
+    ATR_LOW_VOL_MULT = 0.70          # ATR < 0.7× 20-period mean = low vol
+
+    # ── Sweep Detection ─────────────────────────────────────────────
+    SWEEP_TOLERANCE = 0.0002         # Max penetration past swing for "sweep"
+    SWEEP_WINDOW = 5                 # Candles to look back for sweep event
+
+    # ── MSS / Displacement ──────────────────────────────────────────
+    VOLUME_CONFIRMATION = 1.30       # Displacement vol > 1.3× avg
+    BODY_RATIO_MIN = 0.60            # Displacement body ≥ 60% of range
+    RSI_SWEEP_LONG_MAX = 40          # RSI during bullish sweep
+    RSI_SWEEP_SHORT_MIN = 60         # RSI during bearish sweep
+    CONFIRMATION_WINDOW = 3          # Candles after sweep to get MSS
+
+    # ── Risk Management ─────────────────────────────────────────────
+    SL_ATR_BUFFER = 0.20             # SL = sweep wick ± 0.2×ATR
+
+    # ── Entry Mode ──────────────────────────────────────────────────
+    ENTRY_MODE = 'retest'            # 'retest' (wait for pullback) or 'aggressive' (at displacement close)
 
     # ── Session Windows (UTC) ───────────────────────────────────────
     OPTIMAL_SESSIONS = {
@@ -68,7 +86,7 @@ class LiquiditySweepAnalyzer:
         self.ema_medium = 50
         self.ema_long = 200
         self.adx_period = 14
-        self.volume_avg_period = 10  # Tighter than 20 — recent volume matters more
+        self.volume_avg_period = 10
 
     # =================================================================
     #  INDICATOR CALCULATION
@@ -118,13 +136,8 @@ class LiquiditySweepAnalyzer:
         df['is_bullish'] = close > df['open'].astype(float)
         df['is_bearish'] = close < df['open'].astype(float)
 
-        # Higher highs / higher lows for 5M bias
-        df['higher_high'] = high > high.shift(1)
-        df['higher_low'] = low > low.shift(1)
-        df['lower_high'] = high < high.shift(1)
-        df['lower_low'] = low < low.shift(1)
-
-        # Liquidity levels (rolling 5-candle extremes)
+        # Liquidity levels — swing-based (populated by detect_swing_points)
+        # Keep rolling as fallback for indicator tests
         df['liq_low'] = low.rolling(window=self.SWEEP_LOOKBACK).min().shift(1)
         df['liq_high'] = high.rolling(window=self.SWEEP_LOOKBACK).max().shift(1)
 
@@ -155,34 +168,118 @@ class LiquiditySweepAnalyzer:
         return df
 
     # =================================================================
-    #  LAYER 1: 5M REGIME & BIAS
+    #  SWING POINT DETECTION (N-bar Pivot Method)
+    # =================================================================
+
+    def detect_swing_points(self, df, lookback=None):
+        """Identify swing highs and swing lows using N-bar pivot method.
+
+        A swing high is a bar whose high is the highest of (lookback) bars
+        on each side.  Similarly for swing low.
+
+        After identifying raw pivots, label each as:
+          HH (higher high), LH (lower high), HL (higher low), LL (lower low)
+        relative to the previous swing of the same type.
+
+        Args:
+            df: DataFrame with 'high' and 'low' columns (indicators already added).
+            lookback: N bars each side (default: SWING_LOOKBACK).
+
+        Returns:
+            list[dict]: [{index, price, swing_type: 'high'|'low',
+                          label: 'HH'|'LH'|'HL'|'LL'|None, bar_idx: int}]
+            Sorted chronologically.
+        """
+        if lookback is None:
+            lookback = self.SWING_LOOKBACK
+
+        if df is None or len(df) < lookback * 2 + 1:
+            return []
+
+        highs = df['high'].astype(float).values
+        lows = df['low'].astype(float).values
+        n = len(highs)
+
+        swing_points = []
+
+        for i in range(lookback, n - lookback):
+            # Swing High: bar[i] high >= all bars in [i-lookback, i+lookback]
+            window_highs = highs[i - lookback: i + lookback + 1]
+            if highs[i] == window_highs.max() and np.sum(window_highs == highs[i]) == 1:
+                swing_points.append({
+                    'bar_idx': i,
+                    'price': float(highs[i]),
+                    'swing_type': 'high',
+                    'label': None,
+                })
+
+            # Swing Low: bar[i] low <= all bars in [i-lookback, i+lookback]
+            window_lows = lows[i - lookback: i + lookback + 1]
+            if lows[i] == window_lows.min() and np.sum(window_lows == lows[i]) == 1:
+                swing_points.append({
+                    'bar_idx': i,
+                    'price': float(lows[i]),
+                    'swing_type': 'low',
+                    'label': None,
+                })
+
+        # Sort by bar index
+        swing_points.sort(key=lambda x: x['bar_idx'])
+
+        # Label each swing relative to prior swing of same type
+        last_swing_high = None
+        last_swing_low = None
+
+        for sp in swing_points:
+            if sp['swing_type'] == 'high':
+                if last_swing_high is not None:
+                    sp['label'] = 'HH' if sp['price'] > last_swing_high else 'LH'
+                last_swing_high = sp['price']
+            else:  # low
+                if last_swing_low is not None:
+                    sp['label'] = 'HL' if sp['price'] > last_swing_low else 'LL'
+                last_swing_low = sp['price']
+
+        return swing_points
+
+    # =================================================================
+    #  LAYER 1: 5M TRUE SWING STRUCTURE & BIAS
     # =================================================================
 
     def detect_regime(self, df_5m):
-        """Classify market regime from 5M data.
+        """Classify market regime from 5M data using REAL swing structure.
+
+        Bullish: sequence of HH → HL with last HL not broken.
+        Bearish: sequence of LH → LL with last LH not broken.
+        Otherwise: range / no trade.
+
+        ADX ≥ 18 used as secondary filter.  ATR volatility can override.
 
         Returns:
-            dict: {regime, bias, adx, atr_state, details}
-            regime in: trend_up, trend_down, range, high_volatility, low_volatility
-            bias in: 'BUY', 'SELL', None
+            dict: {regime, bias, adx, atr_state, details,
+                   swing_points, last_swing_high, last_swing_low}
         """
+        base_result = {
+            'regime': 'unknown', 'bias': None, 'adx': 0,
+            'atr_state': 'unknown', 'details': 'Insufficient 5M data',
+            'swing_points': [], 'last_swing_high': None, 'last_swing_low': None,
+        }
+
         if df_5m is None or len(df_5m) < 60:
-            return {'regime': 'unknown', 'bias': None, 'adx': 0,
-                    'atr_state': 'unknown', 'details': 'Insufficient 5M data'}
+            return base_result
+
+        # Ensure indicators exist
+        if 'ema_20' not in df_5m.columns:
+            try:
+                df_5m = self.calculate_indicators(df_5m)
+            except Exception:
+                return base_result
 
         latest = df_5m.iloc[-1]
-        ema_20 = float(latest.get('ema_20', 0))
-        ema_50 = float(latest.get('ema_50', 0))
         adx = float(latest.get('adx', 0) or 0)
         atr = float(latest.get('atr', 0) or 0)
         atr_sma20 = float(latest.get('atr_sma20', 0) or 0)
         close = float(latest['close'])
-
-        # Higher highs check (last 2 candles)
-        hh_1 = bool(df_5m['higher_high'].iloc[-1]) if 'higher_high' in df_5m.columns else False
-        hh_2 = bool(df_5m['higher_high'].iloc[-2]) if len(df_5m) > 1 and 'higher_high' in df_5m.columns else False
-        ll_1 = bool(df_5m['lower_low'].iloc[-1]) if 'lower_low' in df_5m.columns else False
-        ll_2 = bool(df_5m['lower_low'].iloc[-2]) if len(df_5m) > 1 and 'lower_low' in df_5m.columns else False
 
         # ATR state
         if atr_sma20 > 0:
@@ -195,53 +292,94 @@ class LiquiditySweepAnalyzer:
         else:
             atr_state = 'normal'
 
-        # Regime + Bias classification
+        # ── True Swing Detection ────────────────────────────────────
+        swing_points = self.detect_swing_points(df_5m, lookback=self.SWING_LOOKBACK)
+
+        # Need at least 4 swing points to establish structure
+        if len(swing_points) < self.SWING_MIN_POINTS:
+            base_result.update({
+                'adx': adx, 'atr_state': atr_state,
+                'regime': 'range', 'bias': None,
+                'swing_points': swing_points,
+                'details': f'Only {len(swing_points)} swing points (need {self.SWING_MIN_POINTS})',
+            })
+            return base_result
+
+        # Extract recent swing highs and lows (last N of each type)
+        recent_highs = [sp for sp in swing_points if sp['swing_type'] == 'high'][-4:]
+        recent_lows = [sp for sp in swing_points if sp['swing_type'] == 'low'][-4:]
+
+        last_sh = recent_highs[-1] if recent_highs else None
+        last_sl = recent_lows[-1] if recent_lows else None
+
+        # Count HH/HL vs LH/LL in recent swings
+        hh_count = sum(1 for sp in recent_highs if sp['label'] == 'HH')
+        lh_count = sum(1 for sp in recent_highs if sp['label'] == 'LH')
+        hl_count = sum(1 for sp in recent_lows if sp['label'] == 'HL')
+        ll_count = sum(1 for sp in recent_lows if sp['label'] == 'LL')
+
+        # Determine bias from swing structure
         bias = None
         regime = 'range'
 
-        if adx >= self.ADX_MIN_BIAS:
-            if ema_20 > ema_50 and close > ema_20:
-                # Trend up requirements: EMA20 > EMA50, price above EMA20,
-                # last 2 candles making higher highs
-                if hh_1 and hh_2:
-                    regime = 'trend_up'
-                    bias = 'BUY'
-                elif hh_1 or hh_2:
-                    # Partial structure — still bullish but weaker
-                    regime = 'trend_up'
-                    bias = 'BUY'
-                else:
-                    regime = 'trend_up'
-                    bias = 'BUY'
-            elif ema_20 < ema_50 and close < ema_20:
-                if ll_1 and ll_2:
-                    regime = 'trend_down'
-                    bias = 'SELL'
-                elif ll_1 or ll_2:
-                    regime = 'trend_down'
-                    bias = 'SELL'
-                else:
-                    regime = 'trend_down'
-                    bias = 'SELL'
+        bullish_score = hh_count + hl_count
+        bearish_score = lh_count + ll_count
+
+        # Bullish: HH + HL sequence, last HL not broken by current price
+        if bullish_score >= 2 and bullish_score > bearish_score:
+            last_hl_price = None
+            for sp in reversed(recent_lows):
+                if sp['label'] == 'HL':
+                    last_hl_price = sp['price']
+                    break
+            # If no HL labeled yet, use last swing low
+            if last_hl_price is None and recent_lows:
+                last_hl_price = recent_lows[-1]['price']
+
+            if last_hl_price is not None and close > last_hl_price:
+                regime = 'trend_up'
+                bias = 'BUY'
+            else:
+                # Price broke below last HL → structure broken
+                regime = 'range'
+                bias = None
+
+        # Bearish: LH + LL sequence, last LH not broken by current price
+        elif bearish_score >= 2 and bearish_score > bullish_score:
+            last_lh_price = None
+            for sp in reversed(recent_highs):
+                if sp['label'] == 'LH':
+                    last_lh_price = sp['price']
+                    break
+            if last_lh_price is None and recent_highs:
+                last_lh_price = recent_highs[-1]['price']
+
+            if last_lh_price is not None and close < last_lh_price:
+                regime = 'trend_down'
+                bias = 'SELL'
             else:
                 regime = 'range'
                 bias = None
-        else:
-            # ADX too low — ranging
+
+        # ADX secondary filter — require minimum directional strength
+        if bias is not None and adx < self.ADX_MIN_BIAS:
             regime = 'range'
             bias = None
 
         # Override with volatility regime if extreme
         if atr_state == 'high_volatility' and regime in ('trend_up', 'trend_down'):
             regime = 'high_volatility'
-            # Keep bias from trend detection
+            # Keep bias from swing detection
         elif atr_state == 'low_volatility':
             regime = 'low_volatility'
             bias = None  # Don't trade in dead markets
 
+        sh_str = f"{last_sh['price']:.5f}" if last_sh else 'N/A'
+        sl_str = f"{last_sl['price']:.5f}" if last_sl else 'N/A'
         details = (
-            f"EMA20={ema_20:.5f} EMA50={ema_50:.5f} ADX={adx:.1f} "
-            f"ATR={atr:.5f} ATR_state={atr_state} HH={hh_1},{hh_2} LL={ll_1},{ll_2}"
+            f"Swings: HH={hh_count} HL={hl_count} LH={lh_count} LL={ll_count} | "
+            f"ADX={adx:.1f} ATR_state={atr_state} | "
+            f"Last SH={sh_str} Last SL={sl_str}"
         )
 
         return {
@@ -249,31 +387,37 @@ class LiquiditySweepAnalyzer:
             'bias': bias,
             'adx': adx,
             'atr_state': atr_state,
-            'ema_20': ema_20,
-            'ema_50': ema_50,
+            'ema_20': float(latest.get('ema_20', 0)),
+            'ema_50': float(latest.get('ema_50', 0)),
             'close': close,
             'details': details,
+            'swing_points': swing_points,
+            'last_swing_high': last_sh,
+            'last_swing_low': last_sl,
         }
 
     # =================================================================
-    #  LAYER 2: 1M LIQUIDITY SWEEP DETECTION
+    #  LAYER 2: 1M LIQUIDITY SWEEP AT SWING LEVELS + 5M INVALIDATION
     # =================================================================
 
-    def detect_sweep(self, df_1m, bias):
-        """Detect a liquidity sweep event on 1M data.
+    def detect_sweep(self, df_1m, bias, regime_info=None):
+        """Detect liquidity sweep at a 1M swing-based level.
 
         Bullish sweep:
-          - Current candle low dips below 5-candle lowest low (sweeps stops)
-          - Current candle CLOSES back above the swept level
-          - RSI dipped below 40 during the sweep
+          - Price sweeps below a 1M swing low (identified pivot, not rolling min)
+          - Close recovers above the swept level
+          - If 5M swing data available, sweep must NOT break the 5M structural level
 
-        Bearish sweep:
-          - Current candle high spikes above 5-candle highest high
-          - Current candle CLOSES back below the swept level
-          - RSI spiked above 60 during the sweep
+        Bearish sweep: inverse.
+
+        Args:
+            df_1m: 1M DataFrame with indicators.
+            bias: 'BUY' or 'SELL' from Layer 1.
+            regime_info: dict from detect_regime (contains 5M swing points for invalidation).
 
         Returns:
-            dict: {detected, direction, sweep_wick, swept_level, rsi_at_sweep, details}
+            dict: {detected, direction, sweep_wick, swept_level, rsi_at_sweep,
+                   fivem_invalidation_held, candle_index, details}
         """
         result = {
             'detected': False,
@@ -282,186 +426,341 @@ class LiquiditySweepAnalyzer:
             'swept_level': None,
             'rsi_at_sweep': None,
             'candle_index': None,
+            'fivem_invalidation_held': True,
             'details': '',
         }
 
-        if df_1m is None or len(df_1m) < self.SWEEP_LOOKBACK + 5:
+        if df_1m is None or len(df_1m) < self.SWING_LOOKBACK * 2 + self.SWEEP_WINDOW + 5:
             result['details'] = 'Insufficient 1M data'
             return result
 
-        # Check last 3 candles for a sweep (the confirmation window)
-        for i in range(-self.CONFIRMATION_WINDOW, 0):
+        # ── Identify 1M swing levels (the liquidity pools) ──────────
+        # Use data up to SWEEP_WINDOW bars back to find swing points
+        # (don't include the last SWEEP_WINDOW bars in swing detection to avoid lookahead)
+        detection_end = len(df_1m) - self.SWEEP_WINDOW
+        if detection_end < self.SWING_LOOKBACK * 2 + 1:
+            result['details'] = 'Not enough data for swing detection'
+            return result
+
+        df_for_swings = df_1m.iloc[:detection_end]
+        swing_points_1m = self.detect_swing_points(df_for_swings, lookback=self.SWING_LOOKBACK)
+
+        if len(swing_points_1m) < 2:
+            result['details'] = 'Insufficient 1M swing points for liquidity levels'
+            return result
+
+        # ── Get 5M structural level for invalidation gate ───────────
+        fivem_structural_level = None
+        if regime_info is not None:
+            if bias == 'BUY' and regime_info.get('last_swing_low'):
+                fivem_structural_level = regime_info['last_swing_low']['price']
+            elif bias == 'SELL' and regime_info.get('last_swing_high'):
+                fivem_structural_level = regime_info['last_swing_high']['price']
+
+        # ── Find the most recent relevant swing level ───────────────
+        if bias == 'BUY':
+            # For bullish sweep: look for recent swing lows (liquidity sits below)
+            swing_lows = [sp for sp in swing_points_1m if sp['swing_type'] == 'low']
+            if not swing_lows:
+                result['details'] = 'No 1M swing lows to sweep'
+                return result
+            # Use the most recent swing low as the target liquidity level
+            target_levels = sorted(swing_lows, key=lambda x: x['bar_idx'], reverse=True)[:3]
+        else:
+            # For bearish sweep: look for recent swing highs
+            swing_highs = [sp for sp in swing_points_1m if sp['swing_type'] == 'high']
+            if not swing_highs:
+                result['details'] = 'No 1M swing highs to sweep'
+                return result
+            target_levels = sorted(swing_highs, key=lambda x: x['bar_idx'], reverse=True)[:3]
+
+        # ── Scan last SWEEP_WINDOW candles for sweep event ──────────
+        for i in range(-self.SWEEP_WINDOW, 0):
             candle = df_1m.iloc[i]
             candle_low = float(candle['low'])
             candle_high = float(candle['high'])
             candle_close = float(candle['close'])
+            candle_open = float(candle['open'])
             candle_rsi = float(candle.get('rsi', 50) or 50)
 
-            # Get the liquidity level BEFORE this candle
-            lookback_end = len(df_1m) + i
-            lookback_start = max(0, lookback_end - self.SWEEP_LOOKBACK - 1)
-            if lookback_end <= lookback_start + 1:
-                continue
-            lookback_window = df_1m.iloc[lookback_start:lookback_end - 1]
+            for target in target_levels:
+                level = target['price']
 
-            if len(lookback_window) < self.SWEEP_LOOKBACK:
-                continue
+                if bias == 'BUY':
+                    # Bullish sweep: wick below swing low, close recovers above
+                    swept = candle_low < level and candle_close > level
+                    rsi_ok = candle_rsi < self.RSI_SWEEP_LONG_MAX
 
-            liq_low = float(lookback_window['low'].min())
-            liq_high = float(lookback_window['high'].max())
+                    if swept and rsi_ok:
+                        # 5M invalidation: sweep must NOT break 5M structural HL
+                        fivem_held = True
+                        if fivem_structural_level is not None:
+                            if candle_low < fivem_structural_level:
+                                fivem_held = False
 
-            if bias == 'BUY':
-                # Bullish sweep: price dips below liquidity low then closes above
-                swept = candle_low < liq_low and candle_close > liq_low
-                rsi_condition = candle_rsi < self.RSI_SWEEP_LONG_MAX
+                        if not fivem_held:
+                            result.update({
+                                'detected': False,
+                                'fivem_invalidation_held': False,
+                                'details': (
+                                    f"Sweep at {level:.5f} BLOCKED: broke 5M HL "
+                                    f"{fivem_structural_level:.5f}"
+                                ),
+                            })
+                            return result
 
-                if swept and rsi_condition:
-                    result.update({
-                        'detected': True,
-                        'direction': 'BUY',
-                        'sweep_wick': candle_low,
-                        'swept_level': liq_low,
-                        'rsi_at_sweep': candle_rsi,
-                        'candle_index': i,
-                        'details': (
-                            f"Bullish sweep: low {candle_low:.5f} < liq_low {liq_low:.5f}, "
-                            f"close {candle_close:.5f} > liq_low, RSI={candle_rsi:.1f}"
-                        ),
-                    })
-                    return result
+                        result.update({
+                            'detected': True,
+                            'direction': 'BUY',
+                            'sweep_wick': candle_low,
+                            'swept_level': level,
+                            'rsi_at_sweep': candle_rsi,
+                            'candle_index': i,
+                            'fivem_invalidation_held': True,
+                            'details': (
+                                f"Bullish sweep: low {candle_low:.5f} < swing_low "
+                                f"{level:.5f}, close {candle_close:.5f} recovered, "
+                                f"RSI={candle_rsi:.1f}"
+                            ),
+                        })
+                        return result
 
-            elif bias == 'SELL':
-                # Bearish sweep: price spikes above liquidity high then closes below
-                swept = candle_high > liq_high and candle_close < liq_high
-                rsi_condition = candle_rsi > self.RSI_SWEEP_SHORT_MIN
+                elif bias == 'SELL':
+                    # Bearish sweep: wick above swing high, close recovers below
+                    swept = candle_high > level and candle_close < level
+                    rsi_ok = candle_rsi > self.RSI_SWEEP_SHORT_MIN
 
-                if swept and rsi_condition:
-                    result.update({
-                        'detected': True,
-                        'direction': 'SELL',
-                        'sweep_wick': candle_high,
-                        'swept_level': liq_high,
-                        'rsi_at_sweep': candle_rsi,
-                        'candle_index': i,
-                        'details': (
-                            f"Bearish sweep: high {candle_high:.5f} > liq_high {liq_high:.5f}, "
-                            f"close {candle_close:.5f} < liq_high, RSI={candle_rsi:.1f}"
-                        ),
-                    })
-                    return result
+                    if swept and rsi_ok:
+                        # 5M invalidation: sweep must NOT break 5M structural LH
+                        fivem_held = True
+                        if fivem_structural_level is not None:
+                            if candle_high > fivem_structural_level:
+                                fivem_held = False
 
-        result['details'] = 'No liquidity sweep detected in last 3 candles'
+                        if not fivem_held:
+                            result.update({
+                                'detected': False,
+                                'fivem_invalidation_held': False,
+                                'details': (
+                                    f"Sweep at {level:.5f} BLOCKED: broke 5M LH "
+                                    f"{fivem_structural_level:.5f}"
+                                ),
+                            })
+                            return result
+
+                        result.update({
+                            'detected': True,
+                            'direction': 'SELL',
+                            'sweep_wick': candle_high,
+                            'swept_level': level,
+                            'rsi_at_sweep': candle_rsi,
+                            'candle_index': i,
+                            'fivem_invalidation_held': True,
+                            'details': (
+                                f"Bearish sweep: high {candle_high:.5f} > swing_high "
+                                f"{level:.5f}, close {candle_close:.5f} recovered, "
+                                f"RSI={candle_rsi:.1f}"
+                            ),
+                        })
+                        return result
+
+        result['details'] = f'No sweep of 1M swing levels in last {self.SWEEP_WINDOW} candles'
         return result
 
     # =================================================================
-    #  LAYER 3: DISPLACEMENT CONFIRMATION
+    #  LAYER 3: MARKET STRUCTURE SHIFT (MSS) + DISPLACEMENT
     # =================================================================
 
-    def detect_displacement(self, df_1m, sweep_result):
-        """Check if a displacement candle appeared after the sweep.
+    def detect_mss(self, df_1m, sweep_result):
+        """Detect Market Structure Shift after a liquidity sweep.
 
-        Displacement candle must:
-          1. Close above prior candle's high (longs) or below prior candle's low (shorts)
-          2. Body ≥ 60% of total range (strong candle, not a doji)
-          3. Volume > 1.3× last 10-candle average
+        For a bullish MSS after bullish sweep:
+          - Find the last internal LH (lower high) BEFORE the sweep
+          - A displacement candle must BREAK above that LH
+          - The displacement candle must have bodyRatio ≥ 60%, volume ≥ 1.3×
+
+        For bearish MSS: find last internal HL, displacement breaks below it.
 
         Returns:
-            dict: {confirmed, candle_data, details}
+            dict: {confirmed, mss_level, entry_price, trigger_level,
+                   displacement_candle, details}
         """
         result = {
             'confirmed': False,
+            'mss_level': None,
             'entry_price': None,
             'trigger_level': None,
-            'candle_data': {},
+            'displacement_candle': {},
             'details': '',
         }
 
-        if not sweep_result['detected']:
+        if not sweep_result.get('detected'):
             result['details'] = 'No sweep to confirm'
             return result
 
-        sweep_idx = sweep_result['candle_index']  # negative index (-3, -2, -1)
         direction = sweep_result['direction']
+        sweep_idx = sweep_result['candle_index']  # negative index
 
-        # Check candles AFTER the sweep for displacement
-        # sweep_idx is negative: -3, -2, or -1
-        # We need candles after it up to and including the latest
+        # Absolute index of the sweep candle
+        abs_sweep_idx = len(df_1m) + sweep_idx
+
+        # ── Find internal structure level to break ──────────────────
+        # Look at candles BEFORE the sweep for the structure level
+        pre_sweep_df = df_1m.iloc[max(0, abs_sweep_idx - 20):abs_sweep_idx]
+
+        if len(pre_sweep_df) < 5:
+            result['details'] = 'Not enough pre-sweep data for MSS detection'
+            return result
+
+        # Find swing points in the pre-sweep region
+        pre_swing_points = self.detect_swing_points(pre_sweep_df, lookback=min(3, self.SWING_LOOKBACK))
+
+        mss_level = None
+
+        if direction == 'BUY':
+            # For bullish MSS: need to break above last internal LH (or swing high)
+            internal_highs = [sp for sp in pre_swing_points if sp['swing_type'] == 'high']
+            if internal_highs:
+                # Use the most recent swing high as the structure level
+                mss_level = internal_highs[-1]['price']
+            else:
+                # Fallback: use the highest high in the last 10 candles before sweep
+                mss_level = float(pre_sweep_df['high'].astype(float).iloc[-10:].max())
+        else:
+            # For bearish MSS: need to break below last internal HL (or swing low)
+            internal_lows = [sp for sp in pre_swing_points if sp['swing_type'] == 'low']
+            if internal_lows:
+                mss_level = internal_lows[-1]['price']
+            else:
+                mss_level = float(pre_sweep_df['low'].astype(float).iloc[-10:].min())
+
+        if mss_level is None:
+            result['details'] = 'Could not identify MSS level'
+            return result
+
+        result['mss_level'] = mss_level
+
+        # ── Check candles AFTER sweep for displacement through MSS level ─
         check_start = sweep_idx + 1
         if check_start >= 0:
-            check_start = -1  # At minimum, check the latest candle
+            check_start = -1
 
         for i in range(check_start, 0):
             if abs(i) > len(df_1m):
                 continue
 
             candle = df_1m.iloc[i]
-            prev_candle = df_1m.iloc[i - 1]
+            disp = self._check_displacement_candle(candle, df_1m.iloc[i - 1], direction)
+
+            if not disp['is_displacement']:
+                continue
 
             candle_close = float(candle['close'])
-            candle_open = float(candle['open'])
             candle_high = float(candle['high'])
             candle_low = float(candle['low'])
-            prev_high = float(prev_candle['high'])
-            prev_low = float(prev_candle['low'])
-            body = abs(candle_close - candle_open)
-            candle_range = candle_high - candle_low
-            body_ratio = body / candle_range if candle_range > 0 else 0
-            vol_ratio = float(candle.get('volume_ratio', 1.0) or 1.0)
 
             if direction == 'BUY':
-                # Bullish displacement: close above prior high, strong body, volume
-                closes_above = candle_close > prev_high
-                is_bullish = candle_close > candle_open
-                body_ok = body_ratio >= self.BODY_RATIO_MIN
-                volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
+                # Displacement must close ABOVE the MSS level
+                if candle_close > mss_level:
+                    # Entry depends on mode
+                    if self.ENTRY_MODE == 'retest':
+                        # Entry at retest of broken MSS level
+                        trigger = mss_level
+                        entry = mss_level  # Limit order at the broken level
+                    else:
+                        # Aggressive: enter at displacement close
+                        trigger = candle_high
+                        entry = candle_close
 
-                if closes_above and is_bullish and body_ok and volume_ok:
                     result.update({
                         'confirmed': True,
-                        'entry_price': candle_close,
-                        'trigger_level': candle_high,  # Entry on break of this high
-                        'candle_data': {
-                            'close': candle_close,
-                            'high': candle_high,
-                            'low': candle_low,
-                            'body_ratio': body_ratio,
-                            'volume_ratio': vol_ratio,
-                        },
+                        'mss_level': mss_level,
+                        'entry_price': entry,
+                        'trigger_level': trigger,
+                        'displacement_candle': disp,
                         'details': (
-                            f"Bullish displacement: close {candle_close:.5f} > prev_high {prev_high:.5f}, "
-                            f"body={body_ratio:.0%}, vol={vol_ratio:.2f}x"
+                            f"Bullish MSS: displaced above {mss_level:.5f}, "
+                            f"close={candle_close:.5f}, body={disp['body_ratio']:.0%}, "
+                            f"vol={disp['volume_ratio']:.2f}x, "
+                            f"mode={self.ENTRY_MODE}"
                         ),
                     })
                     return result
 
             elif direction == 'SELL':
-                # Bearish displacement: close below prior low, strong body, volume
-                closes_below = candle_close < prev_low
-                is_bearish = candle_close < candle_open
-                body_ok = body_ratio >= self.BODY_RATIO_MIN
-                volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
+                if candle_close < mss_level:
+                    if self.ENTRY_MODE == 'retest':
+                        trigger = mss_level
+                        entry = mss_level
+                    else:
+                        trigger = candle_low
+                        entry = candle_close
 
-                if closes_below and is_bearish and body_ok and volume_ok:
                     result.update({
                         'confirmed': True,
-                        'entry_price': candle_close,
-                        'trigger_level': candle_low,  # Entry on break of this low
-                        'candle_data': {
-                            'close': candle_close,
-                            'low': candle_low,
-                            'high': candle_high,
-                            'body_ratio': body_ratio,
-                            'volume_ratio': vol_ratio,
-                        },
+                        'mss_level': mss_level,
+                        'entry_price': entry,
+                        'trigger_level': trigger,
+                        'displacement_candle': disp,
                         'details': (
-                            f"Bearish displacement: close {candle_close:.5f} < prev_low {prev_low:.5f}, "
-                            f"body={body_ratio:.0%}, vol={vol_ratio:.2f}x"
+                            f"Bearish MSS: displaced below {mss_level:.5f}, "
+                            f"close={candle_close:.5f}, body={disp['body_ratio']:.0%}, "
+                            f"vol={disp['volume_ratio']:.2f}x, "
+                            f"mode={self.ENTRY_MODE}"
                         ),
                     })
                     return result
 
-        result['details'] = 'No displacement candle after sweep'
+        result['details'] = f'No MSS displacement through {mss_level:.5f} after sweep'
         return result
+
+    def _check_displacement_candle(self, candle, prev_candle, direction):
+        """Check if a candle qualifies as a displacement candle.
+
+        Requirements:
+          1. Body ≥ 60% of total range
+          2. Volume ≥ 1.3× average
+          3. Closes beyond prior candle's high/low
+
+        Returns:
+            dict: {is_displacement, body_ratio, volume_ratio, close, high, low}
+        """
+        candle_close = float(candle['close'])
+        candle_open = float(candle['open'])
+        candle_high = float(candle['high'])
+        candle_low = float(candle['low'])
+        prev_high = float(prev_candle['high'])
+        prev_low = float(prev_candle['low'])
+
+        body = abs(candle_close - candle_open)
+        candle_range = candle_high - candle_low
+        body_ratio = body / candle_range if candle_range > 0 else 0
+        vol_ratio = float(candle.get('volume_ratio', 1.0) or 1.0)
+
+        is_displacement = False
+
+        if direction == 'BUY':
+            closes_above = candle_close > prev_high
+            is_bullish = candle_close > candle_open
+            body_ok = body_ratio >= self.BODY_RATIO_MIN
+            volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
+            is_displacement = closes_above and is_bullish and body_ok and volume_ok
+
+        elif direction == 'SELL':
+            closes_below = candle_close < prev_low
+            is_bearish = candle_close < candle_open
+            body_ok = body_ratio >= self.BODY_RATIO_MIN
+            volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
+            is_displacement = closes_below and is_bearish and body_ok and volume_ok
+
+        return {
+            'is_displacement': is_displacement,
+            'body_ratio': body_ratio,
+            'volume_ratio': vol_ratio,
+            'close': candle_close,
+            'high': candle_high,
+            'low': candle_low,
+        }
 
     # =================================================================
     #  RISK/REWARD CALCULATION
@@ -472,16 +771,31 @@ class LiquiditySweepAnalyzer:
 
         SL = sweep wick extreme ± 0.2 × ATR buffer
         TP:
-          - 1.5R default
-          - 2.0R if high_volatility regime (impulse continuation)
+          - 1.5R default (trend)
+          - 2.0R if high_volatility regime
           - 1.2R if range regime
+          - Liquidity pool target if available (next opposing swing point)
+
+        Args:
+            sweep_result: dict from detect_sweep
+            displacement_result: dict from detect_mss (v2) or detect_displacement (v1 compat)
+            regime_info: dict from detect_regime
+            pair: currency pair string
+
+        Returns:
+            dict or None: {stop_loss, take_profit, sl_distance, tp_distance,
+                          risk_pips, reward_pips, rr_ratio, tp_ratio_used,
+                          atr, sweep_wick, entry_price}
         """
         config = self.PAIR_CONFIG.get(pair, self.PAIR_CONFIG['EUR/USD'])
         pip_size = config['pip_size']
 
         direction = sweep_result['direction']
         sweep_wick = sweep_result['sweep_wick']
-        entry_price = displacement_result['entry_price']
+        entry_price = displacement_result.get('entry_price')
+
+        if entry_price is None:
+            return None
 
         # Get ATR from regime info
         atr = float(regime_info.get('atr', 0) or 0)
@@ -510,7 +824,38 @@ class LiquiditySweepAnalyzer:
             'low_volatility': 1.2,
         }
         tp_ratio = tp_ratio_map.get(regime, 1.5)
+
+        # ── Liquidity pool TP (next opposing swing) ─────────────────
+        liq_pool_tp = None
+        swing_points = regime_info.get('swing_points', [])
+        if swing_points:
+            if direction == 'BUY':
+                # Target: next swing high above entry
+                candidates = [
+                    sp for sp in swing_points
+                    if sp['swing_type'] == 'high' and sp['price'] > entry_price
+                ]
+                if candidates:
+                    liq_pool_tp = min(candidates, key=lambda x: x['price'])['price']
+            else:
+                # Target: next swing low below entry
+                candidates = [
+                    sp for sp in swing_points
+                    if sp['swing_type'] == 'low' and sp['price'] < entry_price
+                ]
+                if candidates:
+                    liq_pool_tp = max(candidates, key=lambda x: x['price'])['price']
+
+        # Calculate TP distance
         tp_distance = sl_distance * tp_ratio
+
+        # If liquidity pool TP gives better R:R, use it
+        if liq_pool_tp is not None:
+            liq_tp_distance = abs(liq_pool_tp - entry_price)
+            liq_rr = liq_tp_distance / sl_distance if sl_distance > 0 else 0
+            if liq_rr >= tp_ratio:
+                tp_distance = liq_tp_distance
+                tp_ratio = round(liq_rr, 2)
 
         if direction == 'BUY':
             take_profit = round(entry_price + tp_distance, 5)
@@ -585,7 +930,7 @@ class LiquiditySweepAnalyzer:
     # =================================================================
 
     def get_signal(self, df_1m, pair, df_5m=None, spread=None):
-        """Full entry pipeline: Bias → Sweep → Displacement → R:R.
+        """Full 4-layer entry pipeline: Bias → Sweep + 5M Gate → MSS → Entry.
 
         Args:
             df_1m: 1-minute DataFrame with OHLCV
@@ -600,9 +945,11 @@ class LiquiditySweepAnalyzer:
                 regime: str,
                 bias: str,
                 sweep: dict,
-                displacement: dict,
+                displacement: dict,   # v1 compat — maps to MSS result
+                mss: dict,            # v2 MSS result
                 risk_reward: dict,
                 details: str,
+                sweep_sl_tp: dict,
             }
         """
         result = {
@@ -612,6 +959,7 @@ class LiquiditySweepAnalyzer:
             'bias': None,
             'sweep': {},
             'displacement': {},
+            'mss': {},
             'risk_reward': None,
             'details': '',
             'sweep_sl_tp': None,
@@ -637,7 +985,7 @@ class LiquiditySweepAnalyzer:
             bot_logger.info(f"🚫 Sweep skip {pair}: {reason}")
             return result
 
-        # ── Step 2: 5M Regime & Bias (Layer 1) ────────────────────────
+        # ── Step 2: 5M True Swing Structure & Bias (Layer 1) ─────────
         regime_info = self.detect_regime(df_5m)
         result['regime'] = regime_info['regime']
         result['bias'] = regime_info['bias']
@@ -655,36 +1003,37 @@ class LiquiditySweepAnalyzer:
 
         bot_logger.info(
             f"📊 {pair} regime={regime_info['regime']}, bias={regime_info['bias']}, "
-            f"ADX={regime_info['adx']:.1f}"
+            f"ADX={regime_info['adx']:.1f}, swings={len(regime_info.get('swing_points', []))}"
         )
 
-        # ── Step 3: 1M Liquidity Sweep Detection (Layer 2) ───────────
-        sweep = self.detect_sweep(df_1m, regime_info['bias'])
+        # ── Step 3: 1M Sweep + 5M Invalidation Gate (Layer 2) ────────
+        sweep = self.detect_sweep(df_1m, regime_info['bias'], regime_info=regime_info)
         result['sweep'] = sweep
 
         if not sweep['detected']:
-            result['details'] = f"⏳ Bias={regime_info['bias']} but {sweep['details']}"
+            blocked = "" if sweep.get('fivem_invalidation_held', True) else " [5M INVALIDATION]"
+            result['details'] = f"⏳ Bias={regime_info['bias']} but {sweep['details']}{blocked}"
             return result
 
         bot_logger.info(f"💧 {pair} {sweep['details']}")
 
-        # ── Step 4: Displacement Confirmation (Layer 3) ───────────────
-        displacement = self.detect_displacement(df_1m, sweep)
-        result['displacement'] = displacement
+        # ── Step 4: Market Structure Shift (Layer 3) ──────────────────
+        mss = self.detect_mss(df_1m, sweep)
+        result['mss'] = mss
+        result['displacement'] = mss  # v1 backward compatibility
 
-        if not displacement['confirmed']:
-            result['details'] = f"💧 Sweep detected but {displacement['details']}"
-            bot_logger.info(f"⏳ {pair} sweep present but no displacement yet")
+        if not mss['confirmed']:
+            result['details'] = f"💧 Sweep detected but {mss['details']}"
+            bot_logger.info(f"⏳ {pair} sweep present but no MSS yet")
             return result
 
-        bot_logger.info(f"⚡ {pair} {displacement['details']}")
+        bot_logger.info(f"⚡ {pair} MSS: {mss['details']}")
 
         # ── Step 5: Risk/Reward Calculation ───────────────────────────
-        # Get ATR from 1M data for SL buffer
         latest_1m = df_1m.iloc[-1]
         regime_info['atr'] = float(latest_1m.get('atr', 0) or 0)
 
-        rr = self.calculate_risk_reward(sweep, displacement, regime_info, pair)
+        rr = self.calculate_risk_reward(sweep, mss, regime_info, pair)
         if rr is None:
             result['details'] = "🚫 R:R calculation failed (SL too tight)"
             return result
@@ -693,43 +1042,45 @@ class LiquiditySweepAnalyzer:
         result['sweep_sl_tp'] = rr
 
         # ── Step 6: Build final signal ────────────────────────────────
-        # Confidence is high because ALL three layers aligned
-        base_confidence = 0.80
+        # Confidence boost: all 4 layers aligned (Bias + Sweep + 5M Gate + MSS)
+        base_confidence = 0.85  # Higher than v1 (0.80) because MSS adds confirmation
 
         # Bonus for strong ADX
         if regime_info['adx'] >= 25:
-            base_confidence += 0.10
+            base_confidence += 0.08
         elif regime_info['adx'] >= 20:
-            base_confidence += 0.05
+            base_confidence += 0.04
 
-        # Bonus for very strong displacement volume
-        vol_ratio = displacement['candle_data'].get('volume_ratio', 1.0)
+        # Bonus for strong displacement volume
+        vol_ratio = mss.get('displacement_candle', {}).get('volume_ratio', 1.0)
         if vol_ratio >= 2.0:
             base_confidence += 0.05
         elif vol_ratio >= 1.5:
-            base_confidence += 0.03
+            base_confidence += 0.02
 
-        # Penalty for range regime (lower conviction)
+        # Penalty for range regime
         if regime_info['regime'] == 'range':
             base_confidence *= 0.70
 
         result['signal'] = sweep['direction']
         result['confidence'] = min(base_confidence, 1.0)
         result['details'] = (
-            f"✅ SWEEP ENTRY: {sweep['direction']} | "
+            f"✅ SWEEP+MSS ENTRY: {sweep['direction']} | "
             f"Regime={regime_info['regime']} | "
+            f"MSS={mss['mss_level']:.5f} | "
             f"SL={rr['risk_pips']:.1f}p TP={rr['reward_pips']:.1f}p ({rr['rr_ratio']:.1f}R) | "
-            f"Vol={vol_ratio:.2f}x | ADX={regime_info['adx']:.1f}"
+            f"Vol={vol_ratio:.2f}x | ADX={regime_info['adx']:.1f} | "
+            f"Mode={self.ENTRY_MODE}"
         )
 
         config = self.PAIR_CONFIG.get(pair, self.PAIR_CONFIG['EUR/USD'])
-        pip_size = config['pip_size']
         bot_logger.info(
-            f"🎯 SWEEP SIGNAL: {pair} {sweep['direction']} | "
+            f"🎯 SWEEP+MSS SIGNAL: {pair} {sweep['direction']} | "
             f"Entry={rr['entry_price']:.5f} | "
             f"SL={rr['stop_loss']:.5f} ({rr['risk_pips']:.1f}p) | "
             f"TP={rr['take_profit']:.5f} ({rr['reward_pips']:.1f}p) | "
-            f"R:R={rr['rr_ratio']:.1f} | Vol={vol_ratio:.2f}x"
+            f"R:R={rr['rr_ratio']:.1f} | MSS@{mss['mss_level']:.5f} | "
+            f"Vol={vol_ratio:.2f}x | Mode={self.ENTRY_MODE}"
         )
 
         return result

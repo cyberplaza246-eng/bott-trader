@@ -420,6 +420,7 @@ class EnsembleTrader:
                     'confidence': resolved_sweep.get('confidence', sweep_confidence),
                     'regime': sweep_signal.get('regime', 'unknown'),
                     'bias': sweep_signal.get('bias'),
+                    'mss_confirmed': bool(sweep_signal.get('mss', {}).get('confirmed', False)),
                 },
                 'scalping': {
                     'signal': resolved_scalp.get('signal', scalping_signal_type),

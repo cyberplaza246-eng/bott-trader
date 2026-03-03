@@ -738,6 +738,105 @@ class TestLiquiditySweepAnalyzer:
             assert 'pip_size' in cfg
             assert 'session_atr_min' in cfg
 
+    # ── v2 Swing Detection Tests ──────────────────────────────────
+
+    def test_detect_swing_points_basic(self):
+        """Should detect swing highs and lows from synthetic data with clear structure."""
+        # Build data with obvious swing: rise → peak → fall → trough → rise
+        np.random.seed(42)
+        n = 50
+        prices = []
+        base = 1.1000
+        # Segment 1: rise for 12 bars (HL → HH)
+        for i in range(12):
+            prices.append(base + i * 0.0003)
+        # Segment 2: fall for 12 bars (HH → HL)
+        peak = prices[-1]
+        for i in range(1, 13):
+            prices.append(peak - i * 0.0003)
+        # Segment 3: rise for 12 bars (creates another HH)
+        trough = prices[-1]
+        for i in range(1, 13):
+            prices.append(trough + i * 0.0004)
+        # Pad to n
+        while len(prices) < n:
+            prices.append(prices[-1] + 0.0001)
+
+        close = np.array(prices[:n])
+        high = close + 0.0002
+        low = close - 0.0002
+        opn = close - 0.0001
+        df = pd.DataFrame({
+            'open': opn, 'high': high, 'low': low, 'close': close,
+            'volume': np.random.randint(500, 2000, n),
+        })
+
+        swings = self.analyzer.detect_swing_points(df, lookback=3)
+        assert len(swings) > 0, "Should detect at least one swing point"
+        types_found = {s['swing_type'] for s in swings}
+        # Should find swing highs and/or swing lows
+        assert 'high' in types_found or 'low' in types_found
+
+    def test_detect_swing_points_flat_data(self):
+        """Flat data should produce few or no meaningful swings."""
+        n = 50
+        flat = np.full(n, 1.1000)
+        df = pd.DataFrame({
+            'open': flat, 'high': flat + 0.00001,
+            'low': flat - 0.00001, 'close': flat,
+            'volume': np.full(n, 1000),
+        })
+        swings = self.analyzer.detect_swing_points(df, lookback=5)
+        # May detect some, but labeling should be consistent
+        assert isinstance(swings, list)
+
+    def test_detect_mss_returns_dict(self):
+        """detect_mss should return a dict with 'confirmed' key."""
+        df = make_ohlcv(100, freq='1min')
+        df = self.analyzer.calculate_indicators(df)
+        sweep_result = {
+            'detected': True,
+            'direction': 'BUY',
+            'sweep_wick': 1.0990,
+            'swept_level': 1.0995,
+            'candle_index': -3,
+        }
+        mss = self.analyzer.detect_mss(df, sweep_result)
+        assert isinstance(mss, dict)
+        assert 'confirmed' in mss
+        assert isinstance(mss['confirmed'], bool)
+
+    def test_detect_mss_no_sweep(self):
+        """detect_mss should return not-confirmed when sweep not detected."""
+        df = make_ohlcv(100, freq='1min')
+        df = self.analyzer.calculate_indicators(df)
+        sweep_result = {
+            'detected': False,
+            'direction': None,
+            'sweep_wick': None,
+            'swept_level': None,
+            'candle_index': None,
+        }
+        mss = self.analyzer.detect_mss(df, sweep_result)
+        assert mss['confirmed'] is False
+
+    def test_get_signal_returns_mss_key(self):
+        """get_signal result should contain 'mss' key in v2."""
+        df_1m = make_ohlcv(200, freq='1min')
+        df_5m = make_ohlcv(200, freq='5min')
+        result = self.analyzer.get_signal(df_1m, 'EUR/USD', df_5m=df_5m)
+        assert 'mss' in result, "v2 get_signal should return 'mss' key"
+
+    def test_regime_returns_invalidation_levels(self):
+        """detect_regime should return 5M invalidation levels."""
+        df = make_ohlcv(200, freq='5min')
+        df = self.analyzer.calculate_indicators(df)
+        regime = self.analyzer.detect_regime(df)
+        # v2 always returns these keys
+        assert 'last_swing_high' in regime
+        assert 'last_swing_low' in regime
+        assert 'swing_points' in regime
+
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '--tb=short'])
