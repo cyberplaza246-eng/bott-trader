@@ -118,8 +118,11 @@ DASHBOARD_HTML = """
   <div class="card" id="weights-card"><h2>Model Weights</h2><p>Loading...</p></div>
   <div class="card" id="performance-card"><h2>Performance</h2><p>Loading...</p></div>
   <div class="card" id="pair-perf-card"><h2>Pair Performance</h2><p>Loading...</p></div>
+  <div class="card full-width" id="equity-card"><h2>Equity Curve</h2><canvas id="equity-chart" height="200"></canvas></div>
+  <div class="card" id="rl-card"><h2>RL Agent</h2><p>Loading...</p></div>
   <div class="card full-width" id="trade-history-card"><h2>Trade History</h2><p>Loading...</p></div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 function $(id){return document.getElementById(id)}
 function cls(v){return v>=0?'positive':'negative';}
@@ -143,6 +146,10 @@ async function refresh(){
     const now=new Date();
     $('last-update').textContent='Updated '+now.toLocaleTimeString();
     document.querySelectorAll('.card').forEach(c=>{c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');});
+
+    // Equity curve (separate endpoint, less frequent)
+    refreshEquityCurve();
+    refreshRLStats();
   }catch(e){
     $('last-update').textContent='⚠ Connection lost';
     console.error(e);
@@ -289,6 +296,103 @@ function renderTradeHistory(trades){
 
 refresh();
 setInterval(refresh, 3000);
+
+// ── Equity Curve Chart ───────────────────────────────────────────
+let equityChart = null;
+async function refreshEquityCurve(){
+  try {
+    const r = await fetch('/api/equity-curve');
+    const d = await r.json();
+    if (!d.labels || d.labels.length < 2) return;
+    const ctx = document.getElementById('equity-chart');
+    if (!ctx) return;
+
+    if (equityChart) {
+      equityChart.data.labels = d.labels;
+      equityChart.data.datasets[0].data = d.equity;
+      equityChart.data.datasets[1].data = d.drawdown;
+      equityChart.update('none');
+    } else {
+      equityChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: d.labels,
+          datasets: [
+            {
+              label: 'Equity ($)',
+              data: d.equity,
+              borderColor: '#58a6ff',
+              backgroundColor: 'rgba(88,166,255,0.1)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+              yAxisID: 'y',
+            },
+            {
+              label: 'Drawdown (%)',
+              data: d.drawdown,
+              borderColor: '#f85149',
+              backgroundColor: 'rgba(248,81,73,0.1)',
+              fill: true,
+              tension: 0.3,
+              pointRadius: 0,
+              yAxisID: 'y1',
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { labels: { color: '#c9d1d9' } },
+          },
+          scales: {
+            x: { display: false },
+            y: {
+              type: 'linear', position: 'left',
+              title: { display: true, text: 'Equity ($)', color: '#58a6ff' },
+              ticks: { color: '#8b949e' },
+              grid: { color: 'rgba(48,54,61,0.5)' },
+            },
+            y1: {
+              type: 'linear', position: 'right',
+              title: { display: true, text: 'Drawdown (%)', color: '#f85149' },
+              ticks: { color: '#8b949e' },
+              grid: { drawOnChartArea: false },
+              min: -50, max: 0,
+            }
+          }
+        }
+      });
+    }
+  } catch(e) { console.error('Equity chart error:', e); }
+}
+
+// ── RL Agent Stats ───────────────────────────────────────────────
+async function refreshRLStats(){
+  try {
+    const r = await fetch('/api/rl-stats');
+    const d = await r.json();
+    if (!d.mode) { $('rl-card').innerHTML='<h2>RL Agent</h2><p style="color:var(--text2)">Not active</p>'; return; }
+
+    let actionDist = '';
+    if (d.action_distribution) {
+      actionDist = Object.entries(d.action_distribution)
+        .map(([k,v]) => `<div class="metric"><span class="label">${k}</span><span class="value">${v}</span></div>`)
+        .join('');
+    }
+
+    $('rl-card').innerHTML=`<h2>RL Agent (${d.mode.toUpperCase()})</h2>
+      <div class="metric"><span class="label">Epsilon</span><span class="value">${d.epsilon.toFixed(4)}</span></div>
+      <div class="metric"><span class="label">Training Steps</span><span class="value">${d.training_steps}</span></div>
+      <div class="metric"><span class="label">Total Trades</span><span class="value">${d.total_trades}</span></div>
+      <div class="metric"><span class="label">Replay Size</span><span class="value">${d.replay_size}</span></div>
+      <div class="metric"><span class="label">Avg Reward</span><span class="value ${d.recent_avg_reward>=0?'positive':'negative'}">${d.recent_avg_reward.toFixed(3)}</span></div>
+      <div class="metric"><span class="label">Win Rate</span><span class="value ${d.recent_win_rate>=0.5?'positive':'negative'}">${(d.recent_win_rate*100).toFixed(1)}%</span></div>
+      <div style="margin-top:8px;font-size:0.8em;color:var(--text2);text-transform:uppercase">Action Distribution</div>
+      ${actionDist}`;
+  } catch(e) { console.error('RL stats error:', e); }
+}
 </script>
 </body>
 </html>
@@ -432,6 +536,46 @@ def api_trades():
     if _learner_ref:
         return jsonify(_learner_ref.trade_history[-100:])
     return jsonify([])
+
+
+@app.route('/api/equity-curve')
+def api_equity_curve():
+    """Return equity curve data for charting."""
+    if not _learner_ref or not _learner_ref.trade_history:
+        return jsonify({'labels': [], 'equity': [], 'drawdown': []})
+
+    trades = _learner_ref.trade_history
+    initial = _bot_ref.risk_manager.initial_balance if _bot_ref else 50.0
+    equity = [initial]
+    labels = ['Start']
+    dd_pct = [0.0]
+    peak = initial
+
+    for t in trades:
+        pnl = t.get('profit_loss', 0)
+        eq = equity[-1] + pnl
+        equity.append(round(eq, 2))
+        peak = max(peak, eq)
+        drawdown = ((eq - peak) / peak * 100) if peak > 0 else 0
+        dd_pct.append(round(drawdown, 2))
+        ts = t.get('timestamp', t.get('time', ''))
+        labels.append(str(ts)[-8:] if ts else f"T{len(labels)}")
+
+    return jsonify({
+        'labels': labels,
+        'equity': equity,
+        'drawdown': dd_pct,
+        'peak': round(peak, 2),
+        'current': equity[-1] if equity else initial,
+    })
+
+
+@app.route('/api/rl-stats')
+def api_rl_stats():
+    """Return RL agent statistics."""
+    if _bot_ref and hasattr(_bot_ref, 'rl_agent'):
+        return jsonify(_bot_ref.rl_agent.get_stats())
+    return jsonify({})
 
 
 @app.route('/api/model-accuracy')

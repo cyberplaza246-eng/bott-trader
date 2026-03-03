@@ -21,6 +21,7 @@ from src.core.paper_trading import PaperTradingManager
 from src.core.trailing_stop import TrailingStopManager
 from src.ai.economic_calendar import EconomicCalendar
 from src.ai.lstm_retrainer import LSTMRetrainer
+from src.ai.rl_agent import RLTradingAgent
 from src.utils.logger import bot_logger, TradeLogger
 from config.strategy_config import (
     TRADING_MODE,
@@ -98,6 +99,9 @@ class TradingBot:
             predictor=self.ensemble.lstm if self.ensemble.lstm_available else None,
         )
         
+        # RL agent for trade decision optimization
+        self.rl_agent = RLTradingAgent()
+
         # Determine active model count
         model_count = 9 if self.ensemble.lstm_available else 8
         
@@ -472,6 +476,57 @@ class TradingBot:
                     if self.enable_correlation_guard and self._has_correlated_position(pair, signal_result['signal']):
                         continue
 
+                    # ── RL Agent Gate ──────────────────────────────────
+                    # Build state and let the RL agent decide action
+                    try:
+                        enriched = signal_result.get('enriched_df', df)
+                        latest_bar = enriched.iloc[-1]
+                        rl_state = self.rl_agent.build_state(
+                            ensemble_confidence=signal_result['confidence'],
+                            model_agreement=signal_result.get('models_agreement', 0),
+                            total_models=signal_result.get('total_models', 8),
+                            regime=signal_result.get('regime', 'ranging'),
+                            rsi=float(latest_bar.get('rsi', 50)),
+                            adx=float(latest_bar.get('adx', 20)),
+                            atr=float(latest_bar.get('atr', 0)),
+                            atr_median=float(enriched['atr'].median()) if 'atr' in enriched.columns else 0.001,
+                            ema200_dist=(float(latest_bar['close']) - float(latest_bar.get('ema_200', latest_bar['close']))) / float(latest_bar['close']) if 'ema_200' in latest_bar.index else 0,
+                            hour=current_utc_hour,
+                            spread=float(self.broker.get_spread(pair)) if hasattr(self.broker, 'get_spread') else 0,
+                            volume_ratio=float(latest_bar.get('volume_ratio', 1.0)),
+                            daily_trades=self.risk_manager.open_trades,
+                            max_daily_trades=effective_cap,
+                            current_drawdown=self.ensemble.learner.get_drawdown_depth(),
+                        )
+                        # Training mode only during first 500 trades, then exploit
+                        rl_training = self.rl_agent.total_trades < 500
+                        rl_action = self.rl_agent.select_action(rl_state, training=rl_training)
+                        rl_action_name = self.rl_agent.get_action_name(rl_action)
+
+                        if rl_action == 0:  # SKIP
+                            bot_logger.info(f"  🤖 RL Agent: SKIP trade on {pair} (ε={self.rl_agent.epsilon:.3f})")
+                            # Store state for later reward computation
+                            if not hasattr(self, '_rl_pending_skips'):
+                                self._rl_pending_skips = {}
+                            self._rl_pending_skips[f"{pair}_{timeframe_key}"] = {
+                                'state': rl_state, 'action': rl_action,
+                                'signal': signal_result,
+                            }
+                            continue
+                        else:
+                            lot_mult = self.rl_agent.get_lot_multiplier(rl_action)
+                            bot_logger.info(
+                                f"  🤖 RL Agent: {rl_action_name} on {pair} "
+                                f"(lot×{lot_mult:.1f}, ε={self.rl_agent.epsilon:.3f})"
+                            )
+                            # Store RL info for post-trade reward recording
+                            signal_result['_rl_state'] = rl_state
+                            signal_result['_rl_action'] = rl_action
+                            signal_result['_rl_lot_mult'] = lot_mult
+                    except Exception as e:
+                        bot_logger.warning(f"RL agent error: {e} — proceeding with full lot")
+                        signal_result['_rl_lot_mult'] = 1.0
+
                     self._execute_trade(pair, signal_result, df, timeframe_key)
                     # Set cross-timeframe cooldown (prevents 1M and 5M racing)
                     self._last_trade_time[pair] = datetime.now()
@@ -632,6 +687,12 @@ class TradingBot:
         
         lot_size = position_size['lot_size']
 
+        # Apply RL agent lot multiplier if available
+        rl_lot_mult = signal_result.get('_rl_lot_mult', 1.0)
+        if rl_lot_mult != 1.0:
+            lot_size = round(lot_size * rl_lot_mult, 2)
+            bot_logger.info(f"  🤖 RL lot adjustment: ×{rl_lot_mult:.1f} → {lot_size}")
+
         # Scalping: minimum lot 0.01
         lot_size = max(0.01, lot_size)
         
@@ -642,7 +703,20 @@ class TradingBot:
         bot_logger.info(f"  Take Profit: {take_profit:.5f}")
         bot_logger.info(f"  Lot Size: {lot_size}")
         bot_logger.info(f"  Risk: ${position_size['risk_amount']:.2f}")
-        
+
+        # Store RL state for reward computation on trade close
+        rl_state = signal_result.get('_rl_state')
+        rl_action = signal_result.get('_rl_action')
+        if rl_state is not None:
+            if not hasattr(self, '_pending_rl_info'):
+                self._pending_rl_info = {}
+            pair_config_pip = SCALPING_PAIRS.get(pair, {}).get('pip_size', 0.0001)
+            self._pending_rl_info[pair] = {
+                'state': rl_state,
+                'action': rl_action,
+                'sl_pips': abs(entry_price - stop_loss) / pair_config_pip,
+            }
+
         # Execute based on mode
         if self.mode == 'live' and AUTOTRADING_ENABLED:
             order_id = self.broker.place_order(
@@ -735,6 +809,9 @@ class TradingBot:
                     # Record with ML Trade Scorer
                     self._record_ml_outcome(pair, closed_trade['profit_loss'])
 
+                    # Record with RL Agent
+                    self._record_rl_outcome(pair, closed_trade['profit_loss'], exit_type)
+
     @staticmethod
     def _normalize_pair(pair):
         """Normalize pair format (EUR/USD and EURUSD -> EURUSD)."""
@@ -756,6 +833,40 @@ class TradingBot:
                 )
         except Exception as e:
             bot_logger.warning(f"🧠 ML outcome recording failed: {e}")
+
+    def _record_rl_outcome(self, pair: str, pnl: float, exit_type: str = ''):
+        """Feed trade outcome to the RL agent for reward learning."""
+        try:
+            rl_info = getattr(self, '_pending_rl_info', {}).pop(pair, None)
+            if rl_info is None:
+                return
+
+            state = rl_info['state']
+            action = rl_info['action']
+            pips = rl_info.get('pips', pnl)
+            trade_result = {'pips': pips, 'exit_type': exit_type}
+
+            reward = self.rl_agent.compute_reward(action, trade_result=trade_result)
+            # Use current state as next_state (simplified)
+            next_state = state  # In practice, market state at close
+            won = pnl > 0
+            rr = abs(pips / max(rl_info.get('sl_pips', 1), 0.1)) if pips else 0
+
+            self.rl_agent.record_outcome(
+                state, action, reward, next_state, done=False,
+                trade_info={'won': won, 'pips': pips, 'rr': rr}
+            )
+
+            bot_logger.info(
+                f"🤖 RL reward: {pair} reward={reward:+.2f} "
+                f"(action={self.rl_agent.get_action_name(action)}, ε={self.rl_agent.epsilon:.3f})"
+            )
+
+            # Periodically save RL state
+            if self.rl_agent.total_trades % 25 == 0:
+                self.rl_agent.save_state()
+        except Exception as e:
+            bot_logger.warning(f"🤖 RL outcome recording failed: {e}")
 
     def _find_open_position(self, pair):
         """Return the currently open position for a pair, if any."""

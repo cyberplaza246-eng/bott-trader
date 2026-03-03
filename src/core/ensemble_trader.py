@@ -10,6 +10,7 @@ automatically runs with 7 models and redistributes its weight.
 import pandas as pd
 from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
 from src.ai.sentiment_analyzer import SentimentAnalyzer
+from src.ai.nlp_sentiment import NLPSentimentAnalyzer, FINBERT_AVAILABLE
 from src.ai.technical_analyzer import TechnicalAnalyzer
 from src.ai.volume_analyzer import VolumeAnalyzer
 from src.ai.multi_timeframe import MultiTimeframeAnalyzer
@@ -61,7 +62,13 @@ class EnsembleTrader:
     def __init__(self, newsapi_key=None, broker=None):
         self.lstm = LSTMPredictor(lookback_window=60)
         self.lstm_available = TF_AVAILABLE and self.lstm.available
-        self.sentiment = SentimentAnalyzer(newsapi_key=newsapi_key)
+        # Use FinBERT NLP sentiment if available, else legacy keyword analyzer
+        if FINBERT_AVAILABLE:
+            self.sentiment = NLPSentimentAnalyzer(newsapi_key=newsapi_key)
+            bot_logger.info("🧠 NLP sentiment: FinBERT active")
+        else:
+            self.sentiment = SentimentAnalyzer(newsapi_key=newsapi_key)
+            bot_logger.info("⚠️ NLP sentiment: keyword fallback (install transformers+torch for FinBERT)")
         self.technical = TechnicalAnalyzer()
         self.volume = VolumeAnalyzer(volume_period=20)
         self.multi_tf = MultiTimeframeAnalyzer()

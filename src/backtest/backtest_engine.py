@@ -87,12 +87,13 @@ class BacktestEngine:
       - 0.01 min lot
     """
 
-    def __init__(self, initial_balance=10000):
+    def __init__(self, initial_balance=10000, slippage_pips=0.0):
         self.initial_balance = initial_balance
         self.current_balance = initial_balance
         self.equity = initial_balance
         self.trades = []
         self.daily_results = []
+        self.slippage_pips = slippage_pips  # Slippage per trade in pips
 
         # 9 models (sentiment produces HOLD with 0 confidence in backtest)
         self.technical = TechnicalAnalyzer()
@@ -112,7 +113,7 @@ class BacktestEngine:
     # ──────────────────────────────────────────────────────────────────
     def run_backtest(self, historical_data, pair, confidence_threshold=0.45,
                      min_agreement=2, timeframe_key='5m', df_1m=None,
-                     bar_minutes=None):
+                     bar_minutes=None, slippage_pips=None):
         """
         Run backtest on historical data using the 9-model scalping ensemble.
 
@@ -128,6 +129,7 @@ class BacktestEngine:
                    +CONFLUENCE_BONUS / -DIVERGENCE_PENALTY.
             bar_minutes: Minutes per bar in historical_data.
                          Auto-detected if None.
+            slippage_pips: Slippage per trade in pips (overrides constructor default).
 
         Returns:
             dict with backtest results
@@ -135,6 +137,10 @@ class BacktestEngine:
         data = historical_data.copy()
         data = self.technical.calculate_indicators(data)
         data = self.volume.calculate_volume_profile(data)
+
+        # Apply per-run slippage override if provided
+        if slippage_pips is not None:
+            self.slippage_pips = slippage_pips
 
         # Auto-detect bar size from timestamps
         if bar_minutes is None:
@@ -512,7 +518,7 @@ class BacktestEngine:
     #  Helpers
     # ──────────────────────────────────────────────────────────────────
     def _close_position(self, pos, exit_price, exit_type, idx, pair, eq_curve):
-        """Close a position and record the trade."""
+        """Close a position and record the trade (with slippage if configured)."""
         pip_info = PIP_VALUES.get(pair, DEFAULT_PIP)
         pip_size = pip_info['pip_size']
         pip_value = pip_info['pip_value_per_lot']
@@ -521,6 +527,11 @@ class BacktestEngine:
             pips = (exit_price - pos['entry_price']) / pip_size
         else:
             pips = (pos['entry_price'] - exit_price) / pip_size
+
+        # Apply slippage: deduct on both entry and exit (2× slippage_pips)
+        effective_slippage = self.slippage_pips
+        if effective_slippage > 0:
+            pips -= effective_slippage * 2  # entry slip + exit slip
 
         profit_loss = pips * pos['lot_size'] * pip_value
 

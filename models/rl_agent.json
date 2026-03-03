@@ -1,0 +1,267 @@
+{
+  "epsilon": 0.05,
+  "training_step": 18097,
+  "total_trades": 1702,
+  "action_counts": {
+    "3": 566,
+    "0": 16458,
+    "2": 751,
+    "1": 385
+  },
+  "recent_trades": [
+    {
+      "won": false,
+      "pips": -6.2,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 10.7,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -8.9,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 7.6,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -3.8,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 7.1,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 7.2,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -4.6,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 7.4,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 13.4,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 9.8,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 10.4,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -7.7,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -9.1,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -7.3,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 8.1,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 11.2,
+      "rr": 1.63
+    },
+    {
+      "won": false,
+      "pips": -3.0,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -5.4,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 6.4,
+      "rr": 1.63
+    },
+    {
+      "won": false,
+      "pips": -4.8,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 7.3,
+      "rr": 1.63
+    },
+    {
+      "won": false,
+      "pips": -6.1,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -6.9,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -6.4,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -4.5,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 7.1,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 8.0,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -8.3,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 11.7,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -5.2,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -4.6,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 6.7,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -4.3,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 10.5,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 6.8,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -6.4,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -6.2,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 7.7,
+      "rr": 1.63
+    },
+    {
+      "won": false,
+      "pips": -4.5,
+      "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": -5.2,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 7.5,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 2.0,
+      "rr": 0.33
+    },
+    {
+      "won": false,
+      "pips": -6.4,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 10.9,
+      "rr": 1.63
+    },
+    {
+      "won": false,
+      "pips": -7.0,
+      "rr": -1.0
+    },
+    {
+      "won": true,
+      "pips": 6.3,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 10.9,
+      "rr": 1.62
+    },
+    {
+      "won": true,
+      "pips": 12.0,
+      "rr": 1.62
+    },
+    {
+      "won": false,
+      "pips": -6.8,
+      "rr": -1.0
+    }
+  ],
+  "episode_rewards_summary": {
+    "mean": 1.02226,
+    "total": 18160
+  }
+}

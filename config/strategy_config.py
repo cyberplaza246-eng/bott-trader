@@ -15,11 +15,11 @@ MT5_SERVER = os.getenv('MT5_SERVER', 'Exness-MT5')
 # Trading Parameters
 RISK_PER_TRADE_PERCENT = float(os.getenv('RISK_PER_TRADE_PERCENT', 1.0))
 MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 1))
-DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 5))
+DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 3))
 INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', 50))
 
 # Trading Mode
-TRADING_MODE = os.getenv('TRADING_MODE', 'paper')  # 'live', 'paper', 'backtest'
+TRADING_MODE = os.getenv('TRADING_MODE', 'live')  # 'live', 'paper', 'backtest'
 AUTOTRADING_ENABLED = TRADING_MODE == 'live'
 
 # Currency Pairs to Trade (scalping focus)
@@ -123,6 +123,18 @@ LOG_FILE = f'{LOG_DIR}/trading_bot.log'
 BACKTEST_START_DATE = '2022-01-01'
 BACKTEST_END_DATE = '2024-12-31'
 BACKTEST_LEVERAGE = 100
+
+# Walk-Forward Analysis
+WALKFORWARD_SPLITS = int(os.getenv('WALKFORWARD_SPLITS', 5))
+WALKFORWARD_TRAIN_PCT = float(os.getenv('WALKFORWARD_TRAIN_PCT', 0.70))
+WALKFORWARD_MODE = os.getenv('WALKFORWARD_MODE', 'rolling')  # 'rolling' or 'anchored'
+
+# Slippage Modeling (pips per trade — applied to both entry and exit)
+BACKTEST_SLIPPAGE_PIPS = float(os.getenv('BACKTEST_SLIPPAGE_PIPS', 0.5))
+
+# Reinforcement Learning
+RL_ENABLED = os.getenv('RL_ENABLED', 'true').lower() == 'true'
+RL_EXPLORATION_TRADES = int(os.getenv('RL_EXPLORATION_TRADES', 0))  # 0 = exploit-only (agent is pre-trained)
 
 # Model Paths
 LSTM_MODEL_PATH = 'models/lstm_model.h5'

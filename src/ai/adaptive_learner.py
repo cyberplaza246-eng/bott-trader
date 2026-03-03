@@ -843,10 +843,16 @@ class AdaptiveLearner:
         }
 
     # ------------------------------------------------------------------
-    # Persistence
+    # Persistence (with backup rotation)
     # ------------------------------------------------------------------
+    MAX_BACKUPS = 5  # Keep up to 5 rotating backups
+
     def _save(self):
         os.makedirs(os.path.dirname(LEARNING_DB_PATH), exist_ok=True)
+
+        # Rotate backups before writing
+        self._rotate_backups()
+
         data = {
             'model_weights': self.model_weights,
             'model_accuracy': dict(self.model_accuracy),
@@ -883,6 +889,47 @@ class AdaptiveLearner:
         }
         with open(LEARNING_DB_PATH, 'w') as f:
             json.dump(data, f, indent=2, default=str)
+
+    def _rotate_backups(self):
+        """Rotate backup files: .bak.1 (newest) through .bak.N (oldest)."""
+        try:
+            if not os.path.exists(LEARNING_DB_PATH):
+                return
+
+            # Shift existing backups: .bak.4 → .bak.5, .bak.3 → .bak.4, etc.
+            for i in range(self.MAX_BACKUPS, 1, -1):
+                src = f"{LEARNING_DB_PATH}.bak.{i-1}"
+                dst = f"{LEARNING_DB_PATH}.bak.{i}"
+                if os.path.exists(src):
+                    os.replace(src, dst)
+
+            # Copy current file to .bak.1
+            import shutil
+            shutil.copy2(LEARNING_DB_PATH, f"{LEARNING_DB_PATH}.bak.1")
+
+        except Exception as e:
+            bot_logger.warning(f"Backup rotation failed: {e}")
+
+    def restore_from_backup(self, backup_num=1):
+        """Restore adaptive state from a specific backup number.
+
+        Args:
+            backup_num: Which backup to restore (1=newest, N=oldest).
+        """
+        backup_path = f"{LEARNING_DB_PATH}.bak.{backup_num}"
+        if not os.path.exists(backup_path):
+            bot_logger.error(f"Backup {backup_path} not found")
+            return False
+
+        try:
+            import shutil
+            shutil.copy2(backup_path, LEARNING_DB_PATH)
+            self._load()
+            bot_logger.info(f"✅ Restored adaptive state from backup #{backup_num}")
+            return True
+        except Exception as e:
+            bot_logger.error(f"Failed to restore from backup: {e}")
+            return False
 
     def _load(self):
         if not os.path.exists(LEARNING_DB_PATH):
