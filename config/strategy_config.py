@@ -62,12 +62,13 @@ SCALPING_PAIRS = {
     },
 }
 
-# Session windows for scalping — extended to cover all trading hours
-# end=0 means midnight (wraps around), effectively 07:00–23:59 UTC
+# Session windows — only trade during liquid sessions
+# London 07:00-16:00, NY overlap 13:00-17:00 UTC
+# Asian session for JPY only
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 0, 'end': 0},   # All hours (24/7)
-    'GBP/USD': {'start': 0, 'end': 0},   # All hours (24/7)
-    'USD/JPY': {'start': 0, 'end': 0},   # All hours (24/7)
+    'EUR/USD': {'start': 7, 'end': 17},   # London + NY overlap
+    'GBP/USD': {'start': 7, 'end': 17},   # London + NY overlap
+    'USD/JPY': {'start': 0, 'end': 17},   # Asian + London + NY
 }
 
 # Spread limits for scalping (pips — tighter than swing)
