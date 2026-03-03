@@ -205,16 +205,12 @@ class TradingBot:
 
     def _should_trade_pair(self, pair, signal_result):
         """Determine if a pair should be traded, factoring in adaptive + ML learning."""
-        # During a recent losing streak, require higher confidence
+        # Log recent win rate for visibility but don't block trades
         recent_wr = self.ensemble.learner.get_recent_win_rate(5)
-        if recent_wr < 0.20 and len(self.ensemble.learner.recent_trades_window) >= 3:
-            # Only allow trades with very high confidence during cold streaks
-            if signal_result.get('confidence', 0) < 0.80:
-                bot_logger.info(
-                    f"⏸️ Cooldown active (recent WR {recent_wr:.0%}): "
-                    f"blocking {pair} with confidence {signal_result['confidence']:.2%} < 80%"
-                )
-                return False
+        if recent_wr < 0.20 and len(self.ensemble.learner.recent_trades_window) >= 5:
+            bot_logger.info(
+                f"⚠️ Recent win rate {recent_wr:.0%} — tread carefully"
+            )
 
         # ── ML Trade Scorer gate ─────────────────────────────────────
         # If the ML model is trained, use it to predict win probability
@@ -350,13 +346,6 @@ class TradingBot:
                 if self.ensemble.learner.should_skip_loss_pattern(pair):
                     bot_logger.info(f"🚫 Loss pattern guard: {pair} matches a recurring loss pattern — skipping")
                     continue
-
-                # Recent performance cooldown — if last 5 trades are mostly losses, slow down
-                recent_wr = self.ensemble.learner.get_recent_win_rate(5)
-                if recent_wr < 0.20 and len(self.ensemble.learner.recent_trades_window) >= 3:
-                    bot_logger.warning(
-                        f"⏸️ Recent win rate {recent_wr:.0%} — cooling down, only high-confidence trades"
-                    )
 
                 # Economic event filter — avoid trading during high-impact news
                 event_blocked, event_name = self.calendar.is_event_blocked(pair)

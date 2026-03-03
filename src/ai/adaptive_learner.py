@@ -402,47 +402,33 @@ class AdaptiveLearner:
     def _adapt_confidence_threshold(self):
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
         base = ENSEMBLE_CONFIDENCE_THRESHOLD
-        ceiling = base + 0.25  # Can go up to 0.60 during heavy losses
+        ceiling = base + 0.10  # Max threshold = base + 10% (was +25%)
 
-        # ── Recent-loss fast reaction ────────────────────────────────
-        # If 3+ of last 5 trades are losses, react immediately
+        # ── Recent-loss reaction (gentle) ────────────────────────────
         recent_5 = self.recent_trades_window[-5:] if len(self.recent_trades_window) >= 3 else []
         recent_loss_count = sum(1 for t in recent_5 if not t.get('is_win', True))
         recent_loss_ratio = recent_loss_count / len(recent_5) if recent_5 else 0
 
         if self.in_drawdown_protection:
-            self.confidence_threshold = max(0.85, min(ceiling, base + 0.10))
-            bot_logger.info(f"🛡️ Drawdown protection: threshold raised to {self.confidence_threshold:.2f}")
-            return
-
-        if recent_loss_ratio >= 0.80:
-            # 4-5 of last 5 trades lost — very aggressive tightening
-            self.confidence_threshold = max(0.85, min(ceiling, base + 0.12))
-            bot_logger.warning(
-                f"🔴 HEAVY LOSSES: {recent_loss_count}/{len(recent_5)} recent trades lost → "
-                f"threshold {self.confidence_threshold:.2f}"
-            )
+            self.confidence_threshold = min(ceiling, base + 0.05)
+            bot_logger.info(f"🛡️ Drawdown protection: threshold at {self.confidence_threshold:.2f}")
             return
 
         if self.consecutive_losses >= 5:
-            bump = min(0.12, self.consecutive_losses * 0.02)
+            bump = min(0.08, self.consecutive_losses * 0.01)
             self.confidence_threshold = min(ceiling, base + bump)
             bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
         elif self.consecutive_losses >= 3:
-            bump = self.consecutive_losses * 0.015
+            bump = self.consecutive_losses * 0.01
             self.confidence_threshold = min(ceiling, base + bump)
             bot_logger.info(f"⚠️  Threshold → {self.confidence_threshold:.2f} after {self.consecutive_losses} consecutive losses")
-        elif recent_loss_ratio >= 0.60:
-            # 3 of last 5 — moderate tightening
-            self.confidence_threshold = min(ceiling, base + 0.06)
-            bot_logger.info(f"⚠️  Recent loss rate {recent_loss_ratio:.0%} → threshold {self.confidence_threshold:.2f}")
         elif self.consecutive_wins >= 3:
             ease = min(0.06, self.consecutive_wins * 0.01)
             self.confidence_threshold = max(base, self.confidence_threshold - ease)
             bot_logger.info(f"✅ Threshold → {self.confidence_threshold:.2f} (winning streak of {self.consecutive_wins})")
         else:
             if self.confidence_threshold > base:
-                self.confidence_threshold = max(base, self.confidence_threshold - 0.003)
+                self.confidence_threshold = max(base, self.confidence_threshold - 0.005)
 
     # ------------------------------------------------------------------
     # Loss Pattern Analysis
