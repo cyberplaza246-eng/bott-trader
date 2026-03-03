@@ -62,12 +62,12 @@ SCALPING_PAIRS = {
     },
 }
 
-# Session windows for scalping — extended to cover all trading hours
-# end=0 means midnight (wraps around), effectively 07:00–23:59 UTC
+# Session windows for scalping (UTC hours)
+# start <= hour < end.  Use start=0, end=24 for 24/7.
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 0, 'end': 0},   # All hours (24/7)
-    'GBP/USD': {'start': 0, 'end': 0},   # All hours (24/7)
-    'USD/JPY': {'start': 0, 'end': 0},   # All hours (24/7)
+    'EUR/USD': {'start': 7, 'end': 17},   # London open → NY overlap
+    'GBP/USD': {'start': 7, 'end': 17},   # London open → NY overlap
+    'USD/JPY': {'start': 0, 'end': 17},   # Asian + London + NY
 }
 
 # Spread limits for scalping (pips — tighter than swing)
@@ -86,7 +86,7 @@ OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
-# Ensemble conviction scores typically range 0.10–0.40
+# Ensemble conviction scores typicallsy range 0.10–0.40
 # 0.15 = minimum confidence to enter a trade
 _raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.15))
 ENSEMBLE_CONFIDENCE_THRESHOLD = max(_raw_threshold, 0.15)  # Hard floor: 15%

@@ -76,7 +76,7 @@ class ScalpingAnalyzer:
     RSI_ENTRY_HIGH = 60        # RSI pre-expansion zone upper bound
     VOLUME_SPIKE_THRESHOLD = 1.2  # Volume must be > 1.2x average
     MICRO_STRUCTURE_LOOKBACK = 5  # Candles for structure break
-    ENTRY_THRESHOLD = 0.70     # Minimum confidence (grid-search optimal)
+    ENTRY_THRESHOLD = 0.55     # Lowered to allow more setups through
 
     def __init__(self, profit_mode='quick_wins', timeframe='5m'):
         """Initialize ATR-centric scalping analyzer.
@@ -225,7 +225,7 @@ class ScalpingAnalyzer:
         """Gate check: should we even look for trades right now?
 
         Filters:
-          1. Session = London Open (7-12 UTC) or NY Open (13-17 UTC)
+          1. Session = London through NY close (7-20 UTC)
           2. ATR > session minimum threshold for this pair
           3. ATR > its own 5-period rolling average (volatility not dying)
           4. Spread <= 20% of ATR (cost-effective)
@@ -243,13 +243,21 @@ class ScalpingAnalyzer:
         latest = df.iloc[-1]
         atr = float(latest.get('atr', 0) or 0)
 
-        # 1. Session filter
-        now = datetime.now(timezone.utc)
-        hour = now.hour
-        in_london = self.LONDON_OPEN['start'] <= hour < self.LONDON_OPEN['end']
-        in_ny = self.NY_OPEN['start'] <= hour < self.NY_OPEN['end']
-        if not (in_london or in_ny):
-            return False, f"🚫 Outside trading sessions (UTC {hour}:00) - need London 7-12 or NY 13-17"
+        # 1. Session filter — use candle timestamp when available, else wall clock
+        candle_dt = latest.get('datetime', None)
+        if candle_dt is not None:
+            try:
+                candle_dt = pd.to_datetime(candle_dt)
+                hour = candle_dt.hour
+            except Exception:
+                hour = datetime.now(timezone.utc).hour
+        else:
+            hour = datetime.now(timezone.utc).hour
+
+        # Accept London through NY overlap (7-17 UTC) — peak liquidity
+        in_session = 7 <= hour < 17
+        if not in_session:
+            return False, f"🚫 Outside trading sessions (UTC {hour}:00) - need 07-17 UTC"
 
         # 2. ATR floor
         session_atr_min = config['session_atr_min']
@@ -318,11 +326,13 @@ class ScalpingAnalyzer:
             bias = 'flat'
             direction = 'NONE'
 
-        # ADX strength classification (22 = grid-search-optimal minimum)
+        # ADX strength classification (15 minimum for any directional move)
         if adx > 30:
             strength = 'strong'
-        elif adx > 22:
+        elif adx > 20:
             strength = 'preferred'
+        elif adx > 15:
+            strength = 'moderate'
         else:
             strength = 'weak'
 
@@ -375,9 +385,9 @@ class ScalpingAnalyzer:
     def detect_entry(self, df, bias_direction, pair='EUR/USD'):
         """Detect pullback entry with structure break + candle + volume.
 
-        Scoring (threshold = 0.70):
+        Scoring (threshold = 0.55):  # lowered to allow more setups
           - EMA20 pullback zone:       +0.20
-          - RSI 40-60 pre-expansion:   +0.15
+          - RSI 35-65 zone:            +0.15
           - Micro-structure break:     +0.25
           - Candle pattern:            +0.20
           - Volume > 1.2x average:     +0.20
@@ -428,18 +438,29 @@ class ScalpingAnalyzer:
             setup['signals'].append(f"✓ Pullback to EMA20 zone ({pips_dist:.1f} pips away)")
             setup['confidence'] += 0.20
         else:
-            setup['signals'].append(
-                f"✗ Not in EMA20 pullback zone ({distance_to_ema20 / pip_size:.1f}p away, need < {pullback_zone / pip_size:.1f}p)"
-            )
-            return setup  # Hard requirement
+            # Wider zone: still give partial credit if within 1xATR
+            wide_zone = atr * 1.0 if atr > 0 else 0.0020
+            if distance_to_ema20 <= wide_zone:
+                setup['signals'].append(
+                    f"~ Near EMA20 ({distance_to_ema20 / pip_size:.1f}p away, wide zone)"
+                )
+                setup['confidence'] += 0.08  # partial credit
+            else:
+                setup['signals'].append(
+                    f"✗ Not near EMA20 ({distance_to_ema20 / pip_size:.1f}p away)"
+                )
 
-        # -- Check 2: RSI(14) in 40-60 pre-expansion range ----------
-        if self.RSI_ENTRY_LOW <= rsi <= self.RSI_ENTRY_HIGH:
-            setup['signals'].append(f"✓ RSI {rsi:.1f} in pre-expansion zone ({self.RSI_ENTRY_LOW}-{self.RSI_ENTRY_HIGH})")
+        # -- Check 2: RSI(14) in 35-65 zone (widened) ---------------
+        rsi_low = 35
+        rsi_high = 65
+        if rsi_low <= rsi <= rsi_high:
+            setup['signals'].append(f"✓ RSI {rsi:.1f} in entry zone ({rsi_low}-{rsi_high})")
             setup['confidence'] += 0.15
+        elif 25 <= rsi <= 75:
+            setup['signals'].append(f"~ RSI {rsi:.1f} near entry zone")
+            setup['confidence'] += 0.05  # partial credit
         else:
-            setup['signals'].append(f"✗ RSI {rsi:.1f} outside entry range ({self.RSI_ENTRY_LOW}-{self.RSI_ENTRY_HIGH})")
-            return setup  # Hard requirement
+            setup['signals'].append(f"✗ RSI {rsi:.1f} extreme — skip")
 
         # -- Check 3: Micro-structure break (5-candle lookback) ------
         lookback = self.MICRO_STRUCTURE_LOOKBACK
@@ -720,7 +741,7 @@ class ScalpingAnalyzer:
         )
 
         if bias['strength'] == 'weak':
-            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 22 (weak trend — skipping)")
+            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 15 (weak trend — skipping)")
             return result
 
         # 4. Detect ATR regime (for TP adjustment & contracting skip)

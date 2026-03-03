@@ -196,7 +196,16 @@ class BacktestEngine:
 
             in_session = True
             if candle_hour is not None:
-                in_session = session['start'] <= candle_hour < session['end']
+                s_start = session.get('start', 0)
+                s_end = session.get('end', 24)
+                if s_start == s_end:
+                    # start == end means 24/7
+                    in_session = True
+                elif s_start < s_end:
+                    in_session = s_start <= candle_hour < s_end
+                else:
+                    # Wrap-around (e.g. start=22, end=6)
+                    in_session = candle_hour >= s_start or candle_hour < s_end
 
             # ── Close an open position (SL / TP / timeout) ────────
             if open_position:
@@ -277,8 +286,8 @@ class BacktestEngine:
 
             # Use ATR for SL if available in the dataframe
             atr_value = None
-            if 'atr' in df.columns:
-                atr_value = float(df['atr'].iloc[i]) if not pd.isna(df['atr'].iloc[i]) else None
+            if 'atr' in data.columns:
+                atr_value = float(data['atr'].iloc[idx]) if not pd.isna(data['atr'].iloc[idx]) else None
 
             stop_loss = self.risk_manager.calculate_scalping_stop_loss(
                 pair, timeframe_key, entry_price, signal,
