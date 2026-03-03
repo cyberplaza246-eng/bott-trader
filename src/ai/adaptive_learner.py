@@ -254,20 +254,27 @@ class AdaptiveLearner:
         for model_name, model_signal in model_signals.items():
             if model_name not in self.model_accuracy:
                 self.model_accuracy[model_name] = {'correct': 0, 'total': 0}
-            self.model_accuracy[model_name]['total'] += 1
 
-            model_agreed = model_signal.get('signal') == signal
-            if (model_agreed and is_win) or (not model_agreed and not is_win):
-                self.model_accuracy[model_name]['correct'] += 1
+            model_dir = model_signal.get('signal')
+            model_agreed = model_dir == signal
+            model_opposed = model_dir in ('BUY', 'SELL') and model_dir != signal
+
+            # Fixed accuracy: only count directional agreement/disagreement
+            # HOLD/SKIP = neutral (not counted either way)
+            if model_dir in ('BUY', 'SELL'):
+                self.model_accuracy[model_name]['total'] += 1
+                if (model_agreed and is_win) or (model_opposed and not is_win):
+                    self.model_accuracy[model_name]['correct'] += 1
 
             if model_agreed:
                 agreeing_models.add(model_name)
 
-            # Per-pair per-model accuracy
+            # Per-pair per-model accuracy (fixed: only directional signals)
             pm_key = f"{pair}:{model_name}"
-            self.pair_model_accuracy[pm_key]['total'] += 1
-            if (model_agreed and is_win) or (not model_agreed and not is_win):
-                self.pair_model_accuracy[pm_key]['correct'] += 1
+            if model_dir in ('BUY', 'SELL'):
+                self.pair_model_accuracy[pm_key]['total'] += 1
+                if (model_agreed and is_win) or (model_opposed and not is_win):
+                    self.pair_model_accuracy[pm_key]['correct'] += 1
 
             # Rolling PnL per model
             if model_agreed:
@@ -377,7 +384,7 @@ class AdaptiveLearner:
         total_score = sum(scores.values())
         if total_score > 0:
             new_weights = {m: s / total_score for m, s in scores.items()}
-            blend = min(0.30, 0.15 + (total_trades / 500))
+            blend = min(0.15, 0.05 + (total_trades / 1000))  # Slower blend to prevent whipsawing
 
             for model in self.model_weights:
                 if model in new_weights:
@@ -473,21 +480,36 @@ class AdaptiveLearner:
         if regime is None:
             regime = self.current_regime
 
-        # Check pair+session pattern
+        # Check pair+session pattern (with decay — counts < 5 after daily decay)
         ps_key = f"pair_session:{pair}:{session}"
         ps_stats = self.loss_patterns.get(ps_key, {'count': 0})
-        if ps_stats['count'] >= 5:
+        if ps_stats['count'] >= 7:  # Raised from 5 to 7 (accounts for decay)
             bot_logger.info(f"🚫 Loss pattern block: {pair} in {session} has {ps_stats['count']} losses")
             return True
 
-        # Check pair+regime pattern
+        # Check pair+regime pattern (with decay)
         pr_key = f"pair_regime:{pair}:{regime}"
         pr_stats = self.loss_patterns.get(pr_key, {'count': 0})
-        if pr_stats['count'] >= 5:
+        if pr_stats['count'] >= 7:  # Raised from 5 to 7
             bot_logger.info(f"🚫 Loss pattern block: {pair} in {regime} regime has {pr_stats['count']} losses")
             return True
 
         return False
+
+    def decay_loss_patterns(self, factor: float = 0.85):
+        """Apply daily decay to loss pattern counts so old losses fade.
+        Call once per day (e.g. from bot.py daily_reset or save cycle).
+        """
+        keys_to_remove = []
+        for key in list(self.loss_patterns.keys()):
+            self.loss_patterns[key]['count'] = int(self.loss_patterns[key]['count'] * factor)
+            self.loss_patterns[key]['total_loss'] *= factor
+            if self.loss_patterns[key]['count'] <= 0:
+                keys_to_remove.append(key)
+        for key in keys_to_remove:
+            del self.loss_patterns[key]
+        if keys_to_remove:
+            bot_logger.info(f"♻️ Loss pattern decay: removed {len(keys_to_remove)} stale patterns")
 
     def get_recent_win_rate(self, n: int = 10) -> float:
         """Win rate over last n trades — for fast reaction to losing streaks."""

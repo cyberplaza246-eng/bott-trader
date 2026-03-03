@@ -75,16 +75,17 @@ class EnsembleTrader:
         self.broker = broker
 
         # ATR-centric weights: scalping analyzer is the dominant signal
+        # VolumeAnalyzer demoted from 0.14→0.03 (direction from 1-candle noise)
         self.model_weights = {
-            'scalping': 0.28,         # Primary ATR-pullback signal
-            'technical': 0.18,        # Multi-indicator confirmation
-            'volume': 0.14,           # Volume spike confirmation
-            'ema_crossover': 0.12,    # EMA alignment + ATR momentum
+            'scalping': 0.30,         # Primary ATR-pullback signal (was 0.28)
+            'technical': 0.22,        # Multi-indicator confirmation (was 0.18)
+            'ema_crossover': 0.15,    # EMA alignment + ATR momentum (was 0.12)
             'candlestick': 0.10,      # Candle pattern confirmation
             'multi_tf': 0.08,         # 5M timeframe alignment
-            'support_resistance': 0.04,
+            'support_resistance': 0.05,
+            'volume': 0.03,           # Demoted: 1-candle direction = noise
             'lstm': 0.03,
-            'sentiment': 0.03,
+            'sentiment': 0.04,
         }
 
         model_count = 9
@@ -186,9 +187,13 @@ class EnsembleTrader:
             spread=broker_spread,
         )
         scalping_signal_type = scalping_signal.get('signal', 'HOLD')
-        if scalping_signal_type == 'SKIP':
-            scalping_signal_type = 'HOLD'
         scalping_confidence = scalping_signal.get('confidence', 0.0)
+        # When scalping says SKIP, treat it as opposing the majority direction
+        # instead of silencing it to neutral HOLD. The 30%-weight model's
+        # rejection should actively fight the trade.
+        if scalping_signal_type == 'SKIP':
+            scalping_signal_type = 'SKIP_OPPOSE'  # Handled below as opposing
+            scalping_confidence = 0.40  # Moderate opposing strength
 
         # === Build signal map ===
         all_signals = {}
@@ -206,17 +211,31 @@ class EnsembleTrader:
             'ema_crossover': {'signal': ema_signal['signal'], 'confidence': ema_signal['confidence']},
         })
 
-        # Count votes (only from active models)
-        active_signals = {k: v for k, v in all_signals.items() if v['signal'] != 'HOLD' or v['confidence'] > 0.0}
+        # Count votes — HOLD models are NOT active (they don't contribute direction)
         buy_votes = sum(1 for s in all_signals.values() if s['signal'] == 'BUY')
         sell_votes = sum(1 for s in all_signals.values() if s['signal'] == 'SELL')
 
+        # Resolve SKIP_OPPOSE: scalping opposes the majority direction
+        scalp_sig = all_signals.get('scalping', {})
+        if scalp_sig.get('signal') == 'SKIP_OPPOSE':
+            if buy_votes > sell_votes:
+                all_signals['scalping'] = {'signal': 'SELL', 'confidence': scalp_sig['confidence']}
+                sell_votes += 1
+                bot_logger.info("🔪 Scalping SKIP → opposing BUY majority (voting SELL)")
+            elif sell_votes > buy_votes:
+                all_signals['scalping'] = {'signal': 'BUY', 'confidence': scalp_sig['confidence']}
+                buy_votes += 1
+                bot_logger.info("🔪 Scalping SKIP → opposing SELL majority (voting BUY)")
+            else:
+                all_signals['scalping'] = {'signal': 'HOLD', 'confidence': 0.0}
+
+        active_signals = {k: v for k, v in all_signals.items() if v['signal'] in ('BUY', 'SELL')}
         models_agreement = max(buy_votes, sell_votes)
         total_models = len(all_signals)
         active_model_count = len(active_signals)
 
-        # Require at least 3 models to agree for a trade signal
-        min_agreement = max(3, int(MIN_MODELS_AGREEMENT * active_model_count / total_models + 0.5))
+        # Require minimum model agreement for a trade signal
+        min_agreement = max(MIN_MODELS_AGREEMENT, int(MIN_MODELS_AGREEMENT * active_model_count / total_models + 0.5))
 
         if buy_votes > sell_votes and models_agreement >= min_agreement:
             final_signal = 'BUY'
@@ -276,17 +295,18 @@ class EnsembleTrader:
         if ema_200 is not None and not pd.isna(ema_200) and final_signal != 'SKIP':
             if (final_signal == 'BUY' and cur_price < ema_200) or \
                (final_signal == 'SELL' and cur_price > ema_200):
+                # Penalize counter-trend trades instead of blocking them
+                weighted_confidence *= 0.65
                 bot_logger.info(
-                    f"🚫 EMA200 BLOCK: {final_signal} counter-trend "
-                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) — forcing SKIP"
+                    f"⚠️ EMA200 counter-trend: {final_signal} "
+                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) — confidence ×0.65"
                 )
-                final_signal = 'SKIP'
-                weighted_confidence = 0.0
             else:
-                weighted_confidence *= 1.10
+                # EMA200 alignment logged but NOT boosted — ema_crossover model
+                # already accounts for EMA200 alignment in its confidence score
                 bot_logger.info(
                     f"✅ EMA200 aligned: {final_signal} with trend "
-                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) +10% confidence"
+                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
                 )
 
         # === High-Weight Model Disagreement Filter ===
@@ -302,12 +322,12 @@ class EnsembleTrader:
                     f"with {m['signal']} ({m['confidence']:.0%})"
                 )
         if strong_opposition_count >= 2:
-            weighted_confidence *= 0.85  # -15% if 2+ heavy models oppose
+            weighted_confidence *= 0.60  # -40% if 2+ heavy models oppose (was 0.85)
             bot_logger.info(
-                f"⚠️ {strong_opposition_count} heavy models oppose {final_signal} — slight reduction"
+                f"⚠️ {strong_opposition_count} heavy models oppose {final_signal} — heavy reduction"
             )
         elif strong_opposition_count == 1:
-            weighted_confidence *= 0.95  # -5% if 1 heavy model opposes
+            weighted_confidence *= 0.90  # -10% if 1 heavy model opposes (was 0.95)
 
         # === S/R Context Advisory ===
         price_zone = sr_signal.get('levels', {}).get('price_zone', '')
@@ -414,7 +434,7 @@ class EnsembleTrader:
         """
         threshold = self.learner.get_adjusted_threshold()
 
-        # Minimum 3 models must agree
+        # Minimum models must agree (configured in strategy_config)
         if signal_result['models_agreement'] < MIN_MODELS_AGREEMENT:
             bot_logger.info(
                 f"📊 Only {signal_result['models_agreement']} models agree "

@@ -107,10 +107,10 @@ class TradingBot:
             self.paper_trader = None
         
         self.last_signal_time = {}  # Track last signal per pair per timeframe
-        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '20'))
+        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '30'))
         self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.55'))
         self.reversal_exit_min_agreement = int(os.getenv('REVERSAL_EXIT_MIN_AGREEMENT', '2'))
-        self.enable_correlation_guard = os.getenv('ENABLE_CORRELATION_GUARD', 'false').lower() == 'true'
+        self.enable_correlation_guard = os.getenv('ENABLE_CORRELATION_GUARD', 'true').lower() == 'true'
 
         # Dual-timeframe confluence tracking: {pair: {'1m': signal_result, '5m': signal_result}}
         self._last_signals = {pair: {} for pair in PAIRS}
@@ -368,8 +368,12 @@ class TradingBot:
                 # Get ensemble signal
                 signal_result = self.ensemble.get_trading_signal(df, pair)
 
-                # Store signal for confluence tracking
-                self._last_signals[pair][timeframe_key] = signal_result
+                # Store signal for confluence tracking (COPY to avoid mutation)
+                self._last_signals[pair][timeframe_key] = {
+                    'signal': signal_result['signal'],
+                    'confidence': signal_result['confidence'],
+                    'models_agreement': signal_result.get('models_agreement', 0),
+                }
 
                 # ── Confluence modifier ──────────────────────────────
                 other_tf = '5m' if timeframe_key == '1m' else '1m'
@@ -586,9 +590,10 @@ class TradingBot:
         except Exception:
             pass
 
-        # S/R-based dynamic TP: use nearest S/R level within scalping R:R limits
+        # S/R-based dynamic TP: use nearest S/R level ONLY if it improves R:R
         sr_levels = signal_result.get('sr_levels', {})
         risk_distance = abs(entry_price - stop_loss)
+        original_rr = abs(take_profit - entry_price) / risk_distance if risk_distance > 0 else 0
         max_rr = 3.0  # Scalping cap
         if sr_levels and risk_distance > 0:
             if trade_type == 'BUY':
@@ -596,11 +601,11 @@ class TradingBot:
                 for level in sorted(resistances):
                     reward = level - entry_price
                     rr = reward / risk_distance
-                    if 1.2 <= rr <= max_rr:
+                    if 1.2 <= rr <= max_rr and rr >= original_rr * 0.9:
                         sr_tp = round(level, 5)
                         bot_logger.info(
-                            f"🎯 S/R TP: {take_profit:.5f} → {sr_tp:.5f} "
-                            f"(resistance level, R:R = {rr:.1f})"
+                            f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
+                            f"(resistance level, R:R = {rr:.1f} vs original {original_rr:.1f})"
                         )
                         take_profit = sr_tp
                         break
@@ -609,11 +614,11 @@ class TradingBot:
                 for level in sorted(supports, reverse=True):
                     reward = entry_price - level
                     rr = reward / risk_distance
-                    if 1.2 <= rr <= max_rr:
+                    if 1.2 <= rr <= max_rr and rr >= original_rr * 0.9:
                         sr_tp = round(level, 5)
                         bot_logger.info(
-                            f"🎯 S/R TP: {take_profit:.5f} → {sr_tp:.5f} "
-                            f"(support level, R:R = {rr:.1f})"
+                            f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
+                            f"(support level, R:R = {rr:.1f} vs original {original_rr:.1f})"
                         )
                         take_profit = sr_tp
                         break
@@ -1209,9 +1214,12 @@ class TradingBot:
             bot_logger.warning(f"Position sync failed: {e}")
 
     def reset_daily_limits(self):
-        """Reset daily trading limits"""
+        """Reset daily trading limits and decay loss patterns"""
         self._sync_balance()
         self.risk_manager.reset_daily_limits(self.risk_manager.current_balance)
+        # Decay loss pattern counts so old losses don't block forever
+        if hasattr(self, 'adaptive_learner') and self.adaptive_learner:
+            self.adaptive_learner.decay_loss_patterns(factor=0.85)
 
 
 # Entry point

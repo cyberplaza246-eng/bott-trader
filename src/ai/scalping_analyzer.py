@@ -60,7 +60,7 @@ class ScalpingAnalyzer:
     }
 
     # -- ATR risk parameters (universal) -----------------------------
-    SL_ATR_MULT = 1.2          # SL = 1.2 x ATR — wider for breathing room
+    SL_ATR_MULT = 0.8          # SL = 0.8 x ATR — grid-search optimized
     TP_BASE_RATIO = 1.8        # TP = 1.8 x SL — better R:R
     TP_EXPANDING = 2.0         # Wider TP in expanding volatility
     TP_CONTRACTING = 1.5       # Tighter TP in contracting volatility
@@ -74,9 +74,9 @@ class ScalpingAnalyzer:
     # -- Entry parameters --------------------------------------------
     RSI_ENTRY_LOW = 40         # RSI pre-expansion zone lower bound
     RSI_ENTRY_HIGH = 60        # RSI pre-expansion zone upper bound
-    VOLUME_SPIKE_THRESHOLD = 1.2  # Volume must be > 1.2x average
+    VOLUME_SPIKE_THRESHOLD = 1.05  # Volume must be > 1.05x average (was 1.2 — too strict for forex tick vol)
     MICRO_STRUCTURE_LOOKBACK = 5  # Candles for structure break
-    ENTRY_THRESHOLD = 0.55     # Lowered to allow more setups through
+    ENTRY_THRESHOLD = 0.45     # Lowered to 0.45 (partial credit removed, honest scoring)
 
     def __init__(self, profit_mode='quick_wins', timeframe='5m'):
         """Initialize ATR-centric scalping analyzer.
@@ -264,14 +264,15 @@ class ScalpingAnalyzer:
             return False, (
                 f"🚫 ATR too low: {atr:.5f} < {session_atr_min:.5f} "
                 f"({atr / config['pip_size']:.1f} pips < {session_atr_min / config['pip_size']:.1f} pips)"
-            )
+            ), False
 
-        # 3. ATR above its 5-period rolling average
+        # 3. ATR above its 5-period rolling average (soft gate — penalty not block)
         atr_sma5 = float(latest.get('atr_sma5', 0) or 0)
+        atr_declining = False
         if atr_sma5 > 0 and atr < atr_sma5:
-            return False, (
-                f"🚫 ATR below rolling average: {atr:.5f} < SMA5 {atr_sma5:.5f} - volatility declining"
-            )
+            atr_declining = True
+            # Don't return early — apply penalty in entry scoring instead
+            pass
 
         # 4. Spread <= 20% of ATR
         actual_spread = spread if spread is not None else config['spread_sim']
@@ -279,16 +280,16 @@ class ScalpingAnalyzer:
             return False, (
                 f"🚫 Spread too wide vs ATR: {actual_spread:.5f} > 20% of ATR {atr:.5f} "
                 f"({actual_spread / atr * 100:.0f}%)"
-            )
+            ), False
 
         # 5. No exhaustion spike
         candle_range = float(latest.get('candle_range', 0) or 0)
         if atr > 0 and candle_range > 2 * atr:
             return False, (
                 f"🚫 Exhaustion spike: candle range {candle_range:.5f} > 2xATR {2 * atr:.5f}"
-            )
+            ), False
 
-        return True, "✓ Market conditions passed"
+        return True, "✓ Market conditions passed", atr_declining
 
     # =================================================================
     #  5M BIAS DETECTION
@@ -437,29 +438,18 @@ class ScalpingAnalyzer:
             setup['signals'].append(f"✓ Pullback to EMA20 zone ({pips_dist:.1f} pips away)")
             setup['confidence'] += 0.20
         else:
-            # Wider zone: still give partial credit if within 1xATR
-            wide_zone = atr * 1.0 if atr > 0 else 0.0020
-            if distance_to_ema20 <= wide_zone:
-                setup['signals'].append(
-                    f"~ Near EMA20 ({distance_to_ema20 / pip_size:.1f}p away, wide zone)"
-                )
-                setup['confidence'] += 0.08  # partial credit
-            else:
-                setup['signals'].append(
-                    f"✗ Not near EMA20 ({distance_to_ema20 / pip_size:.1f}p away)"
-                )
+            setup['signals'].append(
+                f"✗ Not in EMA20 pullback zone ({distance_to_ema20 / pip_size:.1f}p away)"
+            )
 
-        # -- Check 2: RSI(14) in 35-65 zone (widened) ---------------
+        # -- Check 2: RSI(14) in 35-65 zone -------------------------
         rsi_low = 35
         rsi_high = 65
         if rsi_low <= rsi <= rsi_high:
             setup['signals'].append(f"✓ RSI {rsi:.1f} in entry zone ({rsi_low}-{rsi_high})")
             setup['confidence'] += 0.15
-        elif 25 <= rsi <= 75:
-            setup['signals'].append(f"~ RSI {rsi:.1f} near entry zone")
-            setup['confidence'] += 0.05  # partial credit
         else:
-            setup['signals'].append(f"✗ RSI {rsi:.1f} extreme — skip")
+            setup['signals'].append(f"✗ RSI {rsi:.1f} outside entry zone ({rsi_low}-{rsi_high})")
 
         # -- Check 3: Micro-structure break (5-candle lookback) ------
         lookback = self.MICRO_STRUCTURE_LOOKBACK
@@ -714,7 +704,7 @@ class ScalpingAnalyzer:
         df = self.calculate_indicators(df)
 
         # 2. Market conditions gate
-        ok, reason = self.check_market_conditions(df, pair, spread)
+        ok, reason, atr_declining = self.check_market_conditions(df, pair, spread)
         result['reasons'].append(reason)
         if not ok:
             return result
@@ -739,9 +729,11 @@ class ScalpingAnalyzer:
             f"ADX {bias['adx']:.1f} [{bias['strength']}])"
         )
 
-        if bias['strength'] == 'weak':
-            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 15 (weak trend — skipping)")
+        if bias['strength'] == 'weak' and bias['adx'] < 12:
+            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 12 (very weak trend — skipping)")
             return result
+        elif bias['strength'] == 'weak':
+            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 15 (weak trend — penalized)")
 
         # 4. Detect ATR regime (for TP adjustment & contracting skip)
         atr_regime = self.detect_atr_regime(df)
@@ -753,18 +745,38 @@ class ScalpingAnalyzer:
             f"(streak: {atr_regime['atr_streak']})"
         )
 
-        # Skip contracting regime — backtest shows -$641 bleed
+        # Penalize contracting regime instead of blanket skip — let ensemble decide
         if atr_regime['regime'] == 'contracting':
-            result['reasons'].append('🚫 Contracting ATR regime — sitting out')
-            return result
+            result['reasons'].append('⚠️ Contracting ATR regime — entry score penalized ×0.70')
+            # Don't return — continue to entry detection with reduced score
 
         # 5. Detect entry
         entry = self.detect_entry(df, bias['direction'], pair)
         result['reasons'].extend(entry['signals'])
 
-        if not entry['ready']:
+        # Apply penalties for adverse conditions (soft gates, not blocks)
+        if atr_regime['regime'] == 'contracting':
+            entry['confidence'] *= 0.70
+            result['reasons'].append(f"  ⚠️ Contracting penalty: confidence → {entry['confidence']:.2f}")
+        if atr_declining:
+            entry['confidence'] *= 0.80
+            result['reasons'].append(f"  ⚠️ ATR declining penalty: confidence → {entry['confidence']:.2f}")
+        if bias['strength'] == 'weak':
+            entry['confidence'] *= 0.80
+            result['reasons'].append(f"  ⚠️ Weak ADX penalty: confidence → {entry['confidence']:.2f}")
+
+        if not entry['ready'] and entry['confidence'] < self.ENTRY_THRESHOLD:
             result['reasons'].append(
                 f"Entry not ready: confidence {entry['confidence']:.2f} "
+                f"< threshold {self.ENTRY_THRESHOLD:.2f}"
+            )
+            return result
+
+        # Re-check readiness after penalties
+        entry['ready'] = entry['confidence'] >= self.ENTRY_THRESHOLD
+        if not entry['ready']:
+            result['reasons'].append(
+                f"Entry killed by penalties: confidence {entry['confidence']:.2f} "
                 f"< threshold {self.ENTRY_THRESHOLD:.2f}"
             )
             return result

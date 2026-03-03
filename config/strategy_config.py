@@ -43,21 +43,21 @@ SCALPING_PAIRS = {
         'session_atr_min': 0.00040,    # Min ATR to trade (~4 pips)
         'spread_sim': 0.00015,         # Simulated spread (1.5 pips)
         'pip_size': 0.0001,
-        'cooldown_seconds': 30,
+        'cooldown_seconds': 45,
         'max_hold_candles': 8,         # Time-exit: 8 candles max
     },
     'GBP/USD': {
         'session_atr_min': 0.00055,    # Min ATR to trade (~5.5 pips)
         'spread_sim': 0.00020,         # Simulated spread (2 pips)
         'pip_size': 0.0001,
-        'cooldown_seconds': 30,
+        'cooldown_seconds': 45,
         'max_hold_candles': 8,
     },
     'USD/JPY': {
         'session_atr_min': 0.060,      # Min ATR to trade (~6 pips in JPY terms)
         'spread_sim': 0.020,           # Simulated spread (2 pips)
         'pip_size': 0.01,
-        'cooldown_seconds': 30,
+        'cooldown_seconds': 45,
         'max_hold_candles': 8,
     },
 }
@@ -65,9 +65,9 @@ SCALPING_PAIRS = {
 # Session windows for scalping (UTC hours)
 # start <= hour < end.  start == end means 24/7.
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 0, 'end': 0},    # 24/7 (all forex hours)
-    'GBP/USD': {'start': 0, 'end': 0},    # 24/7 (all forex hours)
-    'USD/JPY': {'start': 0, 'end': 0},    # 24/7 (all forex hours)
+    'EUR/USD': {'start': 7, 'end': 17},    # London open → NY close
+    'GBP/USD': {'start': 7, 'end': 17},    # London open → NY close
+    'USD/JPY': {'start': 0, 'end': 17},    # Tokyo open → NY close
 }
 
 # Spread limits for scalping (pips — tighter than swing)
@@ -79,7 +79,7 @@ SCALPING_SPREAD_LIMITS = {
 
 # Confluence bonus: both timeframes agree → boost confidence
 CONFLUENCE_BONUS = float(os.getenv('CONFLUENCE_BONUS', 0.15))   # +15%
-DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.05))  # -5% (reduced to allow more trades)
+DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.12))  # -12% (was 5% — too lenient)
 
 # Optimal trading hours (bonus confidence during peak liquidity)
 OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
@@ -90,7 +90,7 @@ OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 # 0.35 = minimum confidence to enter a trade (meaningful filter)
 _raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.35))
 ENSEMBLE_CONFIDENCE_THRESHOLD = max(_raw_threshold, 0.35)  # Hard floor: 35%
-MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))
+MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))  # Lowered to 2 (quality comes from fixed signals)
 
 # Technical Analysis Parameters (ATR-centric scalping)
 INDICATORS = {

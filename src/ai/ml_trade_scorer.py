@@ -53,9 +53,10 @@ SESSION_MAP = {'asian': 0, 'london': 1, 'ny_overlap': 2, 'new_york': 3, 'off_hou
 PAIR_MAP = {'EUR/USD': 0, 'GBP/USD': 1}
 
 # Minimum trades before the ML model activates (need enough data to learn from)
-MIN_TRADES_TO_TRAIN = 20
+# Raised from 20 → 200: training 42-feature GBM on 20 samples = guaranteed overfit
+MIN_TRADES_TO_TRAIN = 200
 # Retrain every N new trades
-RETRAIN_INTERVAL = 15
+RETRAIN_INTERVAL = 25
 
 
 class MLTradeScorer:

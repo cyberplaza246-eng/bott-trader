@@ -18,6 +18,17 @@ _PIP_VALUES = {
 }
 _DEFAULT_PIP = {'pip_size': 0.0001, 'pip_value_per_lot': 10.0}
 
+# Simulated spread per pair (in pips) — realistic for ECN/micro accounts
+_SPREAD_PIPS = {
+    'EUR/USD': 1.2,
+    'GBP/USD': 1.5,
+    'USD/JPY': 1.3,
+    'AUD/USD': 1.4,
+    'NZD/USD': 1.8,
+    'USD/CHF': 1.6,
+    'USD/CAD': 1.5,
+}
+
 
 def _pip_params(pair):
     """Return (pip_size, pip_value_per_lot) for a currency pair."""
@@ -61,10 +72,12 @@ class PaperTradingManager:
         
         self.open_positions[pair] = position
         
-        # Calculate risk
+        # Calculate risk (spread-adjusted)
+        pip_size, pip_value = _pip_params(pair)
+        spread_pips = _SPREAD_PIPS.get(pair, 1.5)
+        spread_cost = spread_pips * pip_value * lot_size
         pip_distance = abs(entry_price - stop_loss)
-        pip_value = 10  # Approximate
-        risk_per_lot = pip_distance * pip_value
+        risk_per_lot = (pip_distance / pip_size) * pip_value
         risk_amount = risk_per_lot * lot_size
         
         TradeLogger.log_trade_entry(
@@ -93,14 +106,16 @@ class PaperTradingManager:
         position = self.open_positions[pair]
         position['current_price'] = current_price
         
-        # Calculate profit/loss
+        # Calculate profit/loss (spread-adjusted)
         pip_size, pip_value = _pip_params(position.get('pair', ''))
+        spread_pips = _SPREAD_PIPS.get(position.get('pair', ''), 1.5)
+        spread_cost = spread_pips * pip_value * position['lot_size']
         if position['type'] == 'BUY':
             pips_move = (current_price - position['entry_price']) / pip_size
-            profit_loss = pips_move * position['lot_size'] * pip_value
+            profit_loss = pips_move * position['lot_size'] * pip_value - spread_cost
         else:  # SELL
             pips_move = (position['entry_price'] - current_price) / pip_size
-            profit_loss = pips_move * position['lot_size'] * pip_value
+            profit_loss = pips_move * position['lot_size'] * pip_value - spread_cost
         
         position['profit_loss'] = profit_loss
         position['profit_loss_percent'] = (profit_loss / position['entry_balance']) * 100

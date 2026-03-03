@@ -313,21 +313,22 @@ class TechnicalAnalyzer:
         # === Determine final signal ===
         net_score = buy_score - sell_score
 
-        if net_score > 0.15:
+        if net_score > 0.25:
             signal = 'BUY'
             confidence = min(buy_score, 1.0)
-        elif net_score < -0.15:
+        elif net_score < -0.25:
             signal = 'SELL'
             confidence = min(sell_score, 1.0)
         else:
             signal = 'HOLD'
             confidence = 0.0
 
-        # ADX trend filter
+        # ADX trend filter — block signal entirely when ADX < 20 (ranging market)
         adx_value = latest.get('adx', 0)
-        if signal != 'HOLD' and adx_value < self.adx_trend_threshold:
-            reason_parts.append(f"ADX weak ({adx_value:.0f}<{self.adx_trend_threshold})")
-            confidence *= 0.6
+        if signal != 'HOLD' and adx_value < 20:
+            reason_parts.append(f"ADX too weak ({adx_value:.0f}<20) — blocking signal")
+            signal = 'HOLD'
+            confidence = 0.0
         elif adx_value >= 25:
             # Strong trend — boost confidence
             confidence *= 1.15

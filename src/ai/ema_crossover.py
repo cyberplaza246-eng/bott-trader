@@ -118,11 +118,11 @@ class EMACrossoverAnalyzer:
                     reasons.append('EMA20 crossed above EMA50')
                 else:
                     ema_spread = (cur_ema20 - cur_ema50) / cur_ema50
-                    if ema_spread > 0.0001:
+                    if ema_spread > 0.0003:
                         confidence = 0.50
                         reasons.append(f'Bullish EMA alignment (spread {ema_spread:.5f})')
                     else:
-                        return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Weak EMA alignment'}
+                        return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Weak EMA alignment (< 3 pips)'}
 
                 # ATR expansion boost
                 if atr_expanding:
@@ -155,11 +155,11 @@ class EMACrossoverAnalyzer:
                     reasons.append('EMA20 crossed below EMA50')
                 else:
                     ema_spread = (cur_ema50 - cur_ema20) / cur_ema50
-                    if ema_spread > 0.0001:
+                    if ema_spread > 0.0003:
                         confidence = 0.50
                         reasons.append(f'Bearish EMA alignment (spread {ema_spread:.5f})')
                     else:
-                        return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Weak EMA alignment'}
+                        return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Weak EMA alignment (< 3 pips)'}
 
                 # ATR expansion boost
                 if atr_expanding:
