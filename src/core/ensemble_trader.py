@@ -443,7 +443,7 @@ class EnsembleTrader:
             )
             return False
 
-        # At least one core model must agree with the direction
+        # Core model check — penalty instead of hard block
         core_models = ['scalping', 'technical', 'ema_crossover']
         models = signal_result.get('models', {})
         direction = signal_result['signal']
@@ -451,15 +451,18 @@ class EnsembleTrader:
             models.get(m, {}).get('signal') == direction
             for m in core_models
         )
+        effective_confidence = signal_result['confidence']
         if not core_agrees and direction != 'SKIP':
+            # Apply 15% penalty but allow trade if confidence is still high
+            effective_confidence *= 0.85
             bot_logger.info(
-                f"📊 No core model (scalping/technical/EMA) agrees with {direction} — skipping"
+                f"📊 No core model agrees with {direction} — confidence penalty "
+                f"{signal_result['confidence']:.2%} → {effective_confidence:.2%}"
             )
-            return False
 
         return (
             signal_result['signal'] != 'SKIP' and
-            signal_result['confidence'] >= threshold and
+            effective_confidence >= threshold and
             signal_result['models_agreement'] >= MIN_MODELS_AGREEMENT
         )
 

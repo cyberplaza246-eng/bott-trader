@@ -717,8 +717,8 @@ class AdaptiveLearner:
         return weights
 
     def get_adjusted_threshold(self) -> float:
-        # Floor at 0.35 — only trade when meaningfully confident
-        return max(self.confidence_threshold, 0.35)
+        # Floor at 0.30 — trade when reasonably confident (lowered for volume)
+        return max(self.confidence_threshold, 0.30)
 
     def get_pair_win_rate(self, pair: str) -> float:
         pair = self._normalize_pair(pair)

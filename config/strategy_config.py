@@ -65,9 +65,9 @@ SCALPING_PAIRS = {
 # Session windows for scalping (UTC hours)
 # start <= hour < end.  start == end means 24/7.
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 7, 'end': 17},    # London open → NY close
-    'GBP/USD': {'start': 7, 'end': 17},    # London open → NY close
-    'USD/JPY': {'start': 0, 'end': 17},    # Tokyo open → NY close
+    'EUR/USD': {'start': 3, 'end': 21},    # Pre-London → US close (wider for 25+ trades)
+    'GBP/USD': {'start': 3, 'end': 21},    # Pre-London → US close (wider for 25+ trades)
+    'USD/JPY': {'start': 0, 'end': 21},    # Tokyo open → US close
 }
 
 # Spread limits for scalping (pips — tighter than swing)
@@ -87,9 +87,9 @@ OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
 # Ensemble conviction scores typically range 0.15–0.60
-# 0.35 = minimum confidence to enter a trade (meaningful filter)
-_raw_threshold = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.35))
-ENSEMBLE_CONFIDENCE_THRESHOLD = max(_raw_threshold, 0.35)  # Hard floor: 35%
+# 0.30 = minimum confidence to enter a trade (lowered to allow more volume)
+# NOTE: ignores .env overrides to prevent stale values from blocking trades
+ENSEMBLE_CONFIDENCE_THRESHOLD = 0.30  # Hard-coded — do NOT use .env override
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 2))  # Lowered to 2 (quality comes from fixed signals)
 
 # Technical Analysis Parameters (ATR-centric scalping)
