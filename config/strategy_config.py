@@ -14,7 +14,7 @@ MT5_SERVER = os.getenv('MT5_SERVER', 'Exness-MT5')
 
 # Trading Parameters
 RISK_PER_TRADE_PERCENT = float(os.getenv('RISK_PER_TRADE_PERCENT', 1.0))
-MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 3))
+MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 1))
 DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 5))
 INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', 50))
 
@@ -105,12 +105,12 @@ INDICATORS = {
 }
 
 # Risk Management (ATR-based — no fixed pips)
-STOP_LOSS_MULTIPLIER = 0.8   # SL = 0.8 x ATR(14) (grid-search optimal)
-TAKE_PROFIT_RATIO = 1.3      # TP = 1.3 x SL (flat across all regimes)
-TP_EXPANDING = 1.3            # Flat TP — regime variance removed
-TP_CONTRACTING = 1.3          # Flat TP — contracting regime skipped
-MIN_RISK_REWARD_RATIO = 1.3   # Minimum R:R to enter
-MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 1.4))
+STOP_LOSS_MULTIPLIER = 1.2   # SL = 1.2 x ATR(14) — wider for breathing room
+TAKE_PROFIT_RATIO = 1.8      # TP = 1.8 x SL — better R:R
+TP_EXPANDING = 2.0            # Wider TP in expanding volatility
+TP_CONTRACTING = 1.5          # Tighter TP in contracting volatility
+MIN_RISK_REWARD_RATIO = 1.5   # Minimum R:R to enter
+MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 1.8))
 HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.40))
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
 

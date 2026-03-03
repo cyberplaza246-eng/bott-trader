@@ -555,7 +555,7 @@ class TradingBot:
         else:
             # Fallback: calculate ATR-based SL/TP if signal didn't provide it
             pair_config = SCALPING_PAIRS.get(pair, {})
-            sl_mult = 0.8  # Default ATR multiplier
+            sl_mult = 1.2  # Wider ATR multiplier for breathing room
             sl_distance = atr * sl_mult
 
             if trade_type == 'BUY':
@@ -565,8 +565,8 @@ class TradingBot:
 
             # TP from ATR regime
             atr_regime = signal_result.get('atr_regime', 'neutral')
-            tp_ratio_map = {'expanding': 1.8, 'contracting': 1.2, 'neutral': 1.4}
-            tp_ratio = tp_ratio_map.get(atr_regime, 1.4)
+            tp_ratio_map = {'expanding': 2.0, 'contracting': 1.5, 'neutral': 1.8}
+            tp_ratio = tp_ratio_map.get(atr_regime, 1.8)
             tp_distance = sl_distance * tp_ratio
 
             if trade_type == 'BUY':

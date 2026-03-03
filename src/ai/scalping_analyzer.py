@@ -60,12 +60,12 @@ class ScalpingAnalyzer:
     }
 
     # -- ATR risk parameters (universal) -----------------------------
-    SL_ATR_MULT = 0.8          # SL = 0.8 x ATR (grid-search optimal)
-    TP_BASE_RATIO = 1.3        # TP = 1.3 x SL (flat across all regimes)
-    TP_EXPANDING = 1.3         # Same as base — regime TP variance removed
-    TP_CONTRACTING = 1.3       # Same as base — contracting regime skipped
+    SL_ATR_MULT = 1.2          # SL = 1.2 x ATR — wider for breathing room
+    TP_BASE_RATIO = 1.8        # TP = 1.8 x SL — better R:R
+    TP_EXPANDING = 2.0         # Wider TP in expanding volatility
+    TP_CONTRACTING = 1.5       # Tighter TP in contracting volatility
     MIN_SL_SPREAD_MULT = 3     # Reject if SL < spread x 3
-    MAX_SL_MEDIAN_MULT = 2.0   # Reject if SL > 2x rolling median SL
+    MAX_SL_MEDIAN_MULT = 2.5   # Reject if SL > 2.5x rolling median SL
 
     # -- Session windows (UTC) ---------------------------------------
     LONDON_OPEN = {'start': 7, 'end': 12}

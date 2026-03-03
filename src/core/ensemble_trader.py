@@ -215,8 +215,8 @@ class EnsembleTrader:
         total_models = len(all_signals)
         active_model_count = len(active_signals)
 
-        # Scale min_agreement by active model count
-        min_agreement = max(2, int(MIN_MODELS_AGREEMENT * active_model_count / total_models + 0.5))
+        # Require at least 3 models to agree for a trade signal
+        min_agreement = max(3, int(MIN_MODELS_AGREEMENT * active_model_count / total_models + 0.5))
 
         if buy_votes > sell_votes and models_agreement >= min_agreement:
             final_signal = 'BUY'
@@ -264,22 +264,23 @@ class EnsembleTrader:
             weighted_confidence = 0.0
             net_conviction = 0.0
 
-        # === EMA 200 Trend Filter (advisory only — no hard penalty) ===
+        # === EMA 200 Trend Filter — block counter-trend trades ===
         ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
         cur_price = df_enriched['close'].iloc[-1]
         if ema_200 is not None and not pd.isna(ema_200) and final_signal != 'SKIP':
             if (final_signal == 'BUY' and cur_price < ema_200) or \
                (final_signal == 'SELL' and cur_price > ema_200):
                 bot_logger.info(
-                    f"⚠️  EMA200 advisory: {final_signal} counter-trend "
-                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
+                    f"🚫 EMA200 BLOCK: {final_signal} counter-trend "
+                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) — forcing SKIP"
                 )
-                weighted_confidence *= 0.90  # Soft 10% reduction
+                final_signal = 'SKIP'
+                weighted_confidence = 0.0
             else:
-                weighted_confidence *= 1.05
+                weighted_confidence *= 1.10
                 bot_logger.info(
                     f"✅ EMA200 aligned: {final_signal} with trend "
-                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) +5% confidence"
+                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) +10% confidence"
                 )
 
         # === High-Weight Model Disagreement Filter ===
