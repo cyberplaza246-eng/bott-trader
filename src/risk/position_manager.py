@@ -592,7 +592,7 @@ class RiskManager:
             Take-profit price (rounded to 5 decimals)
         """
         pair_config = SCALPING_PAIRS.get(pair, {})
-        tp_ratio = 1.4  # ATR base TP ratio
+        tp_ratio = 2.0  # ATR base TP ratio (was 1.4 — too tight for sweep entries)
 
         risk_distance = abs(entry_price - stop_loss)
         tp_distance = risk_distance * tp_ratio

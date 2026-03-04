@@ -386,11 +386,11 @@ class ScalpingAnalyzer:
         """Detect pullback entry with structure break + candle + volume.
 
         Scoring (threshold = 0.55):  # lowered to allow more setups
-          - EMA20 pullback zone:       +0.20
-          - RSI 35-65 zone:            +0.15
-          - Micro-structure break:     +0.25
-          - Candle pattern:            +0.20
+          - EMA20 pullback zone:       +0.25
+          - Micro-structure break:     +0.30
+          - Candle pattern:            +0.25
           - Volume > 1.2x average:     +0.20
+          (RSI removed — handled exclusively by LiquiditySweep model)
 
         Args:
             df: DataFrame with indicators
@@ -436,22 +436,15 @@ class ScalpingAnalyzer:
         if in_pullback:
             pips_dist = distance_to_ema20 / pip_size
             setup['signals'].append(f"✓ Pullback to EMA20 zone ({pips_dist:.1f} pips away)")
-            setup['confidence'] += 0.20
+            setup['confidence'] += 0.25
         else:
             setup['signals'].append(
                 f"✗ Not in EMA20 pullback zone ({distance_to_ema20 / pip_size:.1f}p away)"
             )
 
-        # -- Check 2: RSI(14) in 35-65 zone -------------------------
-        rsi_low = 35
-        rsi_high = 65
-        if rsi_low <= rsi <= rsi_high:
-            setup['signals'].append(f"✓ RSI {rsi:.1f} in entry zone ({rsi_low}-{rsi_high})")
-            setup['confidence'] += 0.15
-        else:
-            setup['signals'].append(f"✗ RSI {rsi:.1f} outside entry zone ({rsi_low}-{rsi_high})")
+        # -- (RSI filter removed — RSI is handled by LiquiditySweep model only) --
 
-        # -- Check 3: Micro-structure break (5-candle lookback) ------
+        # -- Check 2: Micro-structure break (5-candle lookback) ------
         lookback = self.MICRO_STRUCTURE_LOOKBACK
         structure_window = df.iloc[-(lookback + 1):-1]
 
@@ -462,7 +455,7 @@ class ScalpingAnalyzer:
                 setup['signals'].append(
                     f"✓ Micro-structure break: close {price:.5f} > {lookback}-candle high {structure_high:.5f}"
                 )
-                setup['confidence'] += 0.25
+                setup['confidence'] += 0.30
             else:
                 setup['signals'].append(
                     f"✗ No structure break: close {price:.5f} <= {lookback}-candle high {structure_high:.5f}"
@@ -474,7 +467,7 @@ class ScalpingAnalyzer:
                 setup['signals'].append(
                     f"✓ Micro-structure break: close {price:.5f} < {lookback}-candle low {structure_low:.5f}"
                 )
-                setup['confidence'] += 0.25
+                setup['confidence'] += 0.30
             else:
                 setup['signals'].append(
                     f"✗ No structure break: close {price:.5f} >= {lookback}-candle low {structure_low:.5f}"

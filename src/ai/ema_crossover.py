@@ -129,10 +129,7 @@ class EMACrossoverAnalyzer:
                     confidence += 0.15
                     reasons.append(f'ATR expanding ({atr_rise_count} consecutive rises)')
 
-                # RSI not extreme
-                if 30 < cur_rsi < 70:
-                    confidence += 0.10
-                    reasons.append(f'RSI {cur_rsi:.0f} non-extreme')
+                # (RSI filter removed — RSI handled by LiquiditySweep model only)
 
                 # EMA200 alignment
                 if above_200:
@@ -166,10 +163,7 @@ class EMACrossoverAnalyzer:
                     confidence += 0.15
                     reasons.append(f'ATR expanding ({atr_rise_count} consecutive rises)')
 
-                # RSI not extreme
-                if 30 < cur_rsi < 70:
-                    confidence += 0.10
-                    reasons.append(f'RSI {cur_rsi:.0f} non-extreme')
+                # (RSI filter removed — RSI handled by LiquiditySweep model only)
 
                 # EMA200 alignment
                 if below_200:

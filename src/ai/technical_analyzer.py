@@ -247,27 +247,13 @@ class TechnicalAnalyzer:
             sell_score += 0.05
             reason_parts.append("MACD histogram flipped bearish")
 
-        # === RSI Analysis (weight: 0.15) ===
+        # === RSI removed from scoring ===
+        # RSI is now handled exclusively by the LiquiditySweep model
+        # as a displacement intensity detector. Not used for independent
+        # overbought/oversold or divergence scoring here.
         rsi = latest['rsi']
-        if rsi < self.rsi_oversold:
-            buy_score += 0.15
-            reason_parts.append(f"RSI oversold ({rsi:.1f})")
-        elif rsi > self.rsi_overbought:
-            sell_score += 0.15
-            reason_parts.append(f"RSI overbought ({rsi:.1f})")
-        elif rsi < 45:
-            buy_score += 0.05
-        elif rsi > 55:
-            sell_score += 0.05
-
-        # === RSI Divergence (weight: 0.15 — high-value signal) ===
-        divergence = latest.get('rsi_divergence', 'none')
-        if divergence == 'bullish':
-            buy_score += 0.15
-            reason_parts.append("Bullish RSI divergence")
-        elif divergence == 'bearish':
-            sell_score += 0.15
-            reason_parts.append("Bearish RSI divergence")
+        # RSI value still available in the dataframe for other models to read,
+        # but does NOT contribute to this model's buy/sell score.
 
         # === DI+/DI- Directional Index (weight: 0.10) ===
         di_plus = float(latest.get('di_plus', 0) or 0)
@@ -351,7 +337,7 @@ class TechnicalAnalyzer:
             'macd': latest['macd'],
             'bb_position': bb_pctb,
             'adx': adx_value,
-            'divergence': divergence,
+            'divergence': latest.get('rsi_divergence', 'none'),
             'buy_score': buy_score,
             'sell_score': sell_score,
         }

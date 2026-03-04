@@ -30,48 +30,49 @@ class LiquiditySweepAnalyzer:
     # ── Pair Configuration ──────────────────────────────────────────
     PAIR_CONFIG = {
         'EUR/USD': {
-            'session_atr_min': 0.00040,
+            'session_atr_min': 0.00010,   # 1.0 pip (lowered for 25+/day frequency)
             'spread_sim': 0.00015,
             'pip_size': 0.0001,
         },
         'GBP/USD': {
-            'session_atr_min': 0.00055,
+            'session_atr_min': 0.00015,   # 1.5 pips
             'spread_sim': 0.00020,
             'pip_size': 0.0001,
         },
         'USD/JPY': {
-            'session_atr_min': 0.060,
+            'session_atr_min': 0.015,     # 1.5 pips
             'spread_sim': 0.020,
             'pip_size': 0.01,
         },
     }
 
     # ── Swing Detection ─────────────────────────────────────────────
-    SWEEP_LOOKBACK = 5               # Backward compat alias for SWING_LOOKBACK
-    SWING_LOOKBACK = 5               # N bars each side for pivot identification
-    SWING_MIN_POINTS = 4             # Minimum swing points to establish structure
+    SWEEP_LOOKBACK = 3               # N bars each side for pivot (was 5 → more swing points)
+    SWING_LOOKBACK = 3               # Alias
+    SWING_MIN_POINTS = 2             # Min swing points for structure (was 4)
 
     # ── Bias / Regime ───────────────────────────────────────────────
-    ADX_MIN_BIAS = 18                # ADX floor for directional bias
-    ATR_HIGH_VOL_MULT = 1.30         # ATR > 1.3× 20-period mean = high vol
-    ATR_LOW_VOL_MULT = 0.70          # ATR < 0.7× 20-period mean = low vol
+    ADX_MIN_BIAS = 8                 # ADX floor for directional bias (was 15)
+    ATR_HIGH_VOL_MULT = 1.50         # ATR > 1.5× 20-period mean = high vol (was 1.30)
+    ATR_LOW_VOL_MULT = 0.50          # ATR < 0.5× 20-period mean = low vol (was 0.70)
 
     # ── Sweep Detection ─────────────────────────────────────────────
-    SWEEP_TOLERANCE = 0.0002         # Max penetration past swing for "sweep"
-    SWEEP_WINDOW = 5                 # Candles to look back for sweep event
+    SWEEP_TOLERANCE = 0.0005         # Max penetration past swing (was 0.0002)
+    SWEEP_WINDOW = 15                # Candles to look back for sweep event (was 5)
 
     # ── MSS / Displacement ──────────────────────────────────────────
-    VOLUME_CONFIRMATION = 1.30       # Displacement vol > 1.3× avg
-    BODY_RATIO_MIN = 0.60            # Displacement body ≥ 60% of range
-    RSI_SWEEP_LONG_MAX = 40          # RSI during bullish sweep
-    RSI_SWEEP_SHORT_MIN = 60         # RSI during bearish sweep
-    CONFIRMATION_WINDOW = 3          # Candles after sweep to get MSS
+    VOLUME_CONFIRMATION = 1.0        # Disabled (forex tick vol unreliable) (was 1.30)
+    BODY_RATIO_MIN = 0.40            # Displacement body ≥ 40% of range (was 60%)
+    RSI_SWEEP_LONG_MAX = 60          # RSI ≤ 60 at bullish sweep (was 45 — too tight)
+    RSI_SWEEP_SHORT_MIN = 40         # RSI ≥ 40 at bearish sweep (was 55)
+    RSI_SLOPE_WINDOW = 3             # Candles after sweep to check RSI slope (was 2)
+    CONFIRMATION_WINDOW = 15         # Candles after sweep to get MSS (was 5)
 
     # ── Risk Management ─────────────────────────────────────────────
     SL_ATR_BUFFER = 0.20             # SL = sweep wick ± 0.2×ATR
 
     # ── Entry Mode ──────────────────────────────────────────────────
-    ENTRY_MODE = 'retest'            # 'retest' (wait for pullback) or 'aggressive' (at displacement close)
+    ENTRY_MODE = 'aggressive'        # 'aggressive' → enter at displacement close (more trades)
 
     # ── Session Windows (UTC) ───────────────────────────────────────
     OPTIMAL_SESSIONS = {
@@ -325,8 +326,8 @@ class LiquiditySweepAnalyzer:
         bullish_score = hh_count + hl_count
         bearish_score = lh_count + ll_count
 
-        # Bullish: HH + HL sequence, last HL not broken by current price
-        if bullish_score >= 2 and bullish_score > bearish_score:
+        # Bullish: HH + HL sequence (relaxed: just need 1+ bullish swing labels)
+        if bullish_score >= 1 and bullish_score > bearish_score:
             last_hl_price = None
             for sp in reversed(recent_lows):
                 if sp['label'] == 'HL':
@@ -340,12 +341,12 @@ class LiquiditySweepAnalyzer:
                 regime = 'trend_up'
                 bias = 'BUY'
             else:
-                # Price broke below last HL → structure broken
+                # Structure broken but still have bullish lean → allow with reduced conf
                 regime = 'range'
-                bias = None
+                bias = 'BUY'
 
-        # Bearish: LH + LL sequence, last LH not broken by current price
-        elif bearish_score >= 2 and bearish_score > bullish_score:
+        # Bearish: LH + LL sequence
+        elif bearish_score >= 1 and bearish_score > bullish_score:
             last_lh_price = None
             for sp in reversed(recent_highs):
                 if sp['label'] == 'LH':
@@ -359,20 +360,30 @@ class LiquiditySweepAnalyzer:
                 bias = 'SELL'
             else:
                 regime = 'range'
-                bias = None
+                bias = 'SELL'
 
-        # ADX secondary filter — require minimum directional strength
+        # Tie — use EMA slope as tiebreaker
+        elif bullish_score == bearish_score and bullish_score >= 1:
+            ema_20 = float(latest.get('ema_20', close))
+            ema_50 = float(latest.get('ema_50', close))
+            if ema_20 > ema_50:
+                regime = 'range'
+                bias = 'BUY'
+            elif ema_20 < ema_50:
+                regime = 'range'
+                bias = 'SELL'
+
+        # ADX secondary filter — very low = apply with soft penalty (don't kill)
         if bias is not None and adx < self.ADX_MIN_BIAS:
+            # Don't remove bias, just note it's weak
             regime = 'range'
-            bias = None
 
-        # Override with volatility regime if extreme
+        # Volatility regime modifiers (don't kill bias on low vol)
         if atr_state == 'high_volatility' and regime in ('trend_up', 'trend_down'):
             regime = 'high_volatility'
-            # Keep bias from swing detection
         elif atr_state == 'low_volatility':
             regime = 'low_volatility'
-            bias = None  # Don't trade in dead markets
+            # Keep bias — low vol trades just get lower TP ratio
 
         sh_str = f"{last_sh['price']:.5f}" if last_sh else 'N/A'
         sl_str = f"{last_sl['price']:.5f}" if last_sl else 'N/A'
@@ -483,13 +494,31 @@ class LiquiditySweepAnalyzer:
             candle_open = float(candle['open'])
             candle_rsi = float(candle.get('rsi', 50) or 50)
 
+            # RSI slope check: was RSI turning in our favour after sweep?
+            # Look at 1–2 candles ahead of the sweep candle for slope reversal
+            rsi_slope_ok = False
+            abs_idx = len(df_1m) + i  # absolute index of sweep candle
+            for look_ahead in range(1, self.RSI_SLOPE_WINDOW + 1):
+                next_idx = abs_idx + look_ahead
+                if next_idx < len(df_1m):
+                    next_rsi = float(df_1m.iloc[next_idx].get('rsi', 50) or 50)
+                    if bias == 'BUY' and next_rsi > candle_rsi:
+                        rsi_slope_ok = True
+                        break
+                    elif bias == 'SELL' and next_rsi < candle_rsi:
+                        rsi_slope_ok = True
+                        break
+            # If sweep is on the very last candle, slope can't be confirmed yet — accept it
+            if abs_idx >= len(df_1m) - 1:
+                rsi_slope_ok = True
+
             for target in target_levels:
                 level = target['price']
 
                 if bias == 'BUY':
                     # Bullish sweep: wick below swing low, close recovers above
                     swept = candle_low < level and candle_close > level
-                    rsi_ok = candle_rsi < self.RSI_SWEEP_LONG_MAX
+                    rsi_ok = candle_rsi <= self.RSI_SWEEP_LONG_MAX and rsi_slope_ok
 
                     if swept and rsi_ok:
                         # 5M invalidation: sweep must NOT break 5M structural HL
@@ -515,12 +544,13 @@ class LiquiditySweepAnalyzer:
                             'sweep_wick': candle_low,
                             'swept_level': level,
                             'rsi_at_sweep': candle_rsi,
+                            'rsi_slope_confirmed': True,
                             'candle_index': i,
                             'fivem_invalidation_held': True,
                             'details': (
                                 f"Bullish sweep: low {candle_low:.5f} < swing_low "
                                 f"{level:.5f}, close {candle_close:.5f} recovered, "
-                                f"RSI={candle_rsi:.1f}"
+                                f"RSI={candle_rsi:.1f} (slope ↑)"
                             ),
                         })
                         return result
@@ -528,7 +558,7 @@ class LiquiditySweepAnalyzer:
                 elif bias == 'SELL':
                     # Bearish sweep: wick above swing high, close recovers below
                     swept = candle_high > level and candle_close < level
-                    rsi_ok = candle_rsi > self.RSI_SWEEP_SHORT_MIN
+                    rsi_ok = candle_rsi >= self.RSI_SWEEP_SHORT_MIN and rsi_slope_ok
 
                     if swept and rsi_ok:
                         # 5M invalidation: sweep must NOT break 5M structural LH
@@ -554,6 +584,7 @@ class LiquiditySweepAnalyzer:
                             'sweep_wick': candle_high,
                             'swept_level': level,
                             'rsi_at_sweep': candle_rsi,
+                            'rsi_slope_confirmed': True,
                             'candle_index': i,
                             'fivem_invalidation_held': True,
                             'details': (
@@ -740,18 +771,17 @@ class LiquiditySweepAnalyzer:
         is_displacement = False
 
         if direction == 'BUY':
-            closes_above = candle_close > prev_high
             is_bullish = candle_close > candle_open
             body_ok = body_ratio >= self.BODY_RATIO_MIN
             volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
-            is_displacement = closes_above and is_bullish and body_ok and volume_ok
+            # Relaxed: just need bullish candle with decent body (no need to close above prev high)
+            is_displacement = is_bullish and body_ok and volume_ok
 
         elif direction == 'SELL':
-            closes_below = candle_close < prev_low
             is_bearish = candle_close < candle_open
             body_ok = body_ratio >= self.BODY_RATIO_MIN
             volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
-            is_displacement = closes_below and is_bearish and body_ok and volume_ok
+            is_displacement = is_bearish and body_ok and volume_ok
 
         return {
             'is_displacement': is_displacement,
@@ -817,10 +847,10 @@ class LiquiditySweepAnalyzer:
         # TP ratio based on regime
         regime = regime_info.get('regime', 'trend_up')
         tp_ratio_map = {
-            'high_volatility': 2.0,
-            'trend_up': 1.5,
-            'trend_down': 1.5,
-            'range': 1.2,
+            'high_volatility': 2.5,
+            'trend_up': 2.0,
+            'trend_down': 2.0,
+            'range': 1.5,
             'low_volatility': 1.2,
         }
         tp_ratio = tp_ratio_map.get(regime, 1.5)
@@ -909,11 +939,12 @@ class LiquiditySweepAnalyzer:
                 f"({atr / config['pip_size']:.1f}p < {config['session_atr_min'] / config['pip_size']:.1f}p)"
             )
 
-        # Spread vs ATR
+        # Spread vs ATR — reject if spread eats too much of the expected move
+        # 60% threshold: generous to allow more trades
         actual_spread = spread if spread is not None else config['spread_sim']
-        if atr > 0 and actual_spread > 0.20 * atr:
+        if atr > 0 and actual_spread > 0.60 * atr:
             return False, (
-                f"Spread too wide: {actual_spread:.5f} > 20% of ATR {atr:.5f}"
+                f"Spread too wide: {actual_spread:.5f} > 60% of ATR {atr:.5f}"
             )
 
         # Exhaustion spike
@@ -965,16 +996,18 @@ class LiquiditySweepAnalyzer:
             'sweep_sl_tp': None,
         }
 
-        # ── Step 0: Calculate indicators ──────────────────────────────
+        # ── Step 0: Calculate indicators (skip if already present) ─────
         try:
-            df_1m = self.calculate_indicators(df_1m)
+            if 'ema_20' not in df_1m.columns:
+                df_1m = self.calculate_indicators(df_1m)
         except Exception as e:
             result['details'] = f"Indicator calculation failed: {e}"
             return result
 
         if df_5m is not None and len(df_5m) >= 60:
             try:
-                df_5m = self.calculate_indicators(df_5m)
+                if 'ema_20' not in df_5m.columns:
+                    df_5m = self.calculate_indicators(df_5m)
             except Exception:
                 df_5m = None
 

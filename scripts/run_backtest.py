@@ -34,6 +34,12 @@ def parse_args():
     parser.add_argument('--tf', default='5m', choices=['1m', '5m'], help='Scalping config key (default: 5m)')
     parser.add_argument('--no-confluence', action='store_true', help='Disable 1M confluence detection')
     parser.add_argument('--candles', type=int, default=0, help='Limit primary candles (0=all)')
+    parser.add_argument('--spread', type=float, default=None,
+                        help='Override spread in pips (default: per-pair config, e.g. EUR/USD=1.5)')
+    parser.add_argument('--commission', type=float, default=7.0,
+                        help='Round-trip commission per standard lot in USD (default: 7.0)')
+    parser.add_argument('--slippage', type=float, default=0.3,
+                        help='Slippage per trade in pips (default: 0.3)')
 
     return parser.parse_args()
 
@@ -105,7 +111,8 @@ def fetch_historical_data(pair, start_date=None, end_date=None, interval='5m', n
 
 def run_backtest(pair, start_date, end_date, initial_balance,
                  confidence_threshold, min_agreement, timeframe_key='5m',
-                 use_confluence=True, candles_limit=0):
+                 use_confluence=True, candles_limit=0,
+                 spread_pips=None, commission_per_lot=7.0, slippage_pips=0.3):
     """Run a single-pair backtest and print results."""
     bot_logger.info("=" * 70)
     bot_logger.info(f"🔬 9-Model Scalping Backtest")
@@ -115,6 +122,9 @@ def run_backtest(pair, start_date, end_date, initial_balance,
     bot_logger.info(f"  Initial Balance: ${initial_balance:,.2f}")
     bot_logger.info(f"  Confidence Threshold: {confidence_threshold:.0%}")
     bot_logger.info(f"  Min Models Agreement: {min_agreement}/9")
+    bot_logger.info(f"  Spread: {spread_pips if spread_pips is not None else 'per-pair config'} pips")
+    bot_logger.info(f"  Commission: ${commission_per_lot:.1f}/lot round-trip")
+    bot_logger.info(f"  Slippage: {slippage_pips:.1f} pips")
     bot_logger.info("=" * 70)
 
     # Load primary timeframe data
@@ -138,7 +148,12 @@ def run_backtest(pair, start_date, end_date, initial_balance,
                                f"running without confluence")
             df_1m = None
 
-    engine = BacktestEngine(initial_balance=initial_balance)
+    engine = BacktestEngine(
+        initial_balance=initial_balance,
+        slippage_pips=slippage_pips,
+        commission_per_lot=commission_per_lot,
+        spread_pips=spread_pips,
+    )
 
     results = engine.run_backtest(
         historical_data,
@@ -177,6 +192,19 @@ def _print_results(results):
         print(f"Final Balance: ${results['final_balance']:,.2f}")
         print(f"Total Profit: ${results['total_profit']:,.2f}")
         print(f"Return: {results['return_percent']:.2f}%")
+
+        # Cost breakdown
+        if results.get('total_costs', 0) > 0:
+            print()
+            print(f"--- Cost Breakdown ---")
+            print(f"Spread Cost: ${results.get('total_spread_cost', 0):,.2f}")
+            print(f"Commission Cost: ${results.get('total_commission_cost', 0):,.2f}")
+            print(f"Slippage Cost: ${results.get('total_slippage_cost', 0):,.2f}")
+            print(f"Total Costs: ${results.get('total_costs', 0):,.2f}")
+            gross = results['total_profit'] + results.get('total_costs', 0)
+            print(f"Gross Profit (before costs): ${gross:,.2f}")
+            print(f"Spread: {results.get('spread_pips', 0):.1f} pips | "
+                  f"Commission: ${results.get('commission_per_lot', 0):.1f}/lot")
     else:
         print(f"Initial Balance: ${results.get('initial_balance', 50):,.2f}")
         print(f"Final Balance: ${results.get('final_balance', 50):,.2f}")
@@ -222,6 +250,9 @@ def main():
             timeframe_key=args.tf,
             use_confluence=use_confluence,
             candles_limit=args.candles,
+            spread_pips=args.spread,
+            commission_per_lot=args.commission,
+            slippage_pips=args.slippage,
         )
         if result:
             all_results[pair] = result
@@ -234,13 +265,16 @@ def main():
         total_profit = sum(r['total_profit'] for r in all_results.values())
         total_trades = sum(r['total_trades'] for r in all_results.values())
         total_wins = sum(r['winning_trades'] for r in all_results.values())
+        total_costs = sum(r.get('total_costs', 0) for r in all_results.values())
         combined_wr = (total_wins / total_trades * 100) if total_trades > 0 else 0
         print(f"Total Trades: {total_trades}")
         print(f"Combined Win Rate: {combined_wr:.1f}%")
         print(f"Combined Profit: ${total_profit:,.2f}")
+        print(f"Combined Costs: ${total_costs:,.2f}")
         for pair, r in all_results.items():
             print(f"  {pair}: {r['return_percent']:+.2f}% "
-                  f"({r['total_trades']} trades, WR {r['win_rate']:.1f}%)")
+                  f"({r['total_trades']} trades, WR {r['win_rate']:.1f}%, "
+                  f"costs ${r.get('total_costs', 0):,.2f})")
         print("=" * 70)
 
 

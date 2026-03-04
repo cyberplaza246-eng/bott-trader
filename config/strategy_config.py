@@ -40,34 +40,34 @@ TIMEFRAMES = {
 # SL/TP are fully derived from ATR at trade time
 SCALPING_PAIRS = {
     'EUR/USD': {
-        'session_atr_min': 0.00040,    # Min ATR to trade (~4 pips)
+        'session_atr_min': 0.00010,    # Min ATR 1.0 pip (lowered for frequency)
         'spread_sim': 0.00015,         # Simulated spread (1.5 pips)
         'pip_size': 0.0001,
-        'cooldown_seconds': 45,
-        'max_hold_candles': 8,         # Time-exit: 8 candles max
+        'cooldown_seconds': 30,
+        'max_hold_candles': 30,        # Time-exit: 30 candles max (2.5h on 5M)
     },
     'GBP/USD': {
-        'session_atr_min': 0.00055,    # Min ATR to trade (~5.5 pips)
+        'session_atr_min': 0.00015,    # Min ATR 1.5 pips
         'spread_sim': 0.00020,         # Simulated spread (2 pips)
         'pip_size': 0.0001,
-        'cooldown_seconds': 45,
-        'max_hold_candles': 8,
+        'cooldown_seconds': 30,
+        'max_hold_candles': 30,
     },
     'USD/JPY': {
-        'session_atr_min': 0.060,      # Min ATR to trade (~6 pips in JPY terms)
+        'session_atr_min': 0.015,      # Min ATR 1.5 pips
         'spread_sim': 0.020,           # Simulated spread (2 pips)
         'pip_size': 0.01,
-        'cooldown_seconds': 45,
-        'max_hold_candles': 8,
+        'cooldown_seconds': 30,
+        'max_hold_candles': 30,
     },
 }
 
 # Session windows for scalping (UTC hours)
 # start <= hour < end.  start == end means 24/7.
 SCALPING_SESSION_WINDOWS = {
-    'EUR/USD': {'start': 3, 'end': 21},    # Pre-London → US close (wider for 25+ trades)
-    'GBP/USD': {'start': 3, 'end': 21},    # Pre-London → US close (wider for 25+ trades)
-    'USD/JPY': {'start': 0, 'end': 21},    # Tokyo open → US close
+    'EUR/USD': {'start': 0, 'end': 0},    # 24/7 trading (start==end means always)
+    'GBP/USD': {'start': 0, 'end': 0},    # 24/7 trading
+    'USD/JPY': {'start': 0, 'end': 0},    # 24/7 trading
 }
 
 # Spread limits for scalping (pips — tighter than swing)
@@ -86,10 +86,11 @@ OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
-# With the liquidity-sweep entry model, signals arrive pre-qualified at ~0.80+
-# so a 0.45 floor is conservative. Reads from .env so tuning doesn't need a code change.
+# With sweep-gated architecture, sweep must fire (4-layer validation)
+# then confidence is boosted/reduced by EMA + Technical confirmation.
+# Sweep signals arrive pre-qualified at ~0.80+, so 0.45 floor is conservative.
 ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
-MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))  # At least 3 models must agree
+MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 1))  # Sweep gate is sufficient (context models for learning only)
 
 # Technical Analysis Parameters (ATR-centric scalping)
 INDICATORS = {

@@ -1,11 +1,15 @@
 """
-8-Model Ensemble Trading Decision System — God Tier v2
+Sweep-Gated Entry System — RayAlgo v3
 
-Combines: LSTM, Sentiment, Technical, Volume, Multi-Timeframe, S/R, Candlestick, EMA Crossover
-With: Regime-aware voting, conviction scaling, confluence bonuses, pair-specific weights
+Architecture:
+  Gate:    LiquiditySweepAnalyzer (4-layer: Bias → Sweep → MSS → Entry)
+           If sweep does NOT fire → signal = SKIP.  No vote can override.
+  Confirm: EMA Crossover (trend alignment) + Technical (MACD/BB momentum)
+           These BOOST or REDUCE sweep confidence — they cannot create a signal.
+  Context: All other models (scalping, volume, sentiment, LSTM, S/R, candle, MTF)
+           still run for logging / adaptive learning — but do NOT affect entry.
 
-LSTM is optional — if TensorFlow is not installed, the ensemble
-automatically runs with 7 models and redistributes its weight.
+LSTM is optional — if TensorFlow is not installed the system runs without it.
 """
 import pandas as pd
 from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
@@ -22,134 +26,122 @@ from src.ai.liquidity_sweep import LiquiditySweepAnalyzer
 from src.ai.adaptive_learner import AdaptiveLearner
 from src.ai.cross_pair_analyzer import CrossPairAnalyzer
 from src.ai.ml_trade_scorer import MLTradeScorer
+from src.ai.rl_agent import RLTradingAgent
 from src.utils.logger import TradeLogger, bot_logger
 from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGREEMENT
 
 
 class EnsembleTrader:
-    """8-model ensemble with regime awareness, conviction scaling, and adaptive learning"""
+    """Sweep-gated entry system with confirmation boosters and adaptive learning."""
 
-    # Regime-based model weight boosts (ATR-centric scalping)
-    REGIME_BOOSTS = {
-        'trending': {
-            'scalping': 1.5,       # ATR-pullback thrives in trends
-            'ema_crossover': 1.3,  # EMA alignment confirms
-            'technical': 1.2,
-            'volume': 1.1,
-            'multi_tf': 1.2,
-            'lstm': 1.0,
-            'support_resistance': 0.6,  # S/R less useful in trends
-            'candlestick': 0.9,
-        },
-        'ranging': {
-            'scalping': 0.5,       # ATR too low in ranges
-            'support_resistance': 1.5,
-            'candlestick': 1.3,
-            'technical': 1.2,
-            'volume': 1.0,
-            'ema_crossover': 0.5,  # Crossovers whipsaw in ranges
-            'multi_tf': 0.7,
-        },
-        'volatile': {
-            'scalping': 1.3,       # ATR expanding = scalping loves it
-            'volume': 1.4,
-            'technical': 0.9,
-            'ema_crossover': 0.6,
-            'support_resistance': 1.1,
-            'candlestick': 1.1,
-        },
-    }
+    # Confirmation boost/penalty amounts
+    EMA_CONFIRM_BOOST = 0.05     # EMA aligned with sweep direction
+    EMA_OPPOSE_PENALTY = 0.10    # EMA opposes sweep direction
+    TECH_CONFIRM_BOOST = 0.03    # Technical momentum matches sweep
+    TECH_OPPOSE_PENALTY = 0.05   # Technical momentum opposes sweep
+    LSTM_CONFIRM_BOOST = 0.08    # LSTM direction agrees with sweep
+    LSTM_OPPOSE_PENALTY = 0.20   # LSTM direction opposes sweep (strong filter)
+    RL_SKIP_PENALTY = 0.08       # RL agent recommends skipping
 
     def __init__(self, newsapi_key=None, broker=None):
+        # ── Primary: sweep gate ──────────────────────────────────────
+        self.sweep = LiquiditySweepAnalyzer()
+
+        # ── Confirmation models (only these affect confidence) ───────
+        self.ema_crossover = EMACrossoverAnalyzer()
+        self.technical = TechnicalAnalyzer()
+
+        # ── Context models (logging/learning only, no entry influence)
         self.lstm = LSTMPredictor(lookback_window=60)
         self.lstm_available = TF_AVAILABLE and self.lstm.available
-        # Use FinBERT NLP sentiment if available, else legacy keyword analyzer
         if FINBERT_AVAILABLE:
             self.sentiment = NLPSentimentAnalyzer(newsapi_key=newsapi_key)
-            bot_logger.info("🧠 NLP sentiment: FinBERT active")
+            bot_logger.info("🧠 NLP sentiment: FinBERT active (context only)")
         else:
             self.sentiment = SentimentAnalyzer(newsapi_key=newsapi_key)
-            bot_logger.info("⚠️ NLP sentiment: keyword fallback (install transformers+torch for FinBERT)")
-        self.technical = TechnicalAnalyzer()
+            bot_logger.info("⚠️ NLP sentiment: keyword fallback (context only)")
         self.volume = VolumeAnalyzer(volume_period=20)
         self.multi_tf = MultiTimeframeAnalyzer()
         self.sr_detector = SupportResistanceDetector()
         self.candle_detector = CandlestickPatternDetector()
-        self.ema_crossover = EMACrossoverAnalyzer()
         self.scalping = ScalpingAnalyzer()
-        self.sweep = LiquiditySweepAnalyzer()
+
+        # ── Adaptive learning & cross-pair ───────────────────────────
         self.learner = AdaptiveLearner()
         self.cross_pair = CrossPairAnalyzer()
         self.ml_scorer = MLTradeScorer()
+        self.rl_agent = RLTradingAgent()
+        self.rl_available = hasattr(self.rl_agent, 'q_network') or hasattr(self.rl_agent, 'q_table')
         self.broker = broker
 
-        # ATR-centric weights: liquidity sweep is the dominant signal,
-        # scalping analyzer demoted to confirmation role
+        # Legacy model_weights kept for adaptive learner compatibility
         self.model_weights = {
-            'sweep': 0.35,            # Primary: liquidity sweep entry model
-            'scalping': 0.15,         # Demoted: ATR-pullback confirmation
-            'technical': 0.15,        # Multi-indicator confirmation
-            'ema_crossover': 0.12,    # EMA alignment + ATR momentum
-            'candlestick': 0.08,      # Candle pattern confirmation
-            'multi_tf': 0.05,         # 5M timeframe alignment
-            'support_resistance': 0.04,
-            'volume': 0.02,           # Demoted: 1-candle direction = noise
-            'lstm': 0.02,
-            'sentiment': 0.02,
+            'sweep': 1.00,
+            'ema_crossover': 0.0,
+            'technical': 0.0,
+            'scalping': 0.0,
+            'candlestick': 0.0,
+            'multi_tf': 0.0,
+            'support_resistance': 0.0,
+            'volume': 0.0,
+            'lstm': 0.0,
+            'sentiment': 0.0,
         }
 
-        model_count = 10
-        if not self.lstm_available:
-            bot_logger.info("\U0001f9e0 Sweep-primary ensemble running with 9 models (LSTM disabled)")
-            model_count = 9
-        else:
-            bot_logger.info("\U0001f9e0 Sweep-primary ensemble running with all 10 models")
-        bot_logger.info(f"\U0001f4a7 LiquiditySweepAnalyzer active as primary entry model (weight 0.35)")
+        bot_logger.info("🎯 Sweep-Gated Entry System (RayAlgo v3)")
+        bot_logger.info("   Gate:    LiquiditySweep (4-layer: Bias → Sweep → MSS → Entry)")
+        bot_logger.info("   Confirm: EMA Crossover + Technical (boost/reduce only)")
+        bot_logger.info("   Context: 8 models for learning (no entry influence)")
 
     def get_trading_signal(self, df, pair):
         """
-        Generate trading signal from ensemble with regime awareness.
+        Generate trading signal using sweep-gated architecture.
+
+        Flow:
+          1. Calculate indicators on 1M data
+          2. Run LiquiditySweep 4-layer pipeline → produces signal + confidence
+          3. If sweep = SKIP → final = SKIP (hard gate)
+          4. If sweep fires → run EMA + Technical as confirmation boosters
+          5. Apply EMA200 trend filter, cross-pair modifier, learner adjustments
+          6. Run context models for logging / adaptive learning
+          7. Return final signal
 
         Returns:
-            {
-                'signal': 'BUY', 'SELL', or 'SKIP',
-                'confidence': 0.0-1.0,
-                'models_agreement': int,
-                'regime': str,
-                'details': {...}
-            }
+            dict with signal, confidence, models_agreement, regime, details, etc.
         """
-        # Calculate indicators first
+        # ── Step 1: Calculate indicators ─────────────────────────────
         df_enriched = self.technical.calculate_indicators(df)
 
-        # Detect market regime
+        # Detect market regime (for adaptive learner)
         regime = self.learner.detect_regime(df_enriched)
 
-        # Get pair-specific adaptive weights
-        adaptive_weights = self.learner.get_adjusted_weights(pair=pair)
-        weights = dict(self.model_weights)
-        for k, v in adaptive_weights.items():
-            if k in weights:
-                weights[k] = v
+        # ── Step 2: Fetch 5M data + spread (shared across models) ────
+        df_5m = None
+        broker_spread = None
+        if self.broker:
+            try:
+                df_5m = self.broker.get_candles(pair, '5m', count=250)
+            except Exception:
+                pass
+            try:
+                broker_spread = self.broker.get_spread(pair)
+            except Exception:
+                pass
 
-        # If LSTM is disabled, redistribute
-        if not self.lstm_available:
-            lstm_w = weights.pop('lstm', 0)
-            if weights:
-                bonus = lstm_w / len(weights)
-                weights = {k: v + bonus for k, v in weights.items()}
+        # ── Step 3: Run sweep gate (PRIMARY — decides entry) ─────────
+        sweep_signal = self.sweep.get_signal(
+            df_enriched, pair,
+            df_5m=df_5m,
+            spread=broker_spread,
+        )
+        sweep_direction = sweep_signal.get('signal', 'SKIP')
+        sweep_confidence = sweep_signal.get('confidence', 0.0)
 
-        # Apply regime-based boosts
-        regime_boosts = self.REGIME_BOOSTS.get(regime, {})
-        for model, boost in regime_boosts.items():
-            if model in weights:
-                weights[model] *= boost
+        # ── Step 4: Run confirmation models ──────────────────────────
+        ema_signal = self.ema_crossover.get_signal(df_enriched)
+        technical_signal = self.technical.get_signal(df_enriched)
 
-        # Normalize weights
-        w_sum = sum(weights.values())
-        weights = {k: v / w_sum for k, v in weights.items()}
-
-        # === Run all models ===
+        # ── Step 5: Run context models (for logging + learning) ──────
         if self.lstm_available:
             lstm_signal = self.lstm.predict_direction(df_enriched)
         else:
@@ -161,7 +153,6 @@ class EnsembleTrader:
         )
         sentiment_confidence = abs(sentiment_signal['sentiment_score'])
 
-        technical_signal = self.technical.get_signal(df_enriched)
         volume_signal = self.volume.get_volume_signal(df_enriched)
 
         if self.broker:
@@ -175,256 +166,193 @@ class EnsembleTrader:
 
         sr_signal = self.sr_detector.get_sr_signal(df_enriched)
         candle_signal = self.candle_detector.get_pattern_signal(df_enriched)
-        ema_signal = self.ema_crossover.get_signal(df_enriched)
 
-        # Fetch 5M data and spread (shared by scalping + sweep)
-        df_5m = None
-        broker_spread = None
-        if self.broker:
-            try:
-                df_5m = self.broker.get_candles(pair, '5m', count=250)
-            except Exception:
-                pass
-            try:
-                broker_spread = self.broker.get_spread(pair)
-            except Exception:
-                pass
-
-        # Scalping signal (ATR-pullback confirmation)
         scalping_signal = self.scalping.get_signal(
             df_enriched, pair,
             df_5m=df_5m,
             spread=broker_spread,
         )
+
+        # ── Step 6: Sweep gate decision ──────────────────────────────
+        if sweep_direction not in ('BUY', 'SELL'):
+            # HARD GATE: no sweep → no trade
+            final_signal = 'SKIP'
+            final_confidence = 0.0
+            models_agreement = 0
+        else:
+            final_signal = sweep_direction
+            final_confidence = sweep_confidence
+
+            # ── Confirmation adjustments (boost/reduce only) ─────────
+            # EMA Crossover
+            if ema_signal['signal'] == sweep_direction:
+                final_confidence += self.EMA_CONFIRM_BOOST
+                bot_logger.info(
+                    f"✅ EMA confirms {sweep_direction} (+{self.EMA_CONFIRM_BOOST:.0%})"
+                )
+            elif ema_signal['signal'] != 'HOLD' and ema_signal['signal'] != sweep_direction:
+                final_confidence -= self.EMA_OPPOSE_PENALTY
+                bot_logger.info(
+                    f"⚠️ EMA opposes {sweep_direction} (−{self.EMA_OPPOSE_PENALTY:.0%})"
+                )
+
+            # Technical momentum
+            if technical_signal['signal'] == sweep_direction:
+                final_confidence += self.TECH_CONFIRM_BOOST
+                bot_logger.info(
+                    f"✅ Technical confirms {sweep_direction} (+{self.TECH_CONFIRM_BOOST:.0%})"
+                )
+            elif technical_signal['signal'] != 'HOLD' and technical_signal['signal'] != sweep_direction:
+                final_confidence -= self.TECH_OPPOSE_PENALTY
+                bot_logger.info(
+                    f"⚠️ Technical opposes {sweep_direction} (−{self.TECH_OPPOSE_PENALTY:.0%})"
+                )
+
+            # ── EMA 200 Trend Filter — SOFT PENALTY counter-trend ─────
+            ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
+            cur_price = df_enriched['close'].iloc[-1]
+            if ema_200 is not None and not pd.isna(ema_200):
+                if (final_signal == 'BUY' and cur_price < ema_200) or \
+                   (final_signal == 'SELL' and cur_price > ema_200):
+                    final_confidence -= 0.10
+                    bot_logger.info(
+                        f"⚠️ EMA200 counter-trend penalty: {final_signal} "
+                        f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f}) -0.10"
+                    )
+                else:
+                    bot_logger.info(
+                        f"✅ EMA200 aligned: {final_signal} with trend "
+                        f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
+                    )
+
+            # ── Cross-pair correlation modifier ──────────────────────
+            if final_signal != 'SKIP' and pair:
+                cross_modifier = self.cross_pair.get_confidence_modifier(pair, final_signal)
+                if cross_modifier != 1.0:
+                    final_confidence *= cross_modifier
+                    direction = 'confirms ✅' if cross_modifier > 1.0 else 'diverges ⚠️'
+                    bot_logger.info(
+                        f"🔗 Cross-pair {direction}: {pair} confidence x{cross_modifier:.3f}"
+                    )
+
+            # ── Regime confidence modifier from learner ──────────────
+            regime_modifier = self.learner.get_regime_confidence_modifier(regime)
+            final_confidence *= regime_modifier
+
+            # Count how many context models agree (for logging & compatibility)
+            context_signals = {
+                'ema_crossover': ema_signal['signal'],
+                'technical': technical_signal['signal'],
+                'scalping': scalping_signal.get('signal', 'HOLD'),
+                'volume': volume_signal['signal'],
+                'multi_tf': mtf_signal_type,
+                'candlestick': candle_signal['signal'],
+                'support_resistance': sr_signal['signal'],
+            }
+            if self.lstm_available:
+                context_signals['lstm'] = lstm_signal['signal']
+            context_signals['sentiment'] = sentiment_signal_type
+
+            agreeing = sum(1 for s in context_signals.values() if s == sweep_direction)
+            models_agreement = agreeing + 1  # +1 for sweep itself
+
+            # ── LSTM direction filter (raw prediction, 0.02% threshold) ──
+            if self.lstm_available and final_signal != 'SKIP':
+                try:
+                    pct_change = lstm_signal.get('predicted_change_percent', 0)
+                    if abs(pct_change) > 0.02:
+                        if (pct_change > 0 and sweep_direction == 'BUY') or \
+                           (pct_change < 0 and sweep_direction == 'SELL'):
+                            final_confidence += self.LSTM_CONFIRM_BOOST
+                            bot_logger.info(f"✅ LSTM confirms {sweep_direction} ({pct_change:+.3f}%) +{self.LSTM_CONFIRM_BOOST}")
+                        else:
+                            final_confidence -= self.LSTM_OPPOSE_PENALTY
+                            bot_logger.info(f"⚠️ LSTM opposes {sweep_direction} ({pct_change:+.3f}%) -{self.LSTM_OPPOSE_PENALTY}")
+                except Exception:
+                    pass
+
+            # ── RL quality filter ────────────────────────────────────
+            if self.rl_available and final_signal != 'SKIP':
+                try:
+                    import numpy as np
+                    rsi_val = float(df_enriched['rsi'].iloc[-1]) if 'rsi' in df_enriched.columns and not pd.isna(df_enriched['rsi'].iloc[-1]) else 50.0
+                    adx_val = float(df_enriched['adx'].iloc[-1]) if 'adx' in df_enriched.columns and not pd.isna(df_enriched['adx'].iloc[-1]) else 25.0
+                    atr_val = float(df_enriched['atr'].iloc[-1]) if 'atr' in df_enriched.columns and not pd.isna(df_enriched['atr'].iloc[-1]) else 0.001
+                    atr_med = float(df_enriched['atr'].median()) if 'atr' in df_enriched.columns else 0.001
+                    ema200_val = float(df_enriched['ema_200'].iloc[-1]) if 'ema_200' in df_enriched.columns and not pd.isna(df_enriched['ema_200'].iloc[-1]) else cur_price
+                    ema200_dist = (cur_price - ema200_val) / (atr_val + 1e-8)
+                    from datetime import datetime
+                    hour = datetime.utcnow().hour
+                    vol_ratio = float(df_enriched['volume'].iloc[-1] / (df_enriched['volume'].rolling(20).mean().iloc[-1] + 1)) if 'volume' in df_enriched.columns else 1.0
+
+                    rl_state = self.rl_agent.build_state(
+                        ensemble_confidence=final_confidence,
+                        model_agreement=models_agreement,
+                        total_models=4,
+                        regime='trending' if regime in ('trend_up', 'trend_down') else 'ranging',
+                        rsi=rsi_val, adx=adx_val,
+                        atr=atr_val, atr_median=atr_med,
+                        ema200_dist=ema200_dist,
+                        hour=hour, spread=broker_spread or 0.00015,
+                        volume_ratio=vol_ratio,
+                        daily_trades=0, max_daily_trades=30,
+                        current_drawdown=0
+                    )
+                    rl_action = self.rl_agent.select_action(rl_state, training=False)
+                    if rl_action == 0:  # SKIP
+                        final_confidence -= self.RL_SKIP_PENALTY
+                        bot_logger.info(f"⚠️ RL recommends SKIP (-{self.RL_SKIP_PENALTY})")
+                    else:
+                        bot_logger.info(f"✅ RL action: {self.rl_agent.get_action_name(rl_action)}")
+                except Exception as e:
+                    bot_logger.debug(f"RL filter skipped: {e}")
+
+        # Cap confidence
+        final_confidence = min(1.0, max(0.0, final_confidence))
+
+        # ── S/R Context Advisory (logging only) ──────────────────────
+        price_zone = sr_signal.get('levels', {}).get('price_zone', '')
+        if final_signal == 'BUY' and price_zone == 'AT_RESISTANCE':
+            bot_logger.info("⚠️ S/R advisory: BUY near resistance")
+        if final_signal == 'SELL' and price_zone == 'AT_SUPPORT':
+            bot_logger.info("⚠️ S/R advisory: SELL near support")
+
+        # ── Build detailed reason string ─────────────────────────────
+        reason_parts = []
+        reason_parts.append(
+            f"SWEEP: {sweep_direction} ({sweep_confidence:.0%}) "
+            f"[{sweep_signal.get('regime', '?')}, MSS={'✓' if sweep_signal.get('mss', {}).get('confirmed') else '✗'}]"
+        )
+        reason_parts.append(f"EMA: {ema_signal['signal']} ({ema_signal['confidence']:.0%})")
+        reason_parts.append(f"Tech: {technical_signal['signal']} ({technical_signal['confidence']:.0%})")
+        reason_parts.append(f"Regime: {regime}")
+        if models_agreement > 0:
+            reason_parts.append(f"Context: {models_agreement} models aligned")
+        detailed_reason = " | ".join(reason_parts)
+
         scalping_signal_type = scalping_signal.get('signal', 'HOLD')
         scalping_confidence = scalping_signal.get('confidence', 0.0)
 
-        # ── Liquidity Sweep signal (PRIMARY entry model) ─────────────
-        sweep_signal = self.sweep.get_signal(
-            df_enriched, pair,
-            df_5m=df_5m,
-            spread=broker_spread,
-        )
-        sweep_signal_type = sweep_signal.get('signal', 'HOLD')
-        sweep_confidence = sweep_signal.get('confidence', 0.0)
-        if sweep_signal_type == 'SKIP':
-            sweep_signal_type = 'HOLD'  # SKIP → neutral, not opposing
-            sweep_confidence = 0.0
-        # When scalping says SKIP, treat it as opposing the majority direction
-        # instead of silencing it to neutral HOLD. The model's
-        # rejection should actively fight the trade.
-        if scalping_signal_type == 'SKIP':
-            scalping_signal_type = 'SKIP_OPPOSE'  # Handled below as opposing
-            scalping_confidence = 0.40  # Moderate opposing strength
-
-        # === Build signal map ===
-        all_signals = {}
-        if self.lstm_available:
-            all_signals['lstm'] = {'signal': lstm_signal['signal'], 'confidence': lstm_signal['confidence']}
-
-        all_signals.update({
-            'sweep': {'signal': sweep_signal_type, 'confidence': sweep_confidence},
-            'scalping': {'signal': scalping_signal_type, 'confidence': scalping_confidence},
-            'sentiment': {'signal': sentiment_signal_type, 'confidence': sentiment_confidence},
-            'technical': {'signal': technical_signal['signal'], 'confidence': technical_signal['confidence']},
-            'volume': {'signal': volume_signal['signal'], 'confidence': volume_signal['confidence']},
-            'multi_tf': {'signal': mtf_signal_type, 'confidence': mtf_confidence},
-            'support_resistance': {'signal': sr_signal['signal'], 'confidence': sr_signal['confidence']},
-            'candlestick': {'signal': candle_signal['signal'], 'confidence': candle_signal['confidence']},
-            'ema_crossover': {'signal': ema_signal['signal'], 'confidence': ema_signal['confidence']},
-        })
-
-        # Count votes — HOLD models are NOT active (they don't contribute direction)
-        buy_votes = sum(1 for s in all_signals.values() if s['signal'] == 'BUY')
-        sell_votes = sum(1 for s in all_signals.values() if s['signal'] == 'SELL')
-
-        # Resolve SKIP_OPPOSE: scalping opposes the majority direction
-        scalp_sig = all_signals.get('scalping', {})
-        if scalp_sig.get('signal') == 'SKIP_OPPOSE':
-            if buy_votes > sell_votes:
-                all_signals['scalping'] = {'signal': 'SELL', 'confidence': scalp_sig['confidence']}
-                sell_votes += 1
-                bot_logger.info("🔪 Scalping SKIP → opposing BUY majority (voting SELL)")
-            elif sell_votes > buy_votes:
-                all_signals['scalping'] = {'signal': 'BUY', 'confidence': scalp_sig['confidence']}
-                buy_votes += 1
-                bot_logger.info("🔪 Scalping SKIP → opposing SELL majority (voting BUY)")
-            else:
-                all_signals['scalping'] = {'signal': 'HOLD', 'confidence': 0.0}
-
-        active_signals = {k: v for k, v in all_signals.items() if v['signal'] in ('BUY', 'SELL')}
-        models_agreement = max(buy_votes, sell_votes)
-        total_models = len(all_signals)
-        active_model_count = len(active_signals)
-
-        # Require minimum model agreement for a trade signal
-        min_agreement = max(MIN_MODELS_AGREEMENT, int(MIN_MODELS_AGREEMENT * active_model_count / total_models + 0.5))
-
-        if buy_votes > sell_votes and models_agreement >= min_agreement:
-            final_signal = 'BUY'
-        elif sell_votes > buy_votes and models_agreement >= min_agreement:
-            final_signal = 'SELL'
-        else:
-            final_signal = 'SKIP'
-
-        # === Conviction Scoring ===
-        # Average conviction of agreeing models (weighted), scaled by agreement breadth.
-        # HOLD models are neutral — they don't drag down the score.
-        if final_signal != 'SKIP' and active_signals:
-            direction = final_signal
-            agreeing = {k: v for k, v in all_signals.items() if v['signal'] == direction}
-            opposing = {k: v for k, v in all_signals.items() if v['signal'] != direction and v['signal'] != 'HOLD'}
-
-            # Weighted confidence of agreeing models
-            weighted_agree = sum(weights.get(k, 0) * v['confidence'] for k, v in agreeing.items())
-            weight_agree_sum = sum(weights.get(k, 0) for k in agreeing)
-            weighted_oppose = sum(weights.get(k, 0) * v['confidence'] for k, v in opposing.items())
-
-            # Average conviction: how confident are the agreeing models? (0-1)
-            avg_conviction = weighted_agree / weight_agree_sum if weight_agree_sum > 0 else 0.0
-
-            # Agreement breadth: what fraction of ALL models agree? (0-1)
-            agreement_ratio = len(agreeing) / max(total_models, 1)
-
-            # Confluence bonus for broad agreement
-            confluence_bonus = 0.0
-            if agreement_ratio >= 0.60:
-                confluence_bonus = 0.10
-                bot_logger.info(f"🎯 Strong confluence: {len(agreeing)}/{total_models} models agree ({agreement_ratio:.0%})")
-            elif agreement_ratio >= 0.40:
-                confluence_bonus = 0.05
-
-            # Opposing penalty (from models that actively disagree)
-            opposing_penalty = weighted_oppose * 0.5
-
-            # Final confidence = avg conviction × (base + agreement scaling) + bonus - penalty
-            # Base 0.5 ensures 3 models at decent conviction can still clear threshold
-            # Scaling 0.5 rewards broader agreement
-            weighted_confidence = avg_conviction * (0.5 + 0.5 * agreement_ratio) + confluence_bonus - opposing_penalty
-
-            # Regime confidence modifier from learner
-            regime_modifier = self.learner.get_regime_confidence_modifier(regime)
-            weighted_confidence *= regime_modifier
-
-            net_conviction = weighted_confidence  # For logging compatibility
-
-        else:
-            weighted_confidence = 0.0
-            net_conviction = 0.0
-
-        # === EMA 200 Trend Filter — HARD BLOCK counter-trend trades ===
-        ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
-        cur_price = df_enriched['close'].iloc[-1]
-        if ema_200 is not None and not pd.isna(ema_200) and final_signal != 'SKIP':
-            if (final_signal == 'BUY' and cur_price < ema_200) or \
-               (final_signal == 'SELL' and cur_price > ema_200):
-                # HARD BLOCK: counter-trend trade = SKIP
-                bot_logger.info(
-                    f"🚫 EMA200 counter-trend BLOCKED: {final_signal} "
-                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
-                )
-                final_signal = 'SKIP'
-                weighted_confidence = 0.0
-            else:
-                # EMA200 alignment logged but NOT boosted — ema_crossover model
-                # already accounts for EMA200 alignment in its confidence score
-                bot_logger.info(
-                    f"✅ EMA200 aligned: {final_signal} with trend "
-                    f"(price {cur_price:.5f} vs EMA200 {ema_200:.5f})"
-                )
-
-        # === High-Weight Model Disagreement Filter ===
-        # If a heavy model (scalping, LSTM, technical) STRONGLY opposes the signal, penalize
-        heavy_models = ['scalping', 'lstm', 'technical', 'ema_crossover']
-        strong_opposition_count = 0
-        for model_name in heavy_models:
-            m = all_signals.get(model_name)
-            if m and m['signal'] != 'HOLD' and m['signal'] != final_signal and m['confidence'] >= 0.50:
-                strong_opposition_count += 1
-                bot_logger.info(
-                    f"⚠️  Heavy model {model_name} opposes {final_signal} "
-                    f"with {m['signal']} ({m['confidence']:.0%})"
-                )
-        if strong_opposition_count >= 2:
-            weighted_confidence *= 0.60  # -40% if 2+ heavy models oppose (was 0.85)
-            bot_logger.info(
-                f"⚠️ {strong_opposition_count} heavy models oppose {final_signal} — heavy reduction"
-            )
-        elif strong_opposition_count == 1:
-            weighted_confidence *= 0.90  # -10% if 1 heavy model opposes (was 0.95)
-
-        # === S/R Context Advisory ===
-        price_zone = sr_signal.get('levels', {}).get('price_zone', '')
-        if final_signal == 'BUY' and price_zone == 'AT_RESISTANCE':
-            bot_logger.info("⚠️  S/R advisory: BUY near resistance")
-        if final_signal == 'SELL' and price_zone == 'AT_SUPPORT':
-            bot_logger.info("⚠️  S/R advisory: SELL near support")
-
-        # === Momentum Divergence Check ===
-        # If RSI diverges from price direction, reduce confidence
-        if final_signal != 'SKIP' and 'rsi' in df_enriched.columns:
-            rsi = df_enriched['rsi'].iloc[-1]
-            if final_signal == 'BUY' and rsi > 70:
-                weighted_confidence *= 0.85
-                bot_logger.info(f"⚠️  RSI overbought ({rsi:.0f}) on BUY signal — reducing confidence")
-            elif final_signal == 'SELL' and rsi < 30:
-                weighted_confidence *= 0.85
-                bot_logger.info(f"⚠️  RSI oversold ({rsi:.0f}) on SELL signal — reducing confidence")
-
-        # === Cross-Pair Correlation Modifier ===
-        if final_signal != 'SKIP' and pair:
-            cross_modifier = self.cross_pair.get_confidence_modifier(pair, final_signal)
-            if cross_modifier != 1.0:
-                weighted_confidence *= cross_modifier
-                direction = 'confirms ✅' if cross_modifier > 1.0 else 'diverges ⚠️'
-                bot_logger.info(
-                    f"🔗 Cross-pair {direction}: {pair} confidence x{cross_modifier:.3f}"
-                )
-
-        # Cap confidence at 1.0
-        weighted_confidence = min(1.0, max(0.0, weighted_confidence))
-
-        # Generate reasoning (use resolved scalping signal, not raw SKIP_OPPOSE)
-        resolved_scalp = all_signals.get('scalping', {})
-        resolved_sweep = all_signals.get('sweep', {})
-        reason_parts = []
-        reason_parts.append(f"Sweep: {resolved_sweep.get('signal', sweep_signal_type)} ({resolved_sweep.get('confidence', sweep_confidence):.0%})")
-        reason_parts.append(f"Scalp: {resolved_scalp.get('signal', scalping_signal_type)} ({resolved_scalp.get('confidence', scalping_confidence):.0%})")
-        if self.lstm_available:
-            reason_parts.append(f"LSTM: {lstm_signal['signal']} ({lstm_signal['confidence']:.0%})")
-        reason_parts.extend([
-            f"Sent: {sentiment_signal_type} ({sentiment_confidence:.0%})",
-            f"Tech: {technical_signal['signal']} ({technical_signal['confidence']:.0%})",
-            f"Vol: {volume_signal['signal']} ({volume_signal['confidence']:.0%})",
-            f"MTF: {mtf_signal_type} ({mtf_confidence:.0%})",
-            f"S/R: {sr_signal['signal']} ({sr_signal['confidence']:.0%})",
-            f"Candle: {candle_signal['signal']} ({candle_signal['confidence']:.0%})",
-            f"EMA: {ema_signal['signal']} ({ema_signal['confidence']:.0%})",
-            f"Regime: {regime}",
-        ])
-
-        detailed_reason = " | ".join(reason_parts)
-
         result = {
             'signal': final_signal,
-            'confidence': weighted_confidence,
+            'confidence': final_confidence,
             'models_agreement': models_agreement,
-            'total_models': total_models,
-            'min_agreement_required': min_agreement,
+            'total_models': 3,  # sweep + 2 confirmations (gate architecture)
+            'min_agreement_required': 1,  # only sweep is required
             'regime': regime,
             'detailed_reason': detailed_reason,
             'enriched_df': df_enriched,
             'models': {
                 'sweep': {
-                    'signal': resolved_sweep.get('signal', sweep_signal_type),
-                    'confidence': resolved_sweep.get('confidence', sweep_confidence),
+                    'signal': sweep_direction,
+                    'confidence': sweep_confidence,
                     'regime': sweep_signal.get('regime', 'unknown'),
                     'bias': sweep_signal.get('bias'),
                     'mss_confirmed': bool(sweep_signal.get('mss', {}).get('confirmed', False)),
                 },
                 'scalping': {
-                    'signal': resolved_scalp.get('signal', scalping_signal_type),
-                    'confidence': resolved_scalp.get('confidence', scalping_confidence),
+                    'signal': scalping_signal_type,
+                    'confidence': scalping_confidence,
                     'setup': scalping_signal.get('setup', 'none'),
                 },
                 'lstm': lstm_signal,
@@ -455,7 +383,7 @@ class EnsembleTrader:
             TradeLogger.log_signal(
                 pair=pair,
                 signal_type=final_signal,
-                confidence=weighted_confidence,
+                confidence=final_confidence,
                 reason=detailed_reason,
                 models_agreement=models_agreement
             )
@@ -465,44 +393,29 @@ class EnsembleTrader:
     def should_trade(self, signal_result):
         """
         Determine if signal is strong enough to trade.
-        Uses adaptive confidence threshold + regime awareness.
-        REQUIRES at least one core model (sweep, scalping, technical, or EMA) to agree.
+        With sweep-gated architecture, the sweep already validated structure.
+        We only check confidence threshold.
         """
         threshold = self.learner.get_adjusted_threshold()
 
-        # Minimum models must agree (configured in strategy_config)
-        if signal_result['models_agreement'] < MIN_MODELS_AGREEMENT:
-            bot_logger.info(
-                f"📊 Only {signal_result['models_agreement']} models agree "
-                f"(need {MIN_MODELS_AGREEMENT}) — skipping"
-            )
+        if signal_result['signal'] == 'SKIP':
             return False
 
-        # Core model check — HARD BLOCK if no core model agrees
-        core_models = ['sweep', 'scalping', 'technical', 'ema_crossover']
-        models = signal_result.get('models', {})
-        direction = signal_result['signal']
-        core_agrees = any(
-            models.get(m, {}).get('signal') == direction
-            for m in core_models
-        )
         effective_confidence = signal_result['confidence']
-        if not core_agrees and direction != 'SKIP':
-            core_summary = ', '.join(
-                f"{m}={models.get(m, {}).get('signal', 'N/A')}"
-                for m in core_models
-            )
+
+        # Sweep must have fired (it's the gate)
+        sweep_model = signal_result.get('models', {}).get('sweep', {})
+        if sweep_model.get('signal') not in ('BUY', 'SELL'):
+            bot_logger.info("🚫 Sweep gate did not fire — no trade")
+            return False
+
+        if effective_confidence < threshold:
             bot_logger.info(
-                f"🚫 No core model agrees with {direction} — BLOCKED "
-                f"(core: {core_summary})"
+                f"📊 Confidence {effective_confidence:.2%} < threshold {threshold:.2%}"
             )
             return False
 
-        return (
-            signal_result['signal'] != 'SKIP' and
-            effective_confidence >= threshold and
-            signal_result['models_agreement'] >= MIN_MODELS_AGREEMENT
-        )
+        return True
 
     def get_ml_win_probability(self, signal_result: dict, pair: str) -> float:
         """Get ML model's predicted win probability for this trade setup."""

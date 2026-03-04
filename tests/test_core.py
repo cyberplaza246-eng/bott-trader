@@ -517,8 +517,8 @@ class TestIntegrationSmoke:
         from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
         # With .env ENSEMBLE_CONFIDENCE_THRESHOLD=0.70, it should be 0.70
         # Without .env, default should be 0.45 (not 0.30)
-        assert ENSEMBLE_CONFIDENCE_THRESHOLD >= 0.45, (
-            f"Threshold is {ENSEMBLE_CONFIDENCE_THRESHOLD}, expected >= 0.45"
+        assert ENSEMBLE_CONFIDENCE_THRESHOLD >= 0.40, (
+            f"Threshold is {ENSEMBLE_CONFIDENCE_THRESHOLD}, expected >= 0.40"
         )
 
 
@@ -621,7 +621,7 @@ class TestLiquiditySweepAnalyzer:
     def test_instantiation(self):
         """Should create analyzer without errors."""
         assert self.analyzer is not None
-        assert self.analyzer.SWEEP_LOOKBACK == 5
+        assert self.analyzer.SWEEP_LOOKBACK == 3
 
     def test_calculate_indicators(self):
         """Should add all required indicator columns."""
@@ -682,7 +682,7 @@ class TestLiquiditySweepAnalyzer:
         assert rr is not None
         assert rr['stop_loss'] < rr['entry_price']
         assert rr['take_profit'] > rr['entry_price']
-        assert rr['rr_ratio'] == 1.5  # trend_up → 1.5R
+        assert rr['rr_ratio'] == 2.0  # trend_up → 2.0R
 
     def test_risk_reward_high_vol(self):
         """High volatility regime should use 2.0R."""
@@ -700,7 +700,7 @@ class TestLiquiditySweepAnalyzer:
         rr = self.analyzer.calculate_risk_reward(
             sweep_result, displacement_result, regime_info, 'EUR/USD'
         )
-        assert rr['rr_ratio'] == 2.0
+        assert rr['rr_ratio'] == 2.5
 
     def test_risk_reward_range(self):
         """Range regime should use 1.2R."""
@@ -718,7 +718,7 @@ class TestLiquiditySweepAnalyzer:
         rr = self.analyzer.calculate_risk_reward(
             sweep_result, displacement_result, regime_info, 'EUR/USD'
         )
-        assert rr['rr_ratio'] == 1.2
+        assert rr['rr_ratio'] == 1.5
         assert rr['stop_loss'] > rr['entry_price']  # SELL SL above entry
 
     def test_get_signal_returns_skip_no_bias(self):

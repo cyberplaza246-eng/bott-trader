@@ -426,7 +426,12 @@ class TradingBot:
                 bot_logger.info(f"\n{pair} [{timeframe_key}] Analysis:")
                 bot_logger.info(f"  Signal: {signal_result['signal']}")
                 bot_logger.info(f"  Confidence: {signal_result['confidence']:.1%}")
-                bot_logger.info(f"  Models Agreement: {signal_result['models_agreement']}/{signal_result.get('total_models', 8)}")
+                sweep_model = signal_result.get('models', {}).get('sweep', {})
+                bot_logger.info(
+                    f"  Sweep: {sweep_model.get('signal', 'N/A')} "
+                    f"(MSS={'\u2713' if sweep_model.get('mss_confirmed') else '\u2717'}) | "
+                    f"Context: {signal_result['models_agreement']} models aligned"
+                )
                 bot_logger.info(f"  Market Regime: {regime}")
                 bot_logger.info(f"  Details: {signal_result['detailed_reason']}")
 
@@ -448,9 +453,10 @@ class TradingBot:
                 
                 # Execute trade if signal is strong enough
                 threshold = self.ensemble.learner.get_adjusted_threshold()
+                sweep_m = signal_result.get('models', {}).get('sweep', {})
                 bot_logger.info(
                     f"  🔑 Trade gate: confidence={signal_result['confidence']:.2%} vs threshold={threshold:.2%} | "
-                    f"agreement={signal_result['models_agreement']}/{MIN_MODELS_AGREEMENT} needed | "
+                    f"sweep={'✓' if sweep_m.get('signal') in ('BUY','SELL') else '✗'} | "
                     f"signal={signal_result['signal']} | drawdown_prot={'ON' if self.ensemble.learner.in_drawdown_protection else 'OFF'}"
                 )
 
@@ -589,11 +595,9 @@ class TradingBot:
                 else:
                     # Log why the signal didn't pass
                     if signal_result['signal'] == 'SKIP':
-                        bot_logger.info(f"  ❌ {pair}: signal is SKIP — no trade")
+                        bot_logger.info(f"  ❌ {pair}: sweep gate did not fire — no trade")
                     elif signal_result['confidence'] < threshold:
                         bot_logger.info(f"  ❌ {pair}: confidence {signal_result['confidence']:.2%} < threshold {threshold:.2%}")
-                    elif signal_result['models_agreement'] < MIN_MODELS_AGREEMENT:
-                        bot_logger.info(f"  ❌ {pair}: only {signal_result['models_agreement']} models agree (need {MIN_MODELS_AGREEMENT})")
                 
                 # Update open positions
                 self._update_positions(pair)
