@@ -205,24 +205,30 @@ class LiquiditySweepAnalyzer:
 
         for i in range(lookback, n - lookback):
             # Swing High: bar[i] high >= all bars in [i-lookback, i+lookback]
+            # Allow ties (uniqueness=1 was too strict for flat/quiet markets)
             window_highs = highs[i - lookback: i + lookback + 1]
-            if highs[i] == window_highs.max() and np.sum(window_highs == highs[i]) == 1:
-                swing_points.append({
-                    'bar_idx': i,
-                    'price': float(highs[i]),
-                    'swing_type': 'high',
-                    'label': None,
-                })
+            if highs[i] == window_highs.max():
+                # If tied, only count if this is the FIRST occurrence (leftmost)
+                first_max_pos = np.argmax(window_highs == highs[i])
+                if first_max_pos == lookback:  # bar[i] is at position 'lookback' in the window
+                    swing_points.append({
+                        'bar_idx': i,
+                        'price': float(highs[i]),
+                        'swing_type': 'high',
+                        'label': None,
+                    })
 
             # Swing Low: bar[i] low <= all bars in [i-lookback, i+lookback]
             window_lows = lows[i - lookback: i + lookback + 1]
-            if lows[i] == window_lows.min() and np.sum(window_lows == lows[i]) == 1:
-                swing_points.append({
-                    'bar_idx': i,
-                    'price': float(lows[i]),
-                    'swing_type': 'low',
-                    'label': None,
-                })
+            if lows[i] == window_lows.min():
+                first_min_pos = np.argmax(window_lows == lows[i])
+                if first_min_pos == lookback:
+                    swing_points.append({
+                        'bar_idx': i,
+                        'price': float(lows[i]),
+                        'swing_type': 'low',
+                        'label': None,
+                    })
 
         # Sort by bar index
         swing_points.sort(key=lambda x: x['bar_idx'])
@@ -295,6 +301,7 @@ class LiquiditySweepAnalyzer:
 
         # ── True Swing Detection ────────────────────────────────────
         swing_points = self.detect_swing_points(df_5m, lookback=self.SWING_LOOKBACK)
+        bot_logger.debug(f"detect_regime: {len(df_5m)} bars, ADX={adx:.1f}, swings={len(swing_points)}, lookback={self.SWING_LOOKBACK}")
 
         # Need at least 4 swing points to establish structure
         if len(swing_points) < self.SWING_MIN_POINTS:
@@ -642,14 +649,14 @@ class LiquiditySweepAnalyzer:
 
         # ── Find internal structure level to break ──────────────────
         # Look at candles BEFORE the sweep for the structure level
-        pre_sweep_df = df_1m.iloc[max(0, abs_sweep_idx - 20):abs_sweep_idx]
+        pre_sweep_df = df_1m.iloc[max(0, abs_sweep_idx - 40):abs_sweep_idx]
 
-        if len(pre_sweep_df) < 5:
+        if len(pre_sweep_df) < 3:
             result['details'] = 'Not enough pre-sweep data for MSS detection'
             return result
 
         # Find swing points in the pre-sweep region
-        pre_swing_points = self.detect_swing_points(pre_sweep_df, lookback=min(3, self.SWING_LOOKBACK))
+        pre_swing_points = self.detect_swing_points(pre_sweep_df, lookback=min(2, self.SWING_LOOKBACK))
 
         mss_level = None
 
@@ -754,6 +761,44 @@ class LiquiditySweepAnalyzer:
                         ),
                     })
                     return result
+
+        # ── Fallback: in relaxed mode, the sweep candle itself IS the
+        #    displacement if it recovered through the swept level ──────
+        if relaxed and sweep_result.get('detected'):
+            sweep_candle = df_1m.iloc[sweep_idx]
+            sc_close = float(sweep_candle['close'])
+            sc_open = float(sweep_candle['open'])
+            sc_high = float(sweep_candle['high'])
+            sc_low = float(sweep_candle['low'])
+            sc_range = sc_high - sc_low
+            sc_body = abs(sc_close - sc_open)
+            sc_body_ratio = sc_body / sc_range if sc_range > 0 else 0
+
+            is_bullish_recovery = direction == 'BUY' and sc_close > sc_open and sc_body_ratio >= 0.10
+            is_bearish_recovery = direction == 'SELL' and sc_close < sc_open and sc_body_ratio >= 0.10
+
+            if is_bullish_recovery or is_bearish_recovery:
+                entry = sc_close
+                result.update({
+                    'confirmed': True,
+                    'mss_level': mss_level,
+                    'entry_price': entry,
+                    'trigger_level': entry,
+                    'displacement_candle': {
+                        'is_displacement': True,
+                        'body_ratio': sc_body_ratio,
+                        'volume_ratio': float(sweep_candle.get('volume_ratio', 1.0) or 1.0),
+                        'close': sc_close,
+                        'high': sc_high,
+                        'low': sc_low,
+                    },
+                    'details': (
+                        f"{'Bullish' if direction == 'BUY' else 'Bearish'} MSS (sweep-recovery): "
+                        f"close={sc_close:.5f}, body={sc_body_ratio:.0%} "
+                        f"[relaxed-range, sweep=displacement]"
+                    ),
+                })
+                return result
 
         result['details'] = f'No MSS displacement through {mss_level:.5f} after sweep'
         return result
@@ -1017,12 +1062,15 @@ class LiquiditySweepAnalyzer:
             result['details'] = f"Indicator calculation failed: {e}"
             return result
 
-        if df_5m is not None and len(df_5m) >= 60:
+        if df_5m is not None and len(df_5m) >= 30:
             try:
                 if 'ema_20' not in df_5m.columns:
                     df_5m = self.calculate_indicators(df_5m)
-            except Exception:
+            except Exception as e:
+                bot_logger.warning(f"⚠️ 5M indicator calc failed: {type(e).__name__}: {e}")
                 df_5m = None
+        elif df_5m is not None:
+            bot_logger.warning(f"⚠️ 5M data too short for indicators: {len(df_5m)} rows (need 30)")
 
         # ── Step 1: Market conditions gate ────────────────────────────
         ok, reason = self.check_market_conditions(df_1m, pair, spread)
@@ -1033,6 +1081,10 @@ class LiquiditySweepAnalyzer:
 
         # ── Step 2: 5M True Swing Structure & Bias (Layer 1) ─────────
         regime_info = self.detect_regime(df_5m)
+        bot_logger.info(f"📊 {pair} detect_regime: df_5m={'None' if df_5m is None else len(df_5m)}, "
+                        f"ADX={regime_info.get('adx', '?')}, "
+                        f"swings={len(regime_info.get('swing_points', []))}, "
+                        f"bias={regime_info.get('bias')}")
         result['regime'] = regime_info['regime']
         result['bias'] = regime_info['bias']
 

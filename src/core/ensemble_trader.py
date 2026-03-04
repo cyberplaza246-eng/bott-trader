@@ -120,13 +120,17 @@ class EnsembleTrader:
         broker_spread = None
         if self.broker:
             try:
-                df_5m = self.broker.get_candles(pair, '5m', count=250)
-            except Exception:
-                pass
+                df_5m = self.broker.get_candles(pair, 5, num_candles=250)
+                if df_5m is not None:
+                    bot_logger.info(f"📊 {pair} 5M fetch OK: {len(df_5m)} rows")
+                else:
+                    bot_logger.warning(f"⚠️ {pair} 5M fetch returned None")
+            except Exception as e:
+                bot_logger.warning(f"⚠️ {pair} 5M fetch EXCEPTION: {type(e).__name__}: {e}")
             try:
                 broker_spread = self.broker.get_spread(pair)
-            except Exception:
-                pass
+            except Exception as e:
+                bot_logger.warning(f"⚠️ {pair} spread fetch failed: {e}")
 
         # ── Step 3: Run sweep gate (PRIMARY — decides entry) ─────────
         sweep_signal = self.sweep.get_signal(

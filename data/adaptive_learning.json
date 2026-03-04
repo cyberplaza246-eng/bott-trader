@@ -14,22 +14,22 @@
   "pair_stats": {
     "EUR/USD": {
       "wins": 0,
-      "losses": 42,
-      "total_pnl": -210.0
+      "losses": 30,
+      "total_pnl": -150.0
     }
   },
   "session_stats": {
     "asian": {
       "wins": 0,
-      "losses": 42
+      "losses": 30
     }
   },
   "pair_model_accuracy": {},
   "session_pair_stats": {
     "asian:EUR/USD": {
       "wins": 0,
-      "losses": 42,
-      "total_pnl": -210.0
+      "losses": 30,
+      "total_pnl": -150.0
     }
   },
   "model_combos": {},
@@ -37,21 +37,21 @@
   "regime_stats": {
     "trending": {
       "wins": 0,
-      "losses": 42,
-      "total_pnl": -210.0
+      "losses": 30,
+      "total_pnl": -150.0
     }
   },
   "hourly_stats": {
-    "2": {
+    "5": {
       "wins": 0,
-      "losses": 42,
-      "total_pnl": -210.0
+      "losses": 30,
+      "total_pnl": -150.0
     }
   },
   "confidence_threshold": 0.53,
-  "consecutive_losses": 42,
+  "consecutive_losses": 30,
   "consecutive_wins": 0,
-  "max_consecutive_losses": 42,
+  "max_consecutive_losses": 30,
   "peak_balance": 0.0,
   "current_drawdown_pct": 0,
   "in_drawdown_protection": false,
@@ -63,9 +63,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:56:40.547382",
+      "timestamp": "2026-03-04T05:10:12.416266",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -74,9 +74,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:56:40.548536",
+      "timestamp": "2026-03-04T05:10:12.417379",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -85,9 +85,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:56:40.553222",
+      "timestamp": "2026-03-04T05:10:12.418321",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -96,9 +96,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:56:40.555590",
+      "timestamp": "2026-03-04T05:10:12.419557",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -107,9 +107,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:56:40.557650",
+      "timestamp": "2026-03-04T05:10:12.420757",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -118,9 +118,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:56:40.560255",
+      "timestamp": "2026-03-04T05:10:12.421996",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -129,9 +129,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:51.103212",
+      "timestamp": "2026-03-04T05:11:18.621177",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -140,9 +140,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:51.105614",
+      "timestamp": "2026-03-04T05:11:18.622630",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -151,9 +151,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:51.106946",
+      "timestamp": "2026-03-04T05:11:18.623936",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -162,9 +162,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:51.108278",
+      "timestamp": "2026-03-04T05:11:18.625266",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -173,9 +173,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:51.109603",
+      "timestamp": "2026-03-04T05:11:18.627358",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -184,9 +184,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:51.110944",
+      "timestamp": "2026-03-04T05:11:18.628953",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -195,9 +195,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:54.612091",
+      "timestamp": "2026-03-04T05:11:21.532010",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -206,9 +206,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:54.614147",
+      "timestamp": "2026-03-04T05:11:21.533607",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -217,9 +217,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:54.615923",
+      "timestamp": "2026-03-04T05:11:21.535009",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -228,9 +228,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:54.617682",
+      "timestamp": "2026-03-04T05:11:21.536470",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -239,9 +239,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:54.619448",
+      "timestamp": "2026-03-04T05:11:21.537878",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -250,9 +250,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:57:54.621239",
+      "timestamp": "2026-03-04T05:11:21.539353",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -261,9 +261,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:01.119653",
+      "timestamp": "2026-03-04T05:11:27.564195",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -272,9 +272,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:01.121610",
+      "timestamp": "2026-03-04T05:11:27.565897",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -283,9 +283,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:01.123390",
+      "timestamp": "2026-03-04T05:11:27.567478",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -294,9 +294,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:01.125155",
+      "timestamp": "2026-03-04T05:11:27.569015",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -305,9 +305,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:01.126828",
+      "timestamp": "2026-03-04T05:11:27.570598",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -316,9 +316,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:01.128690",
+      "timestamp": "2026-03-04T05:11:27.572143",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -327,9 +327,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:11.430067",
+      "timestamp": "2026-03-04T05:11:37.218073",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -338,9 +338,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:11.432059",
+      "timestamp": "2026-03-04T05:11:37.219745",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -349,9 +349,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:11.433685",
+      "timestamp": "2026-03-04T05:11:37.221275",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -360,9 +360,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:11.435309",
+      "timestamp": "2026-03-04T05:11:37.222965",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -371,9 +371,9 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:11.436960",
+      "timestamp": "2026-03-04T05:11:37.224779",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     },
     {
@@ -382,260 +382,128 @@
       "model_signals": {},
       "signal": "BUY",
       "regime": "trending",
-      "timestamp": "2026-03-04T02:58:11.438587",
+      "timestamp": "2026-03-04T05:11:37.226440",
       "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:17.417543",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:17.419801",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:17.421826",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:17.423869",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:17.425775",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:17.427714",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:22.919683",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:22.921622",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:22.927395",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:22.929093",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:22.930822",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-04T02:58:22.932660",
-      "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "is_win": false
     }
   ],
   "loss_patterns": {
     "pair:EUR/USD": {
-      "count": 42,
-      "total_loss": 210.0
+      "count": 30,
+      "total_loss": 150.0
     },
     "session:asian": {
-      "count": 42,
-      "total_loss": 210.0
+      "count": 30,
+      "total_loss": 150.0
     },
     "pair_session:EUR/USD:asian": {
-      "count": 42,
-      "total_loss": 210.0
+      "count": 30,
+      "total_loss": 150.0
     },
     "pair_regime:EUR/USD:trending": {
-      "count": 42,
-      "total_loss": 210.0
+      "count": 30,
+      "total_loss": 150.0
     },
-    "hour:2": {
-      "count": 42,
-      "total_loss": 210.0
+    "hour:5": {
+      "count": 30,
+      "total_loss": 150.0
     },
     "signal:BUY": {
-      "count": 42,
-      "total_loss": 210.0
+      "count": 30,
+      "total_loss": 150.0
     }
   },
   "recent_trades_window": [
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:17.421835"
+      "timestamp": "2026-03-04T05:11:27.567486"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:17.423877"
+      "timestamp": "2026-03-04T05:11:27.569022"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:17.425782"
+      "timestamp": "2026-03-04T05:11:27.570605"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:17.427722"
+      "timestamp": "2026-03-04T05:11:27.572151"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:22.919690"
+      "timestamp": "2026-03-04T05:11:37.218080"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:22.921630"
+      "timestamp": "2026-03-04T05:11:37.219754"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:22.927403"
+      "timestamp": "2026-03-04T05:11:37.221282"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:22.929101"
+      "timestamp": "2026-03-04T05:11:37.222972"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:22.930830"
+      "timestamp": "2026-03-04T05:11:37.224786"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 2,
+      "hour": 5,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T02:58:22.932668"
+      "timestamp": "2026-03-04T05:11:37.226447"
     }
   ],
   "session_atr_profiles": {},
@@ -645,5 +513,5 @@
   "time_exit_candles": 8,
   "time_exit_outcomes": [],
   "atr_regime": "neutral",
-  "last_updated": "2026-03-04T02:58:22.933372"
+  "last_updated": "2026-03-04T05:11:37.227232"
 }

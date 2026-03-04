@@ -482,7 +482,9 @@ class TradingBot:
                             'count': 1,
                             'time': datetime.now(),
                         }
-                    if self._signal_confirmation[confirm_key]['count'] < 2:
+                    # 5m signals already waited 5 minutes — skip extra confirmation
+                    required_count = 1 if timeframe_key == '5m' else 2
+                    if self._signal_confirmation[confirm_key]['count'] < required_count:
                         bot_logger.info(
                             f"  ⏳ Signal confirmation: {pair} {cur_dir} — "
                             f"wait 1 more cycle (count={self._signal_confirmation[confirm_key]['count']})"
@@ -492,7 +494,7 @@ class TradingBot:
                     else:
                         bot_logger.info(
                             f"  ✅ Signal confirmed: {pair} {cur_dir} — "
-                            f"2 consecutive cycles"
+                            f"{'5m immediate' if timeframe_key == '5m' else '2 consecutive cycles'}"
                         )
                 else:
                     # SKIP — reset confirmation
