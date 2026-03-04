@@ -266,7 +266,7 @@ class LiquiditySweepAnalyzer:
             'swing_points': [], 'last_swing_high': None, 'last_swing_low': None,
         }
 
-        if df_5m is None or len(df_5m) < 60:
+        if df_5m is None or len(df_5m) < 20:
             return base_result
 
         # Ensure indicators exist
@@ -1024,15 +1024,42 @@ class LiquiditySweepAnalyzer:
         result['bias'] = regime_info['bias']
 
         if regime_info['bias'] is None:
-            result['details'] = (
-                f"🚫 No directional bias — regime={regime_info['regime']}, "
-                f"ADX={regime_info['adx']:.1f}"
-            )
-            bot_logger.info(
-                f"🚫 Sweep skip {pair}: no bias "
-                f"(regime={regime_info['regime']}, ADX={regime_info['adx']:.1f})"
-            )
-            return result
+            # Infer bias from 1M EMA instead of blocking
+            if df_1m is not None and len(df_1m) >= 20:
+                if 'ema_20' not in df_1m.columns:
+                    try:
+                        df_1m = self.calculate_indicators(df_1m)
+                    except Exception:
+                        pass
+                if 'ema_20' in df_1m.columns and 'ema_50' in df_1m.columns:
+                    ema20 = float(df_1m['ema_20'].iloc[-1])
+                    ema50 = float(df_1m['ema_50'].iloc[-1])
+                    close_1m = float(df_1m['close'].iloc[-1])
+                    if close_1m > ema20 > ema50:
+                        regime_info['bias'] = 'BUY'
+                        regime_info['regime'] = 'range'
+                    elif close_1m < ema20 < ema50:
+                        regime_info['bias'] = 'SELL'
+                        regime_info['regime'] = 'range'
+                    else:
+                        # Use close vs EMA20 as tiebreaker
+                        regime_info['bias'] = 'BUY' if close_1m > ema20 else 'SELL'
+                        regime_info['regime'] = 'range'
+                    result['regime'] = regime_info['regime']
+                    result['bias'] = regime_info['bias']
+                    bot_logger.info(
+                        f"📊 {pair} no 5M bias → inferred {regime_info['bias']} from 1M EMA"
+                    )
+            if regime_info['bias'] is None:
+                result['details'] = (
+                    f"🚫 No directional bias — regime={regime_info['regime']}, "
+                    f"ADX={regime_info['adx']:.1f}"
+                )
+                bot_logger.info(
+                    f"🚫 Sweep skip {pair}: no bias "
+                    f"(regime={regime_info['regime']}, ADX={regime_info['adx']:.1f})"
+                )
+                return result
 
         bot_logger.info(
             f"📊 {pair} regime={regime_info['regime']}, bias={regime_info['bias']}, "
