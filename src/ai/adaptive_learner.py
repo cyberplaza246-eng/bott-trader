@@ -782,7 +782,7 @@ class AdaptiveLearner:
         sp_key = f"{session}:{pair}"
         stats = self.session_pair_stats.get(sp_key, {'wins': 0, 'losses': 0})
         total = stats['wins'] + stats['losses']
-        if total < 8:
+        if total < 25:
             return False
         win_rate = stats['wins'] / total
         if win_rate < 0.25:

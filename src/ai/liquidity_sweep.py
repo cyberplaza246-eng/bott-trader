@@ -940,11 +940,11 @@ class LiquiditySweepAnalyzer:
             )
 
         # Spread vs ATR — reject if spread eats too much of the expected move
-        # 60% threshold: generous to allow more trades
+        # 90% threshold: very generous to allow trading in quiet hours
         actual_spread = spread if spread is not None else config['spread_sim']
-        if atr > 0 and actual_spread > 0.60 * atr:
+        if atr > 0 and actual_spread > 0.90 * atr:
             return False, (
-                f"Spread too wide: {actual_spread:.5f} > 60% of ATR {atr:.5f}"
+                f"Spread too wide: {actual_spread:.5f} > 90% of ATR {atr:.5f}"
             )
 
         # Exhaustion spike
