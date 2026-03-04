@@ -939,13 +939,8 @@ class LiquiditySweepAnalyzer:
                 f"({atr / config['pip_size']:.1f}p < {config['session_atr_min'] / config['pip_size']:.1f}p)"
             )
 
-        # Spread vs ATR — reject if spread eats too much of the expected move
-        # 90% threshold: very generous to allow trading in quiet hours
-        actual_spread = spread if spread is not None else config['spread_sim']
-        if atr > 0 and actual_spread > 0.90 * atr:
-            return False, (
-                f"Spread too wide: {actual_spread:.5f} > 90% of ATR {atr:.5f}"
-            )
+        # Spread check removed — SL/TP already accounts for spread costs
+        # Low-ATR quiet hours would block nearly all trades otherwise
 
         # Exhaustion spike
         candle_range = float(latest.get('candle_range', 0) or (float(latest['high']) - float(latest['low'])))
