@@ -961,6 +961,7 @@ class LiquiditySweepAnalyzer:
         # Minimum SL check: must be > 3× spread
         spread = config['spread_sim']
         if sl_distance < spread * 3:
+            bot_logger.info(f"⚠️ {pair} R:R rejected: SL={sl_pips:.1f}p < 3×spread ({spread*3/pip_size:.1f}p)")
             return None
 
         return {
@@ -1160,7 +1161,8 @@ class LiquiditySweepAnalyzer:
 
         rr = self.calculate_risk_reward(sweep, mss, regime_info, pair)
         if rr is None:
-            result['details'] = "🚫 R:R calculation failed (SL too tight)"
+            result['details'] = f"🚫 R:R calculation failed (SL too tight for {pair})"
+            bot_logger.info(f"🚫 {pair} sweep+MSS passed but R:R failed — SL too tight")
             return result
 
         result['risk_reward'] = rr
