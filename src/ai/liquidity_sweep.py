@@ -602,20 +602,25 @@ class LiquiditySweepAnalyzer:
     #  LAYER 3: MARKET STRUCTURE SHIFT (MSS) + DISPLACEMENT
     # =================================================================
 
-    def detect_mss(self, df_1m, sweep_result):
+    def detect_mss(self, df_1m, sweep_result, regime='range'):
         """Detect Market Structure Shift after a liquidity sweep.
 
         For a bullish MSS after bullish sweep:
           - Find the last internal LH (lower high) BEFORE the sweep
           - A displacement candle must BREAK above that LH
-          - The displacement candle must have bodyRatio ≥ 60%, volume ≥ 1.3×
+          - The displacement candle must have bodyRatio ≥ 25%, volume ≥ 1.0×
 
         For bearish MSS: find last internal HL, displacement breaks below it.
+
+        In RANGE regime (ADX~0): relaxed mode — displacement candle just
+        needs right direction + body ratio, doesn't need to close beyond
+        the full MSS level (structure is too tight in quiet markets).
 
         Returns:
             dict: {confirmed, mss_level, entry_price, trigger_level,
                    displacement_candle, details}
         """
+        relaxed = regime in ('range', 'low_volatility')
         result = {
             'confirmed': False,
             'mss_level': None,
@@ -691,18 +696,18 @@ class LiquiditySweepAnalyzer:
             candle_low = float(candle['low'])
 
             if direction == 'BUY':
-                # Displacement must close ABOVE the MSS level
-                if candle_close > mss_level:
-                    # Entry depends on mode
+                # Full mode: must close ABOVE mss_level
+                # Relaxed (range): just need a bullish displacement candle
+                mss_ok = candle_close > mss_level or relaxed
+                if mss_ok:
                     if self.ENTRY_MODE == 'retest':
-                        # Entry at retest of broken MSS level
                         trigger = mss_level
-                        entry = mss_level  # Limit order at the broken level
+                        entry = mss_level
                     else:
-                        # Aggressive: enter at displacement close
                         trigger = candle_high
                         entry = candle_close
 
+                    label = 'above' if candle_close > mss_level else 'toward'
                     result.update({
                         'confirmed': True,
                         'mss_level': mss_level,
@@ -710,16 +715,18 @@ class LiquiditySweepAnalyzer:
                         'trigger_level': trigger,
                         'displacement_candle': disp,
                         'details': (
-                            f"Bullish MSS: displaced above {mss_level:.5f}, "
+                            f"Bullish MSS: displaced {label} {mss_level:.5f}, "
                             f"close={candle_close:.5f}, body={disp['body_ratio']:.0%}, "
                             f"vol={disp['volume_ratio']:.2f}x, "
                             f"mode={self.ENTRY_MODE}"
+                            f"{' [relaxed-range]' if relaxed else ''}"
                         ),
                     })
                     return result
 
             elif direction == 'SELL':
-                if candle_close < mss_level:
+                mss_ok = candle_close < mss_level or relaxed
+                if mss_ok:
                     if self.ENTRY_MODE == 'retest':
                         trigger = mss_level
                         entry = mss_level
@@ -727,6 +734,7 @@ class LiquiditySweepAnalyzer:
                         trigger = candle_low
                         entry = candle_close
 
+                    label = 'below' if candle_close < mss_level else 'toward'
                     result.update({
                         'confirmed': True,
                         'mss_level': mss_level,
@@ -734,10 +742,11 @@ class LiquiditySweepAnalyzer:
                         'trigger_level': trigger,
                         'displacement_candle': disp,
                         'details': (
-                            f"Bearish MSS: displaced below {mss_level:.5f}, "
+                            f"Bearish MSS: displaced {label} {mss_level:.5f}, "
                             f"close={candle_close:.5f}, body={disp['body_ratio']:.0%}, "
                             f"vol={disp['volume_ratio']:.2f}x, "
                             f"mode={self.ENTRY_MODE}"
+                            f"{' [relaxed-range]' if relaxed else ''}"
                         ),
                     })
                     return result
@@ -1073,7 +1082,7 @@ class LiquiditySweepAnalyzer:
         bot_logger.info(f"💧 {pair} {sweep['details']}")
 
         # ── Step 4: Market Structure Shift (Layer 3) ──────────────────
-        mss = self.detect_mss(df_1m, sweep)
+        mss = self.detect_mss(df_1m, sweep, regime=regime_info.get('regime', 'range'))
         result['mss'] = mss
         result['displacement'] = mss  # v1 backward compatibility
 
