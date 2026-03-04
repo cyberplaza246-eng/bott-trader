@@ -62,11 +62,11 @@ class LiquiditySweepAnalyzer:
 
     # ── MSS / Displacement ──────────────────────────────────────────
     VOLUME_CONFIRMATION = 1.0        # Disabled (forex tick vol unreliable) (was 1.30)
-    BODY_RATIO_MIN = 0.40            # Displacement body ≥ 40% of range (was 60%)
+    BODY_RATIO_MIN = 0.25            # Displacement body ≥ 25% of range (lowered for quiet hours)
     RSI_SWEEP_LONG_MAX = 60          # RSI ≤ 60 at bullish sweep (was 45 — too tight)
     RSI_SWEEP_SHORT_MIN = 40         # RSI ≥ 40 at bearish sweep (was 55)
     RSI_SLOPE_WINDOW = 3             # Candles after sweep to check RSI slope (was 2)
-    CONFIRMATION_WINDOW = 15         # Candles after sweep to get MSS (was 5)
+    CONFIRMATION_WINDOW = 20         # Candles after sweep to get MSS (was 15)
 
     # ── Risk Management ─────────────────────────────────────────────
     SL_ATR_BUFFER = 0.20             # SL = sweep wick ± 0.2×ATR
