@@ -267,7 +267,7 @@ def place_order():
         action_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
         entry_price = tick.ask if order_type == "BUY" else tick.bid
 
-        # Place order WITHOUT SL/TP first (some brokers like TradersWay reject them on market orders)
+        # Place order WITHOUT SL/TP first (some brokers reject them on market orders)
         req_base = {
             "action": mt5.TRADE_ACTION_DEAL,
             "symbol": symbol,
