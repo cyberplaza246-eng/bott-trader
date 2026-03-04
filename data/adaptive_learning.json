@@ -14,8 +14,8 @@
   "pair_stats": {
     "EUR/USD": {
       "wins": 0,
-      "losses": 258,
-      "total_pnl": -1290.0
+      "losses": 288,
+      "total_pnl": -1440.0
     }
   },
   "session_stats": {
@@ -33,7 +33,7 @@
     },
     "asian": {
       "wins": 0,
-      "losses": 6
+      "losses": 36
     }
   },
   "pair_model_accuracy": {},
@@ -55,8 +55,8 @@
     },
     "asian:EUR/USD": {
       "wins": 0,
-      "losses": 6,
-      "total_pnl": -30.0
+      "losses": 36,
+      "total_pnl": -180.0
     }
   },
   "model_combos": {},
@@ -64,8 +64,8 @@
   "regime_stats": {
     "trending": {
       "wins": 0,
-      "losses": 258,
-      "total_pnl": -1290.0
+      "losses": 288,
+      "total_pnl": -1440.0
     }
   },
   "hourly_stats": {
@@ -98,12 +98,17 @@
       "wins": 0,
       "losses": 6,
       "total_pnl": -30.0
+    },
+    "2": {
+      "wins": 0,
+      "losses": 30,
+      "total_pnl": -150.0
     }
   },
   "confidence_threshold": 0.53,
-  "consecutive_losses": 258,
+  "consecutive_losses": 288,
   "consecutive_wins": 0,
-  "max_consecutive_losses": 258,
+  "max_consecutive_losses": 288,
   "peak_balance": 0.0,
   "current_drawdown_pct": 0,
   "in_drawdown_protection": false,
@@ -2946,12 +2951,342 @@
       "session": "asian",
       "hour": 1,
       "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:19:40.818622",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:19:40.822827",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:19:40.826722",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:19:40.830631",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:19:40.834528",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:19:40.838551",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:51.096109",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:51.100537",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:51.104591",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:51.108723",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:51.112978",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:51.117268",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:57.383807",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:57.391103",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:57.398335",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:57.405609",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:57.415579",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:20:57.422762",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:02.269064",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:02.274950",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:02.280467",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:02.285872",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:02.291261",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:02.297817",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:08.548660",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:08.555470",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:08.561655",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:08.569316",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:08.575174",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-04T02:21:08.581198",
+      "session": "asian",
+      "hour": 2,
+      "is_win": false
     }
   ],
   "loss_patterns": {
     "pair:EUR/USD": {
-      "count": 258,
-      "total_loss": 1290.0
+      "count": 288,
+      "total_loss": 1440.0
     },
     "session:ny_overlap": {
       "count": 168,
@@ -2962,16 +3297,16 @@
       "total_loss": 840.0
     },
     "pair_regime:EUR/USD:trending": {
-      "count": 258,
-      "total_loss": 1290.0
+      "count": 288,
+      "total_loss": 1440.0
     },
     "hour:15": {
       "count": 72,
       "total_loss": 360.0
     },
     "signal:BUY": {
-      "count": 258,
-      "total_loss": 1290.0
+      "count": 288,
+      "total_loss": 1440.0
     },
     "hour:16": {
       "count": 96,
@@ -3006,108 +3341,112 @@
       "total_loss": 60.0
     },
     "session:asian": {
-      "count": 6,
-      "total_loss": 30.0
+      "count": 36,
+      "total_loss": 180.0
     },
     "pair_session:EUR/USD:asian": {
-      "count": 6,
-      "total_loss": 30.0
+      "count": 36,
+      "total_loss": 180.0
     },
     "hour:1": {
       "count": 6,
       "total_loss": 30.0
+    },
+    "hour:2": {
+      "count": 30,
+      "total_loss": 150.0
     }
   },
   "recent_trades_window": [
     {
       "pair": "EUR/USD",
-      "session": "off_hours",
-      "hour": 22,
+      "session": "asian",
+      "hour": 2,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-03T22:12:42.558277"
-    },
-    {
-      "pair": "EUR/USD",
-      "session": "off_hours",
-      "hour": 22,
-      "regime": "trending",
-      "is_win": false,
-      "pnl": -5.0,
-      "timestamp": "2026-03-03T22:12:42.562085"
-    },
-    {
-      "pair": "EUR/USD",
-      "session": "off_hours",
-      "hour": 22,
-      "regime": "trending",
-      "is_win": false,
-      "pnl": -5.0,
-      "timestamp": "2026-03-03T22:12:42.565836"
-    },
-    {
-      "pair": "EUR/USD",
-      "session": "off_hours",
-      "hour": 22,
-      "regime": "trending",
-      "is_win": false,
-      "pnl": -5.0,
-      "timestamp": "2026-03-03T22:12:42.571502"
+      "timestamp": "2026-03-04T02:21:02.280475"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 1,
+      "hour": 2,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T01:57:56.978116"
+      "timestamp": "2026-03-04T02:21:02.285880"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 1,
+      "hour": 2,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T01:57:56.990077"
+      "timestamp": "2026-03-04T02:21:02.291269"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 1,
+      "hour": 2,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T01:57:56.994902"
+      "timestamp": "2026-03-04T02:21:02.297824"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 1,
+      "hour": 2,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T01:57:56.998773"
+      "timestamp": "2026-03-04T02:21:08.548670"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 1,
+      "hour": 2,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T01:57:57.004120"
+      "timestamp": "2026-03-04T02:21:08.555478"
     },
     {
       "pair": "EUR/USD",
       "session": "asian",
-      "hour": 1,
+      "hour": 2,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T01:57:57.009036"
+      "timestamp": "2026-03-04T02:21:08.561663"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "asian",
+      "hour": 2,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-04T02:21:08.569324"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "asian",
+      "hour": 2,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-04T02:21:08.575181"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "asian",
+      "hour": 2,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-04T02:21:08.581206"
     }
   ],
   "session_atr_profiles": {},
@@ -3117,5 +3456,5 @@
   "time_exit_candles": 8,
   "time_exit_outcomes": [],
   "atr_regime": "neutral",
-  "last_updated": "2026-03-04T01:57:57.009817"
+  "last_updated": "2026-03-04T02:21:08.582672"
 }

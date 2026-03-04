@@ -30,17 +30,17 @@ class LiquiditySweepAnalyzer:
     # ── Pair Configuration ──────────────────────────────────────────
     PAIR_CONFIG = {
         'EUR/USD': {
-            'session_atr_min': 0.00010,   # 1.0 pip (lowered for 25+/day frequency)
+            'session_atr_min': 0.00003,   # 0.3 pip (trade even in quiet hours)
             'spread_sim': 0.00015,
             'pip_size': 0.0001,
         },
         'GBP/USD': {
-            'session_atr_min': 0.00015,   # 1.5 pips
+            'session_atr_min': 0.00004,   # 0.4 pips (trade even in quiet hours)
             'spread_sim': 0.00020,
             'pip_size': 0.0001,
         },
         'USD/JPY': {
-            'session_atr_min': 0.015,     # 1.5 pips
+            'session_atr_min': 0.005,     # 0.5 pips (trade even in quiet hours)
             'spread_sim': 0.020,
             'pip_size': 0.01,
         },
