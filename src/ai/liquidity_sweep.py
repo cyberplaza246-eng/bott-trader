@@ -676,8 +676,10 @@ class LiquiditySweepAnalyzer:
 
         result['mss_level'] = mss_level
 
-        # ── Check candles AFTER sweep for displacement through MSS level ─
-        check_start = sweep_idx + 1
+        # ── Check candles AT and AFTER sweep for displacement through MSS ─
+        # In relaxed mode, include the sweep candle itself (it already showed
+        # conviction by recovering through the swept level).
+        check_start = sweep_idx if relaxed else sweep_idx + 1
         if check_start >= 0:
             check_start = -1
 
@@ -686,7 +688,9 @@ class LiquiditySweepAnalyzer:
                 continue
 
             candle = df_1m.iloc[i]
-            disp = self._check_displacement_candle(candle, df_1m.iloc[i - 1], direction)
+            disp = self._check_displacement_candle(
+                candle, df_1m.iloc[i - 1], direction, relaxed=relaxed
+            )
 
             if not disp['is_displacement']:
                 continue
@@ -754,13 +758,17 @@ class LiquiditySweepAnalyzer:
         result['details'] = f'No MSS displacement through {mss_level:.5f} after sweep'
         return result
 
-    def _check_displacement_candle(self, candle, prev_candle, direction):
+    def _check_displacement_candle(self, candle, prev_candle, direction, relaxed=False):
         """Check if a candle qualifies as a displacement candle.
 
-        Requirements:
-          1. Body ≥ 60% of total range
-          2. Volume ≥ 1.3× average
-          3. Closes beyond prior candle's high/low
+        In normal mode:
+          1. Body ≥ 25% of total range
+          2. Volume ≥ 1.0× average (effectively disabled)
+          3. Correct direction (bullish for BUY, bearish for SELL)
+
+        In relaxed mode (range / low_vol regime):
+          - Body ≥ 10% — any non-doji directional candle counts
+          - Or candle close == candle high/low (momentum candle)
 
         Returns:
             dict: {is_displacement, body_ratio, volume_ratio, close, high, low}
@@ -777,18 +785,19 @@ class LiquiditySweepAnalyzer:
         body_ratio = body / candle_range if candle_range > 0 else 0
         vol_ratio = float(candle.get('volume_ratio', 1.0) or 1.0)
 
+        # In relaxed mode, accept any directional candle with body > 10%
+        body_min = 0.10 if relaxed else self.BODY_RATIO_MIN
         is_displacement = False
 
         if direction == 'BUY':
             is_bullish = candle_close > candle_open
-            body_ok = body_ratio >= self.BODY_RATIO_MIN
+            body_ok = body_ratio >= body_min
             volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
-            # Relaxed: just need bullish candle with decent body (no need to close above prev high)
             is_displacement = is_bullish and body_ok and volume_ok
 
         elif direction == 'SELL':
             is_bearish = candle_close < candle_open
-            body_ok = body_ratio >= self.BODY_RATIO_MIN
+            body_ok = body_ratio >= body_min
             volume_ok = vol_ratio >= self.VOLUME_CONFIRMATION
             is_displacement = is_bearish and body_ok and volume_ok
 
