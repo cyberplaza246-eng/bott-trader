@@ -267,14 +267,13 @@ def place_order():
         action_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
         entry_price = tick.ask if order_type == "BUY" else tick.bid
 
+        # Place order WITHOUT SL/TP first (some brokers like TradersWay reject them on market orders)
         req_base = {
             "action": mt5.TRADE_ACTION_DEAL,
             "symbol": symbol,
             "volume": lot_size,
             "type": action_type,
             "price": entry_price,
-            "sl": sl,
-            "tp": tp,
             "deviation": 20,
             "magic": 234000,
             "comment": "AI Trading Bot",
@@ -284,6 +283,39 @@ def place_order():
         print(f"\n{'='*50}")
         print(f"ORDER: {symbol} {order_type} {lot_size} lots | SL={sl} TP={tp}")
         result = _try_order(req_base)
+
+        # If order succeeded, add SL/TP via modify
+        if not isinstance(result, str) and (sl > 0 or tp > 0):
+            import time
+            time.sleep(0.3)  # Brief wait for position to register
+            
+            # Find the position we just opened
+            positions = mt5.positions_get(symbol=symbol)
+            position_ticket = None
+            if positions:
+                bot_positions = [p for p in positions if p.magic == 234000]
+                if bot_positions:
+                    position_ticket = max(p.ticket for p in bot_positions)
+            
+            if not position_ticket:
+                position_ticket = result.order
+                print(f"  ⚠️ Could not find position, using order ticket: {position_ticket}")
+            
+            # Modify to add SL/TP
+            modify_req = {
+                "action": mt5.TRADE_ACTION_SLTP,
+                "symbol": symbol,
+                "position": position_ticket,
+                "sl": sl,
+                "tp": tp,
+            }
+            print(f"  Adding SL/TP to ticket {position_ticket}...")
+            modify_result = mt5.order_send(modify_req)
+            if modify_result and modify_result.retcode == mt5.TRADE_RETCODE_DONE:
+                print(f"  ✅ SL/TP set: SL={sl} TP={tp}")
+            else:
+                err = modify_result.comment if modify_result else mt5.last_error()
+                print(f"  ⚠️ SL/TP modify failed: {err}")
 
     if isinstance(result, str):
         return jsonify({"error": f"Order failed: {result}"}), 400
