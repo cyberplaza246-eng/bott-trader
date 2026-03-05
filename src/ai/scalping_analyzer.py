@@ -592,132 +592,76 @@ class ScalpingAnalyzer:
 
         lookback_data = df.iloc[-self.STRUCTURE_LOOKBACK:]
         atr_buffer = atr * self.SL_STRUCTURE_BUFFER
-        
-        # JPY-specific: Require wider minimum distances due to larger spreads
-        if 'JPY' in pair:
-            min_viable_distance_mult = 0.8  # JPY needs 0.8×ATR minimum
-        else:
-            min_viable_distance_mult = 0.5  # Majors need 0.5×ATR minimum
 
         if direction == 'BUY':
-            # Find significant swing lows with adequate distance
-            swing_lows = {}  # level -> (count, age)
-            for i in range(3, len(lookback_data) - 2):  # Require 3-bar pattern
+            # Find significant swing lows - simplified approach for better levels
+            swing_lows = []
+            for i in range(2, len(lookback_data) - 1):  # Simple 3-candle pattern
                 current_low = lookback_data.iloc[i]['low']
-                prev2_low = lookback_data.iloc[i-2]['low']
                 prev_low = lookback_data.iloc[i-1]['low']
                 next_low = lookback_data.iloc[i+1]['low']
                 
-                # Stronger swing pattern: 3-bar low with good clearance
-                if (current_low < prev2_low and current_low < prev_low and 
-                    current_low < next_low and 
-                    min(prev_low, next_low) - current_low >= atr * 0.1):  # 10% ATR minimum swing
-                    level = round(float(current_low), 5)
-                    age = len(lookback_data) - i  # How recent (lower = more recent)
-                    if level not in swing_lows or swing_lows[level][1] > age:
-                        swing_lows[level] = (swing_lows.get(level, (0, age))[0] + 1, age)
+                # Basic swing low: lower than both neighbors
+                if current_low < prev_low and current_low < next_low:
+                    distance = entry_price - current_low
+                    if distance > 0 and distance <= atr * 2.0:  # Within reasonable range
+                        swing_lows.append((current_low, distance, len(lookback_data) - i))
 
             if swing_lows:
-                # Find valid lows below entry with adequate distance
-                valid_lows = []
-                for level, (count, age) in swing_lows.items():
-                    if level < entry_price:
-                        distance = entry_price - level
-                        # Pre-filter: must meet minimum distance after buffer
-                        potential_sl_distance = distance - atr_buffer
-                        if potential_sl_distance >= atr * min_viable_distance_mult:  # Pair-specific minimum
-                            score = count * 2 + (20 - age)  # Prefer tested + not too old
-                            valid_lows.append((level, count, age, score))
+                # Sort by proximity to entry (closest first)
+                swing_lows.sort(key=lambda x: x[1])
+                structure_level = swing_lows[0][0]
                 
-                if valid_lows:
-                    # Sort by score (tested levels + recency), then distance
-                    valid_lows.sort(key=lambda x: (-x[3], entry_price - x[0]))
-                    structure_level = valid_lows[0][0]
-                    test_count = valid_lows[0][1]
-                    age = valid_lows[0][2]
-                    
-                    sl_level = structure_level - atr_buffer
-                    sl_distance = entry_price - sl_level
-                    
-                    # Cap and floor the SL distance
-                    max_sl = atr * self.SL_MAX_ATR_MULT
-                    min_sl = atr * self.SL_MIN_ATR_MULT
-                    
-                    if sl_distance > max_sl:
-                        sl_distance = max_sl
-                        sl_level = entry_price - sl_distance
-                        
-                    if sl_distance < min_sl:
-                        sl_distance = min_sl
-                        sl_level = entry_price - sl_distance
-                    
-                    test_desc = f" (tested {test_count}x)" if test_count > 1 else ""
-                    age_desc = f" {age}bars ago" if age > 3 else " recent"
-                    return {
-                        'distance': sl_distance,
-                        'level': sl_level,
-                        'reason': f'swing low {structure_level:.5f}{test_desc}{age_desc} + {atr_buffer/atr:.1f}×ATR buffer'
-                    }
+                sl_level = structure_level - atr_buffer
+                sl_distance = entry_price - sl_level
+                
+                # Ensure reasonable bounds
+                min_sl = atr * self.SL_MIN_ATR_MULT
+                max_sl = atr * self.SL_MAX_ATR_MULT
+                
+                sl_distance = max(min_sl, min(sl_distance, max_sl))
+                sl_level = entry_price - sl_distance
+                
+                return {
+                    'distance': sl_distance,
+                    'level': sl_level,
+                    'reason': f'swing low {structure_level:.5f} + {atr_buffer/atr:.1f}×ATR buffer'
+                }
 
-        else:  # SELL
-            # Find significant swing highs with adequate distance
-            swing_highs = {}  # level -> (count, age)
-            for i in range(3, len(lookback_data) - 2):  # Require 3-bar pattern
+        elif direction == 'SELL':
+            # Find significant swing highs - simplified approach for better levels  
+            swing_highs = []
+            for i in range(2, len(lookback_data) - 1):  # Simple 3-candle pattern
                 current_high = lookback_data.iloc[i]['high']
-                prev2_high = lookback_data.iloc[i-2]['high']
                 prev_high = lookback_data.iloc[i-1]['high']
                 next_high = lookback_data.iloc[i+1]['high']
                 
-                # Stronger swing pattern: 3-bar high with good clearance
-                if (current_high > prev2_high and current_high > prev_high and 
-                    current_high > next_high and 
-                    current_high - max(prev_high, next_high) >= atr * 0.1):  # 10% ATR minimum swing
-                    level = round(float(current_high), 5)
-                    age = len(lookback_data) - i  # How recent (lower = more recent)
-                    if level not in swing_highs or swing_highs[level][1] > age:
-                        swing_highs[level] = (swing_highs.get(level, (0, age))[0] + 1, age)
+                # Basic swing high: higher than both neighbors
+                if current_high > prev_high and current_high > next_high:
+                    distance = current_high - entry_price
+                    if distance > 0 and distance <= atr * 2.0:  # Within reasonable range
+                        swing_highs.append((current_high, distance, len(lookback_data) - i))
 
             if swing_highs:
-                # Find valid highs above entry with adequate distance
-                valid_highs = []
-                for level, (count, age) in swing_highs.items():
-                    if level > entry_price:
-                        distance = level - entry_price
-                        # Pre-filter: must meet minimum distance after buffer
-                        potential_sl_distance = distance + atr_buffer
-                        if potential_sl_distance >= atr * min_viable_distance_mult:  # Pair-specific minimum
-                            score = count * 2 + (20 - age)  # Prefer tested + not too old
-                            valid_highs.append((level, count, age, score))
+                # Sort by proximity to entry (closest first)
+                swing_highs.sort(key=lambda x: x[1])
+                structure_level = swing_highs[0][0]
                 
-                if valid_highs:
-                    # Sort by score (tested levels + recency), then distance
-                    valid_highs.sort(key=lambda x: (-x[3], x[0] - entry_price))
-                    structure_level = valid_highs[0][0]
-                    test_count = valid_highs[0][1]
-                    age = valid_highs[0][2]
-                    
-                    sl_level = structure_level + atr_buffer
-                    sl_distance = sl_level - entry_price
-                    
-                    # Cap and floor the SL distance
-                    max_sl = atr * self.SL_MAX_ATR_MULT
-                    min_sl = atr * self.SL_MIN_ATR_MULT
-                    
-                    if sl_distance > max_sl:
-                        sl_distance = max_sl
-                        sl_level = entry_price + sl_distance
-                        
-                    if sl_distance < min_sl:
-                        sl_distance = min_sl
-                        sl_level = entry_price + sl_distance
-                    
-                    test_desc = f" (tested {test_count}x)" if test_count > 1 else ""
-                    age_desc = f" {age}bars ago" if age > 3 else " recent"
-                    return {
-                        'distance': sl_distance,
-                        'level': sl_level,
-                        'reason': f'swing high {structure_level:.5f}{test_desc}{age_desc} + {atr_buffer/atr:.1f}×ATR buffer'
-                    }
+                sl_level = structure_level + atr_buffer
+                sl_distance = sl_level - entry_price
+                
+                # Ensure reasonable bounds
+                min_sl = atr * self.SL_MIN_ATR_MULT
+                max_sl = atr * self.SL_MAX_ATR_MULT
+                
+                sl_distance = max(min_sl, min(sl_distance, max_sl))
+                sl_level = entry_price + sl_distance
+                
+                return {
+                    'distance': sl_distance,
+                    'level': sl_level,
+                    'reason': f'swing high {structure_level:.5f} + {atr_buffer/atr:.1f}×ATR buffer'
+                }
 
         return None
 
@@ -911,12 +855,19 @@ class ScalpingAnalyzer:
         else:
             tp_distance = sl_distance * tp_ratio
 
-        # Move TP 3 pips closer to entry to avoid pullback reversals  
-        tp_pullback_buffer = 3 * pip_size  # 3 pips closer to entry
+        # Move TP closer to entry to avoid pullback reversals (smart adjustment)
+        if structure_tp:
+            # Structure TP: smaller 1.5-pip adjustment to preserve good levels
+            tp_pullback_buffer = 1.5 * pip_size  
+        else:
+            # ATR TP: standard 3-pip adjustment for mathematical targets  
+            tp_pullback_buffer = 3 * pip_size
+            
         tp_distance_adjusted = max(tp_distance - tp_pullback_buffer, sl_distance * 1.2)  # Min 1.2R after adjustment
         
         if tp_distance_adjusted != tp_distance:
-            bot_logger.info(f"📍 TP moved 3p closer: {tp_distance/pip_size:.1f}p → {tp_distance_adjusted/pip_size:.1f}p (pullback protection)")
+            adjustment_pips = (tp_distance - tp_distance_adjusted) / pip_size
+            bot_logger.info(f"📍 TP moved {adjustment_pips:.1f}p closer: {tp_distance/pip_size:.1f}p → {tp_distance_adjusted/pip_size:.1f}p (pullback protection)")
 
         # Calculate price levels
         if direction == 'BUY':
