@@ -31,17 +31,17 @@ class LiquiditySweepAnalyzer:
     PAIR_CONFIG = {
         'EUR/USD': {
             'session_atr_min': 0.00003,   # 0.3 pip (trade even in quiet hours)
-            'spread_sim': 0.00015,
+            'spread_sim': 0.00006,        # 0.6 pips (ECN TradersWay)
             'pip_size': 0.0001,
         },
         'GBP/USD': {
             'session_atr_min': 0.00004,   # 0.4 pips (trade even in quiet hours)
-            'spread_sim': 0.00020,
+            'spread_sim': 0.00010,        # 1.0 pip (ECN TradersWay)
             'pip_size': 0.0001,
         },
         'USD/JPY': {
             'session_atr_min': 0.005,     # 0.5 pips (trade even in quiet hours)
-            'spread_sim': 0.015,          # 1.5 pips (ECN spread for JPY)
+            'spread_sim': 0.008,          # 0.8 pips (ECN TradersWay)
             'pip_size': 0.01,
         },
     }
