@@ -61,9 +61,10 @@ class ScalpingAnalyzer:
 
     # -- Structure-based risk parameters (5m scalping) ---------------
     SL_ATR_MULT = 0.8          # Fallback: SL = 0.8 x ATR if no structure
-    SL_STRUCTURE_BUFFER = 0.15  # Buffer below swing low/high (15% of ATR)
+    SL_STRUCTURE_BUFFER = 0.25  # Buffer below swing low/high (25% of ATR) - increased from 15%
     SL_MAX_ATR_MULT = 1.2      # Max SL = 1.2x ATR (structure + buffer cap)
-    SL_MIN_ATR_MULT = 0.5      # Min SL = 0.5x ATR (too close protection)
+    SL_MIN_ATR_MULT = 0.6      # Min SL = 0.6x ATR (increased from 0.5x for spread safety)
+    SL_MIN_SPREAD_MULT = 4     # Enhanced: Min SL = 4x spread (was 3x) for structure safety
     
     TP_BASE_RATIO = 1.8        # TP = 1.8 x SL — better R:R
     TP_EXPANDING = 2.0         # Wider TP in expanding volatility
@@ -807,11 +808,22 @@ class ScalpingAnalyzer:
             sl_distance = structure_sl['distance']
             sl_level = structure_sl['level']
             sl_reason = structure_sl['reason']
-            bot_logger.info(f"📍 Structure SL: {sl_reason} at {sl_level:.5f} ({sl_distance/pip_size:.1f}p)")
-        else:
+            
+            # Verify structure SL meets spread requirements
+            actual_spread = spread if spread is not None else config['spread_sim']
+            min_sl_by_spread = actual_spread * self.SL_MIN_SPREAD_MULT
+            
+            if sl_distance >= min_sl_by_spread:
+                bot_logger.info(f"📍 Structure SL: {sl_reason} at {sl_level:.5f} ({sl_distance/pip_size:.1f}p)")
+            else:
+                bot_logger.info(f"⚠️ Structure SL too tight: {sl_distance/pip_size:.1f}p < {min_sl_by_spread/pip_size:.1f}p req'd → ATR fallback")
+                structure_sl = None
+        
+        if not structure_sl:
             # Fallback to ATR-based SL
             sl_distance = atr * self.SL_ATR_MULT
             sl_reason = f"ATR fallback (0.8×{atr/pip_size:.1f}p)"
+            bot_logger.info(f"📍 ATR SL: {sl_reason} ({sl_distance/pip_size:.1f}p)")
 
         # Reject: SL < spread x 3
         actual_spread = spread if spread is not None else config['spread_sim']
