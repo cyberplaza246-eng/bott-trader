@@ -105411,3 +105411,8 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}
