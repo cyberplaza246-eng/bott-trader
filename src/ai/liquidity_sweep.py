@@ -1001,49 +1001,68 @@ class LiquiditySweepAnalyzer:
         if sl_distance <= 0:
             return None
 
-        # TP ratio based on regime (scalping-optimized)
+        # TP ratio based on regime (fallback if no S/R level found)
         regime = regime_info.get('regime', 'trend_up')
         tp_ratio_map = {
-            'high_volatility': 1.5,   # Quick exits in volatile markets
-            'trend_up': 1.3,          # Trend continuation — grab quick profit
-            'trend_down': 1.3,        # Trend continuation — grab quick profit
-            'range': 1.2,             # Range = tight TP, high hit-rate
-            'low_volatility': 1.1,    # Low vol = very tight TP
+            'high_volatility': 1.5,
+            'trend_up': 1.3,
+            'trend_down': 1.3,
+            'range': 1.2,
+            'low_volatility': 1.1,
         }
-        
-        tp_ratio = tp_ratio_map.get(regime, 1.5)
+        tp_ratio = tp_ratio_map.get(regime, 1.3)
 
-        # ── Liquidity pool TP (next opposing swing) ─────────────────
-        liq_pool_tp = None
+        # ── S/R-based TP: place TP at 85% of distance to nearest S/R ──
+        # Pros target just BEFORE resistance/support, not ON it.
+        # Price often reverses at S/R — taking 85% ensures fill.
+        SR_TP_FRACTION = 0.85
+        SR_MIN_RR = 1.0  # S/R TP must give at least 1.0R
+        sr_tp_used = False
+
         swing_points = regime_info.get('swing_points', [])
-        if swing_points:
+        if swing_points and sl_distance > 0:
             if direction == 'BUY':
-                # Target: next swing high above entry
                 candidates = [
-                    sp for sp in swing_points
+                    sp['price'] for sp in swing_points
                     if sp['swing_type'] == 'high' and sp['price'] > entry_price
                 ]
                 if candidates:
-                    liq_pool_tp = min(candidates, key=lambda x: x['price'])['price']
+                    nearest_resist = min(candidates)
+                    full_distance = nearest_resist - entry_price
+                    sr_distance = full_distance * SR_TP_FRACTION
+                    sr_rr = sr_distance / sl_distance
+                    if sr_rr >= SR_MIN_RR:
+                        tp_distance = sr_distance
+                        tp_ratio = round(sr_rr, 2)
+                        sr_tp_used = True
+                        bot_logger.info(
+                            f"🎯 S/R TP: resist@{nearest_resist:.5f}, "
+                            f"TP@85%={entry_price + sr_distance:.5f} "
+                            f"({sr_distance/pip_size:.1f}p, {sr_rr:.1f}R)"
+                        )
             else:
-                # Target: next swing low below entry
                 candidates = [
-                    sp for sp in swing_points
+                    sp['price'] for sp in swing_points
                     if sp['swing_type'] == 'low' and sp['price'] < entry_price
                 ]
                 if candidates:
-                    liq_pool_tp = max(candidates, key=lambda x: x['price'])['price']
+                    nearest_support = max(candidates)
+                    full_distance = entry_price - nearest_support
+                    sr_distance = full_distance * SR_TP_FRACTION
+                    sr_rr = sr_distance / sl_distance
+                    if sr_rr >= SR_MIN_RR:
+                        tp_distance = sr_distance
+                        tp_ratio = round(sr_rr, 2)
+                        sr_tp_used = True
+                        bot_logger.info(
+                            f"🎯 S/R TP: support@{nearest_support:.5f}, "
+                            f"TP@85%={entry_price - sr_distance:.5f} "
+                            f"({sr_distance/pip_size:.1f}p, {sr_rr:.1f}R)"
+                        )
 
-        # Calculate TP distance
-        tp_distance = sl_distance * tp_ratio
-
-        # If liquidity pool TP gives better R:R, use it
-        if liq_pool_tp is not None:
-            liq_tp_distance = abs(liq_pool_tp - entry_price)
-            liq_rr = liq_tp_distance / sl_distance if sl_distance > 0 else 0
-            if liq_rr >= tp_ratio:
-                tp_distance = liq_tp_distance
-                tp_ratio = round(liq_rr, 2)
+        # Fallback: fixed R:R only if no viable S/R level
+        if not sr_tp_used:
+            tp_distance = sl_distance * tp_ratio
 
         if direction == 'BUY':
             take_profit = round(entry_price + tp_distance, 5)
