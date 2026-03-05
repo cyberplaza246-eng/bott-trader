@@ -783,6 +783,24 @@ class TradingBot:
                 'sl_pips': abs(entry_price - stop_loss) / pair_config_pip,
             }
 
+        # EMERGENCY INVERSION FLAG - set to True if all trades hit SL
+        INVERT_DIRECTION = True  # TODO: Remove after testing
+        
+        if INVERT_DIRECTION:
+            original_trade_type = trade_type
+            trade_type = 'SELL' if trade_type == 'BUY' else 'BUY'
+            bot_logger.warning(f"🔄 EMERGENCY INVERSION: {original_trade_type} → {trade_type}")
+        
+        # VALIDATION: Log exactly what's being sent to broker
+        sl_correct = (trade_type == 'BUY' and stop_loss < entry_price) or (trade_type == 'SELL' and stop_loss > entry_price)
+        tp_correct = (trade_type == 'BUY' and take_profit > entry_price) or (trade_type == 'SELL' and take_profit < entry_price)
+        
+        bot_logger.info(f"🔍 ORDER VALIDATION:")
+        bot_logger.info(f"  Direction: {trade_type}")
+        bot_logger.info(f"  Entry: {entry_price:.5f}")
+        bot_logger.info(f"  SL: {stop_loss:.5f} {'✅' if sl_correct else '❌ WRONG SIDE'}")
+        bot_logger.info(f"  TP: {take_profit:.5f} {'✅' if tp_correct else '❌ WRONG SIDE'}")
+
         # Execute based on mode
         if self.mode == 'live' and AUTOTRADING_ENABLED:
             order_id = self.broker.place_order(
