@@ -715,6 +715,23 @@ class TradingBot:
                 f"({sl_mult}×ATR), TP={tp_distance/pip_size:.1f}p ({tp_ratio:.1f}R)"
             )
 
+        # ── Price drift check: skip if price moved too far from signal ──
+        signal_entry = None
+        if sweep_rr:
+            signal_entry = sweep_rr.get('entry_price')
+        elif scalping_rr:
+            signal_entry = scalping_rr.get('entry_price')
+
+        if signal_entry and abs(entry_price - signal_entry) > atr * 2.5:
+            drift_pips = abs(entry_price - signal_entry) * 10000
+            if 'JPY' in pair:
+                drift_pips = abs(entry_price - signal_entry) * 100
+            bot_logger.warning(
+                f"❌ {pair} price drifted {drift_pips:.1f}p from signal entry "
+                f"({signal_entry:.5f} → {entry_price:.5f}) — trade SKIPPED"
+            )
+            return
+
         # Record SL value for adaptive learner median tracking
         try:
             sl_dist = abs(entry_price - stop_loss)
@@ -818,6 +835,26 @@ class TradingBot:
         bot_logger.info(f"  Entry: {entry_price:.5f}")
         bot_logger.info(f"  SL: {stop_loss:.5f} {'✅' if sl_correct else '❌ WRONG SIDE'}")
         bot_logger.info(f"  TP: {take_profit:.5f} {'✅' if tp_correct else '❌ WRONG SIDE'}")
+
+        # ── FIX: Recalculate TP/SL when price moved since signal ─────
+        if not sl_correct:
+            bot_logger.warning(f"❌ {pair} SL on wrong side — trade BLOCKED (price moved too far)")
+            return
+
+        if not tp_correct:
+            # Price moved past our TP target — recalculate TP from actual entry using same R:R
+            sl_dist = abs(entry_price - stop_loss)
+            if sl_dist > 0:
+                # Use tp_ratio already extracted from sweep/scalping signal
+                tp_dist = sl_dist * tp_ratio
+                if trade_type == 'BUY':
+                    take_profit = round(entry_price + tp_dist, 5)
+                else:
+                    take_profit = round(entry_price - tp_dist, 5)
+                bot_logger.warning(
+                    f"⚠️ TP recalculated from entry: {take_profit:.5f} "
+                    f"(SL={sl_dist*10000:.1f}p, TP={tp_dist*10000:.1f}p, R:R={tp_ratio:.1f})"
+                )
 
         # Execute based on mode
         if self.mode == 'live' and AUTOTRADING_ENABLED:
