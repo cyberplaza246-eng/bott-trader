@@ -52,8 +52,8 @@ class ScalpingAnalyzer:
             'pip_value_label': 'pips',
         },
         'USD/JPY': {
-            'session_atr_min': 0.060,     # Min ATR to trade (~6 pips in JPY)
-            'spread_sim': 0.020,          # Simulated spread (2 pips)
+            'session_atr_min': 0.080,     # Min ATR to trade (~8 pips in JPY) - increased
+            'spread_sim': 0.060,          # Realistic spread (6 pips) - increased from 2 pips  
             'pip_size': 0.01,
             'pip_value_label': 'pips',
         },
@@ -569,7 +569,7 @@ class ScalpingAnalyzer:
     #  STRUCTURE-BASED SL/TP METHODS (5M SCALPING)
     # =================================================================
 
-    def _find_structure_stop_loss(self, df, direction, entry_price, atr):
+    def _find_structure_stop_loss(self, df, direction, entry_price, atr, pair='EUR/USD'):
         """Find structure-based stop loss using recent swing highs/lows.
 
         For BUY: Look for recent swing low below entry  
@@ -582,6 +582,7 @@ class ScalpingAnalyzer:
             direction: 'BUY' or 'SELL'
             entry_price: Current price
             atr: Current ATR value
+            pair: Currency pair (for JPY-specific logic)
 
         Returns:
             dict: {distance, level, reason} or None
@@ -591,6 +592,12 @@ class ScalpingAnalyzer:
 
         lookback_data = df.iloc[-self.STRUCTURE_LOOKBACK:]
         atr_buffer = atr * self.SL_STRUCTURE_BUFFER
+        
+        # JPY-specific: Require wider minimum distances due to larger spreads
+        if 'JPY' in pair:
+            min_viable_distance_mult = 0.8  # JPY needs 0.8×ATR minimum
+        else:
+            min_viable_distance_mult = 0.5  # Majors need 0.5×ATR minimum
 
         if direction == 'BUY':
             # Find significant swing lows with adequate distance
@@ -618,7 +625,7 @@ class ScalpingAnalyzer:
                         distance = entry_price - level
                         # Pre-filter: must meet minimum distance after buffer
                         potential_sl_distance = distance - atr_buffer
-                        if potential_sl_distance >= atr * 0.5:  # Minimum viable distance
+                        if potential_sl_distance >= atr * min_viable_distance_mult:  # Pair-specific minimum
                             score = count * 2 + (20 - age)  # Prefer tested + not too old
                             valid_lows.append((level, count, age, score))
                 
@@ -678,7 +685,7 @@ class ScalpingAnalyzer:
                         distance = level - entry_price
                         # Pre-filter: must meet minimum distance after buffer
                         potential_sl_distance = distance + atr_buffer
-                        if potential_sl_distance >= atr * 0.5:  # Minimum viable distance
+                        if potential_sl_distance >= atr * min_viable_distance_mult:  # Pair-specific minimum
                             score = count * 2 + (20 - age)  # Prefer tested + not too old
                             valid_highs.append((level, count, age, score))
                 
@@ -834,7 +841,7 @@ class ScalpingAnalyzer:
             return None
 
         # Find structure-based SL level
-        structure_sl = self._find_structure_stop_loss(df, direction, entry_price, atr)
+        structure_sl = self._find_structure_stop_loss(df, direction, entry_price, atr, pair)
         
         if structure_sl:
             sl_distance = structure_sl['distance']
@@ -856,8 +863,16 @@ class ScalpingAnalyzer:
             actual_spread = spread if spread is not None else config['spread_sim']
             min_sl_by_spread = actual_spread * self.MIN_SL_SPREAD_MULT
             
+            # JPY-specific: More generous ATR multiplier due to wider spreads
+            if 'JPY' in pair:
+                atr_multiplier = max(self.SL_ATR_MULT, 1.2)  # Min 1.2×ATR for JPY
+                safety_buffer = 1.2  # 20% extra safety for JPY
+            else:
+                atr_multiplier = self.SL_ATR_MULT
+                safety_buffer = 1.1  # 10% extra safety for majors
+            
             # Ensure ATR SL meets minimum spread requirement
-            atr_sl_distance = max(atr * self.SL_ATR_MULT, min_sl_by_spread * 1.1)
+            atr_sl_distance = max(atr * atr_multiplier, min_sl_by_spread * safety_buffer)
             sl_distance = atr_sl_distance
             sl_reason = f"ATR fallback ({atr_sl_distance/pip_size:.1f}p, ≥{min_sl_by_spread/pip_size:.1f}p spread req)"
             bot_logger.info(f"📍 ATR SL: {sl_reason}")
