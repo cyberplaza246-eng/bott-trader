@@ -551,7 +551,7 @@ class TradingBot:
                             volume_ratio=float(latest_bar.get('volume_ratio', 1.0)),
                             daily_trades=self.risk_manager.open_trades,
                             max_daily_trades=effective_cap,
-                            current_drawdown=self.ensemble.learner.get_drawdown_depth(),
+                            current_drawdown=getattr(self.ensemble.learner, 'current_drawdown_pct', 0),
                         )
                         # Training mode only during first 500 trades, then exploit
                         rl_training = self.rl_agent.total_trades < 500
@@ -783,14 +783,6 @@ class TradingBot:
                 'sl_pips': abs(entry_price - stop_loss) / pair_config_pip,
             }
 
-        # EMERGENCY INVERSION FLAG - set to True if all trades hit SL
-        INVERT_DIRECTION = True  # TODO: Remove after testing
-        
-        if INVERT_DIRECTION:
-            original_trade_type = trade_type
-            trade_type = 'SELL' if trade_type == 'BUY' else 'BUY'
-            bot_logger.warning(f"🔄 EMERGENCY INVERSION: {original_trade_type} → {trade_type}")
-        
         # VALIDATION: Log exactly what's being sent to broker
         sl_correct = (trade_type == 'BUY' and stop_loss < entry_price) or (trade_type == 'SELL' and stop_loss > entry_price)
         tp_correct = (trade_type == 'BUY' and take_profit > entry_price) or (trade_type == 'SELL' and take_profit < entry_price)
