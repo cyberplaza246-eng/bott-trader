@@ -715,6 +715,32 @@ class TradingBot:
                 f"({sl_mult}×ATR), TP={tp_distance/pip_size:.1f}p ({tp_ratio:.1f}R)"
             )
 
+        # ── Timeframe-aware SL cap: 1M scalps need tight SL ────────
+        pair_cfg = SCALPING_PAIRS.get(pair, {})
+        pip_size = pair_cfg.get('pip_size', 0.0001)
+        max_sl_atr = 3.0 if timeframe_key == '1m' else 5.0
+        max_sl_dist = atr * max_sl_atr
+        current_sl_dist = abs(entry_price - stop_loss)
+
+        if current_sl_dist > max_sl_dist:
+            old_sl_pips = current_sl_dist / pip_size
+            sl_distance = max_sl_dist
+            if trade_type == 'BUY':
+                stop_loss = round(entry_price - sl_distance, 5)
+            else:
+                stop_loss = round(entry_price + sl_distance, 5)
+            # Recalculate TP from capped SL
+            tp_dist = sl_distance * tp_ratio
+            if trade_type == 'BUY':
+                take_profit = round(entry_price + tp_dist, 5)
+            else:
+                take_profit = round(entry_price - tp_dist, 5)
+            bot_logger.info(
+                f"📏 SL capped for {timeframe_key}: {old_sl_pips:.1f}p → "
+                f"{sl_distance/pip_size:.1f}p ({max_sl_atr}×ATR), "
+                f"TP={tp_dist/pip_size:.1f}p ({tp_ratio:.1f}R)"
+            )
+
         # ── Price drift check: skip if price moved too far from signal ──
         signal_entry = None
         if sweep_rr:

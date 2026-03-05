@@ -985,17 +985,26 @@ class LiquiditySweepAnalyzer:
         # too close to entry for a viable SL.  Enforce minimum SL = 1.3× ATR.
         min_sl = atr * 1.3
 
+        # Max SL cap: prevent absurdly wide SL from distant sweep wicks
+        max_sl = atr * 3.0
+
         if direction == 'BUY':
             stop_loss = round(sweep_wick - atr_buffer, 5)
             sl_distance = entry_price - stop_loss
             if sl_distance < min_sl:
                 sl_distance = min_sl
                 stop_loss = round(entry_price - sl_distance, 5)
+            elif sl_distance > max_sl:
+                sl_distance = max_sl
+                stop_loss = round(entry_price - sl_distance, 5)
         else:
             stop_loss = round(sweep_wick + atr_buffer, 5)
             sl_distance = stop_loss - entry_price
             if sl_distance < min_sl:
                 sl_distance = min_sl
+                stop_loss = round(entry_price + sl_distance, 5)
+            elif sl_distance > max_sl:
+                sl_distance = max_sl
                 stop_loss = round(entry_price + sl_distance, 5)
 
         if sl_distance <= 0:
