@@ -448,6 +448,9 @@ class LiquiditySweepAnalyzer:
             'details': '',
         }
 
+        attempts = 0
+        nearest_gap = None
+
         if df_1m is None or len(df_1m) < self.SWING_LOOKBACK * 2 + self.SWEEP_WINDOW + 5:
             result['details'] = 'Insufficient 1M data'
             return result
@@ -500,6 +503,9 @@ class LiquiditySweepAnalyzer:
             candle_close = float(candle['close'])
             candle_open = float(candle['open'])
             candle_rsi = float(candle.get('rsi', 50) or 50)
+            pip_size = 0.01 if candle_close >= 20 else 0.0001
+            # Adaptive tolerance: 0.5 pip minimum, scaled by local ATR when available.
+            tol = max(0.5 * pip_size, float(candle.get('atr', 0) or 0) * 0.05)
 
             # RSI slope check: was RSI turning in our favour after sweep?
             # Look at 1–2 candles ahead of the sweep candle for slope reversal
@@ -521,11 +527,14 @@ class LiquiditySweepAnalyzer:
 
             for target in target_levels:
                 level = target['price']
+                attempts += 1
 
                 if bias == 'BUY':
                     # Bullish sweep: wick below swing low, close recovers above
-                    swept = candle_low < level and candle_close > level
+                    swept = candle_low <= (level + tol) and candle_close > level
                     rsi_ok = candle_rsi <= self.RSI_SWEEP_LONG_MAX and rsi_slope_ok
+                    gap = abs(candle_low - level)
+                    nearest_gap = gap if nearest_gap is None else min(nearest_gap, gap)
 
                     if swept and rsi_ok:
                         # 5M invalidation: sweep must NOT break 5M structural HL
@@ -564,8 +573,10 @@ class LiquiditySweepAnalyzer:
 
                 elif bias == 'SELL':
                     # Bearish sweep: wick above swing high, close recovers below
-                    swept = candle_high > level and candle_close < level
+                    swept = candle_high >= (level - tol) and candle_close < level
                     rsi_ok = candle_rsi >= self.RSI_SWEEP_SHORT_MIN and rsi_slope_ok
+                    gap = abs(candle_high - level)
+                    nearest_gap = gap if nearest_gap is None else min(nearest_gap, gap)
 
                     if swept and rsi_ok:
                         # 5M invalidation: sweep must NOT break 5M structural LH
@@ -602,7 +613,13 @@ class LiquiditySweepAnalyzer:
                         })
                         return result
 
-        result['details'] = f'No sweep of 1M swing levels in last {self.SWEEP_WINDOW} candles'
+        if nearest_gap is not None:
+            result['details'] = (
+                f"No sweep of 1M swing levels in last {self.SWEEP_WINDOW} candles "
+                f"(checked {attempts} candidates, nearest_gap={nearest_gap:.5f})"
+            )
+        else:
+            result['details'] = f'No sweep of 1M swing levels in last {self.SWEEP_WINDOW} candles'
         return result
 
     # =================================================================
@@ -994,12 +1011,14 @@ class LiquiditySweepAnalyzer:
 
         latest = df_1m.iloc[-1]
         atr = float(latest.get('atr', 0) or 0)
+        atr_min = float(config['session_atr_min'])
+        atr_eps = max(atr_min * 1e-6, 1e-8)
 
         # ATR floor
-        if atr < config['session_atr_min']:
+        if atr + atr_eps < atr_min:
             return False, (
-                f"ATR too low: {atr:.5f} < {config['session_atr_min']:.5f} "
-                f"({atr / config['pip_size']:.1f}p < {config['session_atr_min'] / config['pip_size']:.1f}p)"
+                f"ATR too low: {atr:.5f} < {atr_min:.5f} "
+                f"({atr / config['pip_size']:.1f}p < {atr_min / config['pip_size']:.1f}p)"
             )
 
         # Spread check removed — SL/TP already accounts for spread costs

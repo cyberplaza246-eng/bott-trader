@@ -9,6 +9,9 @@ import pandas as pd
 import numpy as np
 import requests
 import os
+import sys
+import time
+import subprocess
 from datetime import datetime, timedelta
 from src.utils.logger import bot_logger, error_logger, trades_logger
 from config.strategy_config import MT5_ACCOUNT, MT5_PASSWORD, MT5_SERVER, PAIRS, TRADING_MODE
@@ -91,12 +94,50 @@ class MT5Connector:
         except Exception as e:
             error_logger.error(f"Relay POST {path} failed: {e}")
             return None
+
+    def _attempt_relay_autostart(self):
+        """Try to start relay server automatically when configured but unreachable."""
+        if os.getenv('MT5_RELAY_AUTOSTART', 'true').lower() in ('0', 'false', 'no', 'off'):
+            return False
+
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        relay_script = os.path.join(project_root, 'mt5_relay', 'relay_server.py')
+        if not os.path.exists(relay_script):
+            return False
+
+        try:
+            bot_logger.warning(f"🔌 Relay unreachable, attempting auto-start: {relay_script}")
+            creationflags = getattr(subprocess, 'CREATE_NEW_PROCESS_GROUP', 0)
+            # Detach relay process and suppress inherited stdio noise.
+            subprocess.Popen(
+                [sys.executable, relay_script],
+                cwd=project_root,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=creationflags,
+            )
+
+            # Give relay time to bind and initialize MT5 session.
+            for _ in range(12):
+                time.sleep(1)
+                ping = self._relay_get('/ping', timeout=3)
+                if ping and ping.get('mt5_connected'):
+                    bot_logger.info("✅ Relay auto-started successfully")
+                    return True
+        except Exception as e:
+            bot_logger.warning(f"Relay auto-start failed: {e}")
+
+        return False
     
     def initialize(self):
         """Initialize MT5 connection, relay, or simulation mode"""
         if self.relay_mode and not self.simulation_mode:
             # Test relay connection
             result = self._relay_get("/ping")
+            if not result:
+                # Fail-safe: try auto-starting relay once before simulation fallback.
+                if self._attempt_relay_autostart():
+                    result = self._relay_get("/ping")
             if result and result.get("mt5_connected"):
                 self.connected = True
                 self._relay_fallback = False
@@ -395,6 +436,20 @@ class MT5Connector:
         except Exception as e:
             error_logger.error(f"Error getting price for {pair}: {str(e)}")
             return None
+
+    def get_spread(self, pair):
+        """Get current spread (ask-bid) for a pair.
+
+        Returns None when price is unavailable so callers can decide fallback behavior.
+        """
+        price = self.get_latest_price(pair)
+        if not price:
+            return None
+        bid = price.get('bid')
+        ask = price.get('ask')
+        if bid is None or ask is None:
+            return None
+        return abs(float(ask) - float(bid))
     
     def place_order(self, pair, order_type, lot_size, entry_price, stop_loss, take_profit):
         """Place a trading order"""

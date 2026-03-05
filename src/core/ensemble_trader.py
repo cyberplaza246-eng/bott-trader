@@ -127,10 +127,12 @@ class EnsembleTrader:
                     bot_logger.warning(f"⚠️ {pair} 5M fetch returned None")
             except Exception as e:
                 bot_logger.warning(f"⚠️ {pair} 5M fetch EXCEPTION: {type(e).__name__}: {e}")
-            try:
-                broker_spread = self.broker.get_spread(pair)
-            except Exception as e:
-                bot_logger.warning(f"⚠️ {pair} spread fetch failed: {e}")
+            get_spread = getattr(self.broker, 'get_spread', None)
+            if callable(get_spread):
+                try:
+                    broker_spread = get_spread(pair)
+                except Exception as e:
+                    bot_logger.warning(f"⚠️ {pair} spread fetch failed: {e}")
 
         # ── Step 3: Run sweep gate (PRIMARY — decides entry) ─────────
         sweep_signal = self.sweep.get_signal(
