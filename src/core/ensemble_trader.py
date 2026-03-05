@@ -203,29 +203,31 @@ class EnsembleTrader:
             final_signal = sweep_direction
             final_confidence = sweep_confidence
 
+            bot_logger.info(f"🔍 Confidence breakdown: Initial sweep={sweep_confidence:.1%}")
+
             # ── Confirmation adjustments (boost/reduce only) ─────────
             # EMA Crossover
             if ema_signal['signal'] == sweep_direction:
                 final_confidence += self.EMA_CONFIRM_BOOST
                 bot_logger.info(
-                    f"✅ EMA confirms {sweep_direction} (+{self.EMA_CONFIRM_BOOST:.0%})"
+                    f"✅ EMA confirms {sweep_direction} (+{self.EMA_CONFIRM_BOOST:.0%}) → {final_confidence:.1%}"
                 )
             elif ema_signal['signal'] != 'HOLD' and ema_signal['signal'] != sweep_direction:
                 final_confidence -= self.EMA_OPPOSE_PENALTY
                 bot_logger.info(
-                    f"⚠️ EMA opposes {sweep_direction} (−{self.EMA_OPPOSE_PENALTY:.0%})"
+                    f"⚠️ EMA opposes {sweep_direction} (−{self.EMA_OPPOSE_PENALTY:.0%}) → {final_confidence:.1%}"
                 )
 
             # Technical momentum
             if technical_signal['signal'] == sweep_direction:
                 final_confidence += self.TECH_CONFIRM_BOOST
                 bot_logger.info(
-                    f"✅ Technical confirms {sweep_direction} (+{self.TECH_CONFIRM_BOOST:.0%})"
+                    f"✅ Technical confirms {sweep_direction} (+{self.TECH_CONFIRM_BOOST:.0%}) → {final_confidence:.1%}"
                 )
             elif technical_signal['signal'] != 'HOLD' and technical_signal['signal'] != sweep_direction:
                 final_confidence -= self.TECH_OPPOSE_PENALTY
                 bot_logger.info(
-                    f"⚠️ Technical opposes {sweep_direction} (−{self.TECH_OPPOSE_PENALTY:.0%})"
+                    f"⚠️ Technical opposes {sweep_direction} (−{self.TECH_OPPOSE_PENALTY:.0%}) → {final_confidence:.1%}"
                 )
 
             # ── EMA 200 Trend Filter — SOFT PENALTY counter-trend ─────
@@ -249,15 +251,21 @@ class EnsembleTrader:
             if final_signal != 'SKIP' and pair:
                 cross_modifier = self.cross_pair.get_confidence_modifier(pair, final_signal)
                 if cross_modifier != 1.0:
+                    old_confidence = final_confidence
                     final_confidence *= cross_modifier
                     direction = 'confirms ✅' if cross_modifier > 1.0 else 'diverges ⚠️'
                     bot_logger.info(
-                        f"🔗 Cross-pair {direction}: {pair} confidence x{cross_modifier:.3f}"
+                        f"🔗 Cross-pair {direction}: {pair} confidence x{cross_modifier:.3f} ({old_confidence:.1%} → {final_confidence:.1%})"
                     )
 
             # ── Regime confidence modifier from learner ──────────────
+            old_confidence = final_confidence
             regime_modifier = self.learner.get_regime_confidence_modifier(regime)
             final_confidence *= regime_modifier
+            if regime_modifier != 1.0:
+                bot_logger.info(
+                    f"🎭 Regime modifier ({regime}): x{regime_modifier:.3f} ({old_confidence:.1%} → {final_confidence:.1%})"
+                )
 
             # Count how many context models agree (for logging & compatibility)
             context_signals = {

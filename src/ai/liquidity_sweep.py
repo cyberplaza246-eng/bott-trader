@@ -1297,9 +1297,9 @@ class LiquiditySweepAnalyzer:
         elif vol_ratio >= 1.5:
             base_confidence += 0.02
 
-        # Penalty for range regime
+        # Mild penalty for range regime (adaptive learner handles main regime adjustment)
         if regime_info['regime'] == 'range':
-            base_confidence *= 0.70
+            base_confidence *= 0.90
 
         result['signal'] = sweep['direction']
         result['confidence'] = min(base_confidence, 1.0)
