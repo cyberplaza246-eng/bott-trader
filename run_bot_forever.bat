@@ -24,8 +24,8 @@ if not exist logs mkdir logs
 
 :loop
 echo [%date% %time%] Launching bot...
-REM Run bot - output to console with unbuffered flag
-venv\Scripts\python.exe -u -m scripts.run_bot
+REM Run via start_live.py so relay is auto-started and verified before bot starts
+venv\Scripts\python.exe -u start_live.py
 echo [%date% %time%] Bot exited with code %errorlevel%. Restarting in 5 seconds...
 timeout /t 5 /nobreak >nul
 goto loop

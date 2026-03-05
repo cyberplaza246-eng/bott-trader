@@ -644,7 +644,9 @@ class LiquiditySweepAnalyzer:
             dict: {confirmed, mss_level, entry_price, trigger_level,
                    displacement_candle, details}
         """
-        relaxed = regime in ('range', 'low_volatility')
+        # Always relaxed: sweep gate is the primary filter; strict MSS
+        # close-through-level is too hard to achieve on 1M in quiet markets.
+        relaxed = True
         result = {
             'confirmed': False,
             'mss_level': None,
@@ -707,6 +709,7 @@ class LiquiditySweepAnalyzer:
         if check_start >= 0:
             check_start = -1
 
+        candles_checked = 0
         for i in range(check_start, 0):
             if abs(i) > len(df_1m):
                 continue
@@ -715,8 +718,13 @@ class LiquiditySweepAnalyzer:
             disp = self._check_displacement_candle(
                 candle, df_1m.iloc[i - 1], direction, relaxed=relaxed
             )
+            candles_checked += 1
 
             if not disp['is_displacement']:
+                bot_logger.debug(
+                    f"  MSS candle[{i}]: body={disp['body_ratio']:.0%} "
+                    f"vol={disp['volume_ratio']:.2f}x → not displacement"
+                )
                 continue
 
             candle_close = float(candle['close'])
@@ -817,7 +825,10 @@ class LiquiditySweepAnalyzer:
                 })
                 return result
 
-        result['details'] = f'No MSS displacement through {mss_level:.5f} after sweep'
+        result['details'] = (
+            f'No MSS displacement through {mss_level:.5f} after sweep '
+            f'(checked {candles_checked} candles, sweep_idx={sweep_idx})'
+        )
         return result
 
     def _check_displacement_candle(self, candle, prev_candle, direction, relaxed=False):
@@ -1163,17 +1174,28 @@ class LiquiditySweepAnalyzer:
 
         bot_logger.info(f"💧 {pair} {sweep['details']}")
 
-        # ── Step 4: Market Structure Shift (Layer 3) ──────────────────
+        # ── Step 4: Market Structure Shift (Layer 3) — SOFT GATE ─────
         mss = self.detect_mss(df_1m, sweep, regime=regime_info.get('regime', 'range'))
         result['mss'] = mss
         result['displacement'] = mss  # v1 backward compatibility
 
-        if not mss['confirmed']:
-            result['details'] = f"💧 Sweep detected but {mss['details']}"
-            bot_logger.info(f"⏳ {pair} sweep present but no MSS: {mss['details']}")
-            return result
-
-        bot_logger.info(f"⚡ {pair} MSS: {mss['details']}")
+        mss_confirmed_naturally = mss['confirmed']
+        if not mss_confirmed_naturally:
+            # Soft gate: proceed with sweep-only entry at reduced confidence
+            latest_close = float(df_1m.iloc[-1]['close'])
+            mss['confirmed'] = True
+            mss['entry_price'] = latest_close
+            mss['trigger_level'] = latest_close
+            mss['mss_level'] = mss.get('mss_level') or latest_close
+            mss['details'] = f"Sweep-only entry (no displacement): {mss['details']}"
+            result['mss'] = mss
+            result['displacement'] = mss
+            bot_logger.info(
+                f"⚠️ {pair} sweep detected, soft MSS → entry at {latest_close:.5f} "
+                f"({mss['details']})"
+            )
+        else:
+            bot_logger.info(f"⚡ {pair} MSS: {mss['details']}")
 
         # ── Step 5: Risk/Reward Calculation ───────────────────────────
         latest_1m = df_1m.iloc[-1]
@@ -1188,8 +1210,8 @@ class LiquiditySweepAnalyzer:
         result['sweep_sl_tp'] = rr
 
         # ── Step 6: Build final signal ────────────────────────────────
-        # Confidence boost: all 4 layers aligned (Bias + Sweep + 5M Gate + MSS)
-        base_confidence = 0.85  # Higher than v1 (0.80) because MSS adds confirmation
+        # Full MSS → high confidence; sweep-only → moderate confidence
+        base_confidence = 0.85 if mss_confirmed_naturally else 0.55
 
         # Bonus for strong ADX
         if regime_info['adx'] >= 25:

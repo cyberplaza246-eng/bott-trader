@@ -14,14 +14,18 @@
   "pair_stats": {
     "EUR/USD": {
       "wins": 0,
-      "losses": 30,
-      "total_pnl": -150.0
+      "losses": 108,
+      "total_pnl": -540.0
     }
   },
   "session_stats": {
     "asian": {
       "wins": 0,
       "losses": 30
+    },
+    "ny_overlap": {
+      "wins": 0,
+      "losses": 78
     }
   },
   "pair_model_accuracy": {},
@@ -30,6 +34,11 @@
       "wins": 0,
       "losses": 30,
       "total_pnl": -150.0
+    },
+    "ny_overlap:EUR/USD": {
+      "wins": 0,
+      "losses": 78,
+      "total_pnl": -390.0
     }
   },
   "model_combos": {},
@@ -37,8 +46,8 @@
   "regime_stats": {
     "trending": {
       "wins": 0,
-      "losses": 30,
-      "total_pnl": -150.0
+      "losses": 108,
+      "total_pnl": -540.0
     }
   },
   "hourly_stats": {
@@ -46,12 +55,17 @@
       "wins": 0,
       "losses": 30,
       "total_pnl": -150.0
+    },
+    "15": {
+      "wins": 0,
+      "losses": 78,
+      "total_pnl": -390.0
     }
   },
   "confidence_threshold": 0.53,
-  "consecutive_losses": 30,
+  "consecutive_losses": 108,
   "consecutive_wins": 0,
-  "max_consecutive_losses": 30,
+  "max_consecutive_losses": 108,
   "peak_balance": 0.0,
   "current_drawdown_pct": 0,
   "in_drawdown_protection": false,
@@ -386,12 +400,870 @@
       "session": "asian",
       "hour": 5,
       "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:32:03.495187",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:32:03.508877",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:32:03.514404",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:32:03.517731",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:32:03.520750",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:32:03.525049",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:34:12.444026",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:34:12.446728",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:34:12.448612",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:34:12.450316",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:34:12.452033",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:34:12.454068",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:36:50.953168",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:36:50.955547",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:36:50.957517",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:36:50.960480",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:36:50.962637",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:36:50.964819",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:38:56.253650",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:38:56.259240",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:38:56.261376",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:38:56.263774",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:38:56.266026",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:38:56.268385",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:50:22.552059",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:50:22.554245",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:50:22.556317",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:50:22.558384",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:50:22.560869",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:50:22.563497",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:26.157090",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:26.160226",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:26.162361",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:26.164476",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:26.166591",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:26.169036",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:31.470588",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:31.475806",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:31.479071",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:31.482850",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:31.486601",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:31.489932",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:38.878651",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:38.881487",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:38.884247",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:38.886789",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:38.889197",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:38.891668",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:44.831587",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:44.836256",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:44.838453",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:44.840660",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:44.842899",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:44.845122",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:56.771560",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:56.774511",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:56.777738",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:56.780457",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:56.783699",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:52:56.786381",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:00.862159",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:00.867112",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:00.871445",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:00.877622",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:00.881965",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:00.886457",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:43.161504",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:43.170097",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:43.178169",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:43.184449",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:43.196638",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:53:43.202100",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:58:28.468750",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:58:28.481633",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:58:28.490680",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:58:28.501281",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:58:28.510356",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-05T15:58:28.520460",
+      "session": "ny_overlap",
+      "hour": 15,
+      "is_win": false
     }
   ],
   "loss_patterns": {
     "pair:EUR/USD": {
-      "count": 30,
-      "total_loss": 150.0
+      "count": 108,
+      "total_loss": 540.0
     },
     "session:asian": {
       "count": 30,
@@ -402,108 +1274,120 @@
       "total_loss": 150.0
     },
     "pair_regime:EUR/USD:trending": {
-      "count": 30,
-      "total_loss": 150.0
+      "count": 108,
+      "total_loss": 540.0
     },
     "hour:5": {
       "count": 30,
       "total_loss": 150.0
     },
     "signal:BUY": {
-      "count": 30,
-      "total_loss": 150.0
+      "count": 108,
+      "total_loss": 540.0
+    },
+    "session:ny_overlap": {
+      "count": 78,
+      "total_loss": 390.0
+    },
+    "pair_session:EUR/USD:ny_overlap": {
+      "count": 78,
+      "total_loss": 390.0
+    },
+    "hour:15": {
+      "count": 78,
+      "total_loss": 390.0
     }
   },
   "recent_trades_window": [
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:27.567486"
+      "timestamp": "2026-03-05T15:53:43.178176"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:27.569022"
+      "timestamp": "2026-03-05T15:53:43.184457"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:27.570605"
+      "timestamp": "2026-03-05T15:53:43.196646"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:27.572151"
+      "timestamp": "2026-03-05T15:53:43.202108"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:37.218080"
+      "timestamp": "2026-03-05T15:58:28.468759"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:37.219754"
+      "timestamp": "2026-03-05T15:58:28.481641"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:37.221282"
+      "timestamp": "2026-03-05T15:58:28.490688"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:37.222972"
+      "timestamp": "2026-03-05T15:58:28.501289"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:37.224786"
+      "timestamp": "2026-03-05T15:58:28.510365"
     },
     {
       "pair": "EUR/USD",
-      "session": "asian",
-      "hour": 5,
+      "session": "ny_overlap",
+      "hour": 15,
       "regime": "trending",
       "is_win": false,
       "pnl": -5.0,
-      "timestamp": "2026-03-04T05:11:37.226447"
+      "timestamp": "2026-03-05T15:58:28.520468"
     }
   ],
   "session_atr_profiles": {},
@@ -513,5 +1397,5 @@
   "time_exit_candles": 8,
   "time_exit_outcomes": [],
   "atr_regime": "neutral",
-  "last_updated": "2026-03-04T05:11:37.227232"
+  "last_updated": "2026-03-05T15:58:28.523362"
 }
