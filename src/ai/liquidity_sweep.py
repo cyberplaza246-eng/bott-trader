@@ -971,12 +971,22 @@ class LiquiditySweepAnalyzer:
 
         atr_buffer = atr * self.SL_ATR_BUFFER
 
+        # For proximity sweeps the wick is the latest candle's wick — often
+        # too close to entry for a viable SL.  Enforce minimum SL = 1× ATR.
+        min_sl = atr
+
         if direction == 'BUY':
             stop_loss = round(sweep_wick - atr_buffer, 5)
             sl_distance = entry_price - stop_loss
+            if sl_distance < min_sl:
+                sl_distance = min_sl
+                stop_loss = round(entry_price - sl_distance, 5)
         else:
             stop_loss = round(sweep_wick + atr_buffer, 5)
             sl_distance = stop_loss - entry_price
+            if sl_distance < min_sl:
+                sl_distance = min_sl
+                stop_loss = round(entry_price + sl_distance, 5)
 
         if sl_distance <= 0:
             return None
@@ -1035,6 +1045,9 @@ class LiquiditySweepAnalyzer:
         # Minimum SL check: must be > 3× spread
         spread = config['spread_sim']
         if sl_distance < spread * 3:
+            bot_logger.info(
+                f"\u26d4 R:R rejected: SL {sl_distance:.5f} < 3\u00d7spread {spread*3:.5f}"
+            )
             return None
 
         return {
@@ -1250,6 +1263,10 @@ class LiquiditySweepAnalyzer:
         rr = self.calculate_risk_reward(sweep, mss, regime_info, pair)
         if rr is None:
             result['details'] = "🚫 R:R calculation failed (SL too tight)"
+            bot_logger.info(
+                f"🚫 {pair} R:R failed: entry={mss.get('entry_price')}, "
+                f"wick={sweep.get('sweep_wick')}, ATR={regime_info.get('atr')}"
+            )
             return result
 
         result['risk_reward'] = rr
