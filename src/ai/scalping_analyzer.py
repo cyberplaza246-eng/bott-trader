@@ -792,8 +792,8 @@ class ScalpingAnalyzer:
             sl_level = structure_sl['level']
             sl_reason = structure_sl['reason']
             
-            # Verify structure SL meets spread requirements
-            actual_spread = spread if spread is not None else config['spread_sim']
+            # Verify structure SL meets spread requirements (always use config spread for JPY)
+            actual_spread = config['spread_sim'] if 'JPY' in pair else (spread if spread is not None else config['spread_sim'])
             min_sl_by_spread = actual_spread * self.SL_MIN_SPREAD_MULT
             
             if sl_distance >= min_sl_by_spread:
@@ -803,8 +803,8 @@ class ScalpingAnalyzer:
                 structure_sl = None
         
         if not structure_sl:
-            # Fallback to ATR-based SL with spread safety
-            actual_spread = spread if spread is not None else config['spread_sim']
+            # Fallback to ATR-based SL with spread safety (always use config spread for JPY)
+            actual_spread = config['spread_sim'] if 'JPY' in pair else (spread if spread is not None else config['spread_sim'])
             min_sl_by_spread = actual_spread * self.MIN_SL_SPREAD_MULT
             
             # JPY-specific: More generous ATR multiplier due to wider spreads
@@ -821,8 +821,8 @@ class ScalpingAnalyzer:
             sl_reason = f"ATR fallback ({atr_sl_distance/pip_size:.1f}p, ≥{min_sl_by_spread/pip_size:.1f}p spread req)"
             bot_logger.info(f"📍 ATR SL: {sl_reason}")
 
-        # Reject: SL < spread x 3
-        actual_spread = spread if spread is not None else config['spread_sim']
+        # Reject: SL < spread x 3 (always use config spread for JPY)
+        actual_spread = config['spread_sim'] if 'JPY' in pair else (spread if spread is not None else config['spread_sim'])
         min_sl_by_spread = actual_spread * self.MIN_SL_SPREAD_MULT
         if sl_distance < min_sl_by_spread:
             bot_logger.info(

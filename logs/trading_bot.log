@@ -105434,3 +105434,6 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udccd Structure SL: swing high 1.15970 + 0.3\u00d7ATR buffer at 1.15933 (12.0p)"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udccd TP moved 3.0p closer: 21.6p \u2192 18.6p (pullback protection)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f transformers not installed \u2014 falling back to keyword sentiment"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}

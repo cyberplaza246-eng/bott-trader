@@ -839,7 +839,7 @@ class TradingBot:
                 time.sleep(1.0)  
                 
                 # Check the actual position for SL/TP
-                positions = self.broker.get_positions(pair)
+                positions = self.broker.get_open_positions(pair)
                 position_found = False
                 for pos in positions:
                     if pos.get('ticket') == order_id:
@@ -951,7 +951,7 @@ class TradingBot:
         TIME_STOP_CYCLES = 3  # Close after 3 cycles with no profit
 
         try:
-            positions = self.broker.get_positions()
+            positions = self.broker.get_open_positions()
         except Exception:
             return
 
