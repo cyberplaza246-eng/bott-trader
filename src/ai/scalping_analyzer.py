@@ -64,7 +64,7 @@ class ScalpingAnalyzer:
     SL_STRUCTURE_BUFFER = 0.30  # Buffer below swing low/high (30% of ATR) - increased for better clearance
     SL_MAX_ATR_MULT = 1.5      # Max SL = 1.5x ATR (allow wider for structure)
     SL_MIN_ATR_MULT = 0.8      # Min SL = 0.8x ATR (increased floor for 5m)
-    SL_MIN_SPREAD_MULT = 3     # Consistent: Min SL = 3x spread (align with final validation)
+    SL_MIN_SPREAD_MULT = 2     # Realistic: Min SL = 2x spread (reduced from 3x for low-vol periods)
     
     TP_BASE_RATIO = 1.8        # TP = 1.8 x SL — better R:R
     TP_EXPANDING = 2.0         # Wider TP in expanding volatility
@@ -72,7 +72,7 @@ class ScalpingAnalyzer:
     TP_MIN_STRUCTURE_RR = 1.3  # Min 1.3R when targeting structure levels
     TP_MAX_SCALP_RR = 2.2      # Max 2.2R for 5m scalping (realistic)
     
-    MIN_SL_SPREAD_MULT = 3     # Reject if SL < spread x 3
+    MIN_SL_SPREAD_MULT = 2     # Reject if SL < spread x 2 (realistic for scalping)
     MAX_SL_MEDIAN_MULT = 2.5   # Reject if SL > 2.5x rolling median SL
     STRUCTURE_LOOKBACK = 20    # Bars to look back for swing highs/lows
 
@@ -821,13 +821,17 @@ class ScalpingAnalyzer:
             sl_reason = f"ATR fallback ({atr_sl_distance/pip_size:.1f}p, ≥{min_sl_by_spread/pip_size:.1f}p spread req)"
             bot_logger.info(f"📍 ATR SL: {sl_reason}")
 
-        # Reject: SL < spread x 3 (always use config spread for JPY)
+        # Reject: SL < spread x 2 (always use config spread for JPY)
         actual_spread = config['spread_sim'] if 'JPY' in pair else (spread if spread is not None else config['spread_sim'])
         min_sl_by_spread = actual_spread * self.MIN_SL_SPREAD_MULT
-        if sl_distance < min_sl_by_spread:
+        
+        # ATR-based minimum: ensure SL is at least 0.5×ATR even if spread allows smaller
+        min_sl_by_atr = atr * 0.5 if atr > 0 else 0
+        min_sl_required = max(min_sl_by_spread, min_sl_by_atr)
+        if sl_distance < min_sl_required:
             bot_logger.info(
                 f"🚫 Trade rejected: SL {sl_distance / pip_size:.1f}p < "
-                f"spread x 3 = {min_sl_by_spread / pip_size:.1f}p"
+                f"required {min_sl_required / pip_size:.1f}p (spread={min_sl_by_spread/pip_size:.1f}p, ATR={min_sl_by_atr/pip_size:.1f}p)"
             )
             return None
 

@@ -1043,9 +1043,9 @@ class LiquiditySweepAnalyzer:
         sl_pips = sl_distance / pip_size
         tp_pips = tp_distance / pip_size
 
-        # Minimum SL check: must be > 4× spread (enhanced for structure safety)
+        # Minimum SL check: must be > 2× spread (realistic for low-volatility scalping)
         spread = config['spread_sim']
-        if sl_distance < spread * 4:
+        if sl_distance < spread * 2:
             bot_logger.info(
                 f"\u26d4 R:R rejected: SL {sl_distance:.5f} < 4\u00d7spread {spread*4:.5f} (structure safety)"
             )

@@ -105437,3 +105437,5 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f transformers not installed \u2014 falling back to keyword sentiment"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
