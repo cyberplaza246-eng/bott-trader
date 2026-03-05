@@ -538,7 +538,7 @@ class TradingBot:
                         # Set default RL values for position sizing
                         signal_result['_rl_lot_mult'] = 1.0
                         # Proceed directly to trade execution
-                        self._execute_trade_signal(pair, signal_result, df)
+                        self._execute_trade(pair, signal_result, df, timeframe_key)
                         continue
 
                     # ── RL Agent Gate ──────────────────────────────────
