@@ -204,18 +204,22 @@ def positions():
 def _try_order(req_base):
     """Try placing an order with multiple filling types for broker compat.
     
+    If order with SL/TP fails, retries without SL/TP (modify later).
     Caller must hold _mt5_lock.
+    Returns: (result, sl_tp_included) tuple or error string
     """
     filling_types = [
         mt5.ORDER_FILLING_IOC,
         mt5.ORDER_FILLING_FOK,
         mt5.ORDER_FILLING_RETURN,
     ]
+
+    # First pass: try with SL/TP included
     last_error = None
     for filling in filling_types:
         req = dict(req_base)
         req["type_filling"] = filling
-        print(f"  Trying filling={filling} ...")
+        print(f"  Trying filling={filling} (with SL/TP)...")
         result = mt5.order_send(req)
 
         if result is None:
@@ -224,16 +228,42 @@ def _try_order(req_base):
             continue
 
         if result.retcode == mt5.TRADE_RETCODE_DONE:
-            print(f"  OK  ticket={result.order}")
-            return result
+            print(f"  OK  ticket={result.order} (SL/TP included in order)")
+            return result, True
 
         last_error = f"{result.comment} (retcode={result.retcode})"
         print(f"  x {last_error}")
-        # Only retry on filling-type errors
         if result.retcode not in [10030, 10033]:
             break
 
-    return last_error
+    # Second pass: retry WITHOUT SL/TP (some brokers reject SL/TP on market orders)
+    has_sl_tp = req_base.get('sl', 0) > 0 or req_base.get('tp', 0) > 0
+    if has_sl_tp:
+        print(f"  Retrying WITHOUT SL/TP...")
+        req_no_sltp = dict(req_base)
+        req_no_sltp.pop('sl', None)
+        req_no_sltp.pop('tp', None)
+        for filling in filling_types:
+            req = dict(req_no_sltp)
+            req["type_filling"] = filling
+            print(f"  Trying filling={filling} (no SL/TP)...")
+            result = mt5.order_send(req)
+
+            if result is None:
+                last_error = f"order_send returned None: {mt5.last_error()}"
+                print(f"  x {last_error}")
+                continue
+
+            if result.retcode == mt5.TRADE_RETCODE_DONE:
+                print(f"  OK  ticket={result.order} (SL/TP will be added via modify)")
+                return result, False
+
+            last_error = f"{result.comment} (retcode={result.retcode})"
+            print(f"  x {last_error}")
+            if result.retcode not in [10030, 10033]:
+                break
+
+    return last_error, False
 
 
 # ── Order Placement ───────────────────────────────────────────────────
@@ -267,13 +297,15 @@ def place_order():
         action_type = mt5.ORDER_TYPE_BUY if order_type == "BUY" else mt5.ORDER_TYPE_SELL
         entry_price = tick.ask if order_type == "BUY" else tick.bid
 
-        # Place order WITHOUT SL/TP first (some brokers reject them on market orders)
+        # Try placing order WITH SL/TP first (fastest, avoids modify race)
         req_base = {
             "action": mt5.TRADE_ACTION_DEAL,
             "symbol": symbol,
             "volume": lot_size,
             "type": action_type,
             "price": entry_price,
+            "sl": sl if sl > 0 else 0.0,
+            "tp": tp if tp > 0 else 0.0,
             "deviation": 20,
             "magic": 234000,
             "comment": "AI Trading Bot",
@@ -282,30 +314,56 @@ def place_order():
 
         print(f"\n{'='*50}")
         print(f"ORDER: {symbol} {order_type} {lot_size} lots | SL={sl} TP={tp}")
-        result = _try_order(req_base)
+
+        # Snapshot positions BEFORE placing order
+        pre_positions = set()
+        existing = mt5.positions_get(symbol=symbol)
+        if existing:
+            pre_positions = {p.ticket for p in existing}
+
+        result, sl_tp_included = _try_order(req_base)
 
         if isinstance(result, str):
             return jsonify({"error": f"Order failed: {result}"}), 400
 
-        # Find the actual position ticket (may differ from order ticket)
+        # Find the actual position ticket by diffing before/after
         import time
         position_ticket = None
-        sl_tp_set = False
+        sl_tp_set = sl_tp_included  # Already set if broker accepted SL/TP in order
 
-        if sl > 0 or tp > 0:
-            # Retry position lookup up to 3 times with increasing delays
-            for attempt in range(3):
+        if (sl > 0 or tp > 0) and not sl_tp_included:
+            # Find the NEW position by comparing before/after snapshots
+            for attempt in range(5):
                 time.sleep(0.3 * (attempt + 1))
                 positions = mt5.positions_get(symbol=symbol)
+                if positions:
+                    new_positions = [p for p in positions if p.ticket not in pre_positions]
+                    if new_positions:
+                        position_ticket = new_positions[0].ticket
+                        print(f"  Found NEW position ticket: {position_ticket} (attempt {attempt+1})")
+                        break
+                    # Fallback: try matching by order ID
+                    for p in positions:
+                        if p.ticket == result.order:
+                            position_ticket = p.ticket
+                            print(f"  Found position by order ticket: {position_ticket}")
+                            break
+                    if position_ticket:
+                        break
+
+            if not position_ticket:
+                # Last resort: newest position with our magic number
                 if positions:
                     bot_positions = [p for p in positions if p.magic == 234000]
                     if bot_positions:
                         position_ticket = max(p.ticket for p in bot_positions)
-                        break
-
-            if not position_ticket:
-                position_ticket = result.order
-                print(f"  ⚠️ Could not find position, using order ticket: {position_ticket}")
+                        print(f"  ⚠️ Using newest magic position: {position_ticket}")
+                    else:
+                        position_ticket = result.order
+                        print(f"  ⚠️ No magic positions found, using order ticket: {position_ticket}")
+                else:
+                    position_ticket = result.order
+                    print(f"  ⚠️ No positions found, using order ticket: {position_ticket}")
 
             # Retry SL/TP modify up to 3 times
             for attempt in range(3):
@@ -324,13 +382,60 @@ def place_order():
                     break
                 else:
                     err = modify_result.comment if modify_result else mt5.last_error()
-                    print(f"  ⚠️ SL/TP modify attempt {attempt+1} failed: {err}")
+                    retcode = modify_result.retcode if modify_result else "N/A"
+                    print(f"  ⚠️ SL/TP modify attempt {attempt+1} failed: {err} (retcode={retcode})")
                     time.sleep(0.5)
 
             if not sl_tp_set:
                 print(f"  ❌ CRITICAL: SL/TP NOT SET after 3 attempts for {position_ticket}")
+        elif sl_tp_included:
+            # SL/TP was in the order — find the position ticket
+            time.sleep(0.5)
+            positions = mt5.positions_get(symbol=symbol)
+            if positions:
+                new_positions = [p for p in positions if p.ticket not in pre_positions]
+                if new_positions:
+                    position_ticket = new_positions[0].ticket
+                else:
+                    position_ticket = result.order
+            else:
+                position_ticket = result.order
         else:
             position_ticket = result.order
+
+        # Final verification: confirm SL/TP are actually on the position
+        if position_ticket and (sl > 0 or tp > 0):
+            time.sleep(0.3)
+            verify = mt5.positions_get(ticket=position_ticket)
+            if not verify:
+                # Try without ticket filter
+                verify_all = mt5.positions_get(symbol=symbol)
+                if verify_all:
+                    verify = [p for p in verify_all if p.ticket not in pre_positions]
+            if verify:
+                v = verify[0]
+                if v.sl == 0 and v.tp == 0:
+                    print(f"  ❌ VERIFY FAILED: SL/TP still 0! Attempting emergency modify...")
+                    sl_tp_set = False
+                    # Emergency modify attempt
+                    for attempt in range(3):
+                        mod_req = {
+                            "action": mt5.TRADE_ACTION_SLTP,
+                            "symbol": symbol,
+                            "position": v.ticket,
+                            "sl": sl,
+                            "tp": tp,
+                        }
+                        mod_result = mt5.order_send(mod_req)
+                        if mod_result and mod_result.retcode == mt5.TRADE_RETCODE_DONE:
+                            print(f"  ✅ Emergency SL/TP set on ticket {v.ticket}")
+                            sl_tp_set = True
+                            position_ticket = v.ticket
+                            break
+                        time.sleep(0.5)
+                else:
+                    print(f"  ✅ VERIFIED: SL={v.sl} TP={v.tp}")
+                    sl_tp_set = True
 
         return jsonify({
             "ticket": position_ticket or result.order,
@@ -400,7 +505,7 @@ def close_position():
 
         print(f"\n{'='*50}")
         print(f"CLOSE: ticket={pos.ticket} {pos.symbol} {close_volume} lots")
-        result = _try_order(req_base)
+        result, _ = _try_order(req_base)
 
     if isinstance(result, str):
         return jsonify({"error": f"Close failed: {result}"}), 400
@@ -440,7 +545,7 @@ def close_all():
                 "type_time": mt5.ORDER_TIME_GTC,
             }
 
-            result = _try_order(req_base)
+            result, _ = _try_order(req_base)
             if isinstance(result, str):
                 results.append({"ticket": pos.ticket, "error": result})
             else:
