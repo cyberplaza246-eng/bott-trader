@@ -857,7 +857,7 @@ class TradingBot:
                     bot_logger.warning(f"⚠️ Could not find position {order_id} to verify SL/TP")
                 
                 self.risk_manager.on_trade_opened()
-                # Register for trailing stop management (scalping mode)
+                # Register for trailing stop management (aggressive profit protection)
                 self.trailing.register(
                     ticket=order_id,
                     entry_price=entry_price,
@@ -868,6 +868,7 @@ class TradingBot:
                     take_profit=take_profit,
                     volume=lot_size,
                     scalping_mode=True,
+                    quick_wins=True,  # ULTRA aggressive profit protection for 5m scalping
                 )
         
         elif self.mode == 'paper':

@@ -48,22 +48,23 @@ class TrailingStopManager:
             scalping_mode: If True, use tighter breakeven/trail/partial settings
             quick_wins:  If True, use ULTRA tight settings (takes small wins fast)
         """
-        # Quick wins mode: ATR-adaptive tight management
+        # Enhanced profit protection mode: More aggressive settings for 5m scalping
         if quick_wins:
-            effective_breakeven_r = 0.8       # Breakeven at 0.8R
-            effective_trail_mult = 0.8        # Trail at 0.8× ATR
-            effective_partial_pct = 0.50      # Partial close at 50% of TP (= 1.0R)
-        # Scalping overrides: same ATR parameters for consistency
+            effective_breakeven_r = 0.6       # Breakeven at 0.6R (even faster)
+            effective_trail_mult = 0.6        # Trail at 0.6× ATR (tighter)
+            effective_partial_pct = 0.40      # Partial close at 40% of TP (earlier profit lock)
+        # Scalping mode: Improved settings for better profit protection
         elif scalping_mode:
-            effective_breakeven_r = 0.8       # Breakeven at 0.8R
-            effective_trail_mult = 0.8        # Trail at 0.8× ATR
-            effective_partial_pct = 0.50      # Partial close at 50% of TP
+            effective_breakeven_r = 0.6       # Breakeven at 0.6R (was 0.8R) 
+            effective_trail_mult = 0.6        # Trail at 0.6× ATR (was 0.8×ATR)
+            effective_partial_pct = 0.40      # Partial close at 40% of TP (was 50%)
         else:
             effective_breakeven_r = self.breakeven_r
             effective_trail_mult = self.trail_atr_mult
             effective_partial_pct = self.partial_close_pct
 
         self._tracking[ticket] = {
+            'ticket': ticket,            # Add ticket for logging
             'entry': entry_price,
             'original_sl': stop_loss,
             'current_sl': stop_loss,
@@ -253,11 +254,17 @@ class TrailingStopManager:
             if current_price > info['best_price']:
                 info['best_price'] = current_price
 
+            # INSTANT PROFIT LOCK: As soon as 3 pips profit, move SL to +1 pip
+            pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
+            instant_profit_threshold = 3 * pip
+            if not info['at_breakeven'] and profit_distance >= instant_profit_threshold:
+                bot_logger.info(f"🔒 Instant profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +1 pip")
+                return entry + pip
+            
             # Phase 1: Move to breakeven after profit meets breakeven_r
             if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
                 # Set SL to entry + small buffer (1 pip profit)
-                pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
                 return entry + pip
             
             # Phase 2: Trail behind the best price
@@ -274,10 +281,16 @@ class TrailingStopManager:
             if current_price < info['best_price']:
                 info['best_price'] = current_price
 
+            # INSTANT PROFIT LOCK: As soon as 3 pips profit, move SL to -1 pip
+            pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
+            instant_profit_threshold = 3 * pip
+            if not info['at_breakeven'] and profit_distance >= instant_profit_threshold:
+                bot_logger.info(f"🔒 Instant profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +1 pip")
+                return entry - pip
+
             # Phase 1: Breakeven
             if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
-                pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
                 return entry - pip
 
             # Phase 2: Trail above best price
