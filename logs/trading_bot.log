@@ -104601,3 +104601,615 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00096 (<0.00101 = 2\u00d7ATR) to level 1.09398, close=1.09649"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09649 (Sweep-only entry (no displacement): No MSS displacement through 1.09750 after sweep (checked 1 candles, sweep_idx=-1))"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09649 | SL=1.09599 (5.0p) | TP=1.09725 (7.6p) | R:R=1.5 | MSS@1.09750 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $50.00 | Tier: Micro ($0-$200)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $30000.00 | Tier: Elite ($25K+)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Max concurrent trades (3) reached [Tier: standard]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Daily loss limit ($30.00 / 3.0%) reached - pausing trades"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [standard]: Balance $1000.00 | FIXED lot 0.01 (max 0.04)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [standard]: Balance $1000.00 | FIXED lot 0.01 (max 0.04)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf ACCOUNT TIER UPGRADE: standard \u2192 professional | Balance: $6000.00 | Max lots: 0.05 | Max trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf ACCOUNT TIER UPGRADE: standard \u2192 professional | Balance: $5000.00 | Max lots: 0.05 | Max trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf ACCOUNT TIER UPGRADE: standard \u2192 professional | Balance: $10000.00 | Max lots: 0.05 | Max trades: 3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $1000.00 | Tier: Standard ($1K-$5K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Trade opened. Open positions: 1/3 [Tier: standard]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Trade closed - P/L: +10.00 | Balance: 1010.00 | Tier: standard | Open positions: 0"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 126 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 126 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 126 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 126 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Top loss patterns: pair:EUR/USD: 127x ($635.00) | pair_regime:EUR/USD:trending: 127x ($635.00) | signal:BUY: 127x ($635.00) | session:ny_overlap: 97x ($485.00) | pair_session:EUR/USD:ny_overlap: 97x ($485.00)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  Threshold \u2192 0.53 after 127 consecutive losses"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Trade recorded: EUR/USD BUY \u2192 LOSS ($-5.00) | Regime: trending | Session: ny_overlap | Streak: L127"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Top loss patterns: pair:EUR/USD: 128x ($640.00) | pair_regime:EUR/USD:trending: 128x ($640.00) | signal:BUY: 128x ($640.00) | session:ny_overlap: 98x ($490.00) | pair_session:EUR/USD:ny_overlap: 98x ($490.00)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  Threshold \u2192 0.53 after 128 consecutive losses"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Trade recorded: EUR/USD BUY \u2192 LOSS ($-5.00) | Regime: trending | Session: ny_overlap | Streak: L128"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Top loss patterns: pair:EUR/USD: 129x ($645.00) | pair_regime:EUR/USD:trending: 129x ($645.00) | signal:BUY: 129x ($645.00) | session:ny_overlap: 99x ($495.00) | pair_session:EUR/USD:ny_overlap: 99x ($495.00)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  Threshold \u2192 0.53 after 129 consecutive losses"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Trade recorded: EUR/USD BUY \u2192 LOSS ($-5.00) | Regime: trending | Session: ny_overlap | Streak: L129"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Top loss patterns: pair:EUR/USD: 130x ($650.00) | pair_regime:EUR/USD:trending: 130x ($650.00) | signal:BUY: 130x ($650.00) | session:ny_overlap: 100x ($500.00) | pair_session:EUR/USD:ny_overlap: 100x ($500.00)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  Threshold \u2192 0.53 after 130 consecutive losses"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Trade recorded: EUR/USD BUY \u2192 LOSS ($-5.00) | Regime: trending | Session: ny_overlap | Streak: L130"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Top loss patterns: pair:EUR/USD: 131x ($655.00) | pair_regime:EUR/USD:trending: 131x ($655.00) | signal:BUY: 131x ($655.00) | session:ny_overlap: 101x ($505.00) | pair_session:EUR/USD:ny_overlap: 101x ($505.00)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  Threshold \u2192 0.53 after 131 consecutive losses"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Trade recorded: EUR/USD BUY \u2192 LOSS ($-5.00) | Regime: trending | Session: ny_overlap | Streak: L131"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd0d Top loss patterns: pair:EUR/USD: 132x ($660.00) | pair_regime:EUR/USD:trending: 132x ($660.00) | signal:BUY: 132x ($660.00) | session:ny_overlap: 102x ($510.00) | pair_session:EUR/USD:ny_overlap: 102x ($510.00)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f  Threshold \u2192 0.53 after 132 consecutive losses"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Trade recorded: EUR/USD BUY \u2192 LOSS ($-5.00) | Regime: trending | Session: ny_overlap | Streak: L132"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f transformers not installed \u2014 falling back to keyword sentiment"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "NewsAPI key not configured, skipping news sentiment"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 New LSTM model created"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 132 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $10000.00 | Tier: Professional ($5K-$25K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 New LSTM model created"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 132 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $10000.00 | Tier: Professional ($5K-$25K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Starting sweep-gated backtest for EUR/USD | tf_key=5m | bar=5m | candles=50 | confluence=off | spread=1.5pip | commission=$7.0/lot | slippage=0.0pip"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  max_hold=30 candles, cooldown=1 candles (30s)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=50, ADX=24.166491213551843, swings=7, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_down, bias=SELL, ADX=24.2, swings=7"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Insufficient 1M swing points for liquidity levels"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u2705 New LSTM model created"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcda Loaded learning data: 132 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83e\udd16 RL Agent: DQN mode (PyTorch)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL agent loaded: \u03b5=0.050, steps=25189, trades=2472"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RL DQN weights loaded"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "RiskManager initialized: $10000.00 | Tier: Professional ($5K-$25K)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Starting sweep-gated backtest for EUR/USD | tf_key=5m | bar=5m | candles=1000 | confluence=off | spread=1.5pip | commission=$7.0/lot | slippage=0.0pip"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "  max_hold=30 candles, cooldown=1 candles (30s)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=201, ADX=21.06893940875125, swings=38, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=21.1, swings=38"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00283)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=202, ADX=21.84853107898508, swings=38, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=21.8, swings=38"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00283)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=203, ADX=22.06721181412076, swings=38, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=22.1, swings=38"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00283)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=204, ADX=22.07164652119733, swings=38, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=22.1, swings=38"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00319)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=205, ADX=22.591286092491508, swings=39, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=22.6, swings=39"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00319)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=206, ADX=22.0350337695971, swings=39, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=22.0, swings=39"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00339)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=207, ADX=22.78466900820536, swings=39, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=22.8, swings=39"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00220 = 2\u00d7ATR) to level 1.09049, close=1.09259"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS (sweep-recovery): close=1.09259, body=79% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09259 | SL=1.09149 (11.0p) | TP=1.09424 (16.5p) | R:R=1.5 | MSS@1.09480 | Vol=0.15x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=208, ADX=22.82997380168974, swings=40, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=22.8, swings=40"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00217 = 2\u00d7ATR) to level 1.09049, close=1.09310"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS (sweep-recovery): close=1.09310, body=21% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09310 | SL=1.09202 (10.8p) | TP=1.09473 (16.3p) | R:R=1.5 | MSS@1.09517 | Vol=0.42x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[207] BUY @ 1.09318 | SL: 1.09210 | TP: 1.09481 | conf=0.39 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=209, ADX=21.201717139032684, swings=40, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=21.2, swings=40"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00201 = 2\u00d7ATR) to level 1.09049, close=1.09361"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09361 (Sweep-only entry (no displacement): No MSS displacement through 1.09517 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09361 | SL=1.09261 (10.1p) | TP=1.09513 (15.1p) | R:R=1.5 | MSS@1.09517 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[209] EXIT (TAKE_PROFIT) @ 1.09481 (eff=1.09473) | P/L: $1.48 (15.5 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=211, ADX=21.35325879498356, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=21.4, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00264 = 2\u00d7ATR) to level 1.09049, close=1.09798"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09798 (Sweep-only entry (no displacement): No MSS displacement through 1.09517 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09798 | SL=1.09666 (13.2p) | TP=1.10483 (68.5p) | R:R=5.2 | MSS@1.09517 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=212, ADX=23.339497307830094, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=23.3, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00266 = 2\u00d7ATR) to level 1.09049, close=1.09855"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09855 (Sweep-only entry (no displacement): No MSS displacement through 1.09517 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09855 | SL=1.09722 (13.3p) | TP=1.10483 (62.8p) | R:R=4.7 | MSS@1.09517 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=213, ADX=25.1208892139781, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=25.1, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00281 = 2\u00d7ATR) to level 1.09049, close=1.09969"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS (sweep-recovery): close=1.09969, body=54% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09969 | SL=1.09828 (14.1p) | TP=1.10483 (51.4p) | R:R=3.7 | MSS@1.09517 | Vol=0.59x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[212] BUY @ 1.09976 | SL: 1.09835 | TP: 1.10491 | conf=0.43 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=214, ADX=27.542324331218627, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=27.5, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00294 = 2\u00d7ATR) to level 1.09049, close=1.10064"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10064 (Sweep-only entry (no displacement): No MSS displacement through 1.09517 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10064 | SL=1.09917 (14.7p) | TP=1.10483 (41.9p) | R:R=2.9 | MSS@1.09517 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=215, ADX=29.789775797093903, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=29.8, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00289 = 2\u00d7ATR) to level 1.09049, close=1.10129"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10129 (Sweep-only entry (no displacement): No MSS displacement through 1.09517 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10129 | SL=1.09985 (14.5p) | TP=1.10483 (35.4p) | R:R=2.4 | MSS@1.09517 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=216, ADX=31.400184374601945, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=31.4, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00284 = 2\u00d7ATR) to level 1.09049, close=1.10098"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10098 (Sweep-only entry (no displacement): No MSS displacement through 1.09517 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10098 | SL=1.09956 (14.2p) | TP=1.10483 (38.5p) | R:R=2.7 | MSS@1.09517 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=217, ADX=33.781654395642306, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=33.8, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00292 = 2\u00d7ATR) to level 1.09049, close=1.10174"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10174 (Sweep-only entry (no displacement): No MSS displacement through 1.09517 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10174 | SL=1.10028 (14.6p) | TP=1.10483 (30.9p) | R:R=2.1 | MSS@1.09517 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=218, ADX=36.55382969289121, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=36.6, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00081 (<0.00290 = 2\u00d7ATR) to level 1.09049, close=1.10097"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced above 1.09517, close=1.10097, body=90%, vol=1.65x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10097 | SL=1.09951 (14.5p) | TP=1.10483 (38.7p) | R:R=2.7 | MSS@1.09517 | Vol=1.65x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=219, ADX=39.83718807120795, swings=41, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=39.8, swings=41"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09390 < swing_low 1.09387, close 1.09413 recovered, RSI=52.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.09665, close=1.09293, body=198%, vol=1.04x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09293 | SL=1.09156 (13.7p) | TP=1.09499 (20.6p) | R:R=1.5 | MSS@1.09665 | Vol=1.04x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=220, ADX=43.07332752505171, swings=42, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=43.1, swings=42"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09390 < swing_low 1.09387, close 1.09413 recovered, RSI=52.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.09665, close=1.09293, body=198%, vol=1.04x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09293 | SL=1.09158 (13.5p) | TP=1.09496 (20.3p) | R:R=1.5 | MSS@1.09665 | Vol=1.04x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=221, ADX=46.21343101398946, swings=42, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=46.2, swings=42"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09390 < swing_low 1.09387, close 1.09413 recovered, RSI=52.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.09665, close=1.09293, body=198%, vol=1.04x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09293 | SL=1.09158 (13.5p) | TP=1.09496 (20.3p) | R:R=1.5 | MSS@1.09665 | Vol=1.04x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=222, ADX=50.56472552567734, swings=42, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=50.6, swings=42"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09390 < swing_low 1.09387, close 1.09413 recovered, RSI=52.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.09665, close=1.09293, body=198%, vol=1.04x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09293 | SL=1.09145 (14.8p) | TP=1.09516 (22.2p) | R:R=1.5 | MSS@1.09665 | Vol=1.04x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=223, ADX=52.6919895769175, swings=43, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=52.7, swings=43"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09387 BLOCKED: broke 5M HL 1.09919 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=224, ADX=54.7620398714332, swings=43, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=54.8, swings=43"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09387 BLOCKED: broke 5M HL 1.09919 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=225, ADX=52.80521429881942, swings=44, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=52.8, swings=44"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09387 BLOCKED: broke 5M HL 1.09919 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=226, ADX=49.637272298263, swings=44, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=49.6, swings=44"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09387 BLOCKED: broke 5M HL 1.09919 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=227, ADX=46.44819562301471, swings=44, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=46.4, swings=44"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09387 BLOCKED: broke 5M HL 1.09919 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=228, ADX=42.677487456656785, swings=44, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=42.7, swings=44"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09919 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=229, ADX=38.67441666614236, swings=45, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=38.7, swings=45"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09905 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[229] EXIT (STOP_LOSS) @ 1.09835 (eff=1.09828) | P/L: $-1.55 (-14.8 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=231, ADX=31.484791898985943, swings=46, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=31.5, swings=46"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09905 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=232, ADX=28.553557151892985, swings=46, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=28.6, swings=46"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09905 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=233, ADX=25.5674827109814, swings=47, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=25.6, swings=47"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09780 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=234, ADX=22.370217371433302, swings=47, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=22.4, swings=47"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09780 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=235, ADX=18.524275665995138, swings=47, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=18.5, swings=47"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09780 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=236, ADX=14.832681046394184, swings=47, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=14.8, swings=47"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09780 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=237, ADX=12.791018269751474, swings=47, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=12.8, swings=47"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09242 BLOCKED: broke 5M HL 1.09780 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=238, ADX=10.32355599549839, swings=48, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=10.3, swings=48"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09387 BLOCKED: broke 5M HL 1.09785 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=239, ADX=9.632702970614181, swings=48, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=9.6, swings=48"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09387 BLOCKED: broke 5M HL 1.09785 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=240, ADX=9.68678799742281, swings=49, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=9.7, swings=49"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=241, ADX=9.831263519280999, swings=49, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=9.8, swings=49"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=242, ADX=9.80606195857028, swings=49, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=9.8, swings=49"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=243, ADX=9.21053849543733, swings=49, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=9.2, swings=49"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=244, ADX=9.487991451044934, swings=50, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=9.5, swings=50"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=245, ADX=9.695542468087469, swings=50, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=9.7, swings=50"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=246, ADX=9.532594049979783, swings=50, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=9.5, swings=50"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=247, ADX=9.40401212389412, swings=50, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=9.4, swings=50"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00538)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=248, ADX=9.492515003010373, swings=51, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=9.5, swings=51"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00501)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=249, ADX=9.447153725324494, swings=51, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=9.4, swings=51"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00414)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=250, ADX=8.904996656071678, swings=51, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=8.9, swings=51"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00414)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=8.217035302235319, swings=51, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=8.2, swings=51"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00414)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=7.932419566696368, swings=52, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=7.9, swings=52"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00047 (<0.00236 = 2\u00d7ATR) to level 1.10236, close=1.09813"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bearish MSS: displaced toward 1.09656, close=1.09813, body=79%, vol=1.30x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09813 | SL=1.09932 (11.8p) | TP=1.09636 (17.7p) | R:R=1.5 | MSS@1.09656 | Vol=1.30x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[251] SELL @ 1.09806 | SL: 1.09925 | TP: 1.09628 | conf=0.39 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[252] EXIT (STOP_LOSS) @ 1.09925 (eff=1.09932) | P/L: $-1.33 (-12.6 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=11.11595508847969, swings=52, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=11.1, swings=52"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10236 BLOCKED: broke 5M LH 1.10039 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=12.689364008760151, swings=52, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=12.7, swings=52"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10236 BLOCKED: broke 5M LH 1.10039 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=13.569693043122351, swings=52, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=13.6, swings=52"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10236 BLOCKED: broke 5M LH 1.10039 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=14.43472759069937, swings=52, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_down, bias=SELL, ADX=14.4, swings=52"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10236 BLOCKED: broke 5M LH 1.10039 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=14.292677952041638, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=14.3, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09891 < swing_low 1.09919, close 1.09941 recovered, RSI=40.4 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10055, close=1.09868, body=20%, vol=1.00x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09868 | SL=1.09715 (15.3p) | TP=1.10098 (23.0p) | R:R=1.5 | MSS@1.10055 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[257] BUY @ 1.10154 | SL: 1.10001 | TP: 1.10384 | conf=0.54 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=13.564028837997819, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=13.6, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09891 < swing_low 1.09905, close 1.09941 recovered, RSI=40.4 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10055, close=1.09868, body=20%, vol=1.00x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09868 | SL=1.09718 (15.0p) | TP=1.10093 (22.5p) | R:R=1.5 | MSS@1.10055 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[258] BUY @ 1.10084 | SL: 1.09933 | TP: 1.10308 | conf=0.54 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=13.653494565745575, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=13.7, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09891 < swing_low 1.09905, close 1.09941 recovered, RSI=40.4 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10055, close=1.09868, body=20%, vol=1.00x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09868 | SL=1.09721 (14.7p) | TP=1.10089 (22.1p) | R:R=1.5 | MSS@1.10055 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[259] BUY @ 1.10128 | SL: 1.09981 | TP: 1.10349 | conf=0.54 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=14.272918632239094, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=14.3, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09908 < swing_low 1.09905, close 1.09942 recovered, RSI=45.1 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10189, close=1.09902, body=39%, vol=1.20x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09902 | SL=1.09754 (14.8p) | TP=1.10125 (22.3p) | R:R=1.5 | MSS@1.10189 | Vol=1.20x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[260] BUY @ 1.10205 | SL: 1.10057 | TP: 1.10428 | conf=0.54 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=15.018991715453293, swings=52, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=15.0, swings=52"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09908 < swing_low 1.09905, close 1.09942 recovered, RSI=45.1 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10189, close=1.09902, body=39%, vol=1.20x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09902 | SL=1.09752 (15.0p) | TP=1.10127 (22.5p) | R:R=1.5 | MSS@1.10189 | Vol=1.20x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[261] BUY @ 1.10113 | SL: 1.09963 | TP: 1.10338 | conf=0.54 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=16.317806491468563, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=16.3, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09780 BLOCKED: broke 5M HL 1.09990 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[263] EXIT (STOP_LOSS) @ 1.09963 (eff=1.09955) | P/L: $-1.65 (-15.8 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=18.295309016553997, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=18.3, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09905 BLOCKED: broke 5M HL 1.09990 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=19.484317412156223, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=19.5, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09905 BLOCKED: broke 5M HL 1.09990 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=21.030649828147062, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=21.0, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09905 BLOCKED: broke 5M HL 1.09990 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=22.434058220187172, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=22.4, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09905 BLOCKED: broke 5M HL 1.09990 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=24.58689529305131, swings=52, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=24.6, swings=52"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09905 BLOCKED: broke 5M HL 1.09990 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=27.381042927560113, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=27.4, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09908 < swing_low 1.09905, close 1.09942 recovered, RSI=45.1 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10189, close=1.09902, body=39%, vol=1.20x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09902 | SL=1.09763 (13.9p) | TP=1.10111 (20.9p) | R:R=1.5 | MSS@1.10189 | Vol=1.20x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=29.664130364098135, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=29.7, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09803 < swing_low 1.09785, close 1.09902 recovered, RSI=51.4 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10024, close=1.09902, body=39%, vol=1.20x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09902 | SL=1.09763 (13.9p) | TP=1.10111 (20.9p) | R:R=1.5 | MSS@1.10024 | Vol=1.20x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=31.741246520158263, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=31.7, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09803 < swing_low 1.09785, close 1.09902 recovered, RSI=51.4 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10024, close=1.09902, body=39%, vol=1.20x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09902 | SL=1.09764 (13.8p) | TP=1.10109 (20.7p) | R:R=1.5 | MSS@1.10024 | Vol=1.20x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=34.780376737312196, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=34.8, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09803 < swing_low 1.09785, close 1.09902 recovered, RSI=51.4 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10024, close=1.09902, body=39%, vol=1.20x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09902 | SL=1.09759 (14.4p) | TP=1.10118 (21.5p) | R:R=1.5 | MSS@1.10024 | Vol=1.20x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=36.285760106384, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=BUY, ADX=36.3, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09893 < swing_low 1.09905, close 1.09939 recovered, RSI=42.3 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10039, close=1.09939, body=45%, vol=1.64x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09939 | SL=1.09795 (14.4p) | TP=1.10155 (21.6p) | R:R=1.5 | MSS@1.10039 | Vol=1.64x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=37.91702489643513, swings=54, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=37.9, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10189 BLOCKED: broke 5M LH 1.09711 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=39.781028907012725, swings=53, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=39.8, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10189 BLOCKED: broke 5M LH 1.09711 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=41.13424485095458, swings=53, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=41.1, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10189 BLOCKED: broke 5M LH 1.09711 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=41.1082855454149, swings=53, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=41.1, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10189 BLOCKED: broke 5M LH 1.09711 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=40.1172617697027, swings=54, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=40.1, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10189 BLOCKED: broke 5M LH 1.09711 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=39.38597750929921, swings=53, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=39.4, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.10189 BLOCKED: broke 5M LH 1.09711 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=36.79544898625918, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=36.8, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09807 < swing_low 1.09785, close 1.09813 recovered, RSI=45.5 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced above 1.10039, close=1.10147, body=21%, vol=1.28x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10147 | SL=1.09784 (36.3p) | TP=1.10873 (72.6p) | R:R=2.0 | MSS@1.10039 | Vol=1.28x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=33.93530751360385, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=33.9, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09433 (11.0p) | TP=1.09763 (22.0p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=29.79098378852301, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=29.8, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09439 (10.4p) | TP=1.09750 (20.7p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=27.40634976746576, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=27.4, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09430 (11.3p) | TP=1.09768 (22.5p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=24.395876769486687, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=24.4, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09423 (12.0p) | TP=1.09782 (23.9p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=21.62467353588726, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=21.6, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09420 (12.3p) | TP=1.09790 (24.7p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[285] BUY @ 1.09840 | SL: 1.09717 | TP: 1.10087 | conf=0.56 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[286] EXIT (STOP_LOSS) @ 1.09717 (eff=1.09709) | P/L: $-1.37 (-13.0 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=16.062724549935815, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=16.1, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09419 (12.4p) | TP=1.09791 (24.8p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=13.487763067583073, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=13.5, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09414 (12.9p) | TP=1.09801 (25.8p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=11.278117058738067, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=11.3, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09419 (12.4p) | TP=1.09791 (24.8p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=8.416796964422165, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=8.4, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09410 (13.3p) | TP=1.09808 (26.5p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=8.42165749371178, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=8.4, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Bullish sweep: low 1.09619 < swing_low 1.09656, close 1.09673 recovered, RSI=41.6 (slope \u2191)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced toward 1.10201, close=1.09543, body=19%, vol=1.60x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09543 | SL=1.09413 (13.0p) | TP=1.09802 (25.9p) | R:R=2.0 | MSS@1.10201 | Vol=1.60x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=7.77782203569123, swings=55, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=7.8, swings=55"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00267 = 2\u00d7ATR) to level 1.10239, close=1.09576"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09576 (Sweep-only entry (no displacement): No MSS displacement through 1.09582 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09576 | SL=1.09728 (15.2p) | TP=1.09348 (22.8p) | R:R=1.5 | MSS@1.09582 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[292] SELL @ 1.09569 | SL: 1.09720 | TP: 1.09340 | conf=0.46 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=7.098849087479181, swings=55, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=7.1, swings=55"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00270 = 2\u00d7ATR) to level 1.10239, close=1.09517"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bearish MSS (sweep-recovery): close=1.09517, body=838% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09517 | SL=1.09652 (13.5p) | TP=1.09315 (20.2p) | R:R=1.5 | MSS@1.09582 | Vol=0.87x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[293] SELL @ 1.09510 | SL: 1.09644 | TP: 1.09308 | conf=0.72 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=7.938212038052155, swings=54, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=7.9, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00279 = 2\u00d7ATR) to level 1.10239, close=1.09602"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bearish MSS: displaced toward 1.09582, close=1.09602, body=12%, vol=1.18x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09602 | SL=1.09742 (14.0p) | TP=1.09393 (20.9p) | R:R=1.5 | MSS@1.09582 | Vol=1.18x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[294] SELL @ 1.09595 | SL: 1.09735 | TP: 1.09386 | conf=0.54 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=8.168291717746696, swings=54, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=8.2, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00273 = 2\u00d7ATR) to level 1.10239, close=1.09638"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09638 (Sweep-only entry (no displacement): No MSS displacement through 1.09582 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09638 | SL=1.09774 (13.6p) | TP=1.09434 (20.4p) | R:R=1.5 | MSS@1.09582 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[295] SELL @ 1.09630 | SL: 1.09766 | TP: 1.09427 | conf=0.35 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=8.628104147685885, swings=55, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=8.6, swings=55"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00276 = 2\u00d7ATR) to level 1.10239, close=1.09569"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09569 (Sweep-only entry (no displacement): No MSS displacement through 1.09513 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09569 | SL=1.09706 (13.8p) | TP=1.09362 (20.7p) | R:R=1.5 | MSS@1.09513 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[296] SELL @ 1.09561 | SL: 1.09698 | TP: 1.09354 | conf=0.46 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[297] EXIT (STOP_LOSS) @ 1.09698 (eff=1.09706) | P/L: $-1.52 (-14.5 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=7.761631012468813, swings=54, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=7.8, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00255 = 2\u00d7ATR) to level 1.10239, close=1.09689"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09689 (Sweep-only entry (no displacement): No MSS displacement through 1.09513 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09689 | SL=1.09817 (12.7p) | TP=1.09498 (19.1p) | R:R=1.5 | MSS@1.09513 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[298] SELL @ 1.09682 | SL: 1.09810 | TP: 1.09491 | conf=0.35 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=6.956792080136293, swings=54, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=7.0, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00232 = 2\u00d7ATR) to level 1.10239, close=1.09771"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09771 (Sweep-only entry (no displacement): No MSS displacement through 1.09542 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09771 | SL=1.09887 (11.6p) | TP=1.09596 (17.4p) | R:R=1.5 | MSS@1.09542 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[299] SELL @ 1.09763 | SL: 1.09879 | TP: 1.09588 | conf=0.35 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=8.790215418128593, swings=54, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=8.8, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00214 = 2\u00d7ATR) to level 1.10239, close=1.09834"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bearish MSS (sweep-recovery): close=1.09834, body=37% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09834 | SL=1.09941 (10.7p) | TP=1.09673 (16.0p) | R:R=1.5 | MSS@1.09542 | Vol=0.94x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[300] SELL @ 1.09826 | SL: 1.09933 | TP: 1.09665 | conf=0.54 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=10.449059474728491, swings=53, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=10.4, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00215 = 2\u00d7ATR) to level 1.10239, close=1.09751"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bearish MSS (sweep-recovery): close=1.09751, body=12% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09751 | SL=1.09858 (10.7p) | TP=1.09590 (16.1p) | R:R=1.5 | MSS@1.09542 | Vol=0.92x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[301] SELL @ 1.09743 | SL: 1.09850 | TP: 1.09583 | conf=0.54 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=11.536691765607982, swings=53, bias=SELL"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=range, bias=SELL, ADX=11.5, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (SELL): gap=0.00152 (<0.00218 = 2\u00d7ATR) to level 1.10239, close=1.09695"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.09695 (Sweep-only entry (no displacement): No MSS displacement through 1.09542 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD SELL | Entry=1.09695 | SL=1.09803 (10.9p) | TP=1.09531 (16.3p) | R:R=1.5 | MSS@1.09542 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[302] SELL @ 1.09687 | SL: 1.09796 | TP: 1.09523 | conf=0.35 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=11.963222680488437, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=12.0, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09463 BLOCKED: broke 5M HL 1.09513 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[304] EXIT (STOP_LOSS) @ 1.09796 (eff=1.09803) | P/L: $-1.23 (-11.6 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=16.38088553358542, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=16.4, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09463 BLOCKED: broke 5M HL 1.09645 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=17.910448042475497, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=17.9, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09463 BLOCKED: broke 5M HL 1.09645 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=20.140733607497832, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=20.1, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09463 BLOCKED: broke 5M HL 1.09645 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=20.34527369210256, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=20.3, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09477 BLOCKED: broke 5M HL 1.09645 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=20.89316920996965, swings=55, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=20.9, swings=55"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09477 BLOCKED: broke 5M HL 1.09685 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=22.313267579731725, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=22.3, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u23ed\ufe0f EUR/USD NO SWEEP: Sweep at 1.09477 BLOCKED: broke 5M HL 1.09685 [5M INVALIDATION]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=23.210810737919605, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=23.2, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00205 = 2\u00d7ATR) to level 1.09477, close=1.09921"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced above 1.09850, close=1.09921, body=205%, vol=1.76x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.09921 | SL=1.09819 (10.2p) | TP=1.10126 (20.5p) | R:R=2.0 | MSS@1.09850 | Vol=1.76x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[311] BUY @ 1.09929 | SL: 1.09827 | TP: 1.10133 | conf=0.48 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=24.566483602012656, swings=53, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=24.6, swings=53"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00214 = 2\u00d7ATR) to level 1.09477, close=1.10031"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10031 (Sweep-only entry (no displacement): No MSS displacement through 1.10018 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10031 | SL=1.09920 (11.1p) | TP=1.10254 (22.2p) | R:R=2.0 | MSS@1.10018 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[313] EXIT (TAKE_PROFIT) @ 1.10133 (eff=1.10126) | P/L: $1.90 (19.7 pips) | costs: spread=$0.15 comm=$0.07"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=26.76982176657385, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=26.8, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00225 = 2\u00d7ATR) to level 1.09431, close=1.10195"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS (sweep-recovery): close=1.10195, body=58% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10195 | SL=1.10083 (11.3p) | TP=1.10420 (22.5p) | R:R=2.0 | MSS@1.10018 | Vol=0.98x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[314] BUY @ 1.10203 | SL: 1.10091 | TP: 1.10428 | conf=0.50 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=28.05345929745959, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=28.1, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00224 = 2\u00d7ATR) to level 1.09431, close=1.10326"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS: displaced above 1.10018, close=1.10326, body=32%, vol=1.43x, mode=aggressive [relaxed-range]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10326 | SL=1.10213 (11.2p) | TP=1.10550 (22.4p) | R:R=2.0 | MSS@1.10018 | Vol=1.43x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[315] BUY @ 1.10333 | SL: 1.10221 | TP: 1.10557 | conf=0.53 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=30.725614901487802, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=30.7, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00222 = 2\u00d7ATR) to level 1.09431, close=1.10328"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10328 (Sweep-only entry (no displacement): No MSS displacement through 1.10018 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10328 | SL=1.10217 (11.1p) | TP=1.10549 (22.2p) | R:R=2.0 | MSS@1.10018 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[316] BUY @ 1.10335 | SL: 1.10225 | TP: 1.10557 | conf=0.30 agree=2"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=33.62569579282134, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=33.6, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00227 = 2\u00d7ATR) to level 1.09431, close=1.10396"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10396 (Sweep-only entry (no displacement): No MSS displacement through 1.10018 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10396 | SL=1.10282 (11.4p) | TP=1.10623 (22.7p) | R:R=2.0 | MSS@1.10018 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Position sizing [professional]: Balance $10000.00 | FIXED lot 0.01 (max 0.05)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "[317] BUY @ 1.10403 | SL: 1.10289 | TP: 1.10631 | conf=0.33 agree=3"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=34.30103433334349, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=34.3, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00222 = 2\u00d7ATR) to level 1.09431, close=1.10365"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a1 EUR/USD MSS: Bullish MSS (sweep-recovery): close=1.10365, body=64% [relaxed-range, sweep=displacement]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10365 | SL=1.10254 (11.1p) | TP=1.10587 (22.2p) | R:R=2.0 | MSS@1.10018 | Vol=0.87x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=36.839019672950165, swings=54, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=36.8, swings=54"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00213 = 2\u00d7ATR) to level 1.09431, close=1.10397"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10397 (Sweep-only entry (no displacement): No MSS displacement through 1.10018 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10397 | SL=1.10291 (10.6p) | TP=1.10610 (21.3p) | R:R=2.0 | MSS@1.10018 | Vol=1.00x | Mode=aggressive"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD detect_regime: df_5m=251, ADX=40.22436263772509, swings=55, bias=BUY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udcca EUR/USD regime=trend_up, bias=BUY, ADX=40.2, swings=55"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udca7 EUR/USD Proximity sweep (BUY): gap=0.00036 (<0.00194 = 2\u00d7ATR) to level 1.09431, close=1.10384"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\u26a0\ufe0f EUR/USD sweep detected, soft MSS \u2192 entry at 1.10384 (Sweep-only entry (no displacement): No MSS displacement through 1.10449 after sweep (checked 1 candles, sweep_idx=-1))"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf SWEEP+MSS SIGNAL: EUR/USD BUY | Entry=1.10384 | SL=1.10287 (9.7p) | TP=1.10578 (19.4p) | R:R=2.0 | MSS@1.10449 | Vol=1.00x | Mode=aggressive"}
