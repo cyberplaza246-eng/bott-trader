@@ -284,49 +284,62 @@ def place_order():
         print(f"ORDER: {symbol} {order_type} {lot_size} lots | SL={sl} TP={tp}")
         result = _try_order(req_base)
 
-        # If order succeeded, add SL/TP via modify
-        if not isinstance(result, str) and (sl > 0 or tp > 0):
-            import time
-            time.sleep(0.3)  # Brief wait for position to register
-            
-            # Find the position we just opened
-            positions = mt5.positions_get(symbol=symbol)
-            position_ticket = None
-            if positions:
-                bot_positions = [p for p in positions if p.magic == 234000]
-                if bot_positions:
-                    position_ticket = max(p.ticket for p in bot_positions)
-            
+        if isinstance(result, str):
+            return jsonify({"error": f"Order failed: {result}"}), 400
+
+        # Find the actual position ticket (may differ from order ticket)
+        import time
+        position_ticket = None
+        sl_tp_set = False
+
+        if sl > 0 or tp > 0:
+            # Retry position lookup up to 3 times with increasing delays
+            for attempt in range(3):
+                time.sleep(0.3 * (attempt + 1))
+                positions = mt5.positions_get(symbol=symbol)
+                if positions:
+                    bot_positions = [p for p in positions if p.magic == 234000]
+                    if bot_positions:
+                        position_ticket = max(p.ticket for p in bot_positions)
+                        break
+
             if not position_ticket:
                 position_ticket = result.order
                 print(f"  ⚠️ Could not find position, using order ticket: {position_ticket}")
-            
-            # Modify to add SL/TP
-            modify_req = {
-                "action": mt5.TRADE_ACTION_SLTP,
-                "symbol": symbol,
-                "position": position_ticket,
-                "sl": sl,
-                "tp": tp,
-            }
-            print(f"  Adding SL/TP to ticket {position_ticket}...")
-            modify_result = mt5.order_send(modify_req)
-            if modify_result and modify_result.retcode == mt5.TRADE_RETCODE_DONE:
-                print(f"  ✅ SL/TP set: SL={sl} TP={tp}")
-            else:
-                err = modify_result.comment if modify_result else mt5.last_error()
-                print(f"  ⚠️ SL/TP modify failed: {err}")
 
-    if isinstance(result, str):
-        return jsonify({"error": f"Order failed: {result}"}), 400
+            # Retry SL/TP modify up to 3 times
+            for attempt in range(3):
+                modify_req = {
+                    "action": mt5.TRADE_ACTION_SLTP,
+                    "symbol": symbol,
+                    "position": position_ticket,
+                    "sl": sl,
+                    "tp": tp,
+                }
+                print(f"  Adding SL/TP to ticket {position_ticket} (attempt {attempt+1})...")
+                modify_result = mt5.order_send(modify_req)
+                if modify_result and modify_result.retcode == mt5.TRADE_RETCODE_DONE:
+                    print(f"  ✅ SL/TP set: SL={sl} TP={tp}")
+                    sl_tp_set = True
+                    break
+                else:
+                    err = modify_result.comment if modify_result else mt5.last_error()
+                    print(f"  ⚠️ SL/TP modify attempt {attempt+1} failed: {err}")
+                    time.sleep(0.5)
 
-    return jsonify({
-        "ticket": result.order,
-        "pair": symbol,
-        "type": order_type,
-        "volume": lot_size,
-        "price": entry_price,
-    })
+            if not sl_tp_set:
+                print(f"  ❌ CRITICAL: SL/TP NOT SET after 3 attempts for {position_ticket}")
+        else:
+            position_ticket = result.order
+
+        return jsonify({
+            "ticket": position_ticket or result.order,
+            "pair": symbol,
+            "type": order_type,
+            "volume": lot_size,
+            "price": entry_price,
+            "sl_tp_set": sl_tp_set,
+        })
 
 
 # ── Close Position ────────────────────────────────────────────────────

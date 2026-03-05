@@ -847,14 +847,24 @@ class TradingBot:
                         actual_sl = pos.get('sl', 0)
                         actual_tp = pos.get('tp', 0)
                         if actual_sl == 0 and actual_tp == 0:
-                            bot_logger.warning(f"⚠️ SL/TP NOT SET! Position {order_id} has no SL/TP")
-                            bot_logger.warning(f"   Expected SL: {stop_loss:.5f}, TP: {take_profit:.5f}")
+                            bot_logger.warning(f"⚠️ SL/TP NOT SET! Retrying modify for {order_id}...")
+                            # Retry SL/TP via modify_position
+                            for retry in range(3):
+                                mod = self.broker.modify_position(order_id, sl=stop_loss, tp=take_profit)
+                                if mod:
+                                    bot_logger.info(f"✅ SL/TP set on retry {retry+1}: SL={stop_loss:.5f}, TP={take_profit:.5f}")
+                                    break
+                                time.sleep(0.5)
+                            else:
+                                bot_logger.error(f"❌ CRITICAL: SL/TP FAILED after 3 retries for {order_id}! SL={stop_loss:.5f}, TP={take_profit:.5f}")
                         else:
                             bot_logger.info(f"✅ SL/TP confirmed: SL={actual_sl:.5f}, TP={actual_tp:.5f}")
                         break
                 
                 if not position_found:
-                    bot_logger.warning(f"⚠️ Could not find position {order_id} to verify SL/TP")
+                    # Position ticket might differ — try modify anyway
+                    bot_logger.warning(f"⚠️ Could not find position {order_id} — attempting SL/TP modify anyway")
+                    self.broker.modify_position(order_id, sl=stop_loss, tp=take_profit)
                 
                 self.risk_manager.on_trade_opened()
                 # Register for trailing stop management (aggressive profit protection)

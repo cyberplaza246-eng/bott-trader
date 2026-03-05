@@ -41,7 +41,7 @@ class LiquiditySweepAnalyzer:
         },
         'USD/JPY': {
             'session_atr_min': 0.005,     # 0.5 pips (trade even in quiet hours)
-            'spread_sim': 0.020,
+            'spread_sim': 0.015,          # 1.5 pips (ECN spread for JPY)
             'pip_size': 0.01,
         },
     }
