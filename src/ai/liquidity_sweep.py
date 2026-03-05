@@ -540,10 +540,15 @@ class LiquiditySweepAnalyzer:
                     nearest_gap = gap if nearest_gap is None else min(nearest_gap, gap)
 
                     if swept and rsi_ok:
-                        # 5M invalidation: sweep must NOT break 5M structural HL
+                        # 5M invalidation: sweep must NOT break 5M structural HL (with scalping tolerance)
                         fivem_held = True
                         if fivem_structural_level is not None:
-                            if candle_low < fivem_structural_level:
+                            # Add ATR-based tolerance for 1M scalping flexibility
+                            regime_atr = float(regime_info.get('atr', 0) if regime_info else 0)
+                            tolerance = regime_atr * 0.8 if regime_atr > 0 else 0.0015  # 80% ATR or 1.5p fallback
+                            adjusted_fivem_level = fivem_structural_level - tolerance
+                            
+                            if candle_low < adjusted_fivem_level:
                                 fivem_held = False
 
                         if not fivem_held:
@@ -582,10 +587,15 @@ class LiquiditySweepAnalyzer:
                     nearest_gap = gap if nearest_gap is None else min(nearest_gap, gap)
 
                     if swept and rsi_ok:
-                        # 5M invalidation: sweep must NOT break 5M structural LH
+                        # 5M invalidation: sweep must NOT break 5M structural LH (with scalping tolerance)
                         fivem_held = True
                         if fivem_structural_level is not None:
-                            if candle_high > fivem_structural_level:
+                            # Add ATR-based tolerance for 1M scalping flexibility
+                            regime_atr = float(regime_info.get('atr', 0) if regime_info else 0)
+                            tolerance = regime_atr * 0.8 if regime_atr > 0 else 0.0015  # 80% ATR or 1.5p fallback
+                            adjusted_fivem_level = fivem_structural_level + tolerance
+                            
+                            if candle_high > adjusted_fivem_level:
                                 fivem_held = False
 
                         if not fivem_held:
@@ -1047,7 +1057,7 @@ class LiquiditySweepAnalyzer:
         spread = config['spread_sim']
         if sl_distance < spread * 2:
             bot_logger.info(
-                f"\u26d4 R:R rejected: SL {sl_distance:.5f} < 4\u00d7spread {spread*4:.5f} (structure safety)"
+                f"\u26d4 R:R rejected: SL {sl_distance:.5f} < 2\u00d7spread {spread*2:.5f} (structure safety)"
             )
             return None
 

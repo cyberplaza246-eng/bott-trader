@@ -69,6 +69,12 @@ class ScalpingAnalyzer:
     TP_BASE_RATIO = 1.8        # TP = 1.8 x SL — better R:R
     TP_EXPANDING = 2.0         # Wider TP in expanding volatility
     TP_CONTRACTING = 1.5       # Tighter TP in contracting volatility
+    
+    # Session-aware TP ratios for volatility adaptation
+    TP_ASIAN_SESSION = 1.5     # Lower volatility sessions (21-07 UTC)
+    TP_LONDON_OPEN = 2.0       # Breakout volatility (07-12 UTC) 
+    TP_NY_OVERLAP = 2.2        # Highest volatility (13-17 UTC)
+    TP_QUIET_HOURS = 1.3       # Minimal movement periods (17-21 UTC)
     TP_MIN_STRUCTURE_RR = 1.3  # Min 1.3R when targeting structure levels
     TP_MAX_SCALP_RR = 2.2      # Max 2.2R for 5m scalping (realistic)
     
@@ -79,6 +85,8 @@ class ScalpingAnalyzer:
     # -- Session windows (UTC) ---------------------------------------
     LONDON_OPEN = {'start': 7, 'end': 12}
     NY_OPEN = {'start': 13, 'end': 17}
+    ASIAN_SESSION = {'start': 21, 'end': 7}  # Wraps midnight: 21:00-07:00
+    QUIET_HOURS = {'start': 17, 'end': 21}   # Post-NY, pre-Asian
 
     # -- Entry parameters --------------------------------------------
     RSI_ENTRY_LOW = 40         # RSI pre-expansion zone lower bound
@@ -229,6 +237,87 @@ class ScalpingAnalyzer:
     # =================================================================
     #  MARKET CONDITIONS FILTER
     # =================================================================
+
+    def _get_current_session(self, timestamp=None):
+        """Determine current trading session for TP ratio adjustment.
+        
+        Args:
+            timestamp: UTC timestamp, if None uses current time
+            
+        Returns:
+            str: 'london', 'ny_overlap', 'asian', 'quiet'
+        """
+        import datetime
+        if timestamp is None:
+            current_hour = datetime.datetime.utcnow().hour
+        else:
+            current_hour = timestamp.hour if hasattr(timestamp, 'hour') else datetime.datetime.utcfromtimestamp(timestamp).hour
+        
+        if self.LONDON_OPEN['start'] <= current_hour < self.LONDON_OPEN['end']:
+            return 'london'
+        elif self.NY_OPEN['start'] <= current_hour < self.NY_OPEN['end']:
+            return 'ny_overlap'
+        elif self.QUIET_HOURS['start'] <= current_hour < self.QUIET_HOURS['end']:
+            return 'quiet'
+        else:  # Asian session (wraps midnight)
+            return 'asian'
+    
+    def _get_effective_spread(self, pair, broker_spread, config):
+        """Get effective spread using hybrid broker/config approach.
+        
+        Args:
+            pair: Currency pair
+            broker_spread: Spread from broker (may be None)
+            config: Pair configuration
+            
+        Returns:
+            float: Effective spread to use for calculations
+        """
+        config_spread = config['spread_sim']
+        
+        # If no broker spread, use config
+        if broker_spread is None:
+            return config_spread
+            
+        # JPY pairs: use hybrid approach with safety limits
+        if 'JPY' in pair:
+            # Use broker spread if reasonable, otherwise fall back to config
+            max_reasonable_jpy_spread = 0.040  # 4.0 pips max for JPY
+            if broker_spread <= max_reasonable_jpy_spread:
+                # Apply safety multiplier: broker spread × 1.5 to account for volatility
+                return min(broker_spread * 1.5, config_spread)
+            else:
+                return config_spread
+        else:
+            # Major pairs: use broker spread if reasonable, with safety limits
+            max_reasonable_major_spread = config_spread * 1.8  # Max 1.8× config spread
+            if broker_spread <= max_reasonable_major_spread:
+                return broker_spread
+            else:
+                return config_spread
+    
+    def _get_session_tp_ratio(self, base_ratio, session=None):
+        """Get session-adaptive TP ratio based on expected volatility.
+        
+        Args:
+            base_ratio: Base ratio from volatility regime
+            session: Session override, if None detects current
+            
+        Returns:
+            float: Adjusted TP ratio
+        """
+        if session is None:
+            session = self._get_current_session()
+        
+        session_multipliers = {
+            'london': self.TP_LONDON_OPEN / self.TP_BASE_RATIO,     # 2.0/1.8 = 1.11×
+            'ny_overlap': self.TP_NY_OVERLAP / self.TP_BASE_RATIO,  # 2.2/1.8 = 1.22×
+            'asian': self.TP_ASIAN_SESSION / self.TP_BASE_RATIO,    # 1.5/1.8 = 0.83×
+            'quiet': self.TP_QUIET_HOURS / self.TP_BASE_RATIO,      # 1.3/1.8 = 0.72×
+        }
+        
+        multiplier = session_multipliers.get(session, 1.0)
+        return base_ratio * multiplier
 
     def check_market_conditions(self, df, pair, spread=None):
         """Gate check: should we even look for trades right now?
@@ -594,23 +683,59 @@ class ScalpingAnalyzer:
         atr_buffer = atr * self.SL_STRUCTURE_BUFFER
 
         if direction == 'BUY':
-            # Find significant swing lows - simplified approach for better levels
+            # Enhanced swing low detection with volume and significance weighting
             swing_lows = []
-            for i in range(2, len(lookback_data) - 1):  # Simple 3-candle pattern
-                current_low = lookback_data.iloc[i]['low']
+            volume_avg = lookback_data['volume'].rolling(window=5).mean()
+            
+            for i in range(2, len(lookback_data) - 1):  # 3-candle pattern
+                current_row = lookback_data.iloc[i]
+                current_low = current_row['low']
                 prev_low = lookback_data.iloc[i-1]['low']
                 next_low = lookback_data.iloc[i+1]['low']
+                current_volume = current_row.get('volume', 1.0)
+                avg_volume = volume_avg.iloc[i] if i < len(volume_avg) else 1.0
                 
                 # Basic swing low: lower than both neighbors
                 if current_low < prev_low and current_low < next_low:
                     distance = entry_price - current_low
                     if distance > 0 and distance <= atr * 2.0:  # Within reasonable range
-                        swing_lows.append((current_low, distance, len(lookback_data) - i))
+                        
+                        # Calculate level significance score
+                        significance = 1.0
+                        
+                        # Volume confirmation: higher volume = more significant
+                        volume_ratio = current_volume / max(avg_volume, 0.001)
+                        if volume_ratio > 1.2:  # 20% above average
+                            significance += 0.3
+                        elif volume_ratio > 1.0:
+                            significance += 0.1
+                        
+                        # Multiple-touch validation: look for retests of this level
+                        level_tolerance = atr * 0.1  # 10% ATR tolerance
+                        touch_count = 0
+                        for j in range(max(0, i-15), min(len(lookback_data), i+5)):  # Check ±15 candles
+                            if j != i:  # Don't count the original swing
+                                low_j = lookback_data.iloc[j]['low']
+                                if abs(low_j - current_low) <= level_tolerance:
+                                    touch_count += 1
+                        
+                        # Multiple touches increase significance
+                        if touch_count >= 2:
+                            significance += 0.4
+                        elif touch_count == 1:
+                            significance += 0.2
+                        
+                        # Distance weighting: closer levels preferred but not lowest priority
+                        distance_weight = 1.0 / (1.0 + distance / (atr * 0.5))
+                        final_score = significance * distance_weight
+                        
+                        swing_lows.append((current_low, distance, len(lookback_data) - i, final_score, touch_count))
 
             if swing_lows:
-                # Sort by proximity to entry (closest first)
-                swing_lows.sort(key=lambda x: x[1])
+                # Sort by significance score (highest first)
+                swing_lows.sort(key=lambda x: x[3], reverse=True)
                 structure_level = swing_lows[0][0]
+                touch_count = swing_lows[0][4]
                 
                 sl_level = structure_level - atr_buffer
                 sl_distance = entry_price - sl_level
@@ -622,30 +747,67 @@ class ScalpingAnalyzer:
                 sl_distance = max(min_sl, min(sl_distance, max_sl))
                 sl_level = entry_price - sl_distance
                 
+                touch_text = f" ({touch_count} touches)" if touch_count > 0 else ""
                 return {
                     'distance': sl_distance,
                     'level': sl_level,
-                    'reason': f'swing low {structure_level:.5f} + {atr_buffer/atr:.1f}×ATR buffer'
+                    'reason': f'significant swing low {structure_level:.5f}{touch_text} + {atr_buffer/atr:.1f}×ATR buffer'
                 }
 
         elif direction == 'SELL':
-            # Find significant swing highs - simplified approach for better levels  
+            # Enhanced swing high detection with volume and significance weighting  
             swing_highs = []
-            for i in range(2, len(lookback_data) - 1):  # Simple 3-candle pattern
-                current_high = lookback_data.iloc[i]['high']
+            volume_avg = lookback_data['volume'].rolling(window=5).mean()
+            
+            for i in range(2, len(lookback_data) - 1):  # 3-candle pattern
+                current_row = lookback_data.iloc[i]
+                current_high = current_row['high']
                 prev_high = lookback_data.iloc[i-1]['high']
                 next_high = lookback_data.iloc[i+1]['high']
+                current_volume = current_row.get('volume', 1.0)
+                avg_volume = volume_avg.iloc[i] if i < len(volume_avg) else 1.0
                 
                 # Basic swing high: higher than both neighbors
                 if current_high > prev_high and current_high > next_high:
                     distance = current_high - entry_price
                     if distance > 0 and distance <= atr * 2.0:  # Within reasonable range
-                        swing_highs.append((current_high, distance, len(lookback_data) - i))
+                        
+                        # Calculate level significance score
+                        significance = 1.0
+                        
+                        # Volume confirmation: higher volume = more significant
+                        volume_ratio = current_volume / max(avg_volume, 0.001)
+                        if volume_ratio > 1.2:  # 20% above average
+                            significance += 0.3
+                        elif volume_ratio > 1.0:
+                            significance += 0.1
+                        
+                        # Multiple-touch validation: look for retests of this level
+                        level_tolerance = atr * 0.1  # 10% ATR tolerance
+                        touch_count = 0
+                        for j in range(max(0, i-15), min(len(lookback_data), i+5)):  # Check ±15 candles
+                            if j != i:  # Don't count the original swing
+                                high_j = lookback_data.iloc[j]['high']
+                                if abs(high_j - current_high) <= level_tolerance:
+                                    touch_count += 1
+                        
+                        # Multiple touches increase significance
+                        if touch_count >= 2:
+                            significance += 0.4
+                        elif touch_count == 1:
+                            significance += 0.2
+                        
+                        # Distance weighting: closer levels preferred but not lowest priority
+                        distance_weight = 1.0 / (1.0 + distance / (atr * 0.5))
+                        final_score = significance * distance_weight
+                        
+                        swing_highs.append((current_high, distance, len(lookback_data) - i, final_score, touch_count))
 
             if swing_highs:
-                # Sort by proximity to entry (closest first)
-                swing_highs.sort(key=lambda x: x[1])
+                # Sort by significance score (highest first)
+                swing_highs.sort(key=lambda x: x[3], reverse=True)
                 structure_level = swing_highs[0][0]
+                touch_count = swing_highs[0][4]
                 
                 sl_level = structure_level + atr_buffer
                 sl_distance = sl_level - entry_price
@@ -657,10 +819,11 @@ class ScalpingAnalyzer:
                 sl_distance = max(min_sl, min(sl_distance, max_sl))
                 sl_level = entry_price + sl_distance
                 
+                touch_text = f" ({touch_count} touches)" if touch_count > 0 else ""
                 return {
                     'distance': sl_distance,
                     'level': sl_level,
-                    'reason': f'swing high {structure_level:.5f} + {atr_buffer/atr:.1f}×ATR buffer'
+                    'reason': f'significant swing high {structure_level:.5f}{touch_text} + {atr_buffer/atr:.1f}×ATR buffer'
                 }
 
         return None
@@ -792,8 +955,8 @@ class ScalpingAnalyzer:
             sl_level = structure_sl['level']
             sl_reason = structure_sl['reason']
             
-            # Verify structure SL meets spread requirements (always use config spread for JPY)
-            actual_spread = config['spread_sim'] if 'JPY' in pair else (spread if spread is not None else config['spread_sim'])
+            # Verify structure SL meets spread requirements (hybrid spread approach)
+            actual_spread = self._get_effective_spread(pair, spread, config)
             min_sl_by_spread = actual_spread * self.SL_MIN_SPREAD_MULT
             
             if sl_distance >= min_sl_by_spread:
@@ -803,8 +966,8 @@ class ScalpingAnalyzer:
                 structure_sl = None
         
         if not structure_sl:
-            # Fallback to ATR-based SL with spread safety (always use config spread for JPY)
-            actual_spread = config['spread_sim'] if 'JPY' in pair else (spread if spread is not None else config['spread_sim'])
+            # Fallback to ATR-based SL with spread safety (hybrid spread approach)
+            actual_spread = self._get_effective_spread(pair, spread, config)
             min_sl_by_spread = actual_spread * self.MIN_SL_SPREAD_MULT
             
             # JPY-specific: More generous ATR multiplier due to wider spreads
@@ -821,8 +984,8 @@ class ScalpingAnalyzer:
             sl_reason = f"ATR fallback ({atr_sl_distance/pip_size:.1f}p, ≥{min_sl_by_spread/pip_size:.1f}p spread req)"
             bot_logger.info(f"📍 ATR SL: {sl_reason}")
 
-        # Reject: SL < spread x 2 (always use config spread for JPY)
-        actual_spread = config['spread_sim'] if 'JPY' in pair else (spread if spread is not None else config['spread_sim'])
+        # Reject: SL < spread x 2 (hybrid spread approach)
+        actual_spread = self._get_effective_spread(pair, spread, config)
         min_sl_by_spread = actual_spread * self.MIN_SL_SPREAD_MULT
         
         # ATR-based minimum: ensure SL is at least 0.5×ATR even if spread allows smaller
@@ -845,11 +1008,12 @@ class ScalpingAnalyzer:
                 )
                 return None
 
-        # TP distance = ratio x SL
+        # TP distance = ratio x SL (with session adaptation)
         tp_ratio = tp_ratio_override if tp_ratio_override else self.TP_BASE_RATIO
+        session_adapted_tp_ratio = self._get_session_tp_ratio(tp_ratio)
         
         # Try to find structure-based TP (better than ATR-based)
-        structure_tp = self._find_structure_take_profit(df, direction, entry_price, sl_distance, tp_ratio)
+        structure_tp = self._find_structure_take_profit(df, direction, entry_price, sl_distance, session_adapted_tp_ratio)
         
         if structure_tp:
             tp_distance = structure_tp['distance'] 
@@ -857,21 +1021,31 @@ class ScalpingAnalyzer:
             tp_reason = structure_tp['reason']
             bot_logger.info(f"🎯 Structure TP: {tp_reason} (R:R = {tp_ratio:.1f})")
         else:
-            tp_distance = sl_distance * tp_ratio
+            tp_distance = sl_distance * session_adapted_tp_ratio
+            tp_ratio = session_adapted_tp_ratio
 
-        # Move TP closer to entry to avoid pullback reversals (smart adjustment)
-        if structure_tp:
-            # Structure TP: smaller 1.5-pip adjustment to preserve good levels
-            tp_pullback_buffer = 1.5 * pip_size  
+        # ATR-adaptive pullback protection - only apply in low volatility conditions
+        session = self._get_current_session()
+        session_atr_min = config['session_atr_min']
+        is_low_volatility = atr < (session_atr_min * 1.5)  # Apply when ATR < 1.5× session minimum
+        
+        if is_low_volatility:
+            if structure_tp:
+                # Structure TP: smaller ATR-adaptive adjustment to preserve good levels
+                tp_pullback_buffer = min(atr * 0.10, 1.5 * pip_size)  # Min(10% ATR, 1.5p)
+            else:
+                # ATR TP: larger adjustment for mathematical targets in low vol
+                tp_pullback_buffer = min(atr * 0.15, 3 * pip_size)    # Min(15% ATR, 3p)
         else:
-            # ATR TP: standard 3-pip adjustment for mathematical targets  
-            tp_pullback_buffer = 3 * pip_size
+            # High volatility: minimal pullback protection needed
+            tp_pullback_buffer = min(atr * 0.05, 1 * pip_size)       # Min(5% ATR, 1p)
             
         tp_distance_adjusted = max(tp_distance - tp_pullback_buffer, sl_distance * 1.2)  # Min 1.2R after adjustment
         
         if tp_distance_adjusted != tp_distance:
             adjustment_pips = (tp_distance - tp_distance_adjusted) / pip_size
-            bot_logger.info(f"📍 TP moved {adjustment_pips:.1f}p closer: {tp_distance/pip_size:.1f}p → {tp_distance_adjusted/pip_size:.1f}p (pullback protection)")
+            vol_label = "low-vol" if is_low_volatility else "high-vol"
+            bot_logger.info(f"📍 TP moved {adjustment_pips:.1f}p closer: {tp_distance/pip_size:.1f}p → {tp_distance_adjusted/pip_size:.1f}p ({vol_label} pullback protection)")
 
         # Calculate price levels
         if direction == 'BUY':
@@ -898,7 +1072,9 @@ class ScalpingAnalyzer:
             'rr_ratio': actual_rr_ratio,
             'atr': atr,
             'atr_sl_mult': self.SL_ATR_MULT,
-            'tp_ratio_used': tp_ratio,
+            'tp_ratio_used': tp_ratio,          # Actual ratio used (structure or session-adapted)
+            'tp_ratio_base': session_adapted_tp_ratio,  # Session-adapted base ratio
+            'session': session,                 # Current trading session
             'spread': actual_spread,
         }
 
