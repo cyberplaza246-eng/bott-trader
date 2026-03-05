@@ -60,23 +60,23 @@ class ScalpingAnalyzer:
     }
 
     # -- Structure-based risk parameters (5m scalping) ---------------
-    SL_ATR_MULT = 0.8          # Fallback: SL = 0.8 x ATR if no structure
-    SL_STRUCTURE_BUFFER = 0.30  # Buffer below swing low/high (30% of ATR) - increased for better clearance
-    SL_MAX_ATR_MULT = 1.5      # Max SL = 1.5x ATR (allow wider for structure)
-    SL_MIN_ATR_MULT = 0.8      # Min SL = 0.8x ATR (increased floor for 5m)
+    SL_ATR_MULT = 1.2          # Fallback: SL = 1.2 x ATR (wider for noise clearance)
+    SL_STRUCTURE_BUFFER = 0.50  # Buffer below swing low/high (50% of ATR) - room for wicks
+    SL_MAX_ATR_MULT = 2.0      # Max SL = 2.0x ATR (allow wider for structure)
+    SL_MIN_ATR_MULT = 1.0      # Min SL = 1.0x ATR (floor for 5m scalps)
     SL_MIN_SPREAD_MULT = 2     # Realistic: Min SL = 2x spread (reduced from 3x for low-vol periods)
     
-    TP_BASE_RATIO = 1.8        # TP = 1.8 x SL — better R:R
-    TP_EXPANDING = 2.0         # Wider TP in expanding volatility
-    TP_CONTRACTING = 1.5       # Tighter TP in contracting volatility
+    TP_BASE_RATIO = 1.3        # TP = 1.3 x SL — tighter, realistic scalping
+    TP_EXPANDING = 1.5         # Wider TP only in expanding volatility
+    TP_CONTRACTING = 1.2       # Tight TP in contracting volatility
     
     # Session-aware TP ratios for volatility adaptation
-    TP_ASIAN_SESSION = 1.5     # Lower volatility sessions (21-07 UTC)
-    TP_LONDON_OPEN = 2.0       # Breakout volatility (07-12 UTC) 
-    TP_NY_OVERLAP = 2.2        # Highest volatility (13-17 UTC)
-    TP_QUIET_HOURS = 1.3       # Minimal movement periods (17-21 UTC)
-    TP_MIN_STRUCTURE_RR = 1.3  # Min 1.3R when targeting structure levels
-    TP_MAX_SCALP_RR = 2.2      # Max 2.2R for 5m scalping (realistic)
+    TP_ASIAN_SESSION = 1.2     # Lower volatility sessions (21-07 UTC)
+    TP_LONDON_OPEN = 1.4       # Breakout volatility (07-12 UTC) 
+    TP_NY_OVERLAP = 1.5        # Highest volatility (13-17 UTC)
+    TP_QUIET_HOURS = 1.1       # Minimal movement periods (17-21 UTC)
+    TP_MIN_STRUCTURE_RR = 1.1  # Min 1.1R when targeting structure levels
+    TP_MAX_SCALP_RR = 1.6      # Max 1.6R for 5m scalping (realistic)
     
     MIN_SL_SPREAD_MULT = 2     # Reject if SL < spread x 2 (realistic for scalping)
     MAX_SL_MEDIAN_MULT = 2.5   # Reject if SL > 2.5x rolling median SL

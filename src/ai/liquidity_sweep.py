@@ -69,7 +69,7 @@ class LiquiditySweepAnalyzer:
     CONFIRMATION_WINDOW = 20         # Candles after sweep to get MSS (was 15)
 
     # ── Risk Management ─────────────────────────────────────────────
-    SL_ATR_BUFFER = 0.20             # SL = sweep wick ± 0.2×ATR
+    SL_ATR_BUFFER = 0.50             # SL = sweep wick ± 0.5×ATR (wider buffer for noise)
 
     # ── Entry Mode ──────────────────────────────────────────────────
     ENTRY_MODE = 'aggressive'        # 'aggressive' → enter at displacement close (more trades)
@@ -982,8 +982,8 @@ class LiquiditySweepAnalyzer:
         atr_buffer = atr * self.SL_ATR_BUFFER
 
         # For proximity sweeps the wick is the latest candle's wick — often
-        # too close to entry for a viable SL.  Enforce minimum SL = 1× ATR.
-        min_sl = atr
+        # too close to entry for a viable SL.  Enforce minimum SL = 1.3× ATR.
+        min_sl = atr * 1.3
 
         if direction == 'BUY':
             stop_loss = round(sweep_wick - atr_buffer, 5)
@@ -1004,11 +1004,11 @@ class LiquiditySweepAnalyzer:
         # TP ratio based on regime (scalping-optimized)
         regime = regime_info.get('regime', 'trend_up')
         tp_ratio_map = {
-            'high_volatility': 2.0,   # Reduced from 2.5 for scalping
-            'trend_up': 1.6,          # Reduced from 2.0 for scalping
-            'trend_down': 1.6,        # Reduced from 2.0 for scalping
-            'range': 1.4,             # Reduced from 1.5 for scalping
-            'low_volatility': 1.2,    # Kept same (already tight)
+            'high_volatility': 1.5,   # Quick exits in volatile markets
+            'trend_up': 1.3,          # Trend continuation — grab quick profit
+            'trend_down': 1.3,        # Trend continuation — grab quick profit
+            'range': 1.2,             # Range = tight TP, high hit-rate
+            'low_volatility': 1.1,    # Low vol = very tight TP
         }
         
         tp_ratio = tp_ratio_map.get(regime, 1.5)

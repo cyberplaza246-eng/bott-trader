@@ -701,8 +701,8 @@ class TradingBot:
 
             # TP from ATR regime
             atr_regime = signal_result.get('atr_regime', 'neutral')
-            tp_ratio_map = {'expanding': 2.0, 'contracting': 1.5, 'neutral': 1.8}
-            tp_ratio = tp_ratio_map.get(atr_regime, 1.8)
+            tp_ratio_map = {'expanding': 1.5, 'contracting': 1.2, 'neutral': 1.3}
+            tp_ratio = tp_ratio_map.get(atr_regime, 1.3)
             tp_distance = sl_distance * tp_ratio
 
             if trade_type == 'BUY':
@@ -746,11 +746,11 @@ class TradingBot:
         
         # SCALPING: Conservative R:R limits - focus on high-probability targets
         if timeframe_key == '5m':
-            max_rr = 1.8  # 5m scalping cap: 1.8:1 max (realistic for scalping)
-            min_rr_improvement = 1.2  # Must provide at least 1.2:1 R:R
+            max_rr = 1.5  # 5m scalping cap: 1.5:1 max (realistic for scalping)
+            min_rr_improvement = 1.1  # Must provide at least 1.1:1 R:R
         else:
-            max_rr = 2.0  # 1m scalping: slightly higher  
-            min_rr_improvement = 1.3  # 1m can be slightly more aggressive
+            max_rr = 1.6  # 1m scalping: slightly higher  
+            min_rr_improvement = 1.1  # 1m can be slightly more aggressive
             
         if sr_levels and risk_distance > 0:
             if trade_type == 'BUY':
