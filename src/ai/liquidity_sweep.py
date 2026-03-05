@@ -991,14 +991,14 @@ class LiquiditySweepAnalyzer:
         if sl_distance <= 0:
             return None
 
-        # TP ratio based on regime
+        # TP ratio based on regime (scalping-optimized)
         regime = regime_info.get('regime', 'trend_up')
         tp_ratio_map = {
-            'high_volatility': 2.5,
-            'trend_up': 2.0,
-            'trend_down': 2.0,
-            'range': 1.5,
-            'low_volatility': 1.2,
+            'high_volatility': 2.0,   # Reduced from 2.5 for scalping
+            'trend_up': 1.6,          # Reduced from 2.0 for scalping
+            'trend_down': 1.6,        # Reduced from 2.0 for scalping
+            'range': 1.4,             # Reduced from 1.5 for scalping
+            'low_volatility': 1.2,    # Kept same (already tight)
         }
         tp_ratio = tp_ratio_map.get(regime, 1.5)
 

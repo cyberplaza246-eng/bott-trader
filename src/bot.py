@@ -726,7 +726,13 @@ class TradingBot:
         sr_levels = signal_result.get('sr_levels', {})
         risk_distance = abs(entry_price - stop_loss)
         original_rr = abs(take_profit - entry_price) / risk_distance if risk_distance > 0 else 0
-        max_rr = 3.0  # Scalping cap
+        
+        # SCALPING: Much tighter R:R limits for 5m timeframe
+        if timeframe_key == '5m':
+            max_rr = 1.8  # 5m scalping cap: 1.8:1 max
+        else:
+            max_rr = 2.2  # 1m scalping: slightly higher but still conservative
+            
         if sr_levels and risk_distance > 0:
             if trade_type == 'BUY':
                 resistances = sr_levels.get('resistance_levels', [])
@@ -737,7 +743,8 @@ class TradingBot:
                         sr_tp = round(level, 5)
                         bot_logger.info(
                             f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
-                            f"(resistance level, R:R = {rr:.1f} vs original {original_rr:.1f})"
+                            f"(resistance level, R:R = {rr:.1f} vs original {original_rr:.1f}) "
+                            f"[{timeframe_key} max_rr={max_rr}]"
                         )
                         take_profit = sr_tp
                         break
@@ -750,7 +757,8 @@ class TradingBot:
                         sr_tp = round(level, 5)
                         bot_logger.info(
                             f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
-                            f"(support level, R:R = {rr:.1f} vs original {original_rr:.1f})"
+                            f"(support level, R:R = {rr:.1f} vs original {original_rr:.1f}) "
+                            f"[{timeframe_key} max_rr={max_rr}]"
                         )
                         take_profit = sr_tp
                         break
