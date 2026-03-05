@@ -816,6 +816,30 @@ class TradingBot:
             
             if order_id:
                 bot_logger.info(f"✅ Order placed - Ticket: {order_id}")
+                bot_logger.info(f"🔍 Checking SL/TP attachment...")
+                
+                # Wait briefly then check if SL/TP were actually set 
+                import time
+                time.sleep(1.0)  
+                
+                # Check the actual position for SL/TP
+                positions = self.broker.get_positions(pair)
+                position_found = False
+                for pos in positions:
+                    if pos.get('ticket') == order_id:
+                        position_found = True
+                        actual_sl = pos.get('sl', 0)
+                        actual_tp = pos.get('tp', 0)
+                        if actual_sl == 0 and actual_tp == 0:
+                            bot_logger.warning(f"⚠️ SL/TP NOT SET! Position {order_id} has no SL/TP")
+                            bot_logger.warning(f"   Expected SL: {stop_loss:.5f}, TP: {take_profit:.5f}")
+                        else:
+                            bot_logger.info(f"✅ SL/TP confirmed: SL={actual_sl:.5f}, TP={actual_tp:.5f}")
+                        break
+                
+                if not position_found:
+                    bot_logger.warning(f"⚠️ Could not find position {order_id} to verify SL/TP")
+                
                 self.risk_manager.on_trade_opened()
                 # Register for trailing stop management (scalping mode)
                 self.trailing.register(
