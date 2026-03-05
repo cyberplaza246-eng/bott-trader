@@ -59,13 +59,21 @@ class ScalpingAnalyzer:
         },
     }
 
-    # -- ATR risk parameters (universal) -----------------------------
-    SL_ATR_MULT = 0.8          # SL = 0.8 x ATR — grid-search optimized
+    # -- Structure-based risk parameters (5m scalping) ---------------
+    SL_ATR_MULT = 0.8          # Fallback: SL = 0.8 x ATR if no structure
+    SL_STRUCTURE_BUFFER = 0.15  # Buffer below swing low/high (15% of ATR)
+    SL_MAX_ATR_MULT = 1.2      # Max SL = 1.2x ATR (structure + buffer cap)
+    SL_MIN_ATR_MULT = 0.5      # Min SL = 0.5x ATR (too close protection)
+    
     TP_BASE_RATIO = 1.8        # TP = 1.8 x SL — better R:R
     TP_EXPANDING = 2.0         # Wider TP in expanding volatility
     TP_CONTRACTING = 1.5       # Tighter TP in contracting volatility
+    TP_MIN_STRUCTURE_RR = 1.3  # Min 1.3R when targeting structure levels
+    TP_MAX_SCALP_RR = 2.2      # Max 2.2R for 5m scalping (realistic)
+    
     MIN_SL_SPREAD_MULT = 3     # Reject if SL < spread x 3
     MAX_SL_MEDIAN_MULT = 2.5   # Reject if SL > 2.5x rolling median SL
+    STRUCTURE_LOOKBACK = 20    # Bars to look back for swing highs/lows
 
     # -- Session windows (UTC) ---------------------------------------
     LONDON_OPEN = {'start': 7, 'end': 12}
@@ -557,16 +565,215 @@ class ScalpingAnalyzer:
         return {'detected': False, 'pattern': 'none'}
 
     # =================================================================
-    #  DYNAMIC RISK/REWARD (ATR-BASED)
+    #  STRUCTURE-BASED SL/TP METHODS (5M SCALPING)
+    # =================================================================
+
+    def _find_structure_stop_loss(self, df, direction, entry_price, atr):
+        """Find structure-based stop loss using recent swing highs/lows.
+
+        For BUY: Look for recent swing low below entry  
+        For SELL: Look for recent swing high above entry
+        
+        Prioritizes levels that have been "tested" multiple times.
+
+        Args:
+            df: DataFrame with OHLCV
+            direction: 'BUY' or 'SELL'
+            entry_price: Current price
+            atr: Current ATR value
+
+        Returns:
+            dict: {distance, level, reason} or None
+        """
+        if len(df) < self.STRUCTURE_LOOKBACK:
+            return None
+
+        lookback_data = df.iloc[-self.STRUCTURE_LOOKBACK:]
+        atr_buffer = atr * self.SL_STRUCTURE_BUFFER
+
+        if direction == 'BUY':
+            # Find recent swing lows with strength scoring
+            swing_lows = {}  # level -> count
+            for i in range(2, len(lookback_data) - 2):
+                current_low = lookback_data.iloc[i]['low']
+                prev_low = lookback_data.iloc[i-1]['low']
+                next_low = lookback_data.iloc[i+1]['low']
+                
+                # Swing low: lower than neighbors
+                if current_low <= prev_low and current_low <= next_low:
+                    level = round(float(current_low), 5)
+                    swing_lows[level] = swing_lows.get(level, 0) + 1
+
+            if swing_lows:
+                # Find valid lows below entry, prioritizing tested levels
+                valid_lows = [(level, count) for level, count in swing_lows.items() if level < entry_price]
+                if valid_lows:
+                    # Sort by proximity to entry, then by test count
+                    valid_lows.sort(key=lambda x: (entry_price - x[0], -x[1]))
+                    structure_level = valid_lows[0][0]
+                    test_count = valid_lows[0][1]
+                    
+                    sl_level = structure_level - atr_buffer
+                    sl_distance = entry_price - sl_level
+                    
+                    # Cap and floor the SL distance
+                    max_sl = atr * self.SL_MAX_ATR_MULT
+                    min_sl = atr * self.SL_MIN_ATR_MULT
+                    
+                    if sl_distance > max_sl:
+                        sl_distance = max_sl
+                        sl_level = entry_price - sl_distance
+                        
+                    if sl_distance < min_sl:
+                        sl_distance = min_sl
+                        sl_level = entry_price - sl_distance
+                    
+                    test_desc = f" (tested {test_count}x)" if test_count > 1 else ""
+                    return {
+                        'distance': sl_distance,
+                        'level': sl_level,
+                        'reason': f'swing low {structure_level:.5f}{test_desc} + {atr_buffer/atr:.1f}×ATR buffer'
+                    }
+
+        else:  # SELL
+            # Find recent swing highs with strength scoring
+            swing_highs = {}  # level -> count
+            for i in range(2, len(lookback_data) - 2):
+                current_high = lookback_data.iloc[i]['high']
+                prev_high = lookback_data.iloc[i-1]['high']
+                next_high = lookback_data.iloc[i+1]['high']
+                
+                # Swing high: higher than neighbors
+                if current_high >= prev_high and current_high >= next_high:
+                    level = round(float(current_high), 5)
+                    swing_highs[level] = swing_highs.get(level, 0) + 1
+
+            if swing_highs:
+                # Find valid highs above entry, prioritizing tested levels
+                valid_highs = [(level, count) for level, count in swing_highs.items() if level > entry_price]
+                if valid_highs:
+                    # Sort by proximity to entry, then by test count
+                    valid_highs.sort(key=lambda x: (x[0] - entry_price, -x[1]))
+                    structure_level = valid_highs[0][0]
+                    test_count = valid_highs[0][1]
+                    
+                    sl_level = structure_level + atr_buffer
+                    sl_distance = sl_level - entry_price
+                    
+                    # Cap and floor the SL distance
+                    max_sl = atr * self.SL_MAX_ATR_MULT
+                    min_sl = atr * self.SL_MIN_ATR_MULT
+                    
+                    if sl_distance > max_sl:
+                        sl_distance = max_sl
+                        sl_level = entry_price + sl_distance
+                        
+                    if sl_distance < min_sl:
+                        sl_distance = min_sl
+                        sl_level = entry_price + sl_distance
+                    
+                    test_desc = f" (tested {test_count}x)" if test_count > 1 else ""
+                    return {
+                        'distance': sl_distance,
+                        'level': sl_level,
+                        'reason': f'swing high {structure_level:.5f}{test_desc} + {atr_buffer/atr:.1f}×ATR buffer'
+                    }
+
+        return None
+
+    def _find_structure_take_profit(self, df, direction, entry_price, sl_distance, base_tp_ratio):
+        """Find structure-based take profit using S/R levels.
+
+        Args:
+            df: DataFrame with OHLCV
+            direction: 'BUY' or 'SELL'
+            entry_price: Entry price
+            sl_distance: Stop loss distance
+            base_tp_ratio: Fallback TP ratio
+
+        Returns:
+            dict: {distance, ratio, reason} or None
+        """
+        if len(df) < self.STRUCTURE_LOOKBACK:
+            return None
+
+        lookback_data = df.iloc[-self.STRUCTURE_LOOKBACK:]
+
+        if direction == 'BUY':
+            # Find resistance levels (swing highs)
+            resistance_levels = []
+            for i in range(2, len(lookback_data) - 2):
+                current_high = lookback_data.iloc[i]['high']
+                prev_high = lookback_data.iloc[i-1]['high']
+                next_high = lookback_data.iloc[i+1]['high']
+                
+                if current_high >= prev_high and current_high >= next_high:
+                    resistance_levels.append(float(current_high))
+
+            # Find the best resistance level above entry
+            best_tp = None
+            for level in [res for res in resistance_levels if res > entry_price]:
+                tp_distance = level - entry_price
+                rr_ratio = tp_distance / sl_distance if sl_distance > 0 else 0
+                
+                # Must meet minimum R:R and be within scalping limits
+                if self.TP_MIN_STRUCTURE_RR <= rr_ratio <= self.TP_MAX_SCALP_RR:
+                    if best_tp is None or rr_ratio < best_tp['ratio']:  # Prefer closer target
+                        best_tp = {
+                            'distance': tp_distance,
+                            'ratio': rr_ratio,
+                            'reason': f'resistance at {level:.5f}'
+                        }
+                        
+            return best_tp
+
+        else:  # SELL
+            # Find support levels (swing lows)
+            support_levels = []
+            for i in range(2, len(lookback_data) - 2):
+                current_low = lookback_data.iloc[i]['low']
+                prev_low = lookback_data.iloc[i-1]['low']
+                next_low = lookback_data.iloc[i+1]['low']
+                
+                if current_low <= prev_low and current_low <= next_low:
+                    support_levels.append(float(current_low))
+
+            # Find the best support level below entry
+            best_tp = None
+            for level in [sup for sup in support_levels if sup < entry_price]:
+                tp_distance = entry_price - level
+                rr_ratio = tp_distance / sl_distance if sl_distance > 0 else 0
+                
+                # Must meet minimum R:R and be within scalping limits
+                if self.TP_MIN_STRUCTURE_RR <= rr_ratio <= self.TP_MAX_SCALP_RR:
+                    if best_tp is None or rr_ratio < best_tp['ratio']:  # Prefer closer target
+                        best_tp = {
+                            'distance': tp_distance,
+                            'ratio': rr_ratio,
+                            'reason': f'support at {level:.5f}'
+                        }
+                        
+            return best_tp
+
+    # =================================================================
+    #  DYNAMIC RISK/REWARD (STRUCTURE + ATR HYBRID)
     # =================================================================
 
     def calculate_risk_reward(self, df, direction, pair='EUR/USD',
                               spread=None, tp_ratio_override=None,
                               recent_sl_values=None):
-        """Calculate ATR-based SL and TP. Returns None to reject trade.
+        """Calculate structure-based SL and TP for 5m scalping.
 
-        SL = 0.8 x ATR(14)
-        TP = tp_ratio x SL
+        SL Strategy (Structure Priority):
+          1. Find recent swing low/high within 20 bars
+          2. Place SL below/above with 15% ATR buffer
+          3. Cap at 1.2x ATR, floor at 0.5x ATR
+          4. Fallback to 0.8x ATR if no structure
+
+        TP Strategy (Structure Priority):
+          1. Target nearest swing high/low (resistance/support)
+          2. Ensure 1.3R minimum, 2.2R maximum for scalping
+          3. Fallback to regime-based ratio if no good structure
 
         Reject if:
           - SL < spread x 3
@@ -593,8 +800,18 @@ class ScalpingAnalyzer:
             bot_logger.warning(f"Cannot calculate R/R: ATR is {atr}")
             return None
 
-        # SL distance = 0.8 x ATR
-        sl_distance = atr * self.SL_ATR_MULT
+        # Find structure-based SL level
+        structure_sl = self._find_structure_stop_loss(df, direction, entry_price, atr)
+        
+        if structure_sl:
+            sl_distance = structure_sl['distance']
+            sl_level = structure_sl['level']
+            sl_reason = structure_sl['reason']
+            bot_logger.info(f"📍 Structure SL: {sl_reason} at {sl_level:.5f} ({sl_distance/pip_size:.1f}p)")
+        else:
+            # Fallback to ATR-based SL
+            sl_distance = atr * self.SL_ATR_MULT
+            sl_reason = f"ATR fallback (0.8×{atr/pip_size:.1f}p)"
 
         # Reject: SL < spread x 3
         actual_spread = spread if spread is not None else config['spread_sim']
@@ -618,7 +835,17 @@ class ScalpingAnalyzer:
 
         # TP distance = ratio x SL
         tp_ratio = tp_ratio_override if tp_ratio_override else self.TP_BASE_RATIO
-        tp_distance = sl_distance * tp_ratio
+        
+        # Try to find structure-based TP (better than ATR-based)
+        structure_tp = self._find_structure_take_profit(df, direction, entry_price, sl_distance, tp_ratio)
+        
+        if structure_tp:
+            tp_distance = structure_tp['distance'] 
+            tp_ratio = structure_tp['ratio']
+            tp_reason = structure_tp['reason']
+            bot_logger.info(f"🎯 Structure TP: {tp_reason} (R:R = {tp_ratio:.1f})")
+        else:
+            tp_distance = sl_distance * tp_ratio
 
         # Calculate price levels
         if direction == 'BUY':

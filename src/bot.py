@@ -727,41 +727,49 @@ class TradingBot:
         risk_distance = abs(entry_price - stop_loss)
         original_rr = abs(take_profit - entry_price) / risk_distance if risk_distance > 0 else 0
         
-        # SCALPING: Much tighter R:R limits for 5m timeframe
+        # SCALPING: Conservative R:R limits - focus on high-probability targets
         if timeframe_key == '5m':
-            max_rr = 1.8  # 5m scalping cap: 1.8:1 max
+            max_rr = 1.8  # 5m scalping cap: 1.8:1 max (realistic for scalping)
+            min_rr_improvement = 1.2  # Must provide at least 1.2:1 R:R
         else:
-            max_rr = 2.2  # 1m scalping: slightly higher but still conservative  
+            max_rr = 2.0  # 1m scalping: slightly higher  
+            min_rr_improvement = 1.3  # 1m can be slightly more aggressive
             
         if sr_levels and risk_distance > 0:
             if trade_type == 'BUY':
                 resistances = sr_levels.get('resistance_levels', [])
-                for level in sorted(resistances):
+                # Find the nearest resistance that gives good but realistic R:R
+                for level in sorted(resistances)[:3]:  # Only check closest 3 levels
                     reward = level - entry_price
                     rr = reward / risk_distance
-                    if 1.2 <= rr <= max_rr and rr >= original_rr * 0.9:
-                        sr_tp = round(level, 5)
-                        bot_logger.info(
-                            f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
-                            f"(resistance level, R:R = {rr:.1f} vs original {original_rr:.1f}) "
-                            f"[{timeframe_key} max_rr={max_rr}]"
-                        )
-                        take_profit = sr_tp
-                        break
+                    if min_rr_improvement <= rr <= max_rr and rr >= original_rr * 0.95:
+                        # Ensure level is not too close to entry (minimum pip distance)
+                        pip_distance = reward / pair_config.get('pip_size', 0.0001)
+                        if pip_distance >= 8:  # Minimum 8 pips for 5m scalping
+                            sr_tp = round(level, 5)
+                            bot_logger.info(
+                                f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
+                                f"(resistance at {pip_distance:.0f}p, R:R = {rr:.1f}) [{timeframe_key}]"
+                            )
+                            take_profit = sr_tp
+                            break
             elif trade_type == 'SELL':
                 supports = sr_levels.get('support_levels', [])
-                for level in sorted(supports, reverse=True):
+                # Find the nearest support that gives good but realistic R:R
+                for level in sorted(supports, reverse=True)[:3]:  # Only check closest 3 levels
                     reward = entry_price - level
                     rr = reward / risk_distance
-                    if 1.2 <= rr <= max_rr and rr >= original_rr * 0.9:
-                        sr_tp = round(level, 5)
-                        bot_logger.info(
-                            f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
-                            f"(support level, R:R = {rr:.1f} vs original {original_rr:.1f}) "
-                            f"[{timeframe_key} max_rr={max_rr}]"
-                        )
-                        take_profit = sr_tp
-                        break
+                    if min_rr_improvement <= rr <= max_rr and rr >= original_rr * 0.95:
+                        # Ensure level is not too close to entry (minimum pip distance)
+                        pip_distance = reward / pair_config.get('pip_size', 0.0001)
+                        if pip_distance >= 8:  # Minimum 8 pips for 5m scalping
+                            sr_tp = round(level, 5)
+                            bot_logger.info(
+                                f"🎯 S/R TP upgrade: {take_profit:.5f} → {sr_tp:.5f} "
+                                f"(support at {pip_distance:.0f}p, R:R = {rr:.1f}) [{timeframe_key}]"
+                            )
+                            take_profit = sr_tp
+                            break
 
         position_size = self.risk_manager.calculate_position_size(entry_price, stop_loss, pair=pair)
         
