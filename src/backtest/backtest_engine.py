@@ -33,6 +33,7 @@ from src.ai.liquidity_sweep import LiquiditySweepAnalyzer
 from src.ai.adaptive_learner import AdaptiveLearner
 from src.ai.rl_agent import RLTradingAgent
 from src.risk.position_manager import RiskManager, PIP_VALUES, DEFAULT_PIP
+from src.risk.sl_tp import calculate_sl_tp
 from config.strategy_config import (
     SCALPING_PAIRS,
     SCALPING_SESSION_WINDOWS,
@@ -346,55 +347,20 @@ class BacktestEngine:
             else:
                 entry_price = current_price - spread_price / 2   # sell at bid
 
-            # Prefer sweep's own SL/TP distances (structure-based) re-centered on actual entry
-            if sweep_sl_tp and sweep_sl_tp.get('stop_loss') and sweep_sl_tp.get('take_profit'):
-                # Re-center: preserve SL/TP distances but apply from actual entry_price
-                sweep_entry = sweep_sl_tp.get('entry_price', entry_price)
-                if signal == 'BUY':
-                    sl_dist = sweep_entry - sweep_sl_tp['stop_loss']
-                    tp_dist = sweep_sl_tp['take_profit'] - sweep_entry
-                    stop_loss = entry_price - sl_dist
-                    take_profit = entry_price + tp_dist
-                else:
-                    sl_dist = sweep_sl_tp['stop_loss'] - sweep_entry
-                    tp_dist = sweep_entry - sweep_sl_tp['take_profit']
-                    stop_loss = entry_price + sl_dist
-                    take_profit = entry_price - tp_dist
-            else:
-                # Fallback: ATR-based SL/TP from position manager
-                atr_value = None
-                if 'atr' in data.columns:
-                    atr_value = float(data['atr'].iloc[idx]) if not pd.isna(data['atr'].iloc[idx]) else None
+            # ── Unified SL/TP via sl_tp module ─────────────────
+            sl_tp_subset = data.iloc[max(0, idx - 200):idx + 1]
+            sr_result = self.support_resistance.detect_levels(sl_tp_subset)
+            sweep_wick = sweep_sl_tp.get('sweep_wick') if sweep_sl_tp else None
 
-                stop_loss = self.risk_manager.calculate_scalping_stop_loss(
-                    pair, timeframe_key, entry_price, signal,
-                    atr_value=atr_value
-                )
-                take_profit = self.risk_manager.calculate_scalping_take_profit(
-                    pair, timeframe_key, entry_price, stop_loss, signal
-                )
+            sl_tp_result = calculate_sl_tp(
+                sl_tp_subset, signal, pair, timeframe_key,
+                sr_levels=sr_result, sweep_wick=sweep_wick,
+            )
+            if sl_tp_result is None:
+                continue  # No valid SL/TP → skip trade
 
-            # Sanity check: ensure minimum SL distance of 4 pips AND max of 30 pips
-            pip_info = PIP_VALUES.get(pair, DEFAULT_PIP)
-            min_sl_distance = 4 * pip_info['pip_size']
-            max_sl_distance = 30 * pip_info['pip_size']
-            sl_distance = abs(entry_price - stop_loss)
-            if sl_distance < min_sl_distance:
-                sl_distance = min_sl_distance
-                if signal == 'BUY':
-                    stop_loss = entry_price - sl_distance
-                else:
-                    stop_loss = entry_price + sl_distance
-            elif sl_distance > max_sl_distance:
-                # Cap SL and recalculate TP to maintain R:R ratio
-                rr_ratio = abs(entry_price - take_profit) / sl_distance if sl_distance > 0 else 2.0
-                sl_distance = max_sl_distance
-                if signal == 'BUY':
-                    stop_loss = entry_price - sl_distance
-                    take_profit = entry_price + sl_distance * rr_ratio
-                else:
-                    stop_loss = entry_price + sl_distance
-                    take_profit = entry_price - sl_distance * rr_ratio
+            stop_loss = sl_tp_result['stop_loss']
+            take_profit = sl_tp_result['take_profit']
 
             position_size = self.risk_manager.calculate_position_size(
                 entry_price, stop_loss, pair=pair

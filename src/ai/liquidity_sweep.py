@@ -944,25 +944,20 @@ class LiquiditySweepAnalyzer:
     # =================================================================
 
     def calculate_risk_reward(self, sweep_result, displacement_result, regime_info, pair):
-        """Calculate SL/TP based on sweep wick and regime.
+        """Validate sweep setup and return wick/entry data for unified SL/TP.
 
-        SL = sweep wick extreme ± 0.2 × ATR buffer
-        TP:
-          - 1.5R default (trend)
-          - 2.0R if high_volatility regime
-          - 1.2R if range regime
-          - Liquidity pool target if available (next opposing swing point)
+        SL/TP calculation is now handled by src.risk.sl_tp.calculate_sl_tp().
+        This method just validates the sweep wick is viable and returns
+        the data needed by the unified module.
 
         Args:
             sweep_result: dict from detect_sweep
-            displacement_result: dict from detect_mss (v2) or detect_displacement (v1 compat)
+            displacement_result: dict from detect_mss
             regime_info: dict from detect_regime
             pair: currency pair string
 
         Returns:
-            dict or None: {stop_loss, take_profit, sl_distance, tp_distance,
-                          risk_pips, reward_pips, rr_ratio, tp_ratio_used,
-                          atr, sweep_wick, entry_price}
+            dict or None: {sweep_wick, entry_price, atr, direction}
         """
         config = self.PAIR_CONFIG.get(pair, self.PAIR_CONFIG['EUR/USD'])
         pip_size = config['pip_size']
@@ -974,133 +969,31 @@ class LiquiditySweepAnalyzer:
         if entry_price is None:
             return None
 
-        # Get ATR from regime info
         atr = float(regime_info.get('atr', 0) or 0)
         if atr <= 0:
-            atr = config['session_atr_min'] * 2  # Fallback
+            atr = config['session_atr_min'] * 2
 
-        atr_buffer = atr * self.SL_ATR_BUFFER
-
-        # For proximity sweeps the wick is the latest candle's wick — often
-        # too close to entry for a viable SL.  Enforce minimum SL = 1.3× ATR.
-        min_sl = atr * 1.3
-
-        # Max SL cap: prevent absurdly wide SL from distant sweep wicks
-        max_sl = atr * 3.0
-
-        if direction == 'BUY':
-            stop_loss = round(sweep_wick - atr_buffer, 5)
-            sl_distance = entry_price - stop_loss
-            if sl_distance < min_sl:
-                sl_distance = min_sl
-                stop_loss = round(entry_price - sl_distance, 5)
-            elif sl_distance > max_sl:
-                sl_distance = max_sl
-                stop_loss = round(entry_price - sl_distance, 5)
-        else:
-            stop_loss = round(sweep_wick + atr_buffer, 5)
-            sl_distance = stop_loss - entry_price
-            if sl_distance < min_sl:
-                sl_distance = min_sl
-                stop_loss = round(entry_price + sl_distance, 5)
-            elif sl_distance > max_sl:
-                sl_distance = max_sl
-                stop_loss = round(entry_price + sl_distance, 5)
-
-        if sl_distance <= 0:
+        # Basic viability: wick must be on correct side of entry
+        if direction == 'BUY' and sweep_wick >= entry_price:
+            return None
+        if direction == 'SELL' and sweep_wick <= entry_price:
             return None
 
-        # TP ratio based on regime (fallback if no S/R level found)
-        regime = regime_info.get('regime', 'trend_up')
-        tp_ratio_map = {
-            'high_volatility': 1.5,
-            'trend_up': 1.3,
-            'trend_down': 1.3,
-            'range': 1.2,
-            'low_volatility': 1.1,
-        }
-        tp_ratio = tp_ratio_map.get(regime, 1.3)
-
-        # ── S/R-based TP: place TP at 85% of distance to nearest S/R ──
-        # Pros target just BEFORE resistance/support, not ON it.
-        # Price often reverses at S/R — taking 85% ensures fill.
-        SR_TP_FRACTION = 0.85
-        SR_MIN_RR = 1.0  # S/R TP must give at least 1.0R
-        sr_tp_used = False
-
-        swing_points = regime_info.get('swing_points', [])
-        if swing_points and sl_distance > 0:
-            if direction == 'BUY':
-                candidates = [
-                    sp['price'] for sp in swing_points
-                    if sp['swing_type'] == 'high' and sp['price'] > entry_price
-                ]
-                if candidates:
-                    nearest_resist = min(candidates)
-                    full_distance = nearest_resist - entry_price
-                    sr_distance = full_distance * SR_TP_FRACTION
-                    sr_rr = sr_distance / sl_distance
-                    if sr_rr >= SR_MIN_RR:
-                        tp_distance = sr_distance
-                        tp_ratio = round(sr_rr, 2)
-                        sr_tp_used = True
-                        bot_logger.info(
-                            f"🎯 S/R TP: resist@{nearest_resist:.5f}, "
-                            f"TP@85%={entry_price + sr_distance:.5f} "
-                            f"({sr_distance/pip_size:.1f}p, {sr_rr:.1f}R)"
-                        )
-            else:
-                candidates = [
-                    sp['price'] for sp in swing_points
-                    if sp['swing_type'] == 'low' and sp['price'] < entry_price
-                ]
-                if candidates:
-                    nearest_support = max(candidates)
-                    full_distance = entry_price - nearest_support
-                    sr_distance = full_distance * SR_TP_FRACTION
-                    sr_rr = sr_distance / sl_distance
-                    if sr_rr >= SR_MIN_RR:
-                        tp_distance = sr_distance
-                        tp_ratio = round(sr_rr, 2)
-                        sr_tp_used = True
-                        bot_logger.info(
-                            f"🎯 S/R TP: support@{nearest_support:.5f}, "
-                            f"TP@85%={entry_price - sr_distance:.5f} "
-                            f"({sr_distance/pip_size:.1f}p, {sr_rr:.1f}R)"
-                        )
-
-        # Fallback: fixed R:R only if no viable S/R level
-        if not sr_tp_used:
-            tp_distance = sl_distance * tp_ratio
-
-        if direction == 'BUY':
-            take_profit = round(entry_price + tp_distance, 5)
-        else:
-            take_profit = round(entry_price - tp_distance, 5)
-
-        sl_pips = sl_distance / pip_size
-        tp_pips = tp_distance / pip_size
-
-        # Minimum SL check: must be > 2× spread (realistic for low-volatility scalping)
+        # Minimum spread check
         spread = config['spread_sim']
-        if sl_distance < spread * 2:
+        raw_dist = abs(entry_price - sweep_wick)
+        if raw_dist < spread * 2:
             bot_logger.info(
-                f"\u26d4 R:R rejected: SL {sl_distance:.5f} < 2\u00d7spread {spread*2:.5f} (structure safety)"
+                f"⛔ Sweep wick too close: {raw_dist/pip_size:.1f}p < "
+                f"2×spread {spread*2/pip_size:.1f}p"
             )
             return None
 
         return {
-            'stop_loss': stop_loss,
-            'take_profit': take_profit,
-            'sl_distance': sl_distance,
-            'tp_distance': tp_distance,
-            'risk_pips': sl_pips,
-            'reward_pips': tp_pips,
-            'rr_ratio': tp_ratio,
-            'tp_ratio_used': tp_ratio,
-            'atr': atr,
             'sweep_wick': sweep_wick,
             'entry_price': entry_price,
+            'atr': atr,
+            'direction': direction,
         }
 
     # =================================================================
@@ -1346,18 +1239,19 @@ class LiquiditySweepAnalyzer:
             f"✅ SWEEP+MSS ENTRY: {sweep['direction']} | "
             f"Regime={regime_info['regime']} | "
             f"MSS={mss['mss_level']:.5f} | "
-            f"SL={rr['risk_pips']:.1f}p TP={rr['reward_pips']:.1f}p ({rr['rr_ratio']:.1f}R) | "
+            f"Wick={rr['sweep_wick']:.5f} Entry={rr['entry_price']:.5f} | "
             f"Vol={vol_ratio:.2f}x | ADX={regime_info['adx']:.1f} | "
             f"Mode={self.ENTRY_MODE}"
         )
 
         config = self.PAIR_CONFIG.get(pair, self.PAIR_CONFIG['EUR/USD'])
+        pip_size = config['pip_size']
+        wick_dist_pips = abs(rr['entry_price'] - rr['sweep_wick']) / pip_size
         bot_logger.info(
             f"🎯 SWEEP+MSS SIGNAL: {pair} {sweep['direction']} | "
             f"Entry={rr['entry_price']:.5f} | "
-            f"SL={rr['stop_loss']:.5f} ({rr['risk_pips']:.1f}p) | "
-            f"TP={rr['take_profit']:.5f} ({rr['reward_pips']:.1f}p) | "
-            f"R:R={rr['rr_ratio']:.1f} | MSS@{mss['mss_level']:.5f} | "
+            f"Wick={rr['sweep_wick']:.5f} ({wick_dist_pips:.1f}p) | "
+            f"ATR={rr['atr']:.5f} | MSS@{mss['mss_level']:.5f} | "
             f"Vol={vol_ratio:.2f}x | Mode={self.ENTRY_MODE}"
         )
 

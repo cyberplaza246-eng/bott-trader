@@ -651,97 +651,18 @@ class TradingBot:
             bot_logger.warning(f"Daily status logging failed: {e}")
     
     def _execute_trade(self, pair, signal_result, df, timeframe_key='5m'):
-        """Execute a scalping trade with ATR-based SL/TP from signal"""
+        """Execute a scalping trade with unified SL/TP from S/R levels."""
+        from src.risk.sl_tp import calculate_sl_tp
+
         trade_type = signal_result['signal']
-        # Use the enriched df (with indicators) from the ensemble
         enriched_df = signal_result.get('enriched_df', df)
         latest = enriched_df.iloc[-1]
         entry_price = latest['close']
-        atr = latest.get('atr', entry_price * 0.001)  # Fallback: 0.1% of price
+        atr = latest.get('atr', entry_price * 0.001)
 
-        # ── SL/TP Priority: Sweep > Scalping > ATR Fallback ──────────
+        # ── Price drift check ────────────────────────────────────────
         sweep_rr = signal_result.get('sweep_sl_tp')
         scalping_rr = signal_result.get('scalping_risk_reward', {})
-
-        if sweep_rr and sweep_rr.get('stop_loss') and sweep_rr.get('take_profit'):
-            # PREFERRED: Use sweep-wick anchored SL/TP
-            stop_loss = sweep_rr['stop_loss']
-            take_profit = sweep_rr['take_profit']
-            sl_distance = sweep_rr.get('sl_distance', abs(entry_price - stop_loss))
-            tp_ratio = sweep_rr.get('tp_ratio_used', 1.5)
-
-            bot_logger.info(
-                f"💧 Sweep SL/TP: SL={sweep_rr.get('risk_pips', 0):.1f}p "
-                f"(wick+0.5×ATR), "
-                f"TP={sweep_rr.get('reward_pips', 0):.1f}p ({tp_ratio:.1f}R)"
-            )
-        elif scalping_rr and scalping_rr.get('stop_loss') and scalping_rr.get('take_profit'):
-            # Use ATR-derived SL/TP from the scalping analyzer
-            stop_loss = scalping_rr['stop_loss']
-            take_profit = scalping_rr['take_profit']
-            sl_distance = scalping_rr.get('sl_distance', abs(entry_price - stop_loss))
-            tp_ratio = scalping_rr.get('tp_ratio_used', 1.4)
-
-            bot_logger.info(
-                f"📐 ATR-based SL/TP: SL={scalping_rr.get('risk_pips', 0):.1f}p "
-                f"({scalping_rr.get('atr_sl_mult', 0.8)}×ATR), "
-                f"TP={scalping_rr.get('reward_pips_1', 0):.1f}p ({tp_ratio:.1f}R)"
-            )
-        else:
-            # Fallback: calculate ATR-based SL/TP if signal didn't provide it
-            pair_config = SCALPING_PAIRS.get(pair, {})
-            pip_size = pair_config.get('pip_size', 0.0001)
-            sl_mult = 0.8  # Match ScalpingAnalyzer.SL_ATR_MULT (was 1.2 — too wide for scalping)
-            sl_distance = atr * sl_mult
-
-            if trade_type == 'BUY':
-                stop_loss = round(entry_price - sl_distance, 5)
-            else:
-                stop_loss = round(entry_price + sl_distance, 5)
-
-            # TP from ATR regime
-            atr_regime = signal_result.get('atr_regime', 'neutral')
-            tp_ratio_map = {'expanding': 1.5, 'contracting': 1.2, 'neutral': 1.3}
-            tp_ratio = tp_ratio_map.get(atr_regime, 1.3)
-            tp_distance = sl_distance * tp_ratio
-
-            if trade_type == 'BUY':
-                take_profit = round(entry_price + tp_distance, 5)
-            else:
-                take_profit = round(entry_price - tp_distance, 5)
-
-            bot_logger.info(
-                f"📐 ATR fallback SL/TP: SL={sl_distance/pip_size:.1f}p "
-                f"({sl_mult}×ATR), TP={tp_distance/pip_size:.1f}p ({tp_ratio:.1f}R)"
-            )
-
-        # ── Timeframe-aware SL cap: 1M scalps need tight SL ────────
-        pair_cfg = SCALPING_PAIRS.get(pair, {})
-        pip_size = pair_cfg.get('pip_size', 0.0001)
-        max_sl_atr = 3.0 if timeframe_key == '1m' else 5.0
-        max_sl_dist = atr * max_sl_atr
-        current_sl_dist = abs(entry_price - stop_loss)
-
-        if current_sl_dist > max_sl_dist:
-            old_sl_pips = current_sl_dist / pip_size
-            sl_distance = max_sl_dist
-            if trade_type == 'BUY':
-                stop_loss = round(entry_price - sl_distance, 5)
-            else:
-                stop_loss = round(entry_price + sl_distance, 5)
-            # Recalculate TP from capped SL
-            tp_dist = sl_distance * tp_ratio
-            if trade_type == 'BUY':
-                take_profit = round(entry_price + tp_dist, 5)
-            else:
-                take_profit = round(entry_price - tp_dist, 5)
-            bot_logger.info(
-                f"📏 SL capped for {timeframe_key}: {old_sl_pips:.1f}p → "
-                f"{sl_distance/pip_size:.1f}p ({max_sl_atr}×ATR), "
-                f"TP={tp_dist/pip_size:.1f}p ({tp_ratio:.1f}R)"
-            )
-
-        # ── Price drift check: skip if price moved too far from signal ──
         signal_entry = None
         if sweep_rr:
             signal_entry = sweep_rr.get('entry_price')
@@ -749,60 +670,38 @@ class TradingBot:
             signal_entry = scalping_rr.get('entry_price')
 
         if signal_entry and abs(entry_price - signal_entry) > atr * 2.5:
-            drift_pips = abs(entry_price - signal_entry) * 10000
-            if 'JPY' in pair:
-                drift_pips = abs(entry_price - signal_entry) * 100
+            pip_mult = 100 if 'JPY' in pair else 10000
+            drift_pips = abs(entry_price - signal_entry) * pip_mult
             bot_logger.warning(
                 f"❌ {pair} price drifted {drift_pips:.1f}p from signal entry "
                 f"({signal_entry:.5f} → {entry_price:.5f}) — trade SKIPPED"
             )
             return
 
-        # Record SL value for adaptive learner median tracking
+        # ── Unified SL/TP calculation ────────────────────────────────
+        sweep_wick = signal_result.get('sweep_wick')
+        sr_levels = signal_result.get('sr_levels', {})
+
+        sl_tp = calculate_sl_tp(
+            df=enriched_df,
+            direction=trade_type,
+            pair=pair,
+            timeframe=timeframe_key,
+            sr_levels=sr_levels,
+            sweep_wick=sweep_wick,
+        )
+
+        if sl_tp is None:
+            return
+
+        stop_loss = sl_tp['stop_loss']
+        take_profit = sl_tp['take_profit']
+
+        # Record SL for adaptive learner median tracking
         try:
-            sl_dist = abs(entry_price - stop_loss)
-            self.ensemble.learner.record_sl_outcome(pair, sl_dist, True)  # outcome recorded on close
+            self.ensemble.learner.record_sl_outcome(pair, sl_tp['sl_distance'], True)
         except Exception:
             pass
-
-        # S/R-based TP: target 85% of distance to nearest S/R level
-        # Price reverses AT resistance/support — place TP just before it
-        sr_levels = signal_result.get('sr_levels', {})
-        risk_distance = abs(entry_price - stop_loss)
-        SR_TP_FRACTION = 0.85
-
-        if sr_levels and risk_distance > 0:
-            sr_tp = None
-            if trade_type == 'BUY':
-                resistances = sr_levels.get('resistance_levels', [])
-                above = [r for r in resistances if r > entry_price]
-                if above:
-                    nearest = min(above)
-                    full_dist = nearest - entry_price
-                    sr_dist = full_dist * SR_TP_FRACTION
-                    sr_rr = sr_dist / risk_distance
-                    if sr_rr >= 1.0:
-                        sr_tp = round(entry_price + sr_dist, 5)
-                        bot_logger.info(
-                            f"🎯 S/R TP: resist@{nearest:.5f} → TP@85%={sr_tp:.5f} "
-                            f"({sr_dist*10000:.1f}p, {sr_rr:.1f}R)"
-                        )
-            elif trade_type == 'SELL':
-                supports = sr_levels.get('support_levels', [])
-                below = [s for s in supports if s < entry_price]
-                if below:
-                    nearest = max(below)
-                    full_dist = entry_price - nearest
-                    sr_dist = full_dist * SR_TP_FRACTION
-                    sr_rr = sr_dist / risk_distance
-                    if sr_rr >= 1.0:
-                        sr_tp = round(entry_price - sr_dist, 5)
-                        bot_logger.info(
-                            f"🎯 S/R TP: support@{nearest:.5f} → TP@85%={sr_tp:.5f} "
-                            f"({sr_dist*10000:.1f}p, {sr_rr:.1f}R)"
-                        )
-            if sr_tp:
-                take_profit = sr_tp
 
         position_size = self.risk_manager.calculate_position_size(entry_price, stop_loss, pair=pair)
         
@@ -839,38 +738,25 @@ class TradingBot:
             self._pending_rl_info[pair] = {
                 'state': rl_state,
                 'action': rl_action,
-                'sl_pips': abs(entry_price - stop_loss) / pair_config_pip,
+                'sl_pips': sl_tp['sl_pips'],
             }
 
-        # VALIDATION: Log exactly what's being sent to broker
+        # VALIDATION: sanity check SL/TP sides
         sl_correct = (trade_type == 'BUY' and stop_loss < entry_price) or (trade_type == 'SELL' and stop_loss > entry_price)
         tp_correct = (trade_type == 'BUY' and take_profit > entry_price) or (trade_type == 'SELL' and take_profit < entry_price)
-        
+
+        if not sl_correct or not tp_correct:
+            bot_logger.warning(
+                f"❌ {pair} SL/TP wrong side — trade BLOCKED "
+                f"(SL={'✅' if sl_correct else '❌'}, TP={'✅' if tp_correct else '❌'})"
+            )
+            return
+
         bot_logger.info(f"🔍 ORDER VALIDATION:")
         bot_logger.info(f"  Direction: {trade_type}")
         bot_logger.info(f"  Entry: {entry_price:.5f}")
-        bot_logger.info(f"  SL: {stop_loss:.5f} {'✅' if sl_correct else '❌ WRONG SIDE'}")
-        bot_logger.info(f"  TP: {take_profit:.5f} {'✅' if tp_correct else '❌ WRONG SIDE'}")
-
-        # ── FIX: Recalculate TP/SL when price moved since signal ─────
-        if not sl_correct:
-            bot_logger.warning(f"❌ {pair} SL on wrong side — trade BLOCKED (price moved too far)")
-            return
-
-        if not tp_correct:
-            # Price moved past our TP target — recalculate TP from actual entry using same R:R
-            sl_dist = abs(entry_price - stop_loss)
-            if sl_dist > 0:
-                # Use tp_ratio already extracted from sweep/scalping signal
-                tp_dist = sl_dist * tp_ratio
-                if trade_type == 'BUY':
-                    take_profit = round(entry_price + tp_dist, 5)
-                else:
-                    take_profit = round(entry_price - tp_dist, 5)
-                bot_logger.warning(
-                    f"⚠️ TP recalculated from entry: {take_profit:.5f} "
-                    f"(SL={sl_dist*10000:.1f}p, TP={tp_dist*10000:.1f}p, R:R={tp_ratio:.1f})"
-                )
+        bot_logger.info(f"  SL: {stop_loss:.5f} ✅")
+        bot_logger.info(f"  TP: {take_profit:.5f} ✅")
 
         # Execute based on mode
         if self.mode == 'live' and AUTOTRADING_ENABLED:

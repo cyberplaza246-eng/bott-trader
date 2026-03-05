@@ -403,8 +403,10 @@ class EnsembleTrader:
             'atr_regime': scalping_signal.get('atr_regime', 'neutral'),
             'atr_tp_ratio': scalping_signal.get('atr_tp_ratio', 1.4),
             'scalping_risk_reward': scalping_signal.get('risk_reward', {}),
-            # Sweep SL/TP (preferred when available)
+            # Sweep data for unified SL/TP
             'sweep_sl_tp': sweep_signal.get('sweep_sl_tp'),
+            'sweep_wick': (sweep_signal.get('sweep_sl_tp') or {}).get('sweep_wick')
+                          or (sweep_signal.get('sweep') or {}).get('sweep_wick'),
         }
 
         if final_signal != 'SKIP':

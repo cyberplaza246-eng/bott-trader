@@ -661,7 +661,7 @@ class TestLiquiditySweepAnalyzer:
         assert isinstance(reason, str)
 
     def test_risk_reward_calculation(self):
-        """Should calculate valid SL/TP from sweep event."""
+        """Should return sweep_wick/entry data for unified SL/TP."""
         sweep_result = {
             'detected': True,
             'direction': 'BUY',
@@ -680,12 +680,13 @@ class TestLiquiditySweepAnalyzer:
             sweep_result, displacement_result, regime_info, 'EUR/USD'
         )
         assert rr is not None
-        assert rr['stop_loss'] < rr['entry_price']
-        assert rr['take_profit'] > rr['entry_price']
-        assert rr['rr_ratio'] == 2.0  # trend_up → 2.0R
+        assert rr['sweep_wick'] == 1.0980
+        assert rr['entry_price'] == 1.1005
+        assert rr['direction'] == 'BUY'
+        assert rr['atr'] > 0
 
     def test_risk_reward_high_vol(self):
-        """High volatility regime should use 2.0R."""
+        """High volatility regime should still return valid data."""
         sweep_result = {
             'detected': True,
             'direction': 'BUY',
@@ -700,10 +701,12 @@ class TestLiquiditySweepAnalyzer:
         rr = self.analyzer.calculate_risk_reward(
             sweep_result, displacement_result, regime_info, 'EUR/USD'
         )
-        assert rr['rr_ratio'] == 2.5
+        assert rr is not None
+        assert rr['sweep_wick'] == 1.0980
+        assert rr['atr'] > 0
 
     def test_risk_reward_range(self):
-        """Range regime should use 1.2R."""
+        """Range regime should still return valid data for SELL."""
         sweep_result = {
             'detected': True,
             'direction': 'SELL',
@@ -718,8 +721,9 @@ class TestLiquiditySweepAnalyzer:
         rr = self.analyzer.calculate_risk_reward(
             sweep_result, displacement_result, regime_info, 'EUR/USD'
         )
-        assert rr['rr_ratio'] == 1.5
-        assert rr['stop_loss'] > rr['entry_price']  # SELL SL above entry
+        assert rr is not None
+        assert rr['sweep_wick'] == 1.1020
+        assert rr['direction'] == 'SELL'
 
     def test_get_signal_returns_skip_no_bias(self):
         """Should SKIP when 5M data has no directional bias."""
