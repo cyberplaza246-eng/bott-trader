@@ -482,8 +482,8 @@ class TradingBot:
                             'count': 1,
                             'time': datetime.now(),
                         }
-                    # 5m signals already waited 5 minutes — skip extra confirmation
-                    required_count = 1 if timeframe_key == '5m' else 2
+                    # Scalping: immediate execution for both 5m and 1m (markets move too fast for multi-cycle confirmation)
+                    required_count = 1  # Was: 1 if timeframe_key == '5m' else 2
                     if self._signal_confirmation[confirm_key]['count'] < required_count:
                         bot_logger.info(
                             f"  ⏳ Signal confirmation: {pair} {cur_dir} — "
