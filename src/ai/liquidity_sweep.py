@@ -58,7 +58,7 @@ class LiquiditySweepAnalyzer:
 
     # ── Sweep Detection ─────────────────────────────────────────────
     SWEEP_TOLERANCE = 0.0005         # Max penetration past swing (was 0.0002)
-    SWEEP_WINDOW = 15                # Candles to look back for sweep event (was 5)
+    SWEEP_WINDOW = 30                # Candles to look back for sweep event (was 15 → 30 = half-hour on 1M)
 
     # ── MSS / Displacement ──────────────────────────────────────────
     VOLUME_CONFIRMATION = 1.0        # Disabled (forex tick vol unreliable) (was 1.30)
@@ -496,6 +496,8 @@ class LiquiditySweepAnalyzer:
             target_levels = sorted(swing_highs, key=lambda x: x['bar_idx'], reverse=True)[:3]
 
         # ── Scan last SWEEP_WINDOW candles for sweep event ──────────
+        latest_close_price = float(df_1m.iloc[-1]['close'])
+        pip_size = 0.01 if latest_close_price >= 20 else 0.0001
         for i in range(-self.SWEEP_WINDOW, 0):
             candle = df_1m.iloc[i]
             candle_low = float(candle['low'])
@@ -504,8 +506,9 @@ class LiquiditySweepAnalyzer:
             candle_open = float(candle['open'])
             candle_rsi = float(candle.get('rsi', 50) or 50)
             pip_size = 0.01 if candle_close >= 20 else 0.0001
-            # Adaptive tolerance: 0.5 pip minimum, scaled by local ATR when available.
-            tol = max(0.5 * pip_size, float(candle.get('atr', 0) or 0) * 0.05)
+            # Adaptive tolerance: 1 pip minimum, 20% of ATR — generous to catch
+            # near-level approaches in quiet markets.
+            tol = max(1.0 * pip_size, float(candle.get('atr', 0) or 0) * 0.20)
 
             # RSI slope check: was RSI turning in our favour after sweep?
             # Look at 1–2 candles ahead of the sweep candle for slope reversal
@@ -612,6 +615,49 @@ class LiquiditySweepAnalyzer:
                             ),
                         })
                         return result
+
+        # ── Proximity-sweep fallback ────────────────────────────────
+        # If no exact sweep but price came within 2× ATR of a swing level
+        # and moved in the bias direction, treat as a "near sweep" signal
+        # at reduced quality so the soft-MSS gate can still produce a trade.
+        if nearest_gap is not None and target_levels:
+            latest = df_1m.iloc[-1]
+            local_atr = float(latest.get('atr', 0) or 0)
+            if local_atr <= 0:
+                local_atr = pip_size * 5  # fallback
+            if nearest_gap <= local_atr * 2.0:
+                # Find the closest target
+                best_level = target_levels[0]['price']
+                latest_close = float(latest['close'])
+                latest_low = float(latest['low'])
+                latest_high = float(latest['high'])
+                latest_rsi = float(latest.get('rsi', 50) or 50)
+
+                proximity_ok = False
+                if bias == 'BUY' and latest_close > best_level:
+                    proximity_ok = True
+                elif bias == 'SELL' and latest_close < best_level:
+                    proximity_ok = True
+
+                if proximity_ok:
+                    wick = latest_low if bias == 'BUY' else latest_high
+                    result.update({
+                        'detected': True,
+                        'direction': bias,
+                        'sweep_wick': wick,
+                        'swept_level': best_level,
+                        'rsi_at_sweep': latest_rsi,
+                        'rsi_slope_confirmed': True,
+                        'candle_index': -1,
+                        'fivem_invalidation_held': True,
+                        'proximity_sweep': True,
+                        'details': (
+                            f"Proximity sweep ({bias}): gap={nearest_gap:.5f} "
+                            f"(<{local_atr*2:.5f} = 2×ATR) to level {best_level:.5f}, "
+                            f"close={latest_close:.5f}"
+                        ),
+                    })
+                    return result
 
         if nearest_gap is not None:
             result['details'] = (
@@ -1210,8 +1256,16 @@ class LiquiditySweepAnalyzer:
         result['sweep_sl_tp'] = rr
 
         # ── Step 6: Build final signal ────────────────────────────────
-        # Full MSS → high confidence; sweep-only → moderate confidence
-        base_confidence = 0.85 if mss_confirmed_naturally else 0.55
+        # Full MSS → high confidence; sweep-only → moderate; proximity → lower
+        is_proximity = sweep.get('proximity_sweep', False)
+        if mss_confirmed_naturally and not is_proximity:
+            base_confidence = 0.85
+        elif mss_confirmed_naturally and is_proximity:
+            base_confidence = 0.65
+        elif not is_proximity:
+            base_confidence = 0.55
+        else:
+            base_confidence = 0.45
 
         # Bonus for strong ADX
         if regime_info['adx'] >= 25:

@@ -181,10 +181,24 @@ class EnsembleTrader:
 
         # ── Step 6: Sweep gate decision ──────────────────────────────
         if sweep_direction not in ('BUY', 'SELL'):
-            # HARD GATE: no sweep → no trade
-            final_signal = 'SKIP'
-            final_confidence = 0.0
-            models_agreement = 0
+            # Sweep didn't fire — check for EMA+Technical consensus fallback
+            # This lets the bot take high-conviction trend trades when no
+            # liquidity sweep exists but EMA and Technical both agree.
+            ema_dir = ema_signal['signal']
+            tech_dir = technical_signal['signal']
+            if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
+                final_signal = ema_dir
+                final_confidence = 0.40  # just at threshold — intentionally low
+                models_agreement = 2
+                bot_logger.info(
+                    f"🔄 No sweep → EMA+Tech fallback: {ema_dir} "
+                    f"(EMA={ema_signal['confidence']:.0%}, "
+                    f"Tech={technical_signal['confidence']:.0%})"
+                )
+            else:
+                final_signal = 'SKIP'
+                final_confidence = 0.0
+                models_agreement = 0
         else:
             final_signal = sweep_direction
             final_confidence = sweep_confidence
