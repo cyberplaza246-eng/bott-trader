@@ -896,16 +896,24 @@ class ScalpingAnalyzer:
         else:
             tp_distance = sl_distance * tp_ratio
 
+        # Move TP 3 pips closer to entry to avoid pullback reversals  
+        tp_pullback_buffer = 3 * pip_size  # 3 pips closer to entry
+        tp_distance_adjusted = max(tp_distance - tp_pullback_buffer, sl_distance * 1.2)  # Min 1.2R after adjustment
+        
+        if tp_distance_adjusted != tp_distance:
+            bot_logger.info(f"📍 TP moved 3p closer: {tp_distance/pip_size:.1f}p → {tp_distance_adjusted/pip_size:.1f}p (pullback protection)")
+
         # Calculate price levels
         if direction == 'BUY':
             stop_loss = round(entry_price - sl_distance, 5)
-            take_profit = round(entry_price + tp_distance, 5)
+            take_profit = round(entry_price + tp_distance_adjusted, 5)
         else:
             stop_loss = round(entry_price + sl_distance, 5)
-            take_profit = round(entry_price - tp_distance, 5)
+            take_profit = round(entry_price - tp_distance_adjusted, 5)
 
         sl_pips = sl_distance / pip_size
-        tp_pips = tp_distance / pip_size
+        tp_pips = tp_distance_adjusted / pip_size
+        actual_rr_ratio = tp_distance_adjusted / sl_distance
 
         return {
             'stop_loss': stop_loss,
@@ -913,11 +921,11 @@ class ScalpingAnalyzer:
             'take_profit_1': take_profit,
             'take_profit_2': take_profit,
             'sl_distance': sl_distance,
-            'tp_distance': tp_distance,
+            'tp_distance': tp_distance_adjusted,
             'risk_pips': sl_pips,
             'reward_pips_1': tp_pips,
             'reward_pips_2': tp_pips,
-            'rr_ratio': tp_ratio,
+            'rr_ratio': actual_rr_ratio,
             'atr': atr,
             'atr_sl_mult': self.SL_ATR_MULT,
             'tp_ratio_used': tp_ratio,

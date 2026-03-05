@@ -105416,3 +105416,15 @@
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
 {"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udd2a Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udccd ATR SL: ATR fallback (6.4p, \u22654.5p spread req)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83c\udfaf Structure TP: resistance at 1.10100 (R:R = 1.6)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\ud83d\udccd TP moved 3p closer: 10.0p \u2192 7.7p (pullback protection)"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for EUR/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 17280 candles for GBP/USD"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "Loaded 4320 candles for USD/JPY"}
+{"timestamp": null, "level": null, "name": "TradingBot", "message": "\nUSD/JPY: No trades generated"}
