@@ -1000,7 +1000,19 @@ class LiquiditySweepAnalyzer:
             'range': 1.4,             # Reduced from 1.5 for scalping
             'low_volatility': 1.2,    # Kept same (already tight)
         }
-        tp_ratio = tp_ratio_map.get(regime, 1.5)
+        
+        # JPY pairs: use even tighter ratios due to different price behavior
+        if 'JPY' in str(pair or ''):
+            jpy_tp_ratio_map = {
+                'high_volatility': 1.5,   # JPY high vol: 1.5:1 max
+                'trend_up': 1.3,          # JPY trending: 1.3:1
+                'trend_down': 1.3,        # JPY trending: 1.3:1  
+                'range': 1.2,             # JPY range: 1.2:1
+                'low_volatility': 1.1,    # JPY low vol: 1.1:1
+            }
+            tp_ratio = jpy_tp_ratio_map.get(regime, 1.3)
+        else:
+            tp_ratio = tp_ratio_map.get(regime, 1.5)
 
         # ── Liquidity pool TP (next opposing swing) ─────────────────
         liq_pool_tp = None

@@ -694,6 +694,12 @@ class TradingBot:
             sl_mult = 0.8  # Match ScalpingAnalyzer.SL_ATR_MULT (was 1.2 — too wide for scalping)
             sl_distance = atr * sl_mult
 
+            # JPY pairs: tighter ATR multipliers for more realistic scalping
+            if 'JPY' in pair:
+                sl_mult = 0.5  # Much tighter for JPY (0.5x ATR vs 0.8x)
+                sl_distance = atr * sl_mult
+                bot_logger.info(f"🏦 JPY tighter SL: using {sl_mult}x ATR vs standard 0.8x")
+
             if trade_type == 'BUY':
                 stop_loss = round(entry_price - sl_distance, 5)
             else:
@@ -703,6 +709,13 @@ class TradingBot:
             atr_regime = signal_result.get('atr_regime', 'neutral')
             tp_ratio_map = {'expanding': 2.0, 'contracting': 1.5, 'neutral': 1.8}
             tp_ratio = tp_ratio_map.get(atr_regime, 1.8)
+            
+            # JPY pairs: even tighter TP ratios
+            if 'JPY' in pair:
+                jpy_tp_ratio_map = {'expanding': 1.4, 'contracting': 1.2, 'neutral': 1.3}
+                tp_ratio = jpy_tp_ratio_map.get(atr_regime, 1.3)
+                bot_logger.info(f"🏦 JPY tighter TP ratio: {tp_ratio:.1f}R vs standard ratios")
+                
             tp_distance = sl_distance * tp_ratio
 
             if trade_type == 'BUY':
@@ -730,8 +743,13 @@ class TradingBot:
         # SCALPING: Much tighter R:R limits for 5m timeframe
         if timeframe_key == '5m':
             max_rr = 1.8  # 5m scalping cap: 1.8:1 max
+            # JPY pairs: even more conservative due to different price behavior
+            if 'JPY' in pair:
+                max_rr = 1.5  # JPY 5m scalping: 1.5:1 max (respects technical levels better)
         else:
-            max_rr = 2.2  # 1m scalping: slightly higher but still conservative
+            max_rr = 2.2  # 1m scalping: slightly higher but still conservative  
+            if 'JPY' in pair:
+                max_rr = 1.8  # JPY 1m slightly tighter
             
         if sr_levels and risk_distance > 0:
             if trade_type == 'BUY':
