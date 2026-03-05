@@ -41,19 +41,19 @@ class ScalpingAnalyzer:
     PAIR_CONFIG = {
         'GBP/USD': {
             'session_atr_min': 0.00055,   # Min ATR to trade (~5.5 pips)
-            'spread_sim': 0.00020,        # Simulated spread (2 pips)
+            'spread_sim': 0.00010,        # 1.0 pip (ECN TradersWay)
             'pip_size': 0.0001,
             'pip_value_label': 'pips',
         },
         'EUR/USD': {
             'session_atr_min': 0.00040,   # Min ATR to trade (~4 pips)
-            'spread_sim': 0.00015,        # Simulated spread (1.5 pips)
+            'spread_sim': 0.00006,        # 0.6 pips (ECN TradersWay)
             'pip_size': 0.0001,
             'pip_value_label': 'pips',
         },
         'USD/JPY': {
             'session_atr_min': 0.080,     # Min ATR to trade (~8 pips in JPY) - increased
-            'spread_sim': 0.060,          # Realistic spread (6 pips) - increased from 2 pips  
+            'spread_sim': 0.008,          # 0.8 pips (ECN TradersWay)
             'pip_size': 0.01,
             'pip_value_label': 'pips',
         },
@@ -282,10 +282,9 @@ class ScalpingAnalyzer:
         # JPY pairs: use hybrid approach with safety limits
         if 'JPY' in pair:
             # Use broker spread if reasonable, otherwise fall back to config
-            max_reasonable_jpy_spread = 0.040  # 4.0 pips max for JPY
+            max_reasonable_jpy_spread = 0.020  # 2.0 pips max for ECN JPY
             if broker_spread <= max_reasonable_jpy_spread:
-                # Apply safety multiplier: broker spread × 1.5 to account for volatility
-                return min(broker_spread * 1.5, config_spread)
+                return broker_spread
             else:
                 return config_spread
         else:

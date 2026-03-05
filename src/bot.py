@@ -672,7 +672,7 @@ class TradingBot:
 
             bot_logger.info(
                 f"💧 Sweep SL/TP: SL={sweep_rr.get('risk_pips', 0):.1f}p "
-                f"(wick+0.2×ATR), "
+                f"(wick+0.5×ATR), "
                 f"TP={sweep_rr.get('reward_pips', 0):.1f}p ({tp_ratio:.1f}R)"
             )
         elif scalping_rr and scalping_rr.get('stop_loss') and scalping_rr.get('take_profit'):
