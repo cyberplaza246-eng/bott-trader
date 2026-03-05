@@ -531,6 +531,16 @@ class TradingBot:
                     if self.enable_correlation_guard and self._has_correlated_position(pair, signal_result['signal']):
                         continue
 
+                    # ── TEMPORARY: Bypass RL Agent for High Confidence Signals ──
+                    # Allow excellent signals to trade immediately without RL veto
+                    if signal_result['confidence'] >= 0.40:
+                        bot_logger.info(f"🚀 High confidence signal ({signal_result['confidence']:.1%}) — bypassing RL agent")
+                        # Set default RL values for position sizing
+                        signal_result['_rl_lot_mult'] = 1.0
+                        # Proceed directly to trade execution
+                        self._execute_trade_signal(pair, signal_result, df)
+                        continue
+
                     # ── RL Agent Gate ──────────────────────────────────
                     # Build state and let the RL agent decide action
                     try:
