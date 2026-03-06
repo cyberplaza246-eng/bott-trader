@@ -752,6 +752,9 @@ class MT5Connector:
                         'current_price': p.price_current,
                         'profit': p.profit,
                         'open_time': datetime.fromtimestamp(p.time),
+                        'sl': p.sl,
+                        'tp': p.tp,
+                        'magic': p.magic,  # Include magic number for bot position filtering
                     }
                     for p in positions
                 ]

@@ -769,6 +769,23 @@ class TradingBot:
         bot_logger.info(f"  SL: {stop_loss:.5f} ✅")
         bot_logger.info(f"  TP: {take_profit:.5f} ✅")
 
+        # HARD BROKER CHECK: Get actual open positions from MT5 before placing order
+        # This prevents drift/race conditions from causing over-trading
+        if self.mode == 'live' and self.broker:
+            try:
+                current_bot_positions = self.broker.get_bot_positions() or []
+                actual_count = len(current_bot_positions)
+                max_trades = self.risk_manager.get_tier_info()['max_concurrent_trades']
+                
+                if actual_count >= max_trades:
+                    bot_logger.warning(
+                        f"🚫 HARD LIMIT: {actual_count}/{max_trades} bot positions open — "
+                        f"blocking new trade for {pair}"
+                    )
+                    return
+            except Exception as e:
+                bot_logger.warning(f"Position count check failed: {e}")
+
         # Execute based on mode
         if self.mode == 'live' and AUTOTRADING_ENABLED:
             order_id = self.broker.place_order(
