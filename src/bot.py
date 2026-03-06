@@ -782,6 +782,16 @@ class TradingBot:
             
             if order_id:
                 bot_logger.info(f"✅ Order placed - Ticket: {order_id}")
+                
+                # Immediately add to _known_tickets so we can detect when it closes
+                # (prevents race condition where TP/SL hits before next poll)
+                self._known_tickets[order_id] = {
+                    'pair': pair,
+                    'type': trade_type,
+                    'entry_price': entry_price,
+                    'open_time': datetime.now().isoformat(),
+                }
+                
                 bot_logger.info(f"🔍 Checking SL/TP attachment...")
                 
                 # Wait briefly then check if SL/TP were actually set 
