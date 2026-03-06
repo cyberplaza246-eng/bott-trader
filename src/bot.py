@@ -619,7 +619,16 @@ class TradingBot:
         
         # Log risk status with tier info
         try:
-            daily_status = self.risk_manager.get_daily_status()
+            # Get actual position count from broker to ensure accurate display
+            actual_positions = 0
+            if self.mode == 'live' and self.broker:
+                positions = self.broker.get_open_positions()
+                if positions is not None:
+                    actual_positions = len(positions)
+                    # Sync internal counter with reality
+                    self.risk_manager.sync_open_trades(actual_positions)
+            
+            daily_status = self.risk_manager.get_daily_status(actual_open_trades=actual_positions)
             bot_logger.info(f"\n📊 Daily Status:")
             bot_logger.info(f"  Balance: ${daily_status['current_balance']:.2f}")
             bot_logger.info(f"  Tier: {daily_status.get('tier_description', 'N/A')}")

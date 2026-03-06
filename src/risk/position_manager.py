@@ -502,11 +502,38 @@ class RiskManager:
             f"Open positions: {self.open_trades}"
         )
 
-    def get_daily_status(self):
-        """Get daily trading status (includes tier info)."""
+    def sync_open_trades(self, actual_count: int):
+        """Sync internal open_trades counter with actual broker positions.
+        
+        This prevents drift between the internal counter and MT5 reality.
+        """
+        if actual_count != self.open_trades:
+            bot_logger.info(f"📊 Syncing open_trades: {self.open_trades} → {actual_count}")
+            self.open_trades = actual_count
+
+    def get_daily_status(self, actual_open_trades: int = None):
+        """Get daily trading status (includes tier info).
+        
+        Args:
+            actual_open_trades: If provided, use this instead of internal counter
+        """
+        # Use actual count if provided, otherwise fall back to internal counter
+        open_trades = actual_open_trades if actual_open_trades is not None else self.open_trades
+        
         daily_loss_percent = (self.daily_loss / max(self.daily_starting_balance, 1)) * 100
         tier_info = self.get_tier_info()
-        effective_cap, available_slots = self.get_trade_capacity()
+        
+        # Calculate capacity using actual open trades
+        max_trades = self._current_tier['max_concurrent_trades']
+        effective_cap = max_trades
+        available_slots = max(0, effective_cap - open_trades)
+        
+        # can_trade should use actual position count
+        can_trade = (
+            open_trades < max_trades and
+            self.daily_loss <= self.daily_loss_limit and
+            self.current_balance > 0
+        )
 
         return {
             'current_balance': self.current_balance,
@@ -514,11 +541,11 @@ class RiskManager:
             'daily_loss': self.daily_loss,
             'daily_loss_percent': daily_loss_percent,
             'daily_loss_limit': self.daily_loss_limit,
-            'open_trades': self.open_trades,
-            'max_concurrent_trades': self._current_tier['max_concurrent_trades'],
+            'open_trades': open_trades,  # Use actual count
+            'max_concurrent_trades': max_trades,
             'effective_trade_cap': effective_cap,
             'available_trade_slots': available_slots,
-            'can_trade': self.can_trade(),
+            'can_trade': can_trade,  # Use actual count
             'margin_available': self.current_balance * 0.95,
             # Scaling info
             'tier': tier_info['tier_name'],
