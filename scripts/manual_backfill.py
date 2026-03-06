@@ -23,9 +23,9 @@ def main():
     # Initialize broker connection
     broker = MT5Connector()
     
-    # Check if relay is available
-    if not broker.relay_mode and not broker.simulation_mode:
-        print("❌ No MT5 relay configured")
+    # Check if connected (either relay or direct MT5)
+    if not broker.connected and not broker.relay_mode:
+        print("❌ Not connected to MT5")
         return
     
     # Get trade history (last 7 days)
