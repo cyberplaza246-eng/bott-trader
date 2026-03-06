@@ -521,42 +521,68 @@ class MT5Connector:
             
             bot_logger.info(f"📝 Order filled: {pair} {order_type} | Order ticket: {result.order} | Deal: {result.deal}")
             
-            # Get the position ticket (may differ from order ticket)
-            # Wait for position to register, then look it up
+            # Get the position ticket from the deal (most reliable method)
             import time
             position_ticket = None
-            position_obj = None
             
-            # Retry position lookup - wait for MT5 to register the position
-            for attempt in range(8):  # More attempts
-                time.sleep(0.4)  # Wait 400ms between attempts
-                positions = mt5.positions_get(symbol=symbol)
-                bot_logger.debug(f"Position lookup attempt {attempt+1}: found {len(positions) if positions else 0} positions for {symbol}")
-                if positions:
-                    # Find most recent position with our magic number
-                    bot_positions = [p for p in positions if p.magic == 234000]
-                    if bot_positions:
-                        # Get the newest one (highest ticket)
-                        position_obj = max(bot_positions, key=lambda p: p.ticket)
-                        position_ticket = position_obj.ticket
-                        bot_logger.info(f"✓ Found position ticket: {position_ticket}")
+            # Method 1: Get position_id directly from deal history (most reliable)
+            if result.deal:
+                time.sleep(0.5)  # Wait for deal to register in history
+                for attempt in range(5):
+                    deals = mt5.history_deals_get(ticket=result.deal)
+                    if deals and len(deals) > 0:
+                        deal = deals[0]
+                        position_ticket = deal.position_id
+                        bot_logger.info(f"✓ Got position ticket from deal: {position_ticket} (deal={result.deal})")
                         break
+                    time.sleep(0.3)
+                    bot_logger.debug(f"Deal lookup attempt {attempt+1}: waiting for deal {result.deal}")
             
-            # Fallback to deal ticket from result if position lookup fails
+            # Method 2: Fallback - search by symbol and magic
             if not position_ticket:
-                # Try result.deal first (deal ticket often works for SLTP)
+                bot_logger.warning(f"⚠️ Deal lookup failed, trying symbol search...")
+                for attempt in range(5):
+                    time.sleep(0.4)
+                    positions = mt5.positions_get(symbol=symbol)
+                    if positions:
+                        # Find positions with our magic number opened very recently
+                        bot_positions = [p for p in positions if p.magic == 234000]
+                        if bot_positions:
+                            position_obj = max(bot_positions, key=lambda p: p.ticket)
+                            position_ticket = position_obj.ticket
+                            bot_logger.info(f"✓ Found position by symbol: {position_ticket}")
+                            break
+            
+            # Method 3: Last resort - use deal or order ticket
+            if not position_ticket:
                 position_ticket = result.deal if result.deal else result.order
-                bot_logger.warning(f"⚠️ Position lookup failed, using ticket: {position_ticket}")
+                bot_logger.warning(f"⚠️ All lookups failed, using ticket: {position_ticket}")
             
             # Modify position to add SL/TP with aggressive retry
             if stop_loss or take_profit:
                 modify_success = False
-                bot_logger.info(f"🔧 Setting SL={stop_loss:.5f}, TP={take_profit:.5f} on ticket {position_ticket}")
+                bot_logger.info(f"🔧 Setting SL={stop_loss:.5f}, TP={take_profit:.5f} on position {position_ticket}")
                 
-                for retry in range(5):  # More retry attempts
-                    time.sleep(0.6 + retry * 0.2)  # Increasing delay: 0.6s, 0.8s, 1.0s, 1.2s, 1.4s
+                for retry in range(5):
+                    time.sleep(0.5 + retry * 0.3)  # 0.5s, 0.8s, 1.1s, 1.4s, 1.7s
                     
-                    # Build SLTP request directly (bypass modify_position for more control)
+                    # Re-lookup the position to make sure we have the right one
+                    current_pos = mt5.positions_get(ticket=position_ticket)
+                    if not current_pos:
+                        # Try getting ALL positions and find ours
+                        all_pos = mt5.positions_get(symbol=symbol)
+                        if all_pos:
+                            our_pos = [p for p in all_pos if p.magic == 234000]
+                            if our_pos:
+                                position_ticket = max(p.ticket for p in our_pos)
+                                current_pos = mt5.positions_get(ticket=position_ticket)
+                                bot_logger.info(f"📍 Re-found position: {position_ticket}")
+                    
+                    if not current_pos:
+                        bot_logger.warning(f"⚠️ Attempt {retry+1}: Position {position_ticket} not found, retrying...")
+                        continue
+                    
+                    # Build SLTP request
                     sltp_request = {
                         "action": mt5.TRADE_ACTION_SLTP,
                         "position": position_ticket,
