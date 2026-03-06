@@ -43,7 +43,7 @@ SL_MIN_SPREAD_MULT = 2        # Floor: at least 2×spread
 SL_MAX_PIPS_1M = 5.0          # Hard cap: 5 pips for 1M trades
 SL_MAX_PIPS_5M = 10.0         # Hard cap: 10 pips for 5M trades
 
-SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
+SR_TP_FRACTION = 0.90         # TP at 90% of distance to S/R (avoids reversal before TP)
 MIN_RR = 1.2                  # Minimum reward-to-risk ratio
 MAX_RR = 2.0                  # Maximum R:R (scalps don't need 3R+)
 TP_MAX_PIPS_1M = 8.0          # Hard cap: 8 pips TP for 1M scalps
