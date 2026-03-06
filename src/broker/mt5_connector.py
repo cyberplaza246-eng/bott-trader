@@ -454,16 +454,21 @@ class MT5Connector:
     def place_order(self, pair, order_type, lot_size, entry_price, stop_loss, take_profit):
         """Place a trading order"""
         
+        bot_logger.info(f"📤 place_order called: {pair} {order_type} | sim={self.simulation_mode} | relay={self.relay_mode} | MT5_AVAIL={MT5_AVAILABLE}")
+        
         # ══════════════════════════════════════════════════════════════════
         # HARD LIMIT CHECK - CANNOT BE BYPASSED
         # Max 3 positions until account reaches $200
         # ══════════════════════════════════════════════════════════════════
         MAX_POSITIONS = 3
         
-        if not self.simulation_mode and MT5_AVAILABLE and mt5:
+        # Check for ALL modes that use real MT5
+        if MT5_AVAILABLE and mt5 and not self.simulation_mode:
             try:
                 all_positions = mt5.positions_get()
                 current_count = len(all_positions) if all_positions else 0
+                
+                bot_logger.info(f"🔍 ENTRY CHECK: {current_count} positions found")
                 
                 if current_count >= MAX_POSITIONS:
                     error_logger.error(
@@ -476,9 +481,19 @@ class MT5Connector:
             except Exception as e:
                 error_logger.error(f"🚫 SAFETY BLOCK: Could not verify positions ({e}). Trade blocked.")
                 return None
+        else:
+            bot_logger.warning(f"⚠️ Position check SKIPPED: MT5_AVAIL={MT5_AVAILABLE}, mt5={mt5 is not None}, sim={self.simulation_mode}")
         # ══════════════════════════════════════════════════════════════════
         
         if self.relay_mode:
+            # ALSO check in relay mode
+            if MT5_AVAILABLE and mt5:
+                pos = mt5.positions_get()
+                pos_count = len(pos) if pos else 0
+                if pos_count >= MAX_POSITIONS:
+                    error_logger.error(f"🚫 RELAY BLOCK: {pos_count}/{MAX_POSITIONS} positions. Refusing {pair}!")
+                    return None
+            
             r = self._relay_post("/order", {
                 "pair": pair,
                 "type": order_type,
@@ -520,6 +535,23 @@ class MT5Connector:
         try:
             symbol = self._resolve_symbol(pair)
             action = mt5.ORDER_TYPE_BUY if order_type == 'BUY' else mt5.ORDER_TYPE_SELL
+            
+            # ══════════════════════════════════════════════════════════════
+            # FINAL SAFETY CHECK - RIGHT BEFORE ORDER SEND
+            # This is the LAST line of defense
+            # ══════════════════════════════════════════════════════════════
+            MAX_POSITIONS = 3
+            final_check = mt5.positions_get()
+            final_count = len(final_check) if final_check else 0
+            bot_logger.info(f"🔒 FINAL CHECK before order: {final_count}/{MAX_POSITIONS} positions")
+            
+            if final_count >= MAX_POSITIONS:
+                error_logger.error(
+                    f"🚫🚫🚫 FINAL BLOCK: {final_count}/{MAX_POSITIONS} positions! "
+                    f"ABSOLUTELY REFUSING {pair} {order_type}!"
+                )
+                return None
+            # ══════════════════════════════════════════════════════════════
             
             # Don't include SL/TP in initial order (TradersWay and some brokers reject it)
             # We'll add them via modify_position after the order fills
