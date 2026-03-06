@@ -669,8 +669,17 @@ class TradingBot:
         elif scalping_rr:
             signal_entry = scalping_rr.get('entry_price')
 
-        # Use configurable drift tolerance from scalping analyzer (default 3.0×ATR)
-        drift_tolerance_atr = getattr(self.scalping_analyzer, 'PRICE_DRIFT_TOLERANCE_ATR', 3.0)
+        # Use configurable drift tolerance from risk_overrides.json (default 3.0×ATR)
+        drift_tolerance_atr = 3.0
+        try:
+            import json
+            overrides_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'risk_overrides.json')
+            if os.path.exists(overrides_path):
+                with open(overrides_path) as f:
+                    overrides = json.load(f)
+                    drift_tolerance_atr = overrides.get('price_drift_tolerance_atr', 3.0)
+        except Exception:
+            pass
         if signal_entry and abs(entry_price - signal_entry) > atr * drift_tolerance_atr:
             pip_mult = 100 if 'JPY' in pair else 10000
             drift_pips = abs(entry_price - signal_entry) * pip_mult
