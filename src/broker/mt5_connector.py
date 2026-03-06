@@ -34,6 +34,11 @@ FORCE_RELAY = RELAY_AVAILABLE and os.getenv('MT5_RELAY_URL')  # Explicitly set =
 if not MT5_AVAILABLE and not RELAY_AVAILABLE:
     bot_logger.warning("MetaTrader5 not available (Linux/Mac) and no MT5_RELAY_URL set. Using simulation mode.")
 
+import threading
+
+# Global lock to prevent race conditions in order placement
+_ORDER_LOCK = threading.Lock()
+
 
 class MT5Connector:
     def __init__(self):
@@ -454,6 +459,17 @@ class MT5Connector:
     def place_order(self, pair, order_type, lot_size, entry_price, stop_loss, take_profit):
         """Place a trading order"""
         
+        # ══════════════════════════════════════════════════════════════════
+        # THREAD LOCK - Only one order can be processed at a time
+        # This prevents race conditions where multiple pairs check position
+        # count simultaneously and all pass before any orders fill
+        # ══════════════════════════════════════════════════════════════════
+        with _ORDER_LOCK:
+            return self._place_order_impl(pair, order_type, lot_size, entry_price, stop_loss, take_profit)
+    
+    def _place_order_impl(self, pair, order_type, lot_size, entry_price, stop_loss, take_profit):
+        """Internal implementation of place_order (called with lock held)"""
+        
         bot_logger.info(f"📤 place_order called: {pair} {order_type} | sim={self.simulation_mode} | relay={self.relay_mode} | MT5_AVAIL={MT5_AVAILABLE}")
         
         # ══════════════════════════════════════════════════════════════════
@@ -738,6 +754,12 @@ class MT5Connector:
                         error_logger.error(f"❌❌❌ FAILED TO CLOSE UNPROTECTED POSITION! MANUAL INTERVENTION NEEDED! ❌❌❌")
                     
                     return None  # Don't return ticket - trade was closed or failed
+            
+            # Wait and verify position count increased before releasing lock
+            time.sleep(0.5)
+            post_positions = mt5.positions_get()
+            post_count = len(post_positions) if post_positions else 0
+            bot_logger.info(f"✅ ORDER COMPLETE: {pair} {order_type} | Positions now: {post_count}")
             
             trades_logger.info(
                 f"ORDER_PLACED | Pair: {pair} | Type: {order_type} | "
