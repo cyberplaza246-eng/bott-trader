@@ -45,6 +45,9 @@ SL_MAX_PIPS_5M = 10.0         # Hard cap: 10 pips for 5M trades
 
 SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
 MIN_RR = 1.2                  # Minimum reward-to-risk ratio
+MAX_RR = 3.0                  # Maximum R:R (prevents unreachable TP)
+TP_MAX_PIPS_1M = 15.0         # Hard cap: 15 pips TP for 1M
+TP_MAX_PIPS_5M = 25.0         # Hard cap: 25 pips TP for 5M
 
 STRUCTURE_LOOKBACK = 30       # Bars to scan for swing structure
 
@@ -105,6 +108,19 @@ def calculate_sl_tp(df, direction, pair, timeframe,
         return None
 
     tp_distance, tp_reason = tp_result
+
+    # ── TP Cap: max R:R ─────────────────────────────────────────
+    max_rr_dist = sl_distance * MAX_RR
+    if tp_distance > max_rr_dist:
+        tp_distance = max_rr_dist
+        tp_reason += f" → capped to {MAX_RR:.0f}R"
+
+    # ── TP Cap: hard pip limit ──────────────────────────────────
+    tp_max_pips = TP_MAX_PIPS_1M if timeframe == '1m' else TP_MAX_PIPS_5M
+    tp_max_dist = tp_max_pips * pip_size
+    if tp_distance > tp_max_dist:
+        tp_distance = tp_max_dist
+        tp_reason += f" → capped {tp_max_pips:.0f}p ({timeframe})"
 
     if direction == 'BUY':
         take_profit = round(entry_price + tp_distance, 5)
