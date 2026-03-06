@@ -284,6 +284,32 @@ class EnsembleTrader:
             agreeing = sum(1 for s in context_signals.values() if s == sweep_direction)
             models_agreement = agreeing + 1  # +1 for sweep itself
 
+            # ── Adaptive weight bonus ────────────────────────────────
+            # Use learned model weights to give more influence to models
+            # that have historically predicted correctly.
+            try:
+                learned_weights = self.learner.get_adjusted_weights(pair=pair)
+                weighted_agreement = 0.0
+                weighted_total = 0.0
+                for model_name, model_signal in context_signals.items():
+                    w = learned_weights.get(model_name, 0.1)
+                    weighted_total += w
+                    if model_signal == sweep_direction:
+                        weighted_agreement += w
+                if weighted_total > 0:
+                    weighted_ratio = weighted_agreement / weighted_total
+                    # Scale: 0.0 (all disagree) → 0.10 (all agree) bonus
+                    weight_bonus = (weighted_ratio - 0.5) * 0.20
+                    if abs(weight_bonus) > 0.01:
+                        old_conf = final_confidence
+                        final_confidence += weight_bonus
+                        bot_logger.info(
+                            f"📊 Adaptive weight {'bonus' if weight_bonus > 0 else 'penalty'}: "
+                            f"{weight_bonus:+.2%} ({old_conf:.1%} → {final_confidence:.1%})"
+                        )
+            except Exception:
+                pass
+
             # ── LSTM direction filter (raw prediction, 0.02% threshold) ──
             if self.lstm_available and final_signal != 'SKIP':
                 try:

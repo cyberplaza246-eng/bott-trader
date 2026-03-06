@@ -248,32 +248,33 @@ class TrailingStopManager:
         breakeven_r = info.get('breakeven_r', self.breakeven_r)
         trail_mult = info.get('trail_atr_mult', self.trail_atr_mult)
 
+        pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
+
         if direction == 'BUY':
             profit_distance = current_price - entry
             # Track best price
             if current_price > info['best_price']:
                 info['best_price'] = current_price
 
-            # INSTANT PROFIT LOCK: As soon as 3 pips profit, move SL to +1 pip
-            pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
-            instant_profit_threshold = 3 * pip
+            # PROFIT LOCK: Move SL to breakeven+2 pips after 0.5×ATR profit
+            # (was 3 pips — too tight, market noise kept hitting it)
+            instant_profit_threshold = max(atr * 0.5, 8 * pip)
             if not info['at_breakeven'] and profit_distance >= instant_profit_threshold:
-                bot_logger.info(f"🔒 Instant profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +1 pip")
-                return entry + pip
+                info['at_breakeven'] = True
+                bot_logger.info(f"🔒 Profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +2 pips")
+                return entry + 2 * pip
             
             # Phase 1: Move to breakeven after profit meets breakeven_r
             if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
-                # Set SL to entry + small buffer (1 pip profit)
-                return entry + pip
+                return entry + 2 * pip
             
             # Phase 2: Trail behind the best price
             if info['at_breakeven']:
                 trail_distance = atr * trail_mult
                 trail_sl = info['best_price'] - trail_distance
                 # Never go below breakeven
-                pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
-                breakeven_sl = entry + pip
+                breakeven_sl = entry + 2 * pip
                 return max(trail_sl, breakeven_sl)
 
         elif direction == 'SELL':
@@ -281,24 +282,23 @@ class TrailingStopManager:
             if current_price < info['best_price']:
                 info['best_price'] = current_price
 
-            # INSTANT PROFIT LOCK: As soon as 3 pips profit, move SL to -1 pip
-            pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
-            instant_profit_threshold = 3 * pip
+            # PROFIT LOCK: Move SL to breakeven+2 pips after 0.5×ATR profit
+            instant_profit_threshold = max(atr * 0.5, 8 * pip)
             if not info['at_breakeven'] and profit_distance >= instant_profit_threshold:
-                bot_logger.info(f"🔒 Instant profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +1 pip")
-                return entry - pip
+                info['at_breakeven'] = True
+                bot_logger.info(f"🔒 Profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +2 pips")
+                return entry - 2 * pip
 
             # Phase 1: Breakeven
             if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
-                return entry - pip
+                return entry - 2 * pip
 
             # Phase 2: Trail above best price
             if info['at_breakeven']:
                 trail_distance = atr * trail_mult
                 trail_sl = info['best_price'] + trail_distance
-                pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
-                breakeven_sl = entry - pip
+                breakeven_sl = entry - 2 * pip
                 return min(trail_sl, breakeven_sl)
 
         return None
