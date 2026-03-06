@@ -893,3 +893,1930 @@ USD/JPY Analysis:
 2026-02-26 11:59:15 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
 2026-02-26 11:59:15 - TradingBot - INFO -   Open Trades: 2
 2026-02-26 11:59:15 - TradingBot - INFO -   Can Trade: True
+[2026-03-06 14:49:59] Starting bot supervisor loop
+[2026-03-06 14:49:59] Launching bot...
+2026-03-06 14:50:00.726635: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-03-06 14:50:00.777734: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-03-06 14:50:03.316281: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+✅ Strategy Config Loaded - Mode: live, Scalping 1M+5M, Pairs: ['EUR/USD', 'GBP/USD', 'USD/JPY']
+2026-03-06 14:50:08 - TradingBot - WARNING - ⚠️ transformers not installed — falling back to keyword sentiment
+2026-03-06 14:50:24 - TradingBot - INFO - ======================================================================
+2026-03-06 14:50:24 - TradingBot - INFO - 🚀 AI-Powered Forex Trading Bot Starting...
+2026-03-06 14:50:24 - TradingBot - INFO - ======================================================================
+2026-03-06 14:50:24 - TradingBot - INFO - 🔌 Broker mode: relay_url=http://127.0.0.1:5555, relay_mode=True, sim_mode=False
+2026-03-06 14:50:24 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:24 - TradingBot - WARNING - 🔌 Relay unreachable, attempting auto-start: /workspaces/Ai-bot/mt5_relay/relay_server.py
+2026-03-06 14:50:25 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:26 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:27 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:28 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:29 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:30 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:31 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:32 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:33 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:34 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:35 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:36 - Errors - ERROR - Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError("HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-03-06 14:50:36 - TradingBot - WARNING - MT5 Relay at http://127.0.0.1:5555 not reachable — falling back to simulation (will auto-reconnect every 30s)
+2026-03-06 14:50:36 - TradingBot - INFO - ✅ Simulation Mode Active | Balance: $50.00 | Mode: live
+2026-03-06 14:50:36.900283: E external/local_xla/xla/stream_executor/cuda/cuda_platform.cc:51] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+2026-03-06 14:50:37 - Errors - ERROR - Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model
+2026-03-06 14:50:37 - TradingBot - INFO - ✅ New LSTM model created
+2026-03-06 14:50:37 - TradingBot - INFO - ⚠️ NLP sentiment: keyword fallback (context only)
+2026-03-06 14:50:37 - TradingBot - INFO - 🛠️ Applied risk overrides from data/risk_overrides.json: SL_ATR_MULT=1.400, SL_MIN_ATR_MULT=1.000, SL_MAX_ATR_MULT=2.000, TP_BASE_RATIO=1.200, TP_EXPANDING=1.400, TP_CONTRACTING=1.100, TP_ASIAN_SESSION=1.100, TP_LONDON_OPEN=1.300, TP_NY_OVERLAP=1.350, TP_QUIET_HOURS=1.050, ENTRY_THRESHOLD=0.500, PRICE_DRIFT_TOLERANCE_ATR=3.000, SL_EUR/USD=1.30, SL_GBP/USD=1.40, SL_USD/JPY=1.50, AUTO_LEARNING=ON
+2026-03-06 14:50:37 - TradingBot - INFO - 🔪 Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]
+2026-03-06 14:50:37 - TradingBot - INFO - 📚 Loaded learning data: 0 past trades | threshold=0.45 | regime=ranging | drawdown_protection=OFF
+2026-03-06 14:50:37 - TradingBot - INFO - 🧠 ML Trade Scorer: waiting (0/200 trades)
+2026-03-06 14:50:40 - TradingBot - INFO - 🤖 RL Agent: DQN mode (PyTorch)
+2026-03-06 14:50:40 - TradingBot - INFO - RL agent loaded: ε=0.050, steps=25189, trades=2472
+2026-03-06 14:50:40 - TradingBot - INFO - RL DQN weights loaded
+2026-03-06 14:50:40 - TradingBot - INFO - 🎯 Sweep-Gated Entry System (RayAlgo v3)
+2026-03-06 14:50:40 - TradingBot - INFO -    Gate:    LiquiditySweep (4-layer: Bias → Sweep → MSS → Entry)
+2026-03-06 14:50:40 - TradingBot - INFO -    Confirm: EMA Crossover + Technical (boost/reduce only)
+2026-03-06 14:50:40 - TradingBot - INFO -    Context: 8 models for learning (no entry influence)
+2026-03-06 14:50:40 - TradingBot - INFO - 💰 Using actual MT5 balance: $50.00
+2026-03-06 14:50:40 - TradingBot - INFO - RiskManager initialized: $50.00 | Tier: Micro ($0-$200)
+2026-03-06 14:50:40 - TradingBot - INFO - 🤖 RL Agent: DQN mode (PyTorch)
+2026-03-06 14:50:40 - TradingBot - INFO - RL agent loaded: ε=0.050, steps=25189, trades=2472
+2026-03-06 14:50:40 - TradingBot - INFO - RL DQN weights loaded
+2026-03-06 14:50:40 - TradingBot - INFO - 📊 History backfill skipped (set SKIP_HISTORY_BACKFILL=false to enable)
+2026-03-06 14:50:40 - TradingBot - INFO - ✅ Scalping Bot initialized in LIVE mode (9-model ensemble, 1M+5M dual-timeframe)
+2026-03-06 14:50:40 - TradingBot - INFO - 🚀 Starting Trading Bot in LIVE mode
+
+🌐 Dashboard running at http://localhost:5001
+   Open in browser to monitor the bot
+
+ * Serving Flask app 'src.dashboard.app'
+ * Debug mode: off
+2026-03-06 14:50:40 - TradingBot - INFO - 🧠 LSTM auto-retraining scheduled (daily 03:00 UTC)
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5001
+ * Running on http://10.0.11.132:5001
+[33mPress CTRL+C to quit[0m
+2026-03-06 14:50:40 - TradingBot - INFO - Running initial scalping analysis...
+2026-03-06 14:50:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:50:40 - TradingBot - INFO - 🔍 Scalping analysis (5m) at 14:50:40
+2026-03-06 14:50:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:50:41 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:50:41 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=30.058541743009407, swings=48, bias=SELL
+2026-03-06 14:50:41 - TradingBot - INFO - 📊 EUR/USD regime=trend_down, bias=SELL, ADX=30.1, swings=48
+2026-03-06 14:50:41 - TradingBot - INFO - 💧 EUR/USD Bearish sweep: high 1.08518 > swing_high 1.08522, close 1.08518 recovered, RSI=70.7
+2026-03-06 14:50:41 - TradingBot - INFO - ⚠️ EUR/USD sweep detected, soft MSS → entry at 1.08535 (Sweep-only entry (no displacement): No MSS displacement through 1.08505 after sweep (checked 30 candles, sweep_idx=-30))
+2026-03-06 14:50:41 - TradingBot - INFO - 🚫 EUR/USD R:R failed: entry=1.08535, wick=1.08518, ATR=5.4285714285736854e-05
+2026-03-06 14:50:42 - TradingBot - WARNING - NewsAPI rate-limited (429). Pausing sentiment calls until 15:10:42
+2026-03-06 14:50:42 - TradingBot - INFO - 
+EUR/USD [5m] Analysis:
+2026-03-06 14:50:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:50:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:50:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 14:50:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:50:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:50:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:50:42 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:50:42 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:50:42 - TradingBot - INFO - 📊 GBP/USD detect_regime: df_5m=250, ADX=23.551748838936533, swings=49, bias=BUY
+2026-03-06 14:50:42 - TradingBot - INFO - 📊 GBP/USD regime=range, bias=BUY, ADX=23.6, swings=49
+2026-03-06 14:50:42 - TradingBot - INFO - ⏭️ GBP/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00034)
+2026-03-06 14:50:42 - TradingBot - INFO - 
+GBP/USD [5m] Analysis:
+2026-03-06 14:50:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:50:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:50:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:50:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:50:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (35%) | Regime: ranging
+2026-03-06 14:50:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:50:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:50:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:50:42 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=23.85762205126043, swings=53, bias=BUY
+2026-03-06 14:50:42 - TradingBot - INFO - 📊 USD/JPY regime=range, bias=BUY, ADX=23.9, swings=53
+2026-03-06 14:50:42 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.05300)
+2026-03-06 14:50:43 - TradingBot - INFO - 
+USD/JPY [5m] Analysis:
+2026-03-06 14:50:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:50:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:50:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:50:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:50:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (35%) | Regime: ranging
+2026-03-06 14:50:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:50:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:50:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:50:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:50:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:50:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:50:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:50:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:50:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:50:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:50:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:50:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:50:43 - TradingBot - INFO - Scalping bot running (1M every 60s, 5M every 5min). Press Ctrl+C to stop.
+2026-03-06 14:51:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:51:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:51:40
+2026-03-06 14:51:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:51:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:51:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 14:51:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:51:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:51:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:51:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:51:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:51:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (17%) | Regime: ranging
+2026-03-06 14:51:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:51:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:51:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:51:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:51:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:51:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:51:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:51:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:51:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:51:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (17%) | Regime: ranging
+2026-03-06 14:51:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:51:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:51:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:51:41 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=27.092492027738164, swings=52, bias=SELL
+2026-03-06 14:51:41 - TradingBot - INFO - 📊 USD/JPY regime=trend_down, bias=SELL, ADX=27.1, swings=52
+2026-03-06 14:51:41 - TradingBot - INFO - 💧 USD/JPY Bearish sweep: high 150.48800 > swing_high 150.49200, close 150.48800 recovered, RSI=48.8
+2026-03-06 14:51:41 - TradingBot - INFO - ⚡ USD/JPY MSS: Bearish MSS: displaced toward 150.48100, close=150.48400, body=75%, vol=1.55x, mode=aggressive [relaxed-range]
+2026-03-06 14:51:41 - TradingBot - INFO - ⛔ Sweep wick too close: 0.4p < 2×spread 1.6p
+2026-03-06 14:51:41 - TradingBot - INFO - 🚫 USD/JPY R:R failed: entry=150.484, wick=150.488, ATR=0.00521428571428422
+2026-03-06 14:51:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:51:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:51:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:51:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 14:51:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:51:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:51:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:51:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:51:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:51:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:51:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:51:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:51:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:51:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:51:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:51:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:51:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:51:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:52:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:52:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:52:40
+2026-03-06 14:52:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:52:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:52:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 14:52:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:52:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:52:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:52:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:52:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:52:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (25%) | Regime: ranging
+2026-03-06 14:52:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:52:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:52:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:52:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:52:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:52:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:52:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:52:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:52:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:52:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (25%) | Regime: ranging
+2026-03-06 14:52:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:52:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:52:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:52:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00457 < 0.00500 (0.5p < 0.5p)
+2026-03-06 14:52:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:52:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:52:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:52:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:52:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:52:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:52:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:52:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:52:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:52:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:52:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:52:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:52:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:52:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:52:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:52:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:52:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:52:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:53:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:53:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:53:40
+2026-03-06 14:53:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:53:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:53:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 14:53:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:53:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:53:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:53:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:53:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:53:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:53:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:53:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:53:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:53:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00002 < 0.00004 (0.2p < 0.4p)
+2026-03-06 14:53:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:53:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:53:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:53:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:53:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:53:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:53:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:53:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:53:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:53:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00364 < 0.00500 (0.4p < 0.5p)
+2026-03-06 14:53:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:53:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:53:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:53:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:53:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:53:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:53:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:53:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:53:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:53:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:53:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:53:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:53:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:53:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:53:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:53:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:53:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:53:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:54:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:54:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:54:40
+2026-03-06 14:54:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:54:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:54:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 14:54:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:54:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:54:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:54:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:54:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:54:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:54:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:54:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:54:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:54:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:54:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:54:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:54:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:54:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:54:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:54:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (38%) | Regime: ranging
+2026-03-06 14:54:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:54:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:54:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:54:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00436 < 0.00500 (0.4p < 0.5p)
+2026-03-06 14:54:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:54:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:54:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:54:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:54:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:54:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:54:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:54:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:54:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:54:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:54:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:54:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:54:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:54:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:54:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:54:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:54:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:54:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:55:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:55:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:55:40
+2026-03-06 14:55:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:55:40 - TradingBot - INFO - 🔍 Scalping analysis (5m) at 14:55:40
+2026-03-06 14:55:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:55:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:55:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:55:40 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=23.18568518860581, swings=43, bias=BUY
+2026-03-06 14:55:40 - TradingBot - INFO - 📊 EUR/USD regime=trend_up, bias=BUY, ADX=23.2, swings=43
+2026-03-06 14:55:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:55:40 - TradingBot - INFO - ⏭️ EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00021)
+2026-03-06 14:55:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 14:55:41 - TradingBot - INFO - 
+EUR/USD [5m] Analysis:
+2026-03-06 14:55:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:55:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:55:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:55:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:55:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_up, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:55:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:55:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:55:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:55:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:55:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:55:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:55:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:55:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:55:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:55:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:55:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:55:41 - TradingBot - INFO - 📊 GBP/USD detect_regime: df_5m=250, ADX=24.95500879308032, swings=45, bias=SELL
+2026-03-06 14:55:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:55:41 - TradingBot - INFO - 📊 GBP/USD regime=trend_down, bias=SELL, ADX=25.0, swings=45
+2026-03-06 14:55:41 - TradingBot - INFO - 💧 GBP/USD Bearish sweep: high 1.26547 > swing_high 1.26555, close 1.26545 recovered, RSI=48.4
+2026-03-06 14:55:41 - TradingBot - INFO - ⚡ GBP/USD MSS: Bearish MSS: displaced below 1.26530, close=1.26521, body=67%, vol=1.07x, mode=aggressive [relaxed-range]
+2026-03-06 14:55:41 - TradingBot - INFO - 🎯 SWEEP+MSS SIGNAL: GBP/USD SELL | Entry=1.26521 | Wick=1.26547 (2.6p) | ATR=0.00007 | MSS@1.26530 | Vol=1.07x | Mode=aggressive
+2026-03-06 14:55:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:55:42 - TradingBot - INFO - 🔍 Confidence breakdown: Initial sweep=89.0%
+2026-03-06 14:55:42 - TradingBot - INFO - ✅ EMA200 aligned: SELL with trend (price 1.26517 vs EMA200 1.26529)
+2026-03-06 14:55:42 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:55:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:55:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:55:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:55:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:55:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:55:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:55:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:55:42 - TradingBot - INFO - 🔗 Cross-pair confirms ✅: GBP/USD confidence x1.013 (89.0% → 90.2%)
+2026-03-06 14:55:42 - TradingBot - INFO - ✅ LSTM confirms SELL (-14.270%) +0.08
+2026-03-06 14:55:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:55:42 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00450 < 0.00500 (0.5p < 0.5p)
+2026-03-06 14:55:42 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:55:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:55:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:55:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:55:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:55:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:55:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:55:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:55:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:55:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:55:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:55:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:55:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:55:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:55:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:55:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:55:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:55:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:55:42 - TradingBot - INFO - ✅ RL action: TRADE_FULL
+2026-03-06 14:55:42 - Signals - INFO - SIGNAL | Pair: GBP/USD | Type: SELL | Confidence: 98.16% | Models: 3/4 | Reason: SWEEP: SELL (89%) [trend_down, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging | Context: 3 models aligned
+2026-03-06 14:55:42 - TradingBot - INFO - 
+GBP/USD [5m] Analysis:
+2026-03-06 14:55:42 - TradingBot - INFO -   Signal: SELL
+2026-03-06 14:55:42 - TradingBot - INFO -   Confidence: 98.2%
+2026-03-06 14:55:42 - TradingBot - INFO -   Sweep: SELL (MSS=✓) | Context: 3 models aligned
+2026-03-06 14:55:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:55:42 - TradingBot - INFO -   Details: SWEEP: SELL (89%) [trend_down, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging | Context: 3 models aligned
+2026-03-06 14:55:42 - TradingBot - INFO -   🔑 Trade gate: confidence=98.16% vs threshold=45.00% | sweep=✓ | signal=SELL | drawdown_prot=OFF
+2026-03-06 14:55:42 - TradingBot - INFO -   ✅ Signal confirmed: GBP/USD SELL — 5m immediate
+2026-03-06 14:55:42 - TradingBot - INFO - 🚀 High confidence signal (98.2%) — bypassing RL agent
+2026-03-06 14:55:42 - TradingBot - ERROR - Error analyzing GBP/USD [5m]: 'TradingBot' object has no attribute 'scalping_analyzer'
+Traceback (most recent call last):
+  File "/workspaces/Ai-bot/src/bot.py", line 541, in _analyze_and_trade_inner
+    self._execute_trade(pair, signal_result, df, timeframe_key)
+  File "/workspaces/Ai-bot/src/bot.py", line 673, in _execute_trade
+    drift_tolerance_atr = getattr(self.scalping_analyzer, 'PRICE_DRIFT_TOLERANCE_ATR', 3.0)
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TradingBot' object has no attribute 'scalping_analyzer'
+2026-03-06 14:55:43 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:55:43 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=15.129773216185132, swings=53, bias=SELL
+2026-03-06 14:55:43 - TradingBot - INFO - 📊 USD/JPY regime=range, bias=SELL, ADX=15.1, swings=53
+2026-03-06 14:55:43 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.56400 BLOCKED: broke 5M LH 150.51100 [5M INVALIDATION]
+2026-03-06 14:55:43 - TradingBot - INFO - 
+USD/JPY [5m] Analysis:
+2026-03-06 14:55:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:55:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:55:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:55:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:55:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:55:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:55:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:55:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:55:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:55:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:55:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:55:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:55:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:55:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:55:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:55:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:55:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:56:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:56:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:56:40
+2026-03-06 14:56:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:56:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:56:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 14:56:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:56:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:56:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:56:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:56:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:56:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:56:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:56:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:56:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:56:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:56:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:56:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:56:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:56:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:56:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:56:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (21%) | Regime: ranging
+2026-03-06 14:56:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:56:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:56:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:56:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00493 < 0.00500 (0.5p < 0.5p)
+2026-03-06 14:56:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:56:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:56:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:56:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:56:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:56:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:56:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:56:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:56:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:56:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:56:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:56:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:56:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:56:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:56:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:56:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:56:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:56:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:57:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:57:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:57:40
+2026-03-06 14:57:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:57:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:57:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 14:57:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:57:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:57:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:57:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:57:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:57:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:57:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:57:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:57:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:57:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:57:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:57:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:57:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:57:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:57:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:57:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:57:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:57:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:57:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:57:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00357 < 0.00500 (0.4p < 0.5p)
+2026-03-06 14:57:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:57:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:57:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:57:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:57:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:57:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:57:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:57:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:57:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:57:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:57:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:57:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:57:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:57:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:57:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:57:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:57:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:57:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:58:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:58:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:58:40
+2026-03-06 14:58:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:58:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:58:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 14:58:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:58:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:58:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:58:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:58:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:58:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:58:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:58:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:58:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:58:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:58:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:58:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:58:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:58:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:58:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:58:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:58:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:58:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:58:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:58:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00479 < 0.00500 (0.5p < 0.5p)
+2026-03-06 14:58:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:58:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:58:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:58:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:58:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:58:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:58:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:58:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:58:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:58:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:58:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:58:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:58:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:58:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:58:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:58:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:58:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:58:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 14:59:40 - TradingBot - INFO - ============================================================
+2026-03-06 14:59:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 14:59:40
+2026-03-06 14:59:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 14:59:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 14:59:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 14:59:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 14:59:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:59:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:59:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:59:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:59:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:59:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:59:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 14:59:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 14:59:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 14:59:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 14:59:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:59:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:59:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:59:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:59:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:59:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:59:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 14:59:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 14:59:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00421 < 0.00500 (0.4p < 0.5p)
+2026-03-06 14:59:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 14:59:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 14:59:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 14:59:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 14:59:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 14:59:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 14:59:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 14:59:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 14:59:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 14:59:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 14:59:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 14:59:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 14:59:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 14:59:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 14:59:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 14:59:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 14:59:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 14:59:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:00:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:00:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:00:40
+2026-03-06 15:00:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:00:40 - TradingBot - INFO - 🔍 Scalping analysis (5m) at 15:00:40
+2026-03-06 15:00:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:00:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:00:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:00:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:00:40 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=57.84854201848085, swings=48, bias=BUY
+2026-03-06 15:00:40 - TradingBot - INFO - 📊 EUR/USD regime=trend_up, bias=BUY, ADX=57.8, swings=48
+2026-03-06 15:00:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:00:40 - TradingBot - INFO - ⏭️ EUR/USD NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00019)
+2026-03-06 15:00:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:00:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:00:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:00:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:00:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:00:41 - TradingBot - INFO - 
+EUR/USD [5m] Analysis:
+2026-03-06 15:00:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (30%) | Regime: ranging
+2026-03-06 15:00:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:00:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:00:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:00:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:00:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:00:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:00:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_up, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (40%) | Regime: ranging
+2026-03-06 15:00:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:00:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:00:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:00:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:00:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:00:41 - TradingBot - INFO - 📊 GBP/USD detect_regime: df_5m=250, ADX=18.74544102363308, swings=51, bias=SELL
+2026-03-06 15:00:41 - TradingBot - INFO - 📊 GBP/USD regime=trend_down, bias=SELL, ADX=18.7, swings=51
+2026-03-06 15:00:41 - TradingBot - INFO - 💧 GBP/USD Bearish sweep: high 1.26564 > swing_high 1.26572, close 1.26562 recovered, RSI=42.5
+2026-03-06 15:00:41 - TradingBot - INFO - ⚡ GBP/USD MSS: Bearish MSS: displaced toward 1.26555, close=1.26562, body=33%, vol=1.39x, mode=aggressive [relaxed-range]
+2026-03-06 15:00:41 - TradingBot - INFO - ⛔ Sweep wick too close: 0.2p < 2×spread 2.0p
+2026-03-06 15:00:41 - TradingBot - INFO - 🚫 GBP/USD R:R failed: entry=1.26562, wick=1.26564, ATR=7.214285714282223e-05
+2026-03-06 15:00:42 - TradingBot - INFO - 
+GBP/USD [5m] Analysis:
+2026-03-06 15:00:42 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:00:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:00:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:00:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:00:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✓] | EMA: HOLD (0%) | Tech: SELL (42%) | Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:00:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:00:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:00:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:00:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:00:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (23%) | Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:00:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:00:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:00:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:00:42 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00450 < 0.00500 (0.5p < 0.5p)
+2026-03-06 15:00:42 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=32.99010905209582, swings=58, bias=SELL
+2026-03-06 15:00:42 - TradingBot - INFO - 📊 USD/JPY regime=trend_down, bias=SELL, ADX=33.0, swings=58
+2026-03-06 15:00:42 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.55500 BLOCKED: broke 5M LH 150.51000 [5M INVALIDATION]
+2026-03-06 15:00:42 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:00:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:00:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:00:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:00:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (17%) | Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:00:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:00:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:00:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:00:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:00:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:00:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:00:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:00:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:00:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:00:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:00:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:00:42 - TradingBot - INFO - 
+USD/JPY [5m] Analysis:
+2026-03-06 15:00:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:00:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:00:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:00:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (20%) | Regime: ranging
+2026-03-06 15:00:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:00:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:00:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:00:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:00:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:00:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:00:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:00:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:00:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:00:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:00:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:00:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:01:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:01:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:01:40
+2026-03-06 15:01:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:01:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:01:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:01:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:01:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:01:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:01:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:01:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:01:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:01:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:01:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:01:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:01:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:01:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:01:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:01:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:01:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:01:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:01:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:01:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:01:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:01:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:01:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00450 < 0.00500 (0.5p < 0.5p)
+2026-03-06 15:01:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:01:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:01:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:01:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:01:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:01:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:01:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:01:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:01:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:01:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:01:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:01:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:01:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:01:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:01:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:01:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:01:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:01:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:02:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:02:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:02:40
+2026-03-06 15:02:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:02:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:02:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:02:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:02:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:02:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:02:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:02:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:02:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:02:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:02:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:02:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:02:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00004 < 0.00004 (0.4p < 0.4p)
+2026-03-06 15:02:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:02:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:02:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:02:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:02:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:02:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:02:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:02:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:02:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:02:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00364 < 0.00500 (0.4p < 0.5p)
+2026-03-06 15:02:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:02:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:02:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:02:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:02:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:02:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:02:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:02:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:02:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:02:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:02:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:02:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:02:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:02:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:02:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:02:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:02:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:02:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:03:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:03:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:03:40
+2026-03-06 15:03:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:03:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:03:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:03:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:03:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:03:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:03:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:03:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:03:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:03:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:03:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:03:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:03:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00002 < 0.00004 (0.2p < 0.4p)
+2026-03-06 15:03:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:03:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:03:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:03:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:03:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:03:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:03:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:03:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:03:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:03:41 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=19.39418167533085, swings=49, bias=SELL
+2026-03-06 15:03:41 - TradingBot - INFO - 📊 USD/JPY regime=trend_down, bias=SELL, ADX=19.4, swings=49
+2026-03-06 15:03:41 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.48800 BLOCKED: broke 5M LH 150.44700 [5M INVALIDATION]
+2026-03-06 15:03:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:03:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:03:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:03:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:03:41 - TradingBot - INFO -   Market Regime: volatile
+2026-03-06 15:03:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (37%) | Regime: volatile
+2026-03-06 15:03:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:03:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:03:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:03:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:03:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:03:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:03:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:03:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:03:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:03:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:03:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:03:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:04:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:04:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:04:40
+2026-03-06 15:04:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:04:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:04:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:04:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:04:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:04:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:04:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:04:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:04:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:04:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:04:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:04:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:04:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:04:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:04:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:04:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:04:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:04:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:04:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (26%) | Regime: ranging
+2026-03-06 15:04:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:04:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:04:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:04:41 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=23.647151504617522, swings=55, bias=BUY
+2026-03-06 15:04:41 - TradingBot - INFO - 📊 USD/JPY regime=range, bias=BUY, ADX=23.6, swings=55
+2026-03-06 15:04:41 - TradingBot - INFO - 💧 USD/JPY Bullish sweep: low 150.49000 < swing_low 150.48200, close 150.49300 recovered, RSI=47.1 (slope ↑)
+2026-03-06 15:04:41 - TradingBot - INFO - ⚡ USD/JPY MSS: Bullish MSS: displaced toward 150.49600, close=150.49300, body=67%, vol=1.40x, mode=aggressive [relaxed-range]
+2026-03-06 15:04:41 - TradingBot - INFO - ⛔ Sweep wick too close: 0.3p < 2×spread 1.6p
+2026-03-06 15:04:41 - TradingBot - INFO - 🚫 USD/JPY R:R failed: entry=150.493, wick=150.49, ATR=0.005285714285715163
+2026-03-06 15:04:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:04:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:04:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:04:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:04:41 - TradingBot - INFO -   Market Regime: volatile
+2026-03-06 15:04:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: volatile
+2026-03-06 15:04:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:04:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:04:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:04:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:04:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:04:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:04:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:04:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:04:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:04:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:04:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:04:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:05:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:05:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:05:40
+2026-03-06 15:05:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:05:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:05:40 - TradingBot - INFO - 🔍 Scalping analysis (5m) at 15:05:40
+2026-03-06 15:05:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:05:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:05:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:05:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:05:40 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=38.18505542795001, swings=49, bias=BUY
+2026-03-06 15:05:40 - TradingBot - INFO - 📊 EUR/USD regime=range, bias=BUY, ADX=38.2, swings=49
+2026-03-06 15:05:40 - TradingBot - INFO - 💧 EUR/USD Bullish sweep: low 1.08547 < swing_low 1.08548, close 1.08552 recovered, RSI=59.6 (slope ↑)
+2026-03-06 15:05:40 - TradingBot - INFO - ⚠️ EUR/USD sweep detected, soft MSS → entry at 1.08555 (Sweep-only entry (no displacement): No MSS displacement through 1.08541 after sweep (checked 4 candles, sweep_idx=-4))
+2026-03-06 15:05:40 - TradingBot - INFO - ⛔ Sweep wick too close: 0.8p < 2×spread 1.2p
+2026-03-06 15:05:40 - TradingBot - INFO - 🚫 EUR/USD R:R failed: entry=1.08555, wick=1.08547, ATR=6.071428571431868e-05
+2026-03-06 15:05:41 - TradingBot - INFO - 
+EUR/USD [5m] Analysis:
+2026-03-06 15:05:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:05:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:05:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:05:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:05:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:05:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:05:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:05:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:05:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:05:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:05:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:05:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:05:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (34%) | Regime: ranging
+2026-03-06 15:05:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:05:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:05:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:05:41 - TradingBot - INFO - 📊 GBP/USD detect_regime: df_5m=250, ADX=23.632787751151877, swings=56, bias=SELL
+2026-03-06 15:05:41 - TradingBot - INFO - 📊 GBP/USD regime=range, bias=SELL, ADX=23.6, swings=56
+2026-03-06 15:05:41 - TradingBot - INFO - 💧 GBP/USD Bearish sweep: high 1.26512 > swing_high 1.26520, close 1.26508 recovered, RSI=51.5
+2026-03-06 15:05:41 - TradingBot - INFO - ⚡ GBP/USD MSS: Bearish MSS: displaced toward 1.26498, close=1.26508, body=25%, vol=2.22x, mode=aggressive [relaxed-range]
+2026-03-06 15:05:41 - TradingBot - INFO - ⛔ Sweep wick too close: 0.4p < 2×spread 2.0p
+2026-03-06 15:05:41 - TradingBot - INFO - 🚫 GBP/USD R:R failed: entry=1.26508, wick=1.26512, ATR=6.0714285714286955e-05
+2026-03-06 15:05:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:05:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:05:42 - TradingBot - INFO - 
+GBP/USD [5m] Analysis:
+2026-03-06 15:05:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:05:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:05:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:05:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:05:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:05:42 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:05:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:05:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:05:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:05:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:05:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:05:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:05:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:05:42 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=24.48791989490992, swings=47, bias=SELL
+2026-03-06 15:05:42 - TradingBot - INFO - 📊 USD/JPY regime=trend_down, bias=SELL, ADX=24.5, swings=47
+2026-03-06 15:05:42 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00464 < 0.00500 (0.5p < 0.5p)
+2026-03-06 15:05:42 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.61900 BLOCKED: broke 5M LH 150.61600 [5M INVALIDATION]
+2026-03-06 15:05:42 - TradingBot - INFO - 
+USD/JPY [5m] Analysis:
+2026-03-06 15:05:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:05:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:05:42 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:05:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:05:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:05:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:05:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:05:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:05:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:05:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:05:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:05:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:05:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:05:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:05:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:05:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:05:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:05:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:05:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:05:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:05:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:05:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:05:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:05:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:05:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:05:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:05:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:05:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:05:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:05:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:05:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:05:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:06:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:06:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:06:40
+2026-03-06 15:06:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:06:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:06:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:06:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:06:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:06:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:06:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:06:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:06:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (40%) | Regime: ranging
+2026-03-06 15:06:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:06:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:06:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:06:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:06:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:06:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:06:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:06:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:06:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:06:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (40%) | Regime: ranging
+2026-03-06 15:06:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:06:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:06:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:06:41 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=28.036494203613895, swings=51, bias=BUY
+2026-03-06 15:06:41 - TradingBot - INFO - 📊 USD/JPY regime=trend_up, bias=BUY, ADX=28.0, swings=51
+2026-03-06 15:06:41 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 90 candidates, nearest_gap=0.00000)
+2026-03-06 15:06:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:06:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:06:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:06:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:06:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:06:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_up, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:06:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:06:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:06:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:06:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:06:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:06:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:06:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:06:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:06:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:06:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:06:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:06:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:07:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:07:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:07:40
+2026-03-06 15:07:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:07:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:07:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:07:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:07:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:07:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:07:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:07:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:07:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:07:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:07:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:07:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:07:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:07:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:07:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:07:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:07:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:07:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:07:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:07:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:07:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:07:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:07:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00436 < 0.00500 (0.4p < 0.5p)
+2026-03-06 15:07:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:07:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:07:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:07:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:07:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:07:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:07:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:07:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:07:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:07:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:07:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:07:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:07:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:07:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:07:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:07:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:07:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:07:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:08:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:08:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:08:40
+2026-03-06 15:08:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:08:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:08:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:08:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:08:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:08:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:08:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:08:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:08:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:08:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:08:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:08:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:08:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:08:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:08:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:08:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:08:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:08:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:08:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:08:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:08:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:08:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:08:41 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=43.48487739314878, swings=51, bias=BUY
+2026-03-06 15:08:41 - TradingBot - INFO - 📊 USD/JPY regime=trend_up, bias=BUY, ADX=43.5, swings=51
+2026-03-06 15:08:41 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.53100 BLOCKED: broke 5M HL 150.57000 [5M INVALIDATION]
+2026-03-06 15:08:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:08:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:08:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:08:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:08:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:08:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_up, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (21%) | Regime: ranging
+2026-03-06 15:08:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:08:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:08:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:08:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:08:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:08:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:08:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:08:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:08:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:08:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:08:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:08:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:09:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:09:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:09:40
+2026-03-06 15:09:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:09:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:09:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:09:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:09:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:09:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:09:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:09:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:09:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:09:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:09:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:09:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:09:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00002 < 0.00004 (0.2p < 0.4p)
+2026-03-06 15:09:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:09:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:09:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:09:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:09:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:09:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:09:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:09:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:09:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:09:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00393 < 0.00500 (0.4p < 0.5p)
+2026-03-06 15:09:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:09:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:09:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:09:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:09:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:09:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (46%) | Regime: ranging
+2026-03-06 15:09:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:09:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:09:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:09:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:09:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:09:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:09:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:09:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:09:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:09:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:09:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:09:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:10:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:10:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:10:40
+2026-03-06 15:10:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:10:40 - TradingBot - INFO - 🔍 Scalping analysis (5m) at 15:10:40
+2026-03-06 15:10:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:10:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:10:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:10:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:10:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:10:40 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=31.25787663683769, swings=51, bias=SELL
+2026-03-06 15:10:40 - TradingBot - INFO - 📊 EUR/USD regime=trend_down, bias=SELL, ADX=31.3, swings=51
+2026-03-06 15:10:40 - TradingBot - INFO - 💧 EUR/USD Bearish sweep: high 1.08541 > swing_high 1.08546, close 1.08540 recovered, RSI=56.4
+2026-03-06 15:10:40 - TradingBot - INFO - ⚡ EUR/USD MSS: Bearish MSS: displaced toward 1.08526, close=1.08530, body=67%, vol=3.11x, mode=aggressive [relaxed-range]
+2026-03-06 15:10:40 - TradingBot - INFO - ⛔ Sweep wick too close: 1.1p < 2×spread 1.2p
+2026-03-06 15:10:40 - TradingBot - INFO - 🚫 EUR/USD R:R failed: entry=1.0853, wick=1.08541, ATR=5.357142857139888e-05
+2026-03-06 15:10:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:10:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:10:41 - TradingBot - INFO - 
+EUR/USD [5m] Analysis:
+2026-03-06 15:10:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:10:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:10:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:10:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:10:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:10:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:10:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:10:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✓] | EMA: HOLD (0%) | Tech: SELL (34%) | Regime: ranging
+2026-03-06 15:10:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:10:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:10:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:10:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:10:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:10:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:10:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:10:41 - TradingBot - INFO - 📊 GBP/USD detect_regime: df_5m=250, ADX=21.875570126713516, swings=43, bias=BUY
+2026-03-06 15:10:41 - TradingBot - INFO - 📊 GBP/USD regime=range, bias=BUY, ADX=21.9, swings=43
+2026-03-06 15:10:41 - TradingBot - INFO - 💧 GBP/USD Bullish sweep: low 1.26467 < swing_low 1.26466, close 1.26468 recovered, RSI=31.2 (slope ↑)
+2026-03-06 15:10:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:10:41 - TradingBot - INFO - ⚠️ GBP/USD sweep detected, soft MSS → entry at 1.26473 (Sweep-only entry (no displacement): No MSS displacement through 1.26513 after sweep (checked 4 candles, sweep_idx=-4))
+2026-03-06 15:10:41 - TradingBot - INFO - ⛔ Sweep wick too close: 0.6p < 2×spread 2.0p
+2026-03-06 15:10:41 - TradingBot - INFO - 🚫 GBP/USD R:R failed: entry=1.26473, wick=1.26467, ATR=7.285714285716021e-05
+2026-03-06 15:10:42 - TradingBot - INFO - 
+GBP/USD [5m] Analysis:
+2026-03-06 15:10:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:10:42 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:10:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:10:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:10:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:10:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:10:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:10:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:10:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:10:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:10:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:10:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:10:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:10:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:10:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:10:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:10:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:10:42 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=55.67949936903467, swings=44, bias=SELL
+2026-03-06 15:10:42 - TradingBot - INFO - 📊 USD/JPY regime=trend_down, bias=SELL, ADX=55.7, swings=44
+2026-03-06 15:10:42 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.58100 BLOCKED: broke 5M LH 150.54000 [5M INVALIDATION]
+2026-03-06 15:10:42 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00350 < 0.00500 (0.3p < 0.5p)
+2026-03-06 15:10:42 - TradingBot - WARNING - NewsAPI rate-limited (429). Pausing sentiment calls until 15:30:42
+2026-03-06 15:10:42 - TradingBot - WARNING - NewsAPI rate-limited (429). Pausing sentiment calls until 15:30:42
+2026-03-06 15:10:43 - TradingBot - INFO - 
+USD/JPY [5m] Analysis:
+2026-03-06 15:10:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:10:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:10:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:10:43 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:10:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:10:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:10:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:10:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:10:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:10:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:10:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:10:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:10:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:10:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:10:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:10:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:10:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:10:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:10:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:10:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:10:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:10:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:10:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:10:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:10:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:10:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:10:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:10:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:10:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:10:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:10:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:10:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:10:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:10:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:10:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:11:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:11:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:11:40
+2026-03-06 15:11:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:11:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:11:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:11:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:11:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:11:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:11:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:11:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:11:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:11:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:11:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:11:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:11:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:11:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:11:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:11:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:11:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:11:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:11:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:11:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:11:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:11:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:11:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00464 < 0.00500 (0.5p < 0.5p)
+2026-03-06 15:11:42 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:11:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:11:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:11:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:11:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:11:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (42%) | Regime: ranging
+2026-03-06 15:11:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:11:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:11:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:11:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:11:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:11:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:11:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:11:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:11:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:11:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:11:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:11:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:12:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:12:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:12:40
+2026-03-06 15:12:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:12:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:12:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:12:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:12:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:12:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:12:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:12:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:12:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:12:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:12:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:12:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:12:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:12:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:12:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:12:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:12:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:12:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:12:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:12:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:12:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:12:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:12:41 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=29.249646351905223, swings=42, bias=BUY
+2026-03-06 15:12:41 - TradingBot - INFO - 📊 USD/JPY regime=trend_up, bias=BUY, ADX=29.2, swings=42
+2026-03-06 15:12:41 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.53700 BLOCKED: broke 5M HL 150.59300 [5M INVALIDATION]
+2026-03-06 15:12:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:12:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:12:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:12:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:12:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:12:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_up, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (21%) | Regime: ranging
+2026-03-06 15:12:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:12:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:12:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:12:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:12:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:12:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:12:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:12:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:12:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:12:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:12:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:12:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:13:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:13:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:13:40
+2026-03-06 15:13:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:13:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:13:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:13:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:13:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:13:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:13:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:13:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:13:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:13:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:13:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:13:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:13:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:13:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:13:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:13:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:13:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:13:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:13:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:13:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:13:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:13:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:13:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00414 < 0.00500 (0.4p < 0.5p)
+2026-03-06 15:13:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:13:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:13:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:13:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:13:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:13:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:13:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:13:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:13:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:13:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:13:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:13:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:13:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:13:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:13:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:13:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:13:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:13:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:14:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:14:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:14:40
+2026-03-06 15:14:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:14:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:14:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:14:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:14:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:14:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:14:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:14:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:14:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:14:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:14:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:14:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:14:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:14:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:14:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:14:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:14:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:14:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:14:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:14:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:14:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:14:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:14:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00457 < 0.00500 (0.5p < 0.5p)
+2026-03-06 15:14:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:14:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:14:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:14:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:14:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:14:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: SELL (20%) | Regime: ranging
+2026-03-06 15:14:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:14:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:14:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:14:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:14:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:14:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:14:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:14:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:14:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:14:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:14:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:14:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:15:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:15:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:15:40
+2026-03-06 15:15:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:15:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:15:40 - TradingBot - INFO - 🔍 Scalping analysis (5m) at 15:15:40
+2026-03-06 15:15:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:15:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:15:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:15:40 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=15.99166947882805, swings=50, bias=SELL
+2026-03-06 15:15:40 - TradingBot - INFO - 📊 EUR/USD regime=range, bias=SELL, ADX=16.0, swings=50
+2026-03-06 15:15:40 - TradingBot - INFO - 💧 EUR/USD Bearish sweep: high 1.08546 > swing_high 1.08551, close 1.08545 recovered, RSI=45.5
+2026-03-06 15:15:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:15:40 - TradingBot - INFO - ⚡ EUR/USD MSS: Bearish MSS: displaced toward 1.08538, close=1.08545, body=50%, vol=1.49x, mode=aggressive [relaxed-range]
+2026-03-06 15:15:40 - TradingBot - INFO - ⛔ Sweep wick too close: 0.1p < 2×spread 1.2p
+2026-03-06 15:15:40 - TradingBot - INFO - 🚫 EUR/USD R:R failed: entry=1.08545, wick=1.08546, ATR=5.428571428575272e-05
+2026-03-06 15:15:41 - TradingBot - INFO - 
+EUR/USD [5m] Analysis:
+2026-03-06 15:15:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:15:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:15:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:15:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:15:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:15:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:15:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:15:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:15:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:15:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:15:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:15:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:15:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:15:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:15:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:15:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:15:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:15:41 - TradingBot - INFO - 📊 GBP/USD detect_regime: df_5m=250, ADX=13.954650770520043, swings=56, bias=SELL
+2026-03-06 15:15:41 - TradingBot - INFO - 📊 GBP/USD regime=trend_down, bias=SELL, ADX=14.0, swings=56
+2026-03-06 15:15:41 - TradingBot - INFO - 💧 GBP/USD Bearish sweep: high 1.26500 > swing_high 1.26506, close 1.26496 recovered, RSI=57.7
+2026-03-06 15:15:41 - TradingBot - INFO - ⚡ GBP/USD MSS: Bearish MSS: displaced below 1.26486, close=1.26482, body=14%, vol=1.70x, mode=aggressive [relaxed-range]
+2026-03-06 15:15:41 - TradingBot - INFO - ⛔ Sweep wick too close: 1.8p < 2×spread 2.0p
+2026-03-06 15:15:41 - TradingBot - INFO - 🚫 GBP/USD R:R failed: entry=1.26482, wick=1.265, ATR=5.214285714288154e-05
+2026-03-06 15:15:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00002 < 0.00004 (0.2p < 0.4p)
+2026-03-06 15:15:42 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:15:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:15:42 - TradingBot - INFO - 
+GBP/USD [5m] Analysis:
+2026-03-06 15:15:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:15:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:15:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:15:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:15:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:15:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:15:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:15:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:15:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [trend_down, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:15:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:15:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:15:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:15:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:15:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:15:42 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=7.276683390018568, swings=51, bias=BUY
+2026-03-06 15:15:42 - TradingBot - INFO - 📊 USD/JPY regime=range, bias=BUY, ADX=7.3, swings=51
+2026-03-06 15:15:42 - TradingBot - INFO - 💧 USD/JPY Bullish sweep: low 150.49800 < swing_low 150.50300, close 150.50400 recovered, RSI=57.4 (slope ↑)
+2026-03-06 15:15:42 - TradingBot - INFO - ⚡ USD/JPY MSS: Bullish MSS (sweep-recovery): close=150.50400, body=29% [relaxed-range, sweep=displacement]
+2026-03-06 15:15:42 - TradingBot - INFO - ⛔ Sweep wick too close: 0.6p < 2×spread 1.6p
+2026-03-06 15:15:42 - TradingBot - INFO - 🚫 USD/JPY R:R failed: entry=150.504, wick=150.498, ATR=0.011428571428569154
+2026-03-06 15:15:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:15:42 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00450 < 0.00500 (0.4p < 0.5p)
+2026-03-06 15:15:43 - TradingBot - INFO - 
+USD/JPY [5m] Analysis:
+2026-03-06 15:15:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:15:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:15:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:15:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:15:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:15:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:15:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:15:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:15:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:15:43 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:15:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:15:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:15:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:15:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:15:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:15:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:15:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:15:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:15:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:15:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:15:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:15:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:15:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:15:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:15:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:15:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:15:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:15:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:15:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:15:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:15:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:15:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:15:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:15:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:15:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:16:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:16:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:16:40
+2026-03-06 15:16:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:16:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:16:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:16:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:16:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:16:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:16:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:16:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:16:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:16:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:16:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:16:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:16:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:16:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:16:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:16:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:16:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:16:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:16:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:16:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:16:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:16:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:16:42 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00400 < 0.00500 (0.4p < 0.5p)
+2026-03-06 15:16:42 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:16:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:16:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:16:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:16:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:16:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:16:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:16:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:16:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:16:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:16:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:16:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:16:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:16:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:16:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:16:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:16:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:16:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:17:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:17:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:17:40
+2026-03-06 15:17:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:17:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:17:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00002 < 0.00003 (0.2p < 0.3p)
+2026-03-06 15:17:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:17:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:17:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:17:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:17:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:17:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:17:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:17:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:17:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:17:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:17:42 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:17:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:17:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:17:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:17:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:17:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:17:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:17:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:17:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:17:42 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00293 < 0.00500 (0.3p < 0.5p)
+2026-03-06 15:17:42 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:17:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:17:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:17:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:17:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:17:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:17:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:17:42 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:17:42 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:17:42 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:17:42 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:17:42 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:17:42 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:17:42 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:17:42 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:17:42 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:17:42 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:17:42 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:18:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:18:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:18:40
+2026-03-06 15:18:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:18:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:18:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:18:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:18:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:18:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:18:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:18:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:18:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: BUY (30%) | Regime: ranging
+2026-03-06 15:18:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:18:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:18:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:18:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:18:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:18:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:18:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:18:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:18:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:18:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:18:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:18:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:18:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:18:41 - TradingBot - INFO - 🚫 Sweep skip USD/JPY: ATR too low: 0.00407 < 0.00500 (0.4p < 0.5p)
+2026-03-06 15:18:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:18:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:18:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:18:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:18:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:18:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:18:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:18:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:18:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:18:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:18:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:18:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:18:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:18:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:18:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:18:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:18:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:18:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:19:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:19:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:19:40
+2026-03-06 15:19:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:19:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:19:40 - TradingBot - INFO - 🚫 Sweep skip EUR/USD: ATR too low: 0.00003 < 0.00003 (0.3p < 0.3p)
+2026-03-06 15:19:40 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:19:40 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:19:40 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:19:40 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:19:40 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:19:40 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:19:40 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:19:40 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:19:40 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:19:40 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:19:41 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:19:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:19:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:19:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:19:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:19:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:19:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:19:41 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:19:41 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:19:41 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=17.30751860987098, swings=49, bias=BUY
+2026-03-06 15:19:41 - TradingBot - INFO - 📊 USD/JPY regime=range, bias=BUY, ADX=17.3, swings=49
+2026-03-06 15:19:41 - TradingBot - INFO - 💧 USD/JPY Bullish sweep: low 150.49300 < swing_low 150.49300, close 150.49600 recovered, RSI=47.4 (slope ↑)
+2026-03-06 15:19:41 - TradingBot - INFO - ⚡ USD/JPY MSS: Bullish MSS: displaced toward 150.50200, close=150.49800, body=33%, vol=1.07x, mode=aggressive [relaxed-range]
+2026-03-06 15:19:41 - TradingBot - INFO - ⛔ Sweep wick too close: 0.5p < 2×spread 1.6p
+2026-03-06 15:19:41 - TradingBot - INFO - 🚫 USD/JPY R:R failed: entry=150.498, wick=150.493, ATR=0.005714285714284577
+2026-03-06 15:19:41 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:19:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:19:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:19:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:19:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:19:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: BUY (26%) | Regime: ranging
+2026-03-06 15:19:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:19:41 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:19:41 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:19:41 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:19:41 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:19:41 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:19:41 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:19:41 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:19:41 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:19:41 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:19:41 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:19:41 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:20:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:20:40 - TradingBot - INFO - ============================================================
+2026-03-06 15:20:40 - TradingBot - INFO - 🔍 Scalping analysis (5m) at 15:20:40
+2026-03-06 15:20:40 - TradingBot - INFO - 🔍 Scalping analysis (1m) at 15:20:40
+2026-03-06 15:20:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:20:40 - TradingBot - INFO - 🎛️ Trade slots: 3 available (0/3 used)
+2026-03-06 15:20:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:20:40 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=18.530851280290843, swings=49, bias=SELL
+2026-03-06 15:20:40 - TradingBot - INFO - 📊 EUR/USD regime=range, bias=SELL, ADX=18.5, swings=49
+2026-03-06 15:20:40 - TradingBot - INFO - 💧 EUR/USD Bearish sweep: high 1.08507 > swing_high 1.08512, close 1.08507 recovered, RSI=55.0
+2026-03-06 15:20:40 - TradingBot - INFO - ⚡ EUR/USD MSS: Bearish MSS: displaced toward 1.08499, close=1.08500, body=100%, vol=2.30x, mode=aggressive [relaxed-range]
+2026-03-06 15:20:40 - TradingBot - INFO - ⛔ Sweep wick too close: 0.7p < 2×spread 1.2p
+2026-03-06 15:20:40 - TradingBot - INFO - 🚫 EUR/USD R:R failed: entry=1.085, wick=1.08507, ATR=3.071428571429661e-05
+2026-03-06 15:20:40 - TradingBot - INFO - 📊 EUR/USD 5M fetch OK: 250 rows
+2026-03-06 15:20:40 - TradingBot - INFO - 📊 EUR/USD detect_regime: df_5m=250, ADX=18.530851280290843, swings=49, bias=SELL
+2026-03-06 15:20:40 - TradingBot - INFO - 📊 EUR/USD regime=range, bias=SELL, ADX=18.5, swings=49
+2026-03-06 15:20:40 - TradingBot - INFO - 💧 EUR/USD Bearish sweep: high 1.08505 > swing_high 1.08513, close 1.08505 recovered, RSI=58.0
+2026-03-06 15:20:40 - TradingBot - INFO - ⚡ EUR/USD MSS: Bearish MSS: displaced toward 1.08490, close=1.08505, body=50%, vol=1.15x, mode=aggressive [relaxed-range]
+2026-03-06 15:20:40 - TradingBot - INFO - 🚫 EUR/USD R:R failed: entry=1.08505, wick=1.08505, ATR=6.2857142857174e-05
+2026-03-06 15:20:41 - TradingBot - INFO - 
+EUR/USD [5m] Analysis:
+2026-03-06 15:20:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:20:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:20:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:20:41 - TradingBot - INFO - 
+EUR/USD [1m] Analysis:
+2026-03-06 15:20:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:20:41 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:20:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:20:41 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:20:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:20:41 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:20:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:20:41 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:20:41 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:20:41 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:20:41 - TradingBot - INFO -   ❌ EUR/USD: sweep gate did not fire — no trade
+2026-03-06 15:20:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:20:41 - TradingBot - INFO - 📊 GBP/USD 5M fetch OK: 250 rows
+2026-03-06 15:20:41 - TradingBot - INFO - 📊 GBP/USD detect_regime: df_5m=250, ADX=33.268768868647406, swings=44, bias=SELL
+2026-03-06 15:20:41 - TradingBot - INFO - 📊 GBP/USD regime=range, bias=SELL, ADX=33.3, swings=44
+2026-03-06 15:20:41 - TradingBot - INFO - 🚫 Sweep skip GBP/USD: ATR too low: 0.00003 < 0.00004 (0.3p < 0.4p)
+2026-03-06 15:20:41 - TradingBot - INFO - 💧 GBP/USD Bearish sweep: high 1.26538 > swing_high 1.26537, close 1.26533 recovered, RSI=64.5
+2026-03-06 15:20:41 - TradingBot - INFO - ⚡ GBP/USD MSS: Bearish MSS: displaced toward 1.26515, close=1.26525, body=50%, vol=4.12x, mode=aggressive [relaxed-range]
+2026-03-06 15:20:41 - TradingBot - INFO - ⛔ Sweep wick too close: 1.3p < 2×spread 2.0p
+2026-03-06 15:20:41 - TradingBot - INFO - 🚫 GBP/USD R:R failed: entry=1.26525, wick=1.26538, ATR=7.285714285714435e-05
+2026-03-06 15:20:42 - TradingBot - INFO - 
+GBP/USD [5m] Analysis:
+2026-03-06 15:20:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:20:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:20:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✓) | Context: 0 models aligned
+2026-03-06 15:20:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:20:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✓] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:20:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:20:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:20:42 - TradingBot - INFO - 
+GBP/USD [1m] Analysis:
+2026-03-06 15:20:42 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:20:42 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:20:42 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:20:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:20:42 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:20:42 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [unknown, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:20:42 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:20:42 - TradingBot - INFO -   ❌ GBP/USD: sweep gate did not fire — no trade
+2026-03-06 15:20:42 - TradingBot - INFO - 📊 USD/JPY 5M fetch OK: 250 rows
+2026-03-06 15:20:42 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=33.997470236587205, swings=47, bias=SELL
+2026-03-06 15:20:42 - TradingBot - INFO - 📊 USD/JPY regime=range, bias=SELL, ADX=34.0, swings=47
+2026-03-06 15:20:42 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.46700 BLOCKED: broke 5M LH 150.44400 [5M INVALIDATION]
+2026-03-06 15:20:42 - TradingBot - INFO - 📊 USD/JPY detect_regime: df_5m=250, ADX=33.997470236587205, swings=47, bias=SELL
+2026-03-06 15:20:42 - TradingBot - INFO - 📊 USD/JPY regime=range, bias=SELL, ADX=34.0, swings=47
+2026-03-06 15:20:42 - TradingBot - INFO - ⏭️ USD/JPY NO SWEEP: Sweep at 150.45400 BLOCKED: broke 5M LH 150.44400 [5M INVALIDATION]
+2026-03-06 15:20:43 - TradingBot - INFO - 
+USD/JPY [5m] Analysis:
+2026-03-06 15:20:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:20:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:20:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:20:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:20:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:20:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:20:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:20:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:20:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:20:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:20:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:20:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:20:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:20:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:20:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:20:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:20:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)
+2026-03-06 15:20:43 - TradingBot - INFO - 
+USD/JPY [1m] Analysis:
+2026-03-06 15:20:43 - TradingBot - INFO -   Signal: SKIP
+2026-03-06 15:20:43 - TradingBot - INFO -   Confidence: 0.0%
+2026-03-06 15:20:43 - TradingBot - INFO -   Sweep: SKIP (MSS=✗) | Context: 0 models aligned
+2026-03-06 15:20:43 - TradingBot - INFO -   Market Regime: ranging
+2026-03-06 15:20:43 - TradingBot - INFO -   Details: SWEEP: SKIP (0%) [range, MSS=✗] | EMA: HOLD (0%) | Tech: HOLD (0%) | Regime: ranging
+2026-03-06 15:20:43 - TradingBot - INFO -   🔑 Trade gate: confidence=0.00% vs threshold=45.00% | sweep=✗ | signal=SKIP | drawdown_prot=OFF
+2026-03-06 15:20:43 - TradingBot - INFO -   ❌ USD/JPY: sweep gate did not fire — no trade
+2026-03-06 15:20:43 - TradingBot - INFO - 
+📊 Daily Status:
+2026-03-06 15:20:43 - TradingBot - INFO -   Balance: $50.00
+2026-03-06 15:20:43 - TradingBot - INFO -   Tier: Micro ($0-$200)
+2026-03-06 15:20:43 - TradingBot - INFO -   Max Lot: 0.01 | Max Trades: 3
+2026-03-06 15:20:43 - TradingBot - INFO -   Growth: 0.0% | Next tier: Mini ($200-$1K) ($150 away)
+2026-03-06 15:20:43 - TradingBot - INFO -   Daily Loss: $0.00 (0.0%)
+2026-03-06 15:20:43 - TradingBot - INFO -   Open Trades: 0
+2026-03-06 15:20:43 - TradingBot - INFO -   Slots Available: 3 / 3
+2026-03-06 15:20:43 - TradingBot - INFO -   Can Trade: True
+2026-03-06 15:20:43 - TradingBot - INFO -   🧠 ML Scorer: collecting data (0/200 trades)

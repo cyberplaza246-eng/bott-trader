@@ -669,12 +669,14 @@ class TradingBot:
         elif scalping_rr:
             signal_entry = scalping_rr.get('entry_price')
 
-        if signal_entry and abs(entry_price - signal_entry) > atr * 2.5:
+        # Use configurable drift tolerance from scalping analyzer (default 3.0×ATR)
+        drift_tolerance_atr = getattr(self.scalping_analyzer, 'PRICE_DRIFT_TOLERANCE_ATR', 3.0)
+        if signal_entry and abs(entry_price - signal_entry) > atr * drift_tolerance_atr:
             pip_mult = 100 if 'JPY' in pair else 10000
             drift_pips = abs(entry_price - signal_entry) * pip_mult
             bot_logger.warning(
                 f"❌ {pair} price drifted {drift_pips:.1f}p from signal entry "
-                f"({signal_entry:.5f} → {entry_price:.5f}) — trade SKIPPED"
+                f"({signal_entry:.5f} → {entry_price:.5f}) — trade SKIPPED (tolerance: {drift_tolerance_atr}×ATR)"
             )
             return
 

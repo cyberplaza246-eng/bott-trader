@@ -30,6 +30,8 @@ Market Conditions Filter:
 """
 import pandas as pd
 import numpy as np
+import json
+import os
 from datetime import datetime, timezone
 from src.utils.logger import bot_logger
 
@@ -81,6 +83,9 @@ class ScalpingAnalyzer:
     MIN_SL_SPREAD_MULT = 2     # Reject if SL < spread x 2 (realistic for scalping)
     MAX_SL_MEDIAN_MULT = 2.5   # Reject if SL > 2.5x rolling median SL
     STRUCTURE_LOOKBACK = 20    # Bars to look back for swing highs/lows
+    PRICE_DRIFT_TOLERANCE_ATR = 3.0  # Max price drift from signal entry (in ATR units)
+    SL_MULTIPLIER_BY_PAIR = {}       # Per-pair SL multipliers (loaded from risk_overrides.json)
+    AUTO_LEARNING = {}               # Auto-learning config (loaded from risk_overrides.json)
 
     # -- Session windows (UTC) ---------------------------------------
     LONDON_OPEN = {'start': 7, 'end': 12}
@@ -94,6 +99,7 @@ class ScalpingAnalyzer:
     VOLUME_SPIKE_THRESHOLD = 1.05  # Volume must be > 1.05x average (was 1.2 — too strict for forex tick vol)
     MICRO_STRUCTURE_LOOKBACK = 5  # Candles for structure break
     ENTRY_THRESHOLD = 0.45     # Lowered to 0.45 (partial credit removed, honest scoring)
+    RISK_OVERRIDES_PATH = 'data/risk_overrides.json'
 
     def __init__(self, profit_mode='quick_wins', timeframe='5m'):
         """Initialize ATR-centric scalping analyzer.
@@ -113,10 +119,99 @@ class ScalpingAnalyzer:
         self.ema_periods = {'short': 20, 'medium': 50, 'long': 200}
         self.adx_period = 14       # ADX for trend strength
 
+        # Allow safe runtime tuning from file without code edits.
+        self._load_risk_overrides()
+
         mode_label = "QUICK_WINS" if profit_mode == 'quick_wins' else "NORMAL"
         bot_logger.info(
             f"🔪 Scalping Analyzer initialized (ATR-adaptive, {timeframe}) [{mode_label} mode]"
         )
+
+    def _load_risk_overrides(self):
+        """Load optional TP/SL overrides from JSON file.
+
+        Expected schema (all keys optional):
+            {
+              "sl_atr_mult": 1.4,
+              "sl_min_atr_mult": 1.0,
+              "sl_max_atr_mult": 2.0,
+              "sl_multiplier_by_pair": {"EUR/USD": 1.3, "GBP/USD": 1.4, "USD/JPY": 1.5},
+              "tp_base_ratio": 1.2,
+              "tp_expanding": 1.4,
+              "tp_contracting": 1.1,
+              "tp_asian_session": 1.1,
+              "tp_london_open": 1.3,
+              "tp_ny_overlap": 1.35,
+              "tp_quiet_hours": 1.05,
+              "entry_confidence_threshold": 0.50,
+              "price_drift_tolerance_atr": 3.0,
+              "auto_learning": {
+                "enabled": true,
+                "sl_hit_rate_threshold": 0.60,
+                "tp_hit_rate_threshold": 0.70,
+                "adjustment_interval_trades": 30
+              }
+            }
+        """
+        path = self.RISK_OVERRIDES_PATH
+        if not os.path.exists(path):
+            return
+
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                payload = json.load(f)
+
+            key_map = {
+                'sl_atr_mult': ('SL_ATR_MULT', 0.6, 2.5),
+                'sl_min_atr_mult': ('SL_MIN_ATR_MULT', 0.5, 2.0),
+                'sl_max_atr_mult': ('SL_MAX_ATR_MULT', 1.0, 3.0),
+                'tp_base_ratio': ('TP_BASE_RATIO', 0.8, 3.0),
+                'tp_expanding': ('TP_EXPANDING', 0.8, 3.5),
+                'tp_contracting': ('TP_CONTRACTING', 0.8, 2.5),
+                'tp_asian_session': ('TP_ASIAN_SESSION', 0.8, 3.0),
+                'tp_london_open': ('TP_LONDON_OPEN', 0.8, 3.5),
+                'tp_ny_overlap': ('TP_NY_OVERLAP', 0.8, 3.5),
+                'tp_quiet_hours': ('TP_QUIET_HOURS', 0.8, 2.5),
+                'entry_threshold': ('ENTRY_THRESHOLD', 0.2, 0.9),
+                'entry_confidence_threshold': ('ENTRY_THRESHOLD', 0.2, 0.9),
+                'price_drift_tolerance_atr': ('PRICE_DRIFT_TOLERANCE_ATR', 1.5, 5.0),
+            }
+
+            applied = []
+            for key, (attr, floor, ceil) in key_map.items():
+                if key not in payload:
+                    continue
+                try:
+                    raw_value = float(payload[key])
+                except (TypeError, ValueError):
+                    continue
+
+                value = max(floor, min(ceil, raw_value))
+                setattr(self, attr, value)
+                applied.append(f"{attr}={value:.3f}")
+
+            # Load pair-specific SL multipliers
+            if 'sl_multiplier_by_pair' in payload and isinstance(payload['sl_multiplier_by_pair'], dict):
+                self.SL_MULTIPLIER_BY_PAIR = {}
+                for pair, mult in payload['sl_multiplier_by_pair'].items():
+                    try:
+                        self.SL_MULTIPLIER_BY_PAIR[pair] = max(0.5, min(2.5, float(mult)))
+                        applied.append(f"SL_{pair}={mult:.2f}")
+                    except (TypeError, ValueError):
+                        pass
+
+            # Load auto-learning config
+            if 'auto_learning' in payload and isinstance(payload['auto_learning'], dict):
+                self.AUTO_LEARNING = payload['auto_learning']
+                if self.AUTO_LEARNING.get('enabled'):
+                    applied.append("AUTO_LEARNING=ON")
+
+            if applied:
+                bot_logger.info(
+                    f"🛠️ Applied risk overrides from {path}: " + ", ".join(applied)
+                )
+        except Exception as e:
+            bot_logger.warning(f"Could not load risk overrides from {path}: {e}")
 
     # =================================================================
     #  INDICATOR CALCULATION
@@ -969,18 +1064,22 @@ class ScalpingAnalyzer:
             actual_spread = self._get_effective_spread(pair, spread, config)
             min_sl_by_spread = actual_spread * self.MIN_SL_SPREAD_MULT
             
+            # Get pair-specific SL multiplier if available
+            pair_sl_mult = self.SL_MULTIPLIER_BY_PAIR.get(pair, 1.0)
+            base_atr_mult = self.SL_ATR_MULT * pair_sl_mult
+            
             # JPY-specific: More generous ATR multiplier due to wider spreads
             if 'JPY' in pair:
-                atr_multiplier = max(self.SL_ATR_MULT, 1.2)  # Min 1.2×ATR for JPY
+                atr_multiplier = max(base_atr_mult, 1.2)  # Min 1.2×ATR for JPY
                 safety_buffer = 1.2  # 20% extra safety for JPY
             else:
-                atr_multiplier = self.SL_ATR_MULT
+                atr_multiplier = base_atr_mult
                 safety_buffer = 1.1  # 10% extra safety for majors
             
             # Ensure ATR SL meets minimum spread requirement
             atr_sl_distance = max(atr * atr_multiplier, min_sl_by_spread * safety_buffer)
             sl_distance = atr_sl_distance
-            sl_reason = f"ATR fallback ({atr_sl_distance/pip_size:.1f}p, ≥{min_sl_by_spread/pip_size:.1f}p spread req)"
+            sl_reason = f"ATR fallback ({atr_sl_distance/pip_size:.1f}p, {atr_multiplier:.2f}xATR, pair_mult={pair_sl_mult:.2f})"
             bot_logger.info(f"📍 ATR SL: {sl_reason}")
 
         # Reject: SL < spread x 2 (hybrid spread approach)

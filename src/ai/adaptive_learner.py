@@ -111,6 +111,11 @@ class AdaptiveLearner:
         # 5. ATR regime state (expanding / contracting / neutral)
         self.atr_regime = 'neutral'
 
+        # 6. Exit type tracking for auto-learning (SL_HIT, TP_HIT, TIME_EXIT, MANUAL)
+        self.exit_type_tracking = defaultdict(lambda: {'sl_hit': 0, 'tp_hit': 0, 'time_exit': 0, 'manual': 0, 'total': 0})
+        self.auto_learning_trade_count = 0  # Trades since last auto-learning update
+        self.RISK_OVERRIDES_PATH = 'data/risk_overrides.json'
+
         self.decay_factor = 0.95
 
         self._load()
@@ -196,9 +201,13 @@ class AdaptiveLearner:
         signal = trade_result.get('signal', 'UNKNOWN')
         model_signals = trade_result.get('model_signals', {})
         regime = trade_result.get('regime', self.current_regime)
+        exit_type = trade_result.get('exit_type', 'UNKNOWN')  # SL_HIT, TP_HIT, TIME_EXIT, MANUAL
 
         hour = datetime.utcnow().hour
         session = self._get_session(hour)
+
+        # Track exit type for auto-learning
+        self._track_exit_type(pair, exit_type)
 
         # Core stats — breakeven trades are neutral (don't count as win or loss)
         if is_win:
@@ -339,6 +348,10 @@ class AdaptiveLearner:
         # Adapt
         self._adapt_weights()
         self._adapt_confidence_threshold()
+        
+        # Auto-learn and persist risk parameters 
+        self._auto_learn_risk_params()
+        
         self._save()
 
         bot_logger.info(
@@ -618,6 +631,124 @@ class AdaptiveLearner:
         pair = self._normalize_pair(pair)
         return list(self.recent_sl_values.get(pair, []))
 
+    # ------------------------------------------------------------------
+    # Exit Type Tracking & Auto-Learning
+    # ------------------------------------------------------------------
+    def _track_exit_type(self, pair: str, exit_type: str):
+        """Track exit type (SL_HIT, TP_HIT, TIME_EXIT, MANUAL) per pair."""
+        pair = self._normalize_pair(pair)
+        exit_type = exit_type.upper() if exit_type else 'UNKNOWN'
+        
+        self.exit_type_tracking[pair]['total'] += 1
+        
+        if 'STOP' in exit_type or 'SL' in exit_type:
+            self.exit_type_tracking[pair]['sl_hit'] += 1
+        elif 'TAKE' in exit_type or 'TP' in exit_type or 'PROFIT' in exit_type:
+            self.exit_type_tracking[pair]['tp_hit'] += 1
+        elif 'TIME' in exit_type:
+            self.exit_type_tracking[pair]['time_exit'] += 1
+        else:
+            self.exit_type_tracking[pair]['manual'] += 1
+        
+        self.auto_learning_trade_count += 1
+
+    def _auto_learn_risk_params(self):
+        """Auto-adjust risk parameters based on exit type patterns.
+        
+        Triggered every N trades (configurable in risk_overrides.json).
+        - If SL hit rate > 60%: widen SL multiplier
+        - If TP hit rate > 70%: consider widening TP for more profit
+        """
+        import json
+        import os
+        
+        # Load auto-learning config from risk_overrides
+        try:
+            if os.path.exists(self.RISK_OVERRIDES_PATH):
+                with open(self.RISK_OVERRIDES_PATH, 'r') as f:
+                    config = json.load(f)
+            else:
+                config = {}
+        except Exception:
+            config = {}
+        
+        auto_learn = config.get('auto_learning', {})
+        if not auto_learn.get('enabled', False):
+            return
+        
+        interval = auto_learn.get('adjustment_interval_trades', 30)
+        sl_threshold = auto_learn.get('sl_hit_rate_threshold', 0.60)
+        tp_threshold = auto_learn.get('tp_hit_rate_threshold', 0.70)
+        max_sl_adj = auto_learn.get('max_sl_adjustment', 0.3)
+        max_tp_adj = auto_learn.get('max_tp_adjustment', 0.3)
+        
+        if self.auto_learning_trade_count < interval:
+            return
+        
+        # Reset counter
+        self.auto_learning_trade_count = 0
+        
+        changes_made = []
+        
+        # Analyze each pair's exit type distribution
+        for pair, stats in self.exit_type_tracking.items():
+            total = stats.get('total', 0)
+            if total < 10:
+                continue
+            
+            sl_hits = stats.get('sl_hit', 0)
+            tp_hits = stats.get('tp_hit', 0)
+            
+            sl_rate = sl_hits / total
+            tp_rate = tp_hits / total
+            
+            # Get current pair multiplier
+            pair_mult = config.get('sl_multiplier_by_pair', {}).get(pair, 1.0)
+            
+            # SL hit rate too high -> widen SL
+            if sl_rate > sl_threshold:
+                new_mult = min(pair_mult + 0.1, pair_mult + max_sl_adj, 2.0)
+                if 'sl_multiplier_by_pair' not in config:
+                    config['sl_multiplier_by_pair'] = {}
+                config['sl_multiplier_by_pair'][pair] = round(new_mult, 2)
+                changes_made.append(f"SL_{pair}={new_mult:.2f} (SL hit rate {sl_rate:.0%})")
+                bot_logger.warning(
+                    f"📐 AUTO-LEARN: {pair} SL hit rate {sl_rate:.0%} > {sl_threshold:.0%} — "
+                    f"widening SL multiplier to {new_mult:.2f}×ATR"
+                )
+            
+            # TP hit rate very high -> consider widening TP for more profit
+            if tp_rate > tp_threshold:
+                current_tp_ratio = config.get('tp_base_ratio', 1.2)
+                new_tp_ratio = min(current_tp_ratio + 0.05, current_tp_ratio + max_tp_adj, 2.0)
+                config['tp_base_ratio'] = round(new_tp_ratio, 2)
+                changes_made.append(f"TP_BASE={new_tp_ratio:.2f} (TP hit rate {tp_rate:.0%})")
+                bot_logger.info(
+                    f"📐 AUTO-LEARN: {pair} TP hit rate {tp_rate:.0%} > {tp_threshold:.0%} — "
+                    f"widening TP ratio to {new_tp_ratio:.2f}"
+                )
+        
+        # Persist changes if any
+        if changes_made:
+            config['updated_at_utc'] = datetime.utcnow().isoformat()
+            config['auto_learning_adjustments'] = changes_made
+            
+            try:
+                with open(self.RISK_OVERRIDES_PATH, 'w') as f:
+                    json.dump(config, f, indent=2)
+                bot_logger.info(
+                    f"💾 AUTO-LEARN: Saved {len(changes_made)} adjustments to {self.RISK_OVERRIDES_PATH}"
+                )
+            except Exception as e:
+                bot_logger.error(f"Failed to save auto-learning adjustments: {e}")
+
+    def get_exit_type_stats(self, pair: str = None) -> dict:
+        """Get exit type statistics for analysis."""
+        if pair:
+            pair = self._normalize_pair(pair)
+            return dict(self.exit_type_tracking.get(pair, {}))
+        return {k: dict(v) for k, v in self.exit_type_tracking.items()}
+
     def record_time_exit(self, candles_held: int, is_win: bool, pnl: float):
         """Record how long a trade was held vs outcome for time-exit tuning.
 
@@ -886,6 +1017,9 @@ class AdaptiveLearner:
             'time_exit_candles': self.time_exit_candles,
             'time_exit_outcomes': self.time_exit_outcomes[-100:],
             'atr_regime': self.atr_regime,
+            # Exit type tracking for auto-learning
+            'exit_type_tracking': {k: dict(v) for k, v in self.exit_type_tracking.items()},
+            'auto_learning_trade_count': self.auto_learning_trade_count,
             'last_updated': datetime.now().isoformat(),
         }
         with open(LEARNING_DB_PATH, 'w') as f:
@@ -987,6 +1121,11 @@ class AdaptiveLearner:
             self.time_exit_candles = data.get('time_exit_candles', 8)
             self.time_exit_outcomes = data.get('time_exit_outcomes', [])
             self.atr_regime = data.get('atr_regime', 'neutral')
+            
+            # Exit type tracking for auto-learning
+            for k, v in data.get('exit_type_tracking', {}).items():
+                self.exit_type_tracking[k] = v
+            self.auto_learning_trade_count = data.get('auto_learning_trade_count', 0)
 
             self._normalize_pair_stats()
             for t in self.trade_history:

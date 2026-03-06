@@ -1,0 +1,13 @@
+scope,key,trades,wins,losses,win_rate,net_pnl
+by_pair,EUR/USD,192,0,192,0.0,-960.0
+by_session,asian,42,0,42,0.0,-210.0
+by_session,new_york,24,0,24,0.0,-120.0
+by_session,ny_overlap,102,0,102,0.0,-510.0
+by_session,off_hours,24,0,24,0.0,-120.0
+by_hour,0,42,0,42,0.0,-210.0
+by_hour,15,78,0,78,0.0,-390.0
+by_hour,16,24,0,24,0.0,-120.0
+by_hour,17,6,0,6,0.0,-30.0
+by_hour,20,18,0,18,0.0,-90.0
+by_hour,23,24,0,24,0.0,-120.0
+by_regime,trending,192,0,192,0.0,-960.0
