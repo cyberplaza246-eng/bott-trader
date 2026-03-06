@@ -519,42 +519,95 @@ class MT5Connector:
                 )
                 return None
             
+            bot_logger.info(f"📝 Order filled: {pair} {order_type} | Order ticket: {result.order} | Deal: {result.deal}")
+            
             # Get the position ticket (may differ from order ticket)
             # Wait for position to register, then look it up
             import time
             position_ticket = None
+            position_obj = None
             
-            # Retry position lookup a few times
-            for attempt in range(5):
-                time.sleep(0.3)  # Wait 300ms between attempts
+            # Retry position lookup - wait for MT5 to register the position
+            for attempt in range(8):  # More attempts
+                time.sleep(0.4)  # Wait 400ms between attempts
                 positions = mt5.positions_get(symbol=symbol)
+                bot_logger.debug(f"Position lookup attempt {attempt+1}: found {len(positions) if positions else 0} positions for {symbol}")
                 if positions:
                     # Find most recent position with our magic number
                     bot_positions = [p for p in positions if p.magic == 234000]
                     if bot_positions:
                         # Get the newest one (highest ticket)
-                        position_ticket = max(p.ticket for p in bot_positions)
+                        position_obj = max(bot_positions, key=lambda p: p.ticket)
+                        position_ticket = position_obj.ticket
+                        bot_logger.info(f"✓ Found position ticket: {position_ticket}")
                         break
             
-            # Fallback to order ticket if position lookup fails
+            # Fallback to deal ticket from result if position lookup fails
             if not position_ticket:
-                position_ticket = result.order
-                bot_logger.warning(f"Could not find position, using order ticket: {position_ticket}")
+                # Try result.deal first (deal ticket often works for SLTP)
+                position_ticket = result.deal if result.deal else result.order
+                bot_logger.warning(f"⚠️ Position lookup failed, using ticket: {position_ticket}")
             
-            # Modify position to add SL/TP with retry (required for brokers that reject in initial order)
+            # Modify position to add SL/TP with aggressive retry
             if stop_loss or take_profit:
                 modify_success = False
-                for retry in range(3):
-                    time.sleep(0.5)  # Wait before each modify attempt
-                    modify_result = self.modify_position(position_ticket, sl=stop_loss, tp=take_profit)
-                    if modify_result:
-                        bot_logger.info(f"✅ SL/TP set on position {position_ticket}")
+                bot_logger.info(f"🔧 Setting SL={stop_loss:.5f}, TP={take_profit:.5f} on ticket {position_ticket}")
+                
+                for retry in range(5):  # More retry attempts
+                    time.sleep(0.6 + retry * 0.2)  # Increasing delay: 0.6s, 0.8s, 1.0s, 1.2s, 1.4s
+                    
+                    # Build SLTP request directly (bypass modify_position for more control)
+                    sltp_request = {
+                        "action": mt5.TRADE_ACTION_SLTP,
+                        "position": position_ticket,
+                        "symbol": symbol,
+                        "sl": stop_loss if stop_loss else 0.0,
+                        "tp": take_profit if take_profit else 0.0,
+                    }
+                    
+                    modify_result = mt5.order_send(sltp_request)
+                    
+                    if modify_result and modify_result.retcode == mt5.TRADE_RETCODE_DONE:
+                        bot_logger.info(f"✅ SL/TP modification successful on attempt {retry+1}")
                         modify_success = True
                         break
-                    bot_logger.warning(f"⚠️ SL/TP modify attempt {retry+1}/3 failed for {position_ticket}")
+                    else:
+                        retcode = modify_result.retcode if modify_result else "None"
+                        comment = modify_result.comment if modify_result else "No result"
+                        bot_logger.warning(f"⚠️ SL/TP attempt {retry+1}/5 failed: {comment} (code={retcode})")
+                
+                # VERIFY SL/TP were actually set
+                if modify_success:
+                    time.sleep(0.3)
+                    verify_positions = mt5.positions_get(ticket=position_ticket)
+                    if verify_positions:
+                        vp = verify_positions[0]
+                        if vp.sl == 0.0 or vp.tp == 0.0:
+                            bot_logger.error(f"❌ VERIFICATION FAILED: Position {position_ticket} has SL={vp.sl}, TP={vp.tp}")
+                            modify_success = False
+                        else:
+                            bot_logger.info(f"✓ Verified: SL={vp.sl:.5f}, TP={vp.tp:.5f}")
                 
                 if not modify_success:
-                    error_logger.error(f"❌ CRITICAL: Failed to set SL/TP on position {position_ticket} after 3 attempts!")
+                    error_logger.error(f"❌ CRITICAL: Failed to set SL/TP on position {position_ticket}!")
+                    # Close the position to prevent unprotected trade
+                    bot_logger.warning(f"🚨 Closing unprotected position {position_ticket} for safety")
+                    close_request = {
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": symbol,
+                        "volume": lot_size,
+                        "type": mt5.ORDER_TYPE_SELL if order_type == 'BUY' else mt5.ORDER_TYPE_BUY,
+                        "position": position_ticket,
+                        "deviation": 50,
+                        "magic": 234000,
+                        "comment": "Safety close - no SL/TP",
+                    }
+                    close_result = mt5.order_send(close_request)
+                    if close_result and close_result.retcode == mt5.TRADE_RETCODE_DONE:
+                        bot_logger.info(f"✓ Unprotected position closed")
+                    else:
+                        error_logger.error(f"❌ FAILED to close unprotected position! Manual intervention needed!")
+                    return None  # Don't return ticket if we closed it
             
             trades_logger.info(
                 f"ORDER_PLACED | Pair: {pair} | Type: {order_type} | "
