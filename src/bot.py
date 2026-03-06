@@ -771,20 +771,32 @@ class TradingBot:
 
         # HARD BROKER CHECK: Get actual open positions from MT5 before placing order
         # This prevents drift/race conditions from causing over-trading
+        # FAIL-CLOSED: If we can't verify position count, BLOCK the trade
         if self.mode == 'live' and self.broker:
             try:
-                current_bot_positions = self.broker.get_bot_positions() or []
-                actual_count = len(current_bot_positions)
+                # Get ALL positions (not just bot positions) to ensure we never exceed limit
+                all_positions = self.broker.get_open_positions()
+                
+                if all_positions is None:
+                    # MT5 query failed - BLOCK trade for safety
+                    bot_logger.error(f"🚫 SAFETY BLOCK: Could not verify position count — blocking {pair} trade")
+                    return
+                
+                actual_count = len(all_positions)
                 max_trades = self.risk_manager.get_tier_info()['max_concurrent_trades']
+                
+                bot_logger.info(f"📊 Position check: {actual_count}/{max_trades} positions open")
                 
                 if actual_count >= max_trades:
                     bot_logger.warning(
-                        f"🚫 HARD LIMIT: {actual_count}/{max_trades} bot positions open — "
+                        f"🚫 HARD LIMIT: {actual_count}/{max_trades} positions open — "
                         f"blocking new trade for {pair}"
                     )
                     return
             except Exception as e:
-                bot_logger.warning(f"Position count check failed: {e}")
+                # Exception during check - BLOCK trade for safety
+                bot_logger.error(f"🚫 SAFETY BLOCK: Position check error ({e}) — blocking {pair} trade")
+                return
 
         # Execute based on mode
         if self.mode == 'live' and AUTOTRADING_ENABLED:
