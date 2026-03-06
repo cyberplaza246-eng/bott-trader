@@ -453,6 +453,31 @@ class MT5Connector:
     
     def place_order(self, pair, order_type, lot_size, entry_price, stop_loss, take_profit):
         """Place a trading order"""
+        
+        # ══════════════════════════════════════════════════════════════════
+        # HARD LIMIT CHECK - CANNOT BE BYPASSED
+        # Max 3 positions until account reaches $200
+        # ══════════════════════════════════════════════════════════════════
+        MAX_POSITIONS = 3
+        
+        if not self.simulation_mode and MT5_AVAILABLE and mt5:
+            try:
+                all_positions = mt5.positions_get()
+                current_count = len(all_positions) if all_positions else 0
+                
+                if current_count >= MAX_POSITIONS:
+                    error_logger.error(
+                        f"🚫 HARD LIMIT BLOCK: {current_count}/{MAX_POSITIONS} positions open. "
+                        f"REFUSING to place {pair} {order_type}. Close positions first!"
+                    )
+                    return None
+                
+                bot_logger.info(f"✓ Position check passed: {current_count}/{MAX_POSITIONS}")
+            except Exception as e:
+                error_logger.error(f"🚫 SAFETY BLOCK: Could not verify positions ({e}). Trade blocked.")
+                return None
+        # ══════════════════════════════════════════════════════════════════
+        
         if self.relay_mode:
             r = self._relay_post("/order", {
                 "pair": pair,
@@ -617,23 +642,70 @@ class MT5Connector:
                 if not modify_success:
                     error_logger.error(f"❌ CRITICAL: Failed to set SL/TP on position {position_ticket}!")
                     # Close the position to prevent unprotected trade
-                    bot_logger.warning(f"🚨 Closing unprotected position {position_ticket} for safety")
-                    close_request = {
-                        "action": mt5.TRADE_ACTION_DEAL,
-                        "symbol": symbol,
-                        "volume": lot_size,
-                        "type": mt5.ORDER_TYPE_SELL if order_type == 'BUY' else mt5.ORDER_TYPE_BUY,
-                        "position": position_ticket,
-                        "deviation": 50,
-                        "magic": 234000,
-                        "comment": "Safety close - no SL/TP",
-                    }
-                    close_result = mt5.order_send(close_request)
-                    if close_result and close_result.retcode == mt5.TRADE_RETCODE_DONE:
-                        bot_logger.info(f"✓ Unprotected position closed")
-                    else:
-                        error_logger.error(f"❌ FAILED to close unprotected position! Manual intervention needed!")
-                    return None  # Don't return ticket if we closed it
+                    bot_logger.warning(f"🚨 CLOSING UNPROTECTED POSITION {position_ticket} FOR SAFETY")
+                    
+                    # Try to close with multiple methods
+                    close_success = False
+                    
+                    # Method 1: Close by position ticket 
+                    for close_attempt in range(3):
+                        time.sleep(0.5)
+                        
+                        # Re-fetch current position info
+                        pos_info = mt5.positions_get(symbol=symbol)
+                        if not pos_info:
+                            bot_logger.info(f"✓ Position already closed (no positions for {symbol})")
+                            close_success = True
+                            break
+                        
+                        # Find the position to close
+                        target_pos = None
+                        for p in pos_info:
+                            if p.ticket == position_ticket or p.magic == 234000:
+                                target_pos = p
+                                break
+                        
+                        if not target_pos:
+                            bot_logger.info(f"✓ Position {position_ticket} not found - may be closed")
+                            close_success = True 
+                            break
+                        
+                        # Get current price for closing
+                        tick = mt5.symbol_info_tick(symbol)
+                        if not tick:
+                            continue
+                        
+                        close_price = tick.bid if target_pos.type == 0 else tick.ask  # 0=BUY, close at bid
+                        close_type = mt5.ORDER_TYPE_SELL if target_pos.type == 0 else mt5.ORDER_TYPE_BUY
+                        
+                        close_request = {
+                            "action": mt5.TRADE_ACTION_DEAL,
+                            "symbol": symbol,
+                            "volume": target_pos.volume,
+                            "type": close_type,
+                            "position": target_pos.ticket,
+                            "price": close_price,
+                            "deviation": 50,
+                            "magic": 234000,
+                            "comment": "Safety close - no SL/TP",
+                            "type_time": mt5.ORDER_TIME_GTC,
+                            "type_filling": mt5.ORDER_FILLING_IOC,
+                        }
+                        
+                        close_result = mt5.order_send(close_request)
+                        if close_result and close_result.retcode == mt5.TRADE_RETCODE_DONE:
+                            bot_logger.info(f"✅ Unprotected position {target_pos.ticket} closed successfully")
+                            close_success = True
+                            break
+                        else:
+                            retcode = close_result.retcode if close_result else "None"
+                            comment = close_result.comment if close_result else "No result"
+                            bot_logger.warning(f"⚠️ Close attempt {close_attempt+1}/3 failed: {comment} (code={retcode})")
+                    
+                    if not close_success:
+                        error_logger.error(f"❌❌❌ FAILED TO CLOSE UNPROTECTED POSITION! MANUAL INTERVENTION NEEDED! ❌❌❌")
+                    
+                    return None  # Don't return ticket - trade was closed or failed
             
             trades_logger.info(
                 f"ORDER_PLACED | Pair: {pair} | Type: {order_type} | "
