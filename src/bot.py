@@ -129,10 +129,113 @@ class TradingBot:
         # Backfill past closed trades from MT5 history into adaptive learner
         self._backfill_history()
         
+        # STARTUP SAFETY: Check and close excess positions
+        self._enforce_max_positions_on_startup()
+        
         bot_logger.info(
             f"✅ Scalping Bot initialized in {self.mode.upper()} mode "
             f"({model_count}-model ensemble, 1M+5M dual-timeframe)"
         )
+
+    # ── Startup Position Enforcement ──────────────────────────────
+
+    MAX_ALLOWED_POSITIONS = 3  # ABSOLUTE MAXIMUM - never more than this
+    
+    def _enforce_max_positions_on_startup(self):
+        """Close excess positions on startup to enforce max limit."""
+        if self.mode != 'live' or not self.broker:
+            return
+        try:
+            import MetaTrader5 as mt5
+            positions = mt5.positions_get()
+            if not positions:
+                bot_logger.info(f"✅ Startup check: 0 positions open")
+                return
+            
+            count = len(positions)
+            bot_logger.info(f"🔍 Startup check: {count} positions open (max {self.MAX_ALLOWED_POSITIONS})")
+            
+            if count > self.MAX_ALLOWED_POSITIONS:
+                excess = count - self.MAX_ALLOWED_POSITIONS
+                bot_logger.warning(f"🚨 CLOSING {excess} EXCESS POSITIONS!")
+                
+                # Sort by profit (close worst ones first)
+                sorted_pos = sorted(positions, key=lambda p: p.profit)
+                
+                for i in range(excess):
+                    pos = sorted_pos[i]
+                    tick = mt5.symbol_info_tick(pos.symbol)
+                    if not tick:
+                        continue
+                    close_price = tick.bid if pos.type == 0 else tick.ask
+                    close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
+                    
+                    close_req = {
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": pos.symbol,
+                        "volume": pos.volume,
+                        "type": close_type,
+                        "position": pos.ticket,
+                        "price": close_price,
+                        "deviation": 50,
+                        "magic": 234000,
+                        "comment": "Excess position cleanup",
+                        "type_time": mt5.ORDER_TIME_GTC,
+                        "type_filling": mt5.ORDER_FILLING_IOC,
+                    }
+                    result = mt5.order_send(close_req)
+                    if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                        bot_logger.info(f"✅ Closed excess position {pos.ticket} ({pos.symbol} P/L: {pos.profit:.2f})")
+                    else:
+                        bot_logger.error(f"❌ Failed to close {pos.ticket}")
+                
+                # Verify
+                import time
+                time.sleep(1)
+                remaining = mt5.positions_get()
+                bot_logger.info(f"✅ After cleanup: {len(remaining) if remaining else 0} positions")
+        except Exception as e:
+            bot_logger.error(f"Startup position check failed: {e}")
+
+    def _enforce_max_positions(self):
+        """Periodic check to close excess positions. Called each cycle."""
+        if self.mode != 'live' or not self.broker:
+            return
+        try:
+            import MetaTrader5 as mt5
+            positions = mt5.positions_get()
+            if not positions:
+                return
+            count = len(positions)
+            if count > self.MAX_ALLOWED_POSITIONS:
+                bot_logger.error(f"🚨 ENFORCEMENT: {count} positions detected! Max is {self.MAX_ALLOWED_POSITIONS}. Closing excess.")
+                sorted_pos = sorted(positions, key=lambda p: p.profit)
+                excess = count - self.MAX_ALLOWED_POSITIONS
+                for i in range(excess):
+                    pos = sorted_pos[i]
+                    tick = mt5.symbol_info_tick(pos.symbol)
+                    if not tick:
+                        continue
+                    close_price = tick.bid if pos.type == 0 else tick.ask
+                    close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
+                    close_req = {
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": pos.symbol,
+                        "volume": pos.volume,
+                        "type": close_type,
+                        "position": pos.ticket,
+                        "price": close_price,
+                        "deviation": 50,
+                        "magic": 234000,
+                        "comment": "Max position enforcement",
+                        "type_time": mt5.ORDER_TIME_GTC,
+                        "type_filling": mt5.ORDER_FILLING_IOC,
+                    }
+                    result = mt5.order_send(close_req)
+                    if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                        bot_logger.info(f"✅ Enforced close: {pos.ticket} ({pos.symbol})")
+        except Exception as e:
+            bot_logger.warning(f"Position enforcement check failed: {e}")
 
     # ── Session Filter ────────────────────────────────────────────
 
@@ -261,6 +364,10 @@ class TradingBot:
         if not self.broker:
             bot_logger.error("Broker not initialized, skipping analysis")
             return
+        
+        # ENFORCE MAX POSITIONS every cycle
+        self._enforce_max_positions()
+        
         # Use recovery-aware check instead of hard self.broker.connected
         # This lets the bot resume after transient relay outages
         if not self.broker.connected:
