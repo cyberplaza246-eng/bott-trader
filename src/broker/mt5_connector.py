@@ -791,10 +791,14 @@ class MT5Connector:
         self.connected = False
         bot_logger.info("MT5 connection closed")
 
-    def get_trade_history(self, hours=24):
+    def get_trade_history(self, hours=24, include_all=False):
         """
         Get recently closed deals from MT5.
         Returns list of dicts with position_id, pair, profit, etc.
+        
+        Args:
+            hours: How far back to look
+            include_all: If True, include ALL deals (not just bot's magic number)
         """
         # ── Relay mode ──
         # ── Relay mode ──
@@ -826,8 +830,8 @@ class MT5Connector:
             for d in deals:
                 if d.entry != 1:
                     continue
-                # Only include trades placed by this bot (magic number filter)
-                if d.magic != self.BOT_MAGIC:
+                # Only include trades placed by this bot unless include_all is True
+                if not include_all and d.magic != self.BOT_MAGIC:
                     continue
                 closed.append({
                     "ticket": d.ticket,
@@ -841,6 +845,7 @@ class MT5Connector:
                     "commission": d.commission,
                     "swap": d.swap,
                     "time": datetime.fromtimestamp(d.time).isoformat(),
+                    "magic": d.magic,  # Include magic for debugging
                 })
             return closed
         except Exception as e:

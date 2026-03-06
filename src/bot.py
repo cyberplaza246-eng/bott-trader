@@ -1321,6 +1321,7 @@ class TradingBot:
 
             # Query deal history to get P/L for closed trades
             history = self.broker.get_trade_history(hours=24)
+            bot_logger.info(f"🔍 Deal history returned {len(history) if history else 0} deals")
 
             for ticket in closed_tickets:
                 info = self._known_tickets.pop(ticket, {})
@@ -1328,12 +1329,15 @@ class TradingBot:
                 trade_type = info.get('type', 'UNKNOWN')
                 entry_price = info.get('entry_price', 0)
 
+                bot_logger.info(f"🔍 Looking for closed ticket {ticket} ({pair} {trade_type})")
+                
                 # Find matching deal in history (match by position_id = ticket)
                 deal = None
                 for d in history:
                     pos_id = d.get('position_id', d.get('ticket', 0))
                     if pos_id == ticket:
                         deal = d
+                        bot_logger.info(f"✅ Found deal for ticket {ticket}: profit={d.get('profit')}")
                         break
 
                 if deal:
@@ -1342,10 +1346,29 @@ class TradingBot:
                     is_win = profit > 0
                     exit_type = 'TAKE_PROFIT' if is_win else 'STOP_LOSS'
                 else:
-                    # No deal found — estimate from last known state
-                    profit = 0
-                    exit_price = 0
-                    exit_type = 'UNKNOWN'
+                    # No deal found - maybe timing issue, try individual lookup
+                    bot_logger.warning(f"⚠️ Deal for ticket {ticket} not in history - trying fresh query (include_all=True)")
+                    import time
+                    time.sleep(1.0)  # Wait a bit for MT5 to update
+                    fresh_history = self.broker.get_trade_history(hours=1, include_all=True)
+                    for d in (fresh_history or []):
+                        pos_id = d.get('position_id', d.get('ticket', 0))
+                        if pos_id == ticket:
+                            deal = d
+                            bot_logger.info(f"✅ Found deal on retry (magic={d.get('magic')})")
+                            break
+                    
+                    if deal:
+                        profit = deal.get('profit', 0) + deal.get('swap', 0) + deal.get('commission', 0)
+                        exit_price = deal.get('price', 0)
+                        is_win = profit > 0
+                        exit_type = 'TAKE_PROFIT' if is_win else 'STOP_LOSS'
+                        bot_logger.info(f"✅ Found deal on retry: profit=${profit:.2f}")
+                    else:
+                        # Still no deal - skip recording to avoid bad data
+                        bot_logger.error(f"❌ Could not find deal for closed ticket {ticket} - NOT recording with 0 P/L")
+                        self.risk_manager.open_trades = max(0, self.risk_manager.open_trades - 1)
+                        continue  # Skip this trade, don't record with bad data
 
                 bot_logger.info(
                     f"📊 Closed trade detected: {pair} {trade_type} | "
