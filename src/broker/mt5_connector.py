@@ -520,32 +520,41 @@ class MT5Connector:
                 return None
             
             # Get the position ticket (may differ from order ticket)
-            # Wait briefly for position to register, then look it up
+            # Wait for position to register, then look it up
             import time
-            time.sleep(0.5)
-            
-            # Find the position we just opened by symbol and magic
-            positions = mt5.positions_get(symbol=symbol)
             position_ticket = None
-            if positions:
-                # Find most recent position with our magic number
-                bot_positions = [p for p in positions if p.magic == 234000]
-                if bot_positions:
-                    # Get the newest one (highest ticket)
-                    position_ticket = max(p.ticket for p in bot_positions)
+            
+            # Retry position lookup a few times
+            for attempt in range(5):
+                time.sleep(0.3)  # Wait 300ms between attempts
+                positions = mt5.positions_get(symbol=symbol)
+                if positions:
+                    # Find most recent position with our magic number
+                    bot_positions = [p for p in positions if p.magic == 234000]
+                    if bot_positions:
+                        # Get the newest one (highest ticket)
+                        position_ticket = max(p.ticket for p in bot_positions)
+                        break
             
             # Fallback to order ticket if position lookup fails
             if not position_ticket:
                 position_ticket = result.order
                 bot_logger.warning(f"Could not find position, using order ticket: {position_ticket}")
             
-            # Modify position to add SL/TP (required for brokers that reject in initial order)
+            # Modify position to add SL/TP with retry (required for brokers that reject in initial order)
             if stop_loss or take_profit:
-                modify_result = self.modify_position(position_ticket, sl=stop_loss, tp=take_profit)
-                if modify_result:
-                    bot_logger.info(f"✅ SL/TP set on position {position_ticket}")
-                else:
-                    bot_logger.warning(f"⚠️ Failed to set SL/TP on position {position_ticket}")
+                modify_success = False
+                for retry in range(3):
+                    time.sleep(0.5)  # Wait before each modify attempt
+                    modify_result = self.modify_position(position_ticket, sl=stop_loss, tp=take_profit)
+                    if modify_result:
+                        bot_logger.info(f"✅ SL/TP set on position {position_ticket}")
+                        modify_success = True
+                        break
+                    bot_logger.warning(f"⚠️ SL/TP modify attempt {retry+1}/3 failed for {position_ticket}")
+                
+                if not modify_success:
+                    error_logger.error(f"❌ CRITICAL: Failed to set SL/TP on position {position_ticket} after 3 attempts!")
             
             trades_logger.info(
                 f"ORDER_PLACED | Pair: {pair} | Type: {order_type} | "
