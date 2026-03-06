@@ -172,11 +172,12 @@ class RiskManager:
         """Return current tier details for dashboard / logging."""
         growth = ((self.current_balance - self.initial_balance) / self.initial_balance) * 100
         next_tier = self._next_tier()
+        max_trades = self._max_trades_cap()
         return {
             'tier_name': self._current_tier_name,
             'tier_description': self._current_tier['description'],
             'max_lot_size': self._current_tier['max_lot_size'],
-            'max_concurrent_trades': self._current_tier['max_concurrent_trades'],
+            'max_concurrent_trades': max_trades,
             'risk_percent': self._current_tier['risk_percent'],
             'account_growth': round(growth, 2),
             'next_tier': next_tier['description'] if next_tier else 'MAX',
@@ -191,6 +192,15 @@ class RiskManager:
         if idx + 1 < len(tier_order):
             return ACCOUNT_TIERS[tier_order[idx + 1]]
         return None
+
+    def _max_trades_cap(self):
+        """Absolute concurrent-trade cap policy.
+
+        Requirement: keep max at 3 while account is below $200.
+        """
+        if self.current_balance < 200:
+            return 3
+        return self._current_tier['max_concurrent_trades']
 
     # ── Balance Sync ──────────────────────────────────────────────────
 
@@ -215,7 +225,7 @@ class RiskManager:
 
     def can_trade(self):
         """Check if we can open new trades (uses dynamic tier limits)."""
-        max_trades = self._current_tier['max_concurrent_trades']
+        max_trades = self._max_trades_cap()
 
         can_open = (
             self.open_trades < max_trades and
@@ -276,11 +286,8 @@ class RiskManager:
 
     def get_trade_capacity(self, signal_result=None):
         """Return (effective_cap, available_slots) for current market/account context."""
-        tier_cap = self._current_tier['max_concurrent_trades']
-        if 'micro' in (self._current_tier_name or 'micro'):
-            effective_cap = min(3, tier_cap)
-        else:
-            effective_cap = tier_cap
+        # Hard business rule: while account < $200, cap is always exactly 3.
+        effective_cap = self._max_trades_cap()
 
         available_slots = max(0, effective_cap - self.open_trades)
         return effective_cap, available_slots
