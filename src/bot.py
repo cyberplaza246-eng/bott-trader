@@ -110,6 +110,9 @@ class TradingBot:
         else:
             self.paper_trader = None
         
+        # TRADE EXECUTION LOCK - prevents 1m and 5m from placing trades simultaneously
+        self._trade_lock = threading.Lock()
+        
         self.last_signal_time = {}  # Track last signal per pair per timeframe
         self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '30'))
         self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.55'))
@@ -660,7 +663,16 @@ class TradingBot:
             bot_logger.warning(f"Daily status logging failed: {e}")
     
     def _execute_trade(self, pair, signal_result, df, timeframe_key='5m'):
-        """Execute a scalping trade with unified SL/TP from S/R levels."""
+        """Execute a scalping trade with unified SL/TP from S/R levels.
+        
+        Uses a lock to ensure only one trade can be evaluated and placed at a time,
+        preventing race conditions between 1m and 5m timeframe threads.
+        """
+        with self._trade_lock:
+            return self._execute_trade_locked(pair, signal_result, df, timeframe_key)
+    
+    def _execute_trade_locked(self, pair, signal_result, df, timeframe_key='5m'):
+        """Internal trade execution (called with _trade_lock held)."""
         from src.risk.sl_tp import calculate_sl_tp
 
         trade_type = signal_result['signal']
