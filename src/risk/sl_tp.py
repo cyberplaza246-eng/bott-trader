@@ -45,9 +45,9 @@ SL_MAX_PIPS_5M = 10.0         # Hard cap: 10 pips for 5M trades
 
 SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
 MIN_RR = 1.2                  # Minimum reward-to-risk ratio
-MAX_RR = 3.0                  # Maximum R:R (prevents unreachable TP)
-TP_MAX_PIPS_1M = 15.0         # Hard cap: 15 pips TP for 1M
-TP_MAX_PIPS_5M = 25.0         # Hard cap: 25 pips TP for 5M
+MAX_RR = 2.0                  # Maximum R:R (scalps don't need 3R+)
+TP_MAX_PIPS_1M = 8.0          # Hard cap: 8 pips TP for 1M scalps
+TP_MAX_PIPS_5M = 15.0         # Hard cap: 15 pips TP for 5M scalps
 
 STRUCTURE_LOOKBACK = 30       # Bars to scan for swing structure
 
