@@ -94,7 +94,7 @@ def main():
         imported += 1
     
     # Save
-    learner.save()
+    learner._save()
     
     print()
     print(f"📊 Backfill complete:")
