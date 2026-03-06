@@ -146,8 +146,10 @@ class TradingBot:
         if self.mode != 'live' or not self.broker:
             return
         try:
-            import MetaTrader5 as mt5
-            positions = mt5.positions_get()
+            positions = self.broker.get_open_positions()
+            if positions is None:
+                bot_logger.warning("Startup check skipped: could not fetch positions")
+                return
             if not positions:
                 bot_logger.info(f"✅ Startup check: 0 positions open")
                 return
@@ -160,39 +162,27 @@ class TradingBot:
                 bot_logger.warning(f"🚨 CLOSING {excess} EXCESS POSITIONS!")
                 
                 # Sort by profit (close worst ones first)
-                sorted_pos = sorted(positions, key=lambda p: p.profit)
+                sorted_pos = sorted(positions, key=lambda p: p.get('profit', 0))
                 
                 for i in range(excess):
                     pos = sorted_pos[i]
-                    tick = mt5.symbol_info_tick(pos.symbol)
-                    if not tick:
-                        continue
-                    close_price = tick.bid if pos.type == 0 else tick.ask
-                    close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
-                    
-                    close_req = {
-                        "action": mt5.TRADE_ACTION_DEAL,
-                        "symbol": pos.symbol,
-                        "volume": pos.volume,
-                        "type": close_type,
-                        "position": pos.ticket,
-                        "price": close_price,
-                        "deviation": 50,
-                        "magic": 234000,
-                        "comment": "Excess position cleanup",
-                        "type_time": mt5.ORDER_TIME_GTC,
-                        "type_filling": mt5.ORDER_FILLING_IOC,
-                    }
-                    result = mt5.order_send(close_req)
-                    if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-                        bot_logger.info(f"✅ Closed excess position {pos.ticket} ({pos.symbol} P/L: {pos.profit:.2f})")
+                    result = self.broker.close_position(
+                        pair=pos.get('pair'),
+                        volume=pos.get('volume'),
+                        ticket=pos.get('ticket'),
+                    )
+                    if result:
+                        bot_logger.info(
+                            f"✅ Closed excess position {pos.get('ticket')} "
+                            f"({pos.get('pair')} P/L: {pos.get('profit', 0):.2f})"
+                        )
                     else:
-                        bot_logger.error(f"❌ Failed to close {pos.ticket}")
+                        bot_logger.error(f"❌ Failed to close {pos.get('ticket')}")
                 
                 # Verify
                 import time
                 time.sleep(1)
-                remaining = mt5.positions_get()
+                remaining = self.broker.get_open_positions() or []
                 bot_logger.info(f"✅ After cleanup: {len(remaining) if remaining else 0} positions")
         except Exception as e:
             bot_logger.error(f"Startup position check failed: {e}")
@@ -202,38 +192,29 @@ class TradingBot:
         if self.mode != 'live' or not self.broker:
             return
         try:
-            import MetaTrader5 as mt5
-            positions = mt5.positions_get()
-            if not positions:
+            positions = self.broker.get_open_positions()
+            if positions is None:
+                bot_logger.warning("Enforcement skipped: could not fetch positions")
                 return
             count = len(positions)
+            bot_logger.info(f"🛡️ Enforcement check: {count}/{self.MAX_ALLOWED_POSITIONS} positions")
+            if not positions:
+                return
             if count > self.MAX_ALLOWED_POSITIONS:
                 bot_logger.error(f"🚨 ENFORCEMENT: {count} positions detected! Max is {self.MAX_ALLOWED_POSITIONS}. Closing excess.")
-                sorted_pos = sorted(positions, key=lambda p: p.profit)
+                sorted_pos = sorted(positions, key=lambda p: p.get('profit', 0))
                 excess = count - self.MAX_ALLOWED_POSITIONS
                 for i in range(excess):
                     pos = sorted_pos[i]
-                    tick = mt5.symbol_info_tick(pos.symbol)
-                    if not tick:
-                        continue
-                    close_price = tick.bid if pos.type == 0 else tick.ask
-                    close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
-                    close_req = {
-                        "action": mt5.TRADE_ACTION_DEAL,
-                        "symbol": pos.symbol,
-                        "volume": pos.volume,
-                        "type": close_type,
-                        "position": pos.ticket,
-                        "price": close_price,
-                        "deviation": 50,
-                        "magic": 234000,
-                        "comment": "Max position enforcement",
-                        "type_time": mt5.ORDER_TIME_GTC,
-                        "type_filling": mt5.ORDER_FILLING_IOC,
-                    }
-                    result = mt5.order_send(close_req)
-                    if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-                        bot_logger.info(f"✅ Enforced close: {pos.ticket} ({pos.symbol})")
+                    result = self.broker.close_position(
+                        pair=pos.get('pair'),
+                        volume=pos.get('volume'),
+                        ticket=pos.get('ticket'),
+                    )
+                    if result:
+                        bot_logger.info(f"✅ Enforced close: {pos.get('ticket')} ({pos.get('pair')})")
+                    else:
+                        bot_logger.error(f"❌ Enforcement close failed: {pos.get('ticket')} ({pos.get('pair')})")
         except Exception as e:
             bot_logger.warning(f"Position enforcement check failed: {e}")
 
@@ -1128,7 +1109,7 @@ class TradingBot:
                     f"(entry={entry_price:.5f}, current={current_price:.5f}, P/L=${pnl:.2f})"
                 )
                 try:
-                    result = self.broker.close_position(ticket)
+                    result = self.broker.close_position(ticket=ticket)
                     if result:
                         bot_logger.info(f"⏰ TIME STOP closed ticket {ticket}")
                         self.risk_manager.on_trade_closed(pnl)

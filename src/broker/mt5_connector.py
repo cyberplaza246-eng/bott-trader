@@ -772,10 +772,15 @@ class MT5Connector:
             error_logger.error(f"Error placing order for {pair}: {str(e)}")
             return None
     
-    def close_position(self, pair, volume, ticket=None):
-        """Close an open position by ticket or pair."""
+    def close_position(self, pair=None, volume=None, ticket=None):
+        """Close an open position by ticket (preferred) or pair."""
+        # Backward-compat: some call sites pass ticket as first positional arg.
+        if ticket is None and isinstance(pair, (int, float)):
+            ticket = int(pair)
+            pair = None
+
         if self.relay_mode:
-            payload = {"volume": volume}
+            payload = {"volume": volume if volume is not None else 0.01}
             if ticket:
                 payload["ticket"] = ticket
             else:
@@ -789,7 +794,7 @@ class MT5Connector:
 
         elif self.simulation_mode:
             for i, pos in enumerate(self.sim_positions):
-                if pos['pair'] == pair:
+                if (ticket and pos['ticket'] == ticket) or (pair and pos['pair'] == pair):
                     closed = self.sim_positions.pop(i)
                     trades_logger.info(f"POSITION_CLOSED (SIM) | Pair: {pair} | P/L: {closed['profit']:.2f}")
                     return closed['ticket']
@@ -797,20 +802,39 @@ class MT5Connector:
 
         else:
             try:
-                symbol = self._resolve_symbol(pair)
-                positions = mt5.positions_get(symbol=symbol)
-                if not positions:
-                    bot_logger.warning(f"No open position for {pair}")
-                    return None
+                # Prefer ticket-targeted close to avoid closing wrong position.
+                if ticket:
+                    positions = mt5.positions_get(ticket=ticket)
+                    if not positions:
+                        bot_logger.warning(f"No open position for ticket {ticket}")
+                        return None
+                    position = positions[0]
+                    symbol = position.symbol
+                else:
+                    if not pair:
+                        bot_logger.warning("close_position requires ticket or pair")
+                        return None
+                    symbol = self._resolve_symbol(pair)
+                    positions = mt5.positions_get(symbol=symbol)
+                    if not positions:
+                        bot_logger.warning(f"No open position for {pair}")
+                        return None
+                    position = positions[0]
 
-                position = positions[0]
                 close_type = mt5.ORDER_TYPE_SELL if position.type == 0 else mt5.ORDER_TYPE_BUY
+
+                tick = mt5.symbol_info_tick(symbol)
+                if not tick:
+                    bot_logger.warning(f"No tick data for {symbol}, cannot close position")
+                    return None
 
                 request = {
                     "action": mt5.TRADE_ACTION_DEAL,
                     "symbol": symbol,
-                    "volume": volume,
+                    "volume": volume if volume is not None else position.volume,
                     "type": close_type,
+                    "position": position.ticket,
+                    "price": tick.bid if position.type == 0 else tick.ask,
                     "deviation": 20,
                     "magic": 234000,
                     "comment": "AI Bot Position Close",
