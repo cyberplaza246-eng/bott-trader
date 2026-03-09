@@ -787,10 +787,6 @@ class LiquiditySweepAnalyzer:
             candle_high = float(candle['high'])
             candle_low = float(candle['low'])
 
-            # Wick-side sanity: entry must be on the correct side of the
-            # sweep wick so SL geometry is valid (SL sits at the wick).
-            sweep_wick = sweep_result['sweep_wick']
-
             if direction == 'BUY':
                 # Full mode: must close ABOVE mss_level
                 # Relaxed (range): just need a bullish displacement candle
@@ -802,10 +798,6 @@ class LiquiditySweepAnalyzer:
                     else:
                         trigger = candle_high
                         entry = candle_close
-
-                    # Entry must be ABOVE wick for BUY (SL below wick)
-                    if entry <= sweep_wick:
-                        continue  # Try next candle
 
                     label = 'above' if candle_close > mss_level else 'toward'
                     result.update({
@@ -833,10 +825,6 @@ class LiquiditySweepAnalyzer:
                     else:
                         trigger = candle_low
                         entry = candle_close
-
-                    # Entry must be BELOW wick for SELL (SL above wick)
-                    if entry >= sweep_wick:
-                        continue  # Try next candle
 
                     label = 'below' if candle_close < mss_level else 'toward'
                     result.update({
@@ -872,14 +860,7 @@ class LiquiditySweepAnalyzer:
 
             if is_bullish_recovery or is_bearish_recovery:
                 entry = sc_close
-                # Wick-side check: entry must be on correct side of sweep wick
-                sweep_wick = sweep_result['sweep_wick']
-                if direction == 'BUY' and entry <= sweep_wick:
-                    pass  # Invalid geometry — skip recovery fallback
-                elif direction == 'SELL' and entry >= sweep_wick:
-                    pass  # Invalid geometry — skip recovery fallback
-                else:
-                    result.update({
+                result.update({
                     'confirmed': True,
                     'mss_level': mss_level,
                     'entry_price': entry,
@@ -892,13 +873,13 @@ class LiquiditySweepAnalyzer:
                         'high': sc_high,
                         'low': sc_low,
                     },
-                        'details': (
-                            f"{'Bullish' if direction == 'BUY' else 'Bearish'} MSS (sweep-recovery): "
-                            f"close={sc_close:.5f}, body={sc_body_ratio:.0%} "
-                            f"[relaxed-range, sweep=displacement]"
-                        ),
-                    })
-                    return result
+                    'details': (
+                        f"{'Bullish' if direction == 'BUY' else 'Bearish'} MSS (sweep-recovery): "
+                        f"close={sc_close:.5f}, body={sc_body_ratio:.0%} "
+                        f"[relaxed-range, sweep=displacement]"
+                    ),
+                })
+                return result
 
         result['details'] = (
             f'No MSS displacement through {mss_level:.5f} after sweep '
@@ -998,15 +979,13 @@ class LiquiditySweepAnalyzer:
         if direction == 'SELL' and sweep_wick <= entry_price:
             return None
 
-        # Minimum distance check: wick must be at least 1×spread OR 0.3×ATR away
-        # (was 2×spread — too aggressive for wider-spread pairs like USD/JPY)
+        # Minimum spread check
         spread = config['spread_sim']
         raw_dist = abs(entry_price - sweep_wick)
-        min_dist = min(spread, atr * 0.3)  # Use the lesser of spread or 0.3×ATR
-        if raw_dist < min_dist:
+        if raw_dist < spread * 2:
             bot_logger.info(
                 f"⛔ Sweep wick too close: {raw_dist/pip_size:.1f}p < "
-                f"min({spread/pip_size:.1f}p spread, {atr*0.3/pip_size:.1f}p 0.3×ATR)"
+                f"2×spread {spread*2/pip_size:.1f}p"
             )
             return None
 
@@ -1195,24 +1174,6 @@ class LiquiditySweepAnalyzer:
         if not mss_confirmed_naturally:
             # Soft gate: proceed with sweep-only entry at reduced confidence
             latest_close = float(df_1m.iloc[-1]['close'])
-
-            # Wick-side sanity: entry must be on correct side of sweep wick
-            sweep_wick = sweep.get('sweep_wick', 0)
-            wick_ok = (
-                (sweep['direction'] == 'BUY' and latest_close > sweep_wick) or
-                (sweep['direction'] == 'SELL' and latest_close < sweep_wick)
-            )
-            if not wick_ok:
-                result['details'] = (
-                    f"\U0001f6ab Entry ({latest_close:.5f}) on wrong side of "
-                    f"wick ({sweep_wick:.5f}) for {sweep['direction']}"
-                )
-                bot_logger.info(
-                    f"\U0001f6ab {pair} soft MSS rejected: entry {latest_close:.5f} "
-                    f"wrong side of wick {sweep_wick:.5f} for {sweep['direction']}"
-                )
-                return result
-
             mss['confirmed'] = True
             mss['entry_price'] = latest_close
             mss['trigger_level'] = latest_close

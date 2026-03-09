@@ -188,7 +188,7 @@ class EnsembleTrader:
             tech_dir = technical_signal['signal']
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
                 final_signal = ema_dir
-                final_confidence = 0.48  # Above threshold — lets EMA+Tech trades fire
+                final_confidence = 0.40  # just at threshold — intentionally low
                 models_agreement = 2
                 bot_logger.info(
                     f"🔄 No sweep → EMA+Tech fallback: {ema_dir} "
