@@ -39,9 +39,9 @@ class EnsembleTrader:
     EMA_OPPOSE_PENALTY = 0.10    # EMA opposes sweep direction
     TECH_CONFIRM_BOOST = 0.03    # Technical momentum matches sweep
     TECH_OPPOSE_PENALTY = 0.05   # Technical momentum opposes sweep
-    LSTM_CONFIRM_BOOST = 0.05    # LSTM direction agrees with sweep
-    LSTM_OPPOSE_PENALTY = 0.08   # LSTM direction opposes sweep (reduced — model still calibrating)
-    RL_SKIP_PENALTY = 0.04       # RL agent recommends skipping
+    LSTM_CONFIRM_BOOST = 0.08    # LSTM direction agrees with sweep
+    LSTM_OPPOSE_PENALTY = 0.20   # LSTM direction opposes sweep (strong filter)
+    RL_SKIP_PENALTY = 0.08       # RL agent recommends skipping
 
     def __init__(self, newsapi_key=None, broker=None):
         # ── Primary: sweep gate ──────────────────────────────────────
@@ -316,7 +316,10 @@ class EnsembleTrader:
             if self.lstm_available and final_signal != 'SKIP':
                 try:
                     pct_change = lstm_signal.get('predicted_change_percent', 0)
-                    if abs(pct_change) > 0.02:
+                    # Skip LSTM filter if prediction is pegged at clamp limit (unreliable)
+                    if abs(pct_change) >= 4.99:
+                        bot_logger.info(f"⚠️ LSTM at clamp limit ({pct_change:+.3f}%) — ignoring (model needs retraining)")
+                    elif abs(pct_change) > 0.02:
                         if (pct_change > 0 and sweep_direction == 'BUY') or \
                            (pct_change < 0 and sweep_direction == 'SELL'):
                             final_confidence += self.LSTM_CONFIRM_BOOST
