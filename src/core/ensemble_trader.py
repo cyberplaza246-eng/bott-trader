@@ -471,12 +471,12 @@ class EnsembleTrader:
             bot_logger.info("🚫 Sweep gate did not fire — no trade")
             return False
 
-        # EMA crossover must confirm sweep direction
+        # EMA crossover must not oppose sweep direction (HOLD = neutral, allowed)
         ema_model = signal_result.get('models', {}).get('ema_crossover', {})
         ema_dir = ema_model.get('signal', 'HOLD')
-        if ema_dir != signal_result['signal']:
+        if ema_dir in ('BUY', 'SELL') and ema_dir != signal_result['signal']:
             bot_logger.info(
-                f"🚫 EMA crossover ({ema_dir}) does not confirm {signal_result['signal']} — no trade"
+                f"🚫 EMA crossover ({ema_dir}) opposes {signal_result['signal']} — no trade"
             )
             return False
 
