@@ -114,8 +114,8 @@ class TradingBot:
         self._trade_lock = threading.Lock()
         
         self.last_signal_time = {}  # Track last signal per pair per timeframe
-        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '60'))
-        self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.70'))
+        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '30'))
+        self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.55'))
         self.reversal_exit_min_agreement = int(os.getenv('REVERSAL_EXIT_MIN_AGREEMENT', '2'))
         self.enable_correlation_guard = os.getenv('ENABLE_CORRELATION_GUARD', 'true').lower() == 'true'
 
@@ -1092,14 +1092,14 @@ class TradingBot:
         Uses real elapsed wall-clock time instead of cycle counting to avoid
         double-counting from 1m + 5m schedulers both calling this method.
         """
-        MIN_HOLD_MINUTES = 10   # Never close a trade younger than 10 minutes
+        MIN_HOLD_MINUTES = 8    # Never close a trade younger than 8 minutes
         # Use adaptive learner's time-exit candles (4-8) mapped to minutes
         # Each candle ≈ 5 min on the 5m timeframe, so candles × 5 = minutes
         try:
             learned_candles = self.ensemble.learner.get_time_exit_candles()
-            MAX_FLAT_MINUTES = max(10, learned_candles * 5)
+            MAX_FLAT_MINUTES = max(8, learned_candles * 5)
         except Exception:
-            MAX_FLAT_MINUTES = 15   # Default: 15 minutes
+            MAX_FLAT_MINUTES = 12   # Default: 12 minutes (was 15 — too slow for scalping)
 
         try:
             positions = self.broker.get_open_positions()
@@ -1148,6 +1148,21 @@ class TradingBot:
                     if result:
                         bot_logger.info(f"⏰ TIME STOP closed ticket {ticket}")
                         self.risk_manager.on_trade_closed(pnl)
+
+                        # Record with adaptive learner for weight adaptation
+                        pending_signals = getattr(self, '_pending_trade_signals', {})
+                        model_signals = pending_signals.pop(ticket, None) or pending_signals.pop(pair, {})
+                        self.ensemble.record_trade_result({
+                            'pair': pair,
+                            'signal': direction,
+                            'profit_loss': pnl,
+                            'entry_price': entry_price,
+                            'exit_price': current_price,
+                            'exit_type': 'TIME_STOP',
+                            'model_signals': model_signals,
+                            'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
+                        })
+
                         self._record_ml_outcome(pair, pnl, ticket=ticket)
                         self._record_rl_outcome(pair, pnl, 'time_stop')
                 except Exception as e:
@@ -1418,8 +1433,7 @@ class TradingBot:
         age_minutes = self._position_age_minutes(position)
         stale_trade = (
             age_minutes is not None and
-            age_minutes >= self.max_trade_hold_minutes and
-            (signal == 'SKIP' or confidence < self.reversal_exit_confidence)
+            age_minutes >= self.max_trade_hold_minutes
         )
 
         if not strong_reversal and not stale_trade:
@@ -1468,11 +1482,29 @@ class TradingBot:
         if self.mode == 'live' and self.broker:
             volume = float(position.get('volume', 0.01) or 0.01)
             ticket = position.get('ticket')
+            pnl = float(position.get('profit', 0) or 0)
             closed = self.broker.close_position(pair=pair, volume=volume, ticket=ticket)
             if closed:
                 bot_logger.info(
-                    f"🔄 Active exit requested for {pair} ticket={ticket} ({exit_reason})"
+                    f"🔄 Active exit: {pair} ticket={ticket} ({exit_reason}) P/L=${pnl:+.2f}"
                 )
+                self.risk_manager.on_trade_closed(pnl)
+
+                # Record with adaptive learner so learning systems get feedback
+                pending_signals = getattr(self, '_pending_trade_signals', {})
+                model_signals = pending_signals.pop(ticket, None) or pending_signals.pop(pair, {})
+                self.ensemble.record_trade_result({
+                    'pair': pair,
+                    'signal': position_type,
+                    'profit_loss': pnl,
+                    'entry_price': float(position.get('price_open', 0) or position.get('entry_price', 0)),
+                    'exit_price': float(position.get('price_current', 0) or 0),
+                    'exit_type': exit_reason,
+                    'model_signals': model_signals,
+                    'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
+                })
+                self._record_ml_outcome(pair, pnl, ticket=ticket)
+                self._record_rl_outcome(pair, pnl, exit_reason)
     
     def start(self):
         """Start the trading bot"""

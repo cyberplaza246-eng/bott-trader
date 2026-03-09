@@ -979,13 +979,15 @@ class LiquiditySweepAnalyzer:
         if direction == 'SELL' and sweep_wick <= entry_price:
             return None
 
-        # Minimum spread check
+        # Minimum distance check: wick must be at least 1×spread OR 0.3×ATR away
+        # (was 2×spread — too aggressive for wider-spread pairs like USD/JPY)
         spread = config['spread_sim']
         raw_dist = abs(entry_price - sweep_wick)
-        if raw_dist < spread * 2:
+        min_dist = min(spread, atr * 0.3)  # Use the lesser of spread or 0.3×ATR
+        if raw_dist < min_dist:
             bot_logger.info(
                 f"⛔ Sweep wick too close: {raw_dist/pip_size:.1f}p < "
-                f"2×spread {spread*2/pip_size:.1f}p"
+                f"min({spread/pip_size:.1f}p spread, {atr*0.3/pip_size:.1f}p 0.3×ATR)"
             )
             return None
 
