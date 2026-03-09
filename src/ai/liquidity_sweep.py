@@ -635,7 +635,7 @@ class LiquiditySweepAnalyzer:
             local_atr = float(latest.get('atr', 0) or 0)
             if local_atr <= 0:
                 local_atr = pip_size * 5  # fallback
-            if nearest_gap <= local_atr * 2.0:
+            if nearest_gap <= local_atr * 2.5:
                 # Find the closest target
                 best_level = target_levels[0]['price']
                 latest_close = float(latest['close'])

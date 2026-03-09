@@ -1148,8 +1148,26 @@ class TradingBot:
                     if result:
                         bot_logger.info(f"⏰ TIME STOP closed ticket {ticket}")
                         self.risk_manager.on_trade_closed(pnl)
+
+                        # Record with adaptive learner
+                        pending_signals = getattr(self, '_pending_trade_signals', {})
+                        model_signals = pending_signals.pop(ticket, None) or pending_signals.pop(pair, {})
+                        self.ensemble.record_trade_result({
+                            'pair': pair,
+                            'signal': direction,
+                            'profit_loss': pnl,
+                            'entry_price': entry_price,
+                            'exit_price': current_price,
+                            'exit_type': 'time_stop',
+                            'model_signals': model_signals,
+                            'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
+                        })
+
                         self._record_ml_outcome(pair, pnl, ticket=ticket)
                         self._record_rl_outcome(pair, pnl, 'time_stop')
+
+                        # Remove from known tickets so _detect_closed_trades doesn't double-record
+                        self._known_tickets.pop(ticket, None)
                 except Exception as e:
                     bot_logger.warning(f"Time stop close failed for {ticket}: {e}")
 
