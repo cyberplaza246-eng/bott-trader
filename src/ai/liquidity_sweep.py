@@ -787,6 +787,10 @@ class LiquiditySweepAnalyzer:
             candle_high = float(candle['high'])
             candle_low = float(candle['low'])
 
+            # Wick-side sanity: entry must be on the correct side of the
+            # sweep wick so SL geometry is valid (SL sits at the wick).
+            sweep_wick = sweep_result['sweep_wick']
+
             if direction == 'BUY':
                 # Full mode: must close ABOVE mss_level
                 # Relaxed (range): just need a bullish displacement candle
@@ -798,6 +802,10 @@ class LiquiditySweepAnalyzer:
                     else:
                         trigger = candle_high
                         entry = candle_close
+
+                    # Entry must be ABOVE wick for BUY (SL below wick)
+                    if entry <= sweep_wick:
+                        continue  # Try next candle
 
                     label = 'above' if candle_close > mss_level else 'toward'
                     result.update({
@@ -825,6 +833,10 @@ class LiquiditySweepAnalyzer:
                     else:
                         trigger = candle_low
                         entry = candle_close
+
+                    # Entry must be BELOW wick for SELL (SL above wick)
+                    if entry >= sweep_wick:
+                        continue  # Try next candle
 
                     label = 'below' if candle_close < mss_level else 'toward'
                     result.update({
@@ -860,7 +872,14 @@ class LiquiditySweepAnalyzer:
 
             if is_bullish_recovery or is_bearish_recovery:
                 entry = sc_close
-                result.update({
+                # Wick-side check: entry must be on correct side of sweep wick
+                sweep_wick = sweep_result['sweep_wick']
+                if direction == 'BUY' and entry <= sweep_wick:
+                    pass  # Invalid geometry — skip recovery fallback
+                elif direction == 'SELL' and entry >= sweep_wick:
+                    pass  # Invalid geometry — skip recovery fallback
+                else:
+                    result.update({
                     'confirmed': True,
                     'mss_level': mss_level,
                     'entry_price': entry,
@@ -873,13 +892,13 @@ class LiquiditySweepAnalyzer:
                         'high': sc_high,
                         'low': sc_low,
                     },
-                    'details': (
-                        f"{'Bullish' if direction == 'BUY' else 'Bearish'} MSS (sweep-recovery): "
-                        f"close={sc_close:.5f}, body={sc_body_ratio:.0%} "
-                        f"[relaxed-range, sweep=displacement]"
-                    ),
-                })
-                return result
+                        'details': (
+                            f"{'Bullish' if direction == 'BUY' else 'Bearish'} MSS (sweep-recovery): "
+                            f"close={sc_close:.5f}, body={sc_body_ratio:.0%} "
+                            f"[relaxed-range, sweep=displacement]"
+                        ),
+                    })
+                    return result
 
         result['details'] = (
             f'No MSS displacement through {mss_level:.5f} after sweep '
@@ -1176,6 +1195,24 @@ class LiquiditySweepAnalyzer:
         if not mss_confirmed_naturally:
             # Soft gate: proceed with sweep-only entry at reduced confidence
             latest_close = float(df_1m.iloc[-1]['close'])
+
+            # Wick-side sanity: entry must be on correct side of sweep wick
+            sweep_wick = sweep.get('sweep_wick', 0)
+            wick_ok = (
+                (sweep['direction'] == 'BUY' and latest_close > sweep_wick) or
+                (sweep['direction'] == 'SELL' and latest_close < sweep_wick)
+            )
+            if not wick_ok:
+                result['details'] = (
+                    f"\U0001f6ab Entry ({latest_close:.5f}) on wrong side of "
+                    f"wick ({sweep_wick:.5f}) for {sweep['direction']}"
+                )
+                bot_logger.info(
+                    f"\U0001f6ab {pair} soft MSS rejected: entry {latest_close:.5f} "
+                    f"wrong side of wick {sweep_wick:.5f} for {sweep['direction']}"
+                )
+                return result
+
             mss['confirmed'] = True
             mss['entry_price'] = latest_close
             mss['trigger_level'] = latest_close
