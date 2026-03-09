@@ -798,15 +798,17 @@ class TradingBot:
         elif scalping_rr:
             signal_entry = scalping_rr.get('entry_price')
 
-        # Use configurable drift tolerance from risk_overrides.json (default 3.0×ATR)
-        drift_tolerance_atr = 3.0
+        # Use configurable drift tolerance from risk_overrides.json (default 8.0×ATR)
+        # 1M ATR is small (2-3 pips), so signal entries from a few candles ago
+        # can easily drift 10-20 pips by the time the bot confirms the signal.
+        drift_tolerance_atr = 8.0
         try:
             import json
             overrides_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'risk_overrides.json')
             if os.path.exists(overrides_path):
                 with open(overrides_path) as f:
                     overrides = json.load(f)
-                    drift_tolerance_atr = overrides.get('price_drift_tolerance_atr', 3.0)
+                    drift_tolerance_atr = overrides.get('price_drift_tolerance_atr', 8.0)
         except Exception:
             pass
         if signal_entry and abs(entry_price - signal_entry) > atr * drift_tolerance_atr:
