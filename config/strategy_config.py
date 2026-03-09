@@ -90,7 +90,7 @@ OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 # then confidence is boosted/reduced by EMA + Technical confirmation.
 # Sweep signals arrive pre-qualified at ~0.80+, so 0.45 floor is conservative.
 ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
-MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 1))  # Sweep gate is sufficient (context models for learning only)
+MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))  # Sweep + at least 2 context models must agree
 
 # Technical Analysis Parameters (ATR-centric scalping)
 INDICATORS = {

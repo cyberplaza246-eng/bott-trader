@@ -295,8 +295,11 @@ class LSTMPredictor:
         
         pred = self.model.predict(X, verbose=0)
         
-        # Inverse-transform: we need a full-width array for the scaler
-        pred_full = np.zeros((1, num_features))
+        # Inverse-transform: use the LAST row of normalized input as the
+        # template so every column has a realistic value — only replace
+        # column 0 with the prediction.  Using all-zeros in other columns
+        # causes the scaler to produce wildly wrong inverse values.
+        pred_full = normalized[-1:].copy()  # shape (1, num_features)
         pred_full[0, 0] = pred[0][0]
         inverse = self.scaler.inverse_transform(pred_full)
         predicted_close_norm = inverse[0][0]
@@ -311,6 +314,9 @@ class LSTMPredictor:
         current_price = df['close'].iloc[-1]
         price_change_percent = ((next_price - current_price) / current_price) * 100
         
+        # Clamp extreme predictions — anything beyond ±5% on a 1m/5m bar is noise
+        price_change_percent = max(-5.0, min(5.0, price_change_percent))
+
         # Determine signal
         if price_change_percent > 0.1:
             signal = 'BUY'

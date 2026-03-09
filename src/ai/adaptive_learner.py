@@ -215,8 +215,9 @@ class AdaptiveLearner:
             self.consecutive_losses = 0
             self.consecutive_wins += 1
         elif is_breakeven:
-            # Breakeven: don't penalise streaks or pair stats
-            pass
+            # Breakeven: reset streaks — the position didn't lose money
+            self.consecutive_losses = max(0, self.consecutive_losses - 1)
+            self.consecutive_wins = 0
         else:
             self.pair_stats[pair]['losses'] += 1
             self.consecutive_losses += 1
@@ -525,12 +526,16 @@ class AdaptiveLearner:
             bot_logger.info(f"♻️ Loss pattern decay: removed {len(keys_to_remove)} stale patterns")
 
     def get_recent_win_rate(self, n: int = 10) -> float:
-        """Win rate over last n trades — for fast reaction to losing streaks."""
+        """Win rate over last n real trades (excludes breakeven/pnl=0)."""
         recent = self.recent_trades_window[-n:]
         if not recent:
             return 0.5
-        wins = sum(1 for t in recent if t.get('is_win', False))
-        return wins / len(recent)
+        # Only count trades with actual P/L (skip breakeven $0 trades)
+        real_trades = [t for t in recent if t.get('pnl', 0) != 0]
+        if not real_trades:
+            return 0.5  # No real data yet — assume neutral
+        wins = sum(1 for t in real_trades if t.get('is_win', False))
+        return wins / len(real_trades)
 
     # ------------------------------------------------------------------
     # ATR-Centric Adaptive Methods
@@ -889,10 +894,11 @@ class AdaptiveLearner:
             regime = self.current_regime
         stats = self.regime_stats.get(regime, {'wins': 0, 'losses': 0})
         total = stats['wins'] + stats['losses']
-        if total < 5:
-            return 1.0
+        if total < 10:
+            return 1.0  # Not enough data — stay neutral
         win_rate = stats['wins'] / total
-        return 0.6 + (win_rate * 0.8)
+        # Floor at 0.80 to prevent crushing confidence when data is mostly losses
+        return max(0.80, 0.6 + (win_rate * 0.8))
 
     def should_skip_pair(self, pair: str) -> bool:
         pair = self._normalize_pair(pair)

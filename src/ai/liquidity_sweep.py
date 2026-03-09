@@ -496,9 +496,12 @@ class LiquiditySweepAnalyzer:
             target_levels = sorted(swing_highs, key=lambda x: x['bar_idx'], reverse=True)[:3]
 
         # ── Scan last SWEEP_WINDOW candles for sweep event ──────────
+        # Only accept sweeps in the last MAX_SWEEP_AGE candles to avoid
+        # stale signals re-firing every cycle.  For 1M data, 5 bars = 5 min.
+        MAX_SWEEP_AGE = 5
         latest_close_price = float(df_1m.iloc[-1]['close'])
         pip_size = 0.01 if latest_close_price >= 20 else 0.0001
-        for i in range(-self.SWEEP_WINDOW, 0):
+        for i in range(-min(self.SWEEP_WINDOW, MAX_SWEEP_AGE), 0):
             candle = df_1m.iloc[i]
             candle_low = float(candle['low'])
             candle_high = float(candle['high'])
@@ -1228,26 +1231,26 @@ class LiquiditySweepAnalyzer:
         # Full MSS → high confidence; sweep-only → moderate; proximity → lower
         is_proximity = sweep.get('proximity_sweep', False)
         if mss_confirmed_naturally and not is_proximity:
-            base_confidence = 0.85
+            base_confidence = 0.70
         elif mss_confirmed_naturally and is_proximity:
-            base_confidence = 0.65
-        elif not is_proximity:
             base_confidence = 0.55
-        else:
+        elif not is_proximity:
             base_confidence = 0.45
+        else:
+            base_confidence = 0.35
 
         # Bonus for strong ADX
         if regime_info['adx'] >= 25:
-            base_confidence += 0.08
+            base_confidence += 0.05
         elif regime_info['adx'] >= 20:
-            base_confidence += 0.04
+            base_confidence += 0.03
 
         # Bonus for strong displacement volume
         vol_ratio = mss.get('displacement_candle', {}).get('volume_ratio', 1.0)
         if vol_ratio >= 2.0:
-            base_confidence += 0.05
+            base_confidence += 0.03
         elif vol_ratio >= 1.5:
-            base_confidence += 0.02
+            base_confidence += 0.01
 
         # Mild penalty for range regime (adaptive learner handles main regime adjustment)
         if regime_info['regime'] == 'range':

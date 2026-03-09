@@ -1694,6 +1694,9 @@ class TradingBot:
             if not closed_tickets:
                 return
 
+            # Snapshot balance BEFORE processing closures (for fallback P/L estimation)
+            pre_balance = getattr(self.risk_manager, 'current_balance', None)
+
             # Query deal history to get P/L for closed trades
             history = self.broker.get_trade_history(hours=24)
             bot_logger.info(f"🔍 Deal history returned {len(history) if history else 0} deals")
@@ -1715,35 +1718,64 @@ class TradingBot:
                         bot_logger.info(f"✅ Found deal for ticket {ticket}: profit={d.get('profit')}")
                         break
 
+                # Progressive retry with backoff — MT5 history can lag a few seconds
+                if not deal:
+                    import time
+                    retry_delays = [1.5, 2.5, 4.0]  # seconds
+                    for attempt, delay in enumerate(retry_delays, 1):
+                        bot_logger.warning(
+                            f"⚠️ Deal for ticket {ticket} not in history — "
+                            f"retry {attempt}/{len(retry_delays)} after {delay}s"
+                        )
+                        time.sleep(delay)
+                        fresh_history = self.broker.get_trade_history(
+                            hours=2, include_all=True
+                        )
+                        for d in (fresh_history or []):
+                            pos_id = d.get('position_id', d.get('ticket', 0))
+                            if pos_id == ticket:
+                                deal = d
+                                bot_logger.info(
+                                    f"✅ Found deal on retry {attempt}: "
+                                    f"profit={d.get('profit')} magic={d.get('magic')}"
+                                )
+                                break
+                        if deal:
+                            break
+
                 if deal:
                     profit = deal.get('profit', 0) + deal.get('swap', 0) + deal.get('commission', 0)
                     exit_price = deal.get('price', 0)
                     is_win = profit > 0
                     exit_type = 'TAKE_PROFIT' if is_win else 'STOP_LOSS'
+                    bot_logger.info(f"✅ Deal resolved: profit=${profit:.2f}")
                 else:
-                    # No deal found - maybe timing issue, try individual lookup
-                    bot_logger.warning(f"⚠️ Deal for ticket {ticket} not in history - trying fresh query (include_all=True)")
-                    import time
-                    time.sleep(1.0)  # Wait a bit for MT5 to update
-                    fresh_history = self.broker.get_trade_history(hours=1, include_all=True)
-                    for d in (fresh_history or []):
-                        pos_id = d.get('position_id', d.get('ticket', 0))
-                        if pos_id == ticket:
-                            deal = d
-                            bot_logger.info(f"✅ Found deal on retry (magic={d.get('magic')})")
-                            break
-                    
-                    if deal:
-                        profit = deal.get('profit', 0) + deal.get('swap', 0) + deal.get('commission', 0)
-                        exit_price = deal.get('price', 0)
-                        is_win = profit > 0
-                        exit_type = 'TAKE_PROFIT' if is_win else 'STOP_LOSS'
-                        bot_logger.info(f"✅ Found deal on retry: profit=${profit:.2f}")
+                    # Fallback: estimate P/L from broker balance change
+                    bot_logger.warning(
+                        f"⚠️ Could not find deal for ticket {ticket} after retries — "
+                        f"estimating P/L from balance"
+                    )
+                    acct = self.broker.get_account_info() if self.broker else None
+                    post_balance = acct.get('balance', 0) if acct else 0
+                    if pre_balance and post_balance and pre_balance > 0:
+                        estimated_pnl = round(post_balance - pre_balance, 2)
+                        # Sanity check: P/L should be reasonable for micro lot
+                        if abs(estimated_pnl) <= 50:
+                            profit = estimated_pnl
+                            bot_logger.info(
+                                f"📊 Balance-delta P/L estimate: ${profit:+.2f} "
+                                f"(${pre_balance:.2f} → ${post_balance:.2f})"
+                            )
+                        else:
+                            profit = 0.0
+                            bot_logger.warning(
+                                f"📊 Balance delta ${estimated_pnl:+.2f} too large — recording $0"
+                            )
                     else:
-                        # Still no deal - skip recording to avoid bad data
-                        bot_logger.error(f"❌ Could not find deal for closed ticket {ticket} - NOT recording with 0 P/L")
-                        self.risk_manager.open_trades = max(0, self.risk_manager.open_trades - 1)
-                        continue  # Skip this trade, don't record with bad data
+                        profit = 0.0
+                    exit_price = 0
+                    is_win = profit > 0
+                    exit_type = 'ESTIMATED_CLOSE'
 
                 bot_logger.info(
                     f"📊 Closed trade detected: {pair} {trade_type} | "

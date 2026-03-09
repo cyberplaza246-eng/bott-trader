@@ -391,8 +391,8 @@ class EnsembleTrader:
             'signal': final_signal,
             'confidence': final_confidence,
             'models_agreement': models_agreement,
-            'total_models': 3,  # sweep + 2 confirmations (gate architecture)
-            'min_agreement_required': 1,  # only sweep is required
+            'total_models': len(context_signals) + 1,  # context models + sweep
+            'min_agreement_required': MIN_MODELS_AGREEMENT,
             'regime': regime,
             'detailed_reason': detailed_reason,
             'enriched_df': df_enriched,
@@ -423,6 +423,7 @@ class EnsembleTrader:
                 'candlestick': candle_signal,
                 'ema_crossover': ema_signal,
             },
+            'rsi': float(df_enriched['rsi'].iloc[-1]) if 'rsi' in df_enriched.columns and not pd.isna(df_enriched['rsi'].iloc[-1]) else 50.0,
             'sr_levels': sr_signal.get('levels', {}),
             'patterns': candle_signal.get('patterns', []),
             # ATR-centric fields
@@ -463,6 +464,36 @@ class EnsembleTrader:
         sweep_model = signal_result.get('models', {}).get('sweep', {})
         if sweep_model.get('signal') not in ('BUY', 'SELL'):
             bot_logger.info("🚫 Sweep gate did not fire — no trade")
+            return False
+
+        # EMA crossover must confirm sweep direction
+        ema_model = signal_result.get('models', {}).get('ema_crossover', {})
+        ema_dir = ema_model.get('signal', 'HOLD')
+        if ema_dir != signal_result['signal']:
+            bot_logger.info(
+                f"🚫 EMA crossover ({ema_dir}) does not confirm {signal_result['signal']} — no trade"
+            )
+            return False
+
+        # RSI must not contradict trade direction
+        rsi_val = signal_result.get('rsi', 50.0)
+        if signal_result['signal'] == 'BUY' and rsi_val > 70:
+            bot_logger.info(
+                f"🚫 RSI overbought ({rsi_val:.1f} > 70) — blocking BUY"
+            )
+            return False
+        if signal_result['signal'] == 'SELL' and rsi_val < 30:
+            bot_logger.info(
+                f"🚫 RSI oversold ({rsi_val:.1f} < 30) — blocking SELL"
+            )
+            return False
+
+        # Require minimum model agreement
+        agreement = signal_result.get('models_agreement', 0)
+        if agreement < MIN_MODELS_AGREEMENT:
+            bot_logger.info(
+                f"🚫 Model agreement {agreement} < required {MIN_MODELS_AGREEMENT} — no trade"
+            )
             return False
 
         if effective_confidence < threshold:
