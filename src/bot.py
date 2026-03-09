@@ -112,6 +112,8 @@ class TradingBot:
         
         # TRADE EXECUTION LOCK - prevents 1m and 5m from placing trades simultaneously
         self._trade_lock = threading.Lock()
+        # CLOSED TRADE DETECTION LOCK - prevents duplicate closure processing
+        self._closure_lock = threading.Lock()
         
         self.last_signal_time = {}  # Track last signal per pair per timeframe
         # For scalping, use much longer hold time - let TP/SL do the work
@@ -1237,11 +1239,9 @@ class TradingBot:
         """Normalize pair format (EUR/USD and EURUSD -> EURUSD)."""
         return str(pair or '').replace('/', '').upper()
 
-    def _record_ml_outcome(self, pair: str, pnl: float, ticket=None):
+    def _record_ml_outcome(self, pair: str, pnl: float, ticket=None, trade_type: str = ''):
         """Feed a closed trade's features + outcome to the ML Trade Scorer."""
         try:
-            if pnl == 0:
-                return  # Skip breakeven trades — not informative
             pending = getattr(self, '_pending_ml_features', {})
             # Try ticket-keyed first, then pair-keyed (legacy fallback)
             features = None
@@ -1249,14 +1249,34 @@ class TradingBot:
                 features = pending.pop(ticket, None)
             if features is None:
                 features = pending.pop(pair, None)
-            if features is not None:
-                is_win = pnl > 0
-                self.ensemble.record_ml_trade(features, is_win)
-                bot_logger.info(
-                    f"🧠 ML recorded: {pair} {'WIN' if is_win else 'LOSS'} "
-                    f"(${pnl:+.2f}) — "
-                    f"{self.ensemble.ml_scorer.get_status()['training_samples']} total samples"
-                )
+
+            # If features are missing (e.g., trade opened before restart),
+            # reconstruct a minimal feature vector so we still count the trade.
+            if features is None:
+                try:
+                    # Build a synthetic signal_result from what we know
+                    direction = trade_type if trade_type in ('BUY', 'SELL') else 'BUY'
+                    synthetic_result = {
+                        'signal': direction,
+                        'confidence': 0.5,
+                        'models_agreement': 1,
+                        'total_models': 4,
+                        'models': {},
+                        'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
+                    }
+                    features = self.ensemble.capture_ml_features(synthetic_result, pair)
+                    bot_logger.info(f"🧠 ML features reconstructed for {pair} (post-restart)")
+                except Exception as e:
+                    bot_logger.debug(f"🧠 ML feature reconstruction failed: {e}")
+                    return
+
+            is_win = pnl > 0
+            self.ensemble.record_ml_trade(features, is_win)
+            bot_logger.info(
+                f"🧠 ML recorded: {pair} {'WIN' if is_win else 'LOSS'} "
+                f"(${pnl:+.2f}) — "
+                f"{self.ensemble.ml_scorer.get_status()['training_samples']} total samples"
+            )
         except Exception as e:
             bot_logger.warning(f"🧠 ML outcome recording failed: {e}")
 
@@ -1672,6 +1692,10 @@ class TradingBot:
         if self.mode != 'live' or not self.broker:
             return
 
+        # Prevent both 1m and 5m threads from processing the same closure
+        if not self._closure_lock.acquire(blocking=False):
+            return  # Other thread is already handling closures
+
         try:
             positions = self.broker.get_open_positions()
             if positions is None:
@@ -1802,7 +1826,7 @@ class TradingBot:
                 })
 
                 # Record with ML Trade Scorer
-                self._record_ml_outcome(pair, profit, ticket=ticket)
+                self._record_ml_outcome(pair, profit, ticket=ticket, trade_type=trade_type)
 
                 # Record with RL Agent
                 self._record_rl_outcome(pair, profit, exit_type)
@@ -1813,6 +1837,8 @@ class TradingBot:
 
         except Exception as e:
             bot_logger.warning(f"Closed trade detection failed: {e}")
+        finally:
+            self._closure_lock.release()
 
     def _backfill_history(self):
         """One-time backfill: load closed deals from MT5 history into the adaptive learner.

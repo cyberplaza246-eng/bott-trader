@@ -13,6 +13,7 @@ Learns from past trades to improve future decisions:
 import os
 import json
 import math
+import threading
 import numpy as np
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -38,6 +39,8 @@ class AdaptiveLearner:
     REGIME_TRENDING = 'trending'
     REGIME_RANGING = 'ranging'
     REGIME_VOLATILE = 'volatile'
+
+    _save_lock = threading.Lock()  # Prevent concurrent file writes from multiple threads
 
     def __init__(self, initial_weights: dict = None):
         self.model_weights = initial_weights or {
@@ -986,6 +989,10 @@ class AdaptiveLearner:
     MAX_BACKUPS = 5  # Keep up to 5 rotating backups
 
     def _save(self):
+        with self._save_lock:
+            self._save_unlocked()
+
+    def _save_unlocked(self):
         os.makedirs(os.path.dirname(LEARNING_DB_PATH), exist_ok=True)
 
         # Rotate backups before writing
