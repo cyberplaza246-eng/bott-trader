@@ -40,8 +40,8 @@ SL_ATR_BUFFER = 0.50          # Buffer beyond structure level (50% ATR)
 SL_ATR_FALLBACK = 1.2         # Fallback: 1.2×ATR when no structure
 SL_MIN_ATR = 1.0              # Floor: at least 1.0×ATR
 SL_MIN_SPREAD_MULT = 2        # Floor: at least 2×spread
-SL_MAX_PIPS_1M = 5.0          # Hard cap: 5 pips for 1M trades
-SL_MAX_PIPS_5M = 10.0         # Hard cap: 10 pips for 5M trades
+SL_MAX_PIPS_1M = 8.0          # Hard cap: 8 pips for 1M trades
+SL_MAX_PIPS_5M = 15.0         # Hard cap: 15 pips for 5M trades
 
 SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
 MIN_RR = 1.2                  # Minimum reward-to-risk ratio
