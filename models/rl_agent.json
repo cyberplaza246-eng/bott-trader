@@ -1,29 +1,14 @@
 {
   "epsilon": 0.05,
   "training_step": 25189,
-  "total_trades": 2472,
+  "total_trades": 2475,
   "action_counts": {
-    "3": 983,
+    "3": 988,
     "0": 22843,
     "2": 974,
     "1": 515
   },
   "recent_trades": [
-    {
-      "won": true,
-      "pips": 9.714246394091052,
-      "rr": 2.0
-    },
-    {
-      "won": true,
-      "pips": 10.682504937158457,
-      "rr": 2.0
-    },
-    {
-      "won": true,
-      "pips": 19.67286901133121,
-      "rr": 2.0
-    },
     {
       "won": true,
       "pips": 18.153747457219346,
@@ -258,10 +243,25 @@
       "won": false,
       "pips": -121.56435108438907,
       "rr": -1.0
+    },
+    {
+      "won": false,
+      "pips": 0.0,
+      "rr": 0
+    },
+    {
+      "won": false,
+      "pips": 0.0,
+      "rr": 0
+    },
+    {
+      "won": false,
+      "pips": 0.0,
+      "rr": 0
     }
   ],
   "episode_rewards_summary": {
-    "mean": 0.975,
-    "total": 7155
+    "mean": 0.0,
+    "total": 3
   }
 }

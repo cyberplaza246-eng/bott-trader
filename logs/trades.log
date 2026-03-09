@@ -44,3 +44,27 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (RELAY) | Pair: GBP/USD | Closed ticket: 21080079"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (RELAY) | Pair: GBP/USD | Type: SELL | Lot: 0.02 | SL: 1.34589 | TP: 1.34298 | Ticket: 21080292"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: EUR/USD | Type: BUY | Lot: 0.02 | SL: 1.08439 | TP: 1.08664 | Ticket: 893253"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 150.50495 | TP: 150.45411 | Ticket: 523077"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: BUY | Lot: 0.01 | SL: 150.40131 | TP: 150.47238 | Ticket: 591830"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26477 | TP: 1.26417 | Ticket: 893346"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26546 | TP: 1.26501 | Ticket: 191099"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 150.49500 | TP: 150.44700 | Ticket: 310937"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: BUY | Lot: 0.01 | SL: 1.26481 | TP: 1.26541 | Ticket: 690836"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26515 | TP: 1.26449 | Ticket: 991811"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26569 | TP: 1.26509 | Ticket: 291246"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 150.48800 | TP: 150.44000 | Ticket: 591865"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: BUY | Lot: 0.01 | SL: 150.45100 | TP: 150.49900 | Ticket: 71089"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 150.49600 | TP: 150.44800 | Ticket: 252929"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 150.53400 | TP: 150.48600 | Ticket: 451347"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26556 | TP: 1.26487 | Ticket: 992403"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26479 | TP: 1.26362 | Ticket: 592138"}

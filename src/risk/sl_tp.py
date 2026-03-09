@@ -37,17 +37,17 @@ PAIR_CONFIG = {
 
 # ── Constants ───────────────────────────────────────────────────────
 SL_ATR_BUFFER = 0.50          # Buffer beyond structure level (50% ATR)
-SL_ATR_FALLBACK = 1.2         # Fallback: 1.2×ATR when no structure
+SL_ATR_FALLBACK = 1.5         # Fallback: 1.5×ATR when no structure
 SL_MIN_ATR = 1.0              # Floor: at least 1.0×ATR
 SL_MIN_SPREAD_MULT = 2        # Floor: at least 2×spread
-SL_MAX_PIPS_1M = 8.0          # Hard cap: 8 pips for 1M trades
-SL_MAX_PIPS_5M = 15.0         # Hard cap: 15 pips for 5M trades
+SL_MAX_PIPS_1M = 15.0         # Hard cap: 15 pips for 1M trades
+SL_MAX_PIPS_5M = 25.0         # Hard cap: 25 pips for 5M trades
 
 SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
 MIN_RR = 1.2                  # Minimum reward-to-risk ratio
-MAX_RR = 2.0                  # Maximum R:R (scalps don't need 3R+)
-TP_MAX_PIPS_1M = 8.0          # Hard cap: 8 pips TP for 1M scalps
-TP_MAX_PIPS_5M = 15.0         # Hard cap: 15 pips TP for 5M scalps
+MAX_RR = 2.5                  # Maximum R:R
+TP_MAX_PIPS_1M = 20.0         # Hard cap: 20 pips TP for 1M scalps
+TP_MAX_PIPS_5M = 35.0         # Hard cap: 35 pips TP for 5M scalps
 
 STRUCTURE_LOOKBACK = 30       # Bars to scan for swing structure
 
