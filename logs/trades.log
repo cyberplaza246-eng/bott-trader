@@ -68,3 +68,13 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26556 | TP: 1.26487 | Ticket: 992403"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26479 | TP: 1.26362 | Ticket: 592138"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: BUY | Lot: 0.01 | SL: 1.26464 | TP: 1.26524 | Ticket: 791241"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 150.51800 | TP: 150.47000 | Ticket: 910930"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26518 | TP: 1.26458 | Ticket: 691192"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: BUY | Lot: 0.01 | SL: 1.26521 | TP: 1.26619 | Ticket: 891258"}

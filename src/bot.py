@@ -114,9 +114,10 @@ class TradingBot:
         self._trade_lock = threading.Lock()
         
         self.last_signal_time = {}  # Track last signal per pair per timeframe
-        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '60'))
-        self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.70'))
-        self.reversal_exit_min_agreement = int(os.getenv('REVERSAL_EXIT_MIN_AGREEMENT', '2'))
+        # For scalping, use much longer hold time - let TP/SL do the work
+        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '180'))
+        self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.85'))
+        self.reversal_exit_min_agreement = int(os.getenv('REVERSAL_EXIT_MIN_AGREEMENT', '3'))
         self.enable_correlation_guard = os.getenv('ENABLE_CORRELATION_GUARD', 'true').lower() == 'true'
 
         # Dual-timeframe confluence tracking: {pair: {'1m': signal_result, '5m': signal_result}}
@@ -1422,7 +1423,11 @@ class TradingBot:
         return max(0.0, (now_utc - open_time).total_seconds() / 60.0)
 
     def _manage_open_position(self, pair, signal_result):
-        """Actively close stale or strongly reversed positions to free trade slots."""
+        """Actively close stale or strongly reversed positions to free trade slots.
+        
+        CONSERVATIVE: Only exits on very strong reversals or truly old stale trades.
+        Let TP/SL do the heavy lifting for normal exits.
+        """
         position = self._find_open_position(pair)
         if not position:
             return
@@ -1432,28 +1437,40 @@ class TradingBot:
         confidence = signal_result.get('confidence', 0.0)
         agreement = signal_result.get('models_agreement', 0)
         min_required = signal_result.get('min_agreement_required', 2)
+        pnl = float(position.get('profit', 0) or 0)
 
+        # Strong reversal: opposite signal with high confidence
         opposite_signal = signal in ('BUY', 'SELL') and signal != position_type
         strong_reversal = (
             opposite_signal and
             confidence >= self.reversal_exit_confidence and
-            agreement >= max(self.reversal_exit_min_agreement, min_required)
+            agreement >= max(self.reversal_exit_min_agreement, min_required) and
+            pnl < -0.10  # Only exit if losing money
         )
 
         age_minutes = self._position_age_minutes(position)
+        
+        # Stale trade: very old AND consistently failing signals AND in loss
+        # Require ALL conditions to prevent premature exits
         stale_trade = (
             age_minutes is not None and
-            age_minutes >= self.max_trade_hold_minutes and
-            (signal == 'SKIP' or confidence < self.reversal_exit_confidence)
+            age_minutes >= self.max_trade_hold_minutes and  # Default 180 min
+            age_minutes <= 1440 and  # Sanity check: max 24 hours (prevent timezone bugs)
+            pnl < -0.20 and  # Must be losing money
+            (signal == 'SKIP' or confidence < 0.50)  # No strong signal in either direction
         )
 
         if not strong_reversal and not stale_trade:
             return
-
-        if strong_reversal:
-            exit_reason = 'REVERSAL_SIGNAL'
-        else:
-            exit_reason = 'STALE_SIGNAL'
+        
+        # Log why we're exiting
+        exit_reason = 'REVERSAL_SIGNAL' if strong_reversal else 'STALE_SIGNAL'
+        bot_logger.info(
+            f"⚠️ {exit_reason} exit triggered: {pair} | "
+            f"age={age_minutes:.0f}m | P/L=${pnl:+.2f} | "
+            f"signal={signal} conf={confidence:.1%} | "
+            f"reversal={strong_reversal} stale={stale_trade}"
+        )
 
         if self.mode == 'paper' and self.paper_trader:
             latest_price = self.broker.get_latest_price(pair) if self.broker else None

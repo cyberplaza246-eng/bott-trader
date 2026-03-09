@@ -1,19 +1,19 @@
 {
   "model_weights": {
-    "scalping": 0.18351561349607937,
-    "technical": 0.14389777755542227,
-    "volume": 0.0852907586738171,
-    "ema_crossover": 0.1570151196384206,
-    "candlestick": 0.09021485572239783,
-    "multi_tf": 0.13574315874535864,
-    "support_resistance": 0.07335410198766608,
-    "lstm": 0.06542973790363016,
-    "sentiment": 0.06553887627720796
+    "scalping": 0.18348918249218718,
+    "technical": 0.144001099289327,
+    "volume": 0.08506888239441847,
+    "ema_crossover": 0.15765008330974242,
+    "candlestick": 0.09020669355350515,
+    "multi_tf": 0.13644779041087168,
+    "support_resistance": 0.07282650687446458,
+    "lstm": 0.0644109297082194,
+    "sentiment": 0.06589883196726407
   },
   "model_accuracy": {
     "sweep": {
       "correct": 0,
-      "total": 10
+      "total": 11
     },
     "scalping": {
       "correct": 0,
@@ -21,7 +21,7 @@
     },
     "lstm": {
       "correct": 2,
-      "total": 5
+      "total": 6
     },
     "sentiment": {
       "correct": 0,
@@ -41,7 +41,7 @@
     },
     "support_resistance": {
       "correct": 5,
-      "total": 10
+      "total": 11
     },
     "candlestick": {
       "correct": 1,
@@ -55,8 +55,8 @@
   "pair_stats": {
     "EUR/USD": {
       "wins": 0,
-      "losses": 49,
-      "total_pnl": -245.0
+      "losses": 48,
+      "total_pnl": -240.0
     },
     "USD/JPY": {
       "wins": 0,
@@ -72,21 +72,21 @@
   "session_stats": {
     "asian": {
       "wins": 0,
-      "losses": 49
+      "losses": 48
     }
   },
   "pair_model_accuracy": {
     "USD/JPY:sweep": {
       "correct": 0,
-      "total": 5
+      "total": 6
     },
     "USD/JPY:lstm": {
       "correct": 2,
-      "total": 5
+      "total": 6
     },
     "USD/JPY:support_resistance": {
       "correct": 2,
-      "total": 5
+      "total": 6
     },
     "GBP/USD:sweep": {
       "correct": 0,
@@ -124,8 +124,8 @@
   "session_pair_stats": {
     "asian:EUR/USD": {
       "wins": 0,
-      "losses": 49,
-      "total_pnl": -245.0
+      "losses": 48,
+      "total_pnl": -240.0
     },
     "asian:USD/JPY": {
       "wins": 0,
@@ -145,7 +145,7 @@
     },
     "lstm:support_resistance:sweep": {
       "wins": 0,
-      "total": 3
+      "total": 4
     },
     "candlestick:sweep:technical": {
       "wins": 0,
@@ -171,10 +171,12 @@
       0.0,
       0.0,
       0.0,
+      0.0,
       0.0
     ],
     "scalping": [],
     "lstm": [
+      0.0,
       0.0,
       0.0,
       0.0
@@ -192,6 +194,7 @@
       0.0,
       0.0,
       0.0,
+      0.0,
       0.0
     ],
     "candlestick": [
@@ -204,8 +207,8 @@
   "regime_stats": {
     "trending": {
       "wins": 0,
-      "losses": 49,
-      "total_pnl": -245.0
+      "losses": 48,
+      "total_pnl": -240.0
     },
     "ranging": {
       "wins": 0,
@@ -226,14 +229,14 @@
     },
     "3": {
       "wins": 0,
-      "losses": 1,
-      "total_pnl": -5.0
+      "losses": 0,
+      "total_pnl": 0.0
     }
   },
   "confidence_threshold": 0.53,
-  "consecutive_losses": 49,
+  "consecutive_losses": 48,
   "consecutive_wins": 0,
-  "max_consecutive_losses": 49,
+  "max_consecutive_losses": 48,
   "peak_balance": 0.0,
   "current_drawdown_pct": 0,
   "in_drawdown_protection": false,
@@ -2204,12 +2207,140 @@
       "is_win": false
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T03:36:24.820039",
+      "pair": "USD/JPY",
+      "signal": "SELL",
+      "profit_loss": 0.0,
+      "entry_price": 0.0,
+      "exit_price": 0.0,
+      "exit_type": "REVERSAL_SIGNAL",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.9299999999999999,
+          "regime": "trend_down",
+          "bias": "SELL",
+          "mss_confirmed": true
+        },
+        "scalping": {
+          "signal": "SKIP",
+          "confidence": 0.0,
+          "setup": "none"
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 1.0,
+          "reason": "LSTM predicts -99.16% move",
+          "predicted_price": "1.264551",
+          "current_price": 150.518,
+          "predicted_change_percent": -99.15986722949386
+        },
+        "sentiment": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "score": 0.0,
+          "news_count": 0
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Volume spike 3.5x + bullish candle | MACD bullish | DI+ dominant (36 vs 30) | ADX too weak (13<15) \u2014 blocking signal",
+          "rsi": 53.957303698052264,
+          "macd": 0.0018299322219377245,
+          "bb_position": 0.6908050199487623,
+          "adx": 12.87022556465499,
+          "divergence": "bearish",
+          "buy_score": 0.35,
+          "sell_score": 0.0
+        },
+        "volume": {
+          "signal": "HOLD",
+          "confidence": 0.6499999999999999,
+          "reason": "Volume spike (3.51x avg) | 3-candle volume ramp | Above-median recent volume",
+          "current_volume": "14839",
+          "average_volume": 4229.85,
+          "volume_ratio": 3.5081622271456046
+        },
+        "multi_tf": {
+          "signal": "HOLD",
+          "confluence_score": 0.0,
+          "agreement": 0,
+          "timeframe_signals": {
+            "fast": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (36 vs 30) | Near BB lower (%B=0.11) | Stochastic oversold (9/11)",
+              "rsi": 38.95035717421271,
+              "macd": -0.0032923462242422374,
+              "bb_position": 0.11271220545780261,
+              "adx": 13.93948220430588,
+              "divergence": "bearish",
+              "buy_score": 0.08,
+              "sell_score": 0.25
+            },
+            "medium": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (38 vs 29) | Near BB lower (%B=0.11) | Stochastic oversold (9/11)",
+              "rsi": 38.68256409411317,
+              "macd": -0.01153985997223117,
+              "bb_position": 0.10868612436060672,
+              "adx": 14.117085992992042,
+              "divergence": "none",
+              "buy_score": 0.08,
+              "sell_score": 0.25
+            },
+            "slow": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (38 vs 29) | Near BB lower (%B=0.11) | Stochastic oversold (9/11)",
+              "rsi": 38.820624839712174,
+              "macd": -0.022943671974502422,
+              "bb_position": 0.11160809164999733,
+              "adx": 14.171110767637513,
+              "divergence": "none",
+              "buy_score": 0.08,
+              "sell_score": 0.25
+            }
+          },
+          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
+        },
+        "support_resistance": {
+          "signal": "SELL",
+          "confidence": 0.7911689580699531,
+          "reason": "Price at resistance 150.52132",
+          "levels": {
+            "support_levels": [
+              150.0,
+              149.5,
+              149.0
+            ],
+            "resistance_levels": [
+              150.52132307692307,
+              151.0,
+              151.5,
+              152.0
+            ],
+            "current_price": 150.518,
+            "nearest_support": 150.0,
+            "nearest_resistance": 150.52132307692307,
+            "price_zone": "AT_RESISTANCE",
+            "zone_strength": 0.9889611975874414
+          }
+        },
+        "candlestick": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "patterns": [],
+          "reason": "No candlestick patterns detected"
+        },
+        "ema_crossover": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Weak EMA alignment (< 1.5 pips)"
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-09T03:50:50.956187",
       "session": "asian",
       "hour": 3,
       "is_win": false
@@ -2217,32 +2348,28 @@
   ],
   "loss_patterns": {
     "pair:EUR/USD": {
-      "count": 49,
-      "total_loss": 245.0
+      "count": 48,
+      "total_loss": 240.0
     },
     "session:asian": {
-      "count": 49,
-      "total_loss": 245.0
+      "count": 48,
+      "total_loss": 240.0
     },
     "pair_session:EUR/USD:asian": {
-      "count": 49,
-      "total_loss": 245.0
+      "count": 48,
+      "total_loss": 240.0
     },
     "pair_regime:EUR/USD:trending": {
-      "count": 49,
-      "total_loss": 245.0
+      "count": 48,
+      "total_loss": 240.0
     },
     "hour:1": {
       "count": 48,
       "total_loss": 240.0
     },
     "signal:BUY": {
-      "count": 49,
-      "total_loss": 245.0
-    },
-    "hour:3": {
-      "count": 1,
-      "total_loss": 5.0
+      "count": 48,
+      "total_loss": 240.0
     }
   },
   "recent_trades_window": [
@@ -2328,13 +2455,13 @@
       "timestamp": "2026-03-09T03:31:52.864673"
     },
     {
-      "pair": "EUR/USD",
+      "pair": "USD/JPY",
       "session": "asian",
       "hour": 3,
-      "regime": "trending",
+      "regime": "ranging",
       "is_win": false,
-      "pnl": -5.0,
-      "timestamp": "2026-03-09T03:36:24.820052"
+      "pnl": 0.0,
+      "timestamp": "2026-03-09T03:50:50.956205"
     }
   ],
   "session_atr_profiles": {},
@@ -2354,7 +2481,8 @@
       0.0002,
       0.0002222886272051916,
       0.0002,
-      0.00023077883508726416
+      0.00023077883508726416,
+      0.0003906219367768582
     ]
   },
   "sl_multiplier_by_pair": {},
@@ -2366,15 +2494,15 @@
       "sl_hit": 0,
       "tp_hit": 0,
       "time_exit": 0,
-      "manual": 49,
-      "total": 49
+      "manual": 48,
+      "total": 48
     },
     "USD/JPY": {
       "sl_hit": 0,
       "tp_hit": 0,
       "time_exit": 0,
-      "manual": 5,
-      "total": 5
+      "manual": 6,
+      "total": 6
     },
     "GBP/USD": {
       "sl_hit": 0,
@@ -2385,5 +2513,5 @@
     }
   },
   "auto_learning_trade_count": 29,
-  "last_updated": "2026-03-09T03:36:24.860114"
+  "last_updated": "2026-03-09T03:50:50.960503"
 }
