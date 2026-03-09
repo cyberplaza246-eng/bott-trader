@@ -180,6 +180,8 @@ class EnsembleTrader:
         )
 
         # ── Step 6: Sweep gate decision ──────────────────────────────
+        context_signals = {}  # defined early so result dict always has it
+
         if sweep_direction not in ('BUY', 'SELL'):
             # Sweep didn't fire — check for EMA+Technical consensus fallback
             # This lets the bot take high-conviction trend trades when no
