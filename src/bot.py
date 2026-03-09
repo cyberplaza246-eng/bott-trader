@@ -114,8 +114,8 @@ class TradingBot:
         self._trade_lock = threading.Lock()
         
         self.last_signal_time = {}  # Track last signal per pair per timeframe
-        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '30'))
-        self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.55'))
+        self.max_trade_hold_minutes = int(os.getenv('MAX_TRADE_HOLD_MINUTES', '45'))
+        self.reversal_exit_confidence = float(os.getenv('REVERSAL_EXIT_CONFIDENCE', '0.65'))
         self.reversal_exit_min_agreement = int(os.getenv('REVERSAL_EXIT_MIN_AGREEMENT', '2'))
         self.enable_correlation_guard = os.getenv('ENABLE_CORRELATION_GUARD', 'true').lower() == 'true'
 
@@ -137,9 +137,6 @@ class TradingBot:
             f"({model_count}-model ensemble, 1M+5M dual-timeframe)"
         )
 
-        # ── Learning System Status ────────────────────────────────
-        self._log_learning_status()
-
     # ── Startup Position Enforcement ──────────────────────────────
 
     MAX_ALLOWED_POSITIONS = 3  # ABSOLUTE MAXIMUM - never more than this
@@ -149,10 +146,8 @@ class TradingBot:
         if self.mode != 'live' or not self.broker:
             return
         try:
-            positions = self.broker.get_open_positions()
-            if positions is None:
-                bot_logger.warning("Startup check skipped: could not fetch positions")
-                return
+            import MetaTrader5 as mt5
+            positions = mt5.positions_get()
             if not positions:
                 bot_logger.info(f"✅ Startup check: 0 positions open")
                 return
@@ -165,27 +160,39 @@ class TradingBot:
                 bot_logger.warning(f"🚨 CLOSING {excess} EXCESS POSITIONS!")
                 
                 # Sort by profit (close worst ones first)
-                sorted_pos = sorted(positions, key=lambda p: p.get('profit', 0))
+                sorted_pos = sorted(positions, key=lambda p: p.profit)
                 
                 for i in range(excess):
                     pos = sorted_pos[i]
-                    result = self.broker.close_position(
-                        pair=pos.get('pair'),
-                        volume=pos.get('volume'),
-                        ticket=pos.get('ticket'),
-                    )
-                    if result:
-                        bot_logger.info(
-                            f"✅ Closed excess position {pos.get('ticket')} "
-                            f"({pos.get('pair')} P/L: {pos.get('profit', 0):.2f})"
-                        )
+                    tick = mt5.symbol_info_tick(pos.symbol)
+                    if not tick:
+                        continue
+                    close_price = tick.bid if pos.type == 0 else tick.ask
+                    close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
+                    
+                    close_req = {
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": pos.symbol,
+                        "volume": pos.volume,
+                        "type": close_type,
+                        "position": pos.ticket,
+                        "price": close_price,
+                        "deviation": 50,
+                        "magic": 234000,
+                        "comment": "Excess position cleanup",
+                        "type_time": mt5.ORDER_TIME_GTC,
+                        "type_filling": mt5.ORDER_FILLING_IOC,
+                    }
+                    result = mt5.order_send(close_req)
+                    if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                        bot_logger.info(f"✅ Closed excess position {pos.ticket} ({pos.symbol} P/L: {pos.profit:.2f})")
                     else:
-                        bot_logger.error(f"❌ Failed to close {pos.get('ticket')}")
+                        bot_logger.error(f"❌ Failed to close {pos.ticket}")
                 
                 # Verify
                 import time
                 time.sleep(1)
-                remaining = self.broker.get_open_positions() or []
+                remaining = mt5.positions_get()
                 bot_logger.info(f"✅ After cleanup: {len(remaining) if remaining else 0} positions")
         except Exception as e:
             bot_logger.error(f"Startup position check failed: {e}")
@@ -195,29 +202,38 @@ class TradingBot:
         if self.mode != 'live' or not self.broker:
             return
         try:
-            positions = self.broker.get_open_positions()
-            if positions is None:
-                bot_logger.warning("Enforcement skipped: could not fetch positions")
-                return
-            count = len(positions)
-            bot_logger.info(f"🛡️ Enforcement check: {count}/{self.MAX_ALLOWED_POSITIONS} positions")
+            import MetaTrader5 as mt5
+            positions = mt5.positions_get()
             if not positions:
                 return
+            count = len(positions)
             if count > self.MAX_ALLOWED_POSITIONS:
                 bot_logger.error(f"🚨 ENFORCEMENT: {count} positions detected! Max is {self.MAX_ALLOWED_POSITIONS}. Closing excess.")
-                sorted_pos = sorted(positions, key=lambda p: p.get('profit', 0))
+                sorted_pos = sorted(positions, key=lambda p: p.profit)
                 excess = count - self.MAX_ALLOWED_POSITIONS
                 for i in range(excess):
                     pos = sorted_pos[i]
-                    result = self.broker.close_position(
-                        pair=pos.get('pair'),
-                        volume=pos.get('volume'),
-                        ticket=pos.get('ticket'),
-                    )
-                    if result:
-                        bot_logger.info(f"✅ Enforced close: {pos.get('ticket')} ({pos.get('pair')})")
-                    else:
-                        bot_logger.error(f"❌ Enforcement close failed: {pos.get('ticket')} ({pos.get('pair')})")
+                    tick = mt5.symbol_info_tick(pos.symbol)
+                    if not tick:
+                        continue
+                    close_price = tick.bid if pos.type == 0 else tick.ask
+                    close_type = mt5.ORDER_TYPE_SELL if pos.type == 0 else mt5.ORDER_TYPE_BUY
+                    close_req = {
+                        "action": mt5.TRADE_ACTION_DEAL,
+                        "symbol": pos.symbol,
+                        "volume": pos.volume,
+                        "type": close_type,
+                        "position": pos.ticket,
+                        "price": close_price,
+                        "deviation": 50,
+                        "magic": 234000,
+                        "comment": "Max position enforcement",
+                        "type_time": mt5.ORDER_TIME_GTC,
+                        "type_filling": mt5.ORDER_FILLING_IOC,
+                    }
+                    result = mt5.order_send(close_req)
+                    if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+                        bot_logger.info(f"✅ Enforced close: {pos.ticket} ({pos.symbol})")
         except Exception as e:
             bot_logger.warning(f"Position enforcement check failed: {e}")
 
@@ -374,22 +390,9 @@ class TradingBot:
         
         # Sync balance from broker/paper trader each cycle
         self._sync_balance()
-
-        # Hourly learning status log (only on 5m cycle, once per hour)
-        if timeframe_key == '5m':
-            now_min = datetime.now().minute
-            if now_min < 5 and not getattr(self, '_last_learning_log_hour', -1) == datetime.now().hour:
-                self._last_learning_log_hour = datetime.now().hour
-                self._log_learning_status()
         
         # Detect trades closed by MT5 (TP/SL hit) and record them
         self._detect_closed_trades()
-
-        # Evaluate RL skip decisions (did skipping avoid a loss?)
-        try:
-            self._process_rl_pending_skips()
-        except Exception as e:
-            bot_logger.debug(f"RL skip processing: {e}")
         
         # Sync open trade count from broker (live mode)
         self._sync_open_trades()
@@ -406,8 +409,9 @@ class TradingBot:
             except Exception as e:
                 bot_logger.warning(f"Trailing stop update failed: {e}")
 
-            # ── Time Stop ─────────────────────────────────────────────
-            # Close trades not in profit after MAX_FLAT_MINUTES (real elapsed time).
+            # ── 3-Candle Time Stop ────────────────────────────────────
+            # If a trade hasn't moved in our favor after 3 candle cycles,
+            # close it at market to prevent slow bleeds.
             try:
                 self._check_time_stop()
             except Exception as e:
@@ -637,11 +641,18 @@ class TradingBot:
                     if self.enable_correlation_guard and self._has_correlated_position(pair, signal_result['signal']):
                         continue
 
-                    # ── RL Agent ──────────────────────────────────────
-                    # Run ALL signals through RL so it learns from everything.
-                    # High-confidence signals proceed regardless of RL action
-                    # (RL is advisory, not gating), but RL still records the
-                    # outcome for training.
+                    # ── TEMPORARY: Bypass RL Agent for High Confidence Signals ──
+                    # Allow excellent signals to trade immediately without RL veto
+                    if signal_result['confidence'] >= 0.40:
+                        bot_logger.info(f"🚀 High confidence signal ({signal_result['confidence']:.1%}) — bypassing RL agent")
+                        # Set default RL values for position sizing
+                        signal_result['_rl_lot_mult'] = 1.0
+                        # Proceed directly to trade execution
+                        self._execute_trade(pair, signal_result, df, timeframe_key)
+                        continue
+
+                    # ── RL Agent Gate ──────────────────────────────────
+                    # Build state and let the RL agent decide action
                     try:
                         enriched = signal_result.get('enriched_df', df)
                         latest_bar = enriched.iloc[-1]
@@ -668,27 +679,15 @@ class TradingBot:
                         rl_action_name = self.rl_agent.get_action_name(rl_action)
 
                         if rl_action == 0:  # SKIP
+                            bot_logger.info(f"  🤖 RL Agent: SKIP trade on {pair} (ε={self.rl_agent.epsilon:.3f})")
                             # Store state for later reward computation
                             if not hasattr(self, '_rl_pending_skips'):
                                 self._rl_pending_skips = {}
                             self._rl_pending_skips[f"{pair}_{timeframe_key}"] = {
                                 'state': rl_state, 'action': rl_action,
                                 'signal': signal_result,
-                                'timestamp': datetime.now(),
                             }
-                            # Advisory mode: let high-confidence signals through
-                            # regardless of RL SKIP so RL learns from all outcomes
-                            if signal_result['confidence'] >= 0.40:
-                                bot_logger.info(
-                                    f"  🤖 RL: SKIP overridden — high confidence "
-                                    f"({signal_result['confidence']:.1%}) (ε={self.rl_agent.epsilon:.3f})"
-                                )
-                                signal_result['_rl_state'] = rl_state
-                                signal_result['_rl_action'] = rl_action
-                                signal_result['_rl_lot_mult'] = 1.0
-                            else:
-                                bot_logger.info(f"  🤖 RL Agent: SKIP trade on {pair} (ε={self.rl_agent.epsilon:.3f})")
-                                continue
+                            continue
                         else:
                             lot_mult = self.rl_agent.get_lot_multiplier(rl_action)
                             bot_logger.info(
@@ -837,24 +836,6 @@ class TradingBot:
         stop_loss = sl_tp['stop_loss']
         take_profit = sl_tp['take_profit']
 
-        # Apply adaptive SL multiplier (auto-tuned per pair based on hit rate)
-        try:
-            sl_mult = self.ensemble.learner.get_sl_multiplier(pair)
-            if sl_mult != 0.8:  # 0.8 is the default — only log if changed
-                old_sl = stop_loss
-                sl_distance = abs(entry_price - stop_loss)
-                new_sl_distance = sl_distance * (sl_mult / 0.8)  # Adjust relative to default
-                if trade_type == 'BUY':
-                    stop_loss = entry_price - new_sl_distance
-                else:
-                    stop_loss = entry_price + new_sl_distance
-                bot_logger.info(
-                    f"📐 Adaptive SL: {pair} ×{sl_mult:.2f} "
-                    f"({old_sl:.5f} → {stop_loss:.5f})"
-                )
-        except Exception:
-            pass
-
         # Record SL for adaptive learner median tracking
         try:
             self.ensemble.learner.record_sl_outcome(pair, sl_tp['sl_distance'], True)
@@ -892,6 +873,7 @@ class TradingBot:
         if rl_state is not None:
             if not hasattr(self, '_pending_rl_info'):
                 self._pending_rl_info = {}
+            pair_config_pip = SCALPING_PAIRS.get(pair, {}).get('pip_size', 0.0001)
             self._pending_rl_info[pair] = {
                 'state': rl_state,
                 'action': rl_action,
@@ -1028,20 +1010,19 @@ class TradingBot:
             bot_logger.info(f"✅ Paper trade executed - ID: {trade_id}")
             self.risk_manager.on_trade_opened()
 
-        # Store model signals and ML features keyed by TICKET (not pair)
-        # so concurrent trades on the same pair don't overwrite each other.
-        trade_ticket = locals().get('order_id') or locals().get('trade_id')
+        # Store model signals for adaptive learning when trade closes
+        # (works for BOTH live and paper mode so the learner always knows
+        #  which models contributed to each trade)
         if not hasattr(self, '_pending_trade_signals'):
             self._pending_trade_signals = {}
-        sig_key = trade_ticket if trade_ticket else pair
-        self._pending_trade_signals[sig_key] = signal_result.get('models', {})
+        self._pending_trade_signals[pair] = signal_result.get('models', {})
 
         # ── ML Scorer: capture feature snapshot at entry time ────────
         if not hasattr(self, '_pending_ml_features'):
             self._pending_ml_features = {}
         try:
             ml_features = self.ensemble.capture_ml_features(signal_result, pair)
-            self._pending_ml_features[sig_key] = ml_features
+            self._pending_ml_features[pair] = ml_features
         except Exception as e:
             bot_logger.warning(f"🧠 ML feature capture failed: {e}")
     
@@ -1067,8 +1048,7 @@ class TradingBot:
                     )
                     
                     # Record with adaptive learner
-                    pending_signals = getattr(self, '_pending_trade_signals', {})
-                    model_signals = pending_signals.pop(pair, {})
+                    model_signals = getattr(self, '_pending_trade_signals', {}).pop(pair, {})
                     self.ensemble.record_trade_result({
                         'pair': pair,
                         'signal': closed_trade.get('type', 'UNKNOWN'),
@@ -1087,19 +1067,15 @@ class TradingBot:
                     self._record_rl_outcome(pair, closed_trade['profit_loss'], exit_type)
 
     def _check_time_stop(self):
-        """Close positions that haven't moved into profit after MIN_HOLD minutes.
+        """Close positions that haven't moved into profit after 3 candle cycles.
 
-        Uses real elapsed wall-clock time instead of cycle counting to avoid
-        double-counting from 1m + 5m schedulers both calling this method.
+        For sweep-based entries this prevents slow bleed losses.
+        Tracked via _trade_cycle_counts: {ticket: {entry_price, direction, cycles}}.
         """
-        MIN_HOLD_MINUTES = 8    # Never close a trade younger than 8 minutes
-        # Use adaptive learner's time-exit candles (4-8) mapped to minutes
-        # Each candle ≈ 5 min on the 5m timeframe, so candles × 5 = minutes
-        try:
-            learned_candles = self.ensemble.learner.get_time_exit_candles()
-            MAX_FLAT_MINUTES = max(8, learned_candles * 5)
-        except Exception:
-            MAX_FLAT_MINUTES = 12   # Default: 12 minutes (was 15 — too slow for scalping)
+        if not hasattr(self, '_trade_cycle_counts'):
+            self._trade_cycle_counts = {}
+
+        TIME_STOP_CYCLES = 3  # Close after 3 cycles with no profit
 
         try:
             positions = self.broker.get_open_positions()
@@ -1107,24 +1083,32 @@ class TradingBot:
             return
 
         if not positions:
+            # Clean stale tracking
+            self._trade_cycle_counts.clear()
             return
 
-        now = datetime.now(timezone.utc)
-
+        active_tickets = set()
         for pos in positions:
             ticket = pos.get('ticket')
             if not ticket:
                 continue
+            active_tickets.add(ticket)
 
             entry_price = float(pos.get('price_open', 0) or pos.get('entry_price', 0))
             current_price = float(pos.get('price_current', 0) or 0)
             direction = 'BUY' if pos.get('type', 0) == 0 else 'SELL'
             pair = pos.get('symbol', '')
 
-            # Calculate real age of the trade
-            age_minutes = self._position_age_minutes(pos)
-            if age_minutes is None or age_minutes < MIN_HOLD_MINUTES:
-                continue  # Too young — never time-stop before MIN_HOLD_MINUTES
+            if ticket not in self._trade_cycle_counts:
+                self._trade_cycle_counts[ticket] = {
+                    'entry_price': entry_price,
+                    'direction': direction,
+                    'pair': pair,
+                    'cycles': 0,
+                }
+
+            info = self._trade_cycle_counts[ticket]
+            info['cycles'] += 1
 
             # Check if trade is in profit
             if direction == 'BUY':
@@ -1133,111 +1117,42 @@ class TradingBot:
                 in_profit = current_price < entry_price
 
             if in_profit:
-                continue  # Trade is working — leave it alone
-
-            if age_minutes >= MAX_FLAT_MINUTES:
+                # Reset cycle counter — trade is working
+                info['cycles'] = 0
+            elif info['cycles'] >= TIME_STOP_CYCLES:
                 # Time stop triggered — close at market
                 pnl = pos.get('profit', 0)
                 bot_logger.warning(
                     f"⏰ TIME STOP: {pair} ticket {ticket} — "
-                    f"no profit after {age_minutes:.0f}min "
+                    f"no profit after {TIME_STOP_CYCLES} cycles "
                     f"(entry={entry_price:.5f}, current={current_price:.5f}, P/L=${pnl:.2f})"
                 )
                 try:
-                    result = self.broker.close_position(ticket=ticket)
+                    result = self.broker.close_position(ticket)
                     if result:
                         bot_logger.info(f"⏰ TIME STOP closed ticket {ticket}")
                         self.risk_manager.on_trade_closed(pnl)
-
-                        # Record with adaptive learner for weight adaptation
-                        pending_signals = getattr(self, '_pending_trade_signals', {})
-                        model_signals = pending_signals.pop(ticket, None) or pending_signals.pop(pair, {})
-                        self.ensemble.record_trade_result({
-                            'pair': pair,
-                            'signal': direction,
-                            'profit_loss': pnl,
-                            'entry_price': entry_price,
-                            'exit_price': current_price,
-                            'exit_type': 'TIME_STOP',
-                            'model_signals': model_signals,
-                            'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
-                        })
-
-                        self._record_ml_outcome(pair, pnl, ticket=ticket)
+                        self._record_ml_outcome(pair, pnl)
                         self._record_rl_outcome(pair, pnl, 'time_stop')
                 except Exception as e:
                     bot_logger.warning(f"Time stop close failed for {ticket}: {e}")
 
-    def _log_learning_status(self):
-        """Log current state of all learning systems."""
-        try:
-            learner = self.ensemble.learner
-            trade_count = len(learner.trade_history)
-            threshold = learner.get_adjusted_threshold()
-            weights = learner.model_weights
-            drawdown = learner.in_drawdown_protection
-
-            bot_logger.info("=" * 50)
-            bot_logger.info("📚 LEARNING SYSTEM STATUS")
-            bot_logger.info(f"  Adaptive Learner: {trade_count} trades recorded")
-            bot_logger.info(f"  Confidence threshold: {threshold:.2%}")
-            bot_logger.info(f"  Drawdown protection: {'ACTIVE' if drawdown else 'off'}")
-
-            # Model weights
-            sorted_w = sorted(weights.items(), key=lambda x: x[1], reverse=True)
-            top_models = ", ".join(f"{m}={w:.2f}" for m, w in sorted_w[:4])
-            bot_logger.info(f"  Top model weights: {top_models}")
-
-            # Pair stats
-            for pair_key, stats in learner.pair_stats.items():
-                total = stats.get('wins', 0) + stats.get('losses', 0)
-                if total > 0:
-                    wr = stats['wins'] / total * 100
-                    bot_logger.info(f"  {pair_key}: {total} trades, {wr:.0f}% win rate")
-
-            # ML scorer
-            ml_status = self.ensemble.ml_scorer.get_status()
-            samples = ml_status.get('training_samples', 0)
-            trained = ml_status.get('is_trained', False)
-            bot_logger.info(
-                f"  ML Scorer: {samples}/50 samples"
-                f" {'(TRAINED ✓)' if trained else ''}"
-            )
-
-            # RL agent
-            rl_trades = self.rl_agent.total_trades
-            rl_eps = self.rl_agent.epsilon
-            bot_logger.info(f"  RL Agent: {rl_trades} experiences, ε={rl_eps:.3f}")
-
-            # Loss pattern blocks
-            blocked = []
-            for pair_name in ['EURUSD', 'GBPUSD', 'USDJPY']:
-                if learner.should_skip_loss_pattern(pair_name):
-                    blocked.append(pair_name)
-            if blocked:
-                bot_logger.info(f"  ⚠️ Loss pattern blocks: {', '.join(blocked)}")
-
-            bot_logger.info("=" * 50)
-        except Exception as e:
-            bot_logger.warning(f"Learning status log failed: {e}")
+        # Clean tracking for positions that no longer exist
+        stale = [t for t in self._trade_cycle_counts if t not in active_tickets]
+        for t in stale:
+            del self._trade_cycle_counts[t]
 
     @staticmethod
     def _normalize_pair(pair):
         """Normalize pair format (EUR/USD and EURUSD -> EURUSD)."""
         return str(pair or '').replace('/', '').upper()
 
-    def _record_ml_outcome(self, pair: str, pnl: float, ticket=None):
+    def _record_ml_outcome(self, pair: str, pnl: float):
         """Feed a closed trade's features + outcome to the ML Trade Scorer."""
         try:
             if pnl == 0:
                 return  # Skip breakeven trades — not informative
-            pending = getattr(self, '_pending_ml_features', {})
-            # Try ticket-keyed first, then pair-keyed (legacy fallback)
-            features = None
-            if ticket:
-                features = pending.pop(ticket, None)
-            if features is None:
-                features = pending.pop(pair, None)
+            features = getattr(self, '_pending_ml_features', {}).pop(pair, None)
             if features is not None:
                 is_win = pnl > 0
                 self.ensemble.record_ml_trade(features, is_win)
@@ -1282,87 +1197,6 @@ class TradingBot:
                 self.rl_agent.save_state()
         except Exception as e:
             bot_logger.warning(f"🤖 RL outcome recording failed: {e}")
-
-    def _process_rl_pending_skips(self):
-        """Evaluate RL skip decisions: did skipping avoid a loss or miss a win?
-
-        Checks price movement since the skip to estimate what would have happened,
-        then records the appropriate reward (+2.0 for good skip, -0.5 for missed win).
-        Skips older than 30 minutes are expired.
-        """
-        pending = getattr(self, '_rl_pending_skips', {})
-        if not pending:
-            return
-
-        expired_keys = []
-        now = datetime.now()
-
-        for key, info in list(pending.items()):
-            skip_time = info.get('timestamp')
-            if skip_time is None:
-                # Legacy entry without timestamp — add one and skip this cycle
-                info['timestamp'] = now
-                continue
-
-            age_minutes = (now - skip_time).total_seconds() / 60.0
-
-            # Evaluate after 10 minutes (enough time for a trade to play out)
-            if age_minutes < 10:
-                continue
-
-            # Expire after 30 minutes
-            if age_minutes > 30:
-                expired_keys.append(key)
-                continue
-
-            state = info.get('state')
-            action = info.get('action', 0)
-            signal = info.get('signal', {})
-            pair = key.split('_')[0]
-
-            # Check what price did since the skip
-            try:
-                latest_price_data = self.broker.get_latest_price(pair) if self.broker else None
-                if not latest_price_data:
-                    continue
-
-                current_price = latest_price_data.get('bid', 0) or latest_price_data.get('ask', 0)
-                signal_entry = signal.get('enriched_df', {})
-                if hasattr(signal_entry, 'iloc'):
-                    entry_price = float(signal_entry.iloc[-1]['close'])
-                else:
-                    continue
-
-                direction = signal.get('signal', 'SKIP')
-                if direction == 'BUY':
-                    would_have_won = current_price > entry_price
-                elif direction == 'SELL':
-                    would_have_won = current_price < entry_price
-                else:
-                    expired_keys.append(key)
-                    continue
-
-                # Compute skip reward
-                trade_result = {'pips': 0, 'exit_type': 'hypothetical'}
-                reward = self.rl_agent.compute_reward(action, trade_result=trade_result)
-                # Override with skip-specific reward
-                reward = -0.5 if would_have_won else 2.0
-
-                next_state = state
-                self.rl_agent.record_outcome(
-                    state, action, reward, next_state, done=False,
-                    trade_info={'won': False, 'pips': 0, 'rr': 0, 'skip_eval': True}
-                )
-                bot_logger.info(
-                    f"🤖 RL skip eval: {pair} reward={reward:+.1f} "
-                    f"({'good skip' if reward > 0 else 'missed win'})"
-                )
-                expired_keys.append(key)
-            except Exception:
-                expired_keys.append(key)
-
-        for key in expired_keys:
-            pending.pop(key, None)
 
     def _find_open_position(self, pair):
         """Return the currently open position for a pair, if any."""
@@ -1433,7 +1267,8 @@ class TradingBot:
         age_minutes = self._position_age_minutes(position)
         stale_trade = (
             age_minutes is not None and
-            age_minutes >= self.max_trade_hold_minutes
+            age_minutes >= self.max_trade_hold_minutes and
+            (signal == 'SKIP' or confidence < self.reversal_exit_confidence)
         )
 
         if not strong_reversal and not stale_trade:
@@ -1462,8 +1297,7 @@ class TradingBot:
                 else f"🔄 Active exit {pair}: {position_type} closed ({exit_reason})"
             )
 
-            pending_signals = getattr(self, '_pending_trade_signals', {})
-            model_signals = pending_signals.pop(pair, {})
+            model_signals = getattr(self, '_pending_trade_signals', {}).pop(pair, {})
             self.ensemble.record_trade_result({
                 'pair': pair,
                 'signal': closed_trade.get('type', position_type),
@@ -1482,29 +1316,11 @@ class TradingBot:
         if self.mode == 'live' and self.broker:
             volume = float(position.get('volume', 0.01) or 0.01)
             ticket = position.get('ticket')
-            pnl = float(position.get('profit', 0) or 0)
             closed = self.broker.close_position(pair=pair, volume=volume, ticket=ticket)
             if closed:
                 bot_logger.info(
-                    f"🔄 Active exit: {pair} ticket={ticket} ({exit_reason}) P/L=${pnl:+.2f}"
+                    f"🔄 Active exit requested for {pair} ticket={ticket} ({exit_reason})"
                 )
-                self.risk_manager.on_trade_closed(pnl)
-
-                # Record with adaptive learner so learning systems get feedback
-                pending_signals = getattr(self, '_pending_trade_signals', {})
-                model_signals = pending_signals.pop(ticket, None) or pending_signals.pop(pair, {})
-                self.ensemble.record_trade_result({
-                    'pair': pair,
-                    'signal': position_type,
-                    'profit_loss': pnl,
-                    'entry_price': float(position.get('price_open', 0) or position.get('entry_price', 0)),
-                    'exit_price': float(position.get('price_current', 0) or 0),
-                    'exit_type': exit_reason,
-                    'model_signals': model_signals,
-                    'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
-                })
-                self._record_ml_outcome(pair, pnl, ticket=ticket)
-                self._record_rl_outcome(pair, pnl, exit_reason)
     
     def start(self):
         """Start the trading bot"""
@@ -1721,9 +1537,7 @@ class TradingBot:
                 self.risk_manager.open_trades = max(0, self.risk_manager.open_trades - 1)
 
                 # Record with adaptive learner (for weight adaptation only)
-                # Try ticket-keyed first (new), then fall back to pair-keyed (legacy)
-                pending_signals = getattr(self, '_pending_trade_signals', {})
-                model_signals = pending_signals.pop(ticket, None) or pending_signals.pop(pair, {})
+                model_signals = getattr(self, '_pending_trade_signals', {}).pop(pair, {})
                 self.ensemble.record_trade_result({
                     'pair': pair,
                     'signal': trade_type,
@@ -1736,10 +1550,7 @@ class TradingBot:
                 })
 
                 # Record with ML Trade Scorer
-                self._record_ml_outcome(pair, profit, ticket=ticket)
-
-                # Record with RL Agent
-                self._record_rl_outcome(pair, profit, exit_type)
+                self._record_ml_outcome(pair, profit)
 
                 # Clean from trailing stop tracker too
                 if hasattr(self, 'trailing'):
