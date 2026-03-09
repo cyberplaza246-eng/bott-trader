@@ -1123,6 +1123,11 @@ class TradingBot:
             direction = 'BUY' if pos.get('type', 0) == 0 else 'SELL'
             pair = pos.get('symbol', '')
 
+            # Skip positions with invalid/missing price data — can't verify profit status
+            if entry_price <= 0 or current_price <= 0:
+                bot_logger.debug(f"⏰ TIME STOP skipped ticket {ticket}: invalid prices (entry={entry_price}, current={current_price})")
+                continue
+
             # Calculate real age of the trade
             age_minutes = self._position_age_minutes(pos)
             if age_minutes is None or age_minutes < MIN_HOLD_MINUTES:
