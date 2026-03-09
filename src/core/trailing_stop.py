@@ -256,17 +256,10 @@ class TrailingStopManager:
             if current_price > info['best_price']:
                 info['best_price'] = current_price
 
-            # PROFIT LOCK: Move SL to breakeven+2 pips after 0.5×ATR profit
-            # (was 3 pips — too tight, market noise kept hitting it)
-            instant_profit_threshold = max(atr * 0.5, 8 * pip)
-            if not info['at_breakeven'] and profit_distance >= instant_profit_threshold:
-                info['at_breakeven'] = True
-                bot_logger.info(f"🔒 Profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +2 pips")
-                return entry + 2 * pip
-            
             # Phase 1: Move to breakeven after profit meets breakeven_r
             if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
+                bot_logger.info(f"🔒 Breakeven: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +2 pips")
                 return entry + 2 * pip
             
             # Phase 2: Trail behind the best price
@@ -282,16 +275,10 @@ class TrailingStopManager:
             if current_price < info['best_price']:
                 info['best_price'] = current_price
 
-            # PROFIT LOCK: Move SL to breakeven+2 pips after 0.5×ATR profit
-            instant_profit_threshold = max(atr * 0.5, 8 * pip)
-            if not info['at_breakeven'] and profit_distance >= instant_profit_threshold:
-                info['at_breakeven'] = True
-                bot_logger.info(f"🔒 Profit lock: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +2 pips")
-                return entry - 2 * pip
-
             # Phase 1: Breakeven
             if not info['at_breakeven'] and profit_distance >= original_risk * breakeven_r:
                 info['at_breakeven'] = True
+                bot_logger.info(f"🔒 Breakeven: {info['pair']} ticket={info.get('ticket', 'unknown')} - securing +2 pips")
                 return entry - 2 * pip
 
             # Phase 2: Trail above best price
