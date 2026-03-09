@@ -1486,11 +1486,35 @@ class TradingBot:
         if self.mode == 'live' and self.broker:
             volume = float(position.get('volume', 0.01) or 0.01)
             ticket = position.get('ticket')
+            entry_price = float(position.get('open_price', 0) or position.get('price_open', 0) or 0)
+            current_price = float(position.get('current_price', 0) or position.get('price_current', 0) or 0)
+            pnl = float(position.get('profit', 0) or 0)
             closed = self.broker.close_position(pair=pair, volume=volume, ticket=ticket)
             if closed:
                 bot_logger.info(
-                    f"🔄 Active exit requested for {pair} ticket={ticket} ({exit_reason})"
+                    f"🔄 Active exit: {pair} ticket={ticket} ({exit_reason}) P/L=${pnl:+.2f}"
                 )
+
+                # Record with adaptive learner
+                pending_signals = getattr(self, '_pending_trade_signals', {})
+                model_signals = pending_signals.pop(ticket, None) or pending_signals.pop(pair, {})
+                self.ensemble.record_trade_result({
+                    'pair': pair,
+                    'signal': position_type,
+                    'profit_loss': pnl,
+                    'entry_price': entry_price,
+                    'exit_price': current_price,
+                    'exit_type': exit_reason,
+                    'model_signals': model_signals,
+                    'regime': getattr(self, '_last_regime', {}).get(pair, 'unknown'),
+                })
+
+                # Record with ML Trade Scorer and RL Agent
+                self._record_ml_outcome(pair, pnl, ticket=ticket)
+                self._record_rl_outcome(pair, pnl, exit_reason)
+
+                # Remove from known tickets so _detect_closed_trades doesn't double-record
+                self._known_tickets.pop(ticket, None)
     
     def start(self):
         """Start the trading bot"""

@@ -799,6 +799,12 @@ class LiquiditySweepAnalyzer:
                         trigger = candle_high
                         entry = candle_close
 
+                    # Wick-side validation: for BUY, entry must be above sweep wick
+                    sweep_wick = sweep_result.get('sweep_wick')
+                    if sweep_wick is not None and entry <= sweep_wick:
+                        bot_logger.debug(f"  MSS BUY entry {entry:.5f} <= wick {sweep_wick:.5f} — skipped")
+                        continue
+
                     label = 'above' if candle_close > mss_level else 'toward'
                     result.update({
                         'confirmed': True,
@@ -825,6 +831,12 @@ class LiquiditySweepAnalyzer:
                     else:
                         trigger = candle_low
                         entry = candle_close
+
+                    # Wick-side validation: for SELL, entry must be below sweep wick
+                    sweep_wick = sweep_result.get('sweep_wick')
+                    if sweep_wick is not None and entry >= sweep_wick:
+                        bot_logger.debug(f"  MSS SELL entry {entry:.5f} >= wick {sweep_wick:.5f} — skipped")
+                        continue
 
                     label = 'below' if candle_close < mss_level else 'toward'
                     result.update({
@@ -857,6 +869,14 @@ class LiquiditySweepAnalyzer:
 
             is_bullish_recovery = direction == 'BUY' and sc_close > sc_open and sc_body_ratio >= 0.10
             is_bearish_recovery = direction == 'SELL' and sc_close < sc_open and sc_body_ratio >= 0.10
+
+            # Wick-side validation: entry must be on correct side of sweep wick
+            sweep_wick = sweep_result.get('sweep_wick')
+            if sweep_wick is not None:
+                if direction == 'BUY' and sc_close <= sweep_wick:
+                    is_bullish_recovery = False
+                if direction == 'SELL' and sc_close >= sweep_wick:
+                    is_bearish_recovery = False
 
             if is_bullish_recovery or is_bearish_recovery:
                 entry = sc_close
@@ -979,13 +999,13 @@ class LiquiditySweepAnalyzer:
         if direction == 'SELL' and sweep_wick <= entry_price:
             return None
 
-        # Minimum spread check
+        # Minimum spread check — wick must be at least 1×spread from entry
         spread = config['spread_sim']
         raw_dist = abs(entry_price - sweep_wick)
-        if raw_dist < spread * 2:
+        if raw_dist < spread:
             bot_logger.info(
                 f"⛔ Sweep wick too close: {raw_dist/pip_size:.1f}p < "
-                f"2×spread {spread*2/pip_size:.1f}p"
+                f"1×spread {spread/pip_size:.1f}p"
             )
             return None
 
