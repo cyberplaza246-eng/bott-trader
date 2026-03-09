@@ -78,3 +78,4 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: BUY | Lot: 0.01 | SL: 1.26521 | TP: 1.26619 | Ticket: 891258"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: GBP/USD | P/L: 0.00"}

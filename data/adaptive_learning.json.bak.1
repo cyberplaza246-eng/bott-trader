@@ -1,19 +1,19 @@
 {
   "model_weights": {
-    "scalping": 0.16234168284551184,
-    "technical": 0.13570749846367058,
-    "volume": 0.061235892421527605,
-    "ema_crossover": 0.1603574221341856,
-    "candlestick": 0.0896719971202771,
-    "multi_tf": 0.15620656108004702,
-    "support_resistance": 0.08228561738329151,
-    "lstm": 0.06916476559879789,
-    "sentiment": 0.08302856295269079
+    "scalping": 0.15926933002354576,
+    "technical": 0.13537846663303416,
+    "volume": 0.05629347955322242,
+    "ema_crossover": 0.15748944816548613,
+    "candlestick": 0.09408462192801019,
+    "multi_tf": 0.15376612579992383,
+    "support_resistance": 0.08575293424004392,
+    "lstm": 0.06984013217704835,
+    "sentiment": 0.08812546147968527
   },
   "model_accuracy": {
     "sweep": {
       "correct": 0,
-      "total": 15
+      "total": 16
     },
     "scalping": {
       "correct": 0,
@@ -21,7 +21,7 @@
     },
     "lstm": {
       "correct": 2,
-      "total": 6
+      "total": 7
     },
     "sentiment": {
       "correct": 0,
@@ -41,7 +41,7 @@
     },
     "support_resistance": {
       "correct": 7,
-      "total": 15
+      "total": 16
     },
     "candlestick": {
       "correct": 3,
@@ -78,15 +78,15 @@
   "pair_model_accuracy": {
     "USD/JPY:sweep": {
       "correct": 0,
-      "total": 6
+      "total": 7
     },
     "USD/JPY:lstm": {
       "correct": 2,
-      "total": 6
+      "total": 7
     },
     "USD/JPY:support_resistance": {
       "correct": 2,
-      "total": 6
+      "total": 7
     },
     "GBP/USD:sweep": {
       "correct": 0,
@@ -153,7 +153,7 @@
     },
     "lstm:support_resistance:sweep": {
       "wins": 0,
-      "total": 4
+      "total": 5
     },
     "candlestick:sweep:technical": {
       "wins": 0,
@@ -192,10 +192,12 @@
       0.0,
       0.0,
       0.0,
+      0.0,
       0.0
     ],
     "scalping": [],
     "lstm": [
+      0.0,
       0.0,
       0.0,
       0.0,
@@ -213,6 +215,7 @@
       0.0
     ],
     "support_resistance": [
+      0.0,
       0.0,
       0.0,
       0.0,
@@ -2959,6 +2962,145 @@
       "session": "asian",
       "hour": 4,
       "is_win": false
+    },
+    {
+      "pair": "USD/JPY",
+      "signal": "SELL",
+      "profit_loss": 0.0,
+      "entry_price": 0.0,
+      "exit_price": 0.0,
+      "exit_type": "STALE_SIGNAL",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.5670000000000001,
+          "regime": "range",
+          "bias": "SELL",
+          "mss_confirmed": true
+        },
+        "scalping": {
+          "signal": "SKIP",
+          "confidence": 0.0,
+          "setup": "none"
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 1.0,
+          "reason": "LSTM predicts -99.16% move",
+          "predicted_price": "1.264551",
+          "current_price": 150.502,
+          "predicted_change_percent": -99.15977791424005
+        },
+        "sentiment": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "score": 0.0,
+          "news_count": 0
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Volume spike 1.8x + bullish candle | MACD bearish | MACD accelerating \u2193 | MACD histogram flipped bearish | DI- dominant (38 vs 31)",
+          "rsi": 45.33075987334237,
+          "macd": 0.0011064078258016252,
+          "bb_position": 0.2061201656672819,
+          "adx": 15.399322175397938,
+          "divergence": "bearish",
+          "buy_score": 0.15,
+          "sell_score": 0.30000000000000004
+        },
+        "volume": {
+          "signal": "HOLD",
+          "confidence": 0.5,
+          "reason": "Volume spike (1.75x avg) | Above-median recent volume",
+          "current_volume": "7592",
+          "average_volume": 4337.35,
+          "volume_ratio": 1.7503775342662273
+        },
+        "multi_tf": {
+          "signal": "HOLD",
+          "confluence_score": 0.0,
+          "agreement": 0,
+          "timeframe_signals": {
+            "fast": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bullish | DI+ dominant (37 vs 22) | Near BB upper (%B=0.80) | Stochastic overbought (82/88) | Stoch K crossed below D",
+              "rsi": 65.66347139164331,
+              "macd": 0.012007322438591927,
+              "bb_position": 0.8023199539571798,
+              "adx": 20.77937213129859,
+              "divergence": "bearish",
+              "buy_score": 0.2,
+              "sell_score": 0.1
+            },
+            "medium": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bullish | DI+ dominant (37 vs 23) | Near BB upper (%B=0.80) | Stochastic overbought (83/88) | Stoch K crossed below D",
+              "rsi": 65.59627979905416,
+              "macd": 0.041751262946945644,
+              "bb_position": 0.8037106620178136,
+              "adx": 20.20751370751791,
+              "divergence": "bearish",
+              "buy_score": 0.2,
+              "sell_score": 0.1
+            },
+            "slow": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bullish | DI+ dominant (36 vs 22) | Near BB upper (%B=0.80) | Stochastic overbought (83/89) | Stoch K crossed below D",
+              "rsi": 65.28821777518358,
+              "macd": 0.08350529618488167,
+              "bb_position": 0.8012779443674941,
+              "adx": 20.417388434006853,
+              "divergence": "bearish",
+              "buy_score": 0.2,
+              "sell_score": 0.1
+            }
+          },
+          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
+        },
+        "support_resistance": {
+          "signal": "SELL",
+          "confidence": 0.7861624999763507,
+          "reason": "Price at resistance 150.50721",
+          "levels": {
+            "support_levels": [
+              150.0,
+              149.5,
+              149.0
+            ],
+            "resistance_levels": [
+              150.5072064285714,
+              151.0,
+              151.5,
+              152.0
+            ],
+            "current_price": 150.502,
+            "nearest_support": 150.0,
+            "nearest_resistance": 150.5072064285714,
+            "price_zone": "AT_RESISTANCE",
+            "zone_strength": 0.9827031249704383
+          }
+        },
+        "candlestick": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "patterns": [],
+          "reason": "No candlestick patterns detected"
+        },
+        "ema_crossover": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Weak EMA alignment (< 1.5 pips)"
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-09T04:31:51.110025",
+      "session": "asian",
+      "hour": 4,
+      "is_win": false
     }
   ],
   "loss_patterns": {
@@ -2988,15 +3130,6 @@
     }
   },
   "recent_trades_window": [
-    {
-      "pair": "USD/JPY",
-      "session": "asian",
-      "hour": 2,
-      "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T02:57:51.075965"
-    },
     {
       "pair": "USD/JPY",
       "session": "asian",
@@ -3077,6 +3210,15 @@
       "is_win": false,
       "pnl": 0.0,
       "timestamp": "2026-03-09T04:19:51.099039"
+    },
+    {
+      "pair": "USD/JPY",
+      "session": "asian",
+      "hour": 4,
+      "regime": "ranging",
+      "is_win": false,
+      "pnl": 0.0,
+      "timestamp": "2026-03-09T04:31:51.110034"
     }
   ],
   "session_atr_profiles": {},
@@ -3119,8 +3261,8 @@
       "sl_hit": 0,
       "tp_hit": 0,
       "time_exit": 0,
-      "manual": 6,
-      "total": 6
+      "manual": 7,
+      "total": 7
     },
     "GBP/USD": {
       "sl_hit": 0,
@@ -3130,6 +3272,6 @@
       "total": 9
     }
   },
-  "auto_learning_trade_count": 3,
-  "last_updated": "2026-03-09T04:19:51.107743"
+  "auto_learning_trade_count": 4,
+  "last_updated": "2026-03-09T04:31:51.112128"
 }

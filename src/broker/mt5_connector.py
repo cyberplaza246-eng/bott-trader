@@ -12,7 +12,7 @@ import os
 import sys
 import time
 import subprocess
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from src.utils.logger import bot_logger, error_logger, trades_logger
 from config.strategy_config import MT5_ACCOUNT, MT5_PASSWORD, MT5_SERVER, PAIRS, TRADING_MODE
 
@@ -980,7 +980,7 @@ class MT5Connector:
                         'open_price': p.price_open,
                         'current_price': p.price_current,
                         'profit': p.profit,
-                        'open_time': datetime.fromtimestamp(p.time),
+                        'open_time': datetime.fromtimestamp(p.time, tz=timezone.utc),
                         'sl': p.sl,
                         'tp': p.tp,
                         'magic': p.magic,  # Include magic number for bot position filtering

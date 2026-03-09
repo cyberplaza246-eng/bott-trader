@@ -1,19 +1,19 @@
 {
   "model_weights": {
-    "scalping": 0.15926933002354576,
-    "technical": 0.13537846663303416,
-    "volume": 0.05629347955322242,
-    "ema_crossover": 0.15748944816548613,
-    "candlestick": 0.09408462192801019,
-    "multi_tf": 0.15376612579992383,
-    "support_resistance": 0.08575293424004392,
-    "lstm": 0.06984013217704835,
-    "sentiment": 0.08812546147968527
+    "scalping": 0.1574723534718118,
+    "technical": 0.1310561985438231,
+    "volume": 0.051794561417106165,
+    "ema_crossover": 0.15588291897256454,
+    "candlestick": 0.09708457460524346,
+    "multi_tf": 0.1525579921001174,
+    "support_resistance": 0.08913194584406485,
+    "lstm": 0.07107857618312441,
+    "sentiment": 0.09394087886214436
   },
   "model_accuracy": {
     "sweep": {
       "correct": 0,
-      "total": 16
+      "total": 17
     },
     "scalping": {
       "correct": 0,
@@ -29,7 +29,7 @@
     },
     "technical": {
       "correct": 1,
-      "total": 2
+      "total": 3
     },
     "volume": {
       "correct": 0,
@@ -41,11 +41,11 @@
     },
     "support_resistance": {
       "correct": 7,
-      "total": 16
+      "total": 17
     },
     "candlestick": {
       "correct": 3,
-      "total": 6
+      "total": 7
     },
     "ema_crossover": {
       "correct": 1,
@@ -90,19 +90,19 @@
     },
     "GBP/USD:sweep": {
       "correct": 0,
-      "total": 9
+      "total": 10
     },
     "GBP/USD:technical": {
       "correct": 1,
-      "total": 2
+      "total": 3
     },
     "GBP/USD:support_resistance": {
       "correct": 5,
-      "total": 9
+      "total": 10
     },
     "GBP/USD:candlestick": {
       "correct": 3,
-      "total": 5
+      "total": 6
     },
     "GBP/USD:ema_crossover": {
       "correct": 1,
@@ -174,10 +174,15 @@
     "multi_tf:sweep:volume": {
       "wins": 0,
       "total": 1
+    },
+    "candlestick:support_resistance:sweep:technical": {
+      "wins": 0,
+      "total": 1
     }
   },
   "model_pnl_history": {
     "sweep": [
+      0.0,
       0.0,
       0.0,
       0.0,
@@ -205,6 +210,7 @@
     ],
     "sentiment": [],
     "technical": [
+      0.0,
       0.0
     ],
     "volume": [
@@ -223,9 +229,11 @@
       0.0,
       0.0,
       0.0,
+      0.0,
       0.0
     ],
     "candlestick": [
+      0.0,
       0.0,
       0.0,
       0.0
@@ -3101,6 +3109,158 @@
       "session": "asian",
       "hour": 4,
       "is_win": false
+    },
+    {
+      "pair": "GBP/USD",
+      "signal": "BUY",
+      "profit_loss": 0.0,
+      "entry_price": 0.0,
+      "exit_price": 0.0,
+      "exit_type": "REVERSAL_SIGNAL",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.89,
+          "regime": "trend_up",
+          "bias": "BUY",
+          "mss_confirmed": true
+        },
+        "scalping": {
+          "signal": "SKIP",
+          "confidence": 0.0,
+          "setup": "none"
+        },
+        "lstm": {
+          "signal": "HOLD",
+          "confidence": 0.3,
+          "reason": "LSTM predicts -0.07% move",
+          "predicted_price": "1.2646824",
+          "current_price": 1.26554,
+          "predicted_change_percent": -0.06776457895271082
+        },
+        "sentiment": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "score": 0.0,
+          "news_count": 0
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.255,
+          "reason": "MACD bullish | MACD accelerating \u2191 | MACD histogram flipped bullish | DI+ dominant (36 vs 32) | ADX low (15<20) \u2014 penalty \u00d70.85",
+          "rsi": 58.97685668666134,
+          "macd": 2.6860141770335133e-05,
+          "bb_position": 0.77575276046643,
+          "adx": 15.23445158521069,
+          "divergence": "bearish",
+          "buy_score": 0.30000000000000004,
+          "sell_score": 0.0
+        },
+        "volume": {
+          "signal": "HOLD",
+          "confidence": 0.6499999999999999,
+          "reason": "Volume spike (1.25x avg) | 3-candle volume ramp | Above-median recent volume",
+          "current_volume": "4716",
+          "average_volume": 3771.35,
+          "volume_ratio": 1.2504805968020787
+        },
+        "multi_tf": {
+          "signal": "HOLD",
+          "confluence_score": 0.0,
+          "agreement": 1,
+          "timeframe_signals": {
+            "fast": {
+              "signal": "BUY",
+              "confidence": 0.2,
+              "reason": "MACD bullish | DI+ dominant (29 vs 29)",
+              "rsi": 46.362584842183274,
+              "macd": -2.912922889608538e-05,
+              "bb_position": 0.5986156221427837,
+              "adx": 21.5865707011891,
+              "divergence": "bearish",
+              "buy_score": 0.2,
+              "sell_score": 0.0
+            },
+            "medium": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bullish | DI- dominant (32 vs 27)",
+              "rsi": 46.52672525019919,
+              "macd": -0.00010080286660363313,
+              "bb_position": 0.5974414323803678,
+              "adx": 21.98559807543703,
+              "divergence": "bearish",
+              "buy_score": 0.1,
+              "sell_score": 0.1
+            },
+            "slow": {
+              "signal": "HOLD",
+              "confidence": 0.0,
+              "reason": "MACD bullish | DI- dominant (32 vs 27)",
+              "rsi": 46.525084668051385,
+              "macd": -0.00020270481220219239,
+              "bb_position": 0.5998561550496454,
+              "adx": 21.807869910081486,
+              "divergence": "bearish",
+              "buy_score": 0.1,
+              "sell_score": 0.1
+            }
+          },
+          "reason": "FAST: BUY (20%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
+        },
+        "support_resistance": {
+          "signal": "BUY",
+          "confidence": 0.6086674086800147,
+          "reason": "Price at support 1.26493",
+          "levels": {
+            "support_levels": [
+              1.2649346523809524,
+              1.2600000000000002,
+              1.2550000000000001,
+              1.2500000000000002
+            ],
+            "resistance_levels": [
+              1.27,
+              1.2750000000000001,
+              1.28
+            ],
+            "current_price": 1.26554,
+            "nearest_support": 1.2649346523809524,
+            "nearest_resistance": 1.27,
+            "price_zone": "AT_SUPPORT",
+            "zone_strength": 0.7608342608500183
+          }
+        },
+        "candlestick": {
+          "signal": "BUY",
+          "confidence": 0.7,
+          "patterns": [
+            {
+              "pattern": "DOJI",
+              "signal": "HOLD",
+              "strength": 0.5,
+              "candle_index": 4
+            },
+            {
+              "pattern": "BULLISH_PIN_BAR",
+              "signal": "BUY",
+              "strength": 0.7,
+              "candle_index": 4
+            }
+          ],
+          "reason": "Patterns: DOJI, BULLISH_PIN_BAR"
+        },
+        "ema_crossover": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Weak EMA alignment (< 1.5 pips)"
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-09T04:39:51.312604",
+      "session": "asian",
+      "hour": 4,
+      "is_win": false
     }
   ],
   "loss_patterns": {
@@ -3130,15 +3290,6 @@
     }
   },
   "recent_trades_window": [
-    {
-      "pair": "USD/JPY",
-      "session": "asian",
-      "hour": 3,
-      "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T03:00:52.890689"
-    },
     {
       "pair": "GBP/USD",
       "session": "asian",
@@ -3219,6 +3370,15 @@
       "is_win": false,
       "pnl": 0.0,
       "timestamp": "2026-03-09T04:31:51.110034"
+    },
+    {
+      "pair": "GBP/USD",
+      "session": "asian",
+      "hour": 4,
+      "regime": "ranging",
+      "is_win": false,
+      "pnl": 0.0,
+      "timestamp": "2026-03-09T04:39:51.312620"
     }
   ],
   "session_atr_profiles": {},
@@ -3242,7 +3402,8 @@
       0.00023077883508726416,
       0.0003906219367768582,
       0.0002,
-      0.0002
+      0.0002,
+      0.00032547638264079914
     ]
   },
   "sl_multiplier_by_pair": {},
@@ -3268,10 +3429,10 @@
       "sl_hit": 0,
       "tp_hit": 0,
       "time_exit": 0,
-      "manual": 9,
-      "total": 9
+      "manual": 10,
+      "total": 10
     }
   },
-  "auto_learning_trade_count": 4,
-  "last_updated": "2026-03-09T04:31:51.112128"
+  "auto_learning_trade_count": 5,
+  "last_updated": "2026-03-09T04:39:51.333335"
 }
