@@ -530,7 +530,7 @@ class LiveMTFScalper:
             )
             
             if result and result.get('order_id'):
-                print(f"✅ {direction.upper()} {self.symbol} @ {entry:.2f}")
+                print(f"✅ {direction.upper()} {symbol} @ {entry:.2f}")
                 print(f"   Order ID: {result['order_id']}")
                 print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
                 
@@ -687,6 +687,8 @@ class LiveMTFScalper:
                     if symbol not in self.positions and len(self.positions) < MAX_POSITIONS:
                         signal = self.check_entry_signal(symbol, df_1m, ctx_5m)
                         if signal:
+                            print(f"🎯 Signal: {signal['direction'].upper()} {symbol} @ {signal['entry']:.2f}")
+                            print(f"   SL: {signal['sl']:.2f} | TP: {signal['tp']:.2f}")
                             self.place_order(signal)
                 
                 # Status update every 10 loops
