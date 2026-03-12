@@ -586,14 +586,22 @@ class LiveMTFScalper:
             
             # Step 2: Get quote
             print(f"\n[2/3] 📊 Getting {test_symbol} quote...")
-            bid, ask = self.broker.get_quote(test_symbol)
+            quote = self.broker.get_latest_price(test_symbol)
             
-            if not bid or not ask:
+            if not quote:
                 print(f"❌ Failed to get quote for {test_symbol}")
                 return False
             
-            current_price = (bid + ask) / 2
-            print(f"✅ Quote received: Bid={bid:.2f} Ask={ask:.2f}")
+            bid = quote.get('bid', 0)
+            ask = quote.get('ask', 0)
+            last = quote.get('last', 0)
+            current_price = last if last > 0 else (bid + ask) / 2 if bid and ask else 0
+            
+            if current_price == 0:
+                print(f"❌ No valid price for {test_symbol}")
+                return False
+                
+            print(f"✅ Quote received: Bid={bid:.2f} Ask={ask:.2f} Last={last:.2f}")
             
             # Step 3: Test order (with immediate close)
             print(f"\n[3/3] 📝 Testing order placement...")
@@ -648,7 +656,7 @@ class LiveMTFScalper:
             return False
         finally:
             if self.broker:
-                self.broker.disconnect()
+                self.broker.shutdown()
     
     def check_exit(self, symbol: str, current_price: float) -> Optional[str]:
         """Check if position for symbol should be closed."""
