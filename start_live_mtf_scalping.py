@@ -533,22 +533,22 @@ class LiveMTFScalper:
         # Live order
         try:
             side = 'BUY' if direction == 'long' else 'SELL'
-            result = self.broker.place_bracket_order(
+            result = self.broker.place_order(
                 symbol=symbol,
-                side=side,
-                quantity=CONTRACTS,
+                order_type=side,
+                size=CONTRACTS,
                 entry_price=entry,
                 stop_loss=sl,
                 take_profit=tp
             )
             
-            if result and result.get('order_id'):
+            if result and result.get('ticket'):
                 print(f"✅ {direction.upper()} {symbol} @ {entry:.2f}")
-                print(f"   Order ID: {result['order_id']}")
+                print(f"   Order ID: {result['ticket']}")
                 print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
                 
                 self.positions[symbol] = Position(
-                    order_id=result['order_id'],
+                    order_id=result['ticket'],
                     symbol=symbol,
                     direction=direction,
                     entry_price=entry,
@@ -566,6 +566,89 @@ class LiveMTFScalper:
         except Exception as e:
             print(f"❌ Order error: {e}")
             return False
+    
+    def test_order(self):
+        """Test broker connectivity and order capability."""
+        print("\n" + "="*60)
+        print("🧪 ORDER SYSTEM TEST")
+        print("="*60)
+        
+        test_symbol = self.symbols[0] if self.symbols else 'MES'
+        
+        # Step 1: Connect
+        print(f"\n[1/3] 📡 Connecting to broker...")
+        try:
+            if not self.connect():
+                print(f"❌ Failed to connect to broker")
+                return False
+            print(f"✅ Connected!")
+            time.sleep(1)
+            
+            # Step 2: Get quote
+            print(f"\n[2/3] 📊 Getting {test_symbol} quote...")
+            bid, ask = self.broker.get_quote(test_symbol)
+            
+            if not bid or not ask:
+                print(f"❌ Failed to get quote for {test_symbol}")
+                return False
+            
+            current_price = (bid + ask) / 2
+            print(f"✅ Quote received: Bid={bid:.2f} Ask={ask:.2f}")
+            
+            # Step 3: Test order (with immediate close)
+            print(f"\n[3/3] 📝 Testing order placement...")
+            print(f"   This will place a REAL order and immediately close it!")
+            
+            confirm = input("   Continue? (type 'yes'): ")
+            if confirm.lower() != 'yes':
+                print("   Test skipped.")
+                return True
+            
+            # Place order at market with tight brackets
+            spec = SYMBOL_SPECS.get(test_symbol, SYMBOL_SPECS['MES'])
+            sl = current_price - (5 * spec['tick_size'])  # 5 ticks SL
+            tp = current_price + (3 * spec['tick_size'])  # 3 ticks TP
+            
+            result = self.broker.place_order(
+                symbol=test_symbol,
+                order_type='BUY',
+                size=1,
+                entry_price=current_price,
+                stop_loss=sl,
+                take_profit=tp
+            )
+            
+            if result and result.get('ticket'):
+                order_id = result['ticket']
+                print(f"✅ Order placed! Ticket: {order_id}")
+                
+                # Immediately close
+                time.sleep(0.3)
+                print(f"🗑️ Closing position...")
+                close_result = self.broker.close_position(symbol=test_symbol)
+                
+                if close_result:
+                    print(f"✅ Position closed!")
+                    print("\n" + "="*60)
+                    print("✅ ORDER SYSTEM VERIFIED - WORKING!")
+                    print("="*60 + "\n")
+                    return True
+                else:
+                    print(f"⚠️ Close failed - CHECK BROKER MANUALLY!")
+                    print(f"   You may have an open position on {test_symbol}")
+                    return True  # Order worked
+            else:
+                print(f"❌ Order failed: {result}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Test error: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+        finally:
+            if self.broker:
+                self.broker.disconnect()
     
     def check_exit(self, symbol: str, current_price: float) -> Optional[str]:
         """Check if position for symbol should be closed."""
@@ -754,6 +837,7 @@ def main():
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip confirmation')
     parser.add_argument('--duration', type=int, default=480, help='Duration in minutes')
+    parser.add_argument('--test', action='store_true', help='Place test order and cancel immediately')
     args = parser.parse_args()
     
     trader = LiveMTFScalper(
@@ -761,7 +845,11 @@ def main():
         paper_mode=args.paper,
         skip_confirm=args.yes
     )
-    trader.run(duration_minutes=args.duration)
+    
+    if args.test:
+        trader.test_order()
+    else:
+        trader.run(duration_minutes=args.duration)
 
 
 if __name__ == '__main__':
