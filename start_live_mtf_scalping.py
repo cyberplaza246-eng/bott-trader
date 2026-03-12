@@ -30,49 +30,31 @@ import pandas as pd
 import numpy as np
 
 import pytz
-import yagmail
+import smtplib
+from email.mime.text import MIMEText
 
-EMAIL_NOTIFY = True
+EMAIL_NOTIFY = False  # Disabled for now
 EMAIL_TO = 'paraflix246@gmail.com'
 EMAIL_SUBJECT_PREFIX = '[Ai-bot]'
-
-# Set up yagmail SMTP client (Gmail example, requires app password)
-try:
-    yag = yagmail.SMTP(os.getenv('EMAIL_USER'), os.getenv('EMAIL_PASS'))
-except Exception as e:
-    print(f"[Email] Could not initialize yagmail: {e}")
-    yag = None
+EMAIL_USER = os.getenv('EMAIL_USER', '')
+EMAIL_PASS = os.getenv('EMAIL_PASS', '')
 
 def send_email(subject, body):
-    if EMAIL_NOTIFY and yag:
-        try:
-            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
-        except Exception as e:
-            print(f"[Email] Failed to send: {e}")
-
-# Email notification for market pause
-def send_pause_email(subject, body):
-    if EMAIL_NOTIFY and yag:
-        try:
-            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
-        except Exception as e:
-            print(f"[Email] Failed to send: {e}")
-
-# Email notification for market resume
-def send_resume_email(subject, body):
-    if EMAIL_NOTIFY and yag:
-        try:
-            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
-        except Exception as e:
-            print(f"[Email] Failed to send: {e}")
-
-# Email notification for trade placed
-def send_trade_email(subject, body):
-    if EMAIL_NOTIFY and yag:
-        try:
-            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
-        except Exception as e:
-            print(f"[Email] Failed to send: {e}")
+    """Send email notification via Gmail SMTP."""
+    if not EMAIL_NOTIFY or not EMAIL_USER or not EMAIL_PASS:
+        return
+    try:
+        msg = MIMEText(body)
+        msg['Subject'] = f"{EMAIL_SUBJECT_PREFIX} {subject}"
+        msg['From'] = EMAIL_USER
+        msg['To'] = EMAIL_TO
+        
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.send_message(msg)
+        print(f"📧 Email sent: {subject}")
+    except Exception as e:
+        print(f"[Email] Failed to send: {e}")
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
