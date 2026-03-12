@@ -335,8 +335,9 @@ def check_long_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
     # Not at BB extreme
     bb_ok = BB_EXTREME_LOW < bb_pctb < BB_EXTREME_HIGH
     
-    # Price above EMA9
-    above_ema9 = price > ema_9
+    # Price above EMA9 (with small tolerance)
+    ema9_tolerance = atr * 0.1
+    above_ema9 = price > (ema_9 - ema9_tolerance)
     
     return near_ema21 and rsi_ok and macd_rising and volume_ok and bb_ok and above_ema9
 
@@ -378,8 +379,9 @@ def check_short_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
     # Not at BB extreme
     bb_ok = BB_EXTREME_LOW < bb_pctb < BB_EXTREME_HIGH
     
-    # Price below EMA9
-    below_ema9 = price < ema_9
+    # Price below EMA9 (with small tolerance)
+    ema9_tolerance = atr * 0.1
+    below_ema9 = price < (ema_9 + ema9_tolerance)
     
     return near_ema21 and rsi_ok and macd_falling and volume_ok and bb_ok and below_ema9
 

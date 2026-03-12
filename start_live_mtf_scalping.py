@@ -352,9 +352,10 @@ class LiveMTFScalper:
         bb_pctb = row_1m['bb_pctb']
         atr = row_1m['atr']
         
-        # Price above EMA9 (matching backtest)
-        if price <= ema_9:
-            if verbose: print(f"      ❌ Price {price:.2f} <= EMA9 {ema_9:.2f}")
+        # Price above EMA9 (with small tolerance)
+        ema9_tolerance = atr * 0.1
+        if price < (ema_9 - ema9_tolerance):
+            if verbose: print(f"      ❌ Price {price:.2f} < EMA9 {ema_9:.2f} - {ema9_tolerance:.2f}")
             return False
         
         # Pullback to EMA zone (within 1.5 ATR of EMA21)
@@ -407,9 +408,10 @@ class LiveMTFScalper:
         bb_pctb = row_1m['bb_pctb']
         atr = row_1m['atr']
         
-        # Price below EMA9 (matching backtest)
-        if price >= ema_9:
-            if verbose: print(f"      ❌ Price {price:.2f} >= EMA9 {ema_9:.2f}")
+        # Price below EMA9 (with small tolerance)
+        ema9_tolerance = atr * 0.1
+        if price > (ema_9 + ema9_tolerance):
+            if verbose: print(f"      ❌ Price {price:.2f} > EMA9 {ema_9:.2f} + {ema9_tolerance:.2f}")
             return False
         
         # Pullback to EMA zone (within 1.5 ATR of EMA21)
