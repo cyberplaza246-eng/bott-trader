@@ -65,7 +65,7 @@ RSI_PERIOD = 14
 RSI_LONG_MIN, RSI_LONG_MAX = 35, 60       # Widened from 40-55
 RSI_SHORT_MIN, RSI_SHORT_MAX = 40, 65     # Widened from 45-60
 MACD_FAST, MACD_SLOW, MACD_SIGNAL = 12, 26, 9
-VOLUME_RATIO_THRESHOLD = 1.1              # Optimized for MNQ
+VOLUME_RATIO_THRESHOLD = 0.8              # Lowered for more trades
 VOLUME_MA_PERIOD = 20
 BB_PERIOD, BB_STD = 20, 2
 BB_EXTREME_LOW, BB_EXTREME_HIGH = 0.05, 0.95  # Relaxed from 0.1/0.9
@@ -318,9 +318,9 @@ def check_long_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
     volume_ratio = row_1m['volume_ratio']
     bb_pctb = row_1m['bb_pctb']
     
-    # Pullback near EMA21 (within 1 ATR - widened for more entries)
+    # Pullback near EMA21 (within 1.5 ATR - widened for more entries)
     atr = row_1m['atr']
-    pullback_zone = atr * 1.0
+    pullback_zone = atr * 1.5
     near_ema21 = abs(price - ema_21) <= pullback_zone
     
     # RSI in range
@@ -361,9 +361,9 @@ def check_short_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
     volume_ratio = row_1m['volume_ratio']
     bb_pctb = row_1m['bb_pctb']
     
-    # Pullback near EMA21 (within 1 ATR - widened for more entries)
+    # Pullback near EMA21 (within 1.5 ATR - widened for more entries)
     atr = row_1m['atr']
-    pullback_zone = atr * 1.0
+    pullback_zone = atr * 1.5
     near_ema21 = abs(price - ema_21) <= pullback_zone
     
     # RSI in range
