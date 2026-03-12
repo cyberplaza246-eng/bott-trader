@@ -669,8 +669,12 @@ class LiveMTFScalper:
                 
                 # Process each symbol
                 for symbol in self.symbols:
+                    # Small delay between symbols to prevent Rithmic lock timeout
+                    time.sleep(1)
+                    
                     # Fetch data for this symbol
                     df_1m = self.get_candles(symbol, timeframe_minutes=1, count=100)
+                    time.sleep(0.5)  # Brief pause between requests
                     df_5m = self.get_candles(symbol, timeframe_minutes=5, count=RESISTANCE_LOOKBACK + 50)
                     
                     if df_1m is None or df_5m is None:
