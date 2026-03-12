@@ -68,7 +68,7 @@ TP_BUFFER_ATR_MULT = 0.0   # TP capped exactly at resistance/support (no buffer)
 RESISTANCE_LOOKBACK = 20   # 5M bars for swing high/low
 
 # Pullback settings
-MAX_PULLBACK_ATR = 1.0     # Max distance from EMA for pullback
+MAX_PULLBACK_ATR = 1.5     # Max distance from EMA for pullback (matches backtest)
 
 # Risk Management
 DAILY_LOSS_LIMIT = 350.0
@@ -356,9 +356,9 @@ class LiveMTFScalper:
         if ema_9 <= ema_21:
             return False
         
-        # Pullback to EMA zone
-        pullback = price - ema_21
-        if pullback < 0 or pullback > (atr * MAX_PULLBACK_ATR):
+        # Pullback to EMA zone (allow price near EMA 21)
+        pullback = abs(price - ema_21)
+        if pullback > (atr * MAX_PULLBACK_ATR):
             return False
         
         # RSI filter
@@ -407,17 +407,16 @@ class LiveMTFScalper:
             if verbose: print(f"      ❌ EMA: 9={ema_9:.2f} >= 21={ema_21:.2f}")
             return False
         
-        # Pullback to EMA zone
-        pullback = ema_21 - price
-        if pullback < 0 or pullback > (atr * MAX_PULLBACK_ATR):
-            if verbose: print(f"      ❌ Pullback: {pullback:.2f} (need 0 to {atr*MAX_PULLBACK_ATR:.2f})")
+        # Pullback to EMA zone (allow price slightly above or below EMA 21)
+        pullback = price - ema_21  # positive = above EMA, negative = below EMA
+        if abs(pullback) > (atr * MAX_PULLBACK_ATR):
+            if verbose: print(f"      ❌ Pullback: {pullback:.2f} (need within ±{atr*MAX_PULLBACK_ATR:.2f})")
             return False
         
         # RSI filter
         if pd.isna(rsi) or not (RSI_SHORT_MIN <= rsi <= RSI_SHORT_MAX):
             if verbose: print(f"      ❌ RSI: {rsi:.1f} (need {RSI_SHORT_MIN}-{RSI_SHORT_MAX})")
             return False
-        
         # MACD momentum
         if pd.isna(macd_hist) or pd.isna(macd_hist_prev):
             return False
