@@ -30,6 +30,49 @@ import pandas as pd
 import numpy as np
 
 import pytz
+import yagmail
+
+EMAIL_NOTIFY = True
+EMAIL_TO = 'paraflix246@gmail.com'
+EMAIL_SUBJECT_PREFIX = '[Ai-bot]'
+
+# Set up yagmail SMTP client (Gmail example, requires app password)
+try:
+    yag = yagmail.SMTP(os.getenv('EMAIL_USER'), os.getenv('EMAIL_PASS'))
+except Exception as e:
+    print(f"[Email] Could not initialize yagmail: {e}")
+    yag = None
+
+def send_email(subject, body):
+    if EMAIL_NOTIFY and yag:
+        try:
+            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
+        except Exception as e:
+            print(f"[Email] Failed to send: {e}")
+
+# Email notification for market pause
+def send_pause_email(subject, body):
+    if EMAIL_NOTIFY and yag:
+        try:
+            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
+        except Exception as e:
+            print(f"[Email] Failed to send: {e}")
+
+# Email notification for market resume
+def send_resume_email(subject, body):
+    if EMAIL_NOTIFY and yag:
+        try:
+            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
+        except Exception as e:
+            print(f"[Email] Failed to send: {e}")
+
+# Email notification for trade placed
+def send_trade_email(subject, body):
+    if EMAIL_NOTIFY and yag:
+        try:
+            yag.send(EMAIL_TO, f"{EMAIL_SUBJECT_PREFIX} {subject}", body)
+        except Exception as e:
+            print(f"[Email] Failed to send: {e}")
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
