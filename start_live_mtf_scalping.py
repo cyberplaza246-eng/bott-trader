@@ -670,6 +670,11 @@ class LiveMTFScalper:
                     # Get 5M context
                     ctx_5m = self.get_5m_context(df_5m)
                     
+                    # Show 5M trend status
+                    trend = ctx_5m.get('trend', 'none')
+                    adx = ctx_5m.get('adx', 0)
+                    print(f"   {symbol}: 5M trend={trend} ADX={adx:.1f}")
+                    
                     # Get current price
                     price_data = self.broker.get_latest_price(symbol)
                     if not price_data:
@@ -696,6 +701,9 @@ class LiveMTFScalper:
                     pos_list = list(self.positions.keys())
                     pos_str = f"Positions: {pos_list}" if pos_list else "No positions"
                     print(f"⏰ {datetime.now().strftime('%H:%M:%S')} | {pos_str} | Daily P&L: ${self.daily_pnl:+.2f}")
+                
+                # Show scan status every loop
+                print(f"🔍 Scan #{loop_count} | Trades today: {self.daily_trades}/{MAX_TRADES_PER_DAY}")
                 
                 # Wait for next bar
                 time.sleep(60)  # 1-minute bars
