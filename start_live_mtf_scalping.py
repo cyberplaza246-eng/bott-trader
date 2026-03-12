@@ -352,31 +352,36 @@ class LiveMTFScalper:
         bb_pctb = row_1m['bb_pctb']
         atr = row_1m['atr']
         
-        # EMA alignment (9 > 21)
-        if ema_9 <= ema_21:
+        # Price above EMA9 (matching backtest)
+        if price <= ema_9:
+            if verbose: print(f"      ❌ Price {price:.2f} <= EMA9 {ema_9:.2f}")
             return False
         
-        # Pullback to EMA zone (allow price near EMA 21)
-        pullback = abs(price - ema_21)
-        if pullback > (atr * MAX_PULLBACK_ATR):
+        # Pullback to EMA zone (within 1.5 ATR of EMA21)
+        if abs(price - ema_21) > (atr * MAX_PULLBACK_ATR):
+            if verbose: print(f"      ❌ Pullback: {abs(price-ema_21):.2f} (need within {atr*MAX_PULLBACK_ATR:.2f})")
             return False
         
         # RSI filter
         if pd.isna(rsi) or not (RSI_LONG_MIN <= rsi <= RSI_LONG_MAX):
+            if verbose: print(f"      ❌ RSI: {rsi:.1f} (need {RSI_LONG_MIN}-{RSI_LONG_MAX})")
             return False
         
-        # MACD momentum
+        # MACD rising (matching backtest - just needs to be rising, not positive)
         if pd.isna(macd_hist) or pd.isna(macd_hist_prev):
             return False
-        if macd_hist <= 0 or macd_hist <= macd_hist_prev:
+        if macd_hist <= macd_hist_prev:
+            if verbose: print(f"      ❌ MACD: hist={macd_hist:.4f} not rising (prev={macd_hist_prev:.4f})")
             return False
         
         # Volume confirmation
         if pd.isna(volume_ratio) or volume_ratio < VOLUME_RATIO_THRESHOLD:
+            if verbose: print(f"      ❌ Volume: {volume_ratio:.2f}x (need ≥{VOLUME_RATIO_THRESHOLD})")
             return False
         
         # Bollinger filter
         if pd.isna(bb_pctb) or bb_pctb <= BB_EXTREME_LOW or bb_pctb >= BB_EXTREME_HIGH:
+            if verbose: print(f"      ❌ BB%B: {bb_pctb:.2f} (need {BB_EXTREME_LOW}-{BB_EXTREME_HIGH})")
             return False
         
         return True
@@ -402,26 +407,26 @@ class LiveMTFScalper:
         bb_pctb = row_1m['bb_pctb']
         atr = row_1m['atr']
         
-        # EMA alignment (9 < 21)
-        if ema_9 >= ema_21:
-            if verbose: print(f"      ❌ EMA: 9={ema_9:.2f} >= 21={ema_21:.2f}")
+        # Price below EMA9 (matching backtest)
+        if price >= ema_9:
+            if verbose: print(f"      ❌ Price {price:.2f} >= EMA9 {ema_9:.2f}")
             return False
         
-        # Pullback to EMA zone (allow price slightly above or below EMA 21)
-        pullback = price - ema_21  # positive = above EMA, negative = below EMA
-        if abs(pullback) > (atr * MAX_PULLBACK_ATR):
-            if verbose: print(f"      ❌ Pullback: {pullback:.2f} (need within ±{atr*MAX_PULLBACK_ATR:.2f})")
+        # Pullback to EMA zone (within 1.5 ATR of EMA21)
+        if abs(price - ema_21) > (atr * MAX_PULLBACK_ATR):
+            if verbose: print(f"      ❌ Pullback: {abs(price-ema_21):.2f} (need within {atr*MAX_PULLBACK_ATR:.2f})")
             return False
         
         # RSI filter
         if pd.isna(rsi) or not (RSI_SHORT_MIN <= rsi <= RSI_SHORT_MAX):
             if verbose: print(f"      ❌ RSI: {rsi:.1f} (need {RSI_SHORT_MIN}-{RSI_SHORT_MAX})")
             return False
-        # MACD momentum
+        
+        # MACD falling (matching backtest - just needs to be falling, not negative)
         if pd.isna(macd_hist) or pd.isna(macd_hist_prev):
             return False
-        if macd_hist >= 0 or macd_hist >= macd_hist_prev:
-            if verbose: print(f"      ❌ MACD: hist={macd_hist:.4f} (need <0 and falling)")
+        if macd_hist >= macd_hist_prev:
+            if verbose: print(f"      ❌ MACD: hist={macd_hist:.4f} not falling (prev={macd_hist_prev:.4f})")
             return False
         
         # Volume confirmation
