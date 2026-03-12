@@ -135,7 +135,7 @@ SYMBOL_SPECS = {
 }
 
 # Default symbols to trade
-DEFAULT_SYMBOLS = ['MES', 'MNQ', 'NQ', 'MGC']
+DEFAULT_SYMBOLS = ['MES', 'MNQ', 'NQ']
 
 
 @dataclass
