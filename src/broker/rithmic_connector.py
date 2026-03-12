@@ -190,19 +190,30 @@ class RithmicConnector(BaseBroker):
         timeframe_minutes: int,
         num_candles: int = 100,
     ) -> Optional[pd.DataFrame]:
-        # Try Rithmic historical bars first
+        # Try Rithmic historical bars first with retry logic
         if self._connected:
-            try:
-                df = self._run_sync(
-                    self._async_get_candles(symbol, timeframe_minutes, num_candles),
-                    timeout=20,
-                )
-                if df is not None and len(df) >= 10:
-                    return df
-            except Exception as e:
-                error_logger.error(f"Rithmic candles error for {symbol}: {e}")
+            max_retries = 2
+            for attempt in range(max_retries):
+                try:
+                    df = self._run_sync(
+                        self._async_get_candles(symbol, timeframe_minutes, num_candles),
+                        timeout=25,  # Increased timeout
+                    )
+                    if df is not None and len(df) >= 10:
+                        return df
+                except Exception as e:
+                    error_msg = str(e).lower()
+                    # Log and retry on lock timeout
+                    if "lock" in error_msg or "timeout" in error_msg:
+                        if attempt < max_retries - 1:
+                            bot_logger.warning(f"Rithmic history lock timeout, retry {attempt+1}/{max_retries}")
+                            time.sleep(1.0 + attempt)  # Brief backoff
+                            continue
+                    error_logger.error(f"Rithmic candles error for {symbol}: {e}")
+                    break
 
-        # Fallback to Yahoo Finance
+        # Fallback to Yahoo Finance for futures
+        bot_logger.info(f"Using Yahoo Finance fallback for {symbol} candles")
         return self._yf_get_candles(symbol, timeframe_minutes, num_candles)
 
     def get_latest_price(self, symbol: str) -> Optional[Dict[str, float]]:
