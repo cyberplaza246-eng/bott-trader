@@ -29,6 +29,8 @@ from dataclasses import dataclass
 import pandas as pd
 import numpy as np
 
+import pytz
+
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,6 +39,28 @@ load_dotenv()
 
 from src.broker.rithmic_connector import RithmicConnector
 from src.utils.logger import bot_logger, trades_logger
+
+# ── Trading Hours Logic ─────────────────────────────────────────────
+def is_market_open_et(now=None):
+    """Return True if CME Globex is open (ET), else False."""
+    # CME Globex: Sunday 6pm ET to Friday 5pm ET, daily break 5-6pm ET
+    if now is None:
+        now = datetime.now(pytz.timezone('US/Eastern'))
+    else:
+        now = now.astimezone(pytz.timezone('US/Eastern'))
+    wd = now.weekday()  # 0=Mon, 6=Sun
+    hour, minute = now.hour, now.minute
+    # Daily break: 17:00-18:00 ET
+    if hour == 17:
+        return False
+    # Weekend close: Fri 17:00 ET to Sun 18:00 ET
+    if wd == 4 and hour >= 17:  # Friday after 5pm
+        return False
+    if wd == 5:  # Saturday
+        return False
+    if wd == 6 and hour < 18:  # Sunday before 6pm
+        return False
+    return True
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -753,6 +777,36 @@ class LiveMTFScalper:
         while datetime.now() < end_time:
             try:
                 loop_count += 1
+
+                # ── Trading Hours Check ──
+                if not is_market_open_et():
+                    now_et = datetime.now(pytz.timezone('US/Eastern'))
+                    print(f"⏸️  Market closed (CME Globex hours) - {now_et.strftime('%a %H:%M ET')}")
+                    # Sleep until next open: if daily break, sleep 65min; if weekend, sleep 2h
+                    if now_et.weekday() == 4 and now_et.hour >= 17:
+                        # Friday after 5pm, sleep until Sunday 6pm
+                        days = (6 - now_et.weekday()) % 7
+                        next_open = now_et.replace(hour=18, minute=0, second=0, microsecond=0) + timedelta(days=days)
+                        sleep_sec = (next_open - now_et).total_seconds()
+                        sleep_sec = max(sleep_sec, 3600)
+                    elif now_et.hour == 17:
+                        # Daily break, sleep 65min
+                        sleep_sec = 65 * 60
+                    elif now_et.weekday() == 5:
+                        # Saturday, sleep until Sunday 6pm
+                        next_open = now_et + timedelta(days=1)
+                        next_open = next_open.replace(hour=18, minute=0, second=0, microsecond=0)
+                        sleep_sec = (next_open - now_et).total_seconds()
+                        sleep_sec = max(sleep_sec, 3600)
+                    elif now_et.weekday() == 6 and now_et.hour < 18:
+                        # Sunday before 6pm
+                        next_open = now_et.replace(hour=18, minute=0, second=0, microsecond=0)
+                        sleep_sec = (next_open - now_et).total_seconds()
+                        sleep_sec = max(sleep_sec, 3600)
+                    else:
+                        sleep_sec = 3600
+                    time.sleep(sleep_sec)
+                    continue
                 
                 # Check daily limits
                 if not self.check_daily_limits():
