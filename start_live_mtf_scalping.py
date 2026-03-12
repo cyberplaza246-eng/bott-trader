@@ -861,12 +861,12 @@ class LiveMTFScalper:
                 
                 # Process each symbol
                 for symbol in self.symbols:
-                    # Small delay between symbols to prevent Rithmic lock timeout
-                    time.sleep(1)
+                    # Longer delay between symbols to prevent Rithmic lock timeout
+                    time.sleep(3)
                     
                     # Fetch data for this symbol
                     df_1m = self.get_candles(symbol, timeframe_minutes=1, count=100)
-                    time.sleep(0.5)  # Brief pause between requests
+                    time.sleep(2)  # Longer pause between requests
                     df_5m = self.get_candles(symbol, timeframe_minutes=5, count=RESISTANCE_LOOKBACK + 50)
                     
                     if df_1m is None or df_5m is None:
@@ -886,6 +886,7 @@ class LiveMTFScalper:
                     
                     # Get current price
                     price_data = self.broker.get_latest_price(symbol)
+                    time.sleep(1)  # Delay after price request
                     if not price_data:
                         continue
                     
@@ -908,6 +909,7 @@ class LiveMTFScalper:
                         if exit_reason:
                             # Close via broker and use current_price as exit
                             self.broker.close_position(symbol=symbol)
+                            time.sleep(2)  # Delay after close
                             self.close_position(symbol, exit_reason, current_price)
                     
                     # Check for entry (only if under max positions)
@@ -917,6 +919,7 @@ class LiveMTFScalper:
                             print(f"🎯 Signal: {signal['direction'].upper()} {symbol} @ {signal['entry']:.2f}")
                             print(f"   SL: {signal['sl']:.2f} | TP: {signal['tp']:.2f}")
                             self.place_order(signal)
+                            time.sleep(2)  # Delay after order
                 
                 # Status update every 10 loops
                 if loop_count % 10 == 0:
