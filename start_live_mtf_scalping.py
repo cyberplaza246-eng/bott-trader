@@ -385,10 +385,13 @@ class LiveMTFScalper:
         """Check if long entry conditions are met."""
         # 5M Trend Filter
         if ctx_5m['trend'] != 'bullish':
+            if verbose: print(f"      ❌ 5M trend not bullish: {ctx_5m['trend']}")
             return False
         if ctx_5m['adx'] < ADX_THRESHOLD:
+            if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
             return False
         if ctx_5m['di_plus'] <= ctx_5m['di_minus']:
+            if verbose: print(f"      ❌ DI+ {ctx_5m['di_plus']:.1f} <= DI- {ctx_5m['di_minus']:.1f}")
             return False
         
         # 1M Entry Conditions
@@ -441,10 +444,13 @@ class LiveMTFScalper:
         """Check if short entry conditions are met."""
         # 5M Trend Filter
         if ctx_5m['trend'] != 'bearish':
+            if verbose: print(f"      ❌ 5M trend not bearish: {ctx_5m['trend']}")
             return False
         if ctx_5m['adx'] < ADX_THRESHOLD:
+            if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
             return False
         if ctx_5m['di_minus'] <= ctx_5m['di_plus']:
+            if verbose: print(f"      ❌ DI- {ctx_5m['di_minus']:.1f} <= DI+ {ctx_5m['di_plus']:.1f}")
             return False
         
         # 1M Entry Conditions
