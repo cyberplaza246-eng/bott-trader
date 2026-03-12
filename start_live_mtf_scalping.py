@@ -331,7 +331,7 @@ class LiveMTFScalper:
             return False
         return True
     
-    def check_long_entry(self, row_1m: pd.Series, ctx_5m: Dict) -> bool:
+    def check_long_entry(self, row_1m: pd.Series, ctx_5m: Dict, verbose: bool = False) -> bool:
         """Check if long entry conditions are met."""
         # 5M Trend Filter
         if ctx_5m['trend'] != 'bullish':
@@ -381,7 +381,7 @@ class LiveMTFScalper:
         
         return True
     
-    def check_short_entry(self, row_1m: pd.Series, ctx_5m: Dict) -> bool:
+    def check_short_entry(self, row_1m: pd.Series, ctx_5m: Dict, verbose: bool = False) -> bool:
         """Check if short entry conditions are met."""
         # 5M Trend Filter
         if ctx_5m['trend'] != 'bearish':
@@ -404,29 +404,35 @@ class LiveMTFScalper:
         
         # EMA alignment (9 < 21)
         if ema_9 >= ema_21:
+            if verbose: print(f"      ❌ EMA: 9={ema_9:.2f} >= 21={ema_21:.2f}")
             return False
         
         # Pullback to EMA zone
         pullback = ema_21 - price
         if pullback < 0 or pullback > (atr * MAX_PULLBACK_ATR):
+            if verbose: print(f"      ❌ Pullback: {pullback:.2f} (need 0 to {atr*MAX_PULLBACK_ATR:.2f})")
             return False
         
         # RSI filter
         if pd.isna(rsi) or not (RSI_SHORT_MIN <= rsi <= RSI_SHORT_MAX):
+            if verbose: print(f"      ❌ RSI: {rsi:.1f} (need {RSI_SHORT_MIN}-{RSI_SHORT_MAX})")
             return False
         
         # MACD momentum
         if pd.isna(macd_hist) or pd.isna(macd_hist_prev):
             return False
         if macd_hist >= 0 or macd_hist >= macd_hist_prev:
+            if verbose: print(f"      ❌ MACD: hist={macd_hist:.4f} (need <0 and falling)")
             return False
         
         # Volume confirmation
         if pd.isna(volume_ratio) or volume_ratio < VOLUME_RATIO_THRESHOLD:
+            if verbose: print(f"      ❌ Volume: {volume_ratio:.2f}x (need ≥{VOLUME_RATIO_THRESHOLD})")
             return False
         
         # Bollinger filter
         if pd.isna(bb_pctb) or bb_pctb <= BB_EXTREME_LOW or bb_pctb >= BB_EXTREME_HIGH:
+            if verbose: print(f"      ❌ BB%B: {bb_pctb:.2f} (need {BB_EXTREME_LOW}-{BB_EXTREME_HIGH})")
             return False
         
         return True
@@ -451,7 +457,10 @@ class LiveMTFScalper:
         tp_distance = sl_distance * TP_MULT
         entry_price = row['close']
         
-        if self.check_long_entry(row, ctx_5m):
+        # Enable verbose for symbols with valid 5M trend
+        verbose = ctx_5m['adx'] >= ADX_THRESHOLD
+        
+        if self.check_long_entry(row, ctx_5m, verbose=verbose):
             # Always cap TP at resistance - ATR buffer (applies to ALL symbols)
             tp_rr = entry_price + tp_distance
             tp_buffer = atr * TP_BUFFER_ATR_MULT
@@ -468,7 +477,7 @@ class LiveMTFScalper:
                 'atr': atr
             }
         
-        elif self.check_short_entry(row, ctx_5m):
+        elif self.check_short_entry(row, ctx_5m, verbose=verbose):
             # Always cap TP at support + ATR buffer (applies to ALL symbols)
             tp_rr = entry_price - tp_distance
             tp_buffer = atr * TP_BUFFER_ATR_MULT
