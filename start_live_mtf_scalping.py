@@ -732,7 +732,18 @@ class LiveMTFScalper:
         if symbol not in self.positions:
             return None
         
+        # Validate price is reasonable (not 0 or negative)
+        if current_price <= 0:
+            return None
+        
         position = self.positions[symbol]
+        
+        # Sanity check: price should be within reasonable range of entry
+        # (prevents false triggers from bad data)
+        max_deviation = abs(position.entry_price) * 0.1  # 10% max deviation
+        if abs(current_price - position.entry_price) > max_deviation:
+            print(f"   ⚠️ Ignoring suspicious price {current_price:.2f} (entry was {position.entry_price:.2f})")
+            return None
         
         if position.direction == 'long':
             if current_price <= position.sl:
@@ -756,18 +767,15 @@ class LiveMTFScalper:
         spec = SYMBOL_SPECS[symbol]
         point_value = spec['point_value']
         
-        # Calculate P&L
+        # Calculate P&L with real fill price
         if position.direction == 'long':
             pnl = (exit_price - position.entry_price) * point_value * position.size
         else:
             pnl = (position.entry_price - exit_price) * point_value * position.size
-        
         self.daily_pnl += pnl
-        
         emoji = "✅" if pnl > 0 else "❌"
         print(f"{emoji} Closed {symbol} {position.direction.upper()} @ {exit_price:.2f} ({reason})")
         print(f"   P&L: ${pnl:+.2f} | Daily: ${self.daily_pnl:+.2f}")
-        
         # Log trade
         trade = {
             'symbol': symbol,
@@ -782,13 +790,11 @@ class LiveMTFScalper:
             'exit_time': datetime.now(timezone.utc).isoformat(),
         }
         self.trades.append(trade)
-        
         # Save to log
         with open(self.log_file, 'w') as f:
             json.dump(self.trades, f, indent=2)
-        
         del self.positions[symbol]
-    
+        return
     def run(self, duration_minutes: int = 480):
         """Main trading loop - scans all symbols."""
         print(f"\n{'='*70}")
@@ -887,12 +893,25 @@ class LiveMTFScalper:
                     if not price_data:
                         continue
                     
-                    current_price = (price_data.get('bid', 0) + price_data.get('ask', 0)) / 2
+                    bid = price_data.get('bid', 0)
+                    ask = price_data.get('ask', 0)
+                    last = price_data.get('last', 0)
+                    
+                    # Use last price if available, otherwise mid
+                    if last > 0:
+                        current_price = last
+                    elif bid > 0 and ask > 0:
+                        current_price = (bid + ask) / 2
+                    else:
+                        print(f"   ⚠️ No valid price for {symbol}")
+                        continue
                     
                     # Check for exit on existing position
                     if symbol in self.positions:
                         exit_reason = self.check_exit(symbol, current_price)
                         if exit_reason:
+                            # Close via broker and use current_price as exit
+                            self.broker.close_position(symbol=symbol)
                             self.close_position(symbol, exit_reason, current_price)
                     
                     # Check for entry (only if under max positions)
