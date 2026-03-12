@@ -33,6 +33,13 @@ import pytz
 import smtplib
 from email.mime.text import MIMEText
 
+# Add project root to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from dotenv import load_dotenv
+load_dotenv()
+
+# Email config (must be after load_dotenv)
 EMAIL_NOTIFY = True  # Enabled
 EMAIL_TO = 'paraflix246@gmail.com'
 EMAIL_SUBJECT_PREFIX = '[Ai-bot]'
@@ -55,12 +62,6 @@ def send_email(subject, body):
         print(f"📧 Email sent: {subject}")
     except Exception as e:
         print(f"[Email] Failed to send: {e}")
-
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-from dotenv import load_dotenv
-load_dotenv()
 
 from src.broker.rithmic_connector import RithmicConnector
 from src.utils.logger import bot_logger, trades_logger
@@ -598,6 +599,12 @@ class LiveMTFScalper:
                 print(f"   Order ID: {result['ticket']}")
                 print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
                 
+                # Send email notification
+                send_email(
+                    f"Trade: {direction.upper()} {symbol}",
+                    f"Trade Placed!\n\nSymbol: {symbol}\nDirection: {direction.upper()}\nEntry: {entry:.2f}\nSL: {sl:.2f}\nTP: {tp:.2f}\nOrder ID: {result['ticket']}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                )
+                
                 self.positions[symbol] = Position(
                     order_id=result['ticket'],
                     symbol=symbol,
@@ -758,6 +765,13 @@ class LiveMTFScalper:
         emoji = "✅" if pnl > 0 else "❌"
         print(f"{emoji} Closed {symbol} {position.direction.upper()} @ {exit_price:.2f} ({reason})")
         print(f"   P&L: ${pnl:+.2f} | Daily: ${self.daily_pnl:+.2f}")
+        
+        # Send email notification for closed trade
+        send_email(
+            f"Closed: {symbol} ({reason})",
+            f"Trade Closed!\n\nSymbol: {symbol}\nDirection: {position.direction.upper()}\nEntry: {position.entry_price:.2f}\nExit: {exit_price:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}\nDaily P&L: ${self.daily_pnl:+.2f}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+        )
+        
         # Log trade
         trade = {
             'symbol': symbol,
