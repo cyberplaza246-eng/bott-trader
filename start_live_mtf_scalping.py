@@ -33,7 +33,7 @@ import pytz
 import smtplib
 from email.mime.text import MIMEText
 
-EMAIL_NOTIFY = False  # Disabled for now
+EMAIL_NOTIFY = True  # Enabled
 EMAIL_TO = 'paraflix246@gmail.com'
 EMAIL_SUBJECT_PREFIX = '[Ai-bot]'
 EMAIL_USER = os.getenv('EMAIL_USER', '')
