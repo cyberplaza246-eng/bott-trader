@@ -9,10 +9,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 import numpy as np
 from src.ai.liquidity_sweep import LiquiditySweepAnalyzer
+from config.strategy_config import PAIRS as CONFIG_PAIRS
 
 analyzer = LiquiditySweepAnalyzer()
 
-for pair in ['EUR/USD', 'GBP/USD', 'USD/JPY']:
+for pair in CONFIG_PAIRS:
     csv5 = f'data/{pair.replace("/","_")}_5m.csv'
     csv1 = f'data/{pair.replace("/","_")}_1m.csv'
     if not os.path.exists(csv5):

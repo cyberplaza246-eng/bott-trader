@@ -19,8 +19,13 @@ import pandas as pd
 # ═══════════════════════════════════════════════════════════════════
 #  LSTM Training (local CSV data)
 # ═══════════════════════════════════════════════════════════════════
-def train_lstm_local(epochs=30, batch_size=32, lookback=60):
-    """Train LSTM on local 5m/1h CSV data."""
+def train_lstm_local(epochs=30, batch_size=32, lookback=60, futures_only=False):
+    """Train LSTM on local 5m/1h CSV data.
+
+    Args:
+        futures_only: If True, train only on futures data (MES, MNQ) for
+                      better learning of futures-specific price dynamics.
+    """
     try:
         import tensorflow as tf
         print(f"  TensorFlow {tf.__version__} loaded")
@@ -47,8 +52,11 @@ def train_lstm_local(epochs=30, batch_size=32, lookback=60):
     all_features = []
     data_dir = 'data'
 
+    FUTURES_PREFIXES = ('MES', 'MNQ', 'ES_', 'NQ_', 'CL_', 'GC_')
     for fname in sorted(os.listdir(data_dir)):
         if not fname.endswith('_5m.csv'):
+            continue
+        if futures_only and not any(fname.startswith(p) for p in FUTURES_PREFIXES):
             continue
         pair = fname.replace('_5m.csv', '').replace('_', '/')
         fpath = os.path.join(data_dir, fname)
@@ -165,13 +173,25 @@ def train_lstm_local(epochs=30, batch_size=32, lookback=60):
 # ═══════════════════════════════════════════════════════════════════
 #  RL Agent Training (local CSV data)
 # ═══════════════════════════════════════════════════════════════════
-def train_rl_local(epochs=3, balance=50):
-    """Train RL agent on local 5m CSV data."""
+def train_rl_local(epochs=3, balance=50000, futures_only=False):
+    """Train RL agent on local 5m CSV data.
+
+    Args:
+        futures_only: If True, train only on futures pairs (MES, MNQ).
+    """
     from src.ai.rl_agent import RLTradingAgent
     from src.ai.technical_analyzer import TechnicalAnalyzer
     from src.risk.position_manager import RiskManager
 
-    SPREAD_SIM = {'EUR/USD': 0.00012, 'GBP/USD': 0.00016, 'USD/JPY': 0.020}
+    SPREAD_SIM = {
+        'EUR/USD': 0.00012, 'GBP/USD': 0.00016, 'USD/JPY': 0.020,
+        'MES': 0.25, 'MNQ': 0.50,
+    }
+    PIP_SIZES = {
+        'EUR/USD': 0.0001, 'GBP/USD': 0.0001, 'USD/JPY': 0.01,
+        'MES': 0.25, 'MNQ': 0.25,
+    }
+    # Futures use tighter SL (fewer ATR multiples) because ATR is in price points
     SL_ATR_MULT = 0.8
     TP_ATR_MULT = 1.6   # 2R target (matched to sweep TP ratio)
     MAX_HOLD_BARS = 30
@@ -186,7 +206,11 @@ def train_rl_local(epochs=3, balance=50):
     # Load data
     ta = TechnicalAnalyzer()
     pair_data = {}
-    for pair in ['EUR/USD', 'GBP/USD', 'USD/JPY']:
+    if futures_only:
+        pairs = ['MES', 'MNQ']
+    else:
+        pairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'MES', 'MNQ']
+    for pair in pairs:
         fpath = f'data/{pair.replace("/", "_")}_5m.csv'
         if os.path.exists(fpath):
             df = pd.read_csv(fpath, parse_dates=['datetime'])
@@ -215,7 +239,7 @@ def train_rl_local(epochs=3, balance=50):
                    'wins': 0, 'losses': 0, 'pips': 0.0, 'rewards': []}
 
         for pair, df in pair_data.items():
-            pip_size = 0.01 if 'JPY' in pair else 0.0001
+            pip_size = PIP_SIZES.get(pair, 0.01 if 'JPY' in pair else 0.0001)
             spread = SPREAD_SIM.get(pair, 0.00015)
             atr_med = float(df['atr'].median()) if 'atr' in df.columns else 0.001
             last_trade = -COOLDOWN_BARS
@@ -346,6 +370,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Train AI models')
     parser.add_argument('--lstm-only', action='store_true')
     parser.add_argument('--rl-only', action='store_true')
+    parser.add_argument('--futures-only', action='store_true',
+                        help='Train only on futures data (MES, MNQ)')
     parser.add_argument('--lstm-epochs', type=int, default=30)
     parser.add_argument('--rl-epochs', type=int, default=3)
     args = parser.parse_args()
@@ -353,10 +379,10 @@ if __name__ == '__main__':
     t_start = time.time()
 
     if not args.rl_only:
-        train_lstm_local(epochs=args.lstm_epochs)
+        train_lstm_local(epochs=args.lstm_epochs, futures_only=args.futures_only)
 
     if not args.lstm_only:
-        train_rl_local(epochs=args.rl_epochs)
+        train_rl_local(epochs=args.rl_epochs, futures_only=args.futures_only)
 
     print(f"\n{'='*60}")
     print(f"  ALL TRAINING COMPLETE ({time.time()-t_start:.0f}s)")

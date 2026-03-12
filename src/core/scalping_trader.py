@@ -1,8 +1,9 @@
 """
 Scalping Trade Executor — 5-Minute Scalping Strategy Manager
 
-Orchestrates scalping entries, exits, and micro risk management for GBPUSD/EURUSD.
-Integrates with MT5 broker and risk management systems.
+Orchestrates scalping entries, exits, and micro risk management.
+Supports both forex (EUR/USD, GBP/USD) and futures (MES, MNQ).
+Integrates with broker and risk management systems.
 """
 import pandas as pd
 import numpy as np
@@ -10,19 +11,24 @@ from datetime import datetime, timedelta
 from src.ai.scalping_analyzer import ScalpingAnalyzer
 from src.risk.position_manager import PIP_VALUES, DEFAULT_PIP
 from src.utils.logger import bot_logger, TradeLogger
+from config.strategy_config import PAIRS as CONFIG_PAIRS
 
 
 class ScalpingTrader:
     """Execute and manage 5-minute scalping trades."""
     
-    # Pair configuration: (symbols to trade, preferred pairs)
-    SCALPING_PAIRS = ['GBP/USD', 'EUR/USD']
+    # Pair configuration: sourced from strategy_config (auto-selects forex or futures)
+    SCALPING_PAIRS = CONFIG_PAIRS
     
     # Hold time limits (in minutes) - scalping is very short-term
     MAX_HOLD_MINUTES = {
-        'GBP/USD': 15,  # GBP scalps should be closed quickly
-        'EUR/USD': 20,  # EUR scalps may take slightly longer
+        'GBP/USD': 15,
+        'EUR/USD': 20,
+        'USD/JPY': 20,
+        'MES': 10,      # Futures scalps — tighter hold times
+        'MNQ': 10,
     }
+    DEFAULT_HOLD_MINUTES = 15
     
     # Quick wins mode multiplier (0.6 = 60% of normal hold time)
     QUICK_WINS_HOLD_MULTIPLIER = 0.6
@@ -51,7 +57,7 @@ class ScalpingTrader:
         self.active_scalp_trades = {}  # {ticket: trade_data}
         
         mode_label = "QUICK_WINS" if profit_mode == 'quick_wins' else "NORMAL"
-        bot_logger.info(f"🔪 Scalping Trader initialized (GBPUSD/EURUSD) [{mode_label} mode]")
+        bot_logger.info(f"🔪 Scalping Trader initialized ({', '.join(self.SCALPING_PAIRS)}) [{mode_label} mode]")
     
     def set_profit_mode(self, mode):
         """Switch profit mode at runtime.
@@ -346,33 +352,33 @@ class ScalpingTrader:
         
         return closed_trades
     
-    def process_candle(self, df_gbpusd, df_eurusd):
+    def process_candle(self, candle_data_by_pair=None, **kwargs):
         """Process new candle data and generate scalping signals.
         
         Args:
-            df_gbpusd: DataFramefor GBP/USD
-            df_eurusd: DataFrame for EUR/USD
+            candle_data_by_pair: dict mapping pair -> DataFrame
+            **kwargs: legacy positional args (df_gbpusd, df_eurusd) for backward compat
             
         Returns:
             list: New trades opened (if any)
         """
         new_trades = []
         
-        # Check GBP/USD
-        if df_gbpusd is not None and len(df_gbpusd) > 0:
-            signal_gbp = self.analyze_pair(df_gbpusd, 'GBP/USD')
-            if signal_gbp and signal_gbp['signal'] in ['BUY', 'SELL']:
-                trade = self.execute_trade(signal_gbp, 'GBP/USD')
-                if trade:
-                    new_trades.append(trade)
+        # Support legacy call signature: process_candle(df_gbp, df_eur)
+        if candle_data_by_pair is None:
+            candle_data_by_pair = {}
+            legacy_pairs = ['GBP/USD', 'EUR/USD']
+            for i, key in enumerate(['df_gbpusd', 'df_eurusd']):
+                if key in kwargs and kwargs[key] is not None:
+                    candle_data_by_pair[legacy_pairs[i]] = kwargs[key]
         
-        # Check EUR/USD
-        if df_eurusd is not None and len(df_eurusd) > 0:
-            signal_eur = self.analyze_pair(df_eurusd, 'EUR/USD')
-            if signal_eur and signal_eur['signal'] in ['BUY', 'SELL']:
-                trade = self.execute_trade(signal_eur, 'EUR/USD')
-                if trade:
-                    new_trades.append(trade)
+        for pair, df in candle_data_by_pair.items():
+            if df is not None and len(df) > 0:
+                signal = self.analyze_pair(df, pair)
+                if signal and signal['signal'] in ['BUY', 'SELL']:
+                    trade = self.execute_trade(signal, pair)
+                    if trade:
+                        new_trades.append(trade)
         
         # Monitor active trades
         closed = self.check_active_trades()

@@ -1,0 +1,858 @@
+{
+  "model_weights": {
+    "scalping": 0.15294854457063467,
+    "technical": 0.13209483938583258,
+    "volume": 0.04375169507644435,
+    "ema_crossover": 0.1516937972938939,
+    "candlestick": 0.10118588536151643,
+    "multi_tf": 0.14906900027297795,
+    "support_resistance": 0.09509263435896549,
+    "lstm": 0.0713687111102096,
+    "sentiment": 0.10279489256952491
+  },
+  "model_accuracy": {},
+  "pair_stats": {
+    "EUR/USD": {
+      "wins": 0,
+      "losses": 36,
+      "total_pnl": -180.0
+    },
+    "GBP/USD": {
+      "wins": 0,
+      "losses": 0,
+      "total_pnl": 0.0
+    },
+    "USD/JPY": {
+      "wins": 0,
+      "losses": 0,
+      "total_pnl": 0.0
+    }
+  },
+  "session_stats": {
+    "new_york": {
+      "wins": 0,
+      "losses": 36
+    }
+  },
+  "pair_model_accuracy": {
+    "USD/JPY:sweep": {
+      "correct": 0,
+      "total": 8
+    },
+    "USD/JPY:lstm": {
+      "correct": 2,
+      "total": 8
+    },
+    "USD/JPY:support_resistance": {
+      "correct": 2,
+      "total": 8
+    },
+    "GBP/USD:sweep": {
+      "correct": 0,
+      "total": 11
+    },
+    "GBP/USD:technical": {
+      "correct": 2,
+      "total": 4
+    },
+    "GBP/USD:support_resistance": {
+      "correct": 6,
+      "total": 11
+    },
+    "GBP/USD:candlestick": {
+      "correct": 3,
+      "total": 6
+    },
+    "GBP/USD:ema_crossover": {
+      "correct": 1,
+      "total": 2
+    },
+    "USD/JPY:multi_tf": {
+      "correct": 1,
+      "total": 1
+    },
+    "USD/JPY:volume": {
+      "correct": 0,
+      "total": 1
+    },
+    "USD/JPY:candlestick": {
+      "correct": 0,
+      "total": 1
+    },
+    "GBP/USD:volume": {
+      "correct": 0,
+      "total": 1
+    },
+    "GBP/USD:multi_tf": {
+      "correct": 0,
+      "total": 1
+    }
+  },
+  "session_pair_stats": {
+    "new_york:EUR/USD": {
+      "wins": 0,
+      "losses": 36,
+      "total_pnl": -180.0
+    }
+  },
+  "model_combos": {
+    "support_resistance:sweep": {
+      "wins": 0,
+      "total": 4
+    },
+    "lstm:support_resistance:sweep": {
+      "wins": 0,
+      "total": 6
+    },
+    "candlestick:sweep:technical": {
+      "wins": 0,
+      "total": 1
+    },
+    "candlestick:sweep:volume": {
+      "wins": 0,
+      "total": 1
+    },
+    "candlestick:sweep": {
+      "wins": 0,
+      "total": 1
+    },
+    "ema_crossover:sweep": {
+      "wins": 0,
+      "total": 1
+    },
+    "multi_tf:sweep:volume": {
+      "wins": 0,
+      "total": 1
+    },
+    "candlestick:support_resistance:sweep:technical": {
+      "wins": 0,
+      "total": 1
+    }
+  },
+  "model_pnl_history": {
+    "sweep": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "scalping": [],
+    "lstm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sentiment": [],
+    "technical": [
+      0.0,
+      0.0
+    ],
+    "volume": [
+      0.0,
+      0.0
+    ],
+    "multi_tf": [
+      0.0
+    ],
+    "support_resistance": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "candlestick": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "ema_crossover": [
+      0.0
+    ]
+  },
+  "regime_stats": {
+    "trending": {
+      "wins": 0,
+      "losses": 36,
+      "total_pnl": -180.0
+    }
+  },
+  "hourly_stats": {
+    "17": {
+      "wins": 0,
+      "losses": 24,
+      "total_pnl": -120.0
+    },
+    "19": {
+      "wins": 0,
+      "losses": 12,
+      "total_pnl": -60.0
+    }
+  },
+  "confidence_threshold": 0.53,
+  "consecutive_losses": 36,
+  "consecutive_wins": 0,
+  "max_consecutive_losses": 36,
+  "peak_balance": 0,
+  "current_drawdown_pct": 0,
+  "in_drawdown_protection": false,
+  "current_regime": "ranging",
+  "trade_history": [
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-09T01:52:32.735809",
+      "session": "asian",
+      "hour": 1,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-09T01:52:32.738245",
+      "session": "asian",
+      "hour": 1,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-09T01:52:32.740377",
+      "session": "asian",
+      "hour": 1,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-09T01:52:32.742430",
+      "session": "asian",
+      "hour": 1,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-09T01:52:32.744513",
+      "session": "asian",
+      "hour": 1,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:41:03.564668",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:41:03.567633",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:41:03.569242",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:41:03.579030",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:41:03.591672",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:41:03.594804",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:13.844611",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:13.848448",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:13.850394",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:13.852311",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:13.854248",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:13.856282",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:27.635010",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:27.637307",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:27.640763",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:27.643282",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:27.646034",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:42:27.648458",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:44:52.358388",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:44:52.360717",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:44:52.362693",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:44:52.364738",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:44:52.366777",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T17:44:52.368875",
+      "session": "new_york",
+      "hour": 17,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:04:35.025393",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:04:35.027966",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:04:35.030225",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:04:35.032489",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:04:35.034622",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:04:35.036687",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:06:46.400933",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:06:46.409658",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:06:46.412866",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:06:46.416336",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:06:46.419693",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    },
+    {
+      "pair": "EUR/USD",
+      "profit_loss": -5.0,
+      "model_signals": {},
+      "signal": "BUY",
+      "regime": "trending",
+      "timestamp": "2026-03-11T19:06:46.421745",
+      "session": "new_york",
+      "hour": 19,
+      "is_win": false
+    }
+  ],
+  "loss_patterns": {
+    "pair:EUR/USD": {
+      "count": 36,
+      "total_loss": 180.0
+    },
+    "session:new_york": {
+      "count": 36,
+      "total_loss": 180.0
+    },
+    "pair_session:EUR/USD:new_york": {
+      "count": 36,
+      "total_loss": 180.0
+    },
+    "pair_regime:EUR/USD:trending": {
+      "count": 36,
+      "total_loss": 180.0
+    },
+    "hour:17": {
+      "count": 24,
+      "total_loss": 120.0
+    },
+    "signal:BUY": {
+      "count": 36,
+      "total_loss": 180.0
+    },
+    "hour:19": {
+      "count": 12,
+      "total_loss": 60.0
+    }
+  },
+  "recent_trades_window": [
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:04:35.030233"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:04:35.032521"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:04:35.034630"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:04:35.036694"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:06:46.400941"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:06:46.409666"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:06:46.412873"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:06:46.416343"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:06:46.419700"
+    },
+    {
+      "pair": "EUR/USD",
+      "session": "new_york",
+      "hour": 19,
+      "regime": "trending",
+      "is_win": false,
+      "pnl": -5.0,
+      "timestamp": "2026-03-11T19:06:46.421753"
+    }
+  ],
+  "session_atr_profiles": {},
+  "spread_tracking": {},
+  "recent_sl_values": {
+    "USD/JPY": [
+      0.023691156338770725,
+      0.016,
+      0.016,
+      0.016,
+      0.016,
+      0.016,
+      0.016,
+      0.016,
+      0.01877604211722428
+    ],
+    "GBP/USD": [
+      0.0002,
+      0.0002,
+      0.0002,
+      0.0002222886272051916,
+      0.0002,
+      0.00023077883508726416,
+      0.0003906219367768582,
+      0.0002,
+      0.0002,
+      0.00032547638264079914,
+      0.0002,
+      0.0002
+    ]
+  },
+  "sl_multiplier_by_pair": {},
+  "time_exit_candles": 8,
+  "time_exit_outcomes": [],
+  "atr_regime": "neutral",
+  "exit_type_tracking": {
+    "EUR/USD": {
+      "sl_hit": 0,
+      "tp_hit": 0,
+      "time_exit": 0,
+      "manual": 84,
+      "total": 84
+    },
+    "USD/JPY": {
+      "sl_hit": 0,
+      "tp_hit": 0,
+      "time_exit": 0,
+      "manual": 8,
+      "total": 8
+    },
+    "GBP/USD": {
+      "sl_hit": 0,
+      "tp_hit": 0,
+      "time_exit": 0,
+      "manual": 11,
+      "total": 11
+    }
+  },
+  "auto_learning_trade_count": 13,
+  "last_updated": "2026-03-11T19:06:46.422584"
+}

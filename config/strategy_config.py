@@ -7,23 +7,43 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# MT5 Connection
+# Broker selection: "mt5" (forex), "traderspost" (futures via TradersPost), "rithmic" (direct Rithmic)
+BROKER_TYPE = os.getenv('BROKER_TYPE', 'mt5')
+
+# Asset class: "forex" or "futures"
+ASSET_CLASS = os.getenv('ASSET_CLASS', 'forex')
+
+# MT5 Connection (forex mode)
 MT5_ACCOUNT = os.getenv('MT5_ACCOUNT')
 MT5_PASSWORD = os.getenv('MT5_PASSWORD')
 MT5_SERVER = os.getenv('MT5_SERVER', 'Exness-MT5')
+
+# Rithmic Connection (direct futures execution, preferred)
+RITHMIC_USER_ID = os.getenv('RITHMIC_USER_ID', '')
+RITHMIC_PASSWORD = os.getenv('RITHMIC_PASSWORD', '')
+RITHMIC_SYSTEM = os.getenv('RITHMIC_SYSTEM', 'Rithmic Paper Trading')
+RITHMIC_GATEWAY = os.getenv('RITHMIC_GATEWAY', '')
+
+# TradersPost Connection (alternative futures mode — webhook-based)
+TRADERSPOST_WEBHOOK_URL = os.getenv('TRADERSPOST_WEBHOOK_URL', '')
+TRADERSPOST_API_KEY = os.getenv('TRADERSPOST_API_KEY', '')
+TRADERSPOST_WEBHOOK_SECRET = os.getenv('TRADERSPOST_WEBHOOK_SECRET', '')
+TRADERSPOST_ACCOUNT_ID = os.getenv('TRADERSPOST_ACCOUNT_ID', '')
 
 # Trading Parameters
 RISK_PER_TRADE_PERCENT = float(os.getenv('RISK_PER_TRADE_PERCENT', 1.0))
 MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 1))
 DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 3))
-INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', 50))
+INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', 50000 if ASSET_CLASS == 'futures' else 50))
 
 # Trading Mode
 TRADING_MODE = os.getenv('TRADING_MODE', 'live')  # 'live', 'paper', 'backtest'
 AUTOTRADING_ENABLED = TRADING_MODE == 'live'
 
-# Currency Pairs to Trade (scalping focus)
-PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY']
+# Symbols to Trade — auto-selected by asset class
+FOREX_PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY']
+FUTURES_SYMBOLS = ['MES', 'MNQ']  # Start with micros for eval
+PAIRS = FUTURES_SYMBOLS if ASSET_CLASS == 'futures' else FOREX_PAIRS
 
 # Timeframes (in minutes) — dual-timeframe scalping
 TIMEFRAMES = {
@@ -60,6 +80,21 @@ SCALPING_PAIRS = {
         'cooldown_seconds': 30,
         'max_hold_candles': 30,
     },
+    # ── Futures scalping params ─────────────────────────────────
+    'MES': {
+        'session_atr_min': 2.0,        # 2 point minimum ATR (filters low-vol noise)
+        'spread_sim': 0.25,            # 1 tick spread
+        'pip_size': 0.25,              # tick_size
+        'cooldown_seconds': 300,
+        'max_hold_candles': 20,        # Tighter hold for futures
+    },
+    'MNQ': {
+        'session_atr_min': 5.0,        # NQ more volatile, 5m ATR typically 8-12
+        'spread_sim': 0.50,            # 2 ticks spread
+        'pip_size': 0.25,
+        'cooldown_seconds': 300,
+        'max_hold_candles': 20,
+    },
 }
 
 # Session windows for scalping (UTC hours)
@@ -68,13 +103,17 @@ SCALPING_SESSION_WINDOWS = {
     'EUR/USD': {'start': 0, 'end': 0},    # 24/7 trading (start==end means always)
     'GBP/USD': {'start': 0, 'end': 0},    # 24/7 trading
     'USD/JPY': {'start': 0, 'end': 0},    # 24/7 trading
+    'MES': {'start': 13, 'end': 21},        # US extended session: 13-21 UTC (8am-4pm ET)
+    'MNQ': {'start': 13, 'end': 21},
 }
 
-# Spread limits for scalping (pips — tighter than swing)
+# Spread limits for scalping (in tick/pip units)
 SCALPING_SPREAD_LIMITS = {
     'EUR/USD': 2.0,   # Max 2.0 pips
     'GBP/USD': 2.5,   # Max 2.5 pips
     'USD/JPY': 2.5,   # Max 2.5 pips
+    'MES': 2.0,       # Max 2 ticks (0.50 points)
+    'MNQ': 4.0,       # Max 4 ticks (1.0 point)
 }
 
 # Confluence bonus: both timeframes agree → boost confidence
@@ -82,14 +121,18 @@ CONFLUENCE_BONUS = float(os.getenv('CONFLUENCE_BONUS', 0.15))   # +15%
 DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.12))  # -12% (was 5% — too lenient)
 
 # Optimal trading hours (bonus confidence during peak liquidity)
-OPTIMAL_HOURS_UTC = list(range(8, 12))  # 08:00-11:59 UTC
+# Forex: London Open 08-12 UTC | Futures: US RTH 13:30-20:00 UTC (9:30am-4pm ET)
+if ASSET_CLASS == 'futures':
+    OPTIMAL_HOURS_UTC = list(range(13, 20))   # US regular trading hours
+else:
+    OPTIMAL_HOURS_UTC = list(range(8, 12))    # London Open
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
 # With sweep-gated architecture, sweep must fire (4-layer validation)
 # then confidence is boosted/reduced by EMA + Technical confirmation.
-# Sweep signals arrive pre-qualified at ~0.80+, so 0.45 floor is conservative.
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
+# Futures tuning: 0.60 threshold + 3 model agreement was optimal in backtest.
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.60))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))  # Sweep + at least 2 context models must agree
 
 # Technical Analysis Parameters (ATR-centric scalping)

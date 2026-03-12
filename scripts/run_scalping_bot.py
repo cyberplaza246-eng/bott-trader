@@ -32,8 +32,8 @@ from config.scalping_config_1m_5m import MultiTimeframeScalpingConfig
 class ScalpingBot:
     """Main scalping bot orchestrator"""
     
-    # Preferred pairs for scalping
-    SCALPING_PAIRS = ['GBP/USD', 'EUR/USD']
+    # Preferred pairs for scalping (from config — auto-selects forex or futures)
+    SCALPING_PAIRS = PAIRS
     
     # 5-minute candle refresh (update every candle close)
     CANDLE_REFRESH_INTERVAL = 300  # seconds

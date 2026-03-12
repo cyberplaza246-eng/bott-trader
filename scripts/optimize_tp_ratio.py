@@ -8,10 +8,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 from src.backtest.backtest_engine import BacktestEngine
 from src.ai.liquidity_sweep import LiquiditySweepAnalyzer
+from config.strategy_config import PAIRS as CONFIG_PAIRS, INITIAL_BALANCE
 
-PAIRS = ['EUR/USD', 'GBP/USD']
+PAIRS = CONFIG_PAIRS
 MAX_CANDLES = 3500
-BALANCE = 50
+BALANCE = INITIAL_BALANCE
 CONFIDENCE = 0.45
 
 # Test different TP ratios for trend regimes

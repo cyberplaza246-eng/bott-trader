@@ -35,5 +35,8 @@ python-json-logger>=2.0.0
 # Testing
 pytest>=7.4.0
 
+# Rithmic direct connection (futures via R|Protocol)
+async-rithmic>=1.5.0
+
 # MT5 (Windows only - install manually on Windows)
 # MetaTrader5>=5.0.45

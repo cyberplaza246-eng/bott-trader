@@ -17,26 +17,20 @@ TP Strategy:
 """
 import numpy as np
 from src.utils.logger import bot_logger
+from src.instruments import get_instrument, REGISTRY
 
 
-# ── Pair Configuration ──────────────────────────────────────────────
+# ── Backward-compat alias — modules that import PAIR_CONFIG get registry data ─
 PAIR_CONFIG = {
-    'EUR/USD': {
-        'spread_sim': 0.00006,    # 0.6 pips (ECN TradersWay)
-        'pip_size': 0.0001,
-    },
-    'GBP/USD': {
-        'spread_sim': 0.00010,    # 1.0 pip (ECN TradersWay)
-        'pip_size': 0.0001,
-    },
-    'USD/JPY': {
-        'spread_sim': 0.008,      # 0.8 pips (ECN TradersWay)
-        'pip_size': 0.01,
-    },
+    sym: {
+        'spread_sim': spec.spread_default,
+        'pip_size': spec.tick_size,
+    }
+    for sym, spec in REGISTRY.items()
 }
 
 # ── Constants ───────────────────────────────────────────────────────
-SL_ATR_BUFFER = 0.50          # Buffer beyond structure level (50% ATR)
+SL_ATR_BUFFER = 0.35          # Buffer beyond structure level (35% ATR)
 SL_ATR_FALLBACK = 1.5         # Fallback: 1.5×ATR when no structure
 SL_MIN_ATR = 1.0              # Floor: at least 1.0×ATR
 SL_MIN_SPREAD_MULT = 2        # Floor: at least 2×spread
@@ -44,8 +38,8 @@ SL_MAX_PIPS_1M = 15.0         # Hard cap: 15 pips for 1M trades
 SL_MAX_PIPS_5M = 25.0         # Hard cap: 25 pips for 5M trades
 
 SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
-MIN_RR = 1.2                  # Minimum reward-to-risk ratio
-MAX_RR = 2.5                  # Maximum R:R
+MIN_RR = 1.5                  # Minimum reward-to-risk ratio
+MAX_RR = 3.0                  # Maximum R:R
 TP_MAX_PIPS_1M = 20.0         # Hard cap: 20 pips TP for 1M scalps
 TP_MAX_PIPS_5M = 35.0         # Hard cap: 35 pips TP for 5M scalps
 
@@ -68,9 +62,16 @@ def calculate_sl_tp(df, direction, pair, timeframe,
         dict with {stop_loss, take_profit, sl_pips, tp_pips, rr_ratio,
                    sl_reason, tp_reason} or None if no valid setup
     """
-    config = PAIR_CONFIG.get(pair, PAIR_CONFIG['EUR/USD'])
-    pip_size = config['pip_size']
-    spread = config['spread_sim']
+    config = PAIR_CONFIG.get(pair, PAIR_CONFIG.get('EUR/USD', {}))
+    # Prefer registry spec for tick_size / spread
+    try:
+        spec = get_instrument(pair)
+        pip_size = spec.tick_size
+        spread = spec.spread_default
+    except KeyError:
+        pip_size = config.get('pip_size', 0.0001)
+        spread = config.get('spread_sim', 0.00006)
+        spec = None
 
     latest = df.iloc[-1]
     entry_price = float(latest['close'])
@@ -85,7 +86,7 @@ def calculate_sl_tp(df, direction, pair, timeframe,
     # ════════════════════════════════════════════════════════════════
     sl_distance, sl_reason = _calculate_sl(
         df, direction, entry_price, atr, pip_size, spread,
-        timeframe, sweep_wick
+        timeframe, sweep_wick, spec
     )
 
     if sl_distance is None:
@@ -115,12 +116,17 @@ def calculate_sl_tp(df, direction, pair, timeframe,
         tp_distance = max_rr_dist
         tp_reason += f" → capped to {MAX_RR:.0f}R"
 
-    # ── TP Cap: hard pip limit ──────────────────────────────────
-    tp_max_pips = TP_MAX_PIPS_1M if timeframe == '1m' else TP_MAX_PIPS_5M
-    tp_max_dist = tp_max_pips * pip_size
+    # ── TP Cap: hard tick/pip limit (use registry when available) ──
+    if spec:
+        tp_max_ticks = spec.tp_max_ticks_1m if timeframe == '1m' else spec.tp_max_ticks_5m
+        tp_max_dist = tp_max_ticks * spec.tick_size
+    else:
+        tp_max_pips = TP_MAX_PIPS_1M if timeframe == '1m' else TP_MAX_PIPS_5M
+        tp_max_dist = tp_max_pips * pip_size
     if tp_distance > tp_max_dist:
         tp_distance = tp_max_dist
-        tp_reason += f" → capped {tp_max_pips:.0f}p ({timeframe})"
+        tp_capped_pips = tp_max_dist / pip_size
+        tp_reason += f" → capped {tp_capped_pips:.0f}p ({timeframe})"
 
     if direction == 'BUY':
         take_profit = round(entry_price + tp_distance, 5)
@@ -157,7 +163,7 @@ def calculate_sl_tp(df, direction, pair, timeframe,
 # ════════════════════════════════════════════════════════════════════
 
 def _calculate_sl(df, direction, entry_price, atr, pip_size, spread,
-                  timeframe, sweep_wick):
+                  timeframe, sweep_wick, spec=None):
     """Determine SL distance and reason.
 
     Priority: sweep wick → swing structure → ATR fallback
@@ -199,13 +205,18 @@ def _calculate_sl(df, direction, entry_price, atr, pip_size, spread,
         sl_distance = floor
         reason += f" → floored to {sl_distance/pip_size:.1f}p"
 
-    # ── Hard pip cap ────────────────────────────────────────────────
-    max_pips = SL_MAX_PIPS_1M if timeframe == '1m' else SL_MAX_PIPS_5M
-    max_dist = max_pips * pip_size
+    # ── Hard tick/pip cap ──────────────────────────────────────────
+    if spec:
+        max_ticks = spec.sl_max_ticks_1m if timeframe == '1m' else spec.sl_max_ticks_5m
+        max_dist = max_ticks * spec.tick_size
+    else:
+        max_pips = SL_MAX_PIPS_1M if timeframe == '1m' else SL_MAX_PIPS_5M
+        max_dist = max_pips * pip_size
     if sl_distance > max_dist:
         old_pips = sl_distance / pip_size
         sl_distance = max_dist
-        reason = f"capped {old_pips:.1f}p → {max_pips:.0f}p ({timeframe} limit)"
+        capped_pips = max_dist / pip_size
+        reason = f"capped {old_pips:.1f}p → {capped_pips:.0f}p ({timeframe} limit)"
 
     return sl_distance, reason
 
@@ -335,24 +346,31 @@ def _significance(data, idx, col, price, atr, vol_avg):
 def _calculate_tp(direction, entry_price, sl_distance, pip_size, sr_levels):
     """Find TP at 85% of distance to nearest S/R level.
 
+    Falls back to ATR-based TP (1.8R) when no S/R level qualifies.
+
     Returns:
         (tp_distance, reason) or None
     """
+    atr_fallback_rr = 2.5  # ATR-based R:R when no S/R target found
+
     if not sr_levels:
-        return None
+        tp_dist = sl_distance * atr_fallback_rr
+        return tp_dist, f"ATR fallback ({atr_fallback_rr}R, no S/R levels)"
 
     if direction == 'BUY':
         levels = sr_levels.get('resistance_levels', [])
         above = sorted([r for r in levels if r > entry_price])
         if not above:
-            return None
+            tp_dist = sl_distance * atr_fallback_rr
+            return tp_dist, f"ATR fallback ({atr_fallback_rr}R, no resistance above)"
         nearest = above[0]
         full_dist = nearest - entry_price
     else:
         levels = sr_levels.get('support_levels', [])
         below = sorted([s for s in levels if s < entry_price], reverse=True)
         if not below:
-            return None
+            tp_dist = sl_distance * atr_fallback_rr
+            return tp_dist, f"ATR fallback ({atr_fallback_rr}R, no support below)"
         nearest = below[0]
         full_dist = entry_price - nearest
 
@@ -385,7 +403,9 @@ def _calculate_tp(direction, entry_price, sl_distance, pip_size, sr_levels):
                 rr = rr2
                 break
         else:
-            return None
+            # No S/R level meets MIN_RR — use ATR-based fallback
+            tp_dist = sl_distance * atr_fallback_rr
+            return tp_dist, f"ATR fallback ({atr_fallback_rr}R, S/R too close)"
 
     reason = (
         f"85% to {'resistance' if direction == 'BUY' else 'support'} "

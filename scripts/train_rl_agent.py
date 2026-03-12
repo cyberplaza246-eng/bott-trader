@@ -30,7 +30,14 @@ from src.risk.position_manager import RiskManager
 from src.utils.logger import bot_logger
 
 # ── Constants ──
-SPREAD_SIM = {'EUR/USD': 0.00012, 'GBP/USD': 0.00016, 'USD/JPY': 0.020}
+SPREAD_SIM = {
+    'EUR/USD': 0.00012, 'GBP/USD': 0.00016, 'USD/JPY': 0.020,
+    'MES': 0.25, 'MNQ': 0.50,
+}
+PIP_SIZES = {
+    'EUR/USD': 0.0001, 'GBP/USD': 0.0001, 'USD/JPY': 0.01,
+    'MES': 0.25, 'MNQ': 0.25,
+}
 SL_ATR_MULT = 0.8
 TP_ATR_MULT = 1.3
 MAX_HOLD_BARS = 15
@@ -120,7 +127,7 @@ def simulate_trade(df, entry_idx, direction, pair, atr):
     """
     Simulate a trade from entry_idx using ATR SL/TP, return outcome.
     """
-    pip_size = 0.01 if 'JPY' in pair else 0.0001
+    pip_size = PIP_SIZES.get(pair, 0.01 if 'JPY' in pair else 0.0001)
     spread = SPREAD_SIM.get(pair, 0.00015)
     entry_price = float(df.iloc[entry_idx]['close'])
 
@@ -186,7 +193,7 @@ def train_on_pair(agent: RLTradingAgent, pair: str, df: pd.DataFrame,
     """
     ta = TechnicalAnalyzer()
 
-    pip_size = 0.01 if 'JPY' in pair else 0.0001
+    pip_size = PIP_SIZES.get(pair, 0.01 if 'JPY' in pair else 0.0001)
     spread = SPREAD_SIM.get(pair, 0.00015)
 
     stats = {
@@ -362,7 +369,7 @@ def main():
                         help='Simulated account balance')
     args = parser.parse_args()
 
-    pairs = [args.pair] if args.pair else ['EUR/USD', 'GBP/USD']
+    pairs = [args.pair] if args.pair else ['EUR/USD', 'GBP/USD', 'MES', 'MNQ']
 
     # Load data
     pair_data = {}

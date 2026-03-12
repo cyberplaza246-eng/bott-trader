@@ -9,12 +9,14 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd
 from src.backtest.backtest_engine import BacktestEngine
+from config.strategy_config import PAIRS as CONFIG_PAIRS, ASSET_CLASS, INITIAL_BALANCE
+from src.instruments import REGISTRY
 
-PAIRS = ['EUR/USD', 'GBP/USD']     # USD/JPY excluded (no real 5M data yet — live only)
-BALANCE = 50
-CONFIDENCE = 0.45
-AGREEMENT = 1
-MAX_5M_CANDLES = 3500   # ~12 days — keeps backtest under 3 min/pair
+PAIRS = CONFIG_PAIRS
+BALANCE = INITIAL_BALANCE
+CONFIDENCE = 0.55
+AGREEMENT = 2
+MAX_5M_CANDLES = 0   # 0 = use all data
 
 print(f"\n{'='*60}")
 print(f"  SWEEP-GATED BACKTEST (RayAlgo v3)")
@@ -31,7 +33,8 @@ for pair in PAIRS:
     
     df5 = pd.read_csv(csv5)
     df5['datetime'] = pd.to_datetime(df5['datetime'])
-    df5 = df5.tail(MAX_5M_CANDLES).reset_index(drop=True)   # limit for speed
+    if MAX_5M_CANDLES > 0:
+        df5 = df5.tail(MAX_5M_CANDLES).reset_index(drop=True)
     
     df1 = None
     if os.path.exists(csv1):
@@ -41,10 +44,14 @@ for pair in PAIRS:
         dt_start = df5['datetime'].iloc[0]
         df1 = df1[df1['datetime'] >= dt_start].reset_index(drop=True)
     
+    spec = REGISTRY.get(pair)
+    slippage = 0.5 if spec and spec.asset_class == 'futures' else 0.3
+    commission = spec.commission_rt if spec else 7.0
+
     engine = BacktestEngine(
         initial_balance=BALANCE,
-        slippage_pips=0.3,
-        commission_per_lot=7.0,
+        slippage_pips=slippage,
+        commission_per_lot=commission,
     )
     
     r = engine.run_backtest(

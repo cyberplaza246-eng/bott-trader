@@ -11,14 +11,15 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.utils.logger import bot_logger
+from src.instruments import REGISTRY
 
-# ── ATR Strategy constants ──────────────────────────────────
+# ── ATR Strategy constants ──────────────────────────────
 SL_ATR_MULT      = 0.8
 TP_BASE_RATIO    = 1.3
 TP_EXPANDING     = 1.3
 TP_CONTRACTING   = 1.3
 ENTRY_THRESHOLD  = 0.70
-SPREAD_SIM       = {'EUR/USD': 0.00012, 'GBP/USD': 0.00016, 'USD/JPY': 0.020}
+SPREAD_SIM       = {sym: spec.spread_default for sym, spec in REGISTRY.items()}
 COOLDOWN_BARS    = 10
 MAX_HOLD_BARS    = 15
 VOL_SPIKE_MULT   = 1.2
@@ -35,7 +36,9 @@ VOL_PERIOD       = 20
 SESSION_WINDOWS = {
     'EUR/USD': (7, 17),
     'GBP/USD': (7, 17),
-    'USD/JPY': (0, 17),   # Asian + London + NY
+    'USD/JPY': (0, 17),
+    'MES': (13, 20),      # US regular trading hours
+    'MNQ': (13, 20),
 }
 
 
@@ -143,7 +146,8 @@ def run_backtest(filepath, pair, initial_balance=1000):
 
     df = compute_indicators(df)
     spread = SPREAD_SIM.get(pair, 0.00015)
-    pip_size = 0.01 if 'JPY' in pair else 0.0001
+    _spec = REGISTRY.get(pair)
+    pip_size = _spec.tick_size if _spec else (0.01 if 'JPY' in pair else 0.0001)
 
     balance = initial_balance
     trades = []

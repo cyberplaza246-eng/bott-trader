@@ -28,6 +28,7 @@ from src.ai.cross_pair_analyzer import CrossPairAnalyzer
 from src.ai.ml_trade_scorer import MLTradeScorer
 from src.ai.rl_agent import RLTradingAgent
 from src.utils.logger import TradeLogger, bot_logger
+from src.instruments import REGISTRY
 from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGREEMENT
 
 
@@ -352,7 +353,7 @@ class EnsembleTrader:
                         rsi=rsi_val, adx=adx_val,
                         atr=atr_val, atr_median=atr_med,
                         ema200_dist=ema200_dist,
-                        hour=hour, spread=broker_spread or 0.00015,
+                        hour=hour, spread=broker_spread or (REGISTRY[pair].spread_default if pair in REGISTRY else 0.00015),
                         volume_ratio=vol_ratio,
                         daily_trades=0, max_daily_trades=30,
                         current_drawdown=0

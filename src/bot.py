@@ -1,12 +1,14 @@
 """
 Dual-Timeframe Scalping Bot — 1M + 5M Confluence System
 
-Runs continuous 1-minute and 5-minute scalping cycles on EUR/USD & GBP/USD.
+Runs continuous 1-minute and 5-minute scalping cycles.
+Supports both forex (MT5) and futures (TradersPost → Tradovate → Lucid).
 Uses a 9-model ensemble (including ScalpingAnalyzer as primary signal) with:
   - Adaptive learning, trailing stops, economic calendar
   - S/R-aware exits, cross-pair correlation, LSTM auto-retraining
   - Per-timeframe confluence bonuses/penalties
-  - Pip-based SL/TP from scalping config
+  - Tick-based SL/TP from instrument registry
+  - Prop firm guard & evaluation passing algorithm (futures mode)
 """
 import os
 import time
@@ -14,7 +16,7 @@ import threading
 from datetime import datetime, time as dt_time, timezone, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from src.broker.mt5_connector import MT5Connector
+from src.broker.broker_factory import create_broker
 from src.core.ensemble_trader import EnsembleTrader
 from src.risk.position_manager import RiskManager
 from src.core.paper_trading import PaperTradingManager
@@ -22,6 +24,9 @@ from src.core.trailing_stop import TrailingStopManager
 from src.ai.economic_calendar import EconomicCalendar
 from src.ai.lstm_retrainer import LSTMRetrainer
 from src.ai.rl_agent import RLTradingAgent
+from src.risk.prop_guard import PropGuard
+from src.risk.eval_algorithm import EvalAlgorithm, EvalConfig
+from src.instruments import get_instrument, is_futures, is_maintenance_window, REGISTRY
 from src.utils.logger import bot_logger, TradeLogger
 from config.strategy_config import (
     TRADING_MODE,
@@ -38,6 +43,8 @@ from config.strategy_config import (
     DIVERGENCE_PENALTY,
     OPTIMAL_HOURS_UTC,
     OPTIMAL_HOUR_BONUS,
+    ASSET_CLASS,
+    BROKER_TYPE,
 )
 
 
@@ -54,14 +61,21 @@ class TradingBot:
         'EUR/USD': 'GBP/USD',
         'GBP/USD': 'EUR/USD',
         # USD/JPY has negative correlation — no block needed
+        # Futures: MES and ES are same underlying, MNQ and NQ likewise
+        'MES': 'ES',
+        'ES': 'MES',
+        'MNQ': 'NQ',
+        'NQ': 'MNQ',
     }
 
-    # ── Spread Limits (max allowed spread in pips) — Scalping-tight ─
-    MAX_SPREAD = {
-        'EUR/USD': SCALPING_SPREAD_LIMITS.get('EUR/USD', 2.0) * 0.0001,
-        'GBP/USD': SCALPING_SPREAD_LIMITS.get('GBP/USD', 2.5) * 0.0001,
-        'USD/JPY': SCALPING_SPREAD_LIMITS.get('USD/JPY', 2.5) * 0.01,
-    }
+    # ── Spread Limits — built from instrument registry ─────────────
+    MAX_SPREAD = {}
+    for _sym, _limit in SCALPING_SPREAD_LIMITS.items():
+        try:
+            _spec = get_instrument(_sym)
+            MAX_SPREAD[_sym] = _limit * _spec.tick_size
+        except KeyError:
+            pass
     DEFAULT_MAX_SPREAD = 0.00020
 
     def __init__(self, newsapi_key=None, enable_dashboard=True):
@@ -70,25 +84,26 @@ class TradingBot:
         self.scheduler = BackgroundScheduler()
         self.enable_dashboard = enable_dashboard
         self.signal_history = []  # For dashboard
+        self.asset_class = ASSET_CLASS
         
-        # Initialize components
+        # Initialize broker via factory (MT5 for forex, TradersPost for futures)
         if self.mode in ['live', 'paper']:
             try:
-                self.broker = MT5Connector()
+                self.broker = create_broker(BROKER_TYPE)
             except Exception as e:
-                bot_logger.error(f"Failed to initialize MT5: {e}")
+                bot_logger.error(f"Failed to initialize broker ({BROKER_TYPE}): {e}")
                 self.broker = None
         
         self.ensemble = EnsembleTrader(newsapi_key=newsapi_key, broker=self.broker)
         
-        # Use actual MT5 balance when connected, fall back to config
+        # Use actual broker balance when connected, fall back to config
         actual_balance = INITIAL_BALANCE
         if self.broker and self.broker.connected:
             try:
                 info = self.broker.get_account_info()
                 if info and info.get('balance', 0) > 0:
                     actual_balance = info['balance']
-                    bot_logger.info(f"💰 Using actual MT5 balance: ${actual_balance:.2f}")
+                    bot_logger.info(f"💰 Using actual broker balance: ${actual_balance:.2f}")
             except Exception:
                 pass
         self.risk_manager = RiskManager(initial_balance=actual_balance)
@@ -98,6 +113,25 @@ class TradingBot:
             broker=self.broker,
             predictor=self.ensemble.lstm if self.ensemble.lstm_available else None,
         )
+
+        # ── Prop Firm Guard & Eval Algorithm (futures mode) ──────
+        if self.asset_class == 'futures':
+            self.prop_guard = PropGuard(
+                account_size=actual_balance,
+                max_drawdown=float(os.getenv('MAX_DRAWDOWN', '2000')),
+                daily_loss_limit=float(os.getenv('DAILY_LOSS_LIMIT', '400')),
+                max_contracts=int(os.getenv('MAX_CONTRACTS', '2')),
+                max_positions=int(os.getenv('MAX_POSITIONS', '3')),
+            )
+            self.eval_algo = EvalAlgorithm(EvalConfig(
+                account_size=actual_balance,
+                profit_target=actual_balance + float(os.getenv('PROFIT_TARGET', '3000')),
+                daily_target=float(os.getenv('DAILY_TARGET', '500')),
+                daily_stop_loss=float(os.getenv('DAILY_STOP_LOSS', '400')),
+            ))
+        else:
+            self.prop_guard = None
+            self.eval_algo = None
         
         # RL agent for trade decision optimization
         self.rl_agent = RLTradingAgent()
@@ -249,7 +283,8 @@ class TradingBot:
             spread = abs(price['ask'] - price['bid'])
             limit = self.MAX_SPREAD.get(pair, self.DEFAULT_MAX_SPREAD)
             if spread > limit:
-                pip_div = 0.01 if 'JPY' in pair else 0.0001
+                _spec = REGISTRY.get(pair)
+                pip_div = _spec.tick_size if _spec else (0.01 if 'JPY' in pair else 0.0001)
                 bot_logger.info(
                     f"⛔ {pair} spread too wide: {spread/pip_div:.1f} pips "
                     f"(max {limit/pip_div:.1f}) — skipping"

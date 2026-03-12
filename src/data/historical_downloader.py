@@ -15,7 +15,7 @@ from src.utils.logger import bot_logger, error_logger
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data')
 
 
-# Yahoo Finance symbol mapping
+# Yahoo Finance symbol mapping (forex)
 YF_SYMBOLS = {
     'EUR/USD': 'EURUSD=X',
     'GBP/USD': 'GBPUSD=X',
@@ -24,6 +24,13 @@ YF_SYMBOLS = {
     'USD/CAD': 'USDCAD=X',
     'NZD/USD': 'NZDUSD=X',
     'USD/CHF': 'USDCHF=X',
+    # Futures (Yahoo Finance tickers for continuous front-month)
+    'MES': 'MES=F',
+    'MNQ': 'MNQ=F',
+    'ES': 'ES=F',
+    'NQ': 'NQ=F',
+    'CL': 'CL=F',
+    'GC': 'GC=F',
 }
 
 

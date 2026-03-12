@@ -984,6 +984,149 @@ class AdaptiveLearner:
         }
 
     # ------------------------------------------------------------------
+    # Regime-Adaptive Indicator Tuning
+    # ------------------------------------------------------------------
+    def get_regime_adjustments(self) -> dict:
+        """Get recommended indicator adjustments based on regime performance.
+        
+        Returns dict with suggested parameter changes for each regime.
+        These can be applied by the sweep/technical analyzers.
+        """
+        adjustments = {}
+        
+        for regime, stats in self.regime_stats.items():
+            wins = stats.get('wins', 0)
+            losses = stats.get('losses', 0)
+            total = wins + losses
+            
+            if total < 10:
+                continue  # Not enough data
+            
+            win_rate = wins / total
+            
+            # Regime-specific adjustments
+            if regime == 'volatile':
+                if win_rate < 0.30:
+                    # Volatile losing → widen stops, tighten entry
+                    adjustments[regime] = {
+                        'confidence_boost': 0.10,  # Require higher confidence
+                        'sl_multiplier': 1.3,     # Wider stops
+                        'skip_regime': win_rate < 0.20,  # Skip entirely if very bad
+                    }
+                else:
+                    adjustments[regime] = {
+                        'confidence_boost': 0.05,
+                        'sl_multiplier': 1.2,
+                        'skip_regime': False,
+                    }
+                    
+            elif regime == 'trending':
+                if win_rate > 0.45:
+                    # Trending doing well → lower threshold, tighter stops
+                    adjustments[regime] = {
+                        'confidence_boost': -0.05,  # More aggressive
+                        'sl_multiplier': 0.9,
+                        'skip_regime': False,
+                    }
+                else:
+                    adjustments[regime] = {
+                        'confidence_boost': 0.0,
+                        'sl_multiplier': 1.0,
+                        'skip_regime': False,
+                    }
+                    
+            elif regime == 'ranging':
+                if win_rate < 0.35:
+                    adjustments[regime] = {
+                        'confidence_boost': 0.08,
+                        'sl_multiplier': 1.1,
+                        'skip_regime': win_rate < 0.25,
+                    }
+                else:
+                    adjustments[regime] = {
+                        'confidence_boost': 0.0,
+                        'sl_multiplier': 1.0,
+                        'skip_regime': False,
+                    }
+        
+        return adjustments
+    
+    def get_hour_filter(self) -> set:
+        """Get hours to skip based on poor performance.
+        
+        Returns set of UTC hours where win rate is below 30% 
+        with at least 10 trades.
+        """
+        skip_hours = set()
+        
+        for hour_str, stats in self.hourly_stats.items():
+            wins = stats.get('wins', 0)
+            losses = stats.get('losses', 0)
+            total = wins + losses
+            
+            if total >= 10:
+                win_rate = wins / total
+                if win_rate < 0.30:
+                    skip_hours.add(int(hour_str))
+        
+        return skip_hours
+    
+    def get_session_confidence_modifier(self, session: str) -> float:
+        """Get confidence modifier for a session based on performance.
+        
+        Returns value between -0.15 and +0.10 to adjust confidence.
+        """
+        stats = self.session_stats.get(session, {})
+        wins = stats.get('wins', 0)
+        losses = stats.get('losses', 0)
+        total = wins + losses
+        
+        if total < 15:
+            return 0.0  # Not enough data
+        
+        win_rate = wins / total
+        
+        if win_rate >= 0.50:
+            return 0.05  # Good session, slight boost
+        elif win_rate >= 0.40:
+            return 0.0   # Neutral
+        elif win_rate >= 0.30:
+            return -0.05  # Below average, slight penalty
+        else:
+            return -0.10  # Poor session, significant penalty
+    
+    def should_skip_trade(self, pair: str, regime: str, hour: int = None) -> tuple:
+        """Check if a trade should be skipped based on learned patterns.
+        
+        Returns (should_skip: bool, reason: str)
+        """
+        pair = self._normalize_pair(pair)
+        
+        # Check regime skip
+        adjustments = self.get_regime_adjustments()
+        if regime in adjustments and adjustments[regime].get('skip_regime', False):
+            return True, f"regime {regime} has <20% win rate"
+        
+        # Check hour skip
+        if hour is not None:
+            skip_hours = self.get_hour_filter()
+            if hour in skip_hours:
+                return True, f"hour {hour} has <30% win rate"
+        
+        # Check pair-specific loss patterns
+        pair_pattern = self.loss_patterns.get(f"pair:{pair}", {})
+        if pair_pattern.get('count', 0) >= 20:
+            # Too many losses on this pair
+            total_pair_trades = self.pair_stats.get(pair, {}).get('wins', 0) + \
+                               self.pair_stats.get(pair, {}).get('losses', 0)
+            if total_pair_trades > 0:
+                loss_ratio = pair_pattern['count'] / total_pair_trades
+                if loss_ratio > 0.70:
+                    return True, f"pair {pair} has {loss_ratio:.0%} loss ratio"
+        
+        return False, ""
+
+    # ------------------------------------------------------------------
     # Persistence (with backup rotation)
     # ------------------------------------------------------------------
     MAX_BACKUPS = 5  # Keep up to 5 rotating backups

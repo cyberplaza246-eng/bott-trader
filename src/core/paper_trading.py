@@ -4,29 +4,20 @@ Paper Trading Mode - Run live signals with virtual money
 import pandas as pd
 from datetime import datetime
 from src.utils.logger import TradeLogger, bot_logger
+from src.instruments import REGISTRY, get_instrument
 
 
-# ── Pip value lookup (mirrors position_manager.PIP_VALUES) ─────────
+# ── Pip / tick value lookup (sourced from instrument registry) ──────
 _PIP_VALUES = {
-    'EUR/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'GBP/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'USD/JPY': {'pip_size': 0.01,   'pip_value_per_lot': 6.5},
-    'AUD/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'NZD/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'USD/CHF': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'USD/CAD': {'pip_size': 0.0001, 'pip_value_per_lot': 7.5},
+    sym: {'pip_size': spec.tick_size, 'pip_value_per_lot': spec.tick_value_usd}
+    for sym, spec in REGISTRY.items()
 }
 _DEFAULT_PIP = {'pip_size': 0.0001, 'pip_value_per_lot': 10.0}
 
-# Simulated spread per pair (in pips) — realistic for ECN/micro accounts
+# Simulated spread per pair (in pips / ticks)
 _SPREAD_PIPS = {
-    'EUR/USD': 1.2,
-    'GBP/USD': 1.5,
-    'USD/JPY': 1.3,
-    'AUD/USD': 1.4,
-    'NZD/USD': 1.8,
-    'USD/CHF': 1.6,
-    'USD/CAD': 1.5,
+    sym: spec.spread_default / spec.tick_size  # Convert price-unit spread to tick/pip count
+    for sym, spec in REGISTRY.items()
 }
 
 

@@ -1,3135 +1,2826 @@
 {
   "model_weights": {
-    "scalping": 0.16234168284551184,
-    "technical": 0.13570749846367058,
-    "volume": 0.061235892421527605,
-    "ema_crossover": 0.1603574221341856,
-    "candlestick": 0.0896719971202771,
-    "multi_tf": 0.15620656108004702,
-    "support_resistance": 0.08228561738329151,
-    "lstm": 0.06916476559879789,
-    "sentiment": 0.08302856295269079
+    "scalping": 0.11192151990151498,
+    "technical": 0.14178292732136052,
+    "volume": 0.10974869385964126,
+    "ema_crossover": 0.09610301742668674,
+    "candlestick": 0.10912788641910592,
+    "multi_tf": 0.10881748269883819,
+    "support_resistance": 0.10819667525830286,
+    "lstm": 0.1062603237163806,
+    "sentiment": 0.10804147339816904
   },
   "model_accuracy": {
     "sweep": {
-      "correct": 0,
-      "total": 15
-    },
-    "scalping": {
-      "correct": 0,
-      "total": 0
-    },
-    "lstm": {
-      "correct": 2,
-      "total": 6
-    },
-    "sentiment": {
-      "correct": 0,
-      "total": 0
-    },
-    "technical": {
-      "correct": 1,
-      "total": 2
-    },
-    "volume": {
-      "correct": 0,
-      "total": 2
-    },
-    "multi_tf": {
-      "correct": 1,
-      "total": 2
-    },
-    "support_resistance": {
-      "correct": 7,
-      "total": 15
-    },
-    "candlestick": {
-      "correct": 3,
-      "total": 6
+      "correct": 13,
+      "total": 36
     },
     "ema_crossover": {
-      "correct": 1,
-      "total": 2
+      "correct": 13,
+      "total": 33
+    },
+    "technical": {
+      "correct": 10,
+      "total": 18
+    },
+    "lstm": {
+      "correct": 16,
+      "total": 35
     }
   },
   "pair_stats": {
-    "EUR/USD": {
-      "wins": 0,
-      "losses": 48,
-      "total_pnl": -240.0
+    "MES": {
+      "wins": 34,
+      "losses": 62,
+      "total_pnl": -564.9801500000015
     },
-    "USD/JPY": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
-    },
-    "GBP/USD": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
+    "MNQ": {
+      "wins": 2,
+      "losses": 7,
+      "total_pnl": -138.16000000000003
     }
   },
   "session_stats": {
-    "asian": {
-      "wins": 0,
-      "losses": 48
+    "ny_overlap": {
+      "wins": 36,
+      "losses": 69
     }
   },
   "pair_model_accuracy": {
-    "USD/JPY:sweep": {
-      "correct": 0,
-      "total": 6
+    "MES:sweep": {
+      "correct": 13,
+      "total": 36
     },
-    "USD/JPY:lstm": {
-      "correct": 2,
-      "total": 6
+    "MES:technical": {
+      "correct": 10,
+      "total": 18
     },
-    "USD/JPY:support_resistance": {
-      "correct": 2,
-      "total": 6
+    "MES:lstm": {
+      "correct": 16,
+      "total": 35
     },
-    "GBP/USD:sweep": {
-      "correct": 0,
-      "total": 9
-    },
-    "GBP/USD:technical": {
-      "correct": 1,
-      "total": 2
-    },
-    "GBP/USD:support_resistance": {
-      "correct": 5,
-      "total": 9
-    },
-    "GBP/USD:candlestick": {
-      "correct": 3,
-      "total": 5
-    },
-    "GBP/USD:ema_crossover": {
-      "correct": 1,
-      "total": 2
-    },
-    "USD/JPY:multi_tf": {
-      "correct": 1,
-      "total": 1
-    },
-    "USD/JPY:volume": {
-      "correct": 0,
-      "total": 1
-    },
-    "USD/JPY:candlestick": {
-      "correct": 0,
-      "total": 1
-    },
-    "GBP/USD:volume": {
-      "correct": 0,
-      "total": 1
-    },
-    "GBP/USD:multi_tf": {
-      "correct": 0,
-      "total": 1
+    "MES:ema_crossover": {
+      "correct": 13,
+      "total": 33
     }
   },
   "session_pair_stats": {
-    "asian:EUR/USD": {
-      "wins": 0,
-      "losses": 48,
-      "total_pnl": -240.0
+    "ny_overlap:MES": {
+      "wins": 34,
+      "losses": 62,
+      "total_pnl": -564.9801500000015
     },
-    "asian:USD/JPY": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
-    },
-    "asian:GBP/USD": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
+    "ny_overlap:MNQ": {
+      "wins": 2,
+      "losses": 7,
+      "total_pnl": -138.16000000000003
     }
   },
   "model_combos": {
-    "support_resistance:sweep": {
-      "wins": 0,
-      "total": 4
+    "lstm:sweep:technical": {
+      "wins": 2,
+      "total": 3
     },
-    "lstm:support_resistance:sweep": {
-      "wins": 0,
-      "total": 4
-    },
-    "candlestick:sweep:technical": {
-      "wins": 0,
-      "total": 1
-    },
-    "candlestick:sweep:volume": {
-      "wins": 0,
-      "total": 1
-    },
-    "candlestick:sweep": {
-      "wins": 0,
-      "total": 1
+    "ema_crossover:sweep:technical": {
+      "wins": 3,
+      "total": 5
     },
     "ema_crossover:sweep": {
-      "wins": 0,
-      "total": 1
+      "wins": 1,
+      "total": 7
     },
-    "multi_tf:sweep:volume": {
+    "ema_crossover:lstm:sweep:technical": {
+      "wins": 5,
+      "total": 10
+    },
+    "ema_crossover:lstm:sweep": {
+      "wins": 2,
+      "total": 9
+    },
+    "lstm:sweep": {
       "wins": 0,
-      "total": 1
+      "total": 2
     }
   },
   "model_pnl_history": {
     "sweep": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    ],
-    "scalping": [],
-    "lstm": [
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    ],
-    "sentiment": [],
-    "technical": [
-      0.0
-    ],
-    "volume": [
-      0.0,
-      0.0
-    ],
-    "multi_tf": [
-      0.0
-    ],
-    "support_resistance": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    ],
-    "candlestick": [
-      0.0,
-      0.0,
-      0.0
+      28.13,
+      28.13,
+      -19.37,
+      28.13,
+      28.13,
+      28.13,
+      28.13,
+      -19.37,
+      28.13,
+      28.13,
+      15.63,
+      -19.37,
+      -19.37,
+      -18.680599999998886,
+      28.13,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      28.13,
+      -19.37,
+      -13.31955000000209,
+      -19.37,
+      -19.37,
+      28.13,
+      -19.37,
+      28.13,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37
     ],
     "ema_crossover": [
-      0.0
+      28.13,
+      -19.37,
+      28.13,
+      28.13,
+      28.13,
+      -19.37,
+      28.13,
+      28.13,
+      15.63,
+      -19.37,
+      -19.37,
+      28.13,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      28.13,
+      -19.37,
+      -19.37,
+      -19.37,
+      28.13,
+      -19.37,
+      28.13,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37
+    ],
+    "technical": [
+      28.13,
+      28.13,
+      28.13,
+      28.13,
+      28.13,
+      28.13,
+      -19.37,
+      -19.37,
+      28.13,
+      -19.37,
+      28.13,
+      -13.31955000000209,
+      -19.37,
+      28.13,
+      -19.37,
+      28.13,
+      -19.37,
+      -19.37
+    ],
+    "lstm": [
+      28.13,
+      28.13,
+      28.13,
+      28.13,
+      28.13,
+      28.13,
+      -19.37,
+      -18.680599999998886,
+      28.13,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -19.37,
+      -13.31955000000209,
+      -19.37,
+      -19.37,
+      28.13,
+      -19.37,
+      28.13,
+      -19.37,
+      -19.37,
+      -19.37
     ]
   },
   "regime_stats": {
+    "volatile": {
+      "wins": 4,
+      "losses": 17,
+      "total_pnl": -459.04000000000013
+    },
     "trending": {
-      "wins": 0,
-      "losses": 48,
-      "total_pnl": -240.0
+      "wins": 14,
+      "losses": 28,
+      "total_pnl": -201.0100000000002
     },
     "ranging": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
+      "wins": 18,
+      "losses": 24,
+      "total_pnl": -43.09015000000113
     }
   },
   "hourly_stats": {
-    "1": {
-      "wins": 0,
-      "losses": 48,
-      "total_pnl": -240.0
-    },
-    "2": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
-    },
-    "3": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
-    },
-    "4": {
-      "wins": 0,
-      "losses": 0,
-      "total_pnl": 0.0
+    "14": {
+      "wins": 36,
+      "losses": 69,
+      "total_pnl": -703.1401500000015
     }
   },
-  "confidence_threshold": 0.53,
-  "consecutive_losses": 48,
+  "confidence_threshold": 0.5,
+  "consecutive_losses": 4,
   "consecutive_wins": 0,
-  "max_consecutive_losses": 48,
-  "peak_balance": 0.0,
-  "current_drawdown_pct": 0,
-  "in_drawdown_protection": false,
-  "current_regime": "ranging",
+  "max_consecutive_losses": 14,
+  "peak_balance": 128.87999999999994,
+  "current_drawdown_pct": 645.5773975791446,
+  "in_drawdown_protection": true,
+  "current_regime": "trending",
   "trade_history": [
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:48:56.531957",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6400000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:15:29.620992",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:48:56.540423",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7045000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:15:30.183949",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:48:56.542663",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6345000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:15:31.271074",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:48:56.545369",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6645000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:15:32.027688",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:48:56.546986",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7100000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:15:38.944565",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:48:56.548796",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.9000000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:15:41.938493",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:02.074869",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6000000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:15:42.654261",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:02.076593",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6000000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:15:42.880961",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:02.080831",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.9000000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:15:43.091537",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:02.084004",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6000000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:15:44.127303",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:02.085993",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6300000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:15:44.254697",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:02.087970",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6345000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:15:53.539200",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:08.781778",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6175,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:15:53.937815",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:08.783914",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7000000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:15:54.333429",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:08.785949",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6100000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:17:37.700305",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:08.789044",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.9300000000000002,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:17:37.874014",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:08.792802",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.8200000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:17:42.595414",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:08.794627",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.8664000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:17:43.614627",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:14.147787",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7487272727272728,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:17:45.806637",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:14.149788",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6560000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:17:50.885164",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:14.151901",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6475000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:17:53.543096",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:14.154228",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6220000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:17:54.970414",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:14.156136",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.8547692307692308,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:10.352082",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:50:14.158059",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6175,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:15.647529",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:51:02.916581",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7900000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:18.002109",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:51:02.919476",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7800000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:19.888482",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:51:02.921764",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6300000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:26.043054",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:51:02.923953",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.8637142857142859,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:27.622744",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:51:02.926167",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7545000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:28.646662",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:51:02.928264",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6345000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:31.711787",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:20.619178",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7960000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:34.216417",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:20.621196",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.9600000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:38.507572",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:20.623246",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7481400000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:39.805348",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:20.625460",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7170000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:41.031486",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:20.627701",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.693529411764706,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:41.256364",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:20.629758",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6260000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:42.150310",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:24.981637",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6840000000000002,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:18:42.632824",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:24.984194",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7446666666666668,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:18:48.429220",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:24.986569",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6430000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:56.094671",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:24.988966",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7600000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:18:56.308549",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:24.991307",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7036842105263158,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:03.247309",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:24.993683",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6040000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:05.696922",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:32.733189",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7000000000000002,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:07.367266",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:32.735809",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.8144000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:13.161519",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:32.738245",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6422380952380954,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:17.897653",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:32.740377",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6201538461538463,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:18.991251",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:32.742430",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7160000000000002,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:28.804543",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
     },
     {
-      "pair": "EUR/USD",
-      "profit_loss": -5.0,
-      "model_signals": {},
-      "signal": "BUY",
-      "regime": "trending",
-      "timestamp": "2026-03-09T01:52:32.744513",
-      "session": "asian",
-      "hour": 1,
-      "is_win": false
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.8203636363636364,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:31.736941",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
     },
     {
-      "pair": "USD/JPY",
-      "signal": "BUY",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7145454545454546,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:32.164146",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6220000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:36.332962",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6385714285714287,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:44.360066",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6406304347826088,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:45.117530",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6329933333333334,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:46.496389",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6476000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:46.789713",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7200000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:51.420130",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.6100000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:19:53.758747",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.6900000000000002,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:19:54.783484",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7081400000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:20:04.960340",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": 53.76,
+      "pips": 22.0,
+      "confidence": 0.7051923076923078,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:20:05.396611",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "profit_loss": -41.24,
+      "pips": -16.0,
+      "confidence": 0.7957777777777778,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:20:05.827827",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MNQ",
+      "type": "SELL",
+      "profit_loss": -32.24,
+      "pips": -31.0,
+      "confidence": 0.8617142857142859,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:21:07.038098",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
+    },
+    {
+      "pair": "MNQ",
+      "type": "SELL",
+      "profit_loss": -32.24,
+      "pips": -31.0,
+      "confidence": 0.6876000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:21:07.331108",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
+    },
+    {
+      "pair": "MNQ",
+      "type": "SELL",
+      "profit_loss": 43.76,
+      "pips": 45.0,
+      "confidence": 0.6493333333333334,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:21:12.484967",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
+    },
+    {
+      "pair": "MNQ",
+      "type": "SELL",
+      "profit_loss": -32.24,
+      "pips": -31.0,
+      "confidence": 0.7714285714285716,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:21:13.422256",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MNQ",
+      "type": "SELL",
+      "profit_loss": 43.76,
+      "pips": 45.0,
+      "confidence": 0.7148275862068967,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "timestamp": "2026-03-12T14:21:14.156515",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MNQ",
+      "type": "BUY",
+      "profit_loss": -32.24,
+      "pips": -31.0,
+      "confidence": 0.7160000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:21:15.616459",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
+    },
+    {
+      "pair": "MNQ",
+      "type": "BUY",
+      "profit_loss": -32.24,
+      "pips": -31.0,
+      "confidence": 0.7160000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:21:16.128608",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "volatile"
+    },
+    {
+      "pair": "MNQ",
+      "type": "BUY",
+      "profit_loss": -32.24,
+      "pips": -31.0,
+      "confidence": 0.6589333333333334,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:21:18.960605",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending"
+    },
+    {
+      "pair": "MNQ",
+      "type": "BUY",
+      "profit_loss": -32.24,
+      "pips": -31.0,
+      "confidence": 0.6770000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "timestamp": "2026-03-12T14:21:20.892308",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "ranging"
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.5882352941176472,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
       "model_signals": {
         "sweep": {
-          "signal": "BUY",
-          "confidence": 0.855,
-          "regime": "range",
-          "bias": "BUY",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
           "signal": "SELL",
-          "confidence": 1.0,
-          "reason": "LSTM predicts -99.16% move",
-          "predicted_price": "1.264551",
-          "current_price": 150.425,
-          "predicted_change_percent": -99.15934781883966
+          "confidence": 0.68
         },
-        "sentiment": {
+        "ema_crossover": {
           "signal": "HOLD",
           "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
+          "reason": "Weak EMA alignment"
         },
         "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "MACD bullish | DI+ dominant (28 vs 26) | ADX too weak (14<15) \u2014 blocking signal",
-          "rsi": 53.080394161527444,
-          "macd": 0.003770430990243767,
-          "bb_position": 0.6464355621968257,
-          "adx": 14.365098681498218,
+          "signal": "SELL",
+          "confidence": 0.34,
+          "reason": "ATR expanding (4 rises) + DI- dominant | Volume spike 1.5x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (29 vs 14) | Near BB lower (%B=0.20) | ADX low (20<20) \u2014 penalty \u00d70.85",
+          "rsi": 45.40441160896759,
+          "macd": -0.2440139526506755,
+          "bb_position": 0.1969185010372919,
+          "adx": 19.75590001120991,
           "divergence": "bearish",
           "buy_score": 0.2,
-          "sell_score": 0.0
+          "sell_score": 0.4
         },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.2,
-          "reason": "Above-median recent volume",
-          "current_volume": "4497",
-          "average_volume": 7115.15,
-          "volume_ratio": 0.6320316506845208
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI- dominant (32 vs 23) | Near BB lower (%B=0.11)",
-              "rsi": 39.170564933161366,
-              "macd": -0.005165214190640199,
-              "bb_position": 0.10675101884051984,
-              "adx": 16.741294386636493,
-              "divergence": "bearish",
-              "buy_score": 0.15000000000000002,
-              "sell_score": 0.1
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI- dominant (33 vs 22) | Near BB lower (%B=0.11)",
-              "rsi": 39.052848181828544,
-              "macd": -0.018047361379387894,
-              "bb_position": 0.10566687153005885,
-              "adx": 17.358714359209827,
-              "divergence": "bearish",
-              "buy_score": 0.15000000000000002,
-              "sell_score": 0.1
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI- dominant (33 vs 22) | Near BB lower (%B=0.10)",
-              "rsi": 39.09874979325885,
-              "macd": -0.03621975919890019,
-              "bb_position": 0.10196722133817626,
-              "adx": 17.267137513844265,
-              "divergence": "none",
-              "buy_score": 0.15000000000000002,
-              "sell_score": 0.1
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
+        "lstm": {
           "signal": "SELL",
-          "confidence": 0.7684152871213414,
-          "reason": "Price at resistance 150.43688",
-          "levels": {
-            "support_levels": [
-              150.0,
-              149.5,
-              149.0
-            ],
-            "resistance_levels": [
-              150.43687782608694,
-              151.0,
-              151.5,
-              152.0
-            ],
-            "current_price": 150.425,
-            "nearest_support": 150.0,
-            "nearest_resistance": 150.43687782608694,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9605191089016767
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
+          "confidence": 0.09934918312113365
         }
       },
       "regime": "ranging",
-      "timestamp": "2026-03-09T02:11:50.929356",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
+      "timestamp": "2026-03-12T14:41:08.122419",
+      "session": "ny_overlap",
+      "hour": 14
     },
     {
-      "pair": "GBP/USD",
+      "pair": "MES",
+      "type": "SELL",
       "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.5577777777777778,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
       "model_signals": {
         "sweep": {
           "signal": "SELL",
-          "confidence": 0.87,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
+          "confidence": 0.72
         },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts +0.00% move",
-          "predicted_price": "1.2645936",
-          "current_price": 1.26457,
-          "predicted_change_percent": 0.0018663440384216582
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.75,
+          "reason": "Bearish EMA alignment (spread 0.00039) | ATR expanding (7 consecutive rises) | Price < EMA200 \u2014 with trend"
         },
         "technical": {
-          "signal": "BUY",
-          "confidence": 0.255,
-          "reason": "Volume spike 1.9x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI- dominant (26 vs 23) | ADX low (17<20) \u2014 penalty \u00d70.85",
-          "rsi": 50.15009997485206,
-          "macd": -2.3342886755761683e-05,
-          "bb_position": 0.6888766166085836,
-          "adx": 17.341665540510046,
-          "divergence": "bullish",
-          "buy_score": 0.3,
-          "sell_score": 0.1
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.5,
-          "reason": "Volume spike (1.89x avg) | Above-median recent volume",
-          "current_volume": "14735",
-          "average_volume": 7783.7,
-          "volume_ratio": 1.893058570873356
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | DI+ dominant (29 vs 28)",
-              "rsi": 50.142903083287,
-              "macd": -1.984545889621714e-06,
-              "bb_position": 0.4021398298389733,
-              "adx": 12.111323675631999,
-              "divergence": "bearish",
-              "buy_score": 0.1,
-              "sell_score": 0.1
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI+ dominant (36 vs 13) | Near BB upper (%B=0.82) | Stochastic overbought (83/82) | ADX strong (39)",
-              "rsi": 64.2695750166936,
-              "macd": 0.0002455478579272974,
-              "bb_position": 0.8215527913398084,
-              "adx": 39.39746539470774,
-              "divergence": "bearish",
-              "buy_score": 0.1,
-              "sell_score": 0.23
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI+ dominant (37 vs 13) | Near BB upper (%B=0.82) | Stochastic overbought (83/82) | ADX strong (40)",
-              "rsi": 64.06084809998698,
-              "macd": 0.0004893377284655998,
-              "bb_position": 0.8232822436223902,
-              "adx": 39.53447172410443,
-              "divergence": "bearish",
-              "buy_score": 0.1,
-              "sell_score": 0.23
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
           "signal": "SELL",
-          "confidence": 0.7833454300155668,
-          "reason": "Price at resistance 1.26462",
-          "levels": {
-            "support_levels": [
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.264622652173913,
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26457,
-            "nearest_support": 1.2600000000000002,
-            "nearest_resistance": 1.264622652173913,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9791817875194584
-          }
+          "confidence": 0.55,
+          "reason": "ATR expanding (4 rises) + DI- dominant | Volume spike 2.2x + bearish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (38 vs 19) | Price below BB lower (%B=-0.12)",
+          "rsi": 31.656630955044033,
+          "macd": -2.5193117768485536,
+          "bb_position": -0.11938555470834288,
+          "adx": 20.822401235960886,
+          "divergence": "none",
+          "buy_score": 0.1,
+          "sell_score": 0.55
         },
-        "candlestick": {
+        "lstm": {
           "signal": "BUY",
-          "confidence": 1.0,
-          "patterns": [
-            {
-              "pattern": "HAMMER",
-              "signal": "BUY",
-              "strength": 0.7,
-              "candle_index": 4
-            },
-            {
-              "pattern": "BULLISH_PIN_BAR",
-              "signal": "BUY",
-              "strength": 0.7,
-              "candle_index": 4
-            }
-          ],
-          "reason": "Patterns: HAMMER, BULLISH_PIN_BAR"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
+          "confidence": 0.5081743861506169
         }
       },
       "regime": "ranging",
-      "timestamp": "2026-03-09T02:34:50.807584",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
+      "timestamp": "2026-03-12T14:41:26.528837",
+      "session": "ny_overlap",
+      "hour": 14
     },
     {
-      "pair": "GBP/USD",
+      "pair": "MES",
+      "type": "SELL",
       "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "STALE_SIGNAL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5748387096774195,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
       "model_signals": {
         "sweep": {
           "signal": "SELL",
-          "confidence": 0.837,
-          "regime": "range",
-          "bias": "SELL",
-          "mss_confirmed": true
+          "confidence": 0.75
         },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts -0.05% move",
-          "predicted_price": "1.2646573",
-          "current_price": 1.26526,
-          "predicted_change_percent": -0.047637719723479244
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.75,
+          "reason": "Bearish EMA alignment (spread 0.00085) | ATR expanding (7 consecutive rises) | Price < EMA200 \u2014 with trend"
         },
         "technical": {
           "signal": "HOLD",
           "confidence": 0.0,
-          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (39 vs 24) | Near BB upper (%B=0.93)",
-          "rsi": 59.3711370256816,
-          "macd": 7.328547992901946e-07,
-          "bb_position": 0.9278347227291089,
-          "adx": 16.878224335854366,
+          "reason": "ATR expanding (6 rises) + DI- dominant | Volume spike 1.9x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (45 vs 14) | Price below BB lower (%B=-0.07) | Stochastic oversold (10/14) | ADX trending (25)",
+          "rsi": 27.31736239997297,
+          "macd": -6.537542278834735,
+          "bb_position": -0.06715260132171624,
+          "adx": 24.794726849501412,
           "divergence": "bullish",
+          "buy_score": 0.28,
+          "sell_score": 0.4
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.7095801716166232
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:41:26.647095",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.5805368421052632,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.629
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00009) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.34,
+          "reason": "Volume spike 2.3x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (28 vs 19) | Near BB upper (%B=0.81) | ADX low (17<20) \u2014 penalty \u00d70.85",
+          "rsi": 57.78603788422235,
+          "macd": 0.019239405423832068,
+          "bb_position": 0.8060994706745142,
+          "adx": 16.68527287228608,
+          "divergence": "none",
+          "buy_score": 0.4,
+          "sell_score": 0.05
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.29079641683518703
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:41:35.718945",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.5821600000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.646
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.75,
+          "reason": "Bullish EMA alignment (spread 0.00022) | ATR expanding (3 consecutive rises) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "ATR expanding (3 rises) + DI+ dominant | Volume spike 1.8x + bearish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (30 vs 14) | Near BB upper (%B=0.89) | Stochastic overbought (86/85)",
+          "rsi": 59.63364049844973,
+          "macd": 1.2447500818252593,
+          "bb_position": 0.8892368584379349,
+          "adx": 19.292946677599872,
+          "divergence": "bearish",
+          "buy_score": 0.4,
+          "sell_score": 0.23
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.2419447163971703
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:41:35.896240",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.6483809523809525,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.68
+        },
+        "ema_crossover": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Weak EMA alignment"
+        },
+        "technical": {
+          "signal": "SELL",
+          "confidence": 0.34,
+          "reason": "ATR expanding (4 rises) + DI- dominant | Volume spike 1.5x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (29 vs 14) | Near BB lower (%B=0.20) | ADX low (20<20) \u2014 penalty \u00d70.85",
+          "rsi": 45.40441160896759,
+          "macd": -0.2440139526506755,
+          "bb_position": 0.1969185010372919,
+          "adx": 19.75590001120991,
+          "divergence": "bearish",
+          "buy_score": 0.2,
+          "sell_score": 0.4
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.11200754612645661
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:43:38.397438",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.6200000000000001,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.72
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.75,
+          "reason": "Bearish EMA alignment (spread 0.00039) | ATR expanding (7 consecutive rises) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "SELL",
+          "confidence": 0.55,
+          "reason": "ATR expanding (4 rises) + DI- dominant | Volume spike 2.2x + bearish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (38 vs 19) | Price below BB lower (%B=-0.12)",
+          "rsi": 31.656630955044033,
+          "macd": -2.5193117768485536,
+          "bb_position": -0.11938555470834288,
+          "adx": 20.822401235960886,
+          "divergence": "none",
+          "buy_score": 0.1,
+          "sell_score": 0.55
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.5397121987297796
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:44:01.899721",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5675000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.75
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.75,
+          "reason": "Bearish EMA alignment (spread 0.00085) | ATR expanding (7 consecutive rises) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "ATR expanding (6 rises) + DI- dominant | Volume spike 1.9x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (45 vs 14) | Price below BB lower (%B=-0.07) | Stochastic oversold (10/14) | ADX trending (25)",
+          "rsi": 27.31736239997297,
+          "macd": -6.537542278834735,
+          "bb_position": -0.06715260132171624,
+          "adx": 24.794726849501412,
+          "divergence": "bullish",
+          "buy_score": 0.28,
+          "sell_score": 0.4
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.7489812246156078
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:44:02.030369",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.6295913043478262,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.629
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00009) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.34,
+          "reason": "Volume spike 2.3x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (28 vs 19) | Near BB upper (%B=0.81) | ADX low (17<20) \u2014 penalty \u00d70.85",
+          "rsi": 57.78603788422235,
+          "macd": 0.019239405423832068,
+          "bb_position": 0.8060994706745142,
+          "adx": 16.68527287228608,
+          "divergence": "none",
+          "buy_score": 0.4,
+          "sell_score": 0.05
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.3315840879134768
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:44:13.484687",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.6258666666666667,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.646
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.75,
+          "reason": "Bullish EMA alignment (spread 0.00022) | ATR expanding (3 consecutive rises) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "ATR expanding (3 rises) + DI+ dominant | Volume spike 1.8x + bearish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (30 vs 14) | Near BB upper (%B=0.89) | Stochastic overbought (86/85)",
+          "rsi": 59.63364049844973,
+          "macd": 1.2447500818252593,
+          "bb_position": 0.8892368584379349,
+          "adx": 19.292946677599872,
+          "divergence": "bearish",
+          "buy_score": 0.4,
+          "sell_score": 0.23
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.2806392342813831
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:44:13.671425",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": 15.63,
+      "pips": 13.0,
+      "confidence": 0.6450400000000002,
+      "exit_type": "TIMEOUT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.78
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00008) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Volume spike 1.7x + bearish candle | MACD bullish | DI+ dominant (30 vs 19) | Near BB upper (%B=0.80) | Stochastic overbought (84/83)",
+          "rsi": 60.66466091475501,
+          "macd": 0.9373271983677114,
+          "bb_position": 0.80468549338429,
+          "adx": 20.235290325130528,
+          "divergence": "bearish",
+          "buy_score": 0.2,
+          "sell_score": 0.23
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.3240416711532249
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:44:59.889852",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6540000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.68
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.75,
+          "reason": "Bearish EMA alignment (spread 0.00035) | ATR expanding (7 consecutive rises) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "SELL",
+          "confidence": 0.5775000000000001,
+          "reason": "ATR expanding (5 rises) + DI- dominant | Volume spike 3.7x + bearish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (40 vs 14) | Price below BB lower (%B=-0.13) | Stochastic oversold (11/9) | Stoch K crossed above D | ADX trending (25)",
+          "rsi": 26.96146636260614,
+          "macd": -1.8202188542081785,
+          "bb_position": -0.13471700818730684,
+          "adx": 24.776483751518654,
+          "divergence": "none",
+          "buy_score": 0.15,
+          "sell_score": 0.55
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.16865950902325916
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:45:11.659386",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5865882352941177,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.8
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.75,
+          "reason": "Bullish EMA alignment (spread 0.00035) | ATR expanding (6 consecutive rises) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.45999999999999996,
+          "reason": "Volume spike 2.3x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (39 vs 7) | Near BB upper (%B=0.97) | ADX strong (28)",
+          "rsi": 66.73503760200298,
+          "macd": 3.072448798017831,
+          "bb_position": 0.9688398219655513,
+          "adx": 27.773050095605917,
+          "divergence": "bearish",
+          "buy_score": 0.4,
+          "sell_score": 0.05
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 1.1532287847506495
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:45:26.548082",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -18.680599999998886,
+      "pips": -14.448479999999108,
+      "confidence": 0.7081538461538462,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.77
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.3,
+          "reason": "Bullish EMA alignment (spread 0.00009) | Price < EMA200 \u2014 counter-trend (\u00d70.6)"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (27 vs 15) | Price below BB lower (%B=-0.00) | ADX too weak (15<15) \u2014 blocking signal",
+          "rsi": 40.62840354287676,
+          "macd": -0.49396128797980055,
+          "bb_position": -0.002185360305321616,
+          "adx": 14.851202243284433,
+          "divergence": "bearish",
+          "buy_score": 0.1,
+          "sell_score": 0.32999999999999996
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.20867535888821012
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:45:47.261450",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.8646666666666669,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.8
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.6,
+          "reason": "Bearish EMA alignment (spread 0.00006) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "SELL",
+          "confidence": 0.34,
+          "reason": "Volume spike 2.6x + bearish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (35 vs 12) | Price below BB lower (%B=-0.25) | ADX low (16<20) \u2014 penalty \u00d70.85",
+          "rsi": 30.509444214788196,
+          "macd": -0.7268173306601966,
+          "bb_position": -0.2501157446773687,
+          "adx": 16.15813249564602,
+          "divergence": "none",
+          "buy_score": 0.1,
+          "sell_score": 0.4
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.7540961177626876
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:46:03.504483",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6531,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.6204999999999999
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.6,
+          "reason": "Bearish EMA alignment (spread 0.00005) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bearish | DI- dominant (25 vs 22) | Stochastic oversold (16/13) | Stoch K crossed above D",
+          "rsi": 47.432703174318114,
+          "macd": -0.5241921554461442,
+          "bb_position": 0.3531602591830753,
+          "adx": 11.726140329951864,
+          "divergence": "bullish",
+          "buy_score": 0.13,
+          "sell_score": 0.2
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.6094121903969362
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:46:08.098344",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6018285714285716,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.78
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.6,
+          "reason": "Bearish EMA alignment (spread 0.00027) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "SELL",
+          "confidence": 0.5775000000000001,
+          "reason": "ATR expanding (3 rises) + DI- dominant | Volume spike 1.5x + bearish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (31 vs 17) | Near BB lower (%B=0.01) | ADX trending (25)",
+          "rsi": 34.01082895497219,
+          "macd": -1.4687599993731055,
+          "bb_position": 0.007980267904586613,
+          "adx": 24.676880732960587,
+          "divergence": "none",
+          "buy_score": 0.05,
+          "sell_score": 0.55
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.6310128802969939
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:46:14.926182",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.686896551724138,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.7
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00019) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (32 vs 19) | Near BB upper (%B=0.88) | ADX too weak (14<15) \u2014 blocking signal",
+          "rsi": 63.70484758825854,
+          "macd": 0.6874309040131266,
+          "bb_position": 0.8845608145837505,
+          "adx": 14.262941318227423,
+          "divergence": "none",
+          "buy_score": 0.25,
+          "sell_score": 0.05
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 1.3034910551504102
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:46:39.338560",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5893466666666667,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.663
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00007) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (31 vs 16) | Price above BB upper (%B=1.10) | Stochastic overbought (90/83)",
+          "rsi": 69.39433234254349,
+          "macd": 1.3154930458840681,
+          "bb_position": 1.0966854248242313,
+          "adx": 19.393278516405992,
+          "divergence": "none",
           "buy_score": 0.25,
           "sell_score": 0.13
         },
-        "volume": {
+        "lstm": {
           "signal": "HOLD",
-          "confidence": 0.5,
-          "reason": "Volume spike (1.41x avg) | Above-median recent volume",
-          "current_volume": "3673",
-          "average_volume": 2596.25,
-          "volume_ratio": 1.4147327871296167
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI+ dominant (38 vs 21) | Near BB upper (%B=0.89) | Stochastic overbought (92/91)",
-              "rsi": 65.87045251203675,
-              "macd": 8.03192705296496e-05,
-              "bb_position": 0.8879244920425813,
-              "adx": 18.045558458932863,
-              "divergence": "bullish",
-              "buy_score": 0.2,
-              "sell_score": 0.08
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI+ dominant (38 vs 24) | Near BB upper (%B=0.89) | Stochastic overbought (93/91)",
-              "rsi": 66.00224692406724,
-              "macd": 0.0002794154306151597,
-              "bb_position": 0.8884313225246684,
-              "adx": 16.41921691842733,
-              "divergence": "bullish",
-              "buy_score": 0.2,
-              "sell_score": 0.08
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI+ dominant (38 vs 24) | Near BB upper (%B=0.89) | Stochastic overbought (92/91)",
-              "rsi": 65.90889565244771,
-              "macd": 0.0005582062977813607,
-              "bb_position": 0.8889677970999114,
-              "adx": 16.581014553014054,
-              "divergence": "none",
-              "buy_score": 0.2,
-              "sell_score": 0.08
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "BUY",
-          "confidence": 0.7070530126115727,
-          "reason": "Price at support 1.26497",
-          "levels": {
-            "support_levels": [
-              1.2649659947368423,
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26526,
-            "nearest_support": 1.2649659947368423,
-            "nearest_resistance": 1.27,
-            "price_zone": "AT_SUPPORT",
-            "zone_strength": 0.8838162657644658
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
-        },
-        "ema_crossover": {
-          "signal": "BUY",
-          "confidence": 0.85,
-          "reason": "EMA20 crossed above EMA50 | ATR expanding (3 consecutive rises) | Price > EMA200 \u2014 with trend"
+          "confidence": 0.015308562106210621
         }
       },
       "regime": "ranging",
-      "timestamp": "2026-03-09T02:39:51.744543",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
+      "timestamp": "2026-03-12T14:47:21.087972",
+      "session": "ny_overlap",
+      "hour": 14
     },
     {
-      "pair": "USD/JPY",
+      "pair": "MES",
+      "type": "SELL",
       "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "STALE_SIGNAL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6450806451612904,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
       "model_signals": {
         "sweep": {
           "signal": "SELL",
-          "confidence": 0.9400000000000001,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
+          "confidence": 0.6375
         },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
+        "ema_crossover": {
           "signal": "SELL",
-          "confidence": 1.0,
-          "reason": "LSTM predicts -99.16% move",
-          "predicted_price": "1.264551",
-          "current_price": 150.479,
-          "predicted_change_percent": -99.15964949028739
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
+          "confidence": 0.3,
+          "reason": "Bearish EMA alignment (spread 0.00010) | Price > EMA200 \u2014 counter-trend (\u00d70.6)"
         },
         "technical": {
           "signal": "HOLD",
           "confidence": 0.0,
-          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (29 vs 27) | ADX too weak (13<15) \u2014 blocking signal",
-          "rsi": 53.937263825962035,
-          "macd": 0.00032730863117080844,
-          "bb_position": 0.5620802333712921,
-          "adx": 12.597765104133263,
+          "reason": "MACD bearish | DI- dominant (30 vs 12) | Stochastic oversold (12/11) | Stoch K crossed above D | ADX trending (24)",
+          "rsi": 42.69388950257969,
+          "macd": -0.9484463733451776,
+          "bb_position": 0.2163870455568182,
+          "adx": 23.83745075022139,
           "divergence": "bullish",
-          "buy_score": 0.25,
-          "sell_score": 0.0
+          "buy_score": 0.05,
+          "sell_score": 0.2
         },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.2,
-          "reason": "Above-median recent volume",
-          "current_volume": "3196",
-          "average_volume": 3519.1,
-          "volume_ratio": 0.9081867520365473
-        },
-        "multi_tf": {
-          "signal": "BUY",
-          "confluence_score": 0.68,
-          "agreement": 3,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "BUY",
-              "confidence": 0.34,
-              "reason": "ATR expanding (5 rises) + DI+ dominant | MACD bullish | MACD accelerating \u2191 | DI+ dominant (41 vs 16) | Price above BB upper (%B=1.11) | Stochastic overbought (95/85) | ADX low (18<20) \u2014 penalty \u00d70.85",
-              "rsi": 68.01524992102453,
-              "macd": 0.007918829325660681,
-              "bb_position": 1.1111332015802333,
-              "adx": 17.565712055601637,
-              "divergence": "bullish",
-              "buy_score": 0.4,
-              "sell_score": 0.13
-            },
-            "medium": {
-              "signal": "BUY",
-              "confidence": 0.34,
-              "reason": "ATR expanding (5 rises) + DI+ dominant | MACD bullish | MACD accelerating \u2191 | DI+ dominant (41 vs 16) | Price above BB upper (%B=1.11) | Stochastic overbought (95/85) | ADX low (18<20) \u2014 penalty \u00d70.85",
-              "rsi": 68.09049766482367,
-              "macd": 0.027537970274153167,
-              "bb_position": 1.1124065594851427,
-              "adx": 17.672298615209126,
-              "divergence": "none",
-              "buy_score": 0.4,
-              "sell_score": 0.13
-            },
-            "slow": {
-              "signal": "BUY",
-              "confidence": 0.34,
-              "reason": "ATR expanding (5 rises) + DI+ dominant | MACD bullish | MACD accelerating \u2191 | DI+ dominant (41 vs 16) | Price above BB upper (%B=1.11) | Stochastic overbought (95/85) | ADX low (18<20) \u2014 penalty \u00d70.85",
-              "rsi": 68.13597556848775,
-              "macd": 0.05511466963017142,
-              "bb_position": 1.1102294738190532,
-              "adx": 17.67092890594261,
-              "divergence": "none",
-              "buy_score": 0.4,
-              "sell_score": 0.13
-            }
-          },
-          "reason": "FAST: BUY (34%) | MEDIUM: BUY (34%) | SLOW: BUY (34%)"
-        },
-        "support_resistance": {
+        "lstm": {
           "signal": "SELL",
-          "confidence": 0.7507226922029568,
-          "reason": "Price at resistance 150.49754",
-          "levels": {
-            "support_levels": [
-              150.0,
-              149.5,
-              149.0
-            ],
-            "resistance_levels": [
-              150.497538,
-              151.0,
-              151.5,
-              152.0
-            ],
-            "current_price": 150.479,
-            "nearest_support": 150.0,
-            "nearest_resistance": 150.497538,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9384033652536959
-          }
+          "confidence": 1.0449796432898582
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:47:59.664216",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5866666666666668,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.8
         },
-        "candlestick": {
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.7,
+          "reason": "EMA20 crossed below EMA50 | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
           "signal": "HOLD",
           "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
+          "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (36 vs 15) | Price below BB lower (%B=-0.27) | ADX trending (22)",
+          "rsi": 29.35464271485572,
+          "macd": -3.4164247975450053,
+          "bb_position": -0.2696720731010459,
+          "adx": 22.36001540451443,
+          "divergence": "none",
+          "buy_score": 0.1,
+          "sell_score": 0.25
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.25748815433212996
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:48:17.821542",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.65,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.75
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.75,
+          "reason": "Bullish EMA alignment (spread 0.00006) | ATR expanding (6 consecutive rises) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "ATR expanding (4 rises) + DI- dominant | Volume spike 1.8x + bearish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (21 vs 19) | Near BB lower (%B=0.03) | ADX too weak (15<15) \u2014 blocking signal",
+          "rsi": 39.562420416428154,
+          "macd": -0.6942416491228869,
+          "bb_position": 0.029384782156008028,
+          "adx": 14.883860387532247,
+          "divergence": "none",
+          "buy_score": 0.05,
+          "sell_score": 0.55
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.03559252735485729
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:48:52.789793",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.7415151515151517,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.75
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.36,
+          "reason": "EMA20 crossed below EMA50 | Price > EMA200 \u2014 counter-trend (\u00d70.6)"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bearish | MACD accelerating \u2193 | Near BB lower (%B=0.13)",
+          "rsi": 40.589017054849556,
+          "macd": -1.3768590643594507,
+          "bb_position": 0.13096232441802597,
+          "adx": 14.01062343379551,
+          "divergence": "none",
+          "buy_score": 0.05,
+          "sell_score": 0.15000000000000002
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.04188129836242577
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:48:53.110710",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5504764705882352,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.6034999999999999
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00017) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "Volume spike 1.8x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (22 vs 14) | Price above BB upper (%B=1.07) | ADX too weak (11<15) \u2014 blocking signal",
+          "rsi": 62.2501423599704,
+          "macd": 1.4273402131411785,
+          "bb_position": 1.0715859155149976,
+          "adx": 10.858665316419225,
+          "divergence": "none",
+          "buy_score": 0.4,
+          "sell_score": 0.1
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.3942100104783929
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:49:06.423266",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.5573714285714287,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.68
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.75,
+          "reason": "Bearish EMA alignment (spread 0.00045) | ATR expanding (7 consecutive rises) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "SELL",
+          "confidence": 0.55,
+          "reason": "ATR expanding (4 rises) + DI- dominant | Volume spike 3.9x + bearish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (37 vs 10) | Price below BB lower (%B=-0.20) | Stochastic oversold (6/16)",
+          "rsi": 25.321239612302413,
+          "macd": -4.755800748335787,
+          "bb_position": -0.19731293787297302,
+          "adx": 20.006535259889702,
+          "divergence": "none",
+          "buy_score": 0.13,
+          "sell_score": 0.55
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 1.0166404403744773
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:49:06.757014",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5840000000000001,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.77
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.42,
+          "reason": "Bullish EMA alignment (spread 0.00012) | Price > EMA200 \u2014 with trend | ATR contracting (3 falls) \u2014 confidence penalised \u00d70.7"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (21 vs 17) | Near BB upper (%B=0.80) | ADX too weak (14<15) \u2014 blocking signal",
+          "rsi": 58.05132821255294,
+          "macd": 0.24338063294544554,
+          "bb_position": 0.8013056668868241,
+          "adx": 13.565141226282236,
+          "divergence": "none",
+          "buy_score": 0.25,
+          "sell_score": 0.05
+        },
+        "lstm": {
+          "signal": "SELL",
+          "confidence": 0.782582881502787
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:49:47.431288",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -13.31955000000209,
+      "pips": -10.159640000001673,
+      "confidence": 0.567318918918919,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.646
         },
         "ema_crossover": {
           "signal": "HOLD",
           "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T02:41:51.048214",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "BUY",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "BUY",
-          "confidence": 0.882,
-          "regime": "range",
-          "bias": "BUY",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts -0.03% move",
-          "predicted_price": "1.264634",
-          "current_price": 1.26501,
-          "predicted_change_percent": -0.02972204362302372
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
+          "reason": "Weak EMA alignment"
         },
         "technical": {
           "signal": "BUY",
           "confidence": 0.2125,
-          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (33 vs 29) | ADX low (17<20) \u2014 penalty \u00d70.85",
-          "rsi": 55.69528805394249,
-          "macd": -2.2042881434591877e-05,
-          "bb_position": 0.6598406753750076,
-          "adx": 17.26668514454675,
-          "divergence": "bullish",
+          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (21 vs 14) | ADX low (17<20) \u2014 penalty \u00d70.85",
+          "rsi": 50.56665933814617,
+          "macd": -0.26985322160999203,
+          "bb_position": 0.5741639865514024,
+          "adx": 17.07421069499596,
+          "divergence": "bearish",
           "buy_score": 0.25,
           "sell_score": 0.0
         },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Normal volume conditions",
-          "current_volume": "1275",
-          "average_volume": 4162.3,
-          "volume_ratio": 0.3063210243600122
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | DI- dominant (35 vs 14) | Near BB lower (%B=0.07) | Stochastic oversold (12/14) | ADX trending (24)",
-              "rsi": 36.78944613033395,
-              "macd": -3.986747060169549e-05,
-              "bb_position": 0.06588496300311965,
-              "adx": 24.37696072526153,
-              "divergence": "bearish",
-              "buy_score": 0.08,
-              "sell_score": 0.2
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "Volume spike 1.7x + bullish candle | MACD bearish | DI- dominant (35 vs 15) | Near BB lower (%B=0.07) | Stochastic oversold (12/14) | ADX trending (22)",
-              "rsi": 36.852929468623884,
-              "macd": -0.00013898159963976475,
-              "bb_position": 0.0710915663924437,
-              "adx": 22.072878523035588,
-              "divergence": "bearish",
-              "buy_score": 0.23,
-              "sell_score": 0.2
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "Volume spike 1.7x + bullish candle | MACD bearish | DI- dominant (36 vs 15) | Near BB lower (%B=0.07) | Stochastic oversold (12/13) | ADX trending (23)",
-              "rsi": 36.92226586096059,
-              "macd": -0.00027824581215285527,
-              "bb_position": 0.0719625846912472,
-              "adx": 23.10882093781716,
-              "divergence": "none",
-              "buy_score": 0.23,
-              "sell_score": 0.2
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.7974398847213604,
-          "reason": "Price at resistance 1.26502",
-          "levels": {
-            "support_levels": [
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.2650180964285715,
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26501,
-            "nearest_support": 1.2600000000000002,
-            "nearest_resistance": 1.2650180964285715,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9967998559017004
-          }
-        },
-        "candlestick": {
-          "signal": "BUY",
-          "confidence": 0.75,
-          "patterns": [
-            {
-              "pattern": "THREE_WHITE_SOLDIERS",
-              "signal": "BUY",
-              "strength": 0.75,
-              "candle_index": 4
-            }
-          ],
-          "reason": "Patterns: THREE_WHITE_SOLDIERS"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T02:44:51.046266",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "SELL",
-          "confidence": 0.85,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
         "lstm": {
-          "signal": "SELL",
-          "confidence": 1.0,
-          "reason": "LSTM predicts -99.16% move",
-          "predicted_price": "1.264551",
-          "current_price": 150.472,
-          "predicted_change_percent": -99.15961039694399
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Volume spike 4.8x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (37 vs 28)",
-          "rsi": 48.471810961093524,
-          "macd": 0.0010601742367271072,
-          "bb_position": 0.3561160877862363,
-          "adx": 9.41645423725523,
-          "divergence": "bearish",
-          "buy_score": 0.15,
-          "sell_score": 0.25
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.5,
-          "reason": "Volume spike (4.75x avg) | Above-median recent volume",
-          "current_volume": "32175",
-          "average_volume": 6770.95,
-          "volume_ratio": 4.751918120093647
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 1,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "BUY",
-              "confidence": 0.34500000000000003,
-              "reason": "MACD bullish | MACD accelerating \u2191 | MACD histogram flipped bullish | DI+ dominant (34 vs 18) | Near BB upper (%B=0.98) | Stochastic overbought (99/90) | ADX strong (26)",
-              "rsi": 63.87315458449169,
-              "macd": 0.009419686107918324,
-              "bb_position": 0.9757512856217707,
-              "adx": 26.121279996927854,
-              "divergence": "bullish",
-              "buy_score": 0.30000000000000004,
-              "sell_score": 0.08
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (35 vs 18) | Near BB upper (%B=0.96) | Stochastic overbought (98/90) | ADX strong (26)",
-              "rsi": 63.744736162307916,
-              "macd": 0.032647363929385165,
-              "bb_position": 0.9623488633722995,
-              "adx": 26.218322797797697,
-              "divergence": "bullish",
-              "buy_score": 0.25,
-              "sell_score": 0.08
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (35 vs 18) | Near BB upper (%B=0.96) | Stochastic overbought (98/90) | ADX strong (26)",
-              "rsi": 63.610608482562746,
-              "macd": 0.0651562309055862,
-              "bb_position": 0.9597973571159937,
-              "adx": 26.423533511691133,
-              "divergence": "none",
-              "buy_score": 0.25,
-              "sell_score": 0.08
-            }
-          },
-          "reason": "FAST: BUY (34%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.6346991941547717,
-          "reason": "Price at resistance 150.53418",
-          "levels": {
-            "support_levels": [
-              150.0,
-              149.5,
-              149.0
-            ],
-            "resistance_levels": [
-              150.53418285714287,
-              151.0,
-              151.5,
-              152.0
-            ],
-            "current_price": 150.472,
-            "nearest_support": 150.0,
-            "nearest_resistance": 150.53418285714287,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.7933739926934646
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
+          "signal": "BUY",
+          "confidence": 1.2134776297814207
         }
       },
       "regime": "ranging",
-      "timestamp": "2026-03-09T02:57:51.075956",
-      "session": "asian",
-      "hour": 2,
-      "is_win": false
+      "timestamp": "2026-03-12T14:50:36.249365",
+      "session": "ny_overlap",
+      "hour": 14
     },
     {
-      "pair": "USD/JPY",
+      "pair": "MES",
+      "type": "BUY",
       "signal": "BUY",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6247368421052633,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
       "model_signals": {
         "sweep": {
           "signal": "BUY",
-          "confidence": 0.9299999999999999,
-          "regime": "trend_up",
-          "bias": "BUY",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "SELL",
-          "confidence": 1.0,
-          "reason": "LSTM predicts -99.16% move",
-          "predicted_price": "1.264551",
-          "current_price": 150.467,
-          "predicted_change_percent": -99.1595824709003
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Volume spike 1.8x + bullish candle | MACD bearish | DI- dominant (35 vs 31) | ADX strong (28)",
-          "rsi": 48.589772892964454,
-          "macd": -0.005905451995715794,
-          "bb_position": 0.48457524800241575,
-          "adx": 28.13415692640714,
-          "divergence": "bearish",
-          "buy_score": 0.15,
-          "sell_score": 0.2
-        },
-        "volume": {
-          "signal": "BUY",
-          "confidence": 0.3,
-          "reason": "Volume spike (1.78x avg) | Price up 0.00007 with volume",
-          "current_volume": "5483",
-          "average_volume": 3084.45,
-          "volume_ratio": 1.777626480643996
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI+ dominant (26 vs 25)",
-              "rsi": 51.10828348400022,
-              "macd": 0.0031130524678530946,
-              "bb_position": 0.4330134756909503,
-              "adx": 15.40605615352856,
-              "divergence": "bearish",
-              "buy_score": 0.1,
-              "sell_score": 0.15000000000000002
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI+ dominant (26 vs 25)",
-              "rsi": 51.163440329679545,
-              "macd": 0.010772411765486822,
-              "bb_position": 0.4354341409078575,
-              "adx": 15.508105634512866,
-              "divergence": "bearish",
-              "buy_score": 0.1,
-              "sell_score": 0.15000000000000002
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI+ dominant (26 vs 25)",
-              "rsi": 51.176034493972075,
-              "macd": 0.021501499893616938,
-              "bb_position": 0.4367774637128229,
-              "adx": 15.694242426344664,
-              "divergence": "bullish",
-              "buy_score": 0.1,
-              "sell_score": 0.15000000000000002
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.6818069865941125,
-          "reason": "Price at resistance 150.51146",
-          "levels": {
-            "support_levels": [
-              150.0,
-              149.5,
-              149.0
-            ],
-            "resistance_levels": [
-              150.51146037037037,
-              151.0,
-              151.5,
-              152.0
-            ],
-            "current_price": 150.467,
-            "nearest_support": 150.0,
-            "nearest_resistance": 150.51146037037037,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.8522587332426406
-          }
-        },
-        "candlestick": {
-          "signal": "BUY",
-          "confidence": 1.0,
-          "patterns": [
-            {
-              "pattern": "HAMMER",
-              "signal": "BUY",
-              "strength": 0.7,
-              "candle_index": 4
-            },
-            {
-              "pattern": "BULLISH_PIN_BAR",
-              "signal": "BUY",
-              "strength": 0.7,
-              "candle_index": 4
-            }
-          ],
-          "reason": "Patterns: HAMMER, BULLISH_PIN_BAR"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T03:00:52.890679",
-      "session": "asian",
-      "hour": 3,
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "STALE_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "SELL",
-          "confidence": 0.9400000000000001,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts -0.02% move",
-          "predicted_price": "1.2646333",
-          "current_price": 1.26493,
-          "predicted_change_percent": -0.023456007824390206
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (30 vs 25) | ADX too weak (12<15) \u2014 blocking signal",
-          "rsi": 49.50673765390087,
-          "macd": -2.7999402751222036e-05,
-          "bb_position": 0.5840187702788749,
-          "adx": 11.781181330493926,
-          "divergence": "bullish",
-          "buy_score": 0.25,
-          "sell_score": 0.0
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Normal volume conditions",
-          "current_volume": "1532",
-          "average_volume": 4023.3,
-          "volume_ratio": 0.3807819450747441
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI+ dominant (31 vs 15) | Near BB upper (%B=0.81) | Stochastic overbought (86/83) | ADX trending (22)",
-              "rsi": 59.886929528280184,
-              "macd": 3.771617202841249e-05,
-              "bb_position": 0.8109131199465411,
-              "adx": 22.283727632216262,
-              "divergence": "bearish",
-              "buy_score": 0.2,
-              "sell_score": 0.16
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI+ dominant (31 vs 15) | Near BB upper (%B=0.80) | Stochastic overbought (84/82) | ADX trending (23)",
-              "rsi": 59.82853169267436,
-              "macd": 0.00012857751742800794,
-              "bb_position": 0.8049434505444293,
-              "adx": 22.763026548146964,
-              "divergence": "bearish",
-              "buy_score": 0.2,
-              "sell_score": 0.16
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | DI+ dominant (31 vs 16) | Near BB upper (%B=0.80) | Stochastic overbought (85/82) | ADX trending (22)",
-              "rsi": 59.810105145218,
-              "macd": 0.0002573154218221685,
-              "bb_position": 0.8041350564916492,
-              "adx": 22.021512316469078,
-              "divergence": "bearish",
-              "buy_score": 0.2,
-              "sell_score": 0.16
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.7873795387887328,
-          "reason": "Price at resistance 1.26497",
-          "levels": {
-            "support_levels": [
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.26496991,
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26493,
-            "nearest_support": 1.2600000000000002,
-            "nearest_resistance": 1.26496991,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9842244234859159
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T03:09:56.717111",
-      "session": "asian",
-      "hour": 3,
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "STALE_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "SELL",
-          "confidence": 0.87,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts -0.06% move",
-          "predicted_price": "1.2646935",
-          "current_price": 1.26549,
-          "predicted_change_percent": -0.06294015666262147
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "MACD bearish | MACD accelerating \u2193 | MACD histogram flipped bearish | DI- dominant (36 vs 21) | ADX too weak (14<15) \u2014 blocking signal",
-          "rsi": 43.43031014198497,
-          "macd": 1.1200932892307947e-05,
-          "bb_position": 0.2940613822419829,
-          "adx": 13.729768645320476,
-          "divergence": "bearish",
-          "buy_score": 0.0,
-          "sell_score": 0.30000000000000004
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.5,
-          "reason": "Volume spike (1.25x avg) | Above-median recent volume",
-          "current_volume": "6837",
-          "average_volume": 5450.3,
-          "volume_ratio": 1.2544263616214837
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | DI- dominant (37 vs 18) | Near BB lower (%B=0.13) | Stochastic oversold (6/9) | ADX trending (23)",
-              "rsi": 24.922973682890113,
-              "macd": -8.487352778696611e-05,
-              "bb_position": 0.1348910381000273,
-              "adx": 22.965395991405558,
-              "divergence": "bearish",
-              "buy_score": 0.08,
-              "sell_score": 0.2
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | DI- dominant (38 vs 17) | Near BB lower (%B=0.13) | Stochastic oversold (6/8) | ADX trending (23)",
-              "rsi": 25.257880560552373,
-              "macd": -0.0002964351425334133,
-              "bb_position": 0.13430401728920377,
-              "adx": 23.113356942444664,
-              "divergence": "none",
-              "buy_score": 0.08,
-              "sell_score": 0.2
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | DI- dominant (37 vs 17) | Near BB lower (%B=0.13) | Stochastic oversold (6/8) | ADX trending (23)",
-              "rsi": 25.334960884852247,
-              "macd": -0.0005926074392672565,
-              "bb_position": 0.1338740471895929,
-              "adx": 23.28401230821467,
-              "divergence": "none",
-              "buy_score": 0.08,
-              "sell_score": 0.2
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "BUY",
-          "confidence": 0.7548742749084296,
-          "reason": "Price at support 1.26535",
-          "levels": {
-            "support_levels": [
-              1.2653472346153847,
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26549,
-            "nearest_support": 1.2653472346153847,
-            "nearest_resistance": 1.27,
-            "price_zone": "AT_SUPPORT",
-            "zone_strength": 0.943592843635537
-          }
-        },
-        "candlestick": {
-          "signal": "SELL",
-          "confidence": 0.85,
-          "patterns": [
-            {
-              "pattern": "DOJI",
-              "signal": "HOLD",
-              "strength": 0.5,
-              "candle_index": 4
-            },
-            {
-              "pattern": "EVENING_STAR",
-              "signal": "SELL",
-              "strength": 0.85,
-              "candle_index": 4
-            }
-          ],
-          "reason": "Patterns: DOJI, EVENING_STAR"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T03:15:50.561401",
-      "session": "asian",
-      "hour": 3,
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "STALE_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "SELL",
-          "confidence": 0.81,
-          "regime": "range",
-          "bias": "SELL",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "SELL",
-          "confidence": 1.0,
-          "reason": "LSTM predicts -99.16% move",
-          "predicted_price": "1.264551",
-          "current_price": 150.48,
-          "predicted_change_percent": -99.15965507475383
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "MACD bullish | DI- dominant (31 vs 22)",
-          "rsi": 45.62318564222072,
-          "macd": -0.0015930916368063208,
-          "bb_position": 0.2964766233109341,
-          "adx": 13.939007593597763,
-          "divergence": "bearish",
-          "buy_score": 0.1,
-          "sell_score": 0.1
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Normal volume conditions",
-          "current_volume": "1375",
-          "average_volume": 6033.45,
-          "volume_ratio": 0.2278961456168699
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "Volume spike 2.5x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (33 vs 18)",
-              "rsi": 45.314634815260455,
-              "macd": 0.0016310074695695675,
-              "bb_position": 0.3656380572278542,
-              "adx": 13.830201285047185,
-              "divergence": "bearish",
-              "buy_score": 0.15,
-              "sell_score": 0.25
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "Volume spike 2.5x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (33 vs 18)",
-              "rsi": 45.52989009323482,
-              "macd": 0.005842962967278709,
-              "bb_position": 0.36948756116259335,
-              "adx": 13.822920706624245,
-              "divergence": "bearish",
-              "buy_score": 0.15,
-              "sell_score": 0.25
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "Volume spike 2.5x + bullish candle | MACD bearish | MACD accelerating \u2193 | DI- dominant (33 vs 18)",
-              "rsi": 45.53731171653128,
-              "macd": 0.011761953700329286,
-              "bb_position": 0.3693031580089861,
-              "adx": 13.854670124073143,
-              "divergence": "none",
-              "buy_score": 0.15,
-              "sell_score": 0.25
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.7397197784293899,
-          "reason": "Price at resistance 150.50268",
-          "levels": {
-            "support_levels": [
-              150.0,
-              149.5,
-              149.0
-            ],
-            "resistance_levels": [
-              150.50267741935485,
-              151.0,
-              151.5,
-              152.0
-            ],
-            "current_price": 150.48,
-            "nearest_support": 150.0,
-            "nearest_resistance": 150.50267741935485,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9246497230367372
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T03:31:52.864662",
-      "session": "asian",
-      "hour": 3,
-      "is_win": false
-    },
-    {
-      "pair": "USD/JPY",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "SELL",
-          "confidence": 0.9299999999999999,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "SELL",
-          "confidence": 1.0,
-          "reason": "LSTM predicts -99.16% move",
-          "predicted_price": "1.264551",
-          "current_price": 150.518,
-          "predicted_change_percent": -99.15986722949386
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Volume spike 3.5x + bullish candle | MACD bullish | DI+ dominant (36 vs 30) | ADX too weak (13<15) \u2014 blocking signal",
-          "rsi": 53.957303698052264,
-          "macd": 0.0018299322219377245,
-          "bb_position": 0.6908050199487623,
-          "adx": 12.87022556465499,
-          "divergence": "bearish",
-          "buy_score": 0.35,
-          "sell_score": 0.0
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.6499999999999999,
-          "reason": "Volume spike (3.51x avg) | 3-candle volume ramp | Above-median recent volume",
-          "current_volume": "14839",
-          "average_volume": 4229.85,
-          "volume_ratio": 3.5081622271456046
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (36 vs 30) | Near BB lower (%B=0.11) | Stochastic oversold (9/11)",
-              "rsi": 38.95035717421271,
-              "macd": -0.0032923462242422374,
-              "bb_position": 0.11271220545780261,
-              "adx": 13.93948220430588,
-              "divergence": "bearish",
-              "buy_score": 0.08,
-              "sell_score": 0.25
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (38 vs 29) | Near BB lower (%B=0.11) | Stochastic oversold (9/11)",
-              "rsi": 38.68256409411317,
-              "macd": -0.01153985997223117,
-              "bb_position": 0.10868612436060672,
-              "adx": 14.117085992992042,
-              "divergence": "none",
-              "buy_score": 0.08,
-              "sell_score": 0.25
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (38 vs 29) | Near BB lower (%B=0.11) | Stochastic oversold (9/11)",
-              "rsi": 38.820624839712174,
-              "macd": -0.022943671974502422,
-              "bb_position": 0.11160809164999733,
-              "adx": 14.171110767637513,
-              "divergence": "none",
-              "buy_score": 0.08,
-              "sell_score": 0.25
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.7911689580699531,
-          "reason": "Price at resistance 150.52132",
-          "levels": {
-            "support_levels": [
-              150.0,
-              149.5,
-              149.0
-            ],
-            "resistance_levels": [
-              150.52132307692307,
-              151.0,
-              151.5,
-              152.0
-            ],
-            "current_price": 150.518,
-            "nearest_support": 150.0,
-            "nearest_resistance": 150.52132307692307,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9889611975874414
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T03:50:50.956187",
-      "session": "asian",
-      "hour": 3,
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "SELL",
-          "confidence": 0.9400000000000001,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts -0.05% move",
-          "predicted_price": "1.2646816",
-          "current_price": 1.26533,
-          "predicted_change_percent": -0.05124531288319636
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "MACD bearish | DI- dominant (31 vs 22) | Near BB lower (%B=0.19) | Stochastic oversold (12/13)",
-          "rsi": 40.26795460211191,
-          "macd": -3.8775369528565307e-05,
-          "bb_position": 0.19378589758575168,
-          "adx": 15.193552812238678,
-          "divergence": "bearish",
-          "buy_score": 0.08,
-          "sell_score": 0.2
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Normal volume conditions",
-          "current_volume": "1302",
-          "average_volume": 4123.5,
-          "volume_ratio": 0.3157511821715166
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI- dominant (37 vs 32)",
-              "rsi": 48.58460303524941,
-              "macd": -2.8353891264210063e-05,
-              "bb_position": 0.5012740483123919,
-              "adx": 13.531560815757876,
-              "divergence": "bullish",
-              "buy_score": 0.15000000000000002,
-              "sell_score": 0.1
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI- dominant (36 vs 31)",
-              "rsi": 48.451414680976136,
-              "macd": -9.86232752726579e-05,
-              "bb_position": 0.4963602163048963,
-              "adx": 13.342280310874582,
-              "divergence": "bullish",
-              "buy_score": 0.15000000000000002,
-              "sell_score": 0.1
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI- dominant (37 vs 32)",
-              "rsi": 48.47842442781283,
-              "macd": -0.00019694604555353656,
-              "bb_position": 0.4978063037387074,
-              "adx": 13.496098417949872,
-              "divergence": "bullish",
-              "buy_score": 0.15000000000000002,
-              "sell_score": 0.1
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.7839240883142158,
-          "reason": "Price at resistance 1.26538",
-          "levels": {
-            "support_levels": [
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.2653808533333335,
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26533,
-            "nearest_support": 1.2600000000000002,
-            "nearest_resistance": 1.2653808533333335,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.9799051103927696
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [
-            {
-              "pattern": "DOJI",
-              "signal": "HOLD",
-              "strength": 0.5,
-              "candle_index": 4
-            }
-          ],
-          "reason": "Patterns: DOJI"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T03:59:51.209141",
-      "session": "asian",
-      "hour": 3,
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "STALE_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "SELL",
-          "confidence": 0.765,
-          "regime": "range",
-          "bias": "SELL",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts +0.01% move",
-          "predicted_price": "1.2645885",
-          "current_price": 1.2644,
-          "predicted_change_percent": 0.014906297639670092
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (27 vs 20) | Near BB lower (%B=0.16) | ADX too weak (12<15) \u2014 blocking signal",
-          "rsi": 38.225938929687665,
-          "macd": -3.912725240207138e-05,
-          "bb_position": 0.1582144161263734,
-          "adx": 11.637472079358792,
-          "divergence": "bearish",
-          "buy_score": 0.05,
-          "sell_score": 0.25
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Normal volume conditions",
-          "current_volume": "1145",
-          "average_volume": 4659.0,
-          "volume_ratio": 0.2457608928427214
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 1,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "SELL",
-              "confidence": 0.2975,
-              "reason": "Volume spike 2.1x + bearish candle | MACD bearish | DI- dominant (30 vs 19) | Near BB lower (%B=0.14) | Stochastic oversold (9/14) | ADX low (19<20) \u2014 penalty \u00d70.85",
-              "rsi": 38.93922600559916,
-              "macd": -2.447717585352116e-05,
-              "bb_position": 0.13678009514552378,
-              "adx": 18.999762292884675,
-              "divergence": "bearish",
-              "buy_score": 0.08,
-              "sell_score": 0.35
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (38 vs 33) | Stochastic overbought (86/87) | Stoch K crossed below D | ADX too weak (13<15) \u2014 blocking signal",
-              "rsi": 55.30890430953542,
-              "macd": 1.6641913685555565e-05,
-              "bb_position": 0.7470711976454667,
-              "adx": 13.120583154632225,
-              "divergence": "bearish",
-              "buy_score": 0.25,
-              "sell_score": 0.05
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (38 vs 33) | Stochastic overbought (86/87) | Stoch K crossed below D | ADX too weak (13<15) \u2014 blocking signal",
-              "rsi": 55.275608562704996,
-              "macd": 3.369730923430403e-05,
-              "bb_position": 0.7461208796269309,
-              "adx": 13.242672332032845,
-              "divergence": "bearish",
-              "buy_score": 0.25,
-              "sell_score": 0.05
-            }
-          },
-          "reason": "FAST: SELL (30%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.6430243593798898,
-          "reason": "Price at resistance 1.26490",
-          "levels": {
-            "support_levels": [
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.2648962000000001,
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.2644,
-            "nearest_support": 1.2600000000000002,
-            "nearest_resistance": 1.2648962000000001,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.8037804492248621
-          }
-        },
-        "candlestick": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "patterns": [],
-          "reason": "No candlestick patterns detected"
-        },
-        "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
-        }
-      },
-      "regime": "ranging",
-      "timestamp": "2026-03-09T04:10:50.578572",
-      "session": "asian",
-      "hour": 4,
-      "is_win": false
-    },
-    {
-      "pair": "GBP/USD",
-      "signal": "BUY",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
-      "model_signals": {
-        "sweep": {
-          "signal": "BUY",
-          "confidence": 0.837,
-          "regime": "range",
-          "bias": "BUY",
-          "mss_confirmed": true
-        },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts -0.02% move",
-          "predicted_price": "1.2646124",
-          "current_price": 1.26484,
-          "predicted_change_percent": -0.01799150133173368
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
-        },
-        "technical": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (34 vs 19) | Near BB upper (%B=0.84) | Stochastic overbought (86/82)",
-          "rsi": 62.74984998776354,
-          "macd": 3.559526383689615e-05,
-          "bb_position": 0.8394293271999357,
-          "adx": 19.264304915548365,
-          "divergence": "bullish",
-          "buy_score": 0.25,
-          "sell_score": 0.08
-        },
-        "volume": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Normal volume conditions",
-          "current_volume": "1115",
-          "average_volume": 6304.1,
-          "volume_ratio": 0.17686902171969526
-        },
-        "multi_tf": {
-          "signal": "HOLD",
-          "confluence_score": 0.0,
-          "agreement": 0,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (44 vs 21) | Near BB upper (%B=0.98) | Stochastic overbought (100/100) | ADX trending (24)",
-              "rsi": 69.04207726260256,
-              "macd": 9.164967150510073e-05,
-              "bb_position": 0.983158739103526,
-              "adx": 23.66063601037053,
-              "divergence": "bullish",
-              "buy_score": 0.25,
-              "sell_score": 0.08
-            },
-            "medium": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (44 vs 21) | Near BB upper (%B=0.98) | Stochastic overbought (98/98)",
-              "rsi": 68.71861639125642,
-              "macd": 0.0003140760734294812,
-              "bb_position": 0.9790461078750077,
-              "adx": 21.981910554122283,
-              "divergence": "bullish",
-              "buy_score": 0.25,
-              "sell_score": 0.08
-            },
-            "slow": {
-              "signal": "HOLD",
-              "confidence": 0.0,
-              "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (44 vs 21) | Near BB upper (%B=0.98) | Stochastic overbought (99/98) | ADX trending (23)",
-              "rsi": 68.78587185079505,
-              "macd": 0.0006300097903331192,
-              "bb_position": 0.9802593786837139,
-              "adx": 22.683406477535407,
-              "divergence": "none",
-              "buy_score": 0.25,
-              "sell_score": 0.08
-            }
-          },
-          "reason": "FAST: HOLD (0%) | MEDIUM: HOLD (0%) | SLOW: HOLD (0%)"
-        },
-        "support_resistance": {
-          "signal": "SELL",
-          "confidence": 0.7608250845956465,
-          "reason": "Price at resistance 1.26496",
-          "levels": {
-            "support_levels": [
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.264963875,
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26484,
-            "nearest_support": 1.2600000000000002,
-            "nearest_resistance": 1.264963875,
-            "price_zone": "AT_RESISTANCE",
-            "zone_strength": 0.951031355744558
-          }
-        },
-        "candlestick": {
-          "signal": "SELL",
-          "confidence": 0.7,
-          "patterns": [
-            {
-              "pattern": "DOJI",
-              "signal": "HOLD",
-              "strength": 0.5,
-              "candle_index": 4
-            },
-            {
-              "pattern": "BEARISH_PIN_BAR",
-              "signal": "SELL",
-              "strength": 0.7,
-              "candle_index": 4
-            }
-          ],
-          "reason": "Patterns: DOJI, BEARISH_PIN_BAR"
+          "confidence": 0.77
         },
         "ema_crossover": {
           "signal": "BUY",
           "confidence": 0.7,
           "reason": "EMA20 crossed above EMA50 | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.4,
+          "reason": "Volume spike 1.5x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (24 vs 17) | Price above BB upper (%B=1.09) | Stochastic overbought (84/84) | Stoch K crossed below D",
+          "rsi": 63.061173738332684,
+          "macd": 0.2020305802934672,
+          "bb_position": 1.0913001038477939,
+          "adx": 20.5726235170992,
+          "divergence": "none",
+          "buy_score": 0.4,
+          "sell_score": 0.15
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 1.5713473306339574
         }
       },
       "regime": "ranging",
-      "timestamp": "2026-03-09T04:14:51.022990",
-      "session": "asian",
-      "hour": 4,
-      "is_win": false
+      "timestamp": "2026-03-12T14:50:49.085875",
+      "session": "ny_overlap",
+      "hour": 14
     },
     {
-      "pair": "GBP/USD",
-      "signal": "SELL",
-      "profit_loss": 0.0,
-      "entry_price": 0.0,
-      "exit_price": 0.0,
-      "exit_type": "REVERSAL_SIGNAL",
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6267567567567568,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
       "model_signals": {
         "sweep": {
-          "signal": "SELL",
-          "confidence": 0.87,
-          "regime": "trend_down",
-          "bias": "SELL",
-          "mss_confirmed": true
+          "signal": "BUY",
+          "confidence": 0.75
         },
-        "scalping": {
-          "signal": "SKIP",
-          "confidence": 0.0,
-          "setup": "none"
-        },
-        "lstm": {
-          "signal": "HOLD",
-          "confidence": 0.3,
-          "reason": "LSTM predicts -0.03% move",
-          "predicted_price": "1.2646435",
-          "current_price": 1.26498,
-          "predicted_change_percent": -0.02659726484779011
-        },
-        "sentiment": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "score": 0.0,
-          "news_count": 0
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.75,
+          "reason": "Bullish EMA alignment (spread 0.00030) | ATR expanding (4 consecutive rises) | Price > EMA200 \u2014 with trend"
         },
         "technical": {
           "signal": "HOLD",
           "confidence": 0.0,
-          "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (32 vs 27) | ADX too weak (13<15) \u2014 blocking signal",
-          "rsi": 49.41552336584932,
-          "macd": 1.6928687772921336e-05,
-          "bb_position": 0.3093378883348328,
-          "adx": 13.266701798247269,
+          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (24 vs 15) | ADX trending (24)",
+          "rsi": 54.52658015087754,
+          "macd": -0.2669767806746677,
+          "bb_position": 0.6521922706049417,
+          "adx": 23.795112927497563,
           "divergence": "bearish",
-          "buy_score": 0.0,
-          "sell_score": 0.25
+          "buy_score": 0.25,
+          "sell_score": 0.08
         },
-        "volume": {
-          "signal": "SELL",
-          "confidence": 0.3,
-          "reason": "Volume rising with price move | Price down -0.00006 with volume",
-          "current_volume": "4161",
-          "average_volume": 3842.95,
-          "volume_ratio": 1.0827619404148476
-        },
-        "multi_tf": {
-          "signal": "SELL",
-          "confluence_score": 0.42500000000000004,
-          "agreement": 3,
-          "timeframe_signals": {
-            "fast": {
-              "signal": "SELL",
-              "confidence": 0.2125,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (42 vs 24) | Near BB lower (%B=0.16) | ADX low (19<20) \u2014 penalty \u00d70.85",
-              "rsi": 39.5855338723299,
-              "macd": -3.23342066408383e-05,
-              "bb_position": 0.15541579727449337,
-              "adx": 18.68377713570034,
-              "divergence": "bearish",
-              "buy_score": 0.05,
-              "sell_score": 0.25
-            },
-            "medium": {
-              "signal": "SELL",
-              "confidence": 0.2125,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (41 vs 24) | Near BB lower (%B=0.15) | ADX low (18<20) \u2014 penalty \u00d70.85",
-              "rsi": 39.40289920708436,
-              "macd": -0.00011253263771782152,
-              "bb_position": 0.14755620858863722,
-              "adx": 17.81340512555677,
-              "divergence": "bearish",
-              "buy_score": 0.05,
-              "sell_score": 0.25
-            },
-            "slow": {
-              "signal": "SELL",
-              "confidence": 0.2125,
-              "reason": "MACD bearish | MACD accelerating \u2193 | DI- dominant (41 vs 24) | Near BB lower (%B=0.15) | ADX low (18<20) \u2014 penalty \u00d70.85",
-              "rsi": 39.37900099558822,
-              "macd": -0.00022525488802505045,
-              "bb_position": 0.14725354589342463,
-              "adx": 18.332765505342998,
-              "divergence": "none",
-              "buy_score": 0.05,
-              "sell_score": 0.25
-            }
-          },
-          "reason": "FAST: SELL (21%) | MEDIUM: SELL (21%) | SLOW: SELL (21%)"
-        },
-        "support_resistance": {
+        "lstm": {
           "signal": "BUY",
-          "confidence": 0.777565992008947,
-          "reason": "Price at support 1.26491",
-          "levels": {
-            "support_levels": [
-              1.2649090535714287,
-              1.2600000000000002,
-              1.2550000000000001,
-              1.2500000000000002
-            ],
-            "resistance_levels": [
-              1.27,
-              1.2750000000000001,
-              1.28
-            ],
-            "current_price": 1.26498,
-            "nearest_support": 1.2649090535714287,
-            "nearest_resistance": 1.27,
-            "price_zone": "AT_SUPPORT",
-            "zone_strength": 0.9719574900111837
-          }
-        },
-        "candlestick": {
+          "confidence": 0.7224070293808453
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:50:59.369491",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.7120512820512821,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
           "signal": "BUY",
-          "confidence": 0.7,
-          "patterns": [
-            {
-              "pattern": "BULLISH_PIN_BAR",
-              "signal": "BUY",
-              "strength": 0.7,
-              "candle_index": 4
-            }
-          ],
-          "reason": "Patterns: BULLISH_PIN_BAR"
+          "confidence": 0.76
         },
         "ema_crossover": {
-          "signal": "HOLD",
-          "confidence": 0.0,
-          "reason": "Weak EMA alignment (< 1.5 pips)"
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00005) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.34,
+          "reason": "Volume spike 2.5x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (33 vs 14) | Near BB upper (%B=0.97) | Stochastic overbought (85/86) | Stoch K crossed below D | ADX low (16<20) \u2014 penalty \u00d70.85",
+          "rsi": 62.41063035156547,
+          "macd": 0.5164869374648333,
+          "bb_position": 0.9688423872821789,
+          "adx": 16.368088975692928,
+          "divergence": "none",
+          "buy_score": 0.4,
+          "sell_score": 0.1
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.6537043221336715
         }
       },
       "regime": "ranging",
-      "timestamp": "2026-03-09T04:19:51.099032",
-      "session": "asian",
-      "hour": 4,
-      "is_win": false
+      "timestamp": "2026-03-12T14:51:11.420750",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6740000000000002,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.78
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00065) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.5519999999999999,
+          "reason": "ATR expanding (4 rises) + DI+ dominant | MACD bullish | MACD accelerating \u2191 | DI+ dominant (38 vs 16) | Price above BB upper (%B=1.03) | ADX strong (25)",
+          "rsi": 64.50526875589452,
+          "macd": 1.3576355257237083,
+          "bb_position": 1.0281581918311111,
+          "adx": 25.226517659755928,
+          "divergence": "none",
+          "buy_score": 0.48,
+          "sell_score": 0.1
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 1.3605390793170127
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:53:15.154277",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": 28.13,
+      "pips": 23.0,
+      "confidence": 0.6686666666666669,
+      "exit_type": "TAKE_PROFIT",
+      "is_win": "True",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.78
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00078) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.22999999999999998,
+          "reason": "MACD bullish | DI+ dominant (32 vs 18) | ADX strong (26)",
+          "rsi": 57.15568464628235,
+          "macd": 2.639449988972956,
+          "bb_position": 0.7739325397944988,
+          "adx": 25.79110175195548,
+          "divergence": "none",
+          "buy_score": 0.2,
+          "sell_score": 0.0
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 1.4860730593607308
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:53:15.347765",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.56836,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.6545
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.7,
+          "reason": "EMA20 crossed above EMA50 | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.42000000000000004,
+          "reason": "ATR expanding (3 rises) + DI+ dominant | MACD bullish | MACD accelerating \u2191 | DI+ dominant (21 vs 20) | Near BB upper (%B=0.89) | ADX trending (24)",
+          "rsi": 58.46127468155802,
+          "macd": -0.7702902525197715,
+          "bb_position": 0.8945754066293545,
+          "adx": 23.89195996002744,
+          "divergence": "none",
+          "buy_score": 0.4,
+          "sell_score": 0.05
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 0.8692735750589944
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:53:21.729702",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6532,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.72
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00044) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bullish | MACD accelerating \u2191 | DI+ dominant (28 vs 16) | Near BB upper (%B=0.97) | Stochastic overbought (89/86)",
+          "rsi": 63.42653953457319,
+          "macd": 1.1555795504500566,
+          "bb_position": 0.9698047207428855,
+          "adx": 13.501115554099425,
+          "divergence": "none",
+          "buy_score": 0.25,
+          "sell_score": 0.08
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 1.4312577012595837
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:53:39.321812",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "SELL",
+      "signal": "SELL",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.5858536585365854,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "SELL",
+          "confidence": 0.75
+        },
+        "ema_crossover": {
+          "signal": "SELL",
+          "confidence": 0.6,
+          "reason": "Bearish EMA alignment (spread 0.00059) | Price < EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "HOLD",
+          "confidence": 0.0,
+          "reason": "MACD bearish | MACD accelerating \u2193 | MACD histogram flipped bearish | DI+ dominant (23 vs 16)",
+          "rsi": 49.60723536519163,
+          "macd": 1.8003284697242634,
+          "bb_position": 0.4623447272408111,
+          "adx": 21.329690420255915,
+          "divergence": "none",
+          "buy_score": 0.1,
+          "sell_score": 0.2
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 5.0
+        }
+      },
+      "regime": "ranging",
+      "timestamp": "2026-03-12T14:53:52.710327",
+      "session": "ny_overlap",
+      "hour": 14
+    },
+    {
+      "pair": "MES",
+      "type": "BUY",
+      "signal": "BUY",
+      "profit_loss": -19.37,
+      "pips": -15.0,
+      "confidence": 0.6910731707317075,
+      "exit_type": "STOP_LOSS",
+      "is_win": "False",
+      "model_signals": {
+        "sweep": {
+          "signal": "BUY",
+          "confidence": 0.8
+        },
+        "ema_crossover": {
+          "signal": "BUY",
+          "confidence": 0.6,
+          "reason": "Bullish EMA alignment (spread 0.00068) | Price > EMA200 \u2014 with trend"
+        },
+        "technical": {
+          "signal": "BUY",
+          "confidence": 0.42000000000000004,
+          "reason": "Volume spike 3.7x + bullish candle | MACD bullish | MACD accelerating \u2191 | DI+ dominant (35 vs 11) | Price above BB upper (%B=1.28) | ADX trending (23)",
+          "rsi": 71.40576842457814,
+          "macd": 3.433453531480154,
+          "bb_position": 1.2767842179998594,
+          "adx": 23.36979048799718,
+          "divergence": "none",
+          "buy_score": 0.4,
+          "sell_score": 0.1
+        },
+        "lstm": {
+          "signal": "BUY",
+          "confidence": 2.1084691071887978
+        }
+      },
+      "regime": "trending",
+      "timestamp": "2026-03-12T14:54:08.430796",
+      "session": "ny_overlap",
+      "hour": 14
     }
   ],
   "loss_patterns": {
-    "pair:EUR/USD": {
-      "count": 48,
-      "total_loss": 240.0
+    "pair:MES": {
+      "count": 62,
+      "total_loss": 2047.1301499999986
     },
-    "session:asian": {
-      "count": 48,
-      "total_loss": 240.0
+    "session:ny_overlap": {
+      "count": 69,
+      "total_loss": 2272.810149999999
     },
-    "pair_session:EUR/USD:asian": {
-      "count": 48,
-      "total_loss": 240.0
+    "pair_session:MES:ny_overlap": {
+      "count": 62,
+      "total_loss": 2047.1301499999986
     },
-    "pair_regime:EUR/USD:trending": {
-      "count": 48,
-      "total_loss": 240.0
+    "pair_regime:MES:volatile": {
+      "count": 14,
+      "total_loss": 577.36
     },
-    "hour:1": {
-      "count": 48,
-      "total_loss": 240.0
+    "hour:14": {
+      "count": 69,
+      "total_loss": 2272.810149999999
+    },
+    "signal:UNKNOWN": {
+      "count": 46,
+      "total_loss": 1834.0400000000002
+    },
+    "pair_regime:MES:trending": {
+      "count": 26,
+      "total_loss": 853.5400000000001
+    },
+    "pair_regime:MES:ranging": {
+      "count": 22,
+      "total_loss": 616.230150000001
+    },
+    "pair:MNQ": {
+      "count": 7,
+      "total_loss": 225.68000000000004
+    },
+    "pair_session:MNQ:ny_overlap": {
+      "count": 7,
+      "total_loss": 225.68000000000004
+    },
+    "pair_regime:MNQ:ranging": {
+      "count": 2,
+      "total_loss": 64.48
+    },
+    "pair_regime:MNQ:volatile": {
+      "count": 3,
+      "total_loss": 96.72
+    },
+    "pair_regime:MNQ:trending": {
+      "count": 2,
+      "total_loss": 64.48
+    },
+    "signal:SELL": {
+      "count": 11,
+      "total_loss": 212.3805999999989
+    },
+    "model_loss:sweep": {
+      "count": 23,
+      "total_loss": 438.770150000001
+    },
+    "model_loss:ema_crossover": {
+      "count": 20,
+      "total_loss": 387.40000000000003
+    },
+    "model_loss:technical": {
+      "count": 8,
+      "total_loss": 148.9095500000021
+    },
+    "model_loss:lstm": {
+      "count": 15,
+      "total_loss": 283.810150000001
     },
     "signal:BUY": {
-      "count": 48,
-      "total_loss": 240.0
+      "count": 12,
+      "total_loss": 226.38955000000212
     }
   },
   "recent_trades_window": [
     {
-      "pair": "USD/JPY",
-      "session": "asian",
-      "hour": 2,
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
       "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T02:57:51.075965"
+      "is_win": "False",
+      "pnl": -13.31955000000209,
+      "timestamp": "2026-03-12T14:50:36.249372"
     },
     {
-      "pair": "USD/JPY",
-      "session": "asian",
-      "hour": 3,
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
       "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T03:00:52.890689"
+      "is_win": "False",
+      "pnl": -19.37,
+      "timestamp": "2026-03-12T14:50:49.085884"
     },
     {
-      "pair": "GBP/USD",
-      "session": "asian",
-      "hour": 3,
-      "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T03:09:56.717128"
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending",
+      "is_win": "False",
+      "pnl": -19.37,
+      "timestamp": "2026-03-12T14:50:59.369500"
     },
     {
-      "pair": "GBP/USD",
-      "session": "asian",
-      "hour": 3,
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
       "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T03:15:50.562473"
+      "is_win": "True",
+      "pnl": 28.13,
+      "timestamp": "2026-03-12T14:51:11.420761"
     },
     {
-      "pair": "USD/JPY",
-      "session": "asian",
-      "hour": 3,
-      "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T03:31:52.864673"
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending",
+      "is_win": "False",
+      "pnl": -19.37,
+      "timestamp": "2026-03-12T14:53:15.154286"
     },
     {
-      "pair": "USD/JPY",
-      "session": "asian",
-      "hour": 3,
-      "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T03:50:50.956205"
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending",
+      "is_win": "True",
+      "pnl": 28.13,
+      "timestamp": "2026-03-12T14:53:15.347775"
     },
     {
-      "pair": "GBP/USD",
-      "session": "asian",
-      "hour": 3,
-      "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T03:59:51.209150"
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending",
+      "is_win": "False",
+      "pnl": -19.37,
+      "timestamp": "2026-03-12T14:53:21.729710"
     },
     {
-      "pair": "GBP/USD",
-      "session": "asian",
-      "hour": 4,
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
       "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T04:10:50.578581"
+      "is_win": "False",
+      "pnl": -19.37,
+      "timestamp": "2026-03-12T14:53:39.321823"
     },
     {
-      "pair": "GBP/USD",
-      "session": "asian",
-      "hour": 4,
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
       "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T04:14:51.022998"
+      "is_win": "False",
+      "pnl": -19.37,
+      "timestamp": "2026-03-12T14:53:52.710334"
     },
     {
-      "pair": "GBP/USD",
-      "session": "asian",
-      "hour": 4,
-      "regime": "ranging",
-      "is_win": false,
-      "pnl": 0.0,
-      "timestamp": "2026-03-09T04:19:51.099039"
+      "pair": "MES",
+      "session": "ny_overlap",
+      "hour": 14,
+      "regime": "trending",
+      "is_win": "False",
+      "pnl": -19.37,
+      "timestamp": "2026-03-12T14:54:08.430804"
     }
   ],
   "session_atr_profiles": {},
   "spread_tracking": {},
-  "recent_sl_values": {
-    "USD/JPY": [
-      0.023691156338770725,
-      0.016,
-      0.016,
-      0.016,
-      0.016,
-      0.016,
-      0.016
-    ],
-    "GBP/USD": [
-      0.0002,
-      0.0002,
-      0.0002,
-      0.0002222886272051916,
-      0.0002,
-      0.00023077883508726416,
-      0.0003906219367768582,
-      0.0002,
-      0.0002
-    ]
-  },
+  "recent_sl_values": {},
   "sl_multiplier_by_pair": {},
   "time_exit_candles": 8,
   "time_exit_outcomes": [],
   "atr_regime": "neutral",
   "exit_type_tracking": {
-    "EUR/USD": {
-      "sl_hit": 0,
-      "tp_hit": 0,
-      "time_exit": 0,
-      "manual": 48,
-      "total": 48
+    "MES": {
+      "sl_hit": 62,
+      "tp_hit": 33,
+      "time_exit": 1,
+      "manual": 0,
+      "total": 96
     },
-    "USD/JPY": {
-      "sl_hit": 0,
-      "tp_hit": 0,
+    "MNQ": {
+      "sl_hit": 7,
+      "tp_hit": 2,
       "time_exit": 0,
-      "manual": 6,
-      "total": 6
-    },
-    "GBP/USD": {
-      "sl_hit": 0,
-      "tp_hit": 0,
-      "time_exit": 0,
-      "manual": 9,
+      "manual": 0,
       "total": 9
     }
   },
-  "auto_learning_trade_count": 3,
-  "last_updated": "2026-03-09T04:19:51.107743"
+  "auto_learning_trade_count": 15,
+  "last_updated": "2026-03-12T14:54:08.432251"
 }

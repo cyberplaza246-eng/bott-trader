@@ -34,6 +34,7 @@ from src.ai.adaptive_learner import AdaptiveLearner
 from src.ai.rl_agent import RLTradingAgent
 from src.risk.position_manager import RiskManager, PIP_VALUES, DEFAULT_PIP
 from src.risk.sl_tp import calculate_sl_tp
+from src.instruments import get_instrument, is_futures, REGISTRY
 from config.strategy_config import (
     SCALPING_PAIRS,
     SCALPING_SESSION_WINDOWS,
@@ -49,12 +50,12 @@ from src.utils.logger import bot_logger
 
 # ── Sweep-gated confirmation boost/penalty (mirrors ensemble_trader.py) ─
 EMA_CONFIRM_BOOST   = 0.05    # EMA aligned with sweep direction
-EMA_OPPOSE_PENALTY  = 0.10    # EMA opposes sweep direction
+EMA_OPPOSE_PENALTY  = 0.05    # EMA opposes sweep direction
 TECH_CONFIRM_BOOST  = 0.03    # Technical momentum matches sweep
-TECH_OPPOSE_PENALTY = 0.05    # Technical momentum opposes sweep
-LSTM_CONFIRM_BOOST  = 0.08    # LSTM direction agrees with sweep
-LSTM_OPPOSE_PENALTY = 0.20    # LSTM direction opposes sweep (strong filter)
-RL_SKIP_PENALTY     = 0.08    # RL agent recommends skipping
+TECH_OPPOSE_PENALTY = 0.03    # Technical momentum opposes sweep
+LSTM_CONFIRM_BOOST  = 0.05    # LSTM direction agrees with sweep
+LSTM_OPPOSE_PENALTY = 0.08    # LSTM direction opposes sweep
+RL_SKIP_PENALTY     = 0.04    # RL agent recommends skipping
 
 
 class BacktestEngine:
@@ -72,12 +73,11 @@ class BacktestEngine:
       - 0.01 min lot
     """
 
-    # ── Default Costs (realistic ECN broker) ────────────────────────
-    DEFAULT_COMMISSION_PER_LOT = 7.0    # USD round-trip per standard lot
-    DEFAULT_SPREAD_PIPS = {             # Typical average spreads
-        'EUR/USD': 1.5,
-        'GBP/USD': 2.0,
-        'USD/JPY': 2.0,
+    # ── Default Costs (sourced from instrument registry) ──────────────
+    DEFAULT_COMMISSION_PER_LOT = 7.0    # USD round-trip per standard lot (forex default)
+    DEFAULT_SPREAD_PIPS = {             # Typical average spreads (in pip/tick counts)
+        sym: spec.spread_default / spec.tick_size
+        for sym, spec in REGISTRY.items()
     }
 
     def __init__(self, initial_balance=10000, slippage_pips=0.0,
@@ -122,9 +122,9 @@ class BacktestEngine:
     # ──────────────────────────────────────────────────────────────────
     #  Main backtest loop
     # ──────────────────────────────────────────────────────────────────
-    def run_backtest(self, historical_data, pair, confidence_threshold=0.45,
+    def run_backtest(self, historical_data, pair, confidence_threshold=0.55,
                      min_agreement=2, timeframe_key='5m', df_1m=None,
-                     bar_minutes=None, slippage_pips=None):
+                     bar_minutes=None, slippage_pips=None, learning_enabled=False):
         """
         Run backtest on historical data using the 9-model scalping ensemble.
 
@@ -141,10 +141,13 @@ class BacktestEngine:
             bar_minutes: Minutes per bar in historical_data.
                          Auto-detected if None.
             slippage_pips: Slippage per trade in pips (overrides constructor default).
+            learning_enabled: If True, feed trade results to adaptive learner
+                              and save state after backtest (default: False).
 
         Returns:
             dict with backtest results
         """
+        self._learning_enabled = learning_enabled
         data = historical_data.copy()
         data = self.technical.calculate_indicators(data)
         data = self.volume.calculate_volume_profile(data)
@@ -308,7 +311,7 @@ class BacktestEngine:
 
             # ── Generate primary ensemble signal ──────────────────
             historical_subset = data.iloc[max(0, idx - lookback):idx + 1]
-            signal, confidence, agreement, sweep_sl_tp = self._ensemble_signal(
+            signal, confidence, agreement, sweep_sl_tp, model_signals, regime = self._ensemble_signal(
                 data, idx, historical_subset, pair,
                 df_1m_all=data_1m, candle_dt=candle_dt
             )
@@ -319,6 +322,24 @@ class BacktestEngine:
                 continue
             if agreement < min_agreement:
                 continue
+
+            # ── Adaptive learning-based trade filter ──────────────
+            if self._learning_enabled and self.learner:
+                current_hour = candle_dt.hour if candle_dt else idx % 24
+                skip_trade, skip_reason = self.learner.should_skip_trade(pair, regime, current_hour)
+                if skip_trade:
+                    continue  # Skip based on learned patterns
+
+                # Apply regime-specific confidence adjustment
+                regime_adj = self.learner.get_regime_adjustments()
+                if regime in regime_adj:
+                    confidence += regime_adj[regime].get('confidence_boost', 0)
+                
+                # Apply session-based confidence modifier
+                session_name = self._get_session_name(candle_dt) if candle_dt else 'unknown'
+                session_mod = self.learner.get_session_confidence_modifier(session_name)
+                if session_mod != 0:
+                    confidence += session_mod
 
             # ── 1M Confluence (only when sweep used 5M fallback) ──
             # When sweep already has 1M data, skip redundant confluence
@@ -362,15 +383,24 @@ class BacktestEngine:
             stop_loss = sl_tp_result['stop_loss']
             take_profit = sl_tp_result['take_profit']
 
-            position_size = self.risk_manager.calculate_position_size(
-                entry_price, stop_loss, pair=pair
-            )
-            if not position_size:
-                continue
-
-            lot_size = max(0.01, position_size['lot_size'])
+            # ── Position sizing (futures vs forex) ────────────
+            if is_futures(pair):
+                position_size = self.risk_manager.calculate_contracts(
+                    pair, entry_price, stop_loss
+                )
+                if not position_size:
+                    continue
+                lot_size = float(position_size['contracts'])
+            else:
+                position_size = self.risk_manager.calculate_position_size(
+                    entry_price, stop_loss, pair=pair
+                )
+                if not position_size:
+                    continue
+                lot_size = max(0.01, position_size['lot_size'])
 
             open_position = {
+                'pair': pair,
                 'entry_price': entry_price,
                 'entry_idx': idx,
                 'stop_loss': stop_loss,
@@ -378,6 +408,8 @@ class BacktestEngine:
                 'lot_size': lot_size,
                 'type': signal,
                 'confidence': confidence,
+                'model_signals': model_signals,
+                'regime': regime,
             }
 
             bot_logger.info(
@@ -391,6 +423,13 @@ class BacktestEngine:
             last_price = data.iloc[-1]['close']
             self._close_position(open_position, last_price, 'END_OF_DATA',
                                  len(data) - 1, pair, equity_curve)
+
+        # Save learner state if learning was enabled
+        if getattr(self, '_learning_enabled', False):
+            try:
+                self.learner._save()
+            except Exception:
+                pass
 
         return self._generate_backtest_results(equity_curve, pair)
 
@@ -411,7 +450,7 @@ class BacktestEngine:
                 return None
 
             tail = subset_1m.iloc[-200:]
-            sig, conf, _, _ = self._ensemble_signal(
+            sig, conf, _, _, _, _ = self._ensemble_signal(
                 subset_1m, len(subset_1m) - 1, tail, pair
             )
             if sig == 'SKIP' or conf < 0.30:
@@ -419,6 +458,20 @@ class BacktestEngine:
             return sig
         except Exception:
             return None
+
+    def _get_session_name(self, dt) -> str:
+        """Determine trading session from datetime (UTC hours)."""
+        if dt is None:
+            return 'unknown'
+        hour = dt.hour
+        if 13 <= hour < 17:  # 13:00-17:00 UTC = US open overlap
+            return 'ny_overlap'
+        elif 8 <= hour < 13:  # 8:00-13:00 UTC = London/morning
+            return 'london'
+        elif 17 <= hour < 21:  # 17:00-21:00 UTC = US afternoon
+            return 'ny_afternoon'
+        else:  # 21:00-8:00 UTC = Asian/overnight
+            return 'asian'
 
     # ──────────────────────────────────────────────────────────────────
     #  Sweep-gated ensemble (mirrors ensemble_trader.py RayAlgo v3)
@@ -437,7 +490,7 @@ class BacktestEngine:
         When df_1m_all is None:
           - Falls back to using 5M subset as both (legacy behavior)
           
-        Returns (signal, confidence, agreement, sweep_sl_tp).
+        Returns (signal, confidence, agreement, sweep_sl_tp, model_signals, regime).
         """
         # ── Prepare data for sweep analyzer ───────────────────────
         df_5m_subset = data.iloc[max(0, idx - 250):idx + 1] if len(data) > 0 else None
@@ -452,10 +505,12 @@ class BacktestEngine:
                     df_1m_subset = None
         
         # Feed sweep: 1M data for sweep detection, 5M for regime
+        using_5m_fallback = False
         if df_1m_subset is not None:
             sweep_signal = self.sweep.get_signal(df_1m_subset, pair, df_5m=df_5m_subset)
         else:
-            # Fallback: use 5M subset as "1M" (less accurate but works)
+            # Fallback: use 5M subset as "1M" (less accurate)
+            using_5m_fallback = True
             sweep_signal = self.sweep.get_signal(subset, pair, df_5m=df_5m_subset)
         
         sweep_direction = sweep_signal.get('signal', 'SKIP')
@@ -464,13 +519,17 @@ class BacktestEngine:
 
         # HARD GATE: no sweep → no trade
         if sweep_direction not in ('BUY', 'SELL'):
-            return 'SKIP', 0.0, 0, None
+            return 'SKIP', 0.0, 0, None, {}, 'unknown'
 
         # ── Confirmation models (boost/reduce only) ───────────────
         ema_signal = self.ema_crossover.get_signal(subset)
         technical_signal = self.technical.get_signal(subset)
 
         confidence = sweep_conf
+
+        # ── 5M fallback penalty (no 1M data = lower quality sweep) ──
+        if using_5m_fallback:
+            confidence -= 0.10
 
         # EMA Crossover confirmation
         if ema_signal['signal'] == sweep_direction:
@@ -490,12 +549,19 @@ class BacktestEngine:
         if ema200 is not None and not pd.isna(ema200):
             if (sweep_direction == 'BUY' and cur_price < ema200) or \
                (sweep_direction == 'SELL' and cur_price > ema200):
-                confidence -= 0.10  # penalty instead of hard block
+                confidence -= 0.15  # penalty instead of hard block
 
         # ── Regime confidence modifier from learner ───────────────
         regime = self.learner.detect_regime(subset)
         regime_mod = self.learner.get_regime_confidence_modifier(regime)
         confidence *= regime_mod
+
+        # ── Build model_signals dict for learning ─────────────────
+        model_signals = {
+            'sweep': {'signal': sweep_direction, 'confidence': sweep_conf},
+            'ema_crossover': ema_signal,
+            'technical': technical_signal,
+        }
 
         # ── Count context models that agree (for logging) ─────────
         context_count = 1  # sweep itself
@@ -505,18 +571,21 @@ class BacktestEngine:
             context_count += 1
 
         # ── LSTM direction filter ─────────────────────────────────
+        lstm_signal = 'HOLD'
         if self.lstm_available:
             try:
                 lstm_pred = self.lstm.predict_direction(subset)
                 pct_change = lstm_pred.get('predicted_change_percent', 0)
                 # Use raw prediction (0.02% threshold for 5M candles)
                 if abs(pct_change) > 0.02:
+                    lstm_signal = 'BUY' if pct_change > 0 else 'SELL'
                     if (pct_change > 0 and sweep_direction == 'BUY') or \
                        (pct_change < 0 and sweep_direction == 'SELL'):
                         confidence += LSTM_CONFIRM_BOOST
                         context_count += 1
                     else:
                         confidence -= LSTM_OPPOSE_PENALTY
+                model_signals['lstm'] = {'signal': lstm_signal, 'confidence': abs(pct_change)}
             except Exception:
                 pass  # LSTM failure → skip gracefully
 
@@ -540,7 +609,7 @@ class BacktestEngine:
                     rsi=rsi_val, adx=adx_val,
                     atr=atr_val, atr_median=atr_med,
                     ema200_dist=ema200_dist,
-                    hour=hour, spread=0.00015,
+                    hour=hour, spread=REGISTRY[pair].spread_default if pair in REGISTRY else 0.00015,
                     volume_ratio=vol_ratio,
                     daily_trades=0, max_daily_trades=30,
                     current_drawdown=0
@@ -552,7 +621,7 @@ class BacktestEngine:
                 pass  # RL failure → skip gracefully
 
         confidence = min(1.0, max(0.0, confidence))
-        return sweep_direction, confidence, context_count, sweep_sl_tp
+        return sweep_direction, confidence, context_count, sweep_sl_tp, model_signals, regime
 
     # ──────────────────────────────────────────────────────────────────
     #  Helpers
@@ -586,8 +655,12 @@ class BacktestEngine:
         # Gross P/L from pips (spread already embedded)
         gross_pnl = pips * pos['lot_size'] * pip_value
 
-        # Commission: per-lot round-trip
-        commission = self.commission_per_lot * pos['lot_size']
+        # Commission: per-lot round-trip (use instrument rate for futures)
+        if is_futures(pos.get('pair', '')):
+            spec = get_instrument(pos['pair'])
+            commission = spec.commission_rt * pos['lot_size'] if spec else self.commission_per_lot * pos['lot_size']
+        else:
+            commission = self.commission_per_lot * pos['lot_size']
 
         # Net P/L
         profit_loss = gross_pnl - commission
@@ -617,6 +690,24 @@ class BacktestEngine:
             'profit_loss_percent': (profit_loss / self.initial_balance) * 100,
             'candles_held': idx - pos['entry_idx'],
         })
+
+        # ── Feed trade result to adaptive learner for training ──
+        if getattr(self, '_learning_enabled', False):
+            try:
+                self.learner.record_trade({
+                    'pair': pair,
+                    'type': pos['type'],
+                    'signal': pos['type'],  # BUY or SELL
+                    'profit_loss': profit_loss,
+                    'pips': pips,
+                    'confidence': pos.get('confidence', 0.5),
+                    'exit_type': exit_type,
+                    'is_win': profit_loss > 0,
+                    'model_signals': pos.get('model_signals', {}),
+                    'regime': pos.get('regime', 'unknown'),
+                })
+            except Exception:
+                pass  # Don't fail backtest if learning fails
 
         bot_logger.info(
             f"[{idx}] EXIT ({exit_type}) @ {exit_price:.5f} (eff={effective_exit:.5f}) | "

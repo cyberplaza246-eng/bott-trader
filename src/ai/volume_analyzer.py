@@ -68,7 +68,7 @@ class VolumeAnalyzer:
         if prev['volume'] < latest['volume']:
             # Check if price is moving (relaxed for 5-min forex)
             price_change = (latest['close'] - prev['close']) / prev['close']
-            if abs(price_change) > 0.00005:  # ~0.5 pip on EUR/USD
+            if abs(price_change) > 0.00003:  # ~0.3 pip on forex, ~0.2 pt on MES
                 confidence += 0.3
                 reason_parts.append("Volume rising with price move")
         

@@ -10,6 +10,19 @@ Manages active positions with dynamic stop-loss movement:
 Works with both relay (live) and simulation modes.
 """
 from src.utils.logger import bot_logger
+from src.instruments import REGISTRY
+
+
+def _tick_size(pair: str) -> float:
+    """Return tick/pip size for a pair from the registry."""
+    spec = REGISTRY.get(pair)
+    return spec.tick_size if spec else (0.01 if 'JPY' in pair else 0.0001)
+
+
+def _digits(pair: str) -> int:
+    """Return decimal places for a pair from the registry."""
+    spec = REGISTRY.get(pair)
+    return spec.decimal_places if spec else (3 if 'JPY' in pair else 5)
 
 
 class TrailingStopManager:
@@ -147,8 +160,8 @@ class TrailingStopManager:
             # ── Trailing SL check ────────────────────────────────────
             new_sl = self._compute_new_sl(info, current_price)
             if new_sl and new_sl != info['current_sl']:
-                digits = 3 if 'JPY' in info['pair'] else 5
-                new_sl = round(new_sl, digits)
+                digs = _digits(info['pair'])
+                new_sl = round(new_sl, digs)
 
                 # Only move SL in the profitable direction (never widen risk)
                 if info['direction'] == 'BUY' and new_sl <= info['current_sl']:
@@ -160,11 +173,11 @@ class TrailingStopManager:
                 if result:
                     old_sl = info['current_sl']
                     info['current_sl'] = new_sl
-                    pip_div = 0.01 if 'JPY' in info['pair'] else 0.0001
+                    ts = _tick_size(info['pair'])
                     bot_logger.info(
                         f"📈 Trailing SL moved: ticket={ticket} {info['pair']} "
-                        f"{old_sl:.{digits}f} → {new_sl:.{digits}f} "
-                        f"({abs(new_sl - old_sl) / pip_div:.1f} pips)"
+                        f"{old_sl:.{digs}f} → {new_sl:.{digs}f} "
+                        f"({abs(new_sl - old_sl) / ts:.1f} ticks)"
                     )
                     results.append(result)
 
@@ -211,13 +224,13 @@ class TrailingStopManager:
             close_volume = max(0.01, close_volume)  # Broker minimum
 
             pair = info.get('pair', '')
-            pip_div = 0.01 if 'JPY' in pair.upper() else 0.0001
-            digits = 3 if 'JPY' in pair.upper() else 5
+            ts = _tick_size(pair)
+            digs = _digits(pair)
 
             bot_logger.info(
                 f"💰 Partial close triggered: ticket={ticket} {pair} {direction} "
-                f"price={current_price:.{digits}f} reached {partial_pct*100:.0f}% of TP "
-                f"({profit_distance/pip_div:.1f}/{tp_distance/pip_div:.1f} pips) — "
+                f"price={current_price:.{digs}f} reached {partial_pct*100:.0f}% of TP "
+                f"({profit_distance/ts:.1f}/{tp_distance/ts:.1f} ticks) — "
                 f"closing {close_volume} of {volume} lots"
             )
 
@@ -248,7 +261,7 @@ class TrailingStopManager:
         breakeven_r = info.get('breakeven_r', self.breakeven_r)
         trail_mult = info.get('trail_atr_mult', self.trail_atr_mult)
 
-        pip = 0.01 if 'JPY' in info.get('pair', '') else 0.0001
+        pip = _tick_size(info.get('pair', ''))
 
         if direction == 'BUY':
             profit_distance = current_price - entry

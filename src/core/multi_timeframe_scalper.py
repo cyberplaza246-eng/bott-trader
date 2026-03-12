@@ -191,23 +191,50 @@ class MultiTimeframeScalpingTrader:
             'score': score,
         }
 
-    def process_candles_multi_tf(self, df_gbp_1m, df_eur_1m, df_gbp_5m, df_eur_5m,
+    def process_candles_multi_tf(self, data_by_pair=None, spreads=None,
+                                  # Legacy positional args for backward compat
+                                  df_gbp_1m=None, df_eur_1m=None,
+                                  df_gbp_5m=None, df_eur_5m=None,
                                   spread_gbp=None, spread_eur=None):
-        """Process new candles across all timeframes."""
+        """Process new candles across all timeframes.
+        
+        Args:
+            data_by_pair: dict mapping pair -> {'1m': df, '5m': df}
+            spreads: dict mapping pair -> spread value
+        """
         new_trades = []
+        results = {}
 
-        gbp_analysis = self.analyze_pair_multi_tf(
-            df_gbp_1m, df_gbp_5m, 'GBP/USD', spread=spread_gbp,
-        )
-        eur_analysis = self.analyze_pair_multi_tf(
-            df_eur_1m, df_eur_5m, 'EUR/USD', spread=spread_eur,
-        )
+        # Support legacy call signature
+        if data_by_pair is None:
+            data_by_pair = {}
+            if df_gbp_1m is not None or df_gbp_5m is not None:
+                data_by_pair['GBP/USD'] = {'1m': df_gbp_1m, '5m': df_gbp_5m}
+            if df_eur_1m is not None or df_eur_5m is not None:
+                data_by_pair['EUR/USD'] = {'1m': df_eur_1m, '5m': df_eur_5m}
+            spreads = spreads or {}
+            if spread_gbp is not None:
+                spreads['GBP/USD'] = spread_gbp
+            if spread_eur is not None:
+                spreads['EUR/USD'] = spread_eur
 
-        return {
-            'gbp_analysis': gbp_analysis,
-            'eur_analysis': eur_analysis,
-            'trades_opened': new_trades,
-        }
+        spreads = spreads or {}
+        for pair, dfs in data_by_pair.items():
+            df_1m = dfs.get('1m')
+            df_5m = dfs.get('5m')
+            analysis = self.analyze_pair_multi_tf(
+                df_1m, df_5m, pair, spread=spreads.get(pair),
+            )
+            results[f'{pair}_analysis'] = analysis
+
+        # Backward-compat keys
+        if 'GBP/USD_analysis' in results:
+            results['gbp_analysis'] = results['GBP/USD_analysis']
+        if 'EUR/USD_analysis' in results:
+            results['eur_analysis'] = results['EUR/USD_analysis']
+
+        results['trades_opened'] = new_trades
+        return results
 
     def get_summary(self):
         """Get current trading status across timeframes."""

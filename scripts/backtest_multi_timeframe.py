@@ -16,6 +16,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.core.multi_timeframe_scalper import MultiTimeframeScalpingAnalyzer, MultiTimeframeScalpingTrader
 from src.utils.logger import TradeLogger
+from src.instruments import REGISTRY
+
+def _tick(pair):
+    spec = REGISTRY.get(pair)
+    return spec.tick_size if spec else 0.0001
+
+def _multiplier(pair):
+    spec = REGISTRY.get(pair)
+    return spec.contract_multiplier if spec else 100_000
 
 
 class MultiTimeframeScalpingBacktester:
@@ -122,6 +131,7 @@ class MultiTimeframeScalpingBacktester:
                 entry_price = df_1m.iloc[i]['close']
                 sl_pips = np.random.randint(5, 9) if pair == 'GBP/USD' else np.random.randint(4, 7)
                 tp_pips = sl_pips * 1.2
+                _ts = _tick(pair)
                 
                 trade = {
                     'type': '1M',
@@ -129,8 +139,8 @@ class MultiTimeframeScalpingBacktester:
                     'time': df_1m.iloc[i]['time'],
                     'signal': signal['signal'],
                     'entry': entry_price,
-                    'sl': entry_price - (sl_pips/10000 if 'USD' not in pair else sl_pips*0.0001),
-                    'tp': entry_price + (tp_pips/10000 if 'USD' not in pair else tp_pips*0.0001),
+                    'sl': entry_price - (sl_pips * _ts),
+                    'tp': entry_price + (tp_pips * _ts),
                     'confidence': signal.get('confidence', 0),
                     'status': 'pending',
                     'exit_price': None,
@@ -146,23 +156,23 @@ class MultiTimeframeScalpingBacktester:
                         if low <= trade['sl']:
                             trade['status'] = 'stopped_loss'
                             trade['exit_price'] = trade['sl']
-                            trade['profit'] = -sl_pips * 0.0001
+                            trade['profit'] = -sl_pips * _ts
                             break
                         elif high >= trade['tp']:
                             trade['status'] = 'take_profit'
                             trade['exit_price'] = trade['tp']
-                            trade['profit'] = tp_pips * 0.0001
+                            trade['profit'] = tp_pips * _ts
                             break
                     else:
                         if high >= trade['sl']:
                             trade['status'] = 'stopped_loss'
                             trade['exit_price'] = trade['sl']
-                            trade['profit'] = -sl_pips * 0.0001
+                            trade['profit'] = -sl_pips * _ts
                             break
                         elif low <= trade['tp']:
                             trade['status'] = 'take_profit'
                             trade['exit_price'] = trade['tp']
-                            trade['profit'] = tp_pips * 0.0001
+                            trade['profit'] = tp_pips * _ts
                             break
                 
                 if trade['status'] == 'pending':
@@ -170,7 +180,7 @@ class MultiTimeframeScalpingBacktester:
                     trade['exit_price'] = df_1m.iloc[min(i+9, len(df_1m)-1)]['close']
                 
                 trades_1m.append(trade)
-                balance += trade['profit'] * 100000  # Position size
+                balance += trade['profit'] * _multiplier(pair)
         
         # Calculate 1M stats
         if trades_1m:
@@ -181,7 +191,7 @@ class MultiTimeframeScalpingBacktester:
             print(f"  Total Trades: {len(trades_1m)}")
             print(f"  Wins: {len(wins)} ({len(wins)/len(trades_1m)*100:.1f}%)")
             print(f"  Losses: {len(losses)} ({len(losses)/len(trades_1m)*100:.1f}%)")
-            print(f"  Total Profit: ${sum(t['profit'] for t in trades_1m) * 100000:.2f}")
+            print(f"  Total Profit: ${sum(t['profit'] for t in trades_1m) * _multiplier(pair):.2f}")
             print(f"  Final Balance: ${balance:.2f}")
         
         return trades_1m
@@ -217,6 +227,7 @@ class MultiTimeframeScalpingBacktester:
                 entry_price = df_5m.iloc[i]['close']
                 sl_pips = np.random.randint(8, 13) if pair == 'GBP/USD' else np.random.randint(6, 11)
                 tp_pips = sl_pips * 1.5
+                _ts = _tick(pair)
                 
                 trade = {
                     'type': '5M',
@@ -224,8 +235,8 @@ class MultiTimeframeScalpingBacktester:
                     'time': df_5m.iloc[i]['time'],
                     'signal': signal['signal'],
                     'entry': entry_price,
-                    'sl': entry_price - (sl_pips/10000 if 'USD' not in pair else sl_pips*0.0001),
-                    'tp': entry_price + (tp_pips/10000 if 'USD' not in pair else tp_pips*0.0001),
+                    'sl': entry_price - (sl_pips * _ts),
+                    'tp': entry_price + (tp_pips * _ts),
                     'confidence': signal.get('confidence', 0),
                     'status': 'pending',
                     'exit_price': None,
@@ -241,23 +252,23 @@ class MultiTimeframeScalpingBacktester:
                         if low <= trade['sl']:
                             trade['status'] = 'stopped_loss'
                             trade['exit_price'] = trade['sl']
-                            trade['profit'] = -sl_pips * 0.0001
+                            trade['profit'] = -sl_pips * _ts
                             break
                         elif high >= trade['tp']:
                             trade['status'] = 'take_profit'
                             trade['exit_price'] = trade['tp']
-                            trade['profit'] = tp_pips * 0.0001
+                            trade['profit'] = tp_pips * _ts
                             break
                     else:
                         if high >= trade['sl']:
                             trade['status'] = 'stopped_loss'
                             trade['exit_price'] = trade['sl']
-                            trade['profit'] = -sl_pips * 0.0001
+                            trade['profit'] = -sl_pips * _ts
                             break
                         elif low <= trade['tp']:
                             trade['status'] = 'take_profit'
                             trade['exit_price'] = trade['tp']
-                            trade['profit'] = tp_pips * 0.0001
+                            trade['profit'] = tp_pips * _ts
                             break
                 
                 if trade['status'] == 'pending':
@@ -265,7 +276,7 @@ class MultiTimeframeScalpingBacktester:
                     trade['exit_price'] = df_5m.iloc[min(i+19, len(df_5m)-1)]['close']
                 
                 trades_5m.append(trade)
-                balance += trade['profit'] * 100000  # Position size
+                balance += trade['profit'] * _multiplier(pair)
         
         # Calculate 5M stats
         if trades_5m:
@@ -276,7 +287,7 @@ class MultiTimeframeScalpingBacktester:
             print(f"  Total Trades: {len(trades_5m)}")
             print(f"  Wins: {len(wins)} ({len(wins)/len(trades_5m)*100:.1f}%)")
             print(f"  Losses: {len(losses)} ({len(losses)/len(trades_5m)*100:.1f}%)")
-            print(f"  Total Profit: ${sum(t['profit'] for t in trades_5m) * 100000:.2f}")
+            print(f"  Total Profit: ${sum(t['profit'] for t in trades_5m) * _multiplier(pair):.2f}")
             print(f"  Final Balance: ${balance:.2f}")
         
         return trades_5m

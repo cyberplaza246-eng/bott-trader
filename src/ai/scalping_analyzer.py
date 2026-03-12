@@ -34,31 +34,21 @@ import json
 import os
 from datetime import datetime, timezone
 from src.utils.logger import bot_logger
+from src.instruments import get_instrument, REGISTRY
 
 
 class ScalpingAnalyzer:
     """ATR-centric volatility-adaptive scalping analyzer."""
 
-    # -- Pair-specific configuration (ATR-based, no fixed pips) ------
+    # -- Pair-specific configuration (sourced from instrument registry) --
     PAIR_CONFIG = {
-        'GBP/USD': {
-            'session_atr_min': 0.00055,   # Min ATR to trade (~5.5 pips)
-            'spread_sim': 0.00010,        # 1.0 pip (ECN TradersWay)
-            'pip_size': 0.0001,
-            'pip_value_label': 'pips',
-        },
-        'EUR/USD': {
-            'session_atr_min': 0.00040,   # Min ATR to trade (~4 pips)
-            'spread_sim': 0.00006,        # 0.6 pips (ECN TradersWay)
-            'pip_size': 0.0001,
-            'pip_value_label': 'pips',
-        },
-        'USD/JPY': {
-            'session_atr_min': 0.080,     # Min ATR to trade (~8 pips in JPY) - increased
-            'spread_sim': 0.008,          # 0.8 pips (ECN TradersWay)
-            'pip_size': 0.01,
-            'pip_value_label': 'pips',
-        },
+        sym: {
+            'session_atr_min': spec.atr_minimum,
+            'spread_sim': spec.spread_default,
+            'pip_size': spec.tick_size,
+            'pip_value_label': 'ticks' if spec.asset_class == 'futures' else 'pips',
+        }
+        for sym, spec in REGISTRY.items()
     }
 
     # -- Structure-based risk parameters (5m scalping) ---------------
@@ -1114,10 +1104,17 @@ class ScalpingAnalyzer:
         structure_tp = self._find_structure_take_profit(df, direction, entry_price, sl_distance, session_adapted_tp_ratio)
         
         if structure_tp:
-            tp_distance = structure_tp['distance'] 
+            tp_distance = structure_tp['distance']
             tp_ratio = structure_tp['ratio']
             tp_reason = structure_tp['reason']
             bot_logger.info(f"🎯 Structure TP: {tp_reason} (R:R = {tp_ratio:.1f})")
+            # --- Enforce TP > SL ---
+            if tp_distance <= sl_distance:
+                old_tp = tp_distance
+                tp_distance = sl_distance * 1.1  # Minimum 1.1R if structure TP is too close
+                bot_logger.info(f"⚠️ Structure TP ({old_tp:.2f}) <= SL ({sl_distance:.2f}), forcing TP to {tp_distance:.2f} (1.1R)")
+                tp_ratio = tp_distance / sl_distance
+                tp_reason += f" | forced min R:R 1.1"
         else:
             tp_distance = sl_distance * session_adapted_tp_ratio
             tp_ratio = session_adapted_tp_ratio

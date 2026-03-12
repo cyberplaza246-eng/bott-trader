@@ -14,9 +14,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 from src.backtest.backtest_engine import BacktestEngine
 from src.ai import liquidity_sweep as lsmod
+from config.strategy_config import PAIRS as CONFIG_PAIRS, INITIAL_BALANCE
 
-PAIRS = ['EUR/USD', 'GBP/USD']
-BALANCE = 50
+PAIRS = CONFIG_PAIRS
+BALANCE = INITIAL_BALANCE
 CONFIDENCE = 0.45
 AGREEMENT = 1
 MAX_5M_CANDLES = 3500
@@ -121,7 +122,9 @@ for cfg_name, tp_map in CONFIGS.items():
                         else:
                             result['take_profit'] = round(entry - new_tp_dist, 5)
                         result['tp_distance'] = new_tp_dist
-                        pip_size = 0.0001 if 'JPY' not in pair_arg else 0.01
+                        from src.instruments import REGISTRY
+                        _spec = REGISTRY.get(pair_arg)
+                        pip_size = _spec.tick_size if _spec else (0.01 if 'JPY' in str(pair_arg) else 0.0001)
                         result['reward_pips'] = new_tp_dist / pip_size
                         result['rr_ratio'] = new_ratio
                         result['tp_ratio_used'] = new_ratio

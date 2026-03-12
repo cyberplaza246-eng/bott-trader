@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timezone
 from src.utils.logger import bot_logger
+from src.instruments import get_instrument, REGISTRY
 
 
 class LiquiditySweepAnalyzer:
@@ -27,23 +28,14 @@ class LiquiditySweepAnalyzer:
     Shifts, and generates high-probability entry signals.
     """
 
-    # ── Pair Configuration ──────────────────────────────────────────
+    # ── Pair Configuration (sourced from instrument registry) ───────
     PAIR_CONFIG = {
-        'EUR/USD': {
-            'session_atr_min': 0.00003,   # 0.3 pip (trade even in quiet hours)
-            'spread_sim': 0.00006,        # 0.6 pips (ECN TradersWay)
-            'pip_size': 0.0001,
-        },
-        'GBP/USD': {
-            'session_atr_min': 0.00004,   # 0.4 pips (trade even in quiet hours)
-            'spread_sim': 0.00010,        # 1.0 pip (ECN TradersWay)
-            'pip_size': 0.0001,
-        },
-        'USD/JPY': {
-            'session_atr_min': 0.005,     # 0.5 pips (trade even in quiet hours)
-            'spread_sim': 0.008,          # 0.8 pips (ECN TradersWay)
-            'pip_size': 0.01,
-        },
+        sym: {
+            'session_atr_min': spec.atr_minimum,
+            'spread_sim': spec.spread_default,
+            'pip_size': spec.tick_size,
+        }
+        for sym, spec in REGISTRY.items()
     }
 
     # ── Swing Detection ─────────────────────────────────────────────
@@ -52,7 +44,7 @@ class LiquiditySweepAnalyzer:
     SWING_MIN_POINTS = 2             # Min swing points for structure (was 4)
 
     # ── Bias / Regime ───────────────────────────────────────────────
-    ADX_MIN_BIAS = 8                 # ADX floor for directional bias (was 15)
+    ADX_MIN_BIAS = 10                # ADX floor for directional bias
     ATR_HIGH_VOL_MULT = 1.50         # ATR > 1.5× 20-period mean = high vol (was 1.30)
     ATR_LOW_VOL_MULT = 0.50          # ATR < 0.5× 20-period mean = low vol (was 0.70)
 
@@ -62,9 +54,9 @@ class LiquiditySweepAnalyzer:
 
     # ── MSS / Displacement ──────────────────────────────────────────
     VOLUME_CONFIRMATION = 1.0        # Disabled (forex tick vol unreliable) (was 1.30)
-    BODY_RATIO_MIN = 0.25            # Displacement body ≥ 25% of range (lowered for quiet hours)
-    RSI_SWEEP_LONG_MAX = 60          # RSI ≤ 60 at bullish sweep (was 45 — too tight)
-    RSI_SWEEP_SHORT_MIN = 40         # RSI ≥ 40 at bearish sweep (was 55)
+    BODY_RATIO_MIN = 0.30            # Displacement body ≥ 30% of range
+    RSI_SWEEP_LONG_MAX = 55          # RSI ≤ 55 at bullish sweep (tighter filter)
+    RSI_SWEEP_SHORT_MIN = 45         # RSI ≥ 45 at bearish sweep (tighter filter)
     RSI_SLOPE_WINDOW = 3             # Candles after sweep to check RSI slope (was 2)
     CONFIRMATION_WINDOW = 20         # Candles after sweep to get MSS (was 15)
 
@@ -80,6 +72,10 @@ class LiquiditySweepAnalyzer:
         'ny': (13, 17),
     }
 
+    # ── Counter-Trend Filter ───────────────────────────────────────
+    CTF_EMA200_ATR_THRESHOLD = 2.0   # Reject sweep if price >2 ATR from EMA200 against direction
+    CTF_ADX_THRESHOLD = 15           # Only apply when ADX indicates directional movement
+
     def __init__(self):
         self.atr_period = 14
         self.rsi_period = 14
@@ -88,6 +84,97 @@ class LiquiditySweepAnalyzer:
         self.ema_long = 200
         self.adx_period = 14
         self.volume_avg_period = 10
+
+    # =================================================================
+    #  VOLUME PROFILE ANALYSIS
+    # =================================================================
+
+    def compute_volume_profile(self, df, num_bins=24):
+        """Compute volume profile — price levels where most volume traded.
+
+        Returns list of (price_level, volume) sorted by volume descending.
+        High-volume nodes (HVN) act as strong S/R; low-volume nodes (LVN)
+        indicate price acceptance zones where moves accelerate.
+        """
+        if df is None or len(df) < 10 or 'volume' not in df.columns:
+            return []
+
+        volume = df['volume'].astype(float).values
+        if volume.sum() == 0:
+            return []
+
+        # Typical price (HLC/3) weighted by volume
+        typical = ((df['high'].astype(float) + df['low'].astype(float) +
+                     df['close'].astype(float)) / 3).values
+        price_min, price_max = typical.min(), typical.max()
+        if price_max - price_min < 1e-10:
+            return []
+
+        bin_edges = np.linspace(price_min, price_max, num_bins + 1)
+        profile = []
+        for i in range(num_bins):
+            mask = (typical >= bin_edges[i]) & (typical < bin_edges[i + 1])
+            level = (bin_edges[i] + bin_edges[i + 1]) / 2
+            vol = float(volume[mask].sum())
+            profile.append((level, vol))
+
+        # Sort by volume descending (highest-volume nodes first)
+        profile.sort(key=lambda x: -x[1])
+        return profile
+
+    def sweep_at_high_volume_node(self, sweep_level, volume_profile, atr):
+        """Check if a sweep occurred at/near a high-volume node (HVN).
+
+        HVN sweeps are higher quality — institutional orders cluster there.
+
+        Args:
+            sweep_level: Price of the swept swing level.
+            volume_profile: Output of compute_volume_profile().
+            atr: Current ATR for proximity tolerance.
+
+        Returns:
+            (is_hvn: bool, volume_percentile: float 0-1)
+        """
+        if not volume_profile or atr <= 0:
+            return False, 0.0
+
+        total_vol = sum(v for _, v in volume_profile)
+        if total_vol == 0:
+            return False, 0.0
+
+        tolerance = atr * 1.5  # Search within 1.5 ATR of sweep level
+        best_pct = 0.0
+
+        for level, vol in volume_profile:
+            if abs(level - sweep_level) <= tolerance:
+                pct = vol / total_vol
+                best_pct = max(best_pct, pct)
+
+        # Top-quartile of volume nodes = HVN
+        is_hvn = best_pct >= 0.06  # Level holds >=6% of total volume
+        return is_hvn, best_pct
+
+    def displacement_volume_quality(self, df_1m, sweep_candle_idx):
+        """Check if the displacement candle had above-average volume.
+
+        Returns volume ratio (displacement_vol / avg_vol).  Values > 1.5
+        indicate strong institutional participation.
+        """
+        if df_1m is None or 'volume' not in df_1m.columns:
+            return 1.0
+
+        abs_idx = len(df_1m) + sweep_candle_idx if sweep_candle_idx < 0 else sweep_candle_idx
+        if abs_idx < 0 or abs_idx >= len(df_1m):
+            return 1.0
+
+        disp_vol = float(df_1m.iloc[abs_idx]['volume'])
+        # Average volume over preceding 20 bars
+        start = max(0, abs_idx - 20)
+        avg_vol = float(df_1m.iloc[start:abs_idx]['volume'].mean()) if abs_idx > start else 1.0
+        if avg_vol <= 0:
+            return 1.0
+
+        return disp_vol / avg_vol
 
     # =================================================================
     #  INDICATOR CALCULATION
@@ -143,6 +230,21 @@ class LiquiditySweepAnalyzer:
         df['liq_high'] = high.rolling(window=self.SWEEP_LOOKBACK).max().shift(1)
 
         return df
+
+    @staticmethod
+    def _get_pip_size(price_or_pair):
+        """Get pip/tick size from registry or approximate from price level."""
+        if isinstance(price_or_pair, str):
+            spec = REGISTRY.get(price_or_pair)
+            if spec:
+                return spec.tick_size
+        # Numeric price heuristic
+        p = float(price_or_pair) if not isinstance(price_or_pair, str) else 0
+        if p >= 100:      # Futures (MES ~5500, MNQ ~18000) or JPY
+            return 0.25
+        elif p >= 20:     # JPY pairs
+            return 0.01
+        return 0.0001     # Standard forex
 
     def _compute_adx(self, df, high, low, close):
         """Compute ADX, +DI, -DI."""
@@ -500,7 +602,7 @@ class LiquiditySweepAnalyzer:
         # stale signals re-firing every cycle.  For 1M data, 5 bars = 5 min.
         MAX_SWEEP_AGE = 5
         latest_close_price = float(df_1m.iloc[-1]['close'])
-        pip_size = 0.01 if latest_close_price >= 20 else 0.0001
+        pip_size = self._get_pip_size(latest_close_price)
         for i in range(-min(self.SWEEP_WINDOW, MAX_SWEEP_AGE), 0):
             candle = df_1m.iloc[i]
             candle_low = float(candle['low'])
@@ -508,10 +610,10 @@ class LiquiditySweepAnalyzer:
             candle_close = float(candle['close'])
             candle_open = float(candle['open'])
             candle_rsi = float(candle.get('rsi', 50) or 50)
-            pip_size = 0.01 if candle_close >= 20 else 0.0001
-            # Adaptive tolerance: 1 pip minimum, 20% of ATR — generous to catch
-            # near-level approaches in quiet markets.
-            tol = max(1.0 * pip_size, float(candle.get('atr', 0) or 0) * 0.20)
+            pip_size = self._get_pip_size(candle_close)
+            # Tight tolerance: require actual penetration of the swing level.
+            # Only allow 1 tick leeway for bid/ask rounding.
+            tol = pip_size
 
             # RSI slope check: was RSI turning in our favour after sweep?
             # Look at 1–2 candles ahead of the sweep candle for slope reversal
@@ -629,48 +731,7 @@ class LiquiditySweepAnalyzer:
                         })
                         return result
 
-        # ── Proximity-sweep fallback ────────────────────────────────
-        # If no exact sweep but price came within 2× ATR of a swing level
-        # and moved in the bias direction, treat as a "near sweep" signal
-        # at reduced quality so the soft-MSS gate can still produce a trade.
-        if nearest_gap is not None and target_levels:
-            latest = df_1m.iloc[-1]
-            local_atr = float(latest.get('atr', 0) or 0)
-            if local_atr <= 0:
-                local_atr = pip_size * 5  # fallback
-            if nearest_gap <= local_atr * 2.5:
-                # Find the closest target
-                best_level = target_levels[0]['price']
-                latest_close = float(latest['close'])
-                latest_low = float(latest['low'])
-                latest_high = float(latest['high'])
-                latest_rsi = float(latest.get('rsi', 50) or 50)
-
-                proximity_ok = False
-                if bias == 'BUY' and latest_close > best_level:
-                    proximity_ok = True
-                elif bias == 'SELL' and latest_close < best_level:
-                    proximity_ok = True
-
-                if proximity_ok:
-                    wick = latest_low if bias == 'BUY' else latest_high
-                    result.update({
-                        'detected': True,
-                        'direction': bias,
-                        'sweep_wick': wick,
-                        'swept_level': best_level,
-                        'rsi_at_sweep': latest_rsi,
-                        'rsi_slope_confirmed': True,
-                        'candle_index': -1,
-                        'fivem_invalidation_held': True,
-                        'proximity_sweep': True,
-                        'details': (
-                            f"Proximity sweep ({bias}): gap={nearest_gap:.5f} "
-                            f"(<{local_atr*2:.5f} = 2×ATR) to level {best_level:.5f}, "
-                            f"close={latest_close:.5f}"
-                        ),
-                    })
-                    return result
+        # Proximity-sweep fallback removed — require actual level penetration.
 
         if nearest_gap is not None:
             result['details'] = (
@@ -703,9 +764,8 @@ class LiquiditySweepAnalyzer:
             dict: {confirmed, mss_level, entry_price, trigger_level,
                    displacement_candle, details}
         """
-        # Always relaxed: sweep gate is the primary filter; strict MSS
-        # close-through-level is too hard to achieve on 1M in quiet markets.
-        relaxed = True
+        # Always require proper MSS displacement (strict mode)
+        relaxed = False
         result = {
             'confirmed': False,
             'mss_level': None,
@@ -1188,6 +1248,41 @@ class LiquiditySweepAnalyzer:
 
         bot_logger.info(f"💧 {pair} {sweep['details']}")
 
+        # ── Step 3b: Counter-Trend Filter ─────────────────────────────
+        # Aggressively reject sweeps that contradict the dominant trend.
+        # e.g. bearish sweep in a strong uptrend → most are losers.
+        if 'ema_200' in df_1m.columns:
+            ema_200_val = float(df_1m['ema_200'].iloc[-1])
+            current_close = float(df_1m['close'].iloc[-1])
+            local_atr = float(df_1m.iloc[-1].get('atr', 0) or 0)
+            if local_atr > 0 and ema_200_val > 0:
+                ema_dist_atr = (current_close - ema_200_val) / local_atr
+                adx_val = regime_info.get('adx', 0)
+
+                # Price well above EMA200 but sweep says SELL → counter-trend
+                if (ema_dist_atr > self.CTF_EMA200_ATR_THRESHOLD
+                        and sweep['direction'] == 'SELL'
+                        and adx_val >= self.CTF_ADX_THRESHOLD):
+                    result['details'] = (
+                        f"🚫 Counter-trend: SELL at {ema_dist_atr:.1f}×ATR above "
+                        f"EMA200 (ADX={adx_val:.1f})"
+                    )
+                    bot_logger.info(f"🚫 {pair} counter-trend SELL rejected "
+                                    f"(EMA200 dist={ema_dist_atr:.1f}×ATR)")
+                    return result
+
+                # Price well below EMA200 but sweep says BUY → counter-trend
+                if (ema_dist_atr < -self.CTF_EMA200_ATR_THRESHOLD
+                        and sweep['direction'] == 'BUY'
+                        and adx_val >= self.CTF_ADX_THRESHOLD):
+                    result['details'] = (
+                        f"🚫 Counter-trend: BUY at {abs(ema_dist_atr):.1f}×ATR below "
+                        f"EMA200 (ADX={adx_val:.1f})"
+                    )
+                    bot_logger.info(f"🚫 {pair} counter-trend BUY rejected "
+                                    f"(EMA200 dist={ema_dist_atr:.1f}×ATR)")
+                    return result
+
         # ── Step 4: Market Structure Shift (Layer 3) — SOFT GATE ─────
         mss = self.detect_mss(df_1m, sweep, regime=regime_info.get('regime', 'range'))
         result['mss'] = mss
@@ -1235,9 +1330,9 @@ class LiquiditySweepAnalyzer:
         elif mss_confirmed_naturally and is_proximity:
             base_confidence = 0.55
         elif not is_proximity:
-            base_confidence = 0.45
+            base_confidence = 0.38
         else:
-            base_confidence = 0.35
+            base_confidence = 0.30
 
         # Bonus for strong ADX
         if regime_info['adx'] >= 25:
@@ -1252,18 +1347,40 @@ class LiquiditySweepAnalyzer:
         elif vol_ratio >= 1.5:
             base_confidence += 0.01
 
+        # ── Volume Profile Analysis (futures benefit) ─────────────────
+        # Sweep at a high-volume node = more significant (institutional orders)
+        vp_data = df_5m if df_5m is not None and len(df_5m) >= 30 else df_1m
+        vol_profile = self.compute_volume_profile(vp_data)
+        sweep_atr = float(regime_info.get('atr', 0) or 0)
+        is_hvn, hvn_pct = self.sweep_at_high_volume_node(
+            sweep['swept_level'], vol_profile, sweep_atr
+        )
+        if is_hvn:
+            base_confidence += 0.02
+            bot_logger.info(
+                f"📊 {pair} sweep at HVN ({hvn_pct:.1%} of volume) → +2% conf"
+            )
+
+        # Displacement volume quality (real volume on futures)
+        # NOTE: kept for logging/tags only; confidence already handled by MSS vol_ratio above
+        disp_vol_ratio = self.displacement_volume_quality(
+            df_1m, sweep.get('candle_index', -1)
+        )
+
         # Mild penalty for range regime (adaptive learner handles main regime adjustment)
         if regime_info['regime'] == 'range':
-            base_confidence *= 0.90
+            base_confidence *= 0.85
 
         result['signal'] = sweep['direction']
         result['confidence'] = min(base_confidence, 1.0)
+        hvn_tag = f" HVN={hvn_pct:.0%}" if is_hvn else ""
+        dvol_tag = f" DispVol={disp_vol_ratio:.1f}x" if disp_vol_ratio >= 1.5 else ""
         result['details'] = (
             f"✅ SWEEP+MSS ENTRY: {sweep['direction']} | "
             f"Regime={regime_info['regime']} | "
             f"MSS={mss['mss_level']:.5f} | "
             f"Wick={rr['sweep_wick']:.5f} Entry={rr['entry_price']:.5f} | "
-            f"Vol={vol_ratio:.2f}x | ADX={regime_info['adx']:.1f} | "
+            f"Vol={vol_ratio:.2f}x{hvn_tag}{dvol_tag} | ADX={regime_info['adx']:.1f} | "
             f"Mode={self.ENTRY_MODE}"
         )
 

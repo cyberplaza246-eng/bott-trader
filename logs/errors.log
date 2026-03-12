@@ -1008,3 +1008,103 @@
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused\"))"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Relay GET /ping failed: HTTPConnectionPool(host='127.0.0.1', port=5555): Max retries exceeded with url: /ping (Caused by NewConnectionError(\"HTTPConnection(host='127.0.0.1', port=5555): Failed to establish a new connection: [Errno 111] Connection refused\"))"}
 {"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "\ud83d\uded1 KILL SWITCH TRIGGERED: equity $47,999.00 <= floor $48,000.00"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic connection failed: You must specify valid SYSTEM_NAME in the credentials: ['Rithmic Test']"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "No gateway URL for system 'Rithmic Test'"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic connection failed: Rithmic returned an error={'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'template_id': 10, 'template_version': '3.9', 'user': 'MBQQP99400_OBZG6ZD4KJCHY5DSMFSGK43FMEWWI7DUOJQWIZLTMVQS2ZA', 'password': 'h6Rmr8HMv4V3', 'system_name': 'Rithmic Test', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 1}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic connection failed: Rithmic returned an error={'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': 'LT-Z8WS597N', 'system_name': 'Rithmic Test', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 1}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic connection failed: Rithmic returned an error={'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': 'h6Rmr8HMv4V3', 'system_name': 'Rithmic Test', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 1}"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Error loading model: Could not deserialize 'keras.metrics.mse' because it is not a KerasSaveable subclass, creating new model"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic connection failed: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied"}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}
+{"timestamp": null, "level": null, "name": "Errors", "message": "Rithmic candles error for MES: "}

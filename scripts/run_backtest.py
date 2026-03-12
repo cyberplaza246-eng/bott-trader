@@ -24,11 +24,11 @@ from src.utils.logger import bot_logger
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description='Run 9-model scalping backtest')
-    parser.add_argument('--pair', default='EUR/USD', help='Currency pair (default: EUR/USD)')
-    parser.add_argument('--all', action='store_true', help='Run both EUR/USD and GBP/USD')
+    parser.add_argument('--pair', default=None, help='Symbol (default: first in PAIRS, e.g. MES or EUR/USD)')
+    parser.add_argument('--all', action='store_true', help='Run all configured pairs')
     parser.add_argument('--start', default=None, help='Start date (YYYY-MM-DD), auto-detected from CSV if omitted')
     parser.add_argument('--end', default=None, help='End date (YYYY-MM-DD), auto-detected from CSV if omitted')
-    parser.add_argument('--balance', type=float, default=10000, help='Initial balance (default: 10000)')
+    parser.add_argument('--balance', type=float, default=50000, help='Initial balance (default: 50000)')
     parser.add_argument('--confidence', type=float, default=0.45, help='Min confidence (default: 0.45)')
     parser.add_argument('--agreement', type=int, default=2, help='Min models agreement (default: 2)')
     parser.add_argument('--tf', default='5m', choices=['1m', '5m'], help='Scalping config key (default: 5m)')
@@ -235,7 +235,8 @@ def main():
     """Main entry point"""
     args = parse_args()
 
-    pairs = PAIRS if args.all else [args.pair]
+    pair = args.pair or PAIRS[0]
+    pairs = PAIRS if args.all else [pair]
     use_confluence = not args.no_confluence
     all_results = {}
 

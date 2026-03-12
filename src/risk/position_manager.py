@@ -12,6 +12,7 @@ As your account grows from $50 upward, the bot automatically adjusts:
 import numpy as np
 import os
 from src.utils.logger import bot_logger, error_logger
+from src.instruments import get_instrument, is_futures, dollar_risk, REGISTRY
 from config.strategy_config import (
     RISK_PER_TRADE_PERCENT,
     STOP_LOSS_MULTIPLIER,
@@ -32,6 +33,7 @@ ACCOUNT_TIERS = {
         'max_balance': 200,
         'max_concurrent_trades': 3,    # 3 concurrent trades allowed
         'max_lot_size': 0.01,
+        'max_contracts': 1,
         'risk_percent': 1.0,       # Conservative at small size
         'description': 'Micro ($0-$200)',
     },
@@ -40,6 +42,7 @@ ACCOUNT_TIERS = {
         'max_balance': 1000,
         'max_concurrent_trades': 3,
         'max_lot_size': 0.03,
+        'max_contracts': 1,
         'risk_percent': 1.0,
         'description': 'Mini ($200-$1K)',
     },
@@ -48,6 +51,7 @@ ACCOUNT_TIERS = {
         'max_balance': 5000,
         'max_concurrent_trades': 3,
         'max_lot_size': 0.04,
+        'max_contracts': 1,
         'risk_percent': 1.5,       # Can afford slightly more risk
         'description': 'Standard ($1K-$5K)',
     },
@@ -56,6 +60,7 @@ ACCOUNT_TIERS = {
         'max_balance': 25000,
         'max_concurrent_trades': 3,
         'max_lot_size': 0.05,
+        'max_contracts': 1,
         'risk_percent': 2.0,
         'description': 'Professional ($5K-$25K)',
     },
@@ -64,21 +69,17 @@ ACCOUNT_TIERS = {
         'max_balance': float('inf'),
         'max_concurrent_trades': 3,
         'max_lot_size': 0.05,
+        'max_contracts': 2,         # Scale up only at elite tier
         'risk_percent': 2.0,
         'description': 'Elite ($25K+)',
     },
 }
 
-# ── Pair-specific pip values ──────────────────────────────────────────
-# pip value per standard lot (100,000 units) in USD
+# ── Backward-compat aliases — use instrument registry instead ─────────
+# Kept so any stale imports (from position_manager import PIP_VALUES) still work.
 PIP_VALUES = {
-    'EUR/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'GBP/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'USD/JPY': {'pip_size': 0.01,   'pip_value_per_lot': 6.5},   # ~$6.50 per pip at ~153 JPY
-    'AUD/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'NZD/USD': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'USD/CHF': {'pip_size': 0.0001, 'pip_value_per_lot': 10.0},
-    'USD/CAD': {'pip_size': 0.0001, 'pip_value_per_lot': 7.5},
+    sym: {'pip_size': spec.tick_size, 'pip_value_per_lot': spec.tick_value_usd}
+    for sym, spec in REGISTRY.items()
 }
 DEFAULT_PIP = {'pip_size': 0.0001, 'pip_value_per_lot': 10.0}
 
@@ -354,11 +355,12 @@ class RiskManager:
         position_size = max(0.01, min(position_size, max_lots))
 
         # Apply margin safety cap using ACTUAL account leverage & free margin
-        # 1 lot = 100,000 units of BASE currency
-        # For XXX/USD pairs (e.g. EUR/USD): margin = entry_price * 100,000 / leverage
-        # For USD/XXX pairs (e.g. USD/JPY): margin = 100,000 / leverage
         leverage = self.account_leverage
-        if pair and pair.upper().startswith('USD/'):
+        if pair and is_futures(pair):
+            # Futures: margin is per-contract, not per-lot
+            spec = get_instrument(pair)
+            margin_per_lot = spec.margin_per_contract if spec else 1000.0
+        elif pair and pair.upper().startswith('USD/'):
             margin_per_lot = 100_000 / leverage
         else:
             margin_per_lot = (entry_price * 100_000) / leverage
@@ -393,6 +395,74 @@ class RiskManager:
             'max_lot_size': max_lots,
         }
 
+    # ── Futures Position Sizing ───────────────────────────────────────
+
+    def calculate_contracts(self, symbol, entry_price, stop_loss_price):
+        """Calculate position size in contracts for futures instruments.
+
+        Safety caps (applied in order, most restrictive wins):
+          1. Risk-based: risk_amount / dollar_risk_per_contract
+          2. Tier max_contracts cap
+          3. Margin cap: 80% of free_margin / margin_intraday
+          4. Hard cap: max 2 contracts (Lucid $50K eval rule)
+
+        Returns:
+            dict with contracts, risk_amount, dollar_risk, tick_distance, tier
+            or None if the trade should be skipped.
+        """
+        spec = get_instrument(symbol)
+
+        risk_pct = self._current_tier['risk_percent']
+        risk_amount = self.current_balance * (risk_pct / 100)
+
+        # Dollar risk per contract
+        risk_per_contract = dollar_risk(symbol, entry_price, stop_loss_price, contracts=1)
+        if risk_per_contract <= 0:
+            error_logger.error(f"Invalid stop distance for {symbol}")
+            return None
+
+        # Cap 1: risk-based sizing
+        contracts = int(risk_amount / risk_per_contract)
+        contracts = max(1, contracts)
+
+        # Cap 2: tier-based
+        max_contracts = self._current_tier.get('max_contracts', 1)
+        contracts = min(contracts, max_contracts)
+
+        # Cap 3: margin-based (80% of free margin)
+        if spec.margin_intraday > 0:
+            usable_margin = self.free_margin * 0.80
+            margin_cap = int(usable_margin / spec.margin_intraday)
+            margin_cap = max(1, margin_cap)
+            if contracts > margin_cap:
+                bot_logger.info(
+                    f"Margin cap: {contracts} → {margin_cap} contracts "
+                    f"(free margin ${self.free_margin:.2f})"
+                )
+                contracts = margin_cap
+
+        # Cap 4: hard absolute cap (Lucid eval safety)
+        hard_cap = int(os.getenv('MAX_CONTRACTS', '2'))
+        contracts = min(contracts, hard_cap)
+
+        actual_risk = risk_per_contract * contracts
+
+        bot_logger.info(
+            f"Futures sizing [{self._current_tier_name}]: "
+            f"{symbol} {contracts} contract(s) | "
+            f"Risk ${actual_risk:.2f} ({risk_pct}% of ${self.current_balance:.2f}) | "
+            f"${risk_per_contract:.2f}/contract"
+        )
+
+        return {
+            'contracts': contracts,
+            'risk_amount': round(actual_risk, 2),
+            'risk_percent': risk_pct,
+            'risk_per_contract': round(risk_per_contract, 2),
+            'tier': self._current_tier_name,
+            'max_contracts': max_contracts,
+        }
+
     # Minimum stop distance per pair type (in price units)
     # Most brokers require 3-5 pips; we use 8 pips as safe default
     MIN_STOP_DISTANCE = {
@@ -402,13 +472,18 @@ class RiskManager:
 
     @staticmethod
     def _price_digits(pair=None):
-        """Return decimal places for a pair (3 for JPY, 5 for others)."""
+        """Return decimal places for instrument (uses registry when available)."""
+        if pair and pair in REGISTRY:
+            return REGISTRY[pair].decimal_places
         if pair and 'JPY' in pair.upper():
             return 3
         return 5
 
     def _min_stop_distance(self, pair=None):
         """Return the minimum allowed stop distance for a pair."""
+        if pair and pair in REGISTRY:
+            # 8 ticks minimum for any instrument
+            return REGISTRY[pair].tick_size * 8
         if pair and 'JPY' in pair.upper():
             return self.MIN_STOP_DISTANCE['JPY']
         return self.MIN_STOP_DISTANCE['DEFAULT']
@@ -436,9 +511,11 @@ class RiskManager:
         sl_distance = atr * sl_mult
         min_dist = self._min_stop_distance(pair)
         if sl_distance < min_dist:
+            _spec = REGISTRY.get(pair)
+            _ts = _spec.tick_size if _spec else (0.01 if pair and 'JPY' in pair.upper() else 0.0001)
             bot_logger.info(
                 f"SL distance widened: {sl_distance:.5f} → {min_dist:.5f} "
-                f"(minimum {min_dist / (0.01 if pair and 'JPY' in pair.upper() else 0.0001):.0f} pips)"
+                f"(minimum {min_dist / _ts:.0f} ticks)"
             )
             sl_distance = min_dist
 
@@ -472,9 +549,10 @@ class RiskManager:
             tp_ratio = TAKE_PROFIT_RATIO
         reward = risk * tp_ratio
 
-        # TP buffer: pull TP back ~1.5 pips so the order fills before
+        # TP buffer: pull TP back ~1.5 ticks so the order fills before
         # price stalls at S/R zones / round numbers and reverses.
-        pip_size = 0.01 if (pair and 'JPY' in pair.upper()) else 0.0001
+        _spec = REGISTRY.get(pair)
+        pip_size = _spec.tick_size if _spec else (0.01 if (pair and 'JPY' in pair.upper()) else 0.0001)
         tp_buffer = pip_size * 1.5
 
         if trade_type == 'BUY':
@@ -609,7 +687,11 @@ class RiskManager:
         else:
             stop_loss = entry_price + sl_distance
 
-        digits = 3 if 'JPY' in pair.upper() else 5
+        if is_futures(pair):
+            spec = get_instrument(pair)
+            digits = 2 if spec else 5
+        else:
+            digits = 3 if 'JPY' in pair.upper() else 5
         return round(stop_loss, digits)
 
     def calculate_scalping_take_profit(self, pair, timeframe_key, entry_price, stop_loss, trade_type):
@@ -640,5 +722,9 @@ class RiskManager:
         else:
             take_profit = entry_price - tp_distance + tp_buffer
 
-        digits = 3 if 'JPY' in pair.upper() else 5
+        if is_futures(pair):
+            spec = get_instrument(pair)
+            digits = 2 if spec else 5
+        else:
+            digits = 3 if 'JPY' in pair.upper() else 5
         return round(take_profit, digits)
