@@ -309,15 +309,15 @@ class TechnicalAnalyzer:
             signal = 'HOLD'
             confidence = 0.0
 
-        # ADX trend filter — block only in truly dead markets (ADX < 15)
+        # ADX trend filter — block only in truly dead markets (ADX < 10)
         adx_value = latest.get('adx', 0)
-        if signal != 'HOLD' and adx_value < 15:
-            reason_parts.append(f"ADX too weak ({adx_value:.0f}<15) — blocking signal")
+        if signal != 'HOLD' and adx_value < 10:
+            reason_parts.append(f"ADX too weak ({adx_value:.0f}<10) — blocking signal")
             signal = 'HOLD'
             confidence = 0.0
-        elif signal != 'HOLD' and adx_value < 20:
-            confidence *= 0.85
-            reason_parts.append(f"ADX low ({adx_value:.0f}<20) — penalty ×0.85")
+        elif signal != 'HOLD' and adx_value < 15:
+            confidence *= 0.90
+            reason_parts.append(f"ADX low ({adx_value:.0f}<15) — penalty ×0.90")
         elif adx_value >= 25:
             # Strong trend — boost confidence
             confidence *= 1.15

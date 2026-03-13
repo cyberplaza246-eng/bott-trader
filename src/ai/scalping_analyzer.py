@@ -508,12 +508,12 @@ class ScalpingAnalyzer:
             bias = 'flat'
             direction = 'NONE'
 
-        # ADX strength classification (15 minimum for any directional move)
+        # ADX strength classification (10 minimum for any directional move)
         if adx > 30:
             strength = 'strong'
         elif adx > 20:
             strength = 'preferred'
-        elif adx > 15:
+        elif adx > 12:
             strength = 'moderate'
         else:
             strength = 'weak'
@@ -1247,11 +1247,11 @@ class ScalpingAnalyzer:
             f"ADX {bias['adx']:.1f} [{bias['strength']}])"
         )
 
-        if bias['strength'] == 'weak' and bias['adx'] < 12:
-            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 12 (very weak trend — skipping)")
+        if bias['strength'] == 'weak' and bias['adx'] < 8:
+            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 8 (very weak trend — skipping)")
             return result
         elif bias['strength'] == 'weak':
-            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 15 (weak trend — penalized)")
+            result['reasons'].append(f"⚠ ADX {bias['adx']:.1f} < 12 (weak trend — penalized)")
 
         # 4. Detect ATR regime (for TP adjustment & contracting skip)
         atr_regime = self.detect_atr_regime(df)
@@ -1280,7 +1280,7 @@ class ScalpingAnalyzer:
             entry['confidence'] *= 0.80
             result['reasons'].append(f"  ⚠️ ATR declining penalty: confidence → {entry['confidence']:.2f}")
         if bias['strength'] == 'weak':
-            entry['confidence'] *= 0.80
+            entry['confidence'] *= 0.90
             result['reasons'].append(f"  ⚠️ Weak ADX penalty: confidence → {entry['confidence']:.2f}")
 
         if not entry['ready'] and entry['confidence'] < self.ENTRY_THRESHOLD:
