@@ -68,25 +68,32 @@ from src.utils.logger import bot_logger, trades_logger
 
 # ── Trading Hours Logic ─────────────────────────────────────────────
 def is_market_open_et(now=None):
-    """Return True if CME Globex is open (ET), else False."""
-    # CME Globex: Sunday 6pm ET to Friday 5pm ET, daily break 5-6pm ET
+    """Return True if in HIGH LIQUIDITY session (9:30-11:30 AM EST Mon-Fri)."""
+    # ONLY trade during highest liquidity: 9:30 AM - 11:30 AM EST
+    # This avoids thin overnight markets where stops slip badly
     if now is None:
         now = datetime.now(pytz.timezone('US/Eastern'))
     else:
         now = now.astimezone(pytz.timezone('US/Eastern'))
     wd = now.weekday()  # 0=Mon, 6=Sun
     hour, minute = now.hour, now.minute
-    # Daily break: 17:00-18:00 ET
-    if hour == 17:
+    time_mins = hour * 60 + minute
+    
+    # No trading on weekends
+    if wd >= 5:  # Saturday or Sunday
         return False
-    # Weekend close: Fri 17:00 ET to Sun 18:00 ET
-    if wd == 4 and hour >= 17:  # Friday after 5pm
-        return False
-    if wd == 5:  # Saturday
-        return False
-    if wd == 6 and hour < 18:  # Sunday before 6pm
-        return False
-    return True
+    
+    # HIGH LIQUIDITY SESSION: 9:30 AM - 11:30 AM EST (Mon-Fri)
+    session_start = 9 * 60 + 30   # 9:30 AM = 570 mins
+    session_end = 11 * 60 + 30    # 11:30 AM = 690 mins
+    
+    # Optional: Add afternoon session 2:00 PM - 4:00 PM EST
+    # afternoon_start = 14 * 60     # 2:00 PM = 840 mins
+    # afternoon_end = 16 * 60       # 4:00 PM = 960 mins
+    # if afternoon_start <= time_mins < afternoon_end:
+    #     return True
+    
+    return session_start <= time_mins < session_end
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -112,8 +119,8 @@ BB_EXTREME_LOW, BB_EXTREME_HIGH = 0.05, 0.95
 
 # Risk Settings
 ATR_PERIOD = 14
-ATR_MULT = 1.2             # SL = 1.2 × ATR
-TP_MULT = 1.5              # TP = 1.5 × SL
+ATR_MULT = 1.0             # SL = 1.0 × ATR (~8 points on MNQ)
+TP_MULT = 2.5              # TP = 2.5 × SL (~20 points) for better R:R
 TP_BUFFER_ATR_MULT = 0.0   # TP capped exactly at resistance/support (no buffer)
 RESISTANCE_LOOKBACK = 20   # 5M bars for swing high/low
 
@@ -121,10 +128,14 @@ RESISTANCE_LOOKBACK = 20   # 5M bars for swing high/low
 MAX_PULLBACK_ATR = 1.5     # Max distance from EMA for pullback (matches backtest)
 
 # Risk Management
-DAILY_LOSS_LIMIT = 350.0
-MAX_TRADES_PER_DAY = 6
-MAX_POSITIONS = 2          # Max 2 positions at a time
+DAILY_LOSS_LIMIT = 300.0           # Stop trading after $300 daily loss
+MAX_LOSS_PER_TRADE = 250.0         # Force close if unrealized loss > $250
+MAX_TRADES_PER_DAY = 5             # Reduced from 6
+MAX_POSITIONS = 1                  # ONLY 1 position at a time
 CONTRACTS = 1
+
+# Volatility Filter
+VOLATILITY_FILTER_POINTS = 20      # Skip trade if 1M candle > 20 points
 
 # Symbol specs - includes all tradeable futures
 SYMBOL_SPECS = {
@@ -134,8 +145,8 @@ SYMBOL_SPECS = {
     'MGC': {'point_value': 10.0, 'tick_size': 0.10},  # Micro Gold
 }
 
-# Default symbols to trade
-DEFAULT_SYMBOLS = ['MES', 'MNQ', 'NQ']
+# Default symbols to trade (MNQ ONLY - safest for testing)
+DEFAULT_SYMBOLS = ['MNQ']
 
 
 @dataclass
@@ -515,6 +526,12 @@ class LiveMTFScalper:
         if pd.isna(atr) or atr <= 0:
             return None
         
+        # VOLATILITY FILTER: Skip if 1M candle range > 20 points (avoids stop hunts/spikes)
+        candle_range = row['high'] - row['low']
+        if candle_range > VOLATILITY_FILTER_POINTS:
+            print(f"   ⚠️ {symbol}: Skipping - 1M candle too large ({candle_range:.1f} pts > {VOLATILITY_FILTER_POINTS})")
+            return None
+        
         sl_distance = atr * ATR_MULT
         tp_distance = sl_distance * TP_MULT
         entry_price = row['close']
@@ -740,6 +757,19 @@ class LiveMTFScalper:
             print(f"   ⚠️ Ignoring suspicious price {current_price:.2f} (entry was {position.entry_price:.2f})")
             return None
         
+        # Calculate unrealized P&L for max loss check
+        spec = SYMBOL_SPECS[symbol]
+        point_value = spec['point_value']
+        if position.direction == 'long':
+            unrealized_pnl = (current_price - position.entry_price) * point_value * position.size
+        else:
+            unrealized_pnl = (position.entry_price - current_price) * point_value * position.size
+        
+        # MAX LOSS PER TRADE: Force close if unrealized loss exceeds limit
+        if unrealized_pnl < -MAX_LOSS_PER_TRADE:
+            print(f"   🛑 {symbol}: MAX LOSS triggered! Unrealized: ${unrealized_pnl:.2f} < -${MAX_LOSS_PER_TRADE}")
+            return 'MAX_LOSS'
+        
         if position.direction == 'long':
             if current_price <= position.sl:
                 return 'SL'
@@ -800,12 +830,16 @@ class LiveMTFScalper:
     def run(self, duration_minutes: int = 480):
         """Main trading loop - scans all symbols."""
         print(f"\n{'='*70}")
-        print(f"  🔪 MULTI-TIMEFRAME SCALPING BOT - MULTI-SYMBOL")
+        print(f"  🔪 SAFE SCALPING BOT - MNQ ONLY")
         print(f"{'='*70}")
         print(f"Strategy: 5M Trend + 1M Entry")
         print(f"Symbols: {', '.join(self.symbols)}")
-        print(f"Max Positions: {MAX_POSITIONS}")
+        print(f"Session: 9:30 AM - 11:30 AM EST ONLY")
+        print(f"Max Position: {MAX_POSITIONS} (no overlap)")
+        print(f"R:R Ratio: 1:{TP_MULT:.1f} (SL={ATR_MULT:.1f}×ATR, TP={TP_MULT:.1f}×SL)")
         print(f"Daily Loss Limit: ${DAILY_LOSS_LIMIT}")
+        print(f"Max Loss/Trade: ${MAX_LOSS_PER_TRADE}")
+        print(f"Volatility Filter: {VOLATILITY_FILTER_POINTS} pts max candle")
         print(f"Max Trades/Day: {MAX_TRADES_PER_DAY}")
         print(f"{'='*70}\n")
         
