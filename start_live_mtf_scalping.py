@@ -98,6 +98,7 @@ TREND_EMA_SLOW = 200
 ADX_THRESHOLD = 18
 ADX_PERIOD = 14
 DI_TOLERANCE = 3.0             # Allow trade if DI+/DI- within 3 pts of each other
+DI_COUNTER_TREND = 20.0        # Allow counter-trend when DI dominates by 20+ pts
 
 # 1M Entry Conditions
 ENTRY_EMA_FAST = 9
@@ -449,14 +450,21 @@ class LiveMTFScalper:
     def check_short_entry(self, row_1m: pd.Series, ctx_5m: Dict, verbose: bool = False) -> bool:
         """Check if short entry conditions are met."""
         # 5M Trend Filter
-        if ctx_5m['trend'] != 'bearish':
-            if verbose: print(f"      ❌ 5M trend not bearish: {ctx_5m['trend']}")
+        di_diff = ctx_5m['di_minus'] - ctx_5m['di_plus']
+        is_counter_trend = (ctx_5m['trend'] == 'bullish' and 
+                           di_diff >= DI_COUNTER_TREND and 
+                           ctx_5m['adx'] >= 25)  # Strong momentum override
+        
+        if ctx_5m['trend'] != 'bearish' and not is_counter_trend:
+            if verbose: print(f"      ❌ 5M trend not bearish: {ctx_5m['trend']} (DI diff={di_diff:.1f}, need {DI_COUNTER_TREND}+ for counter-trend)")
             return False
+        if is_counter_trend:
+            if verbose: print(f"      ⚡ COUNTER-TREND: DI- dominates by {di_diff:.1f} pts")
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
             return False
-        # Relaxed DI filter: Allow if DI- >= DI+ - tolerance
-        if ctx_5m['di_minus'] < (ctx_5m['di_plus'] - DI_TOLERANCE):
+        # Relaxed DI filter: Allow if DI- >= DI+ - tolerance (skip for counter-trend)
+        if not is_counter_trend and ctx_5m['di_minus'] < (ctx_5m['di_plus'] - DI_TOLERANCE):
             if verbose: print(f"      ❌ DI- {ctx_5m['di_minus']:.1f} < DI+ {ctx_5m['di_plus']:.1f} - {DI_TOLERANCE}")
             return False
         
