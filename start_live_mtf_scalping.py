@@ -68,9 +68,7 @@ from src.utils.logger import bot_logger, trades_logger
 
 # ── Trading Hours Logic ─────────────────────────────────────────────
 def is_market_open_et(now=None):
-    """Return True if in HIGH LIQUIDITY session (9:30-11:30 AM EST Mon-Fri)."""
-    # ONLY trade during highest liquidity: 9:30 AM - 11:30 AM EST
-    # This avoids thin overnight markets where stops slip badly
+    """Return True if in trading session (9:30 AM - 4:30 PM EST Mon-Fri)."""
     if now is None:
         now = datetime.now(pytz.timezone('US/Eastern'))
     else:
@@ -83,15 +81,9 @@ def is_market_open_et(now=None):
     if wd >= 5:  # Saturday or Sunday
         return False
     
-    # HIGH LIQUIDITY SESSION: 9:30 AM - 11:30 AM EST (Mon-Fri)
+    # EXTENDED SESSION: 9:30 AM - 4:30 PM EST (Mon-Fri)
     session_start = 9 * 60 + 30   # 9:30 AM = 570 mins
-    session_end = 11 * 60 + 30    # 11:30 AM = 690 mins
-    
-    # Optional: Add afternoon session 2:00 PM - 4:00 PM EST
-    # afternoon_start = 14 * 60     # 2:00 PM = 840 mins
-    # afternoon_end = 16 * 60       # 4:00 PM = 960 mins
-    # if afternoon_start <= time_mins < afternoon_end:
-    #     return True
+    session_end = 16 * 60 + 30    # 4:30 PM = 990 mins
     
     return session_start <= time_mins < session_end
 
@@ -833,11 +825,11 @@ class LiveMTFScalper:
     def run(self, duration_minutes: int = 480):
         """Main trading loop - scans all symbols."""
         print(f"\n{'='*70}")
-        print(f"  🔪 SAFE SCALPING BOT - MNQ ONLY")
+        print(f"  🔪 SAFE SCALPING BOT - MICROS")
         print(f"{'='*70}")
         print(f"Strategy: 5M Trend + 1M Entry")
         print(f"Symbols: {', '.join(self.symbols)}")
-        print(f"Session: 9:30 AM - 11:30 AM EST ONLY")
+        print(f"Session: 9:30 AM - 4:30 PM EST")
         print(f"Max Position: {MAX_POSITIONS} (no overlap)")
         print(f"R:R Ratio: 1:{TP_MULT:.1f} (SL={ATR_MULT:.1f}×ATR, TP={TP_MULT:.1f}×SL)")
         print(f"Daily Loss Limit: ${DAILY_LOSS_LIMIT}")
