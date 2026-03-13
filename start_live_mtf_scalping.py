@@ -145,8 +145,8 @@ SYMBOL_SPECS = {
     'MGC': {'point_value': 10.0, 'tick_size': 0.10},  # Micro Gold
 }
 
-# Default symbols to trade (MNQ ONLY - safest for testing)
-DEFAULT_SYMBOLS = ['MNQ']
+# Default symbols to trade (Micros only - safer position sizing)
+DEFAULT_SYMBOLS = ['MNQ', 'MES']
 
 
 @dataclass
