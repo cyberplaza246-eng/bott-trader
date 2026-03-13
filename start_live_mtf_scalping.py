@@ -139,7 +139,8 @@ SYMBOL_SPECS = {
 }
 
 # Default symbols to trade (Micros only - safer position sizing)
-DEFAULT_SYMBOLS = ['MNQ', 'MES']
+# Using single symbol to reduce Rithmic API load and avoid lock timeouts
+DEFAULT_SYMBOLS = ['MNQ']
 
 
 @dataclass
@@ -852,8 +853,8 @@ class LiveMTFScalper:
         
         print(f"\n🚀 Starting trading loop...")
         print(f"   Will run until {end_time.strftime('%H:%M:%S')}")
-        print(f"   Waiting 5s for Rithmic connection to stabilize...\n")
-        time.sleep(5)  # Let Rithmic connection stabilize
+        print(f"   Waiting 10s for Rithmic connection to stabilize...\n")
+        time.sleep(10)  # Let Rithmic connection stabilize
         
         loop_count = 0
         while datetime.now() < end_time:
@@ -899,11 +900,11 @@ class LiveMTFScalper:
                 # Process each symbol
                 for symbol in self.symbols:
                     # Longer delay between symbols to prevent Rithmic lock timeout
-                    time.sleep(5)
+                    time.sleep(8)
                     
                     # Fetch data for this symbol
                     df_1m = self.get_candles(symbol, timeframe_minutes=1, count=100)
-                    time.sleep(3)  # Longer pause between requests
+                    time.sleep(5)  # Longer pause between requests
                     df_5m = self.get_candles(symbol, timeframe_minutes=5, count=RESISTANCE_LOOKBACK + 50)
                     
                     if df_1m is None or df_5m is None:
