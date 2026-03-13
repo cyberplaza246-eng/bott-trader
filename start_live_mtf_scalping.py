@@ -343,10 +343,11 @@ class LiveMTFScalper:
     def get_5m_context(self, df_5m: pd.DataFrame) -> Dict:
         """Get current 5M trend context."""
         if df_5m is None or len(df_5m) < RESISTANCE_LOOKBACK:
-            return {'trend': None, 'adx': 0, 'di_plus': 0, 'di_minus': 0, 'resistance': 0, 'support': 0}
+            return {'trend': None, 'adx': 0, 'adx_rising': False, 'di_plus': 0, 'di_minus': 0, 'resistance': 0, 'support': 0}
         
         recent = df_5m.tail(RESISTANCE_LOOKBACK)
         row = recent.iloc[-1]
+        row_prev = recent.iloc[-2] if len(recent) >= 2 else row
         
         # Trend direction
         if row['ema_50'] > row['ema_200']:
@@ -356,6 +357,9 @@ class LiveMTFScalper:
         else:
             trend = 'neutral'
         
+        # ADX direction (rising = trend strengthening, falling = trend weakening)
+        adx_rising = row['adx'] > row_prev['adx']
+        
         # Swing high/low for resistance/support
         resistance = recent['high'].max()
         support = recent['low'].min()
@@ -363,6 +367,7 @@ class LiveMTFScalper:
         return {
             'trend': trend,
             'adx': row['adx'],
+            'adx_rising': adx_rising,
             'di_plus': row['di_plus'],
             'di_minus': row['di_minus'],
             'atr': row['atr'],
@@ -395,6 +400,10 @@ class LiveMTFScalper:
             return False
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
+            return False
+        # ADX DIRECTION FILTER: Don't long when bullish trend is weakening (ADX falling)
+        if not ctx_5m.get('adx_rising', True):
+            if verbose: print(f"      ❌ ADX falling ({ctx_5m['adx']:.1f}) - trend exhausting, skip long")
             return False
         # Relaxed DI filter: Allow if DI+ >= DI- - tolerance
         if ctx_5m['di_plus'] < (ctx_5m['di_minus'] - DI_TOLERANCE):
@@ -468,6 +477,10 @@ class LiveMTFScalper:
             if verbose: print(f"      ⚡ COUNTER-TREND: DI- dominates by {di_diff:.1f} pts")
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
+            return False
+        # ADX DIRECTION FILTER: Don't short when bearish trend is weakening (ADX falling)
+        if not is_counter_trend and not ctx_5m.get('adx_rising', True):
+            if verbose: print(f"      ❌ ADX falling ({ctx_5m['adx']:.1f}) - trend exhausting, skip short")
             return False
         # Relaxed DI filter: Allow if DI- >= DI+ - tolerance (skip for counter-trend)
         if not is_counter_trend and ctx_5m['di_minus'] < (ctx_5m['di_plus'] - DI_TOLERANCE):
