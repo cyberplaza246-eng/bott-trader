@@ -411,6 +411,12 @@ class LiveMTFScalper:
         volume_ratio = row_1m['volume_ratio']
         bb_pctb = row_1m['bb_pctb']
         atr = row_1m['atr']
+        candle_open = row_1m['open']
+        
+        # BULLISH CANDLE CONFIRMATION - don't long during a dip
+        if price <= candle_open:
+            if verbose: print(f"      ❌ Bearish candle (close {price:.2f} <= open {candle_open:.2f}) - wait for bullish")
+            return False
         
         # Price above EMA9 (with small tolerance)
         ema9_tolerance = atr * 0.1
@@ -478,6 +484,12 @@ class LiveMTFScalper:
         volume_ratio = row_1m['volume_ratio']
         bb_pctb = row_1m['bb_pctb']
         atr = row_1m['atr']
+        candle_open = row_1m['open']
+        
+        # BEARISH CANDLE CONFIRMATION - don't short during a bounce
+        if price >= candle_open:
+            if verbose: print(f"      ❌ Bullish candle (close {price:.2f} >= open {candle_open:.2f}) - wait for bearish")
+            return False
         
         # Price below EMA9 (with small tolerance)
         ema9_tolerance = atr * 0.1
