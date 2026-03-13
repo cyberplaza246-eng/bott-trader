@@ -135,7 +135,7 @@ MAX_POSITIONS = 1                  # ONLY 1 position at a time
 CONTRACTS = 1
 
 # Volatility Filter
-VOLATILITY_FILTER_POINTS = 20      # Skip trade if 1M candle > 20 points
+VOLATILITY_FILTER_POINTS = 35      # Skip trade if 1M candle > 35 points (MNQ morning is ~25-30)
 
 # Symbol specs - includes all tradeable futures
 SYMBOL_SPECS = {
