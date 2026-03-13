@@ -851,7 +851,9 @@ class LiveMTFScalper:
         end_time = start_time + timedelta(minutes=duration_minutes)
         
         print(f"\n🚀 Starting trading loop...")
-        print(f"   Will run until {end_time.strftime('%H:%M:%S')}\n")
+        print(f"   Will run until {end_time.strftime('%H:%M:%S')}")
+        print(f"   Waiting 5s for Rithmic connection to stabilize...\n")
+        time.sleep(5)  # Let Rithmic connection stabilize
         
         loop_count = 0
         while datetime.now() < end_time:
@@ -897,11 +899,11 @@ class LiveMTFScalper:
                 # Process each symbol
                 for symbol in self.symbols:
                     # Longer delay between symbols to prevent Rithmic lock timeout
-                    time.sleep(3)
+                    time.sleep(5)
                     
                     # Fetch data for this symbol
                     df_1m = self.get_candles(symbol, timeframe_minutes=1, count=100)
-                    time.sleep(2)  # Longer pause between requests
+                    time.sleep(3)  # Longer pause between requests
                     df_5m = self.get_candles(symbol, timeframe_minutes=5, count=RESISTANCE_LOOKBACK + 50)
                     
                     if df_1m is None or df_5m is None:
