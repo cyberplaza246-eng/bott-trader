@@ -485,14 +485,16 @@ class LiveMTFScalper:
             if verbose: print(f"      ❌ Price {price:.2f} > EMA9 {ema_9:.2f} + {ema9_tolerance:.2f}")
             return False
         
-        # Pullback to EMA zone (within 1.5 ATR of EMA21)
-        if abs(price - ema_21) > (atr * MAX_PULLBACK_ATR):
+        # Pullback to EMA zone (within 1.5 ATR of EMA21) - skip for counter-trend
+        if not is_counter_trend and abs(price - ema_21) > (atr * MAX_PULLBACK_ATR):
             if verbose: print(f"      ❌ Pullback: {abs(price-ema_21):.2f} (need within {atr*MAX_PULLBACK_ATR:.2f})")
             return False
         
-        # RSI filter
-        if pd.isna(rsi) or not (RSI_SHORT_MIN <= rsi <= RSI_SHORT_MAX):
-            if verbose: print(f"      ❌ RSI: {rsi:.1f} (need {RSI_SHORT_MIN}-{RSI_SHORT_MAX})")
+        # RSI filter - relaxed for counter-trend (30-70 instead of 40-65)
+        rsi_min = 30 if is_counter_trend else RSI_SHORT_MIN
+        rsi_max = 70 if is_counter_trend else RSI_SHORT_MAX
+        if pd.isna(rsi) or not (rsi_min <= rsi <= rsi_max):
+            if verbose: print(f"      ❌ RSI: {rsi:.1f} (need {rsi_min}-{rsi_max})")
             return False
         
         # MACD falling (matching backtest - just needs to be falling, not negative)
