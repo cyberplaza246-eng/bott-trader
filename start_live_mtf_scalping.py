@@ -553,6 +553,13 @@ class LiveMTFScalper:
             # Use whichever is closer to entry (safer)
             tp_final = min(tp_rr, tp_resistance) if tp_resistance > entry_price else tp_rr
             
+            # Skip trade if R:R < 1.5:1 after capping
+            actual_tp_distance = tp_final - entry_price
+            actual_rr = actual_tp_distance / sl_distance if sl_distance > 0 else 0
+            if actual_rr < 1.5:
+                print(f"   ⚠️ {symbol}: Skipping LONG - R:R only 1:{actual_rr:.1f} after resistance cap")
+                return None
+            
             return {
                 'symbol': symbol,
                 'direction': 'long',
@@ -569,6 +576,13 @@ class LiveMTFScalper:
             tp_support = ctx_5m['support'] + tp_buffer
             # Use whichever is closer to entry (safer)
             tp_final = max(tp_rr, tp_support) if tp_support < entry_price else tp_rr
+            
+            # Skip trade if R:R < 1.5:1 after capping
+            actual_tp_distance = entry_price - tp_final
+            actual_rr = actual_tp_distance / sl_distance if sl_distance > 0 else 0
+            if actual_rr < 1.5:
+                print(f"   ⚠️ {symbol}: Skipping SHORT - R:R only 1:{actual_rr:.1f} after support cap")
+                return None
             
             return {
                 'symbol': symbol,
