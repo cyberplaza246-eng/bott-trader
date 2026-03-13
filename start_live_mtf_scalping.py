@@ -105,6 +105,7 @@ TREND_EMA_FAST = 50
 TREND_EMA_SLOW = 200
 ADX_THRESHOLD = 18
 ADX_PERIOD = 14
+DI_TOLERANCE = 3.0             # Allow trade if DI+/DI- within 3 pts of each other
 
 # 1M Entry Conditions
 ENTRY_EMA_FAST = 9
@@ -401,8 +402,9 @@ class LiveMTFScalper:
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
             return False
-        if ctx_5m['di_plus'] <= ctx_5m['di_minus']:
-            if verbose: print(f"      ❌ DI+ {ctx_5m['di_plus']:.1f} <= DI- {ctx_5m['di_minus']:.1f}")
+        # Relaxed DI filter: Allow if DI+ >= DI- - tolerance
+        if ctx_5m['di_plus'] < (ctx_5m['di_minus'] - DI_TOLERANCE):
+            if verbose: print(f"      ❌ DI+ {ctx_5m['di_plus']:.1f} < DI- {ctx_5m['di_minus']:.1f} - {DI_TOLERANCE}")
             return False
         
         # 1M Entry Conditions
@@ -460,8 +462,9 @@ class LiveMTFScalper:
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
             return False
-        if ctx_5m['di_minus'] <= ctx_5m['di_plus']:
-            if verbose: print(f"      ❌ DI- {ctx_5m['di_minus']:.1f} <= DI+ {ctx_5m['di_plus']:.1f}")
+        # Relaxed DI filter: Allow if DI- >= DI+ - tolerance
+        if ctx_5m['di_minus'] < (ctx_5m['di_plus'] - DI_TOLERANCE):
+            if verbose: print(f"      ❌ DI- {ctx_5m['di_minus']:.1f} < DI+ {ctx_5m['di_plus']:.1f} - {DI_TOLERANCE}")
             return False
         
         # 1M Entry Conditions
