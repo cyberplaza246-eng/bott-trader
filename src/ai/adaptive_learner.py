@@ -856,9 +856,9 @@ class AdaptiveLearner:
         return weights
 
     def get_adjusted_threshold(self) -> float:
-        # Floor at 0.25 — lowered for testing paper mode
-        # Original was 0.40 for live trading
-        return max(self.confidence_threshold, 0.25)
+        # PAPER MODE OVERRIDE: cap at 0.15 for testing
+        # For live trading, restore to: return max(self.confidence_threshold, 0.40)
+        return 0.15  # Forces all sweep signals to pass
 
     def get_pair_win_rate(self, pair: str) -> float:
         pair = self._normalize_pair(pair)
