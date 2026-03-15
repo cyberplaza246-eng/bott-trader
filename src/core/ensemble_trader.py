@@ -631,6 +631,7 @@ class EnsembleTrader:
         Determine if signal is strong enough to trade.
         With sweep-gated architecture, the sweep already validated structure.
         We only check confidence threshold.
+        Fallback: If sweep didn't fire but EMA+Tech agree, allow trade.
         """
         threshold = self.learner.get_adjusted_threshold()
 
@@ -639,15 +640,31 @@ class EnsembleTrader:
 
         effective_confidence = signal_result['confidence']
 
-        # Sweep must have fired (it's the gate)
+        # Check if sweep fired or if this is a fallback entry
         sweep_model = signal_result.get('models', {}).get('sweep', {})
-        if sweep_model.get('signal') not in ('BUY', 'SELL'):
-            bot_logger.info("🚫 Sweep gate did not fire — no trade")
-            return False
-
-        # EMA crossover must not oppose sweep direction (HOLD = neutral, allowed)
+        sweep_fired = sweep_model.get('signal') in ('BUY', 'SELL')
+        
+        # Allow fallback entries: EMA + Technical agree on direction
         ema_model = signal_result.get('models', {}).get('ema_crossover', {})
+        tech_model = signal_result.get('models', {}).get('technical', {})
         ema_dir = ema_model.get('signal', 'HOLD')
+        tech_dir = tech_model.get('signal', 'HOLD')
+        
+        is_fallback_entry = (
+            not sweep_fired and
+            ema_dir == signal_result['signal'] and
+            tech_dir == signal_result['signal'] and
+            ema_dir in ('BUY', 'SELL')
+        )
+        
+        if not sweep_fired and not is_fallback_entry:
+            bot_logger.info("🚫 Sweep gate did not fire and no EMA+Tech fallback — no trade")
+            return False
+        
+        if is_fallback_entry:
+            bot_logger.info(f"🔄 FALLBACK ENTRY: EMA+Tech agree on {signal_result['signal']} (no sweep required)")
+
+        # EMA crossover must not oppose signal direction (HOLD = neutral, allowed)
         if ema_dir in ('BUY', 'SELL') and ema_dir != signal_result['signal']:
             bot_logger.info(
                 f"🚫 EMA crossover ({ema_dir}) opposes {signal_result['signal']} — no trade"
