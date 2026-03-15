@@ -1,0 +1,276 @@
+{
+  "models": {
+    "TEST_gb_high_05": [
+      {
+        "timestamp": "20260315_180252",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_high_05/model_20260315_180252.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_high_05/metadata_20260315_180252.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "TEST_gb_high_10": [
+      {
+        "timestamp": "20260315_180252",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_high_10/model_20260315_180252.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_high_10/metadata_20260315_180252.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "TEST_gb_high_15": [
+      {
+        "timestamp": "20260315_180252",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_high_15/model_20260315_180252.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_high_15/metadata_20260315_180252.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "TEST_gb_low_05": [
+      {
+        "timestamp": "20260315_180252",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_low_05/model_20260315_180252.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_low_05/metadata_20260315_180252.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "TEST_svc_low_05": [
+      {
+        "timestamp": "20260315_180253",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_svc_low_05/model_20260315_180253.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_svc_low_05/metadata_20260315_180253.json",
+        "metrics": {
+          "accuracy": 0.9994538503549972,
+          "precision": 1.0,
+          "recall": 0.9975728155339806,
+          "f1": 0.9987849331713244,
+          "auc": 0.9997913202925621
+        }
+      }
+    ],
+    "MES_gb_high_05": [
+      {
+        "timestamp": "20260315_181031",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_05/model_20260315_181031.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_05/metadata_20260315_181031.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_181507",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_05/model_20260315_181507.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_05/metadata_20260315_181507.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_183836",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_05/model_20260315_183836.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_05/metadata_20260315_183836.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "MES_svc_high_05": [
+      {
+        "timestamp": "20260315_181113",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_05/model_20260315_181113.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_05/metadata_20260315_181113.json",
+        "metrics": {
+          "accuracy": 0.9885267641858222,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "auc": 0.968105746769475
+        }
+      },
+      {
+        "timestamp": "20260315_181508",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_05/model_20260315_181508.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_05/metadata_20260315_181508.json",
+        "metrics": {
+          "accuracy": 0.9558691083758631,
+          "precision": 0.8,
+          "recall": 0.02666666666666667,
+          "f1": 0.05161290322580645,
+          "auc": 0.9840322749659436
+        }
+      },
+      {
+        "timestamp": "20260315_183836",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_05/model_20260315_183836.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_05/metadata_20260315_183836.json",
+        "metrics": {
+          "accuracy": 0.9878147847278635,
+          "precision": 1.0,
+          "recall": 0.34782608695652173,
+          "f1": 0.5161290322580645,
+          "auc": 0.9997840483731644
+        }
+      }
+    ],
+    "MES_gb_high_10": [
+      {
+        "timestamp": "20260315_181113",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_10/model_20260315_181113.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_10/metadata_20260315_181113.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_181508",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_10/model_20260315_181508.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_10/metadata_20260315_181508.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_183836",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_10/model_20260315_183836.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_10/metadata_20260315_183836.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "MES_svc_high_10": [
+      {
+        "timestamp": "20260315_181119",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/model_20260315_181119.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/metadata_20260315_181119.json",
+        "metrics": {
+          "accuracy": 0.9989350586722392,
+          "precision": 0.75,
+          "recall": 0.05454545454545454,
+          "f1": 0.1016949152542373,
+          "auc": 0.9998549858003121
+        }
+      },
+      {
+        "timestamp": "20260315_181508",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/model_20260315_181508.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/metadata_20260315_181508.json",
+        "metrics": {
+          "accuracy": 0.9840888622035425,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "auc": 0.997329250463352
+        }
+      },
+      {
+        "timestamp": "20260315_183836",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/model_20260315_183836.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/metadata_20260315_183836.json",
+        "metrics": {
+          "accuracy": 0.9983753046303818,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "auc": 1.0
+        }
+      }
+    ],
+    "MES_gb_high_15": [
+      {
+        "timestamp": "20260315_181119",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_15/model_20260315_181119.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_15/metadata_20260315_181119.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_181508",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_15/model_20260315_181508.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_15/metadata_20260315_181508.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_183836",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_15/model_20260315_183836.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_high_15/metadata_20260315_183836.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "MES_gb_low_05": [
+      {
+        "timestamp": "20260315_181119",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_low_05/model_20260315_181119.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_low_05/metadata_20260315_181119.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_181508",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_low_05/model_20260315_181508.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_low_05/metadata_20260315_181508.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      },
+      {
+        "timestamp": "20260315_183836",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_low_05/model_20260315_183836.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_gb_low_05/metadata_20260315_183836.json",
+        "metrics": {
+          "error": "LightGBM not available"
+        }
+      }
+    ],
+    "MES_svc_low_05": [
+      {
+        "timestamp": "20260315_181220",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_low_05/model_20260315_181220.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_low_05/metadata_20260315_181220.json",
+        "metrics": {
+          "accuracy": 0.981413759845684,
+          "precision": 1.0,
+          "recall": 0.003232758620689655,
+          "f1": 0.00644468313641246,
+          "auc": 0.9581776525742043
+        }
+      },
+      {
+        "timestamp": "20260315_181508",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_low_05/model_20260315_181508.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_low_05/metadata_20260315_181508.json",
+        "metrics": {
+          "accuracy": 0.9612728910237166,
+          "precision": 1.0,
+          "recall": 0.044444444444444446,
+          "f1": 0.0851063829787234,
+          "auc": 0.9768622815556482
+        }
+      },
+      {
+        "timestamp": "20260315_183836",
+        "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_low_05/model_20260315_183836.pkl",
+        "metadata_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_low_05/metadata_20260315_183836.json",
+        "metrics": {
+          "accuracy": 0.9951259138911455,
+          "precision": 0.9705882352941176,
+          "recall": 0.868421052631579,
+          "f1": 0.9166666666666666,
+          "auc": 0.9993823620240878
+        }
+      }
+    ]
+  }
+}

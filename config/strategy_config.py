@@ -82,14 +82,14 @@ SCALPING_PAIRS = {
     },
     # ── Futures scalping params ─────────────────────────────────
     'MES': {
-        'session_atr_min': 2.0,        # 2 point minimum ATR (filters low-vol noise)
+        'session_atr_min': 1.0,        # Lowered ATR for quiet/Sunday trading
         'spread_sim': 0.25,            # 1 tick spread
         'pip_size': 0.25,              # tick_size
         'cooldown_seconds': 300,
         'max_hold_candles': 20,        # Tighter hold for futures
     },
     'MNQ': {
-        'session_atr_min': 5.0,        # NQ more volatile, 5m ATR typically 8-12
+        'session_atr_min': 2.0,        # Lowered ATR for quiet/Sunday trading
         'spread_sim': 0.50,            # 2 ticks spread
         'pip_size': 0.25,
         'cooldown_seconds': 300,
@@ -132,7 +132,7 @@ OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 # With sweep-gated architecture, sweep must fire (4-layer validation)
 # then confidence is boosted/reduced by EMA + Technical confirmation.
 # Futures tuning: 0.60 threshold + 3 model agreement was optimal in backtest.
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.60))
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.35))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))  # Sweep + at least 2 context models must agree
 
 # Technical Analysis Parameters (ATR-centric scalping)
@@ -158,7 +158,7 @@ HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.40))
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
 
 # Logging
-LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+LOG_LEVEL = 'DEBUG'
 LOG_DIR = 'logs'
 LOG_FILE = f'{LOG_DIR}/trading_bot.log'
 

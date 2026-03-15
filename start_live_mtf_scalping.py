@@ -401,10 +401,6 @@ class LiveMTFScalper:
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
             return False
-        # ADX DIRECTION FILTER: Don't long when bullish trend is weakening (ADX falling)
-        if not ctx_5m.get('adx_rising', True):
-            if verbose: print(f"      ❌ ADX falling ({ctx_5m['adx']:.1f}) - trend exhausting, skip long")
-            return False
         # Relaxed DI filter: Allow if DI+ >= DI- - tolerance
         if ctx_5m['di_plus'] < (ctx_5m['di_minus'] - DI_TOLERANCE):
             if verbose: print(f"      ❌ DI+ {ctx_5m['di_plus']:.1f} < DI- {ctx_5m['di_minus']:.1f} - {DI_TOLERANCE}")
@@ -477,10 +473,6 @@ class LiveMTFScalper:
             if verbose: print(f"      ⚡ COUNTER-TREND: DI- dominates by {di_diff:.1f} pts")
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
-            return False
-        # ADX DIRECTION FILTER: Don't short when bearish trend is weakening (ADX falling)
-        if not is_counter_trend and not ctx_5m.get('adx_rising', True):
-            if verbose: print(f"      ❌ ADX falling ({ctx_5m['adx']:.1f}) - trend exhausting, skip short")
             return False
         # Relaxed DI filter: Allow if DI- >= DI+ - tolerance (skip for counter-trend)
         if not is_counter_trend and ctx_5m['di_minus'] < (ctx_5m['di_plus'] - DI_TOLERANCE):
