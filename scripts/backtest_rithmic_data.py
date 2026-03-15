@@ -248,13 +248,42 @@ def main():
     
     if df is None or df.empty:
         print("❌ Failed to fetch data. Using cached data...")
-        # Fallback to CSV
+        # Fallback to CSV - try exact match first, then resample from 1m
         csv_path = f"data/{args.symbol}_{args.timeframe}m.csv"
+        csv_1m_path = f"data/{args.symbol}_1m.csv"
+        
         if os.path.exists(csv_path):
             df = pd.read_csv(csv_path)
             print(f"✅ Loaded {len(df)} rows from {csv_path}")
+        elif os.path.exists(csv_1m_path):
+            print(f"📊 Resampling from 1m data...")
+            df_1m = pd.read_csv(csv_1m_path)
+            
+            # Ensure datetime column
+            if 'timestamp' in df_1m.columns:
+                df_1m['datetime'] = pd.to_datetime(df_1m['timestamp'])
+            elif 'datetime' in df_1m.columns:
+                df_1m['datetime'] = pd.to_datetime(df_1m['datetime'])
+            
+            df_1m = df_1m.set_index('datetime')
+            
+            # Resample to desired timeframe
+            df = df_1m.resample(f'{args.timeframe}min').agg({
+                'open': 'first',
+                'high': 'max',
+                'low': 'min',
+                'close': 'last',
+                'volume': 'sum'
+            }).dropna().reset_index()
+            
+            # Filter to requested days
+            if args.days and len(df) > 0:
+                cutoff = df['datetime'].max() - pd.Timedelta(days=args.days)
+                df = df[df['datetime'] >= cutoff]
+            
+            print(f"✅ Resampled to {len(df)} {args.timeframe}m bars from {csv_1m_path}")
         else:
-            print(f"❌ No cached data at {csv_path}")
+            print(f"❌ No data found at {csv_path} or {csv_1m_path}")
             return
     
     # Run backtest
