@@ -1,5 +1,5 @@
 """
-Sweep-Gated Entry System — RayAlgo v3
+Sweep-Gated Entry System — RayAlgo v3 + Intelligent ML
 
 Architecture:
   Gate:    LiquiditySweepAnalyzer (4-layer: Bias → Sweep → MSS → Entry)
@@ -8,8 +8,13 @@ Architecture:
            These BOOST or REDUCE sweep confidence — they cannot create a signal.
   Context: All other models (scalping, volume, sentiment, LSTM, S/R, candle, MTF)
            still run for logging / adaptive learning — but do NOT affect entry.
+  ML:      IntelligentTrader provides ML-augmented signal analysis via:
+           - Feature generators (TA-Lib, statistical, rolling)
+           - Multiple ML classifiers (Neural Net, Gradient Boost, SVC)
+           - Advanced signal generation with threshold/crossover rules
 
 LSTM is optional — if TensorFlow is not installed the system runs without it.
+IntelligentTrader is optional — provides ML boost when models are trained.
 """
 import pandas as pd
 from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
@@ -31,9 +36,33 @@ from src.utils.logger import TradeLogger, bot_logger
 from src.instruments import REGISTRY
 from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGREEMENT
 
+# Import IntelligentTrader with availability check
+try:
+    from src.ai.intelligent_trading import IntelligentTrader
+    INTELLIGENT_AVAILABLE = True
+except ImportError as e:
+    INTELLIGENT_AVAILABLE = False
+    bot_logger.warning(f"IntelligentTrader not available: {e}")
+
+# Import AdvancedStrategies (Binance bot strategies)
+try:
+    from src.ai.advanced_strategies import AdvancedStrategies
+    ADVANCED_STRATS_AVAILABLE = True
+except ImportError as e:
+    ADVANCED_STRATS_AVAILABLE = False
+    bot_logger.warning(f"AdvancedStrategies not available: {e}")
+
+# Import DynamicSLTP manager
+try:
+    from src.ai.dynamic_sltp import DynamicSLTPManager
+    DYNAMIC_SLTP_AVAILABLE = True
+except ImportError as e:
+    DYNAMIC_SLTP_AVAILABLE = False
+    bot_logger.warning(f"DynamicSLTP not available: {e}")
+
 
 class EnsembleTrader:
-    """Sweep-gated entry system with confirmation boosters and adaptive learning."""
+    """Sweep-gated entry system with confirmation boosters, intelligent ML, and adaptive learning."""
 
     # Confirmation boost/penalty amounts
     EMA_CONFIRM_BOOST = 0.05     # EMA aligned with sweep direction
@@ -43,6 +72,12 @@ class EnsembleTrader:
     LSTM_CONFIRM_BOOST = 0.08    # LSTM direction agrees with sweep
     LSTM_OPPOSE_PENALTY = 0.20   # LSTM direction opposes sweep (strong filter)
     RL_SKIP_PENALTY = 0.08       # RL agent recommends skipping
+    INTEL_CONFIRM_BOOST = 0.10   # IntelligentTrader confirms sweep direction
+    INTEL_OPPOSE_PENALTY = 0.15  # IntelligentTrader opposes sweep direction
+    INTEL_HIGH_CONF_BOOST = 0.05 # Extra boost for high-confidence intelligent signal
+    ADV_CONFIRM_BOOST = 0.08     # Advanced strategies confirm sweep direction
+    ADV_OPPOSE_PENALTY = 0.12    # Advanced strategies oppose sweep direction
+    ADV_MULTI_AGREE_BOOST = 0.05 # Extra boost when multiple advanced strategies agree
 
     def __init__(self, newsapi_key=None, broker=None):
         # ── Primary: sweep gate ──────────────────────────────────────
@@ -51,6 +86,51 @@ class EnsembleTrader:
         # ── Confirmation models (only these affect confidence) ───────
         self.ema_crossover = EMACrossoverAnalyzer()
         self.technical = TechnicalAnalyzer()
+
+        # ── Intelligent ML Trading System ────────────────────────────
+        if INTELLIGENT_AVAILABLE:
+            try:
+                self.intelligent = IntelligentTrader(broker=broker)
+                self.intelligent_available = True
+                bot_logger.info("🧠 IntelligentTrader: ML classifiers active (GB, SVC, NN)")
+            except Exception as e:
+                self.intelligent = None
+                self.intelligent_available = False
+                bot_logger.warning(f"⚠️ IntelligentTrader init failed: {e}")
+        else:
+            self.intelligent = None
+            self.intelligent_available = False
+
+        # ── Advanced Strategies (Binance bot strategies) ─────────────
+        if ADVANCED_STRATS_AVAILABLE:
+            try:
+                self.advanced_strategies = AdvancedStrategies()
+                self.advanced_strats_available = True
+                bot_logger.info("📈 AdvancedStrategies: 8 strategies active (FibMACD, StochRSI, HA, etc)")
+            except Exception as e:
+                self.advanced_strategies = None
+                self.advanced_strats_available = False
+                bot_logger.warning(f"⚠️ AdvancedStrategies init failed: {e}")
+        else:
+            self.advanced_strategies = None
+            self.advanced_strats_available = False
+
+        # ── Dynamic SL/TP Manager ────────────────────────────────────
+        if DYNAMIC_SLTP_AVAILABLE:
+            try:
+                self.sltp_manager = DynamicSLTPManager(
+                    use_trailing_stop=True,
+                    trailing_callback=0.002
+                )
+                self.sltp_available = True
+                bot_logger.info("🎯 DynamicSLTP: Trailing stops + swing-based SL/TP active")
+            except Exception as e:
+                self.sltp_manager = None
+                self.sltp_available = False
+                bot_logger.warning(f"⚠️ DynamicSLTP init failed: {e}")
+        else:
+            self.sltp_manager = None
+            self.sltp_available = False
 
         # ── Context models (logging/learning only, no entry influence)
         self.lstm = LSTMPredictor(lookback_window=60)
@@ -78,6 +158,8 @@ class EnsembleTrader:
         # Legacy model_weights kept for adaptive learner compatibility
         self.model_weights = {
             'sweep': 1.00,
+            'intelligent': 0.0,  # Will be enabled when trained
+            'advanced_strategies': 0.0,  # Binance bot strategies
             'ema_crossover': 0.0,
             'technical': 0.0,
             'scalping': 0.0,
@@ -89,9 +171,12 @@ class EnsembleTrader:
             'sentiment': 0.0,
         }
 
-        bot_logger.info("🎯 Sweep-Gated Entry System (RayAlgo v3)")
+        bot_logger.info("🎯 Sweep-Gated Entry System (RayAlgo v3 + Intelligent ML)")
         bot_logger.info("   Gate:    LiquiditySweep (4-layer: Bias → Sweep → MSS → Entry)")
         bot_logger.info("   Confirm: EMA Crossover + Technical (boost/reduce only)")
+        bot_logger.info(f"   ML:      IntelligentTrader ({'active' if self.intelligent_available else 'disabled'})")
+        bot_logger.info(f"   Strats:  AdvancedStrategies ({'active' if self.advanced_strats_available else 'disabled'})")
+        bot_logger.info(f"   SL/TP:   DynamicSLTP ({'active' if self.sltp_available else 'disabled'})")
         bot_logger.info("   Context: 8 models for learning (no entry influence)")
 
     def get_trading_signal(self, df, pair):
@@ -147,6 +232,27 @@ class EnsembleTrader:
         # ── Step 4: Run confirmation models ──────────────────────────
         ema_signal = self.ema_crossover.get_signal(df_enriched)
         technical_signal = self.technical.get_signal(df_enriched)
+
+        # ── Step 4b: Run IntelligentTrader ML analysis ───────────────
+        intelligent_signal = {'signal': 'HOLD', 'confidence': 0.0}
+        if self.intelligent_available:
+            try:
+                intelligent_signal = self.intelligent.get_trading_signal(df_enriched, pair)
+            except Exception as e:
+                bot_logger.debug(f"IntelligentTrader analysis failed: {e}")
+
+        # ── Step 4c: Run Advanced Strategies (Binance bot strategies) ─
+        advanced_signal = {'signal': 'HOLD', 'confidence': 0.0, 'buy_votes': 0, 'sell_votes': 0}
+        if self.advanced_strats_available:
+            try:
+                # Use combined signal from multiple strategies for robustness
+                advanced_signal = self.advanced_strategies.get_combined_signal(
+                    df_enriched,
+                    strategies=['stoch_rsi_macd', 'golden_cross', 'triple_ema_stoch', 'heikin_ashi_ema'],
+                    min_agreement=2
+                )
+            except Exception as e:
+                bot_logger.debug(f"AdvancedStrategies analysis failed: {e}")
 
         # ── Step 5: Run context models (for logging + learning) ──────
         if self.lstm_available:
@@ -233,6 +339,52 @@ class EnsembleTrader:
                     f"⚠️ Technical opposes {sweep_direction} (−{self.TECH_OPPOSE_PENALTY:.0%}) → {final_confidence:.1%}"
                 )
 
+            # ── IntelligentTrader ML confirmation ─────────────────────
+            if self.intelligent_available and intelligent_signal.get('signal') != 'HOLD':
+                intel_dir = intelligent_signal.get('signal')
+                intel_conf = intelligent_signal.get('confidence', 0.0)
+                if intel_dir == sweep_direction:
+                    final_confidence += self.INTEL_CONFIRM_BOOST
+                    bot_logger.info(
+                        f"🧠 IntelligentTrader confirms {sweep_direction} (+{self.INTEL_CONFIRM_BOOST:.0%}) → {final_confidence:.1%}"
+                    )
+                    # Extra boost for high-confidence intelligent signal
+                    if intel_conf > 0.7:
+                        final_confidence += self.INTEL_HIGH_CONF_BOOST
+                        bot_logger.info(
+                            f"🧠 IntelligentTrader HIGH confidence {intel_conf:.0%} (+{self.INTEL_HIGH_CONF_BOOST:.0%}) → {final_confidence:.1%}"
+                        )
+                elif intel_dir in ('BUY', 'SELL') and intel_dir != sweep_direction:
+                    final_confidence -= self.INTEL_OPPOSE_PENALTY
+                    bot_logger.info(
+                        f"⚠️ IntelligentTrader opposes {sweep_direction} (−{self.INTEL_OPPOSE_PENALTY:.0%}) → {final_confidence:.1%}"
+                    )
+
+            # ── Advanced Strategies confirmation (Binance bot strategies)
+            if self.advanced_strats_available and advanced_signal.get('signal') != 'HOLD':
+                adv_dir = advanced_signal.get('signal')
+                adv_conf = advanced_signal.get('confidence', 0.0)
+                buy_votes = advanced_signal.get('buy_votes', 0)
+                sell_votes = advanced_signal.get('sell_votes', 0)
+                
+                if adv_dir == sweep_direction:
+                    final_confidence += self.ADV_CONFIRM_BOOST
+                    bot_logger.info(
+                        f"📈 AdvancedStrategies confirms {sweep_direction} (+{self.ADV_CONFIRM_BOOST:.0%}) → {final_confidence:.1%}"
+                    )
+                    # Extra boost for strong multi-strategy agreement
+                    agreeing_count = buy_votes if adv_dir == 'BUY' else sell_votes
+                    if agreeing_count >= 3:
+                        final_confidence += self.ADV_MULTI_AGREE_BOOST
+                        bot_logger.info(
+                            f"📈 AdvancedStrategies strong consensus ({agreeing_count} strategies) (+{self.ADV_MULTI_AGREE_BOOST:.0%}) → {final_confidence:.1%}"
+                        )
+                elif adv_dir in ('BUY', 'SELL') and adv_dir != sweep_direction:
+                    final_confidence -= self.ADV_OPPOSE_PENALTY
+                    bot_logger.info(
+                        f"⚠️ AdvancedStrategies opposes {sweep_direction} (−{self.ADV_OPPOSE_PENALTY:.0%}) → {final_confidence:.1%}"
+                    )
+
             # ── EMA 200 Trend Filter — SOFT PENALTY counter-trend ─────
             ema_200 = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
             cur_price = df_enriched['close'].iloc[-1]
@@ -283,6 +435,10 @@ class EnsembleTrader:
             if self.lstm_available:
                 context_signals['lstm'] = lstm_signal['signal']
             context_signals['sentiment'] = sentiment_signal_type
+            if self.intelligent_available:
+                context_signals['intelligent'] = intelligent_signal.get('signal', 'HOLD')
+            if self.advanced_strats_available:
+                context_signals['advanced_strategies'] = advanced_signal.get('signal', 'HOLD')
 
             agreeing = sum(1 for s in context_signals.values() if s == sweep_direction)
             models_agreement = agreeing + 1  # +1 for sweep itself
@@ -385,6 +541,8 @@ class EnsembleTrader:
         )
         reason_parts.append(f"EMA: {ema_signal['signal']} ({ema_signal['confidence']:.0%})")
         reason_parts.append(f"Tech: {technical_signal['signal']} ({technical_signal['confidence']:.0%})")
+        if self.intelligent_available:
+            reason_parts.append(f"ML: {intelligent_signal.get('signal', 'HOLD')} ({intelligent_signal.get('confidence', 0):.0%})")
         reason_parts.append(f"Regime: {regime}")
         if models_agreement > 0:
             reason_parts.append(f"Context: {models_agreement} models aligned")
@@ -409,6 +567,21 @@ class EnsembleTrader:
                     'regime': sweep_signal.get('regime', 'unknown'),
                     'bias': sweep_signal.get('bias'),
                     'mss_confirmed': bool(sweep_signal.get('mss', {}).get('confirmed', False)),
+                },
+                'intelligent': {
+                    'signal': intelligent_signal.get('signal', 'HOLD'),
+                    'confidence': intelligent_signal.get('confidence', 0.0),
+                    'trade_score': intelligent_signal.get('trade_score', 0.0),
+                    'signal_strength': intelligent_signal.get('signal_strength', 'weak'),
+                    'available': self.intelligent_available,
+                },
+                'advanced_strategies': {
+                    'signal': advanced_signal.get('signal', 'HOLD'),
+                    'confidence': advanced_signal.get('confidence', 0.0),
+                    'buy_votes': advanced_signal.get('buy_votes', 0),
+                    'sell_votes': advanced_signal.get('sell_votes', 0),
+                    'strategies': advanced_signal.get('strategies', {}),
+                    'available': self.advanced_strats_available,
                 },
                 'scalping': {
                     'signal': scalping_signal_type,
@@ -525,3 +698,138 @@ class EnsembleTrader:
     def record_trade_result(self, trade_data: dict):
         """Pass trade result to adaptive learner."""
         self.learner.record_trade(trade_data)
+
+    def get_dynamic_sl_tp(
+        self,
+        df: pd.DataFrame,
+        direction: str,
+        entry_price: float,
+        symbol: str = None
+    ) -> dict:
+        """
+        Calculate dynamic SL/TP using swing points and ATR.
+        
+        Args:
+            df: OHLCV DataFrame with indicators
+            direction: 'BUY' or 'SELL'
+            entry_price: Current entry price
+            symbol: Trading symbol (optional)
+            
+        Returns:
+            Dict with sl_price, tp_price, risk_reward, etc.
+        """
+        if not self.sltp_available:
+            # Fallback to simple percentage-based SL/TP
+            sl_pct = 0.005  # 0.5%
+            tp_pct = 0.010  # 1.0%
+            if direction == 'BUY':
+                return {
+                    'sl_price': entry_price * (1 - sl_pct),
+                    'tp_price': entry_price * (1 + tp_pct),
+                    'risk_reward': 2.0,
+                    'method': 'fallback'
+                }
+            else:
+                return {
+                    'sl_price': entry_price * (1 + sl_pct),
+                    'tp_price': entry_price * (1 - tp_pct),
+                    'risk_reward': 2.0,
+                    'method': 'fallback'
+                }
+        
+        return self.sltp_manager.calculate_sl_tp(df, direction, entry_price, symbol)
+
+    def start_trailing_stop(
+        self,
+        symbol: str,
+        direction: str,
+        entry_price: float,
+        sl_price: float,
+        tp_price: float,
+        quantity: float = 1.0
+    ):
+        """Start tracking a position for trailing stop updates."""
+        if self.sltp_available:
+            self.sltp_manager.start_tracking(
+                symbol, direction, entry_price, sl_price, tp_price, quantity
+            )
+
+    def update_trailing_stop(self, symbol: str, current_price: float) -> dict:
+        """Update trailing stop for an active position."""
+        if not self.sltp_available:
+            return None
+        return self.sltp_manager.update_trailing_stop(symbol, current_price)
+
+    def check_sltp_exit(self, symbol: str, current_price: float) -> dict:
+        """Check if position should exit due to SL or TP hit."""
+        if not self.sltp_available:
+            return None
+        return self.sltp_manager.check_exit(symbol, current_price)
+
+    def stop_trailing(self, symbol: str):
+        """Stop tracking a position (position closed)."""
+        if self.sltp_available:
+            self.sltp_manager.stop_tracking(symbol)
+
+    def get_advanced_strategy_signal(
+        self,
+        df: pd.DataFrame,
+        strategy: str = 'stoch_rsi_macd'
+    ) -> dict:
+        """
+        Get signal from a specific advanced strategy.
+        
+        Available strategies: fib_macd, stoch_rsi_macd, golden_cross,
+        triple_ema_stoch, heikin_ashi_ema, breakout, stoch_bb, wick_reversal
+        """
+        if not self.advanced_strats_available:
+            return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Not available'}
+        return self.advanced_strategies.get_signal(df, strategy)
+        
+        # Also pass to IntelligentTrader for ML learning
+        if self.intelligent_available:
+            try:
+                prediction = trade_data.get('prediction', {})
+                entry_price = trade_data.get('entry_price', 0)
+                exit_price = trade_data.get('exit_price', 0)
+                direction = 'long' if trade_data.get('signal') == 'BUY' else 'short'
+                self.intelligent.record_trade_outcome(prediction, entry_price, exit_price, direction)
+            except Exception as e:
+                bot_logger.debug(f"IntelligentTrader outcome recording failed: {e}")
+
+    def train_intelligent_models(self, df: pd.DataFrame, pair: str = None):
+        """Train IntelligentTrader ML models on historical data."""
+        if not self.intelligent_available:
+            return {'error': 'IntelligentTrader not available'}
+        return self.intelligent.train(df, pair, force=True)
+
+    def get_intelligent_analysis(self, df: pd.DataFrame, pair: str = None) -> dict:
+        """Get detailed analysis from IntelligentTrader."""
+        if not self.intelligent_available:
+            return {'error': 'IntelligentTrader not available'}
+        return self.intelligent.get_trading_signal(df, pair)
+
+    def backtest_intelligent(self, df: pd.DataFrame, pair: str = None) -> dict:
+        """Run backtest using IntelligentTrader strategy."""
+        if not self.intelligent_available:
+            return {'error': 'IntelligentTrader not available'}
+        return self.intelligent.backtest_strategy(df, pair)
+
+    def get_feature_importance(self) -> dict:
+        """Get feature importance from IntelligentTrader models."""
+        if not self.intelligent_available:
+            return {'error': 'IntelligentTrader not available'}
+        return self.intelligent.get_feature_analysis()
+
+    def save_intelligent_models(self):
+        """Save IntelligentTrader models to disk."""
+        if not self.intelligent_available:
+            return {'error': 'IntelligentTrader not available'}
+        self.intelligent.save_models()
+        return {'status': 'saved'}
+
+    def get_intelligent_summary(self) -> str:
+        """Get summary of IntelligentTrader performance."""
+        if not self.intelligent_available:
+            return "IntelligentTrader not available"
+        return self.intelligent.get_trading_summary()

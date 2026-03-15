@@ -1,0 +1,111 @@
+{
+    // Intelligent Trading Configuration
+    // Based on intelligent-trading-bot by asavinov
+    
+    "enabled": true,
+    "auto_train": true,
+    "retrain_hours": 24,
+    "min_training_samples": 1000,
+
+    // === FEATURE GENERATION ===
+    "feature_sets": [
+        {
+            "generator": "talib",
+            "config": {
+                "columns": ["close"],
+                "functions": ["SMA", "EMA", "RSI", "MACD", "BBANDS", "ATR", "ADX"],
+                "windows": [5, 10, 14, 20, 50]
+            }
+        },
+        {
+            "generator": "talib",
+            "config": {
+                "columns": ["close"],
+                "functions": ["LINEARREG_SLOPE", "STDDEV"],
+                "windows": [10, 20, 50]
+            }
+        },
+        {
+            "generator": "itbstats",
+            "config": {
+                "columns": ["close", "volume"],
+                "functions": ["skew", "kurtosis", "slope", "zscore"],
+                "windows": [10, 20, 50]
+            }
+        },
+        {
+            "generator": "rolling",
+            "config": {
+                "columns": ["close", "volume"],
+                "functions": ["mean", "std", "min", "max"],
+                "windows": [5, 10, 20]
+            }
+        }
+    ],
+
+    // === LABEL GENERATION ===
+    "label_config": {
+        "horizon": 60,
+        "label_type": "highlow",
+        "thresholds": [0.5, 1.0, 1.5, 2.0],
+        "tolerance": 0.15
+    },
+
+    // === ML ALGORITHMS ===
+    "algorithms": [
+        {
+            "name": "gb_default",
+            "algo": "gb",
+            "params": {
+                "n_estimators": 100,
+                "learning_rate": 0.05,
+                "max_depth": 5,
+                "min_samples_split": 10,
+                "verbose": -1
+            }
+        },
+        {
+            "name": "svc_rbf",
+            "algo": "svc",
+            "params": {
+                "C": 1.0,
+                "kernel": "rbf",
+                "probability": true
+            }
+        },
+        {
+            "name": "linear",
+            "algo": "linear",
+            "params": {
+                "penalty": "l2",
+                "C": 1.0
+            }
+        }
+    ],
+
+    // === SIGNAL GENERATION ===
+    "signal_config": {
+        "generator": "threshold",
+        "buy_threshold": 0.08,
+        "sell_threshold": -0.08,
+        "smoothing_window": 5,
+        "min_score_abs": 0.05
+    },
+
+    // === BACKTESTING ===
+    "backtest_config": {
+        "train_ratio": 0.7,
+        "commission_pct": 0.001,
+        "slippage_pct": 0.0005,
+        "initial_capital": 10000
+    },
+
+    // === HORIZONS ===
+    "features_horizon": 200,
+    "label_horizon": 60,
+    
+    // === MODEL PERSISTENCE ===
+    "model_save_path": "models/intelligent",
+    "auto_save": true,
+    "model_version_limit": 5
+}
