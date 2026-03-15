@@ -1,8 +1,12 @@
 #!/usr/bin/env python
 """
-LIVE TRADING - Enhanced Breakout Strategy via Rithmic (Tradesea/Lucid)
+LIVE TRADING - Full AI Ensemble via Rithmic (Tradesea/Lucid)
 
-Strategy: 10-bar breakout + EMA50 trend filter (PF 1.50 validated)
+Strategy: Sweep-Gated Entry + ML Confirmations (PF 1.16+ validated)
+- IntelligentTrader: ML classifiers (Gradient Boost, SVC, Neural Net)
+- AdvancedStrategies: 8 strategies (FibMACD, StochRSI, HeikinAshi, etc)
+- Dynamic SL/TP: Swing-based stops with trailing
+- EMA/Technical confirmation layer
 
 Requirements:
 1. Rithmic credentials in .env (already configured for LucidTrading)
@@ -31,6 +35,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from src.broker.rithmic_connector import RithmicConnector
+from src.core.ensemble_trader import EnsembleTrader
+from src.ai.technical_analyzer import TechnicalAnalyzer
 from src.utils.logger import bot_logger, trades_logger
 
 # Strategy parameters (validated profitable)
@@ -106,6 +112,10 @@ class LiveRithmicTrader:
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
         
+        # Full AI ensemble system
+        self.ensemble: Optional[EnsembleTrader] = None
+        self.technical = TechnicalAnalyzer()
+        
         # Log file
         mode = "paper" if paper_mode else "live"
         self.log_file = f'logs/{mode}_rithmic_{symbol}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
@@ -133,6 +143,11 @@ class LiveRithmicTrader:
                 print(f"   Mode: PAPER - No real orders will be placed")
             else:
                 print(f"   Mode: ⚠️  LIVE - Real money at risk!")
+            
+            # Initialize full AI ensemble
+            print("\n🧠 Initializing AI Ensemble (ML + Advanced Strategies)...")
+            self.ensemble = EnsembleTrader(broker=self.broker)
+            print("✅ AI Ensemble ready!")
             
             return True
         except Exception as e:
@@ -192,20 +207,76 @@ class LiveRithmicTrader:
         return True
     
     def check_entry_signal(self, df: pd.DataFrame) -> Optional[Dict]:
-        """Check for entry signal on latest bar."""
+        """Check for entry signal using full AI Ensemble."""
         if self.position or self.cooldown > 0:
             return None
         
+        # Use full EnsembleTrader for signal
+        if self.ensemble is None:
+            return self._check_simple_breakout(df)
+        
+        try:
+            # Add indicators via technical analyzer
+            df_enriched = self.technical.calculate_indicators(df)
+            
+            # Get ensemble signal (includes sweep gate, ML, advanced strategies)
+            signal_result = self.ensemble.get_trading_signal(df_enriched, self.symbol)
+            
+            # Check if should trade
+            if not self.ensemble.should_trade(signal_result):
+                return None
+            
+            signal = signal_result['signal']
+            confidence = signal_result['confidence']
+            
+            if signal not in ('BUY', 'SELL'):
+                return None
+            
+            row = df.iloc[-1]
+            price = row['close']
+            atr = df_enriched['atr'].iloc[-1] if 'atr' in df_enriched.columns else row.get('atr', 10.0)
+            
+            if pd.isna(atr) or atr < 2.0:
+                atr = 10.0  # Fallback ATR for futures
+            
+            # Use dynamic SL/TP if available
+            if hasattr(self.ensemble, 'get_dynamic_sl_tp'):
+                direction = 'BUY' if signal == 'BUY' else 'SELL'
+                sltp = self.ensemble.get_dynamic_sl_tp(df_enriched, direction, price)
+                sl = sltp['sl_price']
+                tp = sltp['tp_price']
+            else:
+                sl_dist = atr * self.atr_mult
+                if signal == 'BUY':
+                    sl = price - sl_dist
+                    tp = price + (sl_dist * self.tp_mult)
+                else:
+                    sl = price + sl_dist
+                    tp = price - (sl_dist * self.tp_mult)
+            
+            direction = 'long' if signal == 'BUY' else 'short'
+            
+            bot_logger.info(f"🎯 ENSEMBLE SIGNAL: {signal} @ {price:.2f} (conf={confidence:.1%})")
+            bot_logger.info(f"   SL: {sl:.2f} | TP: {tp:.2f}")
+            
+            return {'direction': direction, 'entry': price, 'sl': sl, 'tp': tp, 'atr': atr, 'confidence': confidence}
+            
+        except Exception as e:
+            bot_logger.warning(f"Ensemble signal error: {e}, falling back to breakout")
+            return self._check_simple_breakout(df)
+    
+    def _check_simple_breakout(self, df: pd.DataFrame) -> Optional[Dict]:
+        """Fallback simple breakout strategy."""
         row = df.iloc[-1]
         price = row['close']
         high = row['high']
         low = row['low']
-        atr = row['atr']
-        high_n = row['high_N']
-        low_n = row['low_N']
-        ema = row['ema']
+        atr = row.get('atr', 10.0)
+        high_n = row.get('high_N', row['high'])
+        low_n = row.get('low_N', row['low'])
+        ema = row.get('ema', price)
         
-        if pd.isna(atr) or pd.isna(high_n) or pd.isna(ema) or atr < 2.0:
+        if pd.isna(atr) or atr < 2.0:
             return None
         
         # Long breakout
@@ -387,12 +458,13 @@ class LiveRithmicTrader:
     def run(self):
         """Main trading loop."""
         print("\n" + "=" * 70)
-        print("  LIVE BREAKOUT TRADING - Rithmic/Tradesea")
+        print("  LIVE TRADING - Rithmic + Full AI Ensemble")
         print("=" * 70)
         print(f"Symbol:     {self.symbol}")
         print(f"Contracts:  {self.contracts}")
         print(f"Mode:       {'PAPER' if self.paper_mode else '⚠️ LIVE'}")
-        print(f"Strategy:   10-bar Breakout + EMA50 Filter")
+        print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
+        print(f"Features:   Dynamic SL/TP, Trailing Stops, 8 Confirmation Models")
         print(f"Risk:       Max ${self.daily_loss_limit} daily loss")
         print("=" * 70)
         
