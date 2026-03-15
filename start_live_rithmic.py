@@ -121,8 +121,21 @@ class LiveRithmicTrader:
         self.log_file = f'logs/{mode}_rithmic_{symbol}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
         
     def connect(self) -> bool:
-        """Initialize Rithmic connection."""
+        """Initialize Rithmic connection (skipped in paper mode)."""
         try:
+            # Paper mode: skip Rithmic, use Yahoo Finance for data
+            if self.paper_mode:
+                print("📝 PAPER MODE - Skipping Rithmic connection")
+                print("   Using Yahoo Finance for market data")
+                self.broker = None
+                
+                # Initialize full AI ensemble without broker
+                print("\n🧠 Initializing AI Ensemble (ML + Advanced Strategies)...")
+                self.ensemble = EnsembleTrader(broker=None)
+                print("✅ AI Ensemble ready!")
+                return True
+            
+            # Live mode: connect to Rithmic
             self.broker = RithmicConnector()
             self.broker.initialize()
             
@@ -138,11 +151,7 @@ class LiveRithmicTrader:
             print(f"   System: {acct.get('system', 'Unknown')}")
             print(f"   Balance: ${acct.get('balance', 0):,.2f}")
             print(f"   Equity: ${acct.get('equity', 0):,.2f}")
-            
-            if self.paper_mode:
-                print(f"   Mode: PAPER - No real orders will be placed")
-            else:
-                print(f"   Mode: ⚠️  LIVE - Real money at risk!")
+            print(f"   Mode: ⚠️  LIVE - Real money at risk!")
             
             # Initialize full AI ensemble
             print("\n🧠 Initializing AI Ensemble (ML + Advanced Strategies)...")
@@ -155,20 +164,58 @@ class LiveRithmicTrader:
             return False
     
     def get_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
-        """Fetch candles from Rithmic."""
+        """Fetch candles from Rithmic or Yahoo Finance (paper mode)."""
         try:
+            # Paper mode or no broker: use Yahoo Finance
+            if self.broker is None:
+                return self._get_yahoo_candles(count)
+            
             df = self.broker.get_candles(self.symbol, timeframe_minutes=5, num_candles=count)
             if df is None or len(df) < 20:
-                print(f"⚠️  Insufficient candle data: {len(df) if df is not None else 0}")
-                return None
+                # Fallback to Yahoo
+                return self._get_yahoo_candles(count)
             return df
         except Exception as e:
             print(f"❌ Error getting candles: {e}")
+            return self._get_yahoo_candles(count)
+    
+    def _get_yahoo_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
+        """Fetch candles from Yahoo Finance as fallback."""
+        try:
+            import yfinance as yf
+            
+            # Map futures symbols to Yahoo tickers
+            ticker_map = {
+                'MES': 'ES=F',  # E-mini S&P 500 futures
+                'MNQ': 'NQ=F',  # E-mini Nasdaq futures
+            }
+            ticker = ticker_map.get(self.symbol, f'{self.symbol}=F')
+            
+            data = yf.download(ticker, period='5d', interval='5m', progress=False)
+            if data.empty:
+                return None
+            
+            df = data.reset_index()
+            df.columns = [c.lower() if isinstance(c, str) else c[0].lower() for c in df.columns]
+            
+            if 'datetime' not in df.columns and 'date' in df.columns:
+                df = df.rename(columns={'date': 'datetime'})
+            
+            return df.tail(count).reset_index(drop=True)
+        except Exception as e:
+            bot_logger.warning(f"Yahoo Finance fallback failed: {e}")
             return None
     
     def get_price(self) -> Optional[Dict]:
         """Get current bid/ask."""
         try:
+            if self.broker is None:
+                # Paper mode: get last close from Yahoo
+                df = self._get_yahoo_candles(5)
+                if df is not None and len(df) > 0:
+                    price = float(df['close'].iloc[-1])
+                    return {'bid': price - 0.25, 'ask': price + 0.25, 'last': price}
+                return None
             return self.broker.get_latest_price(self.symbol)
         except Exception as e:
             print(f"❌ Error getting price: {e}")
