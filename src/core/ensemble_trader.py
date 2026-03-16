@@ -293,8 +293,22 @@ class EnsembleTrader:
             # Sweep didn't fire — check for fallback entries
             ema_dir = ema_signal['signal']
             tech_dir = technical_signal['signal']
-            regime_bias = regime.get('bias', 'HOLD') if isinstance(regime, dict) else 'HOLD'
-            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, Regime={regime_bias}")
+            
+            # Convert regime string to bias direction
+            # regime is a string like 'trend_up', 'trend_down', 'ranging', etc.
+            if isinstance(regime, str):
+                if 'up' in regime.lower() or regime == 'volatile_up':
+                    regime_bias = 'BUY'
+                elif 'down' in regime.lower() or regime == 'volatile_down':
+                    regime_bias = 'SELL'
+                else:
+                    regime_bias = 'HOLD'
+            elif isinstance(regime, dict):
+                regime_bias = regime.get('bias', 'HOLD')
+            else:
+                regime_bias = 'HOLD'
+            
+            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, Regime={regime_bias} (raw={regime})")
             
             # Fallback 1: EMA + Technical agree on direction
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
@@ -671,7 +685,20 @@ class EnsembleTrader:
         )
         
         # Fallback 2: Regime bias matches signal and indicators don't oppose
-        regime_bias = signal_result.get('regime', {}).get('bias', 'HOLD') if isinstance(signal_result.get('regime'), dict) else 'HOLD'
+        # Convert regime string to bias direction
+        regime_raw = signal_result.get('regime', 'HOLD')
+        if isinstance(regime_raw, str):
+            if 'up' in regime_raw.lower() or regime_raw == 'volatile_up':
+                regime_bias = 'BUY'
+            elif 'down' in regime_raw.lower() or regime_raw == 'volatile_down':
+                regime_bias = 'SELL'
+            else:
+                regime_bias = 'HOLD'
+        elif isinstance(regime_raw, dict):
+            regime_bias = regime_raw.get('bias', 'HOLD')
+        else:
+            regime_bias = 'HOLD'
+            
         opposing_dir = 'SELL' if signal_result['signal'] == 'BUY' else 'BUY'
         is_regime_fallback = (
             not sweep_fired and
