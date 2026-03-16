@@ -314,7 +314,7 @@ class EnsembleTrader:
             # Fallback 2: Sweep bias is directional and indicators don't oppose
             elif sweep_bias in ('BUY', 'SELL') and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY') and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY'):
                 final_signal = sweep_bias
-                final_confidence = 0.38
+                final_confidence = 0.40
                 models_agreement = 1
                 bot_logger.info(
                     f"🔄 No sweep → BIAS fallback: {sweep_bias} "
