@@ -434,12 +434,42 @@ class RithmicConnector(BaseBroker):
     # ── Position queries ──────────────────────────────────────────
 
     def get_open_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get open positions with ticket IDs for bot tracking.
+        
+        Rithmic returns aggregate positions by symbol, so we match against
+        our _orders dict to reconstruct individual tickets.
+        """
         self._refresh_positions()
+        
+        result = []
         with self._state_lock:
-            positions = list(self._positions.values())
+            # Get symbols that have open positions
+            open_symbols = {sym for sym, pos in self._positions.items() if pos.get('size', 0) != 0}
+        
+        with self._order_lock:
+            # Return individual orders as "positions" if their symbol still has net exposure
+            for order_id, order_info in self._orders.items():
+                order_symbol = order_info.get('symbol', '')
+                if order_symbol in open_symbols:
+                    # This order is still active (symbol has position)
+                    pos_data = self._positions.get(order_symbol, {})
+                    result.append({
+                        'ticket': order_id,
+                        'pair': order_symbol,
+                        'symbol': order_symbol,
+                        'type': order_info.get('type', 'BUY'),
+                        'size': order_info.get('size', 1),
+                        'open_price': order_info.get('entry_price', pos_data.get('avg_price', 0)),
+                        'sl': order_info.get('stop_loss', 0),
+                        'tp': order_info.get('take_profit', 0),
+                        'open_time': order_info.get('time', ''),
+                        'unrealized_pnl': pos_data.get('unrealized_pnl', 0) / max(1, len([o for o in self._orders.values() if o.get('symbol') == order_symbol])),
+                    })
+        
         if symbol:
-            return [p for p in positions if p.get("symbol") == symbol]
-        return positions
+            result = [p for p in result if p.get('symbol') == symbol]
+        
+        return result
 
     def get_bot_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
         return self.get_open_positions(symbol)
@@ -784,8 +814,27 @@ class RithmicConnector(BaseBroker):
                             "avg_price": float(data.get("avg_open_fill_price", 0)),
                             "unrealized_pnl": float(data.get("open_pnl", 0)),
                         }
+            
+            # Clean up orders for closed symbols
+            self._cleanup_closed_orders()
+            
         except Exception as e:
             error_logger.error(f"Rithmic refresh positions error: {e}")
+
+    def _cleanup_closed_orders(self) -> None:
+        """Remove orders from _orders dict when their symbol has no position."""
+        with self._state_lock:
+            open_symbols = {sym for sym, pos in self._positions.items() if pos.get('size', 0) != 0}
+        
+        with self._order_lock:
+            closed_order_ids = [
+                oid for oid, info in self._orders.items()
+                if info.get('symbol', '') not in open_symbols
+            ]
+            for oid in closed_order_ids:
+                removed = self._orders.pop(oid, None)
+                if removed:
+                    bot_logger.info(f"🔄 Order {oid} ({removed.get('symbol')}) removed — position closed")
 
     def _refresh_account_pnl(self) -> None:
         """Sync account balance/equity from Rithmic PnL plant."""
