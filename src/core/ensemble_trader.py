@@ -720,9 +720,9 @@ class EnsembleTrader:
             )
             return False
 
-        # Require minimum model agreement
+        # Require minimum model agreement (skip for fallback entries)
         agreement = signal_result.get('models_agreement', 0)
-        if agreement < MIN_MODELS_AGREEMENT:
+        if agreement < MIN_MODELS_AGREEMENT and not is_fallback_entry:
             bot_logger.info(
                 f"🚫 Model agreement {agreement} < required {MIN_MODELS_AGREEMENT} — no trade"
             )
