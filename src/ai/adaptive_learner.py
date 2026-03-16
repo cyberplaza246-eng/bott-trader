@@ -888,9 +888,9 @@ class AdaptiveLearner:
         # Backtest mode: use the raw threshold without floor
         if getattr(self, 'backtest_mode', False):
             return self.confidence_threshold
-        # Live mode: floor at 0.40 — liquidity-sweep signals arrive at 0.80+,
-        # so this only filters out low-confidence non-sweep trades.
-        return max(self.confidence_threshold, 0.40)
+        # Live mode: floor at 0.50 — liquidity-sweep signals arrive at 0.70+,
+        # so this filters out low-confidence non-sweep trades to reduce drawdowns.
+        return max(self.confidence_threshold, 0.50)
 
     def get_pair_win_rate(self, pair: str) -> float:
         pair = self._normalize_pair(pair)

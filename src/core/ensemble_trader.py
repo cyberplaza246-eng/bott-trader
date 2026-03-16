@@ -728,7 +728,16 @@ class EnsembleTrader:
             )
             return False
 
-        if effective_confidence < threshold:
+        # Fallback entries require HIGHER confidence since they lack sweep confirmation
+        effective_threshold = threshold
+        if is_fallback_entry:
+            effective_threshold = max(threshold, 0.55)  # Minimum 55% for fallback
+            if effective_confidence < effective_threshold:
+                bot_logger.info(
+                    f"📊 Fallback entry confidence {effective_confidence:.2%} < required {effective_threshold:.2%}"
+                )
+                return False
+        elif effective_confidence < threshold:
             bot_logger.info(
                 f"📊 Confidence {effective_confidence:.2%} < threshold {threshold:.2%}"
             )
