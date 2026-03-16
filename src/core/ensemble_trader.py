@@ -290,26 +290,36 @@ class EnsembleTrader:
         context_signals = {}  # defined early so result dict always has it
 
         if sweep_direction not in ('BUY', 'SELL'):
-            # Sweep didn't fire — check for EMA+Technical consensus fallback
-            # This lets the bot take high-conviction trend trades when no
-            # liquidity sweep exists but EMA and Technical both agree.
+            # Sweep didn't fire — check for fallback entries
             ema_dir = ema_signal['signal']
             tech_dir = technical_signal['signal']
-            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}")
+            regime_bias = regime.get('bias', 'HOLD') if isinstance(regime, dict) else 'HOLD'
+            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, Regime={regime_bias}")
+            
+            # Fallback 1: EMA + Technical agree on direction
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
                 final_signal = ema_dir
-                final_confidence = 0.40  # just at threshold — intentionally low
+                final_confidence = 0.40  # just at threshold
                 models_agreement = 2
                 bot_logger.info(
                     f"🔄 No sweep → EMA+Tech fallback: {ema_dir} "
                     f"(EMA={ema_signal['confidence']:.0%}, "
                     f"Tech={technical_signal['confidence']:.0%})"
                 )
+            # Fallback 2: Regime bias is strong and indicators don't oppose
+            elif regime_bias in ('BUY', 'SELL') and ema_dir != ('SELL' if regime_bias == 'BUY' else 'BUY') and tech_dir != ('SELL' if regime_bias == 'BUY' else 'BUY'):
+                final_signal = regime_bias
+                final_confidence = 0.38  # slightly below threshold to be conservative
+                models_agreement = 1
+                bot_logger.info(
+                    f"🔄 No sweep → REGIME fallback: {regime_bias} "
+                    f"(Regime bias strong, EMA={ema_dir}, Tech={tech_dir} not opposing)"
+                )
             else:
                 final_signal = 'SKIP'
                 final_confidence = 0.0
                 models_agreement = 0
-                bot_logger.info(f"🚫 No sweep and EMA/Tech disagree - skipping")
+                bot_logger.info(f"🚫 No sweep and no fallback conditions met - skipping")
         else:
             final_signal = sweep_direction
             final_confidence = sweep_confidence
@@ -633,7 +643,7 @@ class EnsembleTrader:
         Determine if signal is strong enough to trade.
         With sweep-gated architecture, the sweep already validated structure.
         We only check confidence threshold.
-        Fallback: If sweep didn't fire but EMA+Tech agree, allow trade.
+        Fallback: If sweep didn't fire but EMA+Tech agree OR regime bias is strong, allow trade.
         """
         threshold = self.learner.get_adjusted_threshold()
 
@@ -646,25 +656,40 @@ class EnsembleTrader:
         sweep_model = signal_result.get('models', {}).get('sweep', {})
         sweep_fired = sweep_model.get('signal') in ('BUY', 'SELL')
         
-        # Allow fallback entries: EMA + Technical agree on direction
+        # Check EMA and Technical directions
         ema_model = signal_result.get('models', {}).get('ema_crossover', {})
         tech_model = signal_result.get('models', {}).get('technical', {})
         ema_dir = ema_model.get('signal', 'HOLD')
         tech_dir = tech_model.get('signal', 'HOLD')
         
-        is_fallback_entry = (
+        # Fallback 1: EMA + Technical agree on direction
+        is_ema_tech_fallback = (
             not sweep_fired and
             ema_dir == signal_result['signal'] and
             tech_dir == signal_result['signal'] and
             ema_dir in ('BUY', 'SELL')
         )
         
+        # Fallback 2: Regime bias matches signal and indicators don't oppose
+        regime_bias = signal_result.get('regime', {}).get('bias', 'HOLD') if isinstance(signal_result.get('regime'), dict) else 'HOLD'
+        opposing_dir = 'SELL' if signal_result['signal'] == 'BUY' else 'BUY'
+        is_regime_fallback = (
+            not sweep_fired and
+            regime_bias == signal_result['signal'] and
+            ema_dir != opposing_dir and
+            tech_dir != opposing_dir
+        )
+        
+        is_fallback_entry = is_ema_tech_fallback or is_regime_fallback
+        
         if not sweep_fired and not is_fallback_entry:
-            bot_logger.info("🚫 Sweep gate did not fire and no EMA+Tech fallback — no trade")
+            bot_logger.info("🚫 Sweep gate did not fire and no fallback conditions — no trade")
             return False
         
-        if is_fallback_entry:
+        if is_ema_tech_fallback:
             bot_logger.info(f"🔄 FALLBACK ENTRY: EMA+Tech agree on {signal_result['signal']} (no sweep required)")
+        elif is_regime_fallback:
+            bot_logger.info(f"🔄 FALLBACK ENTRY: Regime bias {regime_bias} matches signal (no sweep required)")
 
         # EMA crossover must not oppose signal direction (HOLD = neutral, allowed)
         if ema_dir in ('BUY', 'SELL') and ema_dir != signal_result['signal']:
