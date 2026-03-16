@@ -73,6 +73,7 @@ class Position:
     sl: float
     tp: float
     entry_time: datetime
+    managed_by_broker: bool = False
 
 
 class LiveRithmicTrader:
@@ -416,6 +417,9 @@ class LiveRithmicTrader:
         row = df.iloc[-1]
         
         for order_id, pos in list(self.positions.items()):
+            if pos.managed_by_broker:
+                continue
+
             d = pos.direction
             
             if d == 'long':
@@ -477,11 +481,50 @@ class LiveRithmicTrader:
         """Sync with actual broker position (live mode)."""
         if self.paper_mode or not self.broker:
             return
-        
-        # This would check actual positions from the broker
-        # and update self.position accordingly
-        # For now, relies on bracket orders handling SL/TP
-        pass
+
+        # Preserve locally tracked positions created during this process.
+        # This sync is mainly for restarts, where live broker positions exist
+        # but self.positions starts empty.
+        if self.positions:
+            return
+
+        try:
+            broker_positions = self.broker.get_open_positions(self.symbol)
+        except Exception as e:
+            bot_logger.warning(f"Could not sync broker positions: {e}")
+            return
+
+        if not broker_positions:
+            return
+
+        synced_positions: Dict[str, Position] = {}
+        for broker_pos in broker_positions:
+            raw_size = int(abs(broker_pos.get('size', 0) or 0))
+            if raw_size <= 0:
+                continue
+
+            direction = 'long' if (broker_pos.get('size', 0) or 0) > 0 else 'short'
+            avg_price = float(broker_pos.get('avg_price', 0.0) or 0.0)
+
+            for index in range(raw_size):
+                order_id = f"broker_sync_{self.symbol}_{index + 1}"
+                synced_positions[order_id] = Position(
+                    order_id=order_id,
+                    symbol=self.symbol,
+                    direction=direction,
+                    entry_price=avg_price,
+                    size=1,
+                    sl=0.0,
+                    tp=0.0,
+                    entry_time=datetime.now(timezone.utc),
+                    managed_by_broker=True,
+                )
+
+        if synced_positions:
+            self.positions = synced_positions
+            print(
+                f"🔄 Synced {len(self.positions)} existing broker position(s) for {self.symbol}"
+            )
     
     def save_log(self):
         """Save trade log."""
