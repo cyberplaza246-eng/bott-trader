@@ -173,8 +173,10 @@ class LiveRithmicTrader:
                 return self._get_yahoo_candles(count)
             
             df = self.broker.get_candles(self.symbol, timeframe_minutes=5, num_candles=count)
-            if df is None or len(df) < 20:
-                # Fallback to Yahoo
+            min_bars = self.lookback + self.ema_len + 15  # 75 bars needed
+            if df is None or len(df) < min_bars:
+                # Fallback to Yahoo - Rithmic returned insufficient data
+                print(f"⚠️  Rithmic returned {len(df) if df is not None else 0} bars, need {min_bars} - using Yahoo Finance")
                 return self._get_yahoo_candles(count)
             return df
         except Exception as e:
