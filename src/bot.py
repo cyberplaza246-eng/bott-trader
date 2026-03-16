@@ -1723,6 +1723,9 @@ class TradingBot:
         NOTE: Does NOT call risk_manager.on_trade_closed() for balance adjustment
         because _sync_balance() already synced the authoritative broker balance.
         Only decrements the open_trades counter and records the trade for the learner.
+        
+        When trades are closed and slots become free, triggers immediate scout
+        for new setups.
         """
         if self.mode != 'live' or not self.broker:
             return
@@ -1730,6 +1733,8 @@ class TradingBot:
         # Prevent both 1m and 5m threads from processing the same closure
         if not self._closure_lock.acquire(blocking=False):
             return  # Other thread is already handling closures
+
+        trades_closed = 0  # Track closures for immediate re-scan
 
         try:
             positions = self.broker.get_open_positions()
@@ -1752,6 +1757,8 @@ class TradingBot:
             closed_tickets = set(self._known_tickets.keys()) - current_tickets
             if not closed_tickets:
                 return
+
+            trades_closed = len(closed_tickets)  # Track for re-scan trigger
 
             # Snapshot balance BEFORE processing closures (for fallback P/L estimation)
             pre_balance = getattr(self.risk_manager, 'current_balance', None)
@@ -1874,6 +1881,47 @@ class TradingBot:
             bot_logger.warning(f"Closed trade detection failed: {e}")
         finally:
             self._closure_lock.release()
+
+            # ── Immediate Re-Scan: Scout for new setups when slots freed ──
+            if trades_closed > 0:
+                effective_cap, available_slots = self.risk_manager.get_trade_capacity()
+                if available_slots > 0:
+                    bot_logger.info(
+                        f"🔍 {trades_closed} position(s) closed — "
+                        f"{available_slots} slot(s) now free, scouting for new setups..."
+                    )
+                    # Schedule immediate re-scan in background thread to avoid blocking
+                    self._trigger_immediate_scan()
+
+    def _trigger_immediate_scan(self):
+        """Trigger an immediate scan for new trading setups when slots become free.
+        
+        Runs the 5M analysis immediately in a separate thread to scout for
+        new entries. Uses a cooldown to prevent spamming if multiple closures
+        happen in quick succession.
+        """
+        import threading
+        
+        # Cooldown check: don't spam scans (min 30s between triggered scans)
+        now = time.time()
+        last_triggered = getattr(self, '_last_immediate_scan', 0)
+        if now - last_triggered < 30:
+            bot_logger.debug("Immediate scan skipped — cooldown active")
+            return
+        self._last_immediate_scan = now
+        
+        def _run_scan():
+            try:
+                # Small delay to let deal history populate
+                time.sleep(2)
+                bot_logger.info("🚀 IMMEDIATE SCAN: Looking for new setups...")
+                self.analyze_and_trade('5m')  # Run 5M analysis for higher-quality setups
+            except Exception as e:
+                bot_logger.warning(f"Immediate scan failed: {e}")
+        
+        # Run in background thread to not block the current cycle
+        scan_thread = threading.Thread(target=_run_scan, daemon=True)
+        scan_thread.start()
 
     def _backfill_history(self):
         """One-time backfill: load closed deals from MT5 history into the adaptive learner.

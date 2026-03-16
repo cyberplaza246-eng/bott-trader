@@ -94,6 +94,14 @@ class RithmicConnector(BaseBroker):
         # Yahoo Finance fallback (lazy-loaded)
         self._yf_fallback = None
 
+        # Lock timeout / fallback mode tracking
+        self._lock_error_count = 0
+        self._max_lock_errors = 3  # Switch to fallback mode after this many errors
+        self._fallback_until: Optional[float] = None  # timestamp when to retry Rithmic
+        self._fallback_cooldown_secs = 120  # Stay in fallback mode for 2 minutes
+        self._candle_cache: Dict[str, tuple] = {}  # "sym_tf" → (timestamp, DataFrame)
+        self._candle_cache_ttl = 30  # Cache candles for 30 seconds
+
         # Configuration from env
         self._user = os.getenv("RITHMIC_USER_ID", "")
         self._password = os.getenv("RITHMIC_PASSWORD", "")
@@ -190,6 +198,28 @@ class RithmicConnector(BaseBroker):
         timeframe_minutes: int,
         num_candles: int = 100,
     ) -> Optional[pd.DataFrame]:
+        # Check cache first
+        cache_key = f"{symbol}_{timeframe_minutes}"
+        now = time.time()
+        if cache_key in self._candle_cache:
+            cached_time, cached_df = self._candle_cache[cache_key]
+            if now - cached_time < self._candle_cache_ttl and cached_df is not None and len(cached_df) >= 10:
+                return cached_df
+
+        # Check if we're in fallback mode due to repeated lock errors
+        if self._fallback_until is not None:
+            if now < self._fallback_until:
+                # Still in fallback mode — use Yahoo Finance
+                df = self._yf_get_candles(symbol, timeframe_minutes, num_candles)
+                if df is not None and len(df) >= 10:
+                    self._candle_cache[cache_key] = (now, df)
+                return df
+            else:
+                # Cooldown expired — try Rithmic again
+                bot_logger.info("🔄 Rithmic history cooldown expired, attempting reconnect...")
+                self._fallback_until = None
+                self._lock_error_count = 0
+
         # Try Rithmic historical bars first with retry logic
         if self._connected:
             max_retries = 2
@@ -197,9 +227,12 @@ class RithmicConnector(BaseBroker):
                 try:
                     df = self._run_sync(
                         self._async_get_candles(symbol, timeframe_minutes, num_candles),
-                        timeout=25,  # Increased timeout
+                        timeout=20,  # Reduced timeout to fail faster
                     )
                     if df is not None and len(df) >= 10:
+                        # Success! Reset error counter and cache result
+                        self._lock_error_count = 0
+                        self._candle_cache[cache_key] = (now, df)
                         return df
                     else:
                         bot_logger.warning(
@@ -208,16 +241,31 @@ class RithmicConnector(BaseBroker):
                         )
                 except Exception as e:
                     error_msg = str(e).lower()
-                    # Log and retry on lock timeout
-                    if "lock" in error_msg or "timeout" in error_msg:
-                        if attempt < max_retries - 1:
+                    is_lock_error = "lock" in error_msg or "timeout" in error_msg
+
+                    if is_lock_error:
+                        self._lock_error_count += 1
+                        # Check if we should enter fallback mode
+                        if self._lock_error_count >= self._max_lock_errors:
+                            self._fallback_until = now + self._fallback_cooldown_secs
+                            bot_logger.warning(
+                                f"⚠️ Rithmic history lock errors ({self._lock_error_count}x) — "
+                                f"switching to Yahoo Finance fallback for {self._fallback_cooldown_secs}s"
+                            )
+                            break
+                        elif attempt < max_retries - 1:
                             bot_logger.warning(f"Rithmic history lock timeout, retry {attempt+1}/{max_retries}")
-                            time.sleep(1.0 + attempt)  # Brief backoff
+                            time.sleep(0.5 + attempt)  # Brief backoff
                             continue
+
                     bot_logger.error(f"Rithmic candles error for {symbol}: {e}")
                     break
 
-        return self._yf_get_candles(symbol, timeframe_minutes, num_candles)
+        # Fall back to Yahoo Finance
+        df = self._yf_get_candles(symbol, timeframe_minutes, num_candles)
+        if df is not None and len(df) >= 10:
+            self._candle_cache[cache_key] = (now, df)
+        return df
 
     def get_latest_price(self, symbol: str) -> Optional[Dict[str, float]]:
         # Try cached Rithmic quote
@@ -780,7 +828,10 @@ class RithmicConnector(BaseBroker):
         num_candles: int,
     ) -> Optional[pd.DataFrame]:
         try:
-            return self._get_yf().get_candles(symbol, timeframe_minutes, num_candles)
+            df = self._get_yf().get_candles(symbol, timeframe_minutes, num_candles)
+            if df is not None and len(df) > 0:
+                bot_logger.info(f"Yahoo Finance fallback: {symbol} {len(df)} candles ({timeframe_minutes}m)")
+            return df
         except Exception as e:
             error_logger.error(f"Yahoo Finance candles fallback error: {e}")
             return None
