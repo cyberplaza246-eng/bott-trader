@@ -295,6 +295,7 @@ class EnsembleTrader:
             # liquidity sweep exists but EMA and Technical both agree.
             ema_dir = ema_signal['signal']
             tech_dir = technical_signal['signal']
+            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}")
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
                 final_signal = ema_dir
                 final_confidence = 0.40  # just at threshold — intentionally low
@@ -308,6 +309,7 @@ class EnsembleTrader:
                 final_signal = 'SKIP'
                 final_confidence = 0.0
                 models_agreement = 0
+                bot_logger.info(f"🚫 No sweep and EMA/Tech disagree - skipping")
         else:
             final_signal = sweep_direction
             final_confidence = sweep_confidence
