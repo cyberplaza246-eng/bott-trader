@@ -15,7 +15,7 @@
     "USD/JPY": 1.5,
     "MES": 1.3
   },
-  "entry_confidence_threshold": 0.5,
+  "entry_confidence_threshold": 0.35,
   "price_drift_tolerance_atr": 3.0,
   "auto_learning": {
     "enabled": true,
