@@ -28,6 +28,7 @@ from src.risk.prop_guard import PropGuard
 from src.risk.eval_algorithm import EvalAlgorithm, EvalConfig
 from src.instruments import get_instrument, is_futures, is_maintenance_window, REGISTRY
 from src.utils.logger import bot_logger, TradeLogger
+from src.utils.email_notifier import notify_trade_entry, notify_trade_closed
 from config.strategy_config import (
     TRADING_MODE,
     PAIRS,
@@ -998,6 +999,18 @@ class TradingBot:
             if order_id:
                 bot_logger.info(f"✅ Order placed - Ticket: {order_id}")
                 
+                # Send email notification (runs in background)
+                notify_trade_entry(
+                    pair=pair,
+                    trade_type=trade_type,
+                    entry_price=entry_price,
+                    stop_loss=stop_loss,
+                    take_profit=take_profit,
+                    lot_size=lot_size,
+                    confidence=signal_result.get('confidence', 0),
+                    reason=signal_result.get('detailed_reason', ''),
+                )
+                
                 # Immediately add to _known_tickets so we can detect when it closes
                 # (prevents race condition where TP/SL hits before next poll)
                 self._known_tickets[order_id] = {
@@ -1846,6 +1859,14 @@ class TradingBot:
                 bot_logger.info(
                     f"📊 Closed trade detected: {pair} {trade_type} | "
                     f"P/L: ${profit:+.2f} | Exit: {exit_type}"
+                )
+
+                # Send email notification for trade closure (runs in background)
+                notify_trade_closed(
+                    pair=pair,
+                    trade_type=trade_type,
+                    profit_loss=profit,
+                    exit_type=exit_type,
                 )
 
                 # Decrement open_trades counter (balance is synced from broker
