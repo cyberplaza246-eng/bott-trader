@@ -64,12 +64,12 @@ class TrailingStopManager:
         # Enhanced profit protection mode: More aggressive settings for 5m scalping
         if quick_wins:
             effective_breakeven_r = 0.5       # Breakeven at 0.5R (protect early profits)
-            effective_trail_mult = 1.0        # Trail at 1.0× ATR (tighter protection)
+            effective_trail_mult = 0.4        # Trail at 0.4× ATR (~2.5 pts on MES)
             effective_partial_pct = 0.40      # Partial close at 40% of TP distance
         # Scalping mode: Improved settings for better profit protection
         elif scalping_mode:
             effective_breakeven_r = 0.6       # Breakeven at 0.6R (faster protection)
-            effective_trail_mult = 1.2        # Trail at 1.2× ATR
+            effective_trail_mult = 0.5        # Trail at 0.5× ATR
             effective_partial_pct = 0.50      # Partial close at 50% of TP
         else:
             effective_breakeven_r = self.breakeven_r
