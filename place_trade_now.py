@@ -36,10 +36,21 @@ def main():
     print("\nGetting market data...")
     df = broker.get_candles('MES', 5, 100)
     
-    if df is None or len(df) < 70:
-        print("❌ Could not get candles")
-        broker.shutdown()
-        return 1
+    if df is None or len(df) < 20:
+        print("⚠️  Insufficient Rithmic data, using Yahoo Finance fallback...")
+        import yfinance as yf
+        data = yf.download('ES=F', period='5d', interval='5m', progress=False)
+        if not data.empty:
+            df = data.reset_index()
+            df.columns = [c.lower() if isinstance(c, str) else c[0].lower() for c in df.columns]
+            if 'datetime' not in df.columns and 'date' in df.columns:
+                df = df.rename(columns={'date': 'datetime'})
+            df = df.tail(100).reset_index(drop=True)
+            print(f"✅ Yahoo Finance fallback: {len(df)} candles")
+        else:
+            print("❌ Could not get candles from Yahoo either")
+            broker.shutdown()
+            return 1
     
     # Calculate indicators
     df['high_10'] = df['high'].rolling(10).max().shift(1)
