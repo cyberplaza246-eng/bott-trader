@@ -42,6 +42,32 @@ class AdaptiveLearner:
 
     _save_lock = threading.Lock()  # Prevent concurrent file writes from multiple threads
 
+    def _get_base_confidence_threshold(self) -> float:
+        from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
+
+        try:
+            if os.path.exists(self.RISK_OVERRIDES_PATH):
+                with open(self.RISK_OVERRIDES_PATH, 'r') as f:
+                    config = json.load(f)
+                override = config.get('entry_confidence_threshold')
+                if override is not None:
+                    return float(override)
+        except Exception:
+            pass
+
+        return ENSEMBLE_CONFIDENCE_THRESHOLD
+
+    def _has_explicit_threshold_override(self) -> bool:
+        try:
+            if os.path.exists(self.RISK_OVERRIDES_PATH):
+                with open(self.RISK_OVERRIDES_PATH, 'r') as f:
+                    config = json.load(f)
+                return config.get('entry_confidence_threshold') is not None
+        except Exception:
+            return False
+
+        return False
+
     def __init__(self, initial_weights: dict = None):
         self.model_weights = initial_weights or {
             'scalping': 0.28,
@@ -79,8 +105,8 @@ class AdaptiveLearner:
         # Hourly performance (24 buckets)
         self.hourly_stats = defaultdict(lambda: {'wins': 0, 'losses': 0, 'total_pnl': 0.0})
 
-        from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
-        self.confidence_threshold = ENSEMBLE_CONFIDENCE_THRESHOLD
+        self.RISK_OVERRIDES_PATH = 'data/risk_overrides.json'
+        self.confidence_threshold = self._get_base_confidence_threshold()
 
         self.consecutive_losses = 0
         self.max_consecutive_losses = 0
@@ -117,7 +143,6 @@ class AdaptiveLearner:
         # 6. Exit type tracking for auto-learning (SL_HIT, TP_HIT, TIME_EXIT, MANUAL)
         self.exit_type_tracking = defaultdict(lambda: {'sl_hit': 0, 'tp_hit': 0, 'time_exit': 0, 'manual': 0, 'total': 0})
         self.auto_learning_trade_count = 0  # Trades since last auto-learning update
-        self.RISK_OVERRIDES_PATH = 'data/risk_overrides.json'
 
         self.decay_factor = 0.95
 
@@ -424,8 +449,12 @@ class AdaptiveLearner:
             )
 
     def _adapt_confidence_threshold(self):
-        from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
-        base = ENSEMBLE_CONFIDENCE_THRESHOLD
+        base = self._get_base_confidence_threshold()
+
+        if self._has_explicit_threshold_override():
+            self.confidence_threshold = base
+            return
+
         ceiling = base + 0.10  # Max threshold = base + 10% (was +25%)
 
         # ── Recent-loss reaction (gentle) ────────────────────────────
@@ -1232,12 +1261,11 @@ class AdaptiveLearner:
             with open(LEARNING_DB_PATH, 'r') as f:
                 data = json.load(f)
 
-            from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD
+            base_threshold = self._get_base_confidence_threshold()
 
             self.model_weights = data.get('model_weights', self.model_weights)
-            # Never load a saved threshold higher than current config base
-            saved_threshold = data.get('confidence_threshold', ENSEMBLE_CONFIDENCE_THRESHOLD)
-            self.confidence_threshold = min(saved_threshold, ENSEMBLE_CONFIDENCE_THRESHOLD)
+            saved_threshold = data.get('confidence_threshold', base_threshold)
+            self.confidence_threshold = max(base_threshold, min(saved_threshold, base_threshold + 0.10))
             self.consecutive_losses = data.get('consecutive_losses', 0)
             self.consecutive_wins = data.get('consecutive_wins', 0)
             self.max_consecutive_losses = data.get('max_consecutive_losses', 0)
@@ -1290,6 +1318,8 @@ class AdaptiveLearner:
             for t in self.trade_history:
                 if 'pair' in t:
                     t['pair'] = self._normalize_pair(t.get('pair'))
+
+            self._adapt_confidence_threshold()
 
             bot_logger.info(
                 f"📚 Loaded learning data: {len(self.trade_history)} past trades | "
