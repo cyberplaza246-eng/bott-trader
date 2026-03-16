@@ -23,7 +23,7 @@ import sys
 import time
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Tuple
 from dataclasses import dataclass
 import pandas as pd
 import numpy as np
@@ -52,7 +52,8 @@ RISK_SETTINGS = {
     'contracts': 1,              # Start with 1 micro
     'daily_loss_limit': 150.0,   # Max daily loss $150
     'max_trades_per_day': 8,     # Max trades per day
-    'cooldown_bars': 5           # Bars between trades
+    'cooldown_bars': 5,          # Bars between trades
+    'max_positions': 2,          # Max concurrent positions
 }
 
 # Symbol specs
@@ -100,9 +101,10 @@ class LiveRithmicTrader:
         self.daily_loss_limit = RISK_SETTINGS['daily_loss_limit']
         self.max_trades_per_day = RISK_SETTINGS['max_trades_per_day']
         self.cooldown_bars = RISK_SETTINGS['cooldown_bars']
+        self.max_positions = RISK_SETTINGS.get('max_positions', 2)
         
-        # State
-        self.position: Optional[Position] = None
+        # State - support multiple positions
+        self.positions: Dict[str, Position] = {}  # order_id -> Position
         self.cooldown = 0
         self.daily_pnl = 0.0
         self.daily_trades = 0
@@ -255,7 +257,7 @@ class LiveRithmicTrader:
     
     def check_entry_signal(self, df: pd.DataFrame) -> Optional[Dict]:
         """Check for entry signal using full AI Ensemble."""
-        if self.position or self.cooldown > 0:
+        if len(self.positions) >= self.max_positions or self.cooldown > 0:
             return None
         
         # Use full EnsembleTrader for signal
@@ -356,7 +358,7 @@ class LiveRithmicTrader:
             print(f"📝 [PAPER] {direction.upper()} {self.symbol} @ {entry:.2f}")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             
-            self.position = Position(
+            pos = Position(
                 order_id=order_id,
                 symbol=self.symbol,
                 direction=direction,
@@ -366,6 +368,8 @@ class LiveRithmicTrader:
                 tp=tp,
                 entry_time=datetime.now(timezone.utc)
             )
+            self.positions[order_id] = pos
+            print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
             return True
         
         # Real order
@@ -380,8 +384,9 @@ class LiveRithmicTrader:
         )
         
         if result:
-            self.position = Position(
-                order_id=result.get('ticket', str(int(time.time()))),
+            order_id = result.get('ticket', str(int(time.time())))
+            pos = Position(
+                order_id=order_id,
                 symbol=self.symbol,
                 direction=direction,
                 entry_price=result.get('entry_price', entry),
@@ -390,46 +395,52 @@ class LiveRithmicTrader:
                 tp=tp,
                 entry_time=datetime.now(timezone.utc)
             )
+            self.positions[order_id] = pos
             print(f"✅ ORDER FILLED: {direction.upper()} {self.symbol}")
-            print(f"   Entry: {self.position.entry_price:.2f}")
+            print(f"   Entry: {pos.entry_price:.2f}")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
+            print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
             trades_logger.info(f"ENTRY {direction} {self.symbol} @ {entry:.2f} SL={sl:.2f} TP={tp:.2f}")
             return True
         else:
             print(f"❌ Order failed!")
             return False
     
-    def check_position_exit(self, df: pd.DataFrame) -> Optional[str]:
-        """Check if position hit SL/TP (for paper mode mainly)."""
-        if not self.position:
-            return None
+    def check_position_exit(self, df: pd.DataFrame) -> List[Tuple[str, str]]:
+        """Check if any positions hit SL/TP (for paper mode mainly). Returns list of (order_id, exit_type)."""
+        exits = []
+        if not self.positions:
+            return exits
         
         row = df.iloc[-1]
-        d = self.position.direction
         
-        if d == 'long':
-            if row['low'] <= self.position.sl:
-                return 'STOP_LOSS'
-            if row['high'] >= self.position.tp:
-                return 'TAKE_PROFIT'
-        else:
-            if row['high'] >= self.position.sl:
-                return 'STOP_LOSS'
-            if row['low'] <= self.position.tp:
-                return 'TAKE_PROFIT'
+        for order_id, pos in list(self.positions.items()):
+            d = pos.direction
+            
+            if d == 'long':
+                if row['low'] <= pos.sl:
+                    exits.append((order_id, 'STOP_LOSS'))
+                elif row['high'] >= pos.tp:
+                    exits.append((order_id, 'TAKE_PROFIT'))
+            else:
+                if row['high'] >= pos.sl:
+                    exits.append((order_id, 'STOP_LOSS'))
+                elif row['low'] <= pos.tp:
+                    exits.append((order_id, 'TAKE_PROFIT'))
         
-        return None
+        return exits
     
-    def process_exit(self, exit_type: str, exit_price: float):
+    def process_exit(self, order_id: str, exit_type: str, exit_price: float):
         """Process position exit."""
-        if not self.position:
+        if order_id not in self.positions:
             return
         
-        d = self.position.direction
+        pos = self.positions[order_id]
+        d = pos.direction
         if d == 'long':
-            raw_pnl = (exit_price - self.position.entry_price) * self.point_value * self.position.size
+            raw_pnl = (exit_price - pos.entry_price) * self.point_value * pos.size
         else:
-            raw_pnl = (self.position.entry_price - exit_price) * self.point_value * self.position.size
+            raw_pnl = (pos.entry_price - exit_price) * self.point_value * pos.size
         
         # Subtract costs ($2 commission + 1 tick slippage)
         commission = 2.00
@@ -440,9 +451,9 @@ class LiveRithmicTrader:
         trade = {
             'symbol': self.symbol,
             'direction': d,
-            'entry_time': str(self.position.entry_time),
+            'entry_time': str(pos.entry_time),
             'exit_time': str(datetime.now(timezone.utc)),
-            'entry_price': self.position.entry_price,
+            'entry_price': pos.entry_price,
             'exit_price': exit_price,
             'exit_type': exit_type,
             'pnl': pnl
@@ -457,7 +468,8 @@ class LiveRithmicTrader:
         print(f"   PnL: ${pnl:.2f} | Daily: ${self.daily_pnl:.2f}")
         trades_logger.info(f"EXIT {exit_type} {d} {self.symbol} @ {exit_price:.2f} PnL=${pnl:.2f}")
         
-        self.position = None
+        del self.positions[order_id]
+        print(f"   Remaining positions: {len(self.positions)}/{self.max_positions}")
         self.cooldown = self.cooldown_bars
     
     def sync_broker_position(self):
@@ -569,18 +581,20 @@ class LiveRithmicTrader:
                 if self.cooldown > 0:
                     self.cooldown -= 1
                 
-                # Check for exit (paper mode or monitor)
-                if self.position:
-                    exit_type = self.check_position_exit(df)
-                    if exit_type:
-                        if exit_type == 'TAKE_PROFIT':
-                            exit_price = self.position.tp
-                        else:
-                            exit_price = self.position.sl
-                        self.process_exit(exit_type, exit_price)
+                # Check for exits on all positions (paper mode or monitor)
+                if self.positions:
+                    exits = self.check_position_exit(df)
+                    for order_id, exit_type in exits:
+                        pos = self.positions.get(order_id)
+                        if pos:
+                            if exit_type == 'TAKE_PROFIT':
+                                exit_price = pos.tp
+                            else:
+                                exit_price = pos.sl
+                            self.process_exit(order_id, exit_type, exit_price)
                 
-                # Check for entry
-                if not self.position:
+                # Check for entry (only if room for more positions)
+                if len(self.positions) < self.max_positions:
                     signal = self.check_entry_signal(df)
                     if signal:
                         if self.place_order(signal):
@@ -590,7 +604,7 @@ class LiveRithmicTrader:
                 
                 # Status update
                 row = df.iloc[-1]
-                pos_str = f"{self.position.direction}" if self.position else "None"
+                pos_str = f"{len(self.positions)}/{self.max_positions}" if self.positions else "None"
                 cooldown_str = f"(CD:{self.cooldown})" if self.cooldown > 0 else ""
                 print(f"[{current_bar}] {self.symbol} {row['close']:.2f} | Pos: {pos_str} {cooldown_str} | Daily: ${self.daily_pnl:.2f}")
                 
