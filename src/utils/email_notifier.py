@@ -32,11 +32,12 @@ class EmailNotifier:
     """Send email notifications for trade events."""
 
     def __init__(self):
-        self.enabled = os.getenv('EMAIL_ENABLED', 'false').lower() in ('true', '1', 'yes')
+        self.enabled = os.getenv('EMAIL_ENABLED', 'true').lower() in ('true', '1', 'yes')
         self.smtp_server = os.getenv('EMAIL_SMTP_SERVER', 'smtp.gmail.com')
         self.smtp_port = int(os.getenv('EMAIL_SMTP_PORT', '587'))
-        self.sender = os.getenv('EMAIL_SENDER', '')
-        self.password = os.getenv('EMAIL_PASSWORD', '')
+        # Support both old (EMAIL_USER/EMAIL_PASS) and new (EMAIL_SENDER/EMAIL_PASSWORD) variable names
+        self.sender = os.getenv('EMAIL_SENDER', '') or os.getenv('EMAIL_USER', '')
+        self.password = os.getenv('EMAIL_PASSWORD', '') or os.getenv('EMAIL_PASS', '')
         self.recipient = os.getenv('EMAIL_RECIPIENT', '') or self.sender  # Default to sender
 
         if self.enabled:
