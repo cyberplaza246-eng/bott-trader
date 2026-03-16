@@ -195,16 +195,17 @@ class RithmicConnector(BaseBroker):
             max_retries = 2
             for attempt in range(max_retries):
                 try:
-                    bot_logger.info(f"[DEBUG] Attempting Rithmic candle fetch for {symbol} (attempt {attempt+1}/{max_retries})")
                     df = self._run_sync(
                         self._async_get_candles(symbol, timeframe_minutes, num_candles),
                         timeout=25,  # Increased timeout
                     )
                     if df is not None and len(df) >= 10:
-                        bot_logger.info(f"[DEBUG] Rithmic candle fetch SUCCESS for {symbol}: {len(df)} bars returned.")
                         return df
                     else:
-                        bot_logger.warning(f"[DEBUG] Rithmic candle fetch returned insufficient data for {symbol}: {0 if df is None else len(df)} bars.")
+                        bot_logger.warning(
+                            f"Rithmic candle fetch returned insufficient data for {symbol}: "
+                            f"{0 if df is None else len(df)} bars"
+                        )
                 except Exception as e:
                     error_msg = str(e).lower()
                     # Log and retry on lock timeout
@@ -213,10 +214,9 @@ class RithmicConnector(BaseBroker):
                             bot_logger.warning(f"Rithmic history lock timeout, retry {attempt+1}/{max_retries}")
                             time.sleep(1.0 + attempt)  # Brief backoff
                             continue
-                    bot_logger.error(f"[DEBUG] Rithmic candles error for {symbol}: {e}")
+                    bot_logger.error(f"Rithmic candles error for {symbol}: {e}")
                     break
 
-        bot_logger.info(f"[DEBUG] Using Yahoo Finance fallback for {symbol} candles (Rithmic unavailable or insufficient data)")
         return self._yf_get_candles(symbol, timeframe_minutes, num_candles)
 
     def get_latest_price(self, symbol: str) -> Optional[Dict[str, float]]:
