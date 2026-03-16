@@ -249,7 +249,7 @@
       "total_pnl": -675.0101500000015
     }
   },
-  "confidence_threshold": 0.5,
+  "confidence_threshold": 0.4,
   "consecutive_losses": 0,
   "consecutive_wins": 1,
   "max_consecutive_losses": 14,
