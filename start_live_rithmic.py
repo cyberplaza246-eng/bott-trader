@@ -588,6 +588,11 @@ class LiveRithmicTrader:
 
             direction = 'long' if (broker_pos.get('size', 0) or 0) > 0 else 'short'
             avg_price = float(broker_pos.get('avg_price', 0.0) or 0.0)
+            
+            # Skip invalid positions with no price
+            if avg_price <= 0:
+                bot_logger.warning(f"⚠️ Skipping sync: invalid avg_price={avg_price}")
+                continue
 
             # Calculate protective SL/TP using current ATR
             try:
