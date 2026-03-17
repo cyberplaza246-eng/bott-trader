@@ -42,8 +42,8 @@ from src.utils.logger import bot_logger, trades_logger
 # Strategy parameters (validated profitable)
 PARAMS = {
     'lookback': 10,
-    'atr_mult': 1.0,            # SL = 1.0 × ATR (breathing room)
-    'tp_mult': 0.5,             # TP = 0.5 × ATR (tight for quick wins)
+    'atr_mult': 0.75,           # SL = 0.75 × ATR (tight but not noise)
+    'tp_mult': 1.0,             # TP = 1.0 × ATR (bigger target, good R:R)
     'ema_len': 50,
     'tp_tighten': 1.0,          # Disabled - using direct ATR multipliers above
 }
@@ -329,8 +329,8 @@ class LiveRithmicTrader:
                 atr = 10.0  # Fallback ATR for futures
             
             # Simple ATR-based SL/TP (skip dynamic for consistency)
-            sl_dist = atr * self.atr_mult  # SL = 1 ATR
-            tp_dist = atr * self.tp_mult   # TP = 0.5 ATR
+            sl_dist = atr * self.atr_mult  # SL = 0.75 ATR
+            tp_dist = atr * self.tp_mult   # TP = 1.0 ATR
             if signal == 'BUY':
                 sl = price - sl_dist
                 tp = price + tp_dist
@@ -338,7 +338,7 @@ class LiveRithmicTrader:
                 sl = price + sl_dist
                 tp = price - tp_dist
             
-            bot_logger.info(f"📍 SL: {sl_dist:.2f} pts (1×ATR) | TP: {tp_dist:.2f} pts (0.5×ATR)")
+            bot_logger.info(f"📍 SL: {sl_dist:.2f} pts ({self.atr_mult}×ATR) | TP: {tp_dist:.2f} pts ({self.tp_mult}×ATR)")
             
             direction = 'long' if signal == 'BUY' else 'short'
             
