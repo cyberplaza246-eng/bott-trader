@@ -86,3 +86,11 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: USD/JPY | Type: SELL | Lot: 0.01 | SL: 150.57878 | TP: 150.52245 | Ticket: 991831"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "POSITION_CLOSED (SIM) | Pair: USD/JPY | P/L: 0.00"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ORDER_PLACED (SIM) | Pair: GBP/USD | Type: SELL | Lot: 0.01 | SL: 1.26563 | TP: 1.26511 | Ticket: 591263"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MES @ 6695.50 SL=6700.98 TP=6684.54"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MES @ 6695.50 SL=6700.98 TP=6684.54"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MES @ 6695.25 SL=6700.61 TP=6684.54"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MES @ 6695.25 SL=6700.61 TP=6684.54"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$51.56"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$50.31"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$51.56"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$50.31"}
