@@ -586,6 +586,26 @@ class LiveRithmicTrader:
             direction = 'long' if (broker_pos.get('size', 0) or 0) > 0 else 'short'
             avg_price = float(broker_pos.get('avg_price', 0.0) or 0.0)
 
+            # Calculate protective SL/TP using current ATR
+            try:
+                df = self.get_candles(count=30)
+                if df is not None and len(df) >= 15:
+                    df = self.calculate_indicators(df)
+                    atr = float(df['atr'].iloc[-1]) if 'atr' in df.columns else 10.0
+                else:
+                    atr = 10.0
+            except Exception:
+                atr = 10.0
+
+            sl_dist = atr * self.atr_mult
+            tp_dist = sl_dist * self.tp_mult * self.tp_tighten
+            if direction == 'long':
+                sl = avg_price - sl_dist
+                tp = avg_price + tp_dist
+            else:
+                sl = avg_price + sl_dist
+                tp = avg_price - tp_dist
+
             for index in range(raw_size):
                 order_id = f"broker_sync_{self.symbol}_{index + 1}"
                 synced_positions[order_id] = Position(
@@ -594,17 +614,20 @@ class LiveRithmicTrader:
                     direction=direction,
                     entry_price=avg_price,
                     size=1,
-                    sl=0.0,
-                    tp=0.0,
+                    sl=sl,
+                    tp=tp,
                     entry_time=datetime.now(timezone.utc),
-                    managed_by_broker=True,
+                    managed_by_broker=False,
                 )
 
         if synced_positions:
             self.positions = synced_positions
-            print(
-                f"🔄 Synced {len(self.positions)} existing broker position(s) for {self.symbol}"
-            )
+            for oid, p in synced_positions.items():
+                print(
+                    f"🔄 Synced {p.direction.upper()} {self.symbol} @ {p.entry_price:.2f} "
+                    f"SL={p.sl:.2f} TP={p.tp:.2f} (ATR-based)"
+                )
+            print(f"🔄 Total synced: {len(self.positions)} position(s) for {self.symbol}")
     
     def save_log(self):
         """Save trade log."""
