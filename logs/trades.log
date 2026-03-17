@@ -94,3 +94,4 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$50.31"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$51.56"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$50.31"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MES @ 6689.25 SL=6693.87 TP=6680.02"}

@@ -44,7 +44,8 @@ PARAMS = {
     'lookback': 10,
     'atr_mult': 1.5,
     'tp_mult': 2.0,
-    'ema_len': 50
+    'ema_len': 50,
+    'tp_tighten': 0.15,         # Keep 15% of TP distance (85% closer to entry)
 }
 
 # Risk settings
@@ -95,6 +96,7 @@ class LiveRithmicTrader:
         self.lookback = PARAMS['lookback']
         self.atr_mult = PARAMS['atr_mult']
         self.tp_mult = PARAMS['tp_mult']
+        self.tp_tighten = PARAMS.get('tp_tighten', 1.0)  # 0.15 = keep 15% of TP distance (85% closer)
         self.ema_len = PARAMS['ema_len']
         
         # Risk management
@@ -341,6 +343,13 @@ class LiveRithmicTrader:
                     sl = price + sl_dist
                     tp = price - (sl_dist * self.tp_mult)
             
+            # Tighten TP: keep only tp_tighten fraction of original distance
+            if self.tp_tighten < 1.0:
+                tp_dist = abs(tp - price)
+                tp_new_dist = tp_dist * self.tp_tighten
+                tp = price + tp_new_dist if signal == 'BUY' else price - tp_new_dist
+                bot_logger.info(f"📍 TP tightened {self.tp_tighten:.0%}: {tp_dist:.2f} → {tp_new_dist:.2f} pts")
+            
             direction = 'long' if signal == 'BUY' else 'short'
             
             bot_logger.info(f"🎯 ENSEMBLE SIGNAL: {signal} @ {price:.2f} (conf={confidence:.1%})")
@@ -371,7 +380,7 @@ class LiveRithmicTrader:
             entry = high_n + self.tick_size
             sl_dist = atr * self.atr_mult
             sl = entry - sl_dist
-            tp = entry + (sl_dist * self.tp_mult)
+            tp = entry + (sl_dist * self.tp_mult * self.tp_tighten)
             return {'direction': 'long', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
         
         # Short breakout
@@ -379,7 +388,7 @@ class LiveRithmicTrader:
             entry = low_n - self.tick_size
             sl_dist = atr * self.atr_mult
             sl = entry + sl_dist
-            tp = entry - (sl_dist * self.tp_mult)
+            tp = entry - (sl_dist * self.tp_mult * self.tp_tighten)
             return {'direction': 'short', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
         
         return None
