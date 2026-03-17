@@ -299,12 +299,13 @@ class EnsembleTrader:
             if sweep_bias not in ('BUY', 'SELL'):
                 sweep_bias = 'HOLD'
             
-            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, SweepBias={sweep_bias} (regime={regime})")
+            tech_conf = technical_signal.get('confidence', 0)
+            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}({tech_conf:.0%}), SweepBias={sweep_bias} (regime={regime})")
             
             # Fallback 1: EMA + Technical agree on direction
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
                 final_signal = ema_dir
-                final_confidence = 0.40  # just at threshold
+                final_confidence = 0.46  # meets 45% fallback threshold
                 models_agreement = 2
                 bot_logger.info(
                     f"🔄 No sweep → EMA+Tech fallback: {ema_dir} "
@@ -314,11 +315,29 @@ class EnsembleTrader:
             # Fallback 2: Sweep bias is directional and indicators don't oppose
             elif sweep_bias in ('BUY', 'SELL') and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY') and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY'):
                 final_signal = sweep_bias
-                final_confidence = 0.40
+                final_confidence = 0.46  # meets 45% fallback threshold
                 models_agreement = 1
                 bot_logger.info(
                     f"🔄 No sweep → BIAS fallback: {sweep_bias} "
                     f"(5M bias strong, EMA={ema_dir}, Tech={tech_dir} not opposing)"
+                )
+            # Fallback 3: Technical has signal, EMA neutral (HOLD), use Tech direction
+            elif tech_dir in ('BUY', 'SELL') and ema_dir == 'HOLD' and technical_signal.get('confidence', 0) >= 0.35:
+                final_signal = tech_dir
+                final_confidence = 0.46  # meets 45% fallback threshold
+                models_agreement = 1
+                bot_logger.info(
+                    f"🔄 No sweep → TECH fallback: {tech_dir} "
+                    f"(Tech={technical_signal['confidence']:.0%}, EMA neutral)"
+                )
+            # Fallback 4: In ranging regime, follow Tech momentum even if it opposes 5M bias
+            elif regime == 'ranging' and tech_dir in ('BUY', 'SELL') and technical_signal.get('confidence', 0) >= 0.40:
+                final_signal = tech_dir
+                final_confidence = 0.46  # meets 45% fallback threshold
+                models_agreement = 1
+                bot_logger.info(
+                    f"🔄 No sweep → RANGE-MOMENTUM fallback: {tech_dir} "
+                    f"(ranging market, following Tech={technical_signal['confidence']:.0%})"
                 )
             else:
                 final_signal = 'SKIP'
