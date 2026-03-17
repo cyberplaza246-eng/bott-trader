@@ -138,9 +138,45 @@ class LiveRithmicTrader:
                 print("✅ AI Ensemble ready!")
                 return True
             
-            # Live mode: connect to Rithmic
+            # Live mode: connect to Rithmic with session-limit handling
+            import logging
+            
+            # Track ForcedLogout to prevent infinite reconnect loops
+            self._forced_logout_count = 0
+            _trader_ref = self
+            
+            class ForcedLogoutFilter(logging.Filter):
+                def filter(self, record):
+                    if 'ForcedLogout' in record.getMessage():
+                        _trader_ref._forced_logout_count += 1
+                        if _trader_ref._forced_logout_count >= 3:
+                            print("\n⚠️  Rithmic ForcedLogout detected 3 times!")
+                            print("   Switching to PAPER MODE with Yahoo Finance data.")
+                            print("   Fix: Close all other Rithmic sessions, then restart.\n")
+                            _trader_ref.paper_mode = True
+                            if _trader_ref.broker:
+                                try:
+                                    _trader_ref.broker.shutdown()
+                                except Exception:
+                                    pass
+                            _trader_ref.broker = None
+                    return True
+            
+            # Install filter on rithmic loggers
+            for logger_name in ['rithmic.plant.ticker', 'rithmic.plant.history', 'rithmic']:
+                rith_logger = logging.getLogger(logger_name)
+                rith_logger.addFilter(ForcedLogoutFilter())
+            
             self.broker = RithmicConnector()
             self.broker.initialize()
+            
+            # Check if we got forced-logout during init
+            if self.paper_mode:
+                print("📝 Fell back to PAPER MODE due to Rithmic session limits")
+                self.broker = None
+                self.ensemble = EnsembleTrader(broker=None)
+                print("✅ AI Ensemble ready (paper mode)!")
+                return True
             
             if not self.broker.connected:
                 print("❌ Rithmic not connected - check credentials in .env")

@@ -1,0 +1,41 @@
+{
+  "symbol": "MES",
+  "paper_mode": false,
+  "strategy": "enhanced_breakout",
+  "params": {
+    "lookback": 10,
+    "atr_mult": 1.5,
+    "tp_mult": 2.0,
+    "ema_len": 50
+  },
+  "stats": {
+    "trades": 2,
+    "wins": 2,
+    "losses": 0,
+    "win_rate": 100.0,
+    "total_pnl": 101.87370000000192,
+    "profit_factor": 101.87370000000192
+  },
+  "trades": [
+    {
+      "symbol": "MES",
+      "direction": "short",
+      "entry_time": "2026-03-17 00:11:41.552064+00:00",
+      "exit_time": "2026-03-17 01:01:25.635391+00:00",
+      "entry_price": 6695.5,
+      "exit_price": 6684.53737,
+      "exit_type": "TAKE_PROFIT",
+      "pnl": 51.56314999999995
+    },
+    {
+      "symbol": "MES",
+      "direction": "short",
+      "entry_time": "2026-03-17 00:16:13.222539+00:00",
+      "exit_time": "2026-03-17 01:01:25.639897+00:00",
+      "entry_price": 6695.25,
+      "exit_price": 6684.53789,
+      "exit_type": "TAKE_PROFIT",
+      "pnl": 50.31055000000197
+    }
+  ]
+}
