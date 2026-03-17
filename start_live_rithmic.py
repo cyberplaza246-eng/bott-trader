@@ -348,7 +348,10 @@ class LiveRithmicTrader:
                 tp_dist = abs(tp - price)
                 tp_new_dist = tp_dist * self.tp_tighten
                 tp = price + tp_new_dist if signal == 'BUY' else price - tp_new_dist
-                bot_logger.info(f"📍 TP tightened {self.tp_tighten:.0%}: {tp_dist:.2f} → {tp_new_dist:.2f} pts")
+                
+                # Tighten SL to match TP (1:1 R:R)
+                sl = price - tp_new_dist if signal == 'BUY' else price + tp_new_dist
+                bot_logger.info(f"📍 TP/SL tightened {self.tp_tighten:.0%}: {tp_dist:.2f} → {tp_new_dist:.2f} pts (1:1 R:R)")
             
             direction = 'long' if signal == 'BUY' else 'short'
             
@@ -378,17 +381,17 @@ class LiveRithmicTrader:
         # Long breakout
         if high > high_n and price > high_n and price > ema:
             entry = high_n + self.tick_size
-            sl_dist = atr * self.atr_mult
+            sl_dist = atr * self.atr_mult * self.tp_mult * self.tp_tighten  # 1:1 R:R with tightened distance
             sl = entry - sl_dist
-            tp = entry + (sl_dist * self.tp_mult * self.tp_tighten)
+            tp = entry + sl_dist
             return {'direction': 'long', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
         
         # Short breakout
         elif low < low_n and price < low_n and price < ema:
             entry = low_n - self.tick_size
-            sl_dist = atr * self.atr_mult
+            sl_dist = atr * self.atr_mult * self.tp_mult * self.tp_tighten  # 1:1 R:R with tightened distance
             sl = entry + sl_dist
-            tp = entry - (sl_dist * self.tp_mult * self.tp_tighten)
+            tp = entry - sl_dist
             return {'direction': 'short', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
         
         return None
