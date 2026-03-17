@@ -445,25 +445,60 @@ class LiveRithmicTrader:
             return False
     
     def check_position_exit(self, df: pd.DataFrame) -> List[Tuple[str, str]]:
-        """Check if any positions hit SL/TP (for paper mode mainly). Returns list of (order_id, exit_type)."""
+        """Check if any positions hit SL/TP, with trailing stop and breakeven."""
         exits = []
         if not self.positions:
             return exits
         
         row = df.iloc[-1]
+        current_price = row['close']
         
         for order_id, pos in list(self.positions.items()):
             if pos.managed_by_broker:
                 continue
 
             d = pos.direction
+            entry = pos.entry_price
+            initial_risk = abs(entry - pos.sl)
             
             if d == 'long':
+                profit_pts = current_price - entry
+                
+                # Move SL to breakeven when price moves 1x risk in our favor
+                if profit_pts >= initial_risk and pos.sl < entry:
+                    old_sl = pos.sl
+                    pos.sl = entry + (self.tick_size * 2)  # Slightly above entry
+                    print(f"🔒 BREAKEVEN: {self.symbol} LONG SL moved {old_sl:.2f} → {pos.sl:.2f}")
+                
+                # Trail SL: when price moves 1.5x risk, trail at 1x risk behind price
+                if profit_pts >= initial_risk * 1.5:
+                    trail_sl = current_price - initial_risk
+                    if trail_sl > pos.sl:
+                        old_sl = pos.sl
+                        pos.sl = trail_sl
+                        print(f"📈 TRAIL: {self.symbol} LONG SL moved {old_sl:.2f} → {pos.sl:.2f}")
+                
                 if row['low'] <= pos.sl:
                     exits.append((order_id, 'STOP_LOSS'))
                 elif row['high'] >= pos.tp:
                     exits.append((order_id, 'TAKE_PROFIT'))
             else:
+                profit_pts = entry - current_price
+                
+                # Move SL to breakeven when price moves 1x risk in our favor
+                if profit_pts >= initial_risk and pos.sl > entry:
+                    old_sl = pos.sl
+                    pos.sl = entry - (self.tick_size * 2)  # Slightly below entry
+                    print(f"🔒 BREAKEVEN: {self.symbol} SHORT SL moved {old_sl:.2f} → {pos.sl:.2f}")
+                
+                # Trail SL: when price moves 1.5x risk, trail at 1x risk behind price
+                if profit_pts >= initial_risk * 1.5:
+                    trail_sl = current_price + initial_risk
+                    if trail_sl < pos.sl:
+                        old_sl = pos.sl
+                        pos.sl = trail_sl
+                        print(f"📈 TRAIL: {self.symbol} SHORT SL moved {old_sl:.2f} → {pos.sl:.2f}")
+                
                 if row['high'] >= pos.sl:
                     exits.append((order_id, 'STOP_LOSS'))
                 elif row['low'] <= pos.tp:
