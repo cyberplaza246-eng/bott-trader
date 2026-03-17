@@ -704,15 +704,17 @@ class EnsembleTrader:
             ema_dir in ('BUY', 'SELL')
         )
         
-        # Fallback 2: Sweep bias matches signal and indicators don't oppose
+        # Fallback 2: Sweep bias matches signal AND at least one indicator agrees
         sweep_bias = signal_result.get('sweep_bias', 'HOLD')
         if sweep_bias not in ('BUY', 'SELL'):
             sweep_bias = 'HOLD'
             
         opposing_dir = 'SELL' if signal_result['signal'] == 'BUY' else 'BUY'
+        has_indicator_agreement = (ema_dir == signal_result['signal'] or tech_dir == signal_result['signal'])
         is_bias_fallback = (
             not sweep_fired and
             sweep_bias == signal_result['signal'] and
+            has_indicator_agreement and  # Require active agreement, not just no opposition
             ema_dir != opposing_dir and
             tech_dir != opposing_dir
         )
@@ -759,7 +761,7 @@ class EnsembleTrader:
         # Fallback entries require HIGHER confidence since they lack sweep confirmation
         effective_threshold = threshold
         if is_fallback_entry:
-            effective_threshold = max(threshold, 0.45)  # Minimum 45% for fallback
+            effective_threshold = max(threshold, 0.55)  # Minimum 55% for fallback (stricter)
             if effective_confidence < effective_threshold:
                 bot_logger.info(
                     f"📊 Fallback entry confidence {effective_confidence:.2%} < required {effective_threshold:.2%}"
