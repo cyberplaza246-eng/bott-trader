@@ -53,7 +53,7 @@ RISK_SETTINGS = {
     'contracts': 1,              # Start with 1 micro
     'daily_loss_limit': 150.0,   # Max daily loss $150
     'max_trades_per_day': 8,     # Max trades per day
-    'cooldown_bars': 5,          # Bars between trades
+    'cooldown_bars': 1,          # Bars between trades (1 bar = ~5 min)
     'max_positions': 2,          # Max concurrent positions
 }
 
