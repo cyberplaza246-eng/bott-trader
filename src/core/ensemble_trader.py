@@ -321,8 +321,17 @@ class EnsembleTrader:
                     f"🔄 No sweep → BIAS fallback: {sweep_bias} "
                     f"(5M bias strong, EMA={ema_dir}, Tech={tech_dir} not opposing)"
                 )
-            # Fallback 3: Technical has signal, EMA neutral (HOLD), use Tech direction
-            elif tech_dir in ('BUY', 'SELL') and ema_dir == 'HOLD' and technical_signal.get('confidence', 0) >= 0.35:
+            # Fallback 3: Sweep bias directional, weak opposing tech (< 30% conf) is ignored
+            elif sweep_bias in ('BUY', 'SELL') and ema_dir == 'HOLD' and tech_conf < 0.30:
+                final_signal = sweep_bias
+                final_confidence = 0.46
+                models_agreement = 1
+                bot_logger.info(
+                    f"🔄 No sweep → BIAS-OVERRIDE fallback: {sweep_bias} "
+                    f"(5M bias, Tech={tech_dir}({tech_conf:.0%}) too weak to block)"
+                )
+            # Fallback 4: Technical has signal, EMA neutral (HOLD), use Tech direction
+            elif tech_dir in ('BUY', 'SELL') and ema_dir == 'HOLD' and tech_conf >= 0.35:
                 final_signal = tech_dir
                 final_confidence = 0.46  # meets 45% fallback threshold
                 models_agreement = 1
@@ -330,8 +339,8 @@ class EnsembleTrader:
                     f"🔄 No sweep → TECH fallback: {tech_dir} "
                     f"(Tech={technical_signal['confidence']:.0%}, EMA neutral)"
                 )
-            # Fallback 4: In ranging regime, follow Tech momentum even if it opposes 5M bias
-            elif regime == 'ranging' and tech_dir in ('BUY', 'SELL') and technical_signal.get('confidence', 0) >= 0.40:
+            # Fallback 5: In ranging regime, follow Tech momentum even if it opposes 5M bias
+            elif regime == 'ranging' and tech_dir in ('BUY', 'SELL') and tech_conf >= 0.40:
                 final_signal = tech_dir
                 final_confidence = 0.46  # meets 45% fallback threshold
                 models_agreement = 1
