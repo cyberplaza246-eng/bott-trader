@@ -42,18 +42,17 @@ from src.utils.logger import bot_logger, trades_logger
 # Strategy parameters (validated profitable)
 PARAMS = {
     'lookback': 10,
-    'atr_mult': 0.75,           # SL = 0.75 × ATR (tight but not noise)
-    'tp_mult': 1.0,             # TP = 1.0 × ATR (bigger target, good R:R)
-    'ema_len': 50,
-    'tp_tighten': 1.0,          # Disabled - using direct ATR multipliers above
+    'atr_mult': 1.5,
+    'tp_mult': 2.0,
+    'ema_len': 50
 }
 
 # Risk settings
 RISK_SETTINGS = {
     'contracts': 1,              # Start with 1 micro
     'daily_loss_limit': 150.0,   # Max daily loss $150
-    'max_trades_per_day': 8,     # Max trades per day
-    'cooldown_bars': 1,          # Bars between trades (1 bar = ~5 min)
+    'max_trades_per_day': 50,    # Max trades per day
+    'cooldown_bars': 5,          # Bars between trades
     'max_positions': 2,          # Max concurrent positions
 }
 
@@ -74,7 +73,6 @@ class Position:
     sl: float
     tp: float
     entry_time: datetime
-    managed_by_broker: bool = False
 
 
 class LiveRithmicTrader:
@@ -96,7 +94,6 @@ class LiveRithmicTrader:
         self.lookback = PARAMS['lookback']
         self.atr_mult = PARAMS['atr_mult']
         self.tp_mult = PARAMS['tp_mult']
-        self.tp_tighten = PARAMS.get('tp_tighten', 1.0)  # 0.15 = keep 15% of TP distance (85% closer)
         self.ema_len = PARAMS['ema_len']
         
         # Risk management
@@ -140,45 +137,9 @@ class LiveRithmicTrader:
                 print("✅ AI Ensemble ready!")
                 return True
             
-            # Live mode: connect to Rithmic with session-limit handling
-            import logging
-            
-            # Track ForcedLogout to prevent infinite reconnect loops
-            self._forced_logout_count = 0
-            _trader_ref = self
-            
-            class ForcedLogoutFilter(logging.Filter):
-                def filter(self, record):
-                    if 'ForcedLogout' in record.getMessage():
-                        _trader_ref._forced_logout_count += 1
-                        if _trader_ref._forced_logout_count >= 3:
-                            print("\n⚠️  Rithmic ForcedLogout detected 3 times!")
-                            print("   Switching to PAPER MODE with Yahoo Finance data.")
-                            print("   Fix: Close all other Rithmic sessions, then restart.\n")
-                            _trader_ref.paper_mode = True
-                            if _trader_ref.broker:
-                                try:
-                                    _trader_ref.broker.shutdown()
-                                except Exception:
-                                    pass
-                            _trader_ref.broker = None
-                    return True
-            
-            # Install filter on rithmic loggers
-            for logger_name in ['rithmic.plant.ticker', 'rithmic.plant.history', 'rithmic']:
-                rith_logger = logging.getLogger(logger_name)
-                rith_logger.addFilter(ForcedLogoutFilter())
-            
+            # Live mode: connect to Rithmic
             self.broker = RithmicConnector()
             self.broker.initialize()
-            
-            # Check if we got forced-logout during init
-            if self.paper_mode:
-                print("📝 Fell back to PAPER MODE due to Rithmic session limits")
-                self.broker = None
-                self.ensemble = EnsembleTrader(broker=None)
-                print("✅ AI Ensemble ready (paper mode)!")
-                return True
             
             if not self.broker.connected:
                 print("❌ Rithmic not connected - check credentials in .env")
@@ -214,7 +175,8 @@ class LiveRithmicTrader:
             df = self.broker.get_candles(self.symbol, timeframe_minutes=5, num_candles=count)
             min_bars = self.lookback + self.ema_len + 15  # 75 bars needed
             if df is None or len(df) < min_bars:
-                # Fallback to Yahoo - Rithmic returned insufficient data (normal on Sunday open)
+                # Fallback to Yahoo - Rithmic returned insufficient data
+                print(f"⚠️  Rithmic returned {len(df) if df is not None else 0} bars, need {min_bars} - using Yahoo Finance")
                 return self._get_yahoo_candles(count)
             return df
         except Exception as e:
@@ -328,17 +290,20 @@ class LiveRithmicTrader:
             if pd.isna(atr) or atr < 2.0:
                 atr = 10.0  # Fallback ATR for futures
             
-            # Simple ATR-based SL/TP (skip dynamic for consistency)
-            sl_dist = atr * self.atr_mult  # SL = 0.75 ATR
-            tp_dist = atr * self.tp_mult   # TP = 1.0 ATR
-            if signal == 'BUY':
-                sl = price - sl_dist
-                tp = price + tp_dist
+            # Use dynamic SL/TP if available
+            if hasattr(self.ensemble, 'get_dynamic_sl_tp'):
+                direction = 'BUY' if signal == 'BUY' else 'SELL'
+                sltp = self.ensemble.get_dynamic_sl_tp(df_enriched, direction, price)
+                sl = sltp['sl_price']
+                tp = sltp['tp_price']
             else:
-                sl = price + sl_dist
-                tp = price - tp_dist
-            
-            bot_logger.info(f"📍 SL: {sl_dist:.2f} pts ({self.atr_mult}×ATR) | TP: {tp_dist:.2f} pts ({self.tp_mult}×ATR)")
+                sl_dist = atr * self.atr_mult
+                if signal == 'BUY':
+                    sl = price - sl_dist
+                    tp = price + (sl_dist * self.tp_mult)
+                else:
+                    sl = price + sl_dist
+                    tp = price - (sl_dist * self.tp_mult)
             
             direction = 'long' if signal == 'BUY' else 'short'
             
@@ -368,19 +333,17 @@ class LiveRithmicTrader:
         # Long breakout
         if high > high_n and price > high_n and price > ema:
             entry = high_n + self.tick_size
-            sl_dist = atr * self.atr_mult  # SL = 1 ATR
-            tp_dist = atr * self.tp_mult   # TP = 0.5 ATR
+            sl_dist = atr * self.atr_mult
             sl = entry - sl_dist
-            tp = entry + tp_dist
+            tp = entry + (sl_dist * self.tp_mult)
             return {'direction': 'long', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
         
         # Short breakout
         elif low < low_n and price < low_n and price < ema:
             entry = low_n - self.tick_size
-            sl_dist = atr * self.atr_mult  # SL = 1 ATR
-            tp_dist = atr * self.tp_mult   # TP = 0.5 ATR
+            sl_dist = atr * self.atr_mult
             sl = entry + sl_dist
-            tp = entry - tp_dist
+            tp = entry - (sl_dist * self.tp_mult)
             return {'direction': 'short', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
         
         return None
@@ -446,60 +409,22 @@ class LiveRithmicTrader:
             return False
     
     def check_position_exit(self, df: pd.DataFrame) -> List[Tuple[str, str]]:
-        """Check if any positions hit SL/TP, with trailing stop and breakeven."""
+        """Check if any positions hit SL/TP (for paper mode mainly). Returns list of (order_id, exit_type)."""
         exits = []
         if not self.positions:
             return exits
         
         row = df.iloc[-1]
-        current_price = row['close']
         
         for order_id, pos in list(self.positions.items()):
-            if pos.managed_by_broker:
-                continue
-
             d = pos.direction
-            entry = pos.entry_price
-            initial_risk = abs(entry - pos.sl)
             
             if d == 'long':
-                profit_pts = current_price - entry
-                
-                # Move SL to breakeven when price moves 1x risk in our favor
-                if profit_pts >= initial_risk and pos.sl < entry:
-                    old_sl = pos.sl
-                    pos.sl = entry + (self.tick_size * 2)  # Slightly above entry
-                    print(f"🔒 BREAKEVEN: {self.symbol} LONG SL moved {old_sl:.2f} → {pos.sl:.2f}")
-                
-                # Trail SL: when price moves 1.5x risk, trail at 1x risk behind price
-                if profit_pts >= initial_risk * 1.5:
-                    trail_sl = current_price - initial_risk
-                    if trail_sl > pos.sl:
-                        old_sl = pos.sl
-                        pos.sl = trail_sl
-                        print(f"📈 TRAIL: {self.symbol} LONG SL moved {old_sl:.2f} → {pos.sl:.2f}")
-                
                 if row['low'] <= pos.sl:
                     exits.append((order_id, 'STOP_LOSS'))
                 elif row['high'] >= pos.tp:
                     exits.append((order_id, 'TAKE_PROFIT'))
             else:
-                profit_pts = entry - current_price
-                
-                # Move SL to breakeven when price moves 1x risk in our favor
-                if profit_pts >= initial_risk and pos.sl > entry:
-                    old_sl = pos.sl
-                    pos.sl = entry - (self.tick_size * 2)  # Slightly below entry
-                    print(f"🔒 BREAKEVEN: {self.symbol} SHORT SL moved {old_sl:.2f} → {pos.sl:.2f}")
-                
-                # Trail SL: when price moves 1.5x risk, trail at 1x risk behind price
-                if profit_pts >= initial_risk * 1.5:
-                    trail_sl = current_price + initial_risk
-                    if trail_sl < pos.sl:
-                        old_sl = pos.sl
-                        pos.sl = trail_sl
-                        print(f"📈 TRAIL: {self.symbol} SHORT SL moved {old_sl:.2f} → {pos.sl:.2f}")
-                
                 if row['high'] >= pos.sl:
                     exits.append((order_id, 'STOP_LOSS'))
                 elif row['low'] <= pos.tp:
@@ -550,81 +475,61 @@ class LiveRithmicTrader:
         self.cooldown = self.cooldown_bars
     
     def sync_broker_position(self):
-        """Sync with actual broker position (live mode)."""
+        """Sync with actual broker position (live mode).
+        
+        Queries Rithmic for the actual open position count and removes
+        any positions from self.positions that have been closed by SL/TP.
+        """
         if self.paper_mode or not self.broker:
             return
-
-        # Preserve locally tracked positions created during this process.
-        # This sync is mainly for restarts, where live broker positions exist
-        # but self.positions starts empty.
-        if self.positions:
-            return
-
+        
         try:
-            broker_positions = self.broker.get_open_positions(self.symbol)
-        except Exception as e:
-            bot_logger.warning(f"Could not sync broker positions: {e}")
-            return
-
-        if not broker_positions:
-            return
-
-        synced_positions: Dict[str, Position] = {}
-        for broker_pos in broker_positions:
-            raw_size = int(abs(broker_pos.get('size', 0) or 0))
-            if raw_size <= 0:
-                continue
-
-            direction = 'long' if (broker_pos.get('size', 0) or 0) > 0 else 'short'
-            avg_price = float(broker_pos.get('avg_price', 0.0) or 0.0)
+            # Get actual positions from broker
+            broker_positions = self.broker.get_open_positions(symbol=self.symbol)
+            broker_order_ids = {p.get('ticket') for p in broker_positions if p.get('ticket')}
             
-            # Skip invalid positions with no price
-            if avg_price <= 0:
-                bot_logger.warning(f"⚠️ Skipping sync: invalid avg_price={avg_price}")
-                continue
-
-            # Calculate protective SL/TP using current ATR
-            try:
-                df = self.get_candles(count=30)
-                if df is not None and len(df) >= 15:
-                    df = self.calculate_indicators(df)
-                    atr = float(df['atr'].iloc[-1]) if 'atr' in df.columns else 10.0
-                else:
-                    atr = 10.0
-            except Exception:
-                atr = 10.0
-
-            sl_dist = atr * self.atr_mult
-            tp_dist = sl_dist * self.tp_mult * self.tp_tighten
-            if direction == 'long':
-                sl = avg_price - sl_dist
-                tp = avg_price + tp_dist
-            else:
-                sl = avg_price + sl_dist
-                tp = avg_price - tp_dist
-
-            for index in range(raw_size):
-                order_id = f"broker_sync_{self.symbol}_{index + 1}"
-                synced_positions[order_id] = Position(
-                    order_id=order_id,
-                    symbol=self.symbol,
-                    direction=direction,
-                    entry_price=avg_price,
-                    size=1,
-                    sl=sl,
-                    tp=tp,
-                    entry_time=datetime.now(timezone.utc),
-                    managed_by_broker=False,
-                )
-
-        if synced_positions:
-            self.positions = synced_positions
-            for oid, p in synced_positions.items():
-                print(
-                    f"🔄 Synced {p.direction.upper()} {self.symbol} @ {p.entry_price:.2f} "
-                    f"SL={p.sl:.2f} TP={p.tp:.2f} (ATR-based)"
-                )
-            print(f"🔄 Total synced: {len(self.positions)} position(s) for {self.symbol}")
+            # Find positions we think are open but broker says are closed
+            our_order_ids = set(self.positions.keys())
+            closed_ids = our_order_ids - broker_order_ids
+            
+            # Remove closed positions and log the exit
+            for order_id in closed_ids:
+                pos = self.positions.get(order_id)
+                if pos:
+                    # Position was closed by broker (likely SL or TP hit)
+                    # Since we don't know the exact exit price, estimate from SL/TP
+                    # Rithmic bracket orders typically close at the trigger price
+                    bot_logger.info(f"🔄 Position sync: {order_id} closed by broker (SL/TP hit)")
+                    
+                    # Log minimal exit info
+                    d = pos.direction.upper()
+                    self.trades.append({
+                        'entry_time': pos.entry_time.isoformat() if pos.entry_time else '',
+                        'exit_time': datetime.now(timezone.utc).isoformat(),
+                        'symbol': pos.symbol,
+                        'direction': d,
+                        'entry': pos.entry_price,
+                        'exit': 0,  # Unknown - broker handled it
+                        'pnl': 0,   # Unknown - will update from account later
+                        'exit_type': 'BROKER_SYNC',
+                        'sl': pos.sl,
+                        'tp': pos.tp,
+                    })
+                    
+                    del self.positions[order_id]
+                    print(f"🔄 Position {order_id} removed (closed by broker)")
+            
+            # Also check if broker has more positions than we track (rare, but possible)
+            if len(broker_positions) > len(self.positions):
+                extra_count = len(broker_positions) - len(self.positions)
+                bot_logger.warning(f"⚠️ Broker has {extra_count} positions not tracked by bot")
+            
+            # Log sync if any changes
+            if closed_ids:
+                print(f"📊 Position sync: {len(self.positions)}/{self.max_positions} active")
+                
+        except Exception as e:
+            bot_logger.warning(f"Position sync error: {e}")
     
     def save_log(self):
         """Save trade log."""

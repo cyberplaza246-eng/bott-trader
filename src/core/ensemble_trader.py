@@ -299,13 +299,12 @@ class EnsembleTrader:
             if sweep_bias not in ('BUY', 'SELL'):
                 sweep_bias = 'HOLD'
             
-            tech_conf = technical_signal.get('confidence', 0)
-            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}({tech_conf:.0%}), SweepBias={sweep_bias} (regime={regime})")
+            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, SweepBias={sweep_bias} (regime={regime})")
             
             # Fallback 1: EMA + Technical agree on direction
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
                 final_signal = ema_dir
-                final_confidence = 0.46  # meets 45% fallback threshold
+                final_confidence = 0.45
                 models_agreement = 2
                 bot_logger.info(
                     f"🔄 No sweep → EMA+Tech fallback: {ema_dir} "
@@ -315,38 +314,11 @@ class EnsembleTrader:
             # Fallback 2: Sweep bias is directional and indicators don't oppose
             elif sweep_bias in ('BUY', 'SELL') and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY') and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY'):
                 final_signal = sweep_bias
-                final_confidence = 0.46  # meets 45% fallback threshold
+                final_confidence = 0.45
                 models_agreement = 1
                 bot_logger.info(
                     f"🔄 No sweep → BIAS fallback: {sweep_bias} "
                     f"(5M bias strong, EMA={ema_dir}, Tech={tech_dir} not opposing)"
-                )
-            # Fallback 3: Sweep bias directional, weak opposing tech (< 30% conf) is ignored
-            elif sweep_bias in ('BUY', 'SELL') and ema_dir == 'HOLD' and tech_conf < 0.30:
-                final_signal = sweep_bias
-                final_confidence = 0.46
-                models_agreement = 1
-                bot_logger.info(
-                    f"🔄 No sweep → BIAS-OVERRIDE fallback: {sweep_bias} "
-                    f"(5M bias, Tech={tech_dir}({tech_conf:.0%}) too weak to block)"
-                )
-            # Fallback 4: Technical has signal, EMA neutral (HOLD), use Tech direction
-            elif tech_dir in ('BUY', 'SELL') and ema_dir == 'HOLD' and tech_conf >= 0.35:
-                final_signal = tech_dir
-                final_confidence = 0.46  # meets 45% fallback threshold
-                models_agreement = 1
-                bot_logger.info(
-                    f"🔄 No sweep → TECH fallback: {tech_dir} "
-                    f"(Tech={technical_signal['confidence']:.0%}, EMA neutral)"
-                )
-            # Fallback 5: In ranging regime, follow Tech momentum even if it opposes 5M bias
-            elif regime == 'ranging' and tech_dir in ('BUY', 'SELL') and tech_conf >= 0.40:
-                final_signal = tech_dir
-                final_confidence = 0.46  # meets 45% fallback threshold
-                models_agreement = 1
-                bot_logger.info(
-                    f"🔄 No sweep → RANGE-MOMENTUM fallback: {tech_dir} "
-                    f"(ranging market, following Tech={technical_signal['confidence']:.0%})"
                 )
             else:
                 final_signal = 'SKIP'
@@ -704,17 +676,15 @@ class EnsembleTrader:
             ema_dir in ('BUY', 'SELL')
         )
         
-        # Fallback 2: Sweep bias matches signal AND at least one indicator agrees
+        # Fallback 2: Sweep bias matches signal and indicators don't oppose
         sweep_bias = signal_result.get('sweep_bias', 'HOLD')
         if sweep_bias not in ('BUY', 'SELL'):
             sweep_bias = 'HOLD'
             
         opposing_dir = 'SELL' if signal_result['signal'] == 'BUY' else 'BUY'
-        has_indicator_agreement = (ema_dir == signal_result['signal'] or tech_dir == signal_result['signal'])
         is_bias_fallback = (
             not sweep_fired and
             sweep_bias == signal_result['signal'] and
-            has_indicator_agreement and  # Require active agreement, not just no opposition
             ema_dir != opposing_dir and
             tech_dir != opposing_dir
         )
@@ -758,16 +728,7 @@ class EnsembleTrader:
             )
             return False
 
-        # Fallback entries require HIGHER confidence since they lack sweep confirmation
-        effective_threshold = threshold
-        if is_fallback_entry:
-            effective_threshold = max(threshold, 0.55)  # Minimum 55% for fallback (stricter)
-            if effective_confidence < effective_threshold:
-                bot_logger.info(
-                    f"📊 Fallback entry confidence {effective_confidence:.2%} < required {effective_threshold:.2%}"
-                )
-                return False
-        elif effective_confidence < threshold:
+        if effective_confidence < threshold:
             bot_logger.info(
                 f"📊 Confidence {effective_confidence:.2%} < threshold {threshold:.2%}"
             )

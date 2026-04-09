@@ -132,7 +132,7 @@ OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 # With sweep-gated architecture, sweep must fire (4-layer validation)
 # then confidence is boosted/reduced by EMA + Technical confirmation.
 # Futures tuning: 0.60 threshold + 3 model agreement was optimal in backtest.
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.35))
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))  # Sweep + at least 2 context models must agree
 
 # Technical Analysis Parameters (ATR-centric scalping)

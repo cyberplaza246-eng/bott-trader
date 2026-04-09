@@ -18,6 +18,8 @@ class EMACrossoverAnalyzer:
     """ATR / EMA alignment model — confirms momentum via volatility growth."""
 
     def get_signal(self, df):
+        from src.utils.logger import bot_logger
+        bot_logger.info("[EMA] get_signal called")
         """Analyse latest candles for EMA alignment + ATR momentum.
 
         Scoring:
@@ -37,7 +39,9 @@ class EMACrossoverAnalyzer:
         """
         try:
             if df is None or len(df) < 200:
-                return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Insufficient data'}
+                result = {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Insufficient data'}
+                bot_logger.info(f"[EMA] Returning: {result}")
+                return result
 
             close = df['close']
             high = df['high']
@@ -180,12 +184,16 @@ class EMACrossoverAnalyzer:
 
             confidence = round(min(confidence, 1.0), 2)
 
-            return {
+            result = {
                 'signal': signal,
                 'confidence': confidence,
                 'reason': ' | '.join(reasons) if reasons else 'No alignment signal',
             }
+            bot_logger.info(f"[EMA] Returning: {result}")
+            return result
 
         except Exception as e:
             bot_logger.error(f"EMA/Volatility analyzer error: {e}")
-            return {'signal': 'HOLD', 'confidence': 0.0, 'reason': f'Error: {e}'}
+            result = {'signal': 'HOLD', 'confidence': 0.0, 'reason': f'Error: {e}'}
+            bot_logger.info(f"[EMA] Returning: {result}")
+            return result
