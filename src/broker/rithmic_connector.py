@@ -204,6 +204,7 @@ class RithmicConnector(BaseBroker):
         # Check cache first
         cache_key = f"{symbol}_{timeframe_minutes}"
         now = time.time()
+        latest_partial_df: Optional[pd.DataFrame] = None
         if cache_key in self._candle_cache:
             cached_time, cached_df = self._candle_cache[cache_key]
             if now - cached_time < self._candle_cache_ttl and cached_df is not None and len(cached_df) >= 10:
@@ -240,6 +241,8 @@ class RithmicConnector(BaseBroker):
                         self._candle_cache[cache_key] = (now, df)
                         return df
                     else:
+                        if df is not None and len(df) > 0:
+                            latest_partial_df = df
                         bot_logger.warning(
                             f"Rithmic candle fetch returned insufficient data for {symbol}: "
                             f"{0 if df is None else len(df)} bars"
@@ -280,6 +283,8 @@ class RithmicConnector(BaseBroker):
                     break
 
         if self._disable_yahoo_fallback:
+            if latest_partial_df is not None and len(latest_partial_df) > 0:
+                return latest_partial_df
             return None
 
         # Fall back to Yahoo Finance

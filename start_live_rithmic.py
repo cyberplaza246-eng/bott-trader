@@ -177,12 +177,68 @@ class LiveRithmicTrader:
             min_bars = self.lookback + self.ema_len + 15  # 75 bars needed
             if df is None or len(df) < min_bars:
                 rith_bars = 0 if df is None else len(df)
-                print(f"⚠️  Rithmic returned {rith_bars} bars, need {min_bars} - waiting for more live bars")
-                return df
+                local_df = self._get_local_history_candles(count)
+                merged = self._merge_candles(local_df, df, count)
+                merged_bars = 0 if merged is None else len(merged)
+                print(
+                    f"⚠️  Rithmic returned {rith_bars} bars, need {min_bars} - "
+                    f"using local warm history ({merged_bars} bars total)"
+                )
+                return merged
             return df
         except Exception as e:
             print(f"❌ Error getting candles: {e}")
             return None
+
+    def _get_local_history_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
+        """Load local 5m history CSV as indicator warm-start (no Yahoo usage)."""
+        try:
+            data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+            path = os.path.join(data_dir, f'{self.symbol}_5m.csv')
+            if not os.path.exists(path):
+                return None
+
+            df = pd.read_csv(path)
+            df.columns = [str(c).lower() for c in df.columns]
+            if 'datetime' not in df.columns and 'date' in df.columns:
+                df = df.rename(columns={'date': 'datetime'})
+            if 'datetime' in df.columns:
+                df['datetime'] = pd.to_datetime(df['datetime'], utc=True, errors='coerce')
+                df = df.dropna(subset=['datetime'])
+
+            required = {'open', 'high', 'low', 'close'}
+            if not required.issubset(set(df.columns)):
+                return None
+
+            keep_cols = [c for c in ['datetime', 'open', 'high', 'low', 'close', 'volume'] if c in df.columns]
+            return df[keep_cols].tail(count).reset_index(drop=True)
+        except Exception as e:
+            bot_logger.warning(f"Local history warm-start failed for {self.symbol}: {e}")
+            return None
+
+    def _merge_candles(
+        self,
+        history_df: Optional[pd.DataFrame],
+        live_df: Optional[pd.DataFrame],
+        count: int,
+    ) -> Optional[pd.DataFrame]:
+        """Merge local history with live bars and keep latest rows."""
+        if history_df is None and live_df is None:
+            return None
+        if history_df is None:
+            return live_df.tail(count).reset_index(drop=True)
+        if live_df is None:
+            return history_df.tail(count).reset_index(drop=True)
+
+        merged = pd.concat([history_df, live_df], ignore_index=True)
+        if 'datetime' in merged.columns:
+            merged['datetime'] = pd.to_datetime(merged['datetime'], utc=True, errors='coerce')
+            merged = merged.dropna(subset=['datetime'])
+            merged = merged.drop_duplicates(subset=['datetime'], keep='last')
+            merged = merged.sort_values('datetime')
+        else:
+            merged = merged.drop_duplicates(keep='last')
+        return merged.tail(count).reset_index(drop=True)
     
     def _get_yahoo_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
         """Fetch candles from Yahoo Finance as fallback."""
