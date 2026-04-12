@@ -258,7 +258,11 @@ class RithmicConnector(BaseBroker):
                             time.sleep(0.5 + attempt)  # Brief backoff
                             continue
 
-                    bot_logger.error(f"Rithmic candles error for {symbol}: {e}")
+                    # KeyError from async_rithmic when no bars exist (e.g. market closed)
+                    if isinstance(e, KeyError):
+                        bot_logger.info(f"Rithmic no bars for {symbol} (market closed?) — using Yahoo fallback")
+                    else:
+                        bot_logger.error(f"Rithmic candles error for {symbol}: {e}")
                     break
 
         # Fall back to Yahoo Finance
@@ -397,6 +401,7 @@ class RithmicConnector(BaseBroker):
         tp: Optional[float] = None,
     ) -> bool:
         if not self._connected:
+            bot_logger.warning("Rithmic modify_position rejected: connector not connected")
             return False
         try:
             order_id = str(ticket)
@@ -405,6 +410,11 @@ class RithmicConnector(BaseBroker):
             with self._order_lock:
                 order = self._orders.get(order_id)
             if not order:
+                bot_logger.warning(f"Rithmic modify_position rejected: unknown order_id {order_id}")
+                return False
+
+            if sl is None and tp is None:
+                bot_logger.warning(f"Rithmic modify_position skipped: no SL/TP provided for {order_id}")
                 return False
 
             spec = get_instrument(order["symbol"])
