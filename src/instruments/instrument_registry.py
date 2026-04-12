@@ -93,10 +93,10 @@ _MES = InstrumentSpec(
     commission_rt=0.62,          # Typical micro commission RT
     spread_default=0.25,         # 1 tick typical
     atr_minimum=2.0,             # ~2 points min ATR (filters low-vol noise)
-    sl_max_ticks_1m=10,          # 2.5 points = $3.12 on MES
-    sl_max_ticks_5m=14,          # 3.5 points = $4.38
-    tp_max_ticks_1m=18,          # 4.5 points = $5.62
-    tp_max_ticks_5m=24,          # 6 points = $7.50
+    sl_max_ticks_1m=40,          # 10 points = $12.50 on MES
+    sl_max_ticks_5m=80,          # 20 points = $25.00 (2.5×ATR at median ATR ~4pts)
+    tp_max_ticks_1m=80,          # 20 points = $25.00
+    tp_max_ticks_5m=200,         # 50 points = $62.50 (2.5R × 2.5×ATR at p75 ATR)
     sweep_tolerance_ticks=2,     # 0.5 point sweep past level
     session_start=dt_time(23, 0),   # Sun 6pm ET = 23 UTC
     session_end=dt_time(22, 0),     # Fri 5pm ET = 22 UTC
@@ -119,10 +119,10 @@ _MNQ = InstrumentSpec(
     commission_rt=0.62,
     spread_default=0.50,         # 2 ticks typical
     atr_minimum=5.0,            # NQ more volatile, 5m ATR typically 8-12
-    sl_max_ticks_1m=20,          # 5 points = $2.50 on MNQ
-    sl_max_ticks_5m=28,          # 7 points = $3.50
-    tp_max_ticks_1m=35,          # 8.75 points = $4.38
-    tp_max_ticks_5m=48,          # 12 points = $6.00
+    sl_max_ticks_1m=80,          # 20 points = $10.00 on MNQ
+    sl_max_ticks_5m=300,         # 75 points = $37.50 (2.5×ATR at median ATR ~20pts)
+    tp_max_ticks_1m=120,         # 30 points = $15.00
+    tp_max_ticks_5m=500,         # 125 points = $62.50 (1.5R × 2.5×ATR at p75 ATR)
     sweep_tolerance_ticks=5,     # 1.25 points
     session_start=dt_time(23, 0),
     session_end=dt_time(22, 0),

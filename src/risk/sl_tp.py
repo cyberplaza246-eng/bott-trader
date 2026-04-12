@@ -31,17 +31,25 @@ PAIR_CONFIG = {
 
 # ── Constants ───────────────────────────────────────────────────────
 SL_ATR_BUFFER = 0.35          # Buffer beyond structure level (35% ATR)
-SL_ATR_FALLBACK = 1.5         # Fallback: 1.5×ATR when no structure
-SL_MIN_ATR = 1.0              # Floor: at least 1.0×ATR
+SL_ATR_FALLBACK = 2.5         # Fallback: 2.5×ATR when no structure (from sweep)
+SL_MIN_ATR = 1.5              # Floor: at least 1.5×ATR (from sweep)
 SL_MIN_SPREAD_MULT = 2        # Floor: at least 2×spread
 SL_MAX_PIPS_1M = 15.0         # Hard cap: 15 pips for 1M trades
 SL_MAX_PIPS_5M = 25.0         # Hard cap: 25 pips for 5M trades
 
 SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
 MIN_RR = 1.5                  # Minimum reward-to-risk ratio
-MAX_RR = 3.0                  # Maximum R:R
+MAX_RR = 3.5                  # Maximum R:R (raised from 3.0 — MES optimal is 2.5R)
 TP_MAX_PIPS_1M = 20.0         # Hard cap: 20 pips TP for 1M scalps
 TP_MAX_PIPS_5M = 35.0         # Hard cap: 35 pips TP for 5M scalps
+
+# Per-symbol TP R-multiple (from backtest parameter sweep)
+# MES: 2.5R optimal (PF 1.89), MNQ: 1.5R optimal (PF 1.76)
+SYMBOL_TP_R_MULT = {
+    'MES': 2.5,
+    'MNQ': 1.5,
+}
+DEFAULT_TP_R_MULT = 2.5
 
 STRUCTURE_LOOKBACK = 30       # Bars to scan for swing structure
 
@@ -101,7 +109,7 @@ def calculate_sl_tp(df, direction, pair, timeframe,
     #  TAKE PROFIT
     # ════════════════════════════════════════════════════════════════
     tp_result = _calculate_tp(
-        direction, entry_price, sl_distance, pip_size, sr_levels
+        direction, entry_price, sl_distance, pip_size, sr_levels, pair
     )
 
     if tp_result is None:
@@ -343,15 +351,15 @@ def _significance(data, idx, col, price, atr, vol_avg):
 #  TP INTERNALS
 # ════════════════════════════════════════════════════════════════════
 
-def _calculate_tp(direction, entry_price, sl_distance, pip_size, sr_levels):
+def _calculate_tp(direction, entry_price, sl_distance, pip_size, sr_levels, pair=None):
     """Find TP at 85% of distance to nearest S/R level.
 
-    Falls back to ATR-based TP (1.8R) when no S/R level qualifies.
+    Falls back to ATR-based TP using per-symbol R-multiple when no S/R level qualifies.
 
     Returns:
         (tp_distance, reason) or None
     """
-    atr_fallback_rr = 2.5  # ATR-based R:R when no S/R target found
+    atr_fallback_rr = SYMBOL_TP_R_MULT.get(pair, DEFAULT_TP_R_MULT)
 
     if not sr_levels:
         tp_dist = sl_distance * atr_fallback_rr

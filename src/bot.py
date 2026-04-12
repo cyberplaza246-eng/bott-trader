@@ -262,8 +262,21 @@ class TradingBot:
     # ── Session Filter ────────────────────────────────────────────
 
     def is_pair_in_session(self, pair):
-        """Check if the current UTC hour falls within this pair's trading window."""
-        current_hour = datetime.now(timezone.utc).hour
+        """Check if the current UTC hour falls within this pair's trading window.
+        Also enforces bad-hour and Friday filters from backtest optimization."""
+        now = datetime.now(timezone.utc)
+        current_hour = now.hour
+
+        # Friday filter (from backtest: negative edge on Fridays for MES/MNQ)
+        pair_cfg = SCALPING_PAIRS.get(pair, {})
+        if pair_cfg.get('skip_friday', False) and now.weekday() == 4:
+            return False
+
+        # Bad hours filter (empirically derived from 444 paper trades + backtest sweep)
+        bad_hours = pair_cfg.get('bad_hours_utc', [])
+        if current_hour in bad_hours:
+            return False
+
         session = self.PAIR_SESSIONS.get(pair, self.DEFAULT_SESSION)
         s, e = session['start'], session['end']
         if s == e:
@@ -661,6 +674,14 @@ class TradingBot:
                             f"No free trade slot for {pair}: "
                             f"{self.risk_manager.open_trades}/{cap} in use (available: {available})"
                         )
+                        continue
+
+                    # Hard risk envelope check (exposure caps, session loss gate, equity hard-stop)
+                    risk_gate_ok, risk_gate_reason = self.risk_manager.check_hard_risk_gates(
+                        symbol=pair, risk_amount_usd=0.0  # risk_amount computed later in sizing
+                    )
+                    if not risk_gate_ok:
+                        bot_logger.warning(f"🛑 Hard risk gate blocked {pair}: {risk_gate_reason}")
                         continue
 
                     # Adaptive learner: skip chronically losing pairs
@@ -1872,6 +1893,9 @@ class TradingBot:
                 # Decrement open_trades counter (balance is synced from broker
                 # by _sync_balance — do NOT double-count P/L here)
                 self.risk_manager.open_trades = max(0, self.risk_manager.open_trades - 1)
+
+                # Record PnL for hard risk gates (session loss, symbol kill switch)
+                self.risk_manager.record_trade_pnl(pair, profit)
 
                 # Record with adaptive learner (for weight adaptation only)
                 # Try ticket-keyed first (new), then fall back to pair-keyed (legacy)

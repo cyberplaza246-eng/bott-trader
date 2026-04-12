@@ -101,6 +101,30 @@ class RiskManager:
         self.slot3_confidence_threshold = float(os.getenv('SLOT3_CONFIDENCE_THRESHOLD', '0.58'))
         self.slot3_min_agreement = int(os.getenv('SLOT3_MIN_AGREEMENT', '3'))
 
+        # ── Hard Risk Envelope ────────────────────────────────────────
+        # Per-trade wallet exposure cap (% of balance risked per trade)
+        self.max_trade_exposure_pct = float(os.getenv('MAX_TRADE_EXPOSURE_PCT', '2.0'))
+        # Aggregate open exposure cap (% of balance across all open trades)
+        self.max_aggregate_exposure_pct = float(os.getenv('MAX_AGGREGATE_EXPOSURE_PCT', '6.0'))
+        # Session realized-loss gate: pause trading after losing this % in a session
+        self.session_loss_gate_pct = float(os.getenv('SESSION_LOSS_GATE_PCT', '4.0'))
+        # Cooldown after session loss gate (seconds)
+        self.session_loss_cooldown_sec = int(os.getenv('SESSION_LOSS_COOLDOWN_SEC', '1800'))
+        # Equity drawdown hard-stop: enter safe mode if equity drops this % from peak
+        self.equity_hardstop_pct = float(os.getenv('EQUITY_HARDSTOP_PCT', '8.0'))
+        # Per-symbol kill switch (track consecutive losses per symbol)
+        self.symbol_consecutive_loss_limit = int(os.getenv('SYMBOL_CONSEC_LOSS_LIMIT', '4'))
+
+        # Runtime state for hard risk gates
+        self._session_realized_loss = 0.0
+        self._session_loss_gate_active = False
+        self._session_loss_gate_until = 0.0  # timestamp
+        self._equity_peak = initial_balance
+        self._safe_mode = False
+        self._symbol_consec_losses = {}  # symbol -> consecutive loss count
+        self._killed_symbols = set()  # symbols disabled by kill switch
+        self._aggregate_risk_usd = 0.0  # total $ at risk across open trades
+
         # Set initial tier & limits (will be recalculated each cycle)
         self._current_tier_name = None
         self._current_tier = None
@@ -109,6 +133,12 @@ class RiskManager:
         bot_logger.info(
             f"RiskManager initialized: ${initial_balance:.2f} | "
             f"Tier: {self._current_tier['description']}"
+        )
+        bot_logger.info(
+            f"  Hard risk: exposure cap {self.max_trade_exposure_pct}%/trade, "
+            f"{self.max_aggregate_exposure_pct}% agg | "
+            f"session gate {self.session_loss_gate_pct}% | "
+            f"equity hard-stop {self.equity_hardstop_pct}%"
         )
 
     # ── Tier Management ───────────────────────────────────────────────
@@ -292,6 +322,125 @@ class RiskManager:
 
         available_slots = max(0, effective_cap - self.open_trades)
         return effective_cap, available_slots
+
+    # ── Hard Risk Envelope ────────────────────────────────────────────
+
+    def check_hard_risk_gates(self, symbol=None, risk_amount_usd=0.0):
+        """Check all hard risk gates before allowing a new trade.
+
+        Returns (allowed: bool, reason: str).  Call BEFORE opening any trade.
+        """
+        import time
+
+        # 1. Safe-mode hard-stop (equity drawdown)
+        if self._safe_mode:
+            return False, "SAFE_MODE: equity drawdown hard-stop active"
+
+        # Update equity peak
+        if self.current_balance > self._equity_peak:
+            self._equity_peak = self.current_balance
+        dd_pct = ((self._equity_peak - self.current_balance) / self._equity_peak) * 100 if self._equity_peak > 0 else 0
+        if dd_pct >= self.equity_hardstop_pct:
+            self._safe_mode = True
+            bot_logger.warning(
+                f"🛑 EQUITY HARD-STOP: DD {dd_pct:.1f}% >= {self.equity_hardstop_pct}% "
+                f"(peak ${self._equity_peak:.2f} → ${self.current_balance:.2f}) — entering safe mode"
+            )
+            return False, f"EQUITY_HARDSTOP: {dd_pct:.1f}% drawdown"
+
+        # 2. Session realized-loss gate
+        if self._session_loss_gate_active:
+            if time.time() < self._session_loss_gate_until:
+                remaining = int(self._session_loss_gate_until - time.time())
+                return False, f"SESSION_LOSS_GATE: cooldown {remaining}s remaining"
+            else:
+                self._session_loss_gate_active = False
+                bot_logger.info("✅ Session loss gate cooldown expired — trading resumed")
+
+        session_loss_pct = (self._session_realized_loss / self.daily_starting_balance) * 100 if self.daily_starting_balance > 0 else 0
+        if session_loss_pct >= self.session_loss_gate_pct:
+            self._session_loss_gate_active = True
+            self._session_loss_gate_until = time.time() + self.session_loss_cooldown_sec
+            bot_logger.warning(
+                f"⛔ SESSION LOSS GATE: lost {session_loss_pct:.1f}% >= {self.session_loss_gate_pct}% "
+                f"— pausing {self.session_loss_cooldown_sec}s"
+            )
+            return False, f"SESSION_LOSS_GATE: {session_loss_pct:.1f}% session loss"
+
+        # 3. Per-trade exposure cap
+        if risk_amount_usd > 0 and self.current_balance > 0:
+            trade_exposure_pct = (risk_amount_usd / self.current_balance) * 100
+            if trade_exposure_pct > self.max_trade_exposure_pct:
+                return False, (
+                    f"TRADE_EXPOSURE: {trade_exposure_pct:.1f}% > "
+                    f"{self.max_trade_exposure_pct}% cap"
+                )
+
+        # 4. Aggregate exposure cap
+        if self.current_balance > 0:
+            new_agg = self._aggregate_risk_usd + risk_amount_usd
+            agg_pct = (new_agg / self.current_balance) * 100
+            if agg_pct > self.max_aggregate_exposure_pct:
+                return False, (
+                    f"AGGREGATE_EXPOSURE: {agg_pct:.1f}% > "
+                    f"{self.max_aggregate_exposure_pct}% cap"
+                )
+
+        # 5. Per-symbol kill switch
+        if symbol and symbol in self._killed_symbols:
+            return False, f"SYMBOL_KILLED: {symbol} disabled after {self.symbol_consecutive_loss_limit} consecutive losses"
+
+        return True, "OK"
+
+    def record_trade_pnl(self, symbol, pnl):
+        """Record a completed trade's PnL for hard risk gate tracking."""
+        # Session loss tracking
+        if pnl < 0:
+            self._session_realized_loss += abs(pnl)
+
+        # Per-symbol consecutive loss tracking
+        if symbol:
+            if pnl < 0:
+                self._symbol_consec_losses[symbol] = self._symbol_consec_losses.get(symbol, 0) + 1
+                if self._symbol_consec_losses[symbol] >= self.symbol_consecutive_loss_limit:
+                    self._killed_symbols.add(symbol)
+                    bot_logger.warning(
+                        f"🔴 SYMBOL KILL SWITCH: {symbol} disabled after "
+                        f"{self._symbol_consec_losses[symbol]} consecutive losses"
+                    )
+            else:
+                # Reset on win
+                self._symbol_consec_losses[symbol] = 0
+                # Re-enable if previously killed and now winning
+                if symbol in self._killed_symbols:
+                    self._killed_symbols.discard(symbol)
+                    bot_logger.info(f"✅ {symbol} re-enabled after winning trade")
+
+    def add_open_risk(self, risk_usd):
+        """Track aggregate open risk when a new position is opened."""
+        self._aggregate_risk_usd += risk_usd
+
+    def remove_open_risk(self, risk_usd):
+        """Remove aggregate open risk when a position is closed."""
+        self._aggregate_risk_usd = max(0.0, self._aggregate_risk_usd - risk_usd)
+
+    def reset_session(self):
+        """Reset session-level risk counters (call at start of each trading day)."""
+        self._session_realized_loss = 0.0
+        self._session_loss_gate_active = False
+        self.daily_starting_balance = self.current_balance
+        self.daily_loss = 0.0
+        bot_logger.info(f"📅 Session reset: starting balance ${self.current_balance:.2f}")
+
+    def exit_safe_mode(self):
+        """Manually exit safe mode after review."""
+        self._safe_mode = False
+        self._equity_peak = self.current_balance
+        bot_logger.info(f"✅ Safe mode exited. New equity peak: ${self.current_balance:.2f}")
+
+    @property
+    def is_safe_mode(self):
+        return self._safe_mode
 
     # ── Position Sizing ───────────────────────────────────────────────
 

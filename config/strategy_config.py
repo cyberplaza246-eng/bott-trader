@@ -85,15 +85,21 @@ SCALPING_PAIRS = {
         'session_atr_min': 1.0,        # Lowered ATR for quiet/Sunday trading
         'spread_sim': 0.25,            # 1 tick spread
         'pip_size': 0.25,              # tick_size
-        'cooldown_seconds': 300,
-        'max_hold_candles': 20,        # Tighter hold for futures
+        'cooldown_seconds': 300,       # 60 bars × 5min = 300s
+        'max_hold_candles': 120,       # 10 hours max hold (from backtest)
+        'adx_min': 25,                 # From sweep
+        'skip_friday': False,
+        'bad_hours_utc': [0, 4, 21],
     },
     'MNQ': {
         'session_atr_min': 2.0,        # Lowered ATR for quiet/Sunday trading
         'spread_sim': 0.50,            # 2 ticks spread
         'pip_size': 0.25,
         'cooldown_seconds': 300,
-        'max_hold_candles': 20,
+        'max_hold_candles': 120,       # 10 hours max hold
+        'adx_min': 20,                 # MNQ needs lower threshold from sweep
+        'skip_friday': False,
+        'bad_hours_utc': [0, 4, 21],
     },
 }
 
@@ -103,8 +109,8 @@ SCALPING_SESSION_WINDOWS = {
     'EUR/USD': {'start': 0, 'end': 0},    # 24/7 trading (start==end means always)
     'GBP/USD': {'start': 0, 'end': 0},    # 24/7 trading
     'USD/JPY': {'start': 0, 'end': 0},    # 24/7 trading
-    'MES': {'start': 13, 'end': 21},        # US extended session: 13-21 UTC (8am-4pm ET)
-    'MNQ': {'start': 13, 'end': 21},
+    'MES': {'start': 0, 'end': 0},        # 24/7 — bad_hours_utc handles filtering
+    'MNQ': {'start': 0, 'end': 0},
 }
 
 # Spread limits for scalping (in tick/pip units)
@@ -132,7 +138,7 @@ OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 # With sweep-gated architecture, sweep must fire (4-layer validation)
 # then confidence is boosted/reduced by EMA + Technical confirmation.
 # Futures tuning: 0.60 threshold + 3 model agreement was optimal in backtest.
-ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.45))
+ENSEMBLE_CONFIDENCE_THRESHOLD = float(os.getenv('ENSEMBLE_CONFIDENCE_THRESHOLD', 0.60))
 MIN_MODELS_AGREEMENT = int(os.getenv('MIN_MODELS_AGREEMENT', 3))  # Sweep + at least 2 context models must agree
 
 # Technical Analysis Parameters (ATR-centric scalping)
@@ -141,20 +147,29 @@ INDICATORS = {
     'MACD': {'fast': 12, 'slow': 26, 'signal': 9},
     'BOLLINGER_BANDS': {'period': 20, 'std_dev': 2},
     'ATR': {'period': 14},
-    'ADX': {'period': 14, 'trend_threshold': 18},
+    'ADX': {'period': 14, 'trend_threshold': 25},  # ADX>25 for MES, ADX>20 for MNQ (per-symbol in bot)
     'EMA': {'short': 20, 'medium': 50, 'long': 200},
     'VOLUME_PERIOD': 20,
     'VOLUME_SPIKE_THRESHOLD': 1.2,   # Volume > 1.2x average
 }
 
 # Risk Management (ATR-based — no fixed pips)
-STOP_LOSS_MULTIPLIER = 0.8    # SL = 0.8 x ATR(14) — matches ScalpingAnalyzer.SL_ATR_MULT
-TAKE_PROFIT_RATIO = 1.8      # TP = 1.8 x SL — better R:R
-TP_EXPANDING = 2.0            # Wider TP in expanding volatility
-TP_CONTRACTING = 1.5          # Tighter TP in contracting volatility
+# Optimal params from rithmic_backtest.py sweep + walk-forward validation:
+#   MES: SL=2.5×ATR, TP=2.5R (6.25×ATR), ADX>25, PF 1.89
+#   MNQ: SL=2.5×ATR, TP=1.5R (3.75×ATR), ADX>20, PF 1.76
+STOP_LOSS_MULTIPLIER = 2.5    # SL = 2.5 x ATR(14) — from sweep
+TAKE_PROFIT_RATIO = 2.5      # TP = 2.5 x SL (default, MES uses this)
+TP_EXPANDING = 3.0            # Wider TP in expanding volatility
+TP_CONTRACTING = 1.5          # Tighter TP in contracting volatility (MNQ default)
 MIN_RISK_REWARD_RATIO = 1.5   # Minimum R:R to enter
-MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 1.8))
-HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.40))
+MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 2.5))
+HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.55))
+
+# Per-symbol TP ratio (R-multiple of SL distance)
+SYMBOL_TP_R_MULT = {
+    'MES': 2.5,   # 2.5R — from sweep (PF 1.89)
+    'MNQ': 1.5,   # 1.5R — MNQ is more mean-reverting (PF 1.76)
+}
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
 
 # Logging

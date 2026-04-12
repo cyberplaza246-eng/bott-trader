@@ -1371,6 +1371,30 @@ class LiquiditySweepAnalyzer:
         if regime_info['regime'] == 'range':
             base_confidence *= 0.85
 
+        # ── Volatile Regime Gate ─────────────────────────────────────
+        # In high-volatility regimes, require stronger confirmation or skip.
+        # ATR well above average + low ADX = chaotic whipsaw — most setups fail.
+        local_atr_val = float(regime_info.get('atr', 0) or 0)
+        if local_atr_val > 0 and 'atr' in df_1m.columns:
+            atr_mean = float(df_1m['atr'].rolling(50).mean().iloc[-1]) if len(df_1m) >= 50 else float(df_1m['atr'].mean())
+            if atr_mean > 0:
+                atr_ratio = local_atr_val / atr_mean
+                adx_val = regime_info.get('adx', 25)
+                # Extreme volatility (ATR > 2x average) with weak trend (ADX < 20)
+                if atr_ratio > 2.0 and adx_val < 20:
+                    base_confidence *= 0.70
+                    bot_logger.info(
+                        f"⚠️ {pair} VOLATILE REGIME GATE: ATR={atr_ratio:.1f}x avg, "
+                        f"ADX={adx_val:.1f} — conf ×0.70 → {base_confidence:.2f}"
+                    )
+                # Elevated volatility with moderate trend
+                elif atr_ratio > 1.8 and adx_val < 25:
+                    base_confidence *= 0.85
+                    bot_logger.info(
+                        f"⚠️ {pair} elevated volatility: ATR={atr_ratio:.1f}x avg, "
+                        f"ADX={adx_val:.1f} — conf ×0.85 → {base_confidence:.2f}"
+                    )
+
         result['signal'] = sweep['direction']
         result['confidence'] = min(base_confidence, 1.0)
         hvn_tag = f" HVN={hvn_pct:.0%}" if is_hvn else ""
