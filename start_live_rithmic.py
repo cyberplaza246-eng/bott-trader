@@ -13,9 +13,10 @@ Requirements:
 2. Active Tradesea/Lucid account with trading permissions
 
 Usage:
-    python start_live_rithmic.py              # MES default
-    python start_live_rithmic.py --symbol MNQ # Trade MNQ
-    python start_live_rithmic.py --paper      # Paper mode (signals only)
+    python start_live_rithmic.py                       # MES default
+    python start_live_rithmic.py --symbol MNQ          # Trade MNQ
+    python start_live_rithmic.py --symbols MES MNQ     # Scan both, trade best setup
+    python start_live_rithmic.py --paper               # Paper mode (signals only)
 """
 
 import os
@@ -23,7 +24,7 @@ import sys
 import time
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Dict, List, Tuple
+from typing import Optional, Dict, List, Tuple, Any
 from dataclasses import dataclass
 import pandas as pd
 import numpy as np
@@ -78,17 +79,15 @@ class Position:
 class LiveRithmicTrader:
     """Live trading with Enhanced Breakout Strategy via Rithmic."""
     
-    def __init__(self, symbol: str = 'MES', paper_mode: bool = False, skip_confirm: bool = False):
+    def __init__(self, symbol: str = 'MES', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False):
         self.skip_confirm = skip_confirm
-        self.symbol = symbol
+        self.symbols = symbols or [symbol]
+        self.symbol = self.symbols[0]
         self.paper_mode = paper_mode
         
-        # Symbol specs
-        spec = SYMBOL_SPECS.get(symbol)
-        if not spec:
-            raise ValueError(f"Unsupported symbol: {symbol}")
-        self.point_value = spec['point_value']
-        self.tick_size = spec['tick_size']
+        for sym in self.symbols:
+            if sym not in SYMBOL_SPECS:
+                raise ValueError(f"Unsupported symbol: {sym}")
         
         # Strategy params
         self.lookback = PARAMS['lookback']
@@ -120,7 +119,11 @@ class LiveRithmicTrader:
         
         # Log file
         mode = "paper" if paper_mode else "live"
-        self.log_file = f'logs/{mode}_rithmic_{symbol}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        symbols_tag = "_".join(self.symbols)
+        self.log_file = f'logs/{mode}_rithmic_{symbols_tag}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+
+    def _spec(self, symbol: str) -> Dict[str, float]:
+        return SYMBOL_SPECS[symbol]
         
     def connect(self) -> bool:
         """Initialize Rithmic connection (skipped in paper mode)."""
@@ -166,35 +169,35 @@ class LiveRithmicTrader:
             print(f"❌ Connection error: {e}")
             return False
     
-    def get_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
+    def get_candles(self, symbol: str, count: int = 100) -> Optional[pd.DataFrame]:
         """Fetch candles from Rithmic only in live mode."""
         try:
             # Paper mode or no broker: use Yahoo Finance
             if self.broker is None:
                 return self._get_yahoo_candles(count)
             
-            df = self.broker.get_candles(self.symbol, timeframe_minutes=5, num_candles=count)
+            df = self.broker.get_candles(symbol, timeframe_minutes=5, num_candles=count)
             min_bars = self.lookback + self.ema_len + 15  # 75 bars needed
             if df is None or len(df) < min_bars:
                 rith_bars = 0 if df is None else len(df)
-                local_df = self._get_local_history_candles(count)
+                local_df = self._get_local_history_candles(symbol, count)
                 merged = self._merge_candles(local_df, df, count)
                 merged_bars = 0 if merged is None else len(merged)
                 print(
-                    f"⚠️  Rithmic returned {rith_bars} bars, need {min_bars} - "
+                    f"⚠️  {symbol} Rithmic returned {rith_bars} bars, need {min_bars} - "
                     f"using local warm history ({merged_bars} bars total)"
                 )
                 return merged
             return df
         except Exception as e:
-            print(f"❌ Error getting candles: {e}")
+            print(f"❌ Error getting candles for {symbol}: {e}")
             return None
 
-    def _get_local_history_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
+    def _get_local_history_candles(self, symbol: str, count: int = 100) -> Optional[pd.DataFrame]:
         """Load local 5m history CSV as indicator warm-start (no Yahoo usage)."""
         try:
             data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
-            path = os.path.join(data_dir, f'{self.symbol}_5m.csv')
+            path = os.path.join(data_dir, f'{symbol}_5m.csv')
             if not os.path.exists(path):
                 return None
 
@@ -213,7 +216,7 @@ class LiveRithmicTrader:
             keep_cols = [c for c in ['datetime', 'open', 'high', 'low', 'close', 'volume'] if c in df.columns]
             return df[keep_cols].tail(count).reset_index(drop=True)
         except Exception as e:
-            bot_logger.warning(f"Local history warm-start failed for {self.symbol}: {e}")
+            bot_logger.warning(f"Local history warm-start failed for {symbol}: {e}")
             return None
 
     def _merge_candles(
@@ -240,7 +243,7 @@ class LiveRithmicTrader:
             merged = merged.drop_duplicates(keep='last')
         return merged.tail(count).reset_index(drop=True)
     
-    def _get_yahoo_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
+    def _get_yahoo_candles(self, count: int = 100, symbol: Optional[str] = None) -> Optional[pd.DataFrame]:
         """Fetch candles from Yahoo Finance as fallback."""
         try:
             import yfinance as yf
@@ -250,7 +253,8 @@ class LiveRithmicTrader:
                 'MES': 'ES=F',  # E-mini S&P 500 futures
                 'MNQ': 'NQ=F',  # E-mini Nasdaq futures
             }
-            ticker = ticker_map.get(self.symbol, f'{self.symbol}=F')
+            target = symbol or self.symbol
+            ticker = ticker_map.get(target, f'{target}=F')
             
             data = yf.download(ticker, period='5d', interval='5m', progress=False)
             if data.empty:
@@ -267,17 +271,17 @@ class LiveRithmicTrader:
             bot_logger.warning(f"Yahoo Finance fallback failed: {e}")
             return None
     
-    def get_price(self) -> Optional[Dict]:
+    def get_price(self, symbol: Optional[str] = None) -> Optional[Dict]:
         """Get current bid/ask."""
         try:
             if self.broker is None:
                 # Paper mode: get last close from Yahoo
-                df = self._get_yahoo_candles(5)
+                df = self._get_yahoo_candles(5, symbol=symbol)
                 if df is not None and len(df) > 0:
                     price = float(df['close'].iloc[-1])
                     return {'bid': price - 0.25, 'ask': price + 0.25, 'last': price}
                 return None
-            return self.broker.get_latest_price(self.symbol)
+            return self.broker.get_latest_price(symbol or self.symbol)
         except Exception as e:
             print(f"❌ Error getting price: {e}")
             return None
@@ -314,21 +318,21 @@ class LiveRithmicTrader:
             return False
         return True
     
-    def check_entry_signal(self, df: pd.DataFrame) -> Optional[Dict]:
+    def check_entry_signal(self, symbol: str, df: pd.DataFrame) -> Optional[Dict]:
         """Check for entry signal using full AI Ensemble."""
         if len(self.positions) >= self.max_positions or self.cooldown > 0:
             return None
         
         # Use full EnsembleTrader for signal
         if self.ensemble is None:
-            return self._check_simple_breakout(df)
+            return self._check_simple_breakout(symbol, df)
         
         try:
             # Add indicators via technical analyzer
             df_enriched = self.technical.calculate_indicators(df)
             
             # Get ensemble signal (includes sweep gate, ML, advanced strategies)
-            signal_result = self.ensemble.get_trading_signal(df_enriched, self.symbol)
+            signal_result = self.ensemble.get_trading_signal(df_enriched, symbol)
             
             # Check if should trade
             if not self.ensemble.should_trade(signal_result):
@@ -364,16 +368,24 @@ class LiveRithmicTrader:
             
             direction = 'long' if signal == 'BUY' else 'short'
             
-            bot_logger.info(f"🎯 ENSEMBLE SIGNAL: {signal} @ {price:.2f} (conf={confidence:.1%})")
+            bot_logger.info(f"🎯 ENSEMBLE SIGNAL: {symbol} {signal} @ {price:.2f} (conf={confidence:.1%})")
             bot_logger.info(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             
-            return {'direction': direction, 'entry': price, 'sl': sl, 'tp': tp, 'atr': atr, 'confidence': confidence}
+            return {
+                'symbol': symbol,
+                'direction': direction,
+                'entry': price,
+                'sl': sl,
+                'tp': tp,
+                'atr': atr,
+                'confidence': confidence,
+            }
             
         except Exception as e:
             bot_logger.warning(f"Ensemble signal error: {e}, falling back to breakout")
-            return self._check_simple_breakout(df)
+            return self._check_simple_breakout(symbol, df)
     
-    def _check_simple_breakout(self, df: pd.DataFrame) -> Optional[Dict]:
+    def _check_simple_breakout(self, symbol: str, df: pd.DataFrame) -> Optional[Dict]:
         """Fallback simple breakout strategy."""
         row = df.iloc[-1]
         price = row['close']
@@ -384,29 +396,32 @@ class LiveRithmicTrader:
         low_n = row.get('low_N', row['low'])
         ema = row.get('ema', price)
         
+        tick_size = self._spec(symbol)['tick_size']
         if pd.isna(atr) or atr < 2.0:
             return None
         
         # Long breakout
         if high > high_n and price > high_n and price > ema:
-            entry = high_n + self.tick_size
+            entry = high_n + tick_size
             sl_dist = atr * self.atr_mult
             sl = entry - sl_dist
             tp = entry + (sl_dist * self.tp_mult)
-            return {'direction': 'long', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
+            return {'symbol': symbol, 'direction': 'long', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr, 'confidence': 0.5}
         
         # Short breakout
         elif low < low_n and price < low_n and price < ema:
-            entry = low_n - self.tick_size
+            entry = low_n - tick_size
             sl_dist = atr * self.atr_mult
             sl = entry + sl_dist
             tp = entry - (sl_dist * self.tp_mult)
-            return {'direction': 'short', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr}
+            return {'symbol': symbol, 'direction': 'short', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr, 'confidence': 0.5}
         
         return None
     
     def place_order(self, signal: Dict) -> bool:
         """Place order with bracket (SL+TP)."""
+        symbol = signal['symbol']
+        tick_size = self._spec(symbol)['tick_size']
         direction = signal['direction']
         entry = signal['entry']
         sl = signal['sl']
@@ -414,12 +429,12 @@ class LiveRithmicTrader:
         
         if self.paper_mode:
             order_id = f"paper_{int(time.time())}"
-            print(f"📝 [PAPER] {direction.upper()} {self.symbol} @ {entry:.2f}")
+            print(f"📝 [PAPER] {direction.upper()} {symbol} @ {entry:.2f}")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             
             pos = Position(
                 order_id=order_id,
-                symbol=self.symbol,
+                symbol=symbol,
                 direction=direction,
                 entry_price=entry,
                 size=self.contracts,
@@ -434,7 +449,7 @@ class LiveRithmicTrader:
         # Real order
         order_type = 'buy' if direction == 'long' else 'sell'
         result = self.broker.place_order(
-            symbol=self.symbol,
+            symbol=symbol,
             order_type=order_type,
             size=self.contracts,
             entry_price=entry,
@@ -446,7 +461,7 @@ class LiveRithmicTrader:
             order_id = result.get('ticket', str(int(time.time())))
             pos = Position(
                 order_id=order_id,
-                symbol=self.symbol,
+                symbol=symbol,
                 direction=direction,
                 entry_price=result.get('entry_price', entry),
                 size=self.contracts,
@@ -455,17 +470,17 @@ class LiveRithmicTrader:
                 entry_time=datetime.now(timezone.utc)
             )
             self.positions[order_id] = pos
-            print(f"✅ ORDER FILLED: {direction.upper()} {self.symbol}")
+            print(f"✅ ORDER FILLED: {direction.upper()} {symbol}")
             print(f"   Entry: {pos.entry_price:.2f}")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
-            trades_logger.info(f"ENTRY {direction} {self.symbol} @ {entry:.2f} SL={sl:.2f} TP={tp:.2f}")
+            trades_logger.info(f"ENTRY {direction} {symbol} @ {entry:.2f} SL={sl:.2f} TP={tp:.2f}")
             return True
         else:
             print(f"❌ Order failed!")
             return False
     
-    def check_position_exit(self, df: pd.DataFrame) -> List[Tuple[str, str]]:
+    def check_position_exit(self, symbol: str, df: pd.DataFrame) -> List[Tuple[str, str]]:
         """Check if any positions hit SL/TP (for paper mode mainly). Returns list of (order_id, exit_type)."""
         exits = []
         if not self.positions:
@@ -474,6 +489,8 @@ class LiveRithmicTrader:
         row = df.iloc[-1]
         
         for order_id, pos in list(self.positions.items()):
+            if pos.symbol != symbol:
+                continue
             d = pos.direction
             
             if d == 'long':
@@ -495,20 +512,21 @@ class LiveRithmicTrader:
             return
         
         pos = self.positions[order_id]
+        spec = self._spec(pos.symbol)
         d = pos.direction
         if d == 'long':
-            raw_pnl = (exit_price - pos.entry_price) * self.point_value * pos.size
+            raw_pnl = (exit_price - pos.entry_price) * spec['point_value'] * pos.size
         else:
-            raw_pnl = (pos.entry_price - exit_price) * self.point_value * pos.size
+            raw_pnl = (pos.entry_price - exit_price) * spec['point_value'] * pos.size
         
         # Subtract costs ($2 commission + 1 tick slippage)
         commission = 2.00
-        slippage = self.tick_size * self.point_value
+        slippage = spec['tick_size'] * spec['point_value']
         pnl = raw_pnl - commission - slippage
         
         # Record trade
         trade = {
-            'symbol': self.symbol,
+            'symbol': pos.symbol,
             'direction': d,
             'entry_time': str(pos.entry_time),
             'exit_time': str(datetime.now(timezone.utc)),
@@ -525,7 +543,7 @@ class LiveRithmicTrader:
         emoji = "🟢" if pnl > 0 else "🔴"
         print(f"{emoji} EXIT {exit_type}: {d.upper()} @ {exit_price:.2f}")
         print(f"   PnL: ${pnl:.2f} | Daily: ${self.daily_pnl:.2f}")
-        trades_logger.info(f"EXIT {exit_type} {d} {self.symbol} @ {exit_price:.2f} PnL=${pnl:.2f}")
+        trades_logger.info(f"EXIT {exit_type} {d} {pos.symbol} @ {exit_price:.2f} PnL=${pnl:.2f}")
         
         del self.positions[order_id]
         print(f"   Remaining positions: {len(self.positions)}/{self.max_positions}")
@@ -542,8 +560,10 @@ class LiveRithmicTrader:
         
         try:
             # Get actual positions from broker
-            broker_positions = self.broker.get_open_positions(symbol=self.symbol)
-            broker_order_ids = {p.get('ticket') for p in broker_positions if p.get('ticket')}
+            broker_positions = []
+            for sym in self.symbols:
+                broker_positions.extend(self.broker.get_open_positions(symbol=sym))
+            broker_order_ids = {str(p.get('ticket')) for p in broker_positions if p.get('ticket')}
             
             # Find positions we think are open but broker says are closed
             our_order_ids = set(self.positions.keys())
@@ -610,7 +630,7 @@ class LiveRithmicTrader:
         
         with open(self.log_file, 'w') as f:
             json.dump({
-                'symbol': self.symbol,
+                'symbols': self.symbols,
                 'paper_mode': self.paper_mode,
                 'strategy': 'enhanced_breakout',
                 'params': PARAMS,
@@ -625,7 +645,7 @@ class LiveRithmicTrader:
         print("\n" + "=" * 70)
         print("  LIVE TRADING - Rithmic + Full AI Ensemble")
         print("=" * 70)
-        print(f"Symbol:     {self.symbol}")
+        print(f"Symbols:    {', '.join(self.symbols)}")
         print(f"Contracts:  {self.contracts}")
         print(f"Mode:       {'PAPER' if self.paper_mode else '⚠️ LIVE'}")
         print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
@@ -646,7 +666,7 @@ class LiveRithmicTrader:
         
         print("\n🚀 Starting trading loop...\n")
         
-        last_bar_time = None
+        last_bar_time: Dict[str, Any] = {}
         
         try:
             while True:
@@ -659,61 +679,71 @@ class LiveRithmicTrader:
                 # Sync position with broker
                 self.sync_broker_position()
                 
-                # Get candles
-                df = self.get_candles(count=100)
-                if df is None or len(df) < self.lookback + self.ema_len + 15:
-                    print("⚠️  Insufficient data, retrying in 30s...")
-                    time.sleep(30)
-                    continue
-                
-                df = self.calculate_indicators(df)
-                
-                # Get current bar time
-                if 'datetime' in df.columns:
-                    current_bar = df.iloc[-1]['datetime']
-                elif 'time' in df.columns:
-                    current_bar = df.iloc[-1]['time']
-                else:
-                    current_bar = datetime.now()
-                
-                # Only process on new bar
-                if last_bar_time == current_bar:
+                any_new_bar = False
+                cycle_candidates: List[Dict[str, Any]] = []
+
+                for symbol in self.symbols:
+                    df = self.get_candles(symbol=symbol, count=100)
+                    if df is None or len(df) < self.lookback + self.ema_len + 15:
+                        print(f"⚠️  {symbol} insufficient data, waiting...")
+                        continue
+
+                    df = self.calculate_indicators(df)
+
+                    if 'datetime' in df.columns:
+                        current_bar = df.iloc[-1]['datetime']
+                    elif 'time' in df.columns:
+                        current_bar = df.iloc[-1]['time']
+                    else:
+                        current_bar = datetime.now()
+
+                    if last_bar_time.get(symbol) == current_bar:
+                        continue
+                    last_bar_time[symbol] = current_bar
+                    any_new_bar = True
+
+                    if self.positions:
+                        exits = self.check_position_exit(symbol, df)
+                        for order_id, exit_type in exits:
+                            pos = self.positions.get(order_id)
+                            if pos:
+                                exit_price = pos.tp if exit_type == 'TAKE_PROFIT' else pos.sl
+                                self.process_exit(order_id, exit_type, exit_price)
+
+                    if len(self.positions) < self.max_positions and self.cooldown == 0:
+                        if any(p.symbol == symbol for p in self.positions.values()):
+                            pass
+                        else:
+                            signal = self.check_entry_signal(symbol, df)
+                            if signal:
+                                cycle_candidates.append(signal)
+
+                    row = df.iloc[-1]
+                    pos_syms = [p.symbol for p in self.positions.values()]
+                    pos_str = f"{len(self.positions)}/{self.max_positions} {pos_syms}" if self.positions else "None"
+                    cooldown_str = f"(CD:{self.cooldown})" if self.cooldown > 0 else ""
+                    print(f"[{current_bar}] {symbol} {row['close']:.2f} | Pos: {pos_str} {cooldown_str} | Daily: ${self.daily_pnl:.2f}")
+
+                if not any_new_bar:
                     time.sleep(5)
                     continue
-                
-                last_bar_time = current_bar
-                
-                # Decrement cooldown
+
                 if self.cooldown > 0:
                     self.cooldown -= 1
-                
-                # Check for exits on all positions (paper mode or monitor)
-                if self.positions:
-                    exits = self.check_position_exit(df)
-                    for order_id, exit_type in exits:
-                        pos = self.positions.get(order_id)
-                        if pos:
-                            if exit_type == 'TAKE_PROFIT':
-                                exit_price = pos.tp
-                            else:
-                                exit_price = pos.sl
-                            self.process_exit(order_id, exit_type, exit_price)
-                
-                # Check for entry (only if room for more positions)
-                if len(self.positions) < self.max_positions:
-                    signal = self.check_entry_signal(df)
-                    if signal:
-                        if self.place_order(signal):
-                            print(f"📊 ATR: {signal['atr']:.2f}")
-                            risk = abs(signal['entry'] - signal['sl']) * self.point_value
-                            print(f"   Risk: ${risk:.2f} per contract")
-                
-                # Status update
-                row = df.iloc[-1]
-                pos_str = f"{len(self.positions)}/{self.max_positions}" if self.positions else "None"
-                cooldown_str = f"(CD:{self.cooldown})" if self.cooldown > 0 else ""
-                print(f"[{current_bar}] {self.symbol} {row['close']:.2f} | Pos: {pos_str} {cooldown_str} | Daily: ${self.daily_pnl:.2f}")
-                
+
+                if len(self.positions) < self.max_positions and cycle_candidates:
+                    best = max(cycle_candidates, key=lambda s: float(s.get('confidence', 0.0)))
+                    if len(cycle_candidates) > 1:
+                        print(
+                            f"🏆 Best setup this cycle: {best['symbol']} "
+                            f"({best.get('confidence', 0.0):.1%} confidence)"
+                        )
+                    if self.place_order(best):
+                        spec = self._spec(best['symbol'])
+                        print(f"📊 {best['symbol']} ATR: {best['atr']:.2f}")
+                        risk = abs(best['entry'] - best['sl']) * spec['point_value']
+                        print(f"   Risk: ${risk:.2f} per contract")
+
                 time.sleep(10)
                 
         except KeyboardInterrupt:
@@ -737,13 +767,15 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
-    parser.add_argument('--symbol', default='MES', help='Symbol (MES or MNQ)')
+    parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ'], help='Single symbol mode')
+    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
     
     args = parser.parse_args()
-    
-    trader = LiveRithmicTrader(symbol=args.symbol, paper_mode=args.paper, skip_confirm=args.yes)
+
+    symbols = args.symbols if args.symbols else [args.symbol]
+    trader = LiveRithmicTrader(symbol=symbols[0], symbols=symbols, paper_mode=args.paper, skip_confirm=args.yes)
     
     if not trader.connect():
         print("\n❌ Could not connect to Rithmic")
