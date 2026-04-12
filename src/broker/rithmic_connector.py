@@ -109,6 +109,9 @@ class RithmicConnector(BaseBroker):
         self._gateway = os.getenv("RITHMIC_GATEWAY", "")
         self._app_name = "AiScalpBot"
         self._app_version = "1.0"
+        self._disable_yahoo_fallback = (
+            os.getenv("RITHMIC_DISABLE_YAHOO_FALLBACK", "false").lower() == "true"
+        )
 
         # Symbols to subscribe (populated from config at init time)
         self._symbols_to_watch: List[str] = []
@@ -209,6 +212,8 @@ class RithmicConnector(BaseBroker):
         # Check if we're in fallback mode due to repeated lock errors
         if self._fallback_until is not None:
             if now < self._fallback_until:
+                if self._disable_yahoo_fallback:
+                    return None
                 # Still in fallback mode — use Yahoo Finance
                 df = self._yf_get_candles(symbol, timeframe_minutes, num_candles)
                 if df is not None and len(df) >= 10:
@@ -248,10 +253,16 @@ class RithmicConnector(BaseBroker):
                         # Check if we should enter fallback mode
                         if self._lock_error_count >= self._max_lock_errors:
                             self._fallback_until = now + self._fallback_cooldown_secs
-                            bot_logger.warning(
-                                f"⚠️ Rithmic history lock errors ({self._lock_error_count}x) — "
-                                f"switching to Yahoo Finance fallback for {self._fallback_cooldown_secs}s"
-                            )
+                            if self._disable_yahoo_fallback:
+                                bot_logger.warning(
+                                    f"⚠️ Rithmic history lock errors ({self._lock_error_count}x) — "
+                                    f"Yahoo fallback disabled, retrying after {self._fallback_cooldown_secs}s"
+                                )
+                            else:
+                                bot_logger.warning(
+                                    f"⚠️ Rithmic history lock errors ({self._lock_error_count}x) — "
+                                    f"switching to Yahoo Finance fallback for {self._fallback_cooldown_secs}s"
+                                )
                             break
                         elif attempt < max_retries - 1:
                             bot_logger.warning(f"Rithmic history lock timeout, retry {attempt+1}/{max_retries}")
@@ -260,10 +271,16 @@ class RithmicConnector(BaseBroker):
 
                     # KeyError from async_rithmic when no bars exist (e.g. market closed)
                     if isinstance(e, KeyError):
-                        bot_logger.info(f"Rithmic no bars for {symbol} (market closed?) — using Yahoo fallback")
+                        if self._disable_yahoo_fallback:
+                            bot_logger.info(f"Rithmic no bars for {symbol} (market closed?)")
+                        else:
+                            bot_logger.info(f"Rithmic no bars for {symbol} (market closed?) — using Yahoo fallback")
                     else:
                         bot_logger.error(f"Rithmic candles error for {symbol}: {e}")
                     break
+
+        if self._disable_yahoo_fallback:
+            return None
 
         # Fall back to Yahoo Finance
         df = self._yf_get_candles(symbol, timeframe_minutes, num_candles)
@@ -277,6 +294,9 @@ class RithmicConnector(BaseBroker):
             quote = self._quotes.get(symbol)
             if quote and quote.get("last", 0) > 0:
                 return dict(quote)
+
+        if self._disable_yahoo_fallback:
+            return None
 
         # Fallback to Yahoo Finance
         return self._yf_get_latest_price(symbol)

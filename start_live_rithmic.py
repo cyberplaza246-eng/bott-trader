@@ -138,6 +138,7 @@ class LiveRithmicTrader:
                 return True
             
             # Live mode: connect to Rithmic
+            os.environ['RITHMIC_DISABLE_YAHOO_FALLBACK'] = 'true'
             self.broker = RithmicConnector()
             self.broker.initialize()
             
@@ -166,7 +167,7 @@ class LiveRithmicTrader:
             return False
     
     def get_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
-        """Fetch candles from Rithmic or Yahoo Finance (paper mode)."""
+        """Fetch candles from Rithmic only in live mode."""
         try:
             # Paper mode or no broker: use Yahoo Finance
             if self.broker is None:
@@ -175,39 +176,13 @@ class LiveRithmicTrader:
             df = self.broker.get_candles(self.symbol, timeframe_minutes=5, num_candles=count)
             min_bars = self.lookback + self.ema_len + 15  # 75 bars needed
             if df is None or len(df) < min_bars:
-                # Warm-start after market open: blend Yahoo history with live Rithmic bars.
                 rith_bars = 0 if df is None else len(df)
-                print(f"⚠️  Rithmic returned {rith_bars} bars, need {min_bars} - blending with Yahoo history")
-                ydf = self._get_yahoo_candles(count)
-                return self._merge_candles(ydf, df, count)
+                print(f"⚠️  Rithmic returned {rith_bars} bars, need {min_bars} - waiting for more live bars")
+                return df
             return df
         except Exception as e:
             print(f"❌ Error getting candles: {e}")
-            return self._get_yahoo_candles(count)
-
-    def _merge_candles(
-        self,
-        history_df: Optional[pd.DataFrame],
-        live_df: Optional[pd.DataFrame],
-        count: int,
-    ) -> Optional[pd.DataFrame]:
-        """Merge historical fallback candles with live bars and keep latest rows."""
-        if history_df is None and live_df is None:
             return None
-        if history_df is None:
-            return live_df.tail(count).reset_index(drop=True)
-        if live_df is None:
-            return history_df.tail(count).reset_index(drop=True)
-
-        merged = pd.concat([history_df, live_df], ignore_index=True)
-        if 'datetime' in merged.columns:
-            merged['datetime'] = pd.to_datetime(merged['datetime'], utc=True, errors='coerce')
-            merged = merged.dropna(subset=['datetime'])
-            merged = merged.drop_duplicates(subset=['datetime'], keep='last')
-            merged = merged.sort_values('datetime')
-        else:
-            merged = merged.drop_duplicates(keep='last')
-        return merged.tail(count).reset_index(drop=True)
     
     def _get_yahoo_candles(self, count: int = 100) -> Optional[pd.DataFrame]:
         """Fetch candles from Yahoo Finance as fallback."""
