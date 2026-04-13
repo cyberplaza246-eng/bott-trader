@@ -110,6 +110,7 @@ class LiveRithmicTrader:
         self.current_date = None
         self.trades: List[Dict] = []
         self._warmup_log_state: Dict[str, tuple] = {}
+        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'MNQ,MES').split(',') if s.strip()]
         
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
@@ -737,11 +738,18 @@ class LiveRithmicTrader:
                     self.cooldown -= 1
 
                 if len(self.positions) < self.max_positions and cycle_candidates:
-                    best = max(cycle_candidates, key=lambda s: float(s.get('confidence', 0.0)))
+                    priority_rank = {sym: idx for idx, sym in enumerate(self.symbol_priority)}
+                    best = max(
+                        cycle_candidates,
+                        key=lambda s: (
+                            float(s.get('confidence', 0.0)),
+                            -priority_rank.get(s.get('symbol', ''), 999),
+                        ),
+                    )
                     if len(cycle_candidates) > 1:
                         print(
                             f"🏆 Best setup this cycle: {best['symbol']} "
-                            f"({best.get('confidence', 0.0):.1%} confidence)"
+                            f"({best.get('confidence', 0.0):.1%} confidence, priority={self.symbol_priority})"
                         )
                     if self.place_order(best):
                         spec = self._spec(best['symbol'])
