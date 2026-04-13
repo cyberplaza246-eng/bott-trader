@@ -728,7 +728,13 @@ class EnsembleTrader:
         # RSI must not contradict trade direction (with optional high-volatility thresholds)
         rsi_val = signal_result.get('rsi', 50.0)
         regime_name = str(signal_result.get('regime', '') or '').lower()
-        is_high_vol = regime_name in ('high_volatility', 'volatile', 'volatility')
+        sweep_regime = str(
+            (signal_result.get('models', {}).get('sweep', {}) or {}).get('regime', '') or ''
+        ).lower()
+        is_high_vol = (
+            regime_name in ('high_volatility', 'volatile', 'volatility')
+            or sweep_regime in ('high_volatility', 'volatile', 'volatility')
+        )
         buy_block = self.rsi_buy_block_high_vol if is_high_vol else self.rsi_buy_block
         sell_block = self.rsi_sell_block_high_vol if is_high_vol else self.rsi_sell_block
 
