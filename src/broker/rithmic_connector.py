@@ -243,6 +243,9 @@ class RithmicConnector(BaseBroker):
                     else:
                         if df is not None and len(df) > 0:
                             latest_partial_df = df
+                            if self._disable_yahoo_fallback:
+                                # In strict Rithmic mode, return partial bars immediately.
+                                return latest_partial_df
                         bot_logger.warning(
                             f"Rithmic candle fetch returned insufficient data for {symbol}: "
                             f"{0 if df is None else len(df)} bars"

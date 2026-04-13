@@ -109,6 +109,7 @@ class LiveRithmicTrader:
         self.daily_trades = 0
         self.current_date = None
         self.trades: List[Dict] = []
+        self._warmup_log_state: Dict[str, tuple] = {}
         
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
@@ -183,10 +184,14 @@ class LiveRithmicTrader:
                 local_df = self._get_local_history_candles(symbol, count)
                 merged = self._merge_candles(local_df, df, count)
                 merged_bars = 0 if merged is None else len(merged)
-                print(
-                    f"⚠️  {symbol} Rithmic returned {rith_bars} bars, need {min_bars} - "
-                    f"using local warm history ({merged_bars} bars total)"
-                )
+                # Avoid repeating the same warm-up message every loop.
+                state_key = (rith_bars, merged_bars)
+                if self._warmup_log_state.get(symbol) != state_key:
+                    self._warmup_log_state[symbol] = state_key
+                    print(
+                        f"⚠️  {symbol} Rithmic returned {rith_bars} bars, need {min_bars} - "
+                        f"using local warm history ({merged_bars} bars total)"
+                    )
                 return merged
             return df
         except Exception as e:
