@@ -87,6 +87,7 @@ class Position:
     sl: float
     tp: float
     entry_time: datetime
+    trailing_enabled: bool = True
 
 
 class LiveRithmicTrader:
@@ -164,6 +165,8 @@ class LiveRithmicTrader:
         for order_id, pos in list(self.positions.items()):
             if pos.symbol != symbol:
                 continue
+            if not pos.trailing_enabled:
+                continue
 
             tp_dist = abs(pos.tp - pos.entry_price)
             if tp_dist <= 0:
@@ -216,6 +219,16 @@ class LiveRithmicTrader:
                 bot_logger.info(
                     f"Trailing stop updated {symbol} {order_id}: {old_sl:.2f} -> {candidate_sl:.2f}"
                 )
+                continue
+
+            if self.broker and hasattr(self.broker, 'get_order_info'):
+                order_info = self.broker.get_order_info(order_id)
+                if order_info and not order_info.get('supports_stop_modify', True):
+                    pos.trailing_enabled = False
+                    bot_logger.error(
+                        f"Trailing disabled for {symbol} {order_id}: native stop was not attached at entry"
+                    )
+                    print(f"   ⚠️ {symbol} trail disabled for {order_id}: no native stop from entry")
         
     def connect(self) -> bool:
         """Initialize Rithmic connection (skipped in paper mode)."""
@@ -547,7 +560,8 @@ class LiveRithmicTrader:
                 size=self.contracts,
                 sl=sl,
                 tp=tp,
-                entry_time=datetime.now(timezone.utc)
+                entry_time=datetime.now(timezone.utc),
+                trailing_enabled=True,
             )
             self.positions[order_id] = pos
             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
@@ -574,13 +588,19 @@ class LiveRithmicTrader:
                 size=self.contracts,
                 sl=sl,
                 tp=tp,
-                entry_time=datetime.now(timezone.utc)
+                entry_time=datetime.now(timezone.utc),
+                trailing_enabled=bool(result.get('supports_stop_modify', True)),
             )
             self.positions[order_id] = pos
             print(f"✅ ORDER FILLED: {direction.upper()} {symbol}")
             print(f"   Entry: {pos.entry_price:.2f}")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
+            if not pos.trailing_enabled:
+                print(f"   ⚠️ Native stop missing on entry - trailing disabled for {order_id}")
+                bot_logger.error(
+                    f"Order {order_id} for {symbol} filled without native stop support; trailing is disabled"
+                )
             trades_logger.info(f"ENTRY {direction} {symbol} @ {entry:.2f} SL={sl:.2f} TP={tp:.2f}")
             return True
         else:

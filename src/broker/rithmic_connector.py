@@ -338,6 +338,7 @@ class RithmicConnector(BaseBroker):
                     symbol=symbol,
                     side=order_type,
                     qty=int(size),
+                    entry_price=entry_price,
                     stop_loss=stop_loss,
                     take_profit=take_profit,
                     order_id=order_id,
@@ -345,6 +346,9 @@ class RithmicConnector(BaseBroker):
                 timeout=15,
             )
             if result is not None:
+                raw_result = result.get("result") if isinstance(result, dict) else result
+                native_stop_attached = bool(result.get("native_stop_attached")) if isinstance(result, dict) else False
+                native_target_attached = bool(result.get("native_target_attached")) if isinstance(result, dict) else False
                 order_info = {
                     "ticket": order_id,
                     "symbol": symbol,
@@ -353,6 +357,9 @@ class RithmicConnector(BaseBroker):
                     "entry_price": entry_price,
                     "stop_loss": stop_loss,
                     "take_profit": take_profit,
+                    "native_stop_attached": native_stop_attached,
+                    "native_target_attached": native_target_attached,
+                    "supports_stop_modify": native_stop_attached,
                     "time": datetime.now(timezone.utc).isoformat(),
                 }
                 with self._order_lock:
@@ -361,11 +368,30 @@ class RithmicConnector(BaseBroker):
                     f"Rithmic order placed: {order_id} {order_type} "
                     f"{int(size)} {symbol}"
                 )
+                if stop_loss > 0 and not native_stop_attached:
+                    bot_logger.error(
+                        f"Rithmic order {order_id} was submitted without a native stop; "
+                        f"later stop modification will not be available"
+                    )
+                if take_profit > 0 and not native_target_attached:
+                    bot_logger.warning(
+                        f"Rithmic order {order_id} was submitted without a native target"
+                    )
+                if raw_result is not None and isinstance(raw_result, dict):
+                    order_info["broker_response"] = raw_result
                 return order_info
             return None
         except Exception as e:
             error_logger.error(f"Rithmic place_order error: {e}")
             return None
+
+    def get_order_info(self, ticket: Any) -> Optional[Dict[str, Any]]:
+        order_id = str(ticket)
+        with self._order_lock:
+            order = self._orders.get(order_id)
+            if not order:
+                return None
+            return dict(order)
 
     def close_position(
         self,
@@ -441,6 +467,12 @@ class RithmicConnector(BaseBroker):
                 bot_logger.warning(f"Rithmic modify_position rejected: unknown order_id {order_id}")
                 return False
 
+            if not order.get("supports_stop_modify", True):
+                bot_logger.warning(
+                    f"Rithmic modify_position skipped: order {order_id} has no native stop from entry"
+                )
+                return False
+
             if sl is None and tp is None:
                 bot_logger.warning(f"Rithmic modify_position skipped: no SL/TP provided for {order_id}")
                 return False
@@ -466,6 +498,16 @@ class RithmicConnector(BaseBroker):
             bot_logger.info(f"Rithmic order {order_id} modified: SL={sl}, TP={tp}")
             return True
         except Exception as e:
+            error_msg = str(e)
+            if "No stop loss was set at order creation" in error_msg:
+                with self._order_lock:
+                    order = self._orders.get(str(ticket))
+                    if order is not None:
+                        order["supports_stop_modify"] = False
+                bot_logger.warning(
+                    f"Rithmic order {ticket} does not support stop modification (stop missing at creation)"
+                )
+                return False
             error_logger.error(f"Rithmic modify_position error: {e}")
             return False
 
@@ -727,6 +769,7 @@ class RithmicConnector(BaseBroker):
         symbol: str,
         side: str,
         qty: int,
+        entry_price: float,
         stop_loss: float,
         take_profit: float,
         order_id: str,
@@ -752,25 +795,31 @@ class RithmicConnector(BaseBroker):
 
         # Add bracket (SL/TP) in ticks
         spec = get_instrument(symbol)
+        price_ref = self._get_cached_price(symbol)
+        if price_ref <= 0 and entry_price > 0:
+            # Fallback to caller-provided entry estimate so bracket orders are still attached.
+            price_ref = entry_price
+
         if stop_loss > 0:
-            # For a buy, SL is below entry; for sell, SL is above
-            # We need distance in ticks from fill price
-            # Use current price as estimate for tick distance
-            price = self._get_cached_price(symbol)
-            if price > 0:
-                sl_ticks = abs(round((price - stop_loss) / spec.tick_size))
+            # We need the distance in ticks from an approximate fill reference.
+            if price_ref > 0:
+                sl_ticks = abs(round((price_ref - stop_loss) / spec.tick_size))
                 if sl_ticks > 0:
                     kwargs["stop_ticks"] = sl_ticks
 
         if take_profit > 0:
-            price = self._get_cached_price(symbol)
-            if price > 0:
-                tp_ticks = abs(round((take_profit - price) / spec.tick_size))
+            if price_ref > 0:
+                tp_ticks = abs(round((take_profit - price_ref) / spec.tick_size))
                 if tp_ticks > 0:
                     kwargs["target_ticks"] = tp_ticks
 
         result = await self._client.submit_order(**kwargs)
-        return result
+        return {
+            "result": result,
+            "native_stop_attached": bool(kwargs.get("stop_ticks", 0) > 0),
+            "native_target_attached": bool(kwargs.get("target_ticks", 0) > 0),
+            "price_ref": price_ref,
+        }
 
     # ══════════════════════════════════════════════════════════════
     #  INTERNAL: helpers
