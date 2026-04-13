@@ -17,6 +17,7 @@ LSTM is optional — if TensorFlow is not installed the system runs without it.
 IntelligentTrader is optional — provides ML boost when models are trained.
 """
 import pandas as pd
+import os
 from src.risk.sl_tp import calculate_sl_tp as calculate_structure_sl_tp
 from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
 from src.ai.sentiment_analyzer import SentimentAnalyzer
@@ -80,7 +81,23 @@ class EnsembleTrader:
     ADV_OPPOSE_PENALTY = 0.12    # Advanced strategies oppose sweep direction
     ADV_MULTI_AGREE_BOOST = 0.05 # Extra boost when multiple advanced strategies agree
 
+    @staticmethod
+    def _env_float(name: str, default: float) -> float:
+        v = os.getenv(name)
+        if v is None:
+            return default
+        try:
+            return float(v)
+        except Exception:
+            return default
+
     def __init__(self, newsapi_key=None, broker=None):
+        # RSI filter thresholds (configurable at runtime via env vars)
+        self.rsi_buy_block = self._env_float('RSI_BUY_BLOCK', 70.0)
+        self.rsi_sell_block = self._env_float('RSI_SELL_BLOCK', 30.0)
+        self.rsi_buy_block_high_vol = self._env_float('RSI_BUY_BLOCK_HIGH_VOL', self.rsi_buy_block)
+        self.rsi_sell_block_high_vol = self._env_float('RSI_SELL_BLOCK_HIGH_VOL', self.rsi_sell_block)
+
         # ── Primary: sweep gate ──────────────────────────────────────
         self.sweep = LiquiditySweepAnalyzer()
 
@@ -708,16 +725,21 @@ class EnsembleTrader:
             )
             return False
 
-        # RSI must not contradict trade direction
+        # RSI must not contradict trade direction (with optional high-volatility thresholds)
         rsi_val = signal_result.get('rsi', 50.0)
-        if signal_result['signal'] == 'BUY' and rsi_val > 70:
+        regime_name = str(signal_result.get('regime', '') or '').lower()
+        is_high_vol = regime_name in ('high_volatility', 'volatile', 'volatility')
+        buy_block = self.rsi_buy_block_high_vol if is_high_vol else self.rsi_buy_block
+        sell_block = self.rsi_sell_block_high_vol if is_high_vol else self.rsi_sell_block
+
+        if signal_result['signal'] == 'BUY' and rsi_val > buy_block:
             bot_logger.info(
-                f"🚫 RSI overbought ({rsi_val:.1f} > 70) — blocking BUY"
+                f"🚫 RSI overbought ({rsi_val:.1f} > {buy_block:.1f}) — blocking BUY"
             )
             return False
-        if signal_result['signal'] == 'SELL' and rsi_val < 30:
+        if signal_result['signal'] == 'SELL' and rsi_val < sell_block:
             bot_logger.info(
-                f"🚫 RSI oversold ({rsi_val:.1f} < 30) — blocking SELL"
+                f"🚫 RSI oversold ({rsi_val:.1f} < {sell_block:.1f}) — blocking SELL"
             )
             return False
 
