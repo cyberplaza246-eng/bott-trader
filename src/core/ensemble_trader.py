@@ -304,7 +304,7 @@ class EnsembleTrader:
             # Fallback 1: EMA + Technical agree on direction
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
                 final_signal = ema_dir
-                final_confidence = 0.45
+                final_confidence = 0.62
                 models_agreement = 2
                 bot_logger.info(
                     f"🔄 No sweep → EMA+Tech fallback: {ema_dir} "
@@ -314,7 +314,7 @@ class EnsembleTrader:
             # Fallback 2: Sweep bias is directional and indicators don't oppose
             elif sweep_bias in ('BUY', 'SELL') and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY') and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY'):
                 final_signal = sweep_bias
-                final_confidence = 0.45
+                final_confidence = 0.62
                 models_agreement = 1
                 bot_logger.info(
                     f"🔄 No sweep → BIAS fallback: {sweep_bias} "
@@ -575,7 +575,7 @@ class EnsembleTrader:
             'total_models': len(context_signals) + 1,  # context models + sweep
             'min_agreement_required': MIN_MODELS_AGREEMENT,
             'regime': regime,
-            'sweep_bias': sweep_signal.get('bias', 'HOLD'),
+            'sweep_bias': sweep_bias,
             'detailed_reason': detailed_reason,
             'enriched_df': df_enriched,
             'models': {
