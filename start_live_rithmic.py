@@ -51,6 +51,8 @@ PARAMS = {
 TRAIL_SETTINGS = {
     # Start trailing once price has moved this fraction of TP distance.
     'activation_tp_fraction': float(os.getenv('TRAIL_ACTIVATION_TP_FRACTION', '0.35')),
+    # Alternative activation based on initial risk (R-multiple).
+    'activation_r': float(os.getenv('TRAIL_ACTIVATION_R', '0.30')),
     # Trail stop behind favorable move using ATR.
     'atr_mult': float(os.getenv('TRAIL_ATR_MULT', '0.6')),
     # Minimum SL movement required before submitting a broker update.
@@ -156,6 +158,7 @@ class LiveRithmicTrader:
         tick = self._spec(symbol)['tick_size']
         min_move = max(1, TRAIL_SETTINGS['min_step_ticks']) * tick
         activation_frac = max(0.05, min(0.95, TRAIL_SETTINGS['activation_tp_fraction']))
+        activation_r = max(0.05, TRAIL_SETTINGS.get('activation_r', 0.30))
         trail_dist = max(tick, atr * max(0.05, TRAIL_SETTINGS['atr_mult']))
 
         for order_id, pos in list(self.positions.items()):
@@ -168,7 +171,10 @@ class LiveRithmicTrader:
 
             if pos.direction == 'long':
                 favorable_move = bar_high - pos.entry_price
-                if favorable_move < tp_dist * activation_frac:
+                # Start trailing once either TP-fraction OR R-based threshold is reached.
+                risk_dist = max(tick, pos.entry_price - pos.sl)
+                activation_move = min(tp_dist * activation_frac, risk_dist * activation_r)
+                if favorable_move < activation_move:
                     continue
 
                 breakeven_sl = pos.entry_price + tick
@@ -182,7 +188,10 @@ class LiveRithmicTrader:
                     continue
             else:
                 favorable_move = pos.entry_price - bar_low
-                if favorable_move < tp_dist * activation_frac:
+                # Start trailing once either TP-fraction OR R-based threshold is reached.
+                risk_dist = max(tick, pos.sl - pos.entry_price)
+                activation_move = min(tp_dist * activation_frac, risk_dist * activation_r)
+                if favorable_move < activation_move:
                     continue
 
                 breakeven_sl = pos.entry_price - tick
