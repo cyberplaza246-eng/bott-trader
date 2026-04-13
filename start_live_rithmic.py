@@ -48,13 +48,15 @@ PARAMS = {
     'ema_len': 50
 }
 
+ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', '3')))
+
 # Risk settings
 RISK_SETTINGS = {
     'contracts': 1,              # Start with 1 micro
     'daily_loss_limit': 150.0,   # Max daily loss $150
     'max_trades_per_day': 50,    # Max trades per day
     'cooldown_bars': 5,          # Bars between trades
-    'max_positions': 2,          # Max concurrent positions
+    'max_positions': ENV_MAX_CONCURRENT_TRADES,  # Max concurrent positions
 }
 
 # Symbol specs
@@ -717,12 +719,9 @@ class LiveRithmicTrader:
                                 self.process_exit(order_id, exit_type, exit_price)
 
                     if len(self.positions) < self.max_positions and self.cooldown == 0:
-                        if any(p.symbol == symbol for p in self.positions.values()):
-                            pass
-                        else:
-                            signal = self.check_entry_signal(symbol, df)
-                            if signal:
-                                cycle_candidates.append(signal)
+                        signal = self.check_entry_signal(symbol, df)
+                        if signal:
+                            cycle_candidates.append(signal)
 
                     row = df.iloc[-1]
                     pos_syms = [p.symbol for p in self.positions.values()]
