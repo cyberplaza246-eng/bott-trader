@@ -345,9 +345,37 @@ class LiveRithmicTrader:
             
             signal = signal_result['signal']
             confidence = signal_result['confidence']
+            sweep_model = signal_result.get('models', {}).get('sweep', {})
+            sweep_fired = sweep_model.get('signal') in ('BUY', 'SELL')
+            models_agreement = int(signal_result.get('models_agreement', 0))
+            sr_levels = signal_result.get('models', {}).get('support_resistance', {}).get('levels', {})
+            price_zone = sr_levels.get('price_zone', '')
+            sr_adverse = (
+                (signal == 'BUY' and price_zone == 'AT_RESISTANCE') or
+                (signal == 'SELL' and price_zone == 'AT_SUPPORT')
+            )
             
             if signal not in ('BUY', 'SELL'):
                 return None
+
+            # Quality gate for fallback-only entries (no liquidity sweep fire).
+            # These are allowed, but only when confirmation quality is stronger.
+            if not sweep_fired:
+                if confidence < 0.67:
+                    bot_logger.info(
+                        f"🚫 {symbol} fallback blocked: confidence {confidence:.1%} < 67.0%"
+                    )
+                    return None
+                if models_agreement < 2:
+                    bot_logger.info(
+                        f"🚫 {symbol} fallback blocked: models agreement {models_agreement} < 2"
+                    )
+                    return None
+                if sr_adverse:
+                    bot_logger.info(
+                        f"🚫 {symbol} fallback blocked: adverse S/R zone ({price_zone})"
+                    )
+                    return None
             
             row = df.iloc[-1]
             price = row['close']
@@ -372,6 +400,13 @@ class LiveRithmicTrader:
                     tp = price - (sl_dist * self.tp_mult)
             
             direction = 'long' if signal == 'BUY' else 'short'
+
+            # Rank candidates across symbols by quality, not just raw confidence.
+            quality_score = float(confidence)
+            quality_score += 0.08 if sweep_fired else -0.03
+            quality_score += min(models_agreement, 3) * 0.01
+            if sr_adverse:
+                quality_score -= 0.04
             
             bot_logger.info(f"🎯 ENSEMBLE SIGNAL: {symbol} {signal} @ {price:.2f} (conf={confidence:.1%})")
             bot_logger.info(f"   SL: {sl:.2f} | TP: {tp:.2f}")
@@ -384,6 +419,10 @@ class LiveRithmicTrader:
                 'tp': tp,
                 'atr': atr,
                 'confidence': confidence,
+                'quality_score': quality_score,
+                'sweep_fired': sweep_fired,
+                'models_agreement': models_agreement,
+                'sr_adverse': sr_adverse,
             }
             
         except Exception as e:
@@ -737,11 +776,17 @@ class LiveRithmicTrader:
                     self.cooldown -= 1
 
                 if len(self.positions) < self.max_positions and cycle_candidates:
-                    best = max(cycle_candidates, key=lambda s: float(s.get('confidence', 0.0)))
+                    best = max(
+                        cycle_candidates,
+                        key=lambda s: (
+                            float(s.get('quality_score', 0.0)),
+                            float(s.get('confidence', 0.0)),
+                        ),
+                    )
                     if len(cycle_candidates) > 1:
                         print(
                             f"🏆 Best setup this cycle: {best['symbol']} "
-                            f"({best.get('confidence', 0.0):.1%} confidence)"
+                            f"({best.get('confidence', 0.0):.1%} conf, Q={best.get('quality_score', 0.0):.2f})"
                         )
                     if self.place_order(best):
                         spec = self._spec(best['symbol'])
