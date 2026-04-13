@@ -17,6 +17,7 @@ LSTM is optional — if TensorFlow is not installed the system runs without it.
 IntelligentTrader is optional — provides ML boost when models are trained.
 """
 import pandas as pd
+import os
 from src.risk.sl_tp import calculate_sl_tp as calculate_structure_sl_tp
 from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
 from src.ai.sentiment_analyzer import SentimentAnalyzer
@@ -80,7 +81,18 @@ class EnsembleTrader:
     ADV_OPPOSE_PENALTY = 0.12    # Advanced strategies oppose sweep direction
     ADV_MULTI_AGREE_BOOST = 0.05 # Extra boost when multiple advanced strategies agree
 
+    @staticmethod
+    def _env_flag(name: str, default: bool = False) -> bool:
+        v = os.getenv(name)
+        if v is None:
+            return default
+        return str(v).strip().lower() in ('1', 'true', 'yes', 'on')
+
     def __init__(self, newsapi_key=None, broker=None):
+        # Optional hard gate: require EMA crossover direction to match final entry signal.
+        # When enabled, EMA=HOLD is treated as no confirmation and blocks entry.
+        self.require_ema_cross_confirm = self._env_flag('REQUIRE_EMA_CROSS_CONFIRM', default=True)
+
         # ── Primary: sweep gate ──────────────────────────────────────
         self.sweep = LiquiditySweepAnalyzer()
 
@@ -700,6 +712,14 @@ class EnsembleTrader:
             bot_logger.info(f"🔄 FALLBACK ENTRY: EMA+Tech agree on {signal_result['signal']} (no sweep required)")
         elif is_bias_fallback:
             bot_logger.info(f"🔄 FALLBACK ENTRY: 5M bias {sweep_bias} matches signal (no sweep required)")
+
+        # Optional hard EMA confirmation gate.
+        if self.require_ema_cross_confirm:
+            if ema_dir != signal_result['signal']:
+                bot_logger.info(
+                    f"🚫 EMA confirmation required: EMA={ema_dir}, signal={signal_result['signal']} — no trade"
+                )
+                return False
 
         # EMA crossover must not oppose signal direction (HOLD = neutral, allowed)
         if ema_dir in ('BUY', 'SELL') and ema_dir != signal_result['signal']:
