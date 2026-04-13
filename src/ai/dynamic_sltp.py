@@ -104,6 +104,17 @@ class DynamicSLTPManager:
                 tp_price = tp_from_atr
                 
         # Calculate risk metrics
+        if direction == 'BUY':
+            if sl_price >= entry_price:
+                sl_price = entry_price - max(atr * self.atr_multiplier_sl, entry_price * 0.001)
+            if tp_price <= entry_price:
+                tp_price = entry_price + max((entry_price - sl_price) * 2.0, atr * self.atr_multiplier_tp)
+        else:
+            if sl_price <= entry_price:
+                sl_price = entry_price + max(atr * self.atr_multiplier_sl, entry_price * 0.001)
+            if tp_price >= entry_price:
+                tp_price = entry_price - max((sl_price - entry_price) * 2.0, atr * self.atr_multiplier_tp)
+
         sl_distance = abs(entry_price - sl_price)
         tp_distance = abs(tp_price - entry_price)
         risk_reward = tp_distance / sl_distance if sl_distance > 0 else 1.0

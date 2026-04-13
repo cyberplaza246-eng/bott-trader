@@ -13,7 +13,7 @@ SL Strategy (priority order):
 TP Strategy:
   1. 85% of distance to nearest S/R level
   2. Must give ≥ 1.2R
-  3. No valid S/R → skip trade (return None)
+    3. No valid S/R → ATR-based fallback TP
 """
 import numpy as np
 from src.utils.logger import bot_logger
@@ -31,23 +31,29 @@ PAIR_CONFIG = {
 
 # ── Constants ───────────────────────────────────────────────────────
 SL_ATR_BUFFER = 0.35          # Buffer beyond structure level (35% ATR)
-SL_ATR_FALLBACK = 2.5         # Fallback: 2.5×ATR when no structure (from sweep)
+SL_ATR_FALLBACK = 2.5         # Base fallback; per-symbol overrides below
 SL_MIN_ATR = 1.5              # Floor: at least 1.5×ATR (from sweep)
 SL_MIN_SPREAD_MULT = 2        # Floor: at least 2×spread
 SL_MAX_PIPS_1M = 15.0         # Hard cap: 15 pips for 1M trades
 SL_MAX_PIPS_5M = 25.0         # Hard cap: 25 pips for 5M trades
 
 SR_TP_FRACTION = 0.85         # TP at 85% of distance to S/R
-MIN_RR = 1.5                  # Minimum reward-to-risk ratio
+MIN_RR = 1.2                  # Minimum reward-to-risk ratio
 MAX_RR = 3.5                  # Maximum R:R (raised from 3.0 — MES optimal is 2.5R)
 TP_MAX_PIPS_1M = 20.0         # Hard cap: 20 pips TP for 1M scalps
 TP_MAX_PIPS_5M = 35.0         # Hard cap: 35 pips TP for 5M scalps
 
-# Per-symbol TP R-multiple (from backtest parameter sweep)
-# MES: 2.5R optimal (PF 1.89), MNQ: 1.5R optimal (PF 1.76)
+# Per-symbol ATR fallback / TP R-multiples tuned from recent sweep.
+# MES favored wider stop + moderate TP; MNQ favored tighter TP.
+SYMBOL_SL_ATR_MULT = {
+    'MES': 3.0,
+    'MNQ': 2.5,
+}
+
+# Per-symbol TP R-multiple used when structure target is unavailable/invalid.
 SYMBOL_TP_R_MULT = {
-    'MES': 2.5,
-    'MNQ': 1.5,
+    'MES': 2.0,
+    'MNQ': 1.2,
 }
 DEFAULT_TP_R_MULT = 2.5
 
@@ -94,7 +100,7 @@ def calculate_sl_tp(df, direction, pair, timeframe,
     # ════════════════════════════════════════════════════════════════
     sl_distance, sl_reason = _calculate_sl(
         df, direction, entry_price, atr, pip_size, spread,
-        timeframe, sweep_wick, spec
+        timeframe, sweep_wick, spec, pair
     )
 
     if sl_distance is None:
@@ -171,7 +177,7 @@ def calculate_sl_tp(df, direction, pair, timeframe,
 # ════════════════════════════════════════════════════════════════════
 
 def _calculate_sl(df, direction, entry_price, atr, pip_size, spread,
-                  timeframe, sweep_wick, spec=None):
+                  timeframe, sweep_wick, spec=None, pair=None):
     """Determine SL distance and reason.
 
     Priority: sweep wick → swing structure → ATR fallback
@@ -204,8 +210,9 @@ def _calculate_sl(df, direction, entry_price, atr, pip_size, spread,
             reason = struct['reason']
         else:
             # ── Priority 3: ATR fallback ────────────────────────────
-            sl_distance = atr * SL_ATR_FALLBACK
-            reason = f"ATR fallback ({SL_ATR_FALLBACK}×ATR)"
+            sl_mult = SYMBOL_SL_ATR_MULT.get(pair, SL_ATR_FALLBACK)
+            sl_distance = atr * sl_mult
+            reason = f"ATR fallback ({sl_mult}×ATR)"
 
     # ── Floor ───────────────────────────────────────────────────────
     floor = max(atr * SL_MIN_ATR, spread * SL_MIN_SPREAD_MULT)

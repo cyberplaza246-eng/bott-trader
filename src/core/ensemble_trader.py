@@ -17,6 +17,7 @@ LSTM is optional — if TensorFlow is not installed the system runs without it.
 IntelligentTrader is optional — provides ML boost when models are trained.
 """
 import pandas as pd
+from src.risk.sl_tp import calculate_sl_tp as calculate_structure_sl_tp
 from src.ai.lstm_predictor import LSTMPredictor, TF_AVAILABLE
 from src.ai.sentiment_analyzer import SentimentAnalyzer
 from src.ai.nlp_sentiment import NLPSentimentAnalyzer, FINBERT_AVAILABLE
@@ -757,7 +758,10 @@ class EnsembleTrader:
         df: pd.DataFrame,
         direction: str,
         entry_price: float,
-        symbol: str = None
+        symbol: str = None,
+        sr_levels: dict = None,
+        sweep_wick: float = None,
+        timeframe: str = '5m',
     ) -> dict:
         """
         Calculate dynamic SL/TP using swing points and ATR.
@@ -771,6 +775,29 @@ class EnsembleTrader:
         Returns:
             Dict with sl_price, tp_price, risk_reward, etc.
         """
+        # Prefer structure-aware SL/TP when symbol context is available.
+        if symbol:
+            try:
+                structure_result = calculate_structure_sl_tp(
+                    df=df,
+                    direction=direction,
+                    pair=symbol,
+                    timeframe=timeframe,
+                    sr_levels=sr_levels,
+                    sweep_wick=sweep_wick,
+                )
+                if structure_result:
+                    return {
+                        'sl_price': structure_result['stop_loss'],
+                        'tp_price': structure_result['take_profit'],
+                        'sl_distance': structure_result.get('sl_distance'),
+                        'tp_distance': structure_result.get('tp_distance'),
+                        'risk_reward': structure_result.get('rr_ratio', 2.0),
+                        'method': 'structure_aware',
+                    }
+            except Exception as e:
+                bot_logger.warning(f"Structure-aware SL/TP failed: {e} — falling back")
+
         if not self.sltp_available:
             # Fallback to simple percentage-based SL/TP
             sl_pct = 0.005  # 0.5%
@@ -790,7 +817,10 @@ class EnsembleTrader:
                     'method': 'fallback'
                 }
         
-        return self.sltp_manager.calculate_sl_tp(df, direction, entry_price, symbol)
+        dynamic_result = self.sltp_manager.calculate_sl_tp(df, direction, entry_price, symbol)
+        if isinstance(dynamic_result, dict):
+            dynamic_result.setdefault('method', 'dynamic')
+        return dynamic_result
 
     def start_trailing_stop(
         self,

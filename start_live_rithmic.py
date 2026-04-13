@@ -48,6 +48,15 @@ PARAMS = {
     'ema_len': 50
 }
 
+TRAIL_SETTINGS = {
+    # Start trailing once price has moved this fraction of TP distance.
+    'activation_tp_fraction': float(os.getenv('TRAIL_ACTIVATION_TP_FRACTION', '0.35')),
+    # Trail stop behind favorable move using ATR.
+    'atr_mult': float(os.getenv('TRAIL_ATR_MULT', '0.6')),
+    # Minimum SL movement required before submitting a broker update.
+    'min_step_ticks': int(os.getenv('TRAIL_MIN_STEP_TICKS', '1')),
+}
+
 ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', '3')))
 
 # Risk settings
@@ -128,6 +137,76 @@ class LiveRithmicTrader:
 
     def _spec(self, symbol: str) -> Dict[str, float]:
         return SYMBOL_SPECS[symbol]
+
+    def _round_to_tick(self, price: float, tick_size: float) -> float:
+        return round(round(price / tick_size) * tick_size, 8)
+
+    def update_trailing_stops(self, symbol: str, df: pd.DataFrame):
+        """Move SL before TP is reached to protect unrealized gains."""
+        if not self.positions or df is None or len(df) == 0:
+            return
+
+        row = df.iloc[-1]
+        bar_high = float(row['high'])
+        bar_low = float(row['low'])
+        atr = float(row.get('atr', np.nan))
+        if not np.isfinite(atr) or atr <= 0:
+            return
+
+        tick = self._spec(symbol)['tick_size']
+        min_move = max(1, TRAIL_SETTINGS['min_step_ticks']) * tick
+        activation_frac = max(0.05, min(0.95, TRAIL_SETTINGS['activation_tp_fraction']))
+        trail_dist = max(tick, atr * max(0.05, TRAIL_SETTINGS['atr_mult']))
+
+        for order_id, pos in list(self.positions.items()):
+            if pos.symbol != symbol:
+                continue
+
+            tp_dist = abs(pos.tp - pos.entry_price)
+            if tp_dist <= 0:
+                continue
+
+            if pos.direction == 'long':
+                favorable_move = bar_high - pos.entry_price
+                if favorable_move < tp_dist * activation_frac:
+                    continue
+
+                breakeven_sl = pos.entry_price + tick
+                trail_sl = bar_high - trail_dist
+                candidate_sl = self._round_to_tick(max(breakeven_sl, trail_sl), tick)
+
+                # Keep stop on the valid side of market and only ratchet upward.
+                if candidate_sl >= bar_low:
+                    candidate_sl = self._round_to_tick(bar_low - tick, tick)
+                if candidate_sl <= pos.sl or (candidate_sl - pos.sl) < min_move:
+                    continue
+            else:
+                favorable_move = pos.entry_price - bar_low
+                if favorable_move < tp_dist * activation_frac:
+                    continue
+
+                breakeven_sl = pos.entry_price - tick
+                trail_sl = bar_low + trail_dist
+                candidate_sl = self._round_to_tick(min(breakeven_sl, trail_sl), tick)
+
+                # Keep stop on the valid side of market and only ratchet downward.
+                if candidate_sl <= bar_high:
+                    candidate_sl = self._round_to_tick(bar_high + tick, tick)
+                if candidate_sl >= pos.sl or (pos.sl - candidate_sl) < min_move:
+                    continue
+
+            old_sl = pos.sl
+            if self.paper_mode:
+                pos.sl = candidate_sl
+                print(f"   🔒 {symbol} trail: SL {old_sl:.2f} → {candidate_sl:.2f}")
+                continue
+
+            if self.broker and self.broker.modify_position(ticket=order_id, sl=candidate_sl, tp=pos.tp):
+                pos.sl = candidate_sl
+                print(f"   🔒 {symbol} trail: SL {old_sl:.2f} → {candidate_sl:.2f}")
+                bot_logger.info(
+                    f"Trailing stop updated {symbol} {order_id}: {old_sl:.2f} -> {candidate_sl:.2f}"
+                )
         
     def connect(self) -> bool:
         """Initialize Rithmic connection (skipped in paper mode)."""
@@ -362,9 +441,18 @@ class LiveRithmicTrader:
             # Use dynamic SL/TP if available
             if hasattr(self.ensemble, 'get_dynamic_sl_tp'):
                 direction = 'BUY' if signal == 'BUY' else 'SELL'
-                sltp = self.ensemble.get_dynamic_sl_tp(df_enriched, direction, price)
+                sltp = self.ensemble.get_dynamic_sl_tp(
+                    df_enriched,
+                    direction,
+                    price,
+                    symbol=symbol,
+                    sr_levels=signal_result.get('sr_levels'),
+                    sweep_wick=signal_result.get('sweep_wick'),
+                    timeframe='5m',
+                )
                 sl = sltp['sl_price']
                 tp = sltp['tp_price']
+                sltp_method = sltp.get('method', 'unknown') if isinstance(sltp, dict) else 'unknown'
             else:
                 sl_dist = atr * self.atr_mult
                 if signal == 'BUY':
@@ -373,11 +461,13 @@ class LiveRithmicTrader:
                 else:
                     sl = price + sl_dist
                     tp = price - (sl_dist * self.tp_mult)
+                sltp_method = 'atr_fallback'
             
             direction = 'long' if signal == 'BUY' else 'short'
             
             bot_logger.info(f"🎯 ENSEMBLE SIGNAL: {symbol} {signal} @ {price:.2f} (conf={confidence:.1%})")
             bot_logger.info(f"   SL: {sl:.2f} | TP: {tp:.2f}")
+            bot_logger.info(f"   SL/TP method: {sltp_method}")
             
             return {
                 'symbol': symbol,
@@ -717,6 +807,9 @@ class LiveRithmicTrader:
                             if pos:
                                 exit_price = pos.tp if exit_type == 'TAKE_PROFIT' else pos.sl
                                 self.process_exit(order_id, exit_type, exit_price)
+
+                        # Trail remaining open positions after processing exits.
+                        self.update_trailing_stops(symbol, df)
 
                     if len(self.positions) < self.max_positions and self.cooldown == 0:
                         signal = self.check_entry_signal(symbol, df)
