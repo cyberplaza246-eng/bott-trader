@@ -91,16 +91,28 @@ class RithmicConnector(BaseBroker):
         self._order_lock = threading.Lock()
         self._orders: Dict[str, Dict[str, Any]] = {}  # order_id → order info
 
+        # Serialize history requests to avoid async_rithmic internal lock contention.
+        # The library's history plant uses a single lock shared between _recv_loop
+        # and send_and_recv_immediate; concurrent requests cause lock timeouts.
+        self._history_gate = threading.Lock()
+        self._history_async_lock: Optional[asyncio.Lock] = None  # created on event loop
+
         # Yahoo Finance fallback (lazy-loaded)
         self._yf_fallback = None
 
         # Lock timeout / fallback mode tracking
         self._lock_error_count = 0
-        self._max_lock_errors = 3  # Switch to fallback mode after this many errors
+        self._max_lock_errors = int(
+            os.getenv("RITHMIC_HISTORY_MAX_LOCK_ERRORS", "1")
+        )  # Switch to fallback mode quickly on lock contention
         self._fallback_until: Optional[float] = None  # timestamp when to retry Rithmic
-        self._fallback_cooldown_secs = 120  # Stay in fallback mode for 2 minutes
+        self._fallback_cooldown_secs = int(
+            os.getenv("RITHMIC_HISTORY_FALLBACK_COOLDOWN_SECS", "60")
+        )
         self._candle_cache: Dict[str, tuple] = {}  # "sym_tf" → (timestamp, DataFrame)
-        self._candle_cache_ttl = 30  # Cache candles for 30 seconds
+        self._candle_cache_ttl = int(
+            os.getenv("RITHMIC_CANDLE_CACHE_TTL_SECS", "90")
+        )
 
         # Configuration from env
         self._user = os.getenv("RITHMIC_USER_ID", "")
@@ -205,14 +217,20 @@ class RithmicConnector(BaseBroker):
         cache_key = f"{symbol}_{timeframe_minutes}"
         now = time.time()
         latest_partial_df: Optional[pd.DataFrame] = None
+        stale_cached_df: Optional[pd.DataFrame] = None
         if cache_key in self._candle_cache:
             cached_time, cached_df = self._candle_cache[cache_key]
+            if cached_df is not None and len(cached_df) >= 10:
+                stale_cached_df = cached_df
             if now - cached_time < self._candle_cache_ttl and cached_df is not None and len(cached_df) >= 10:
                 return cached_df
 
         # Check if we're in fallback mode due to repeated lock errors
         if self._fallback_until is not None:
             if now < self._fallback_until:
+                # During cooldown prefer stale cache to avoid hammering history plant.
+                if stale_cached_df is not None:
+                    return stale_cached_df
                 if self._disable_yahoo_fallback:
                     return None
                 # Still in fallback mode — use Yahoo Finance
@@ -228,12 +246,12 @@ class RithmicConnector(BaseBroker):
 
         # Try Rithmic historical bars first with retry logic
         if self._connected:
-            max_retries = 2
+            max_retries = 1
             for attempt in range(max_retries):
                 try:
                     df = self._run_sync(
                         self._async_get_candles(symbol, timeframe_minutes, num_candles),
-                        timeout=20,  # Reduced timeout to fail faster
+                        timeout=12,  # Must exceed async wait_for (8s) + recovery sleep (1s)
                     )
                     if df is not None and len(df) >= 10:
                         # Success! Reset error counter and cache result
@@ -256,7 +274,7 @@ class RithmicConnector(BaseBroker):
 
                     if is_lock_error:
                         self._lock_error_count += 1
-                        # Check if we should enter fallback mode
+                        # Enter fallback quickly on lock contention to avoid history-plant thrash.
                         if self._lock_error_count >= self._max_lock_errors:
                             self._fallback_until = now + self._fallback_cooldown_secs
                             if self._disable_yahoo_fallback:
@@ -269,11 +287,9 @@ class RithmicConnector(BaseBroker):
                                     f"⚠️ Rithmic history lock errors ({self._lock_error_count}x) — "
                                     f"switching to Yahoo Finance fallback for {self._fallback_cooldown_secs}s"
                                 )
-                            break
-                        elif attempt < max_retries - 1:
-                            bot_logger.warning(f"Rithmic history lock timeout, retry {attempt+1}/{max_retries}")
-                            time.sleep(0.5 + attempt)  # Brief backoff
-                            continue
+                        # Let the library's _recv_loop recover before any retry
+                        time.sleep(1.5)
+                        break
 
                     # KeyError from async_rithmic when no bars exist (e.g. market closed)
                     if isinstance(e, KeyError):
@@ -288,6 +304,8 @@ class RithmicConnector(BaseBroker):
         if self._disable_yahoo_fallback:
             if latest_partial_df is not None and len(latest_partial_df) > 0:
                 return latest_partial_df
+            if stale_cached_df is not None:
+                return stale_cached_df
             return None
 
         # Fall back to Yahoo Finance
@@ -551,6 +569,15 @@ class RithmicConnector(BaseBroker):
         
         return result
 
+    def get_net_position_size(self, symbol: str) -> int:
+        """Return live net quantity for a symbol from Rithmic position data.
+
+        Positive = net long, negative = net short, zero = flat.
+        """
+        self._refresh_positions()
+        with self._state_lock:
+            return int(self._positions.get(symbol, {}).get('size', 0))
+
     def get_bot_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
         return self.get_open_positions(symbol)
 
@@ -733,14 +760,34 @@ class RithmicConnector(BaseBroker):
         # Request extra bars to account for non-trading hours
         start_time = end_time - timedelta(minutes=timeframe_minutes * num_candles * 3)
 
-        bars = await self._client.get_historical_time_bars(
-            symbol=rith_sym,
-            exchange=exchange,
-            start_time=start_time,
-            end_time=end_time,
-            bar_type=bar_type,
-            bar_type_periods=period,
-        )
+        # Serialize history requests — the async_rithmic history plant has a
+        # single internal lock shared by _recv_loop and send_and_recv_immediate.
+        # Concurrent history calls cause the 5-second lock timeout.
+        # We also wrap in wait_for() to CANCEL hang if the library deadlocks;
+        # cancellation releases the internal lock so _recv_loop can recover.
+        if self._history_async_lock is None:
+            self._history_async_lock = asyncio.Lock()
+        async with self._history_async_lock:
+            try:
+                bars = await asyncio.wait_for(
+                    self._client.get_historical_time_bars(
+                        symbol=rith_sym,
+                        exchange=exchange,
+                        start_time=start_time,
+                        end_time=end_time,
+                        bar_type=bar_type,
+                        bar_type_periods=period,
+                    ),
+                    timeout=8.0,  # Break deadlock faster than library's 5s lock wait
+                )
+            except asyncio.TimeoutError:
+                bot_logger.warning(
+                    f"⏱️ History request for {symbol} timed out (8s) — "
+                    f"likely async_rithmic internal lock deadlock"
+                )
+                # Give _recv_loop time to reacquire the now-released lock
+                await asyncio.sleep(1.0)
+                raise TimeoutError("Rithmic history lock timeout — cancelled")
 
         if not bars:
             return None
