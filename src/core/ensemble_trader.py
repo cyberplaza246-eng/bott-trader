@@ -93,8 +93,8 @@ class EnsembleTrader:
 
     def __init__(self, newsapi_key=None, broker=None):
         # RSI filter thresholds (configurable at runtime via env vars)
-        self.rsi_buy_block = self._env_float('RSI_BUY_BLOCK', 70.0)
-        self.rsi_sell_block = self._env_float('RSI_SELL_BLOCK', 30.0)
+        self.rsi_buy_block = self._env_float('RSI_BUY_BLOCK', 55.0)       # Tightened from 70 (MTF backtest: RSI 40-55 for longs)
+        self.rsi_sell_block = self._env_float('RSI_SELL_BLOCK', 45.0)      # Tightened from 30 (MTF backtest: RSI 45-60 for shorts)
         self.rsi_buy_block_high_vol = self._env_float('RSI_BUY_BLOCK_HIGH_VOL', self.rsi_buy_block)
         self.rsi_sell_block_high_vol = self._env_float('RSI_SELL_BLOCK_HIGH_VOL', self.rsi_sell_block)
 

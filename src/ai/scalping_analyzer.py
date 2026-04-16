@@ -86,7 +86,7 @@ class ScalpingAnalyzer:
     # -- Entry parameters --------------------------------------------
     RSI_ENTRY_LOW = 40         # RSI pre-expansion zone lower bound
     RSI_ENTRY_HIGH = 60        # RSI pre-expansion zone upper bound
-    VOLUME_SPIKE_THRESHOLD = 1.05  # Volume must be > 1.05x average (was 1.2 — too strict for forex tick vol)
+    VOLUME_SPIKE_THRESHOLD = 1.0   # Volume must be >= 1.0x average (MTF backtest validated)
     MICRO_STRUCTURE_LOOKBACK = 5  # Candles for structure break
     ENTRY_THRESHOLD = 0.45     # Lowered to 0.45 (partial credit removed, honest scoring)
     RISK_OVERRIDES_PATH = 'data/risk_overrides.json'

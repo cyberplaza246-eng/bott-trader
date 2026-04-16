@@ -1,5 +1,5 @@
 {
-  "tp_base_ratio": 2.0,
+  "tp_base_ratio": 1.8,
   "tp_expanding": 3.0,
   "tp_contracting": 1.5,
   "tp_asian_session": 1.5,
@@ -22,10 +22,10 @@
   },
   "entry_confidence_threshold": 0.60,
   "price_drift_tolerance_atr": 2.5,
-  "skip_friday": true,
+  "skip_friday": false,
   "bad_hours_utc": {
-    "MES": [0, 4, 21],
-    "MNQ": [0, 4, 21]
+    "MES": [],
+    "MNQ": []
   },
   "trailing_stop": {
     "MES": {"enabled": false},

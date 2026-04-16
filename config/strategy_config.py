@@ -32,7 +32,7 @@ TRADERSPOST_ACCOUNT_ID = os.getenv('TRADERSPOST_ACCOUNT_ID', '')
 
 # Trading Parameters
 RISK_PER_TRADE_PERCENT = float(os.getenv('RISK_PER_TRADE_PERCENT', 1.0))
-MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 1))
+MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 4))
 DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 3))
 INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', 50000 if ASSET_CLASS == 'futures' else 50))
 
@@ -89,7 +89,7 @@ SCALPING_PAIRS = {
         'max_hold_candles': 120,       # 10 hours max hold (from backtest)
         'adx_min': 25,                 # From sweep
         'skip_friday': False,
-        'bad_hours_utc': [0, 4, 21],
+        'bad_hours_utc': [],           # No hour restrictions — trade 24/7
     },
     'MNQ': {
         'session_atr_min': 2.0,        # Lowered ATR for quiet/Sunday trading
@@ -97,9 +97,9 @@ SCALPING_PAIRS = {
         'pip_size': 0.25,
         'cooldown_seconds': 300,
         'max_hold_candles': 120,       # 10 hours max hold
-        'adx_min': 20,                 # MNQ needs lower threshold from sweep
+        'adx_min': 22,                 # Tightened from 20 (MTF backtest: PF 1.33 validated)
         'skip_friday': False,
-        'bad_hours_utc': [0, 4, 21],
+        'bad_hours_utc': [],           # No hour restrictions — trade 24/7
     },
 }
 
@@ -129,9 +129,9 @@ DIVERGENCE_PENALTY = float(os.getenv('DIVERGENCE_PENALTY', 0.12))  # -12% (was 5
 # Optimal trading hours (bonus confidence during peak liquidity)
 # Forex: London Open 08-12 UTC | Futures: US RTH 13:30-20:00 UTC (9:30am-4pm ET)
 if ASSET_CLASS == 'futures':
-    OPTIMAL_HOURS_UTC = list(range(13, 20))   # US regular trading hours
+    OPTIMAL_HOURS_UTC = list(range(0, 24))    # All hours — trade anytime
 else:
-    OPTIMAL_HOURS_UTC = list(range(8, 12))    # London Open
+    OPTIMAL_HOURS_UTC = list(range(0, 24))    # All hours — trade anytime
 OPTIMAL_HOUR_BONUS = float(os.getenv('OPTIMAL_HOUR_BONUS', 0.05))  # +5%
 
 # AI Model Thresholds
