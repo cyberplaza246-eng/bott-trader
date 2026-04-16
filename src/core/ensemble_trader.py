@@ -346,6 +346,7 @@ class EnsembleTrader:
         else:
             final_signal = sweep_direction
             final_confidence = sweep_confidence
+            sweep_bias = sweep_signal.get('bias', sweep_direction)
 
             bot_logger.info(f"🔍 Confidence breakdown: Initial sweep={sweep_confidence:.1%}")
 

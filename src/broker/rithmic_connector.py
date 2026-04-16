@@ -338,13 +338,21 @@ class RithmicConnector(BaseBroker):
 
     def place_order(
         self,
-        symbol: str,
-        order_type: str,
-        size: float,
-        entry_price: float,
-        stop_loss: float,
-        take_profit: float,
+        symbol: str = "",
+        order_type: str = "",
+        size: float = 1,
+        entry_price: float = 0,
+        stop_loss: float = 0,
+        take_profit: float = 0,
+        # Accept bot.py's alternate keyword names
+        pair: str = "",
+        lot_size: float = 0,
     ) -> Optional[Dict[str, Any]]:
+        # Normalize alternate parameter names from bot.py
+        if not symbol and pair:
+            symbol = pair
+        if size <= 0 and lot_size > 0:
+            size = lot_size
         if not self._connected:
             bot_logger.warning("Rithmic not connected — order rejected")
             return None
@@ -853,12 +861,27 @@ class RithmicConnector(BaseBroker):
                 sl_ticks = abs(round((price_ref - stop_loss) / spec.tick_size))
                 if sl_ticks > 0:
                     kwargs["stop_ticks"] = sl_ticks
+                else:
+                    bot_logger.warning(
+                        f"SL tick calc = 0: price_ref={price_ref}, SL={stop_loss}, "
+                        f"tick_size={spec.tick_size}"
+                    )
+            else:
+                bot_logger.warning(
+                    f"Cannot attach SL: no price reference (cached=0, entry={entry_price})"
+                )
 
         if take_profit > 0:
             if price_ref > 0:
                 tp_ticks = abs(round((take_profit - price_ref) / spec.tick_size))
                 if tp_ticks > 0:
                     kwargs["target_ticks"] = tp_ticks
+
+        bot_logger.info(
+            f"Rithmic submit_order: {symbol} {transaction} qty={qty} "
+            f"price_ref={price_ref} stop_ticks={kwargs.get('stop_ticks', 'NONE')} "
+            f"target_ticks={kwargs.get('target_ticks', 'NONE')}"
+        )
 
         result = await self._client.submit_order(**kwargs)
         return {
