@@ -29,6 +29,7 @@ Strategy Rules:
 Usage:
     python scripts/backtest_mtf_scalping.py --symbol MES
     python scripts/backtest_mtf_scalping.py --symbol MNQ
+    python scripts/backtest_mtf_scalping.py --symbol NQ
 """
 
 import os
@@ -50,28 +51,29 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SYMBOL_SPECS = {
     'MES': {'point_value': 5.0, 'tick_size': 0.25, 'atr_mult': 1.2},
     'MNQ': {'point_value': 2.0, 'tick_size': 0.25, 'atr_mult': 1.2},
+    'NQ': {'point_value': 20.0, 'tick_size': 0.25, 'atr_mult': 1.2},
 }
 
 # 5M Trend Filter Settings
 TREND_EMA_FAST = 50
 TREND_EMA_SLOW = 200
-ADX_THRESHOLD = 18    # Lowered from 22 to catch more trending moves
+ADX_THRESHOLD = 22    # Require strong trends for higher-quality entries
 ADX_PERIOD = 14
 
 # 1M Entry Settings
 ENTRY_EMA_FAST = 9
 ENTRY_EMA_MED = 21
 RSI_PERIOD = 14
-RSI_LONG_MIN, RSI_LONG_MAX = 35, 60       # Widened from 40-55
-RSI_SHORT_MIN, RSI_SHORT_MAX = 40, 65     # Widened from 45-60
+RSI_LONG_MIN, RSI_LONG_MAX = 40, 55       # Tightened for higher-quality entries
+RSI_SHORT_MIN, RSI_SHORT_MAX = 45, 60     # Tightened for higher-quality entries
 MACD_FAST, MACD_SLOW, MACD_SIGNAL = 12, 26, 9
-VOLUME_RATIO_THRESHOLD = 0.5              # Lowered for more trades
+VOLUME_RATIO_THRESHOLD = 1.0              # Require above-average volume
 VOLUME_MA_PERIOD = 20
 BB_PERIOD, BB_STD = 20, 2
-BB_EXTREME_LOW, BB_EXTREME_HIGH = 0.05, 0.95  # Relaxed from 0.1/0.9
+BB_EXTREME_LOW, BB_EXTREME_HIGH = 0.10, 0.90  # Avoid extreme stretches
 
 # Risk Settings
-TP_MULT = 1.5  # TP = 1.5 × SL (less aggressive, higher win rate)
+TP_MULT = 1.8  # TP = 1.8 × SL (better R:R)
 TP_BUFFER_ATR_MULT = 0.0  # TP capped exactly at resistance/support (no buffer)
 RESISTANCE_LOOKBACK = 20  # 5M bars to look back for swing high/low
 DAILY_LOSS_LIMIT = 350.0
@@ -190,12 +192,7 @@ def calculate_bb_pctb(close: pd.Series, lower: pd.Series, upper: pd.Series) -> p
 # ══════════════════════════════════════════════════════════════════════════════
 
 def is_trading_session(dt: datetime) -> bool:
-    """Check if datetime is within valid US trading sessions (UTC)
-    
-    CURRENTLY DISABLED for testing - all hours allowed
-    """
-    return True  # Disabled for now
-    
+    """Check if datetime is within valid US trading sessions (UTC)"""
     if not isinstance(dt, datetime):
         return True  # If no datetime, allow
     
@@ -225,6 +222,21 @@ def load_data(symbol: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
     path_1m = os.path.join(data_dir, f'{symbol}_1m.csv')
     path_5m = os.path.join(data_dir, f'{symbol}_5m.csv')
     
+    if not os.path.exists(path_1m) or not os.path.exists(path_5m):
+        if symbol == 'NQ':
+            fallback_symbol = 'MNQ'
+            fallback_1m = os.path.join(data_dir, f'{fallback_symbol}_1m.csv')
+            fallback_5m = os.path.join(data_dir, f'{fallback_symbol}_5m.csv')
+            if os.path.exists(fallback_1m) and os.path.exists(fallback_5m):
+                print(f"Warning: NQ data files missing, using {fallback_symbol} historical data as proxy.")
+                path_1m = fallback_1m
+                path_5m = fallback_5m
+        if not os.path.exists(path_1m) or not os.path.exists(path_5m):
+            missing_files = [p for p in (path_1m, path_5m) if not os.path.exists(p)]
+            raise FileNotFoundError(
+                f"Missing data files for {symbol}: {', '.join(missing_files)}"
+            )
+
     df_1m = pd.read_csv(path_1m, parse_dates=['datetime'])
     df_5m = pd.read_csv(path_5m, parse_dates=['datetime'])
     
@@ -318,9 +330,9 @@ def check_long_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
     volume_ratio = row_1m['volume_ratio']
     bb_pctb = row_1m['bb_pctb']
     
-    # Pullback near EMA21 (within 1.5 ATR - widened for more entries)
+    # Pullback near EMA21 (within 1.0 ATR - tightened for quality)
     atr = row_1m['atr']
-    pullback_zone = atr * 1.5
+    pullback_zone = atr * 1.0
     near_ema21 = abs(price - ema_21) <= pullback_zone
     
     # RSI in range
@@ -362,9 +374,9 @@ def check_short_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
     volume_ratio = row_1m['volume_ratio']
     bb_pctb = row_1m['bb_pctb']
     
-    # Pullback near EMA21 (within 1.5 ATR - widened for more entries)
+    # Pullback near EMA21 (within 1.0 ATR - tightened for quality)
     atr = row_1m['atr']
-    pullback_zone = atr * 1.5
+    pullback_zone = atr * 1.0
     near_ema21 = abs(price - ema_21) <= pullback_zone
     
     # RSI in range
@@ -781,7 +793,7 @@ def print_results(stats: Dict):
 
 def main():
     parser = argparse.ArgumentParser(description='Multi-Timeframe Scalping Backtest')
-    parser.add_argument('--symbol', type=str, default='MES', choices=['MES', 'MNQ'],
+    parser.add_argument('--symbol', type=str, default='MES', choices=['MES', 'MNQ', 'NQ'],
                         help='Symbol to backtest')
     args = parser.parse_args()
     
