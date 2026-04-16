@@ -14,22 +14,26 @@
     "GBP/USD": 1.4,
     "USD/JPY": 1.5,
     "MES": 3.0,
-    "MNQ": 2.5
+    "MNQ": 2.5,
+    "NQ": 2.5
   },
   "tp_multiplier_by_pair": {
     "MES": 2.0,
-    "MNQ": 1.2
+    "MNQ": 1.2,
+    "NQ": 1.2
   },
   "entry_confidence_threshold": 0.60,
   "price_drift_tolerance_atr": 2.5,
   "skip_friday": false,
   "bad_hours_utc": {
     "MES": [],
-    "MNQ": []
+    "MNQ": [],
+    "NQ": []
   },
   "trailing_stop": {
-    "MES": {"enabled": false},
-    "MNQ": {"enabled": false}
+    "MES": {"enabled": true},
+    "MNQ": {"enabled": true},
+    "NQ": {"enabled": true}
   },
   "auto_learning": {
     "enabled": false,
