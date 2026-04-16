@@ -15,7 +15,8 @@ Requirements:
 Usage:
     python start_live_rithmic.py                       # MES default
     python start_live_rithmic.py --symbol MNQ          # Trade MNQ
-    python start_live_rithmic.py --symbols MES MNQ     # Scan both, trade best setup
+    python start_live_rithmic.py --symbol NQ           # Trade NQ
+    python start_live_rithmic.py --symbols MES MNQ NQ  # Scan all, trade best setup
     python start_live_rithmic.py --paper               # Paper mode (signals only)
 """
 
@@ -59,12 +60,12 @@ TRAIL_SETTINGS = {
     'min_step_ticks': int(os.getenv('TRAIL_MIN_STEP_TICKS', '1')),
 }
 
-ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', '3')))
+ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', '4')))
 
 # Risk settings
 RISK_SETTINGS = {
     'contracts': 1,              # Start with 1 micro
-    'daily_loss_limit': 150.0,   # Max daily loss $150
+    'daily_loss_limit': 500.0,   # Max daily loss $500
     'max_trades_per_day': 50,    # Max trades per day
     'cooldown_bars': 5,          # Bars between trades
     'max_positions': ENV_MAX_CONCURRENT_TRADES,  # Max concurrent positions
@@ -74,6 +75,7 @@ RISK_SETTINGS = {
 SYMBOL_SPECS = {
     'MES': {'point_value': 5.0, 'tick_size': 0.25},
     'MNQ': {'point_value': 2.0, 'tick_size': 0.25},
+    'NQ': {'point_value': 20.0, 'tick_size': 0.25},
 }
 
 
@@ -361,6 +363,7 @@ class LiveRithmicTrader:
             ticker_map = {
                 'MES': 'ES=F',  # E-mini S&P 500 futures
                 'MNQ': 'NQ=F',  # E-mini Nasdaq futures
+                'NQ': 'NQ=F',   # E-mini Nasdaq futures
             }
             target = symbol or self.symbol
             ticker = ticker_map.get(target, f'{target}=F')
@@ -537,6 +540,16 @@ class LiveRithmicTrader:
             return {'symbol': symbol, 'direction': 'short', 'entry': entry, 'sl': sl, 'tp': tp, 'atr': atr, 'confidence': 0.5}
         
         return None
+
+    def _next_order_size(self) -> int:
+        """Return contracts for the next entry.
+
+        Pattern requested: 1st=1x, 2nd=2x, 3rd+=1x (subject to max positions).
+        """
+        open_count = len(self.positions)
+        if open_count == 1:
+            return self.contracts * 2
+        return self.contracts
     
     def place_order(self, signal: Dict) -> bool:
         """Place order with bracket (SL+TP)."""
@@ -546,6 +559,14 @@ class LiveRithmicTrader:
         entry = signal['entry']
         sl = signal['sl']
         tp = signal['tp']
+        order_size = self._next_order_size()
+        pre_net_qty = None
+
+        if not self.paper_mode and self.broker and hasattr(self.broker, 'get_net_position_size'):
+            try:
+                pre_net_qty = int(self.broker.get_net_position_size(symbol))
+            except Exception:
+                pre_net_qty = None
         
         if self.paper_mode:
             order_id = f"paper_{int(time.time())}"
@@ -557,7 +578,7 @@ class LiveRithmicTrader:
                 symbol=symbol,
                 direction=direction,
                 entry_price=entry,
-                size=self.contracts,
+                size=order_size,
                 sl=sl,
                 tp=tp,
                 entry_time=datetime.now(timezone.utc),
@@ -572,7 +593,7 @@ class LiveRithmicTrader:
         result = self.broker.place_order(
             symbol=symbol,
             order_type=order_type,
-            size=self.contracts,
+            size=order_size,
             entry_price=entry,
             stop_loss=sl,
             take_profit=tp
@@ -585,7 +606,7 @@ class LiveRithmicTrader:
                 symbol=symbol,
                 direction=direction,
                 entry_price=result.get('entry_price', entry),
-                size=self.contracts,
+                size=order_size,
                 sl=sl,
                 tp=tp,
                 entry_time=datetime.now(timezone.utc),
@@ -594,8 +615,54 @@ class LiveRithmicTrader:
             self.positions[order_id] = pos
             print(f"✅ ORDER FILLED: {direction.upper()} {symbol}")
             print(f"   Entry: {pos.entry_price:.2f}")
+            print(f"   Size: {order_size} contract(s)")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
+
+            # Verify live broker net qty delta so size clipping is visible immediately.
+            if self.broker and pre_net_qty is not None and hasattr(self.broker, 'get_net_position_size'):
+                expected_delta = order_size if direction == 'long' else -order_size
+                verified = False
+                for _ in range(4):
+                    try:
+                        post_net_qty = int(self.broker.get_net_position_size(symbol))
+                        observed_delta = post_net_qty - pre_net_qty
+                        if observed_delta == expected_delta:
+                            print(f"   Broker net qty: {post_net_qty} (delta {observed_delta:+d}) ✅")
+                            verified = True
+                            break
+                    except Exception:
+                        pass
+                    time.sleep(0.5)
+
+                if not verified:
+                    try:
+                        post_net_qty = int(self.broker.get_net_position_size(symbol))
+                        observed_delta = post_net_qty - pre_net_qty
+                        if observed_delta == 0:
+                            # Order was NOT filled on broker — remove phantom position
+                            print(
+                                f"   ❌ Order NOT filled on broker (delta 0). "
+                                f"Removing phantom position {order_id}"
+                            )
+                            bot_logger.error(
+                                f"Phantom position {order_id} removed for {symbol}: "
+                                f"broker delta=0, order never filled"
+                            )
+                            del self.positions[order_id]
+                            return False
+                        else:
+                            print(
+                                f"   ⚠️ Broker qty mismatch: requested {expected_delta:+d}, "
+                                f"observed {observed_delta:+d} (net {post_net_qty})"
+                            )
+                            bot_logger.warning(
+                                f"Broker qty mismatch for {symbol}: requested delta {expected_delta:+d}, "
+                                f"observed delta {observed_delta:+d}, net={post_net_qty}"
+                            )
+                    except Exception:
+                        pass
+
             if not pos.trailing_enabled:
                 print(f"   ⚠️ Native stop missing on entry - trailing disabled for {order_id}")
                 bot_logger.error(
@@ -773,7 +840,7 @@ class LiveRithmicTrader:
         print("  LIVE TRADING - Rithmic + Full AI Ensemble")
         print("=" * 70)
         print(f"Symbols:    {', '.join(self.symbols)}")
-        print(f"Contracts:  {self.contracts}")
+        print(f"Max Concurrent Trades: {self.max_positions} (1@2x, 3@1x)")
         print(f"Mode:       {'PAPER' if self.paper_mode else '⚠️ LIVE'}")
         print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
         print(f"Features:   Dynamic SL/TP, Trailing Stops, 8 Confirmation Models")
@@ -860,10 +927,17 @@ class LiveRithmicTrader:
 
                 if len(self.positions) < self.max_positions and cycle_candidates:
                     priority_rank = {sym: idx for idx, sym in enumerate(self.symbol_priority)}
+                    # NQ needs 8% higher confidence than micros to be selected
+                    NQ_CONFIDENCE_PENALTY = 0.08
+                    def _adjusted_confidence(s):
+                        c = float(s.get('confidence', 0.0))
+                        if s.get('symbol', '') == 'NQ':
+                            c -= NQ_CONFIDENCE_PENALTY
+                        return c
                     best = max(
                         cycle_candidates,
                         key=lambda s: (
-                            float(s.get('confidence', 0.0)),
+                            _adjusted_confidence(s),
                             -priority_rank.get(s.get('symbol', ''), 999),
                         ),
                     )
@@ -901,8 +975,8 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
-    parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ'], help='Single symbol mode')
-    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ')
+    parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ', 'NQ'], help='Single symbol mode')
+    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
     
