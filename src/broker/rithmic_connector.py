@@ -583,6 +583,7 @@ class RithmicConnector(BaseBroker):
         
         Rithmic returns aggregate positions by symbol, so we match against
         our _orders dict to reconstruct individual tickets.
+        When PnL plant is unavailable, falls back to order tracking only.
         """
         self._refresh_positions()
         
@@ -590,7 +591,28 @@ class RithmicConnector(BaseBroker):
         with self._state_lock:
             # Get symbols that have open positions
             open_symbols = {sym for sym, pos in self._positions.items() if pos.get('size', 0) != 0}
-        
+
+        # When PnL plant is denied, treat all tracked orders as open.
+        if self._pnl_permission_denied:
+            with self._order_lock:
+                for order_id, order_info in self._orders.items():
+                    order_symbol = order_info.get('symbol', '')
+                    result.append({
+                        'ticket': order_id,
+                        'pair': order_symbol,
+                        'symbol': order_symbol,
+                        'type': order_info.get('type', 'BUY'),
+                        'size': order_info.get('size', 1),
+                        'open_price': order_info.get('entry_price', 0),
+                        'sl': order_info.get('stop_loss', 0),
+                        'tp': order_info.get('take_profit', 0),
+                        'open_time': order_info.get('time', ''),
+                        'unrealized_pnl': 0,
+                    })
+            if symbol:
+                result = [p for p in result if p.get('symbol') == symbol]
+            return result
+
         with self._order_lock:
             # Return individual orders as "positions" if their symbol still has net exposure
             for order_id, order_info in self._orders.items():
@@ -620,10 +642,25 @@ class RithmicConnector(BaseBroker):
         """Return live net quantity for a symbol from Rithmic position data.
 
         Positive = net long, negative = net short, zero = flat.
+        Falls back to internal order tracking when PnL plant is unavailable.
         """
         self._refresh_positions()
         with self._state_lock:
-            return int(self._positions.get(symbol, {}).get('size', 0))
+            size = int(self._positions.get(symbol, {}).get('size', 0))
+            if size != 0:
+                return size
+
+        # PnL plant unavailable or returned empty — fall back to order tracking.
+        # This prevents phantom removal of positions that are still live.
+        if self._pnl_permission_denied:
+            with self._order_lock:
+                for order_info in self._orders.values():
+                    if order_info.get('symbol') == symbol:
+                        qty = order_info.get('size', 1)
+                        if order_info.get('type', 'BUY').upper() == 'SELL':
+                            return -qty
+                        return qty
+        return 0
 
     def get_bot_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
         return self.get_open_positions(symbol)
@@ -1134,7 +1171,7 @@ class RithmicConnector(BaseBroker):
 
     def _refresh_positions(self) -> None:
         """Sync positions from Rithmic PnL plant."""
-        if not self._connected:
+        if not self._connected or self._pnl_permission_denied:
             return
         try:
             positions = self._run_sync(
