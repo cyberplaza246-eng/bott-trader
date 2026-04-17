@@ -338,6 +338,15 @@ class EnsembleTrader:
                     f"🔄 No sweep → BIAS fallback: {sweep_bias} "
                     f"(5M bias strong, EMA={ema_dir}, Tech={tech_dir} not opposing)"
                 )
+            # Fallback 3: Strong trend (ADX≥25) + EMA confirms bias → enter despite Tech opposition
+            elif sweep_bias in ('BUY', 'SELL') and ema_dir == sweep_bias and sweep_signal.get('adx', 0) >= 25:
+                final_signal = sweep_bias
+                final_confidence = 0.60
+                models_agreement = 1
+                bot_logger.info(
+                    f"🔄 No sweep → TREND fallback: {sweep_bias} "
+                    f"(ADX={sweep_signal.get('adx', 0):.1f}, EMA confirms, Tech={tech_dir} overridden)"
+                )
             else:
                 final_signal = 'SKIP'
                 final_confidence = 0.0

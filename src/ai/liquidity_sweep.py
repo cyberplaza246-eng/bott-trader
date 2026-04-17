@@ -1191,6 +1191,7 @@ class LiquiditySweepAnalyzer:
                         f"bias={regime_info.get('bias')}")
         result['regime'] = regime_info['regime']
         result['bias'] = regime_info['bias']
+        result['adx'] = regime_info.get('adx', 0)
 
         if regime_info['bias'] is None:
             # Infer bias from 1M EMA instead of blocking
