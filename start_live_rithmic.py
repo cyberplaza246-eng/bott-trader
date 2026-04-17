@@ -13,7 +13,8 @@ Requirements:
 2. Active Tradesea/Lucid account with trading permissions
 
 Usage:
-    python start_live_rithmic.py                       # MES default
+    python start_live_rithmic.py                       # NQ default
+    python start_live_rithmic.py --symbol NQ           # Trade NQ
     python start_live_rithmic.py --symbol MNQ          # Trade MNQ
     python start_live_rithmic.py --symbol NQ           # Trade NQ
     python start_live_rithmic.py --symbols MES MNQ NQ  # Scan all, trade best setup
@@ -40,6 +41,7 @@ from src.broker.rithmic_connector import RithmicConnector
 from src.core.ensemble_trader import EnsembleTrader
 from src.ai.technical_analyzer import TechnicalAnalyzer
 from src.utils.logger import bot_logger, trades_logger
+from config.strategy_config import MAX_CONCURRENT_TRADES as CFG_MAX_CONCURRENT_TRADES
 
 # Strategy parameters (validated profitable)
 PARAMS = {
@@ -60,7 +62,7 @@ TRAIL_SETTINGS = {
     'min_step_ticks': int(os.getenv('TRAIL_MIN_STEP_TICKS', '1')),
 }
 
-ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', '4')))
+ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', str(CFG_MAX_CONCURRENT_TRADES))))
 
 # Risk settings
 RISK_SETTINGS = {
@@ -95,7 +97,7 @@ class Position:
 class LiveRithmicTrader:
     """Live trading with Enhanced Breakout Strategy via Rithmic."""
     
-    def __init__(self, symbol: str = 'MES', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False):
+    def __init__(self, symbol: str = 'NQ', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False):
         self.skip_confirm = skip_confirm
         self.symbols = symbols or [symbol]
         self.symbol = self.symbols[0]
@@ -126,7 +128,7 @@ class LiveRithmicTrader:
         self.current_date = None
         self.trades: List[Dict] = []
         self._warmup_log_state: Dict[str, tuple] = {}
-        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'MNQ,MES').split(',') if s.strip()]
+        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'NQ,MES').split(',') if s.strip()]
         
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
@@ -840,7 +842,7 @@ class LiveRithmicTrader:
         print("  LIVE TRADING - Rithmic + Full AI Ensemble")
         print("=" * 70)
         print(f"Symbols:    {', '.join(self.symbols)}")
-        print(f"Max Concurrent Trades: {self.max_positions} (1@2x, 3@1x)")
+        print(f"Max Concurrent Trades: {self.max_positions}")
         print(f"Mode:       {'PAPER' if self.paper_mode else '⚠️ LIVE'}")
         print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
         print(f"Features:   Dynamic SL/TP, Trailing Stops, 8 Confirmation Models")
@@ -975,7 +977,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
-    parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ', 'NQ'], help='Single symbol mode')
+    parser.add_argument('--symbol', default='NQ', choices=['NQ', 'MES', 'MNQ'], help='Single symbol mode')
     parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
