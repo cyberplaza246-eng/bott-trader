@@ -254,12 +254,16 @@ class RithmicConnector(BaseBroker):
 
         # Try Rithmic historical bars first with retry logic
         if self._connected:
-            max_retries = 1
+            max_retries = 3
             for attempt in range(max_retries):
                 try:
+                    # Give more time on retries — the first timeout cancels
+                    # the library's internal lock holder, so the next attempt
+                    # has a clean slate.
+                    rpc_timeout = 12 + attempt * 4  # 12s, 16s, 20s
                     df = self._run_sync(
                         self._async_get_candles(symbol, timeframe_minutes, num_candles),
-                        timeout=12,  # Must exceed async wait_for (8s) + recovery sleep (1s)
+                        timeout=rpc_timeout,
                     )
                     if df is not None and len(df) >= 10:
                         # Success! Reset error counter and cache result
@@ -283,7 +287,18 @@ class RithmicConnector(BaseBroker):
 
                     if is_lock_error:
                         self._lock_error_count += 1
-                        # Enter fallback quickly on lock contention to avoid history-plant thrash.
+                        bot_logger.warning(
+                            f"History lock error for {symbol} (attempt {attempt+1}/{max_retries}): {e}"
+                        )
+                        if attempt < max_retries - 1:
+                            # Wait for _recv_loop to recover, then retry
+                            wait = 2.0 + attempt * 2.0  # 2s, 4s
+                            bot_logger.info(
+                                f"⏳ Waiting {wait:.0f}s for history plant lock to clear..."
+                            )
+                            time.sleep(wait)
+                            continue
+                        # Final attempt failed — enter fallback
                         if self._lock_error_count >= self._max_lock_errors:
                             self._consecutive_lock_failures += 1
                             # Progressive backoff: 60s, 120s, 240s, 480s, cap at 600s
@@ -304,8 +319,6 @@ class RithmicConnector(BaseBroker):
                                     f"streak {self._consecutive_lock_failures}) — "
                                     f"switching to Yahoo Finance fallback for {backoff}s"
                                 )
-                        # Let the library's _recv_loop recover before any retry
-                        time.sleep(1.5)
                         break
 
                     # KeyError from async_rithmic when no bars exist (e.g. market closed)
@@ -664,6 +677,12 @@ class RithmicConnector(BaseBroker):
         # Connect all plants (ticker, order, history, pnl)
         await self._client.connect()
 
+        # Let all plants (especially history) finish their handshake
+        # before we start sending requests.  The history plant's _recv_loop
+        # holds its internal lock while processing connection messages;
+        # requesting bars too early causes the 5-second lock timeout.
+        await asyncio.sleep(3)
+
         # Install ForcedLogout storm detector on each plant.
         self._forced_logout_times: List[float] = []
         self._patch_forced_logout_detection()
@@ -868,11 +887,11 @@ class RithmicConnector(BaseBroker):
                         bar_type=bar_type,
                         bar_type_periods=period,
                     ),
-                    timeout=8.0,  # Break deadlock faster than library's 5s lock wait
+                    timeout=15.0,  # Allow time for library's 5s lock wait + data transfer
                 )
             except asyncio.TimeoutError:
                 bot_logger.warning(
-                    f"⏱️ History request for {symbol} timed out (8s) — "
+                    f"⏱️ History request for {symbol} timed out (15s) — "
                     f"likely async_rithmic internal lock deadlock"
                 )
                 # Give _recv_loop time to reacquire the now-released lock
