@@ -1084,13 +1084,13 @@ def main():
     
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
     parser.add_argument('--symbol', default='NQ', choices=['NQ', 'MES', 'MNQ'], help='Single symbol mode')
-    parser.add_argument('--symbols', nargs='+', default=['NQ', 'MES'], choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
+    parser.add_argument('--symbols', nargs='+', default=None, choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
     
     args = parser.parse_args()
 
-    symbols = args.symbols
+    symbols = args.symbols if args.symbols else [args.symbol]
     trader = LiveRithmicTrader(symbol=symbols[0], symbols=symbols, paper_mode=args.paper, skip_confirm=args.yes)
     
     if not trader.connect():
