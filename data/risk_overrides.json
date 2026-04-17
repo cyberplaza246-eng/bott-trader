@@ -22,7 +22,7 @@
     "MNQ": 1.2,
     "NQ": 1.2
   },
-  "entry_confidence_threshold": 0.60,
+  "entry_confidence_threshold": 0.55,
   "price_drift_tolerance_atr": 2.5,
   "skip_friday": false,
   "bad_hours_utc": {

@@ -522,7 +522,7 @@ class BacktestEngine:
             return 'SKIP', 0.0, 0, None, {}, 'unknown'
 
         # ── Confirmation models (boost/reduce only) ───────────────
-        ema_signal = self.ema_crossover.get_signal(subset, pair=symbol)
+        ema_signal = self.ema_crossover.get_signal(subset, pair=pair)
         technical_signal = self.technical.get_signal(subset)
 
         confidence = sweep_conf
