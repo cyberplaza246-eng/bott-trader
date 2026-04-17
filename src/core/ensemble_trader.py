@@ -249,11 +249,16 @@ class EnsembleTrader:
         # Relax limit when sweep engine confirms a strong trend — in a trend, price
         # will always be extended from short EMAs; that extension IS the setup.
         sweep_regime = signal_result.get('sweep_regime', 'unknown')
-        effective_max_chase = (
-            self.entry_max_chase_atr * 2.5
-            if sweep_regime in ('trend_up', 'trend_down')
-            else self.entry_max_chase_atr
-        )
+        effective_max_chase = self.entry_max_chase_atr
+
+        # Protect live trading from stale local env overrides like ENTRY_MAX_CHASE_ATR=0.90.
+        # If multiple models agree on the fallback entry, enforce a sane minimum chase limit.
+        models_agreement = int(signal_result.get('models_agreement', 0) or 0)
+        if models_agreement >= 2:
+            effective_max_chase = max(effective_max_chase, 1.25)
+
+        if sweep_regime in ('trend_up', 'trend_down'):
+            effective_max_chase = max(effective_max_chase * 2.5, 2.5)
 
         if signed_dist_atr > effective_max_chase:
             bot_logger.info(

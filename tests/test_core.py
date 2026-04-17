@@ -603,6 +603,29 @@ class TestEnsembleRegimeSeparation:
             for call in log_info.call_args_list
         )
 
+    def test_entry_timing_filter_applies_floor_for_multi_model_fallbacks(self):
+        from src.core.ensemble_trader import EnsembleTrader
+
+        ensemble = EnsembleTrader.__new__(EnsembleTrader)
+        ensemble.entry_timing_filter_enabled = True
+        ensemble.entry_max_chase_atr = 0.90
+        ensemble.entry_max_early_atr = 0.80
+
+        df = pd.DataFrame({
+            'close': [100.0],
+            'atr': [10.0],
+            'ema_50': [111.7],
+        })
+
+        signal_result = {
+            'signal': 'SELL',
+            'models_agreement': 2,
+            'sweep_regime': 'unknown',
+            'enriched_df': df,
+        }
+
+        assert ensemble._passes_entry_timing_filter(signal_result) is True
+
 
 # ═══════════════════════════════════════════════════════════════════
 #  LiquiditySweepAnalyzer Tests
