@@ -133,6 +133,9 @@ class LiveRithmicTrader:
         self.trades: List[Dict] = []
         self._warmup_log_state: Dict[str, tuple] = {}
         self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'NQ,MES').split(',') if s.strip()]
+        self.fill_confirm_grace_seconds = float(os.getenv('FILL_CONFIRM_GRACE_SECONDS', '20'))
+        # order_id -> UTC timestamp; during grace we do not auto-remove on broker delta=0.
+        self.pending_fill_confirm_until: Dict[str, datetime] = {}
         
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
@@ -639,6 +642,9 @@ class LiveRithmicTrader:
                 trailing_enabled=bool(result.get('supports_stop_modify', True)),
             )
             self.positions[order_id] = pos
+            self.pending_fill_confirm_until[order_id] = (
+                datetime.now(timezone.utc) + timedelta(seconds=self.fill_confirm_grace_seconds)
+            )
             print(f"✅ ORDER FILLED: {direction.upper()} {symbol}")
             print(f"   Entry: {pos.entry_price:.2f}")
             print(f"   Size: {order_size} contract(s)")
@@ -666,17 +672,12 @@ class LiveRithmicTrader:
                         post_net_qty = int(self.broker.get_net_position_size(symbol))
                         observed_delta = post_net_qty - pre_net_qty
                         if observed_delta == 0:
-                            # Order was NOT filled on broker — remove phantom position
+                            # Broker state can lag right after submit; keep local position
+                            # and let sync_broker_position reconcile after grace window.
                             print(
-                                f"   ❌ Order NOT filled on broker (delta 0). "
-                                f"Removing phantom position {order_id}"
+                                f"   ⏳ Fill pending broker confirmation (delta 0). "
+                                f"Will re-check for {self.fill_confirm_grace_seconds:.0f}s"
                             )
-                            bot_logger.error(
-                                f"Phantom position {order_id} removed for {symbol}: "
-                                f"broker delta=0, order never filled"
-                            )
-                            del self.positions[order_id]
-                            return False
                         else:
                             print(
                                 f"   ⚠️ Broker qty mismatch: requested {expected_delta:+d}, "
@@ -766,6 +767,7 @@ class LiveRithmicTrader:
         trades_logger.info(f"EXIT {exit_type} {d} {pos.symbol} @ {exit_price:.2f} PnL=${pnl:.2f}")
         
         del self.positions[order_id]
+        self.pending_fill_confirm_until.pop(order_id, None)
         print(f"   Remaining positions: {len(self.positions)}/{self.max_positions}")
         self.cooldown = self.cooldown_bars
     
@@ -779,50 +781,49 @@ class LiveRithmicTrader:
             return
         
         try:
-            # Get actual positions from broker
-            broker_positions = []
+            now_utc = datetime.now(timezone.utc)
+
+            # Query net positions by symbol once per cycle.
+            net_by_symbol: Dict[str, int] = {}
             for sym in self.symbols:
-                broker_positions.extend(self.broker.get_open_positions(symbol=sym))
-            broker_order_ids = {str(p.get('ticket')) for p in broker_positions if p.get('ticket')}
-            
-            # Find positions we think are open but broker says are closed
-            our_order_ids = set(self.positions.keys())
-            closed_ids = our_order_ids - broker_order_ids
-            
-            # Remove closed positions and log the exit
-            for order_id in closed_ids:
-                pos = self.positions.get(order_id)
-                if pos:
-                    # Position was closed by broker (likely SL or TP hit)
-                    # Since we don't know the exact exit price, estimate from SL/TP
-                    # Rithmic bracket orders typically close at the trigger price
-                    bot_logger.info(f"🔄 Position sync: {order_id} closed by broker (SL/TP hit)")
-                    
-                    # Log minimal exit info
+                try:
+                    net_by_symbol[sym] = int(self.broker.get_net_position_size(sym))
+                except Exception:
+                    net_by_symbol[sym] = 0
+
+            removed_any = False
+            for order_id, pos in list(self.positions.items()):
+                net_qty = abs(net_by_symbol.get(pos.symbol, 0))
+                pending_until = self.pending_fill_confirm_until.get(order_id)
+
+                # During grace window, keep local position to avoid false phantom removals.
+                if pending_until and now_utc < pending_until:
+                    if net_qty > 0:
+                        self.pending_fill_confirm_until.pop(order_id, None)
+                    continue
+
+                # Once grace expires, if broker still shows flat, remove local stale position.
+                if net_qty == 0:
+                    bot_logger.info(f"🔄 Position sync: {order_id} closed/absent on broker")
                     d = pos.direction.upper()
                     self.trades.append({
                         'entry_time': pos.entry_time.isoformat() if pos.entry_time else '',
-                        'exit_time': datetime.now(timezone.utc).isoformat(),
+                        'exit_time': now_utc.isoformat(),
                         'symbol': pos.symbol,
                         'direction': d,
                         'entry': pos.entry_price,
-                        'exit': 0,  # Unknown - broker handled it
-                        'pnl': 0,   # Unknown - will update from account later
+                        'exit': 0,
+                        'pnl': 0,
                         'exit_type': 'BROKER_SYNC',
                         'sl': pos.sl,
                         'tp': pos.tp,
                     })
-                    
                     del self.positions[order_id]
-                    print(f"🔄 Position {order_id} removed (closed by broker)")
-            
-            # Also check if broker has more positions than we track (rare, but possible)
-            if len(broker_positions) > len(self.positions):
-                extra_count = len(broker_positions) - len(self.positions)
-                bot_logger.warning(f"⚠️ Broker has {extra_count} positions not tracked by bot")
-            
-            # Log sync if any changes
-            if closed_ids:
+                    self.pending_fill_confirm_until.pop(order_id, None)
+                    removed_any = True
+                    print(f"🔄 Position {order_id} removed (broker flat)")
+
+            if removed_any:
                 print(f"📊 Position sync: {len(self.positions)}/{self.max_positions} active")
                 
         except Exception as e:
