@@ -435,6 +435,18 @@ class EnsembleTrader:
                     f"🔄 No sweep → REGIME+EMA fallback: {sweep_bias} "
                     f"(sweep_regime={sweep_regime}, ADX={sweep_signal.get('adx', 0):.1f}, Tech={tech_dir})"
                 )
+            # Fallback 4: High-confidence EMA alone, Tech not opposing
+            # Fires in any regime when EMA conf ≥0.55 and no conflicting Tech signal
+            elif (ema_dir in ('BUY', 'SELL')
+                  and ema_signal['confidence'] >= 0.55
+                  and tech_dir != ('SELL' if ema_dir == 'BUY' else 'BUY')):
+                final_signal = ema_dir
+                final_confidence = ema_signal['confidence'] * 0.90  # slight haircut for no sweep
+                models_agreement = 1
+                bot_logger.info(
+                    f"🔄 No sweep → HIGH-EMA fallback: {ema_dir} "
+                    f"(EMA conf={ema_signal['confidence']:.0%}, Tech={tech_dir})"
+                )
             else:
                 final_signal = 'SKIP'
                 final_confidence = 0.0
@@ -825,8 +837,18 @@ class EnsembleTrader:
             sweep_adx >= 10 and
             tech_dir != opposing_dir
         )
-        
-        is_fallback_entry = is_ema_tech_fallback or is_trend_fallback or is_regime_ema_fallback
+
+        # Fallback 4: High-confidence EMA, Tech not opposing
+        ema_confidence = signal_result.get('models', {}).get('ema_crossover', {}).get('confidence', 0)
+        is_high_ema_fallback = (
+            not sweep_fired and
+            ema_dir == signal_result['signal'] and
+            ema_dir in ('BUY', 'SELL') and
+            ema_confidence >= 0.55 and
+            tech_dir != opposing_dir
+        )
+
+        is_fallback_entry = is_ema_tech_fallback or is_trend_fallback or is_regime_ema_fallback or is_high_ema_fallback
         
         if not sweep_fired and not is_fallback_entry:
             bot_logger.info("🚫 Sweep gate did not fire and no fallback conditions — no trade")
@@ -838,6 +860,8 @@ class EnsembleTrader:
             bot_logger.info(f"🔄 FALLBACK ENTRY: Strong trend ADX={sweep_adx:.0f} + EMA+Bias={sweep_bias} (no sweep required)")
         elif is_regime_ema_fallback:
             bot_logger.info(f"🔄 FALLBACK ENTRY: Regime={sr} + EMA+Bias={sweep_bias} ADX={sweep_adx:.0f} (no sweep required)")
+        elif is_high_ema_fallback:
+            bot_logger.info(f"🔄 FALLBACK ENTRY: High-EMA {ema_dir} conf={ema_confidence:.0%} Tech={tech_dir} (no sweep required)")
 
         # EMA crossover must not oppose signal direction (HOLD = neutral, allowed)
         if ema_dir in ('BUY', 'SELL') and ema_dir != signal_result['signal']:
