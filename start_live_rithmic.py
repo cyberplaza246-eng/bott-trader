@@ -100,6 +100,12 @@ class Position:
 
 class LiveRithmicTrader:
     """Live trading with Enhanced Breakout Strategy via Rithmic."""
+
+    SIGNAL_PROFILE_ALIAS = {
+        # NQ and MNQ are the same underlying. Reuse the better-behaved MNQ
+        # signal profile for NQ entries while still executing actual NQ orders.
+        'NQ': 'MNQ',
+    }
     
     def __init__(self, symbol: str = 'NQ', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False):
         self.skip_confirm = skip_confirm
@@ -155,6 +161,9 @@ class LiveRithmicTrader:
 
     def _spec(self, symbol: str) -> Dict[str, float]:
         return SYMBOL_SPECS[symbol]
+
+    def _signal_profile_symbol(self, symbol: str) -> str:
+        return self.SIGNAL_PROFILE_ALIAS.get(symbol, symbol)
 
     def _round_to_tick(self, price: float, tick_size: float) -> float:
         return round(round(price / tick_size) * tick_size, 8)
@@ -482,11 +491,13 @@ class LiveRithmicTrader:
             return self._check_simple_breakout(symbol, df)
         
         try:
+            signal_profile_symbol = self._signal_profile_symbol(symbol)
+
             # Add indicators via technical analyzer
             df_enriched = self.technical.calculate_indicators(df)
             
             # Get ensemble signal (includes sweep gate, ML, advanced strategies)
-            signal_result = self.ensemble.get_trading_signal(df_enriched, symbol)
+            signal_result = self.ensemble.get_trading_signal(df_enriched, signal_profile_symbol)
             
             # Check if should trade
             if not self.ensemble.should_trade(signal_result):
@@ -512,7 +523,7 @@ class LiveRithmicTrader:
                     df_enriched,
                     direction,
                     price,
-                    symbol=symbol,
+                    symbol=signal_profile_symbol,
                     sr_levels=signal_result.get('sr_levels'),
                     sweep_wick=signal_result.get('sweep_wick'),
                     timeframe='5m',
@@ -531,6 +542,11 @@ class LiveRithmicTrader:
                 sltp_method = 'atr_fallback'
             
             direction = 'long' if signal == 'BUY' else 'short'
+
+            if signal_profile_symbol != symbol:
+                bot_logger.info(
+                    f"🧭 Using {signal_profile_symbol} signal profile for {symbol} entries"
+                )
             
             bot_logger.info(f"🎯 ENSEMBLE SIGNAL: {symbol} {signal} @ {price:.2f} (conf={confidence:.1%})")
             bot_logger.info(f"   SL: {sl:.2f} | TP: {tp:.2f}")
