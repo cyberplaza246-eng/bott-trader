@@ -42,6 +42,7 @@ from src.core.ensemble_trader import EnsembleTrader
 from src.ai.technical_analyzer import TechnicalAnalyzer
 from src.utils.logger import bot_logger, trades_logger
 from config.strategy_config import MAX_CONCURRENT_TRADES as CFG_MAX_CONCURRENT_TRADES
+from config.strategy_config import MAX_CONTRACTS_PER_SYMBOL
 
 # Strategy parameters (validated profitable)
 PARAMS = {
@@ -62,7 +63,10 @@ TRAIL_SETTINGS = {
     'min_step_ticks': int(os.getenv('TRAIL_MIN_STEP_TICKS', '1')),
 }
 
-ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', str(CFG_MAX_CONCURRENT_TRADES))))
+_env_max_concurrent = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', str(CFG_MAX_CONCURRENT_TRADES))))
+_env_max_positions = max(1, int(os.getenv('MAX_POSITIONS', str(_env_max_concurrent))))
+# Hard guardrail requested: never exceed 3 total open positions.
+ENV_MAX_CONCURRENT_TRADES = min(3, _env_max_concurrent, _env_max_positions)
 
 # Risk settings
 RISK_SETTINGS = {
@@ -552,6 +556,10 @@ class LiveRithmicTrader:
         if open_count == 1:
             return self.contracts * 2
         return self.contracts
+
+    def _symbol_open_contracts(self, symbol: str) -> int:
+        """Return currently open contracts for a symbol in local tracker."""
+        return int(sum(pos.size for pos in self.positions.values() if pos.symbol == symbol))
     
     def place_order(self, signal: Dict) -> bool:
         """Place order with bracket (SL+TP)."""
@@ -562,6 +570,22 @@ class LiveRithmicTrader:
         sl = signal['sl']
         tp = signal['tp']
         order_size = self._next_order_size()
+        # Hard per-symbol contract cap (e.g., NQ max 2 contracts total).
+        symbol_cap = int(MAX_CONTRACTS_PER_SYMBOL.get(symbol, 3))
+        current_symbol_contracts = self._symbol_open_contracts(symbol)
+        remaining_symbol_capacity = max(0, symbol_cap - current_symbol_contracts)
+        if remaining_symbol_capacity <= 0:
+            print(
+                f"🚫 {symbol} contract cap reached: "
+                f"{current_symbol_contracts}/{symbol_cap}. Entry skipped."
+            )
+            return False
+        if order_size > remaining_symbol_capacity:
+            print(
+                f"⚠️ Clipping {symbol} order size: {order_size} -> {remaining_symbol_capacity} "
+                f"(cap {symbol_cap})"
+            )
+            order_size = remaining_symbol_capacity
         pre_net_qty = None
 
         if not self.paper_mode and self.broker and hasattr(self.broker, 'get_net_position_size'):
@@ -625,7 +649,7 @@ class LiveRithmicTrader:
             if self.broker and pre_net_qty is not None and hasattr(self.broker, 'get_net_position_size'):
                 expected_delta = order_size if direction == 'long' else -order_size
                 verified = False
-                for _ in range(4):
+                for _ in range(8):
                     try:
                         post_net_qty = int(self.broker.get_net_position_size(symbol))
                         observed_delta = post_net_qty - pre_net_qty
