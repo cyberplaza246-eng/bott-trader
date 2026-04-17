@@ -421,6 +421,20 @@ class EnsembleTrader:
                     f"🔄 No sweep → TREND fallback: {sweep_bias} "
                     f"(ADX={sweep_signal.get('adx', 0):.1f}, EMA+Bias aligned, Tech={tech_dir})"
                 )
+            # Fallback 3: Structural trend regime + EMA + Bias agree, Tech not opposing
+            # Covers moderate ADX (≥14) when sweep_regime confirms trend direction
+            elif (sweep_regime in ('trend_up', 'trend_down')
+                  and sweep_bias in ('BUY', 'SELL')
+                  and ema_dir == sweep_bias
+                  and sweep_signal.get('adx', 0) >= 14
+                  and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY')):
+                final_signal = sweep_bias
+                final_confidence = 0.52
+                models_agreement = 2
+                bot_logger.info(
+                    f"🔄 No sweep → REGIME+EMA fallback: {sweep_bias} "
+                    f"(sweep_regime={sweep_regime}, ADX={sweep_signal.get('adx', 0):.1f}, Tech={tech_dir})"
+                )
             else:
                 final_signal = 'SKIP'
                 final_confidence = 0.0
