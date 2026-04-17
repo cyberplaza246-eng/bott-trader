@@ -102,6 +102,7 @@ class RithmicConnector(BaseBroker):
 
         # Lock timeout / fallback mode tracking
         self._lock_error_count = 0
+        self._consecutive_lock_failures = 0  # tracks back-to-back failures for progressive backoff
         self._max_lock_errors = int(
             os.getenv("RITHMIC_HISTORY_MAX_LOCK_ERRORS", "1")
         )  # Switch to fallback mode quickly on lock contention
@@ -263,6 +264,7 @@ class RithmicConnector(BaseBroker):
                     if df is not None and len(df) >= 10:
                         # Success! Reset error counter and cache result
                         self._lock_error_count = 0
+                        self._consecutive_lock_failures = 0
                         self._candle_cache[cache_key] = (now, df)
                         return df
                     else:
@@ -283,16 +285,24 @@ class RithmicConnector(BaseBroker):
                         self._lock_error_count += 1
                         # Enter fallback quickly on lock contention to avoid history-plant thrash.
                         if self._lock_error_count >= self._max_lock_errors:
-                            self._fallback_until = now + self._fallback_cooldown_secs
+                            self._consecutive_lock_failures += 1
+                            # Progressive backoff: 60s, 120s, 240s, 480s, cap at 600s
+                            backoff = min(
+                                self._fallback_cooldown_secs * (2 ** (self._consecutive_lock_failures - 1)),
+                                600,
+                            )
+                            self._fallback_until = now + backoff
                             if self._disable_yahoo_fallback:
                                 bot_logger.warning(
-                                    f"⚠️ Rithmic history lock errors ({self._lock_error_count}x) — "
-                                    f"Yahoo fallback disabled, retrying after {self._fallback_cooldown_secs}s"
+                                    f"⚠️ Rithmic history lock errors ({self._lock_error_count}x, "
+                                    f"streak {self._consecutive_lock_failures}) — "
+                                    f"Yahoo fallback disabled, retrying after {backoff}s"
                                 )
                             else:
                                 bot_logger.warning(
-                                    f"⚠️ Rithmic history lock errors ({self._lock_error_count}x) — "
-                                    f"switching to Yahoo Finance fallback for {self._fallback_cooldown_secs}s"
+                                    f"⚠️ Rithmic history lock errors ({self._lock_error_count}x, "
+                                    f"streak {self._consecutive_lock_failures}) — "
+                                    f"switching to Yahoo Finance fallback for {backoff}s"
                                 )
                         # Let the library's _recv_loop recover before any retry
                         time.sleep(1.5)

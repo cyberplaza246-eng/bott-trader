@@ -623,6 +623,43 @@ class LiveRithmicTrader:
         entry = signal['entry']
         sl = signal['sl']
         tp = signal['tp']
+        atr = signal.get('atr', 10.0)
+
+        # ── Price drift guard ────────────────────────────────────
+        # Reject if signal entry is far from the live market quote.
+        # This prevents stale Yahoo-fallback candles from creating
+        # absurd bracket orders.
+        if not self.paper_mode and self.broker and hasattr(self.broker, '_get_cached_price'):
+            live_price = self.broker._get_cached_price(symbol)
+            if live_price > 0 and atr > 0:
+                drift = abs(entry - live_price)
+                max_drift = atr * 2.5
+                if drift > max_drift:
+                    print(
+                        f"🚫 PRICE DRIFT: {symbol} signal entry {entry:.2f} is "
+                        f"{drift:.1f}pts from market {live_price:.2f} "
+                        f"(max {max_drift:.1f}pts = 2.5×ATR). Order rejected."
+                    )
+                    bot_logger.warning(
+                        f"Price drift guard: {symbol} entry={entry:.2f} "
+                        f"market={live_price:.2f} drift={drift:.1f} "
+                        f"max_drift={max_drift:.1f}. Stale candle data?"
+                    )
+                    return False
+                # Adjust entry/SL/TP to live price if still within tolerance
+                if drift > tick_size:
+                    offset = live_price - entry
+                    entry = live_price
+                    sl = sl + offset
+                    tp = tp + offset
+                    signal['entry'] = entry
+                    signal['sl'] = sl
+                    signal['tp'] = tp
+                    bot_logger.info(
+                        f"Price drift adjust: shifted {symbol} entry/SL/TP by "
+                        f"{offset:+.2f} to match live market {live_price:.2f}"
+                    )
+
         order_size = self._next_order_size()
         # Hard per-symbol contract cap (e.g., NQ max 2 contracts total).
         symbol_cap = int(MAX_CONTRACTS_PER_SYMBOL.get(symbol, 3))
