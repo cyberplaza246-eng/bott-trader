@@ -132,7 +132,7 @@ class LiveRithmicTrader:
         self.current_date = None
         self.trades: List[Dict] = []
         self._warmup_log_state: Dict[str, tuple] = {}
-        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'NQ,MNQ,MES').split(',') if s.strip()]
+        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'NQ,MES').split(',') if s.strip()]
         self.fill_confirm_grace_seconds = float(os.getenv('FILL_CONFIRM_GRACE_SECONDS', '60'))
         # order_id -> UTC timestamp; during grace we do not auto-remove on broker delta=0.
         self.pending_fill_confirm_until: Dict[str, datetime] = {}
@@ -1026,10 +1026,19 @@ class LiveRithmicTrader:
                         print(f"🏆 Cycle candidates: {names}")
 
                     # Trade ALL qualifying signals (up to max positions)
+                    # NQ and MNQ are the same underlying — skip if sibling already open.
+                    SAME_UNDERLYING = {'NQ': 'MNQ', 'MNQ': 'NQ'}
+                    open_syms = {p.symbol for p in self.positions.values()}
                     for candidate in sorted_candidates:
                         if len(self.positions) >= self.max_positions:
                             break
+                        sym = candidate.get('symbol', '')
+                        sibling = SAME_UNDERLYING.get(sym)
+                        if sibling and sibling in open_syms:
+                            print(f"   ⏭️ Skipping {sym} — {sibling} already open (same underlying)")
+                            continue
                         if self.place_order(candidate):
+                            open_syms.add(sym)
                             spec = self._spec(candidate['symbol'])
                             print(f"📊 {candidate['symbol']} ATR: {candidate['atr']:.2f}")
                             risk = abs(candidate['entry'] - candidate['sl']) * spec['point_value']
@@ -1059,7 +1068,7 @@ def main():
     
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
     parser.add_argument('--symbol', default='NQ', choices=['NQ', 'MES', 'MNQ'], help='Single symbol mode')
-    parser.add_argument('--symbols', nargs='+', default=['NQ', 'MNQ'], choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
+    parser.add_argument('--symbols', nargs='+', default=['NQ', 'MES'], choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
     
