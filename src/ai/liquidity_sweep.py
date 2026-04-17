@@ -55,8 +55,8 @@ class LiquiditySweepAnalyzer:
     # ── MSS / Displacement ──────────────────────────────────────────
     VOLUME_CONFIRMATION = 1.0        # Disabled (forex tick vol unreliable) (was 1.30)
     BODY_RATIO_MIN = 0.30            # Displacement body ≥ 30% of range
-    RSI_SWEEP_LONG_MAX = 55          # RSI ≤ 55 at bullish sweep (tighter filter)
-    RSI_SWEEP_SHORT_MIN = 45         # RSI ≥ 45 at bearish sweep (tighter filter)
+    RSI_SWEEP_LONG_MAX = 65          # RSI ≤ 65 at bullish sweep (standard: uptrends sit 55-65)
+    RSI_SWEEP_SHORT_MIN = 35         # RSI ≥ 35 at bearish sweep (standard: downtrends sit 35-45)
     RSI_SLOPE_WINDOW = 3             # Candles after sweep to check RSI slope (was 2)
     CONFIRMATION_WINDOW = 20         # Candles after sweep to get MSS (was 15)
 
@@ -520,7 +520,7 @@ class LiquiditySweepAnalyzer:
     #  LAYER 2: 1M LIQUIDITY SWEEP AT SWING LEVELS + 5M INVALIDATION
     # =================================================================
 
-    def detect_sweep(self, df_1m, bias, regime_info=None):
+    def detect_sweep(self, df_1m, bias, regime_info=None, pair=None):
         """Detect liquidity sweep at a 1M swing-based level.
 
         Bullish sweep:
@@ -588,21 +588,27 @@ class LiquiditySweepAnalyzer:
                 result['details'] = 'No 1M swing lows to sweep'
                 return result
             # Use the most recent swing low as the target liquidity level
-            target_levels = sorted(swing_lows, key=lambda x: x['bar_idx'], reverse=True)[:3]
+            target_levels = sorted(swing_lows, key=lambda x: x['bar_idx'], reverse=True)[:5]
         else:
             # For bearish sweep: look for recent swing highs
             swing_highs = [sp for sp in swing_points_1m if sp['swing_type'] == 'high']
             if not swing_highs:
                 result['details'] = 'No 1M swing highs to sweep'
                 return result
-            target_levels = sorted(swing_highs, key=lambda x: x['bar_idx'], reverse=True)[:3]
+            target_levels = sorted(swing_highs, key=lambda x: x['bar_idx'], reverse=True)[:5]
 
         # ── Scan last SWEEP_WINDOW candles for sweep event ──────────
         # Only accept sweeps in the last MAX_SWEEP_AGE candles to avoid
-        # stale signals re-firing every cycle.  For 1M data, 5 bars = 5 min.
-        MAX_SWEEP_AGE = 5
+        # stale signals re-firing every cycle.  For 1M data, 15 bars = 15 min.
+        MAX_SWEEP_AGE = 15
         latest_close_price = float(df_1m.iloc[-1]['close'])
         pip_size = self._get_pip_size(latest_close_price)
+
+        # Use instrument-specific sweep tolerance (in ticks) from registry
+        spec = REGISTRY.get(pair) if pair else None
+        tol_ticks = spec.sweep_tolerance_ticks if spec else 2
+        base_tol = pip_size * tol_ticks  # MES: 0.25*2=0.5pts, MNQ: 0.25*5=1.25pts
+
         for i in range(-min(self.SWEEP_WINDOW, MAX_SWEEP_AGE), 0):
             candle = df_1m.iloc[i]
             candle_low = float(candle['low'])
@@ -611,9 +617,8 @@ class LiquiditySweepAnalyzer:
             candle_open = float(candle['open'])
             candle_rsi = float(candle.get('rsi', 50) or 50)
             pip_size = self._get_pip_size(candle_close)
-            # Tight tolerance: require actual penetration of the swing level.
-            # Only allow 1 tick leeway for bid/ask rounding.
-            tol = pip_size
+            # Use instrument-calibrated tolerance from registry
+            tol = base_tol
 
             # RSI slope check: was RSI turning in our favour after sweep?
             # Look at 1–2 candles ahead of the sweep candle for slope reversal
@@ -1237,7 +1242,7 @@ class LiquiditySweepAnalyzer:
         )
 
         # ── Step 3: 1M Sweep + 5M Invalidation Gate (Layer 2) ────────
-        sweep = self.detect_sweep(df_1m, regime_info['bias'], regime_info=regime_info)
+        sweep = self.detect_sweep(df_1m, regime_info['bias'], regime_info=regime_info, pair=pair)
         result['sweep'] = sweep
 
         if not sweep['detected']:

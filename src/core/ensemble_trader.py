@@ -319,7 +319,7 @@ class EnsembleTrader:
             
             bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, SweepBias={sweep_bias} (regime={regime})")
             
-            # Fallback 1: EMA + Technical agree on direction
+            # Fallback 1: EMA + Technical agree on direction (strongest non-sweep signal)
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
                 final_signal = ema_dir
                 final_confidence = 0.62
@@ -329,23 +329,17 @@ class EnsembleTrader:
                     f"(EMA={ema_signal['confidence']:.0%}, "
                     f"Tech={technical_signal['confidence']:.0%})"
                 )
-            # Fallback 2: Sweep bias is directional and indicators don't oppose
-            elif sweep_bias in ('BUY', 'SELL') and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY') and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY'):
+            # Fallback 2: Strong trend (ADX≥30) + EMA + Bias all agree → high conviction trend entry
+            elif (sweep_bias in ('BUY', 'SELL')
+                  and ema_dir == sweep_bias
+                  and sweep_signal.get('adx', 0) >= 30
+                  and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY')):
                 final_signal = sweep_bias
-                final_confidence = 0.62
-                models_agreement = 1
-                bot_logger.info(
-                    f"🔄 No sweep → BIAS fallback: {sweep_bias} "
-                    f"(5M bias strong, EMA={ema_dir}, Tech={tech_dir} not opposing)"
-                )
-            # Fallback 3: Strong trend (ADX≥25) + EMA confirms bias → enter despite Tech opposition
-            elif sweep_bias in ('BUY', 'SELL') and ema_dir == sweep_bias and sweep_signal.get('adx', 0) >= 25:
-                final_signal = sweep_bias
-                final_confidence = 0.60
-                models_agreement = 1
+                final_confidence = 0.61
+                models_agreement = 2
                 bot_logger.info(
                     f"🔄 No sweep → TREND fallback: {sweep_bias} "
-                    f"(ADX={sweep_signal.get('adx', 0):.1f}, EMA confirms, Tech={tech_dir} overridden)"
+                    f"(ADX={sweep_signal.get('adx', 0):.1f}, EMA+Bias aligned, Tech={tech_dir})"
                 )
             else:
                 final_signal = 'SKIP'
@@ -612,6 +606,7 @@ class EnsembleTrader:
                     'confidence': sweep_confidence,
                     'regime': sweep_signal.get('regime', 'unknown'),
                     'bias': sweep_signal.get('bias'),
+                    'adx': sweep_signal.get('adx', 0),
                     'mss_confirmed': bool(sweep_signal.get('mss', {}).get('confirmed', False)),
                 },
                 'intelligent': {
@@ -704,20 +699,22 @@ class EnsembleTrader:
             ema_dir in ('BUY', 'SELL')
         )
         
-        # Fallback 2: Sweep bias matches signal and indicators don't oppose
+        # Fallback 2: Strong trend (ADX≥30) + EMA + Bias aligned, Tech not opposing
         sweep_bias = signal_result.get('sweep_bias', 'HOLD')
         if sweep_bias not in ('BUY', 'SELL'):
             sweep_bias = 'HOLD'
             
         opposing_dir = 'SELL' if signal_result['signal'] == 'BUY' else 'BUY'
-        is_bias_fallback = (
+        sweep_adx = signal_result.get('models', {}).get('sweep', {}).get('adx', 0) if isinstance(signal_result.get('models', {}).get('sweep'), dict) else 0
+        is_trend_fallback = (
             not sweep_fired and
             sweep_bias == signal_result['signal'] and
-            ema_dir != opposing_dir and
+            ema_dir == signal_result['signal'] and
+            sweep_adx >= 30 and
             tech_dir != opposing_dir
         )
         
-        is_fallback_entry = is_ema_tech_fallback or is_bias_fallback
+        is_fallback_entry = is_ema_tech_fallback or is_trend_fallback
         
         if not sweep_fired and not is_fallback_entry:
             bot_logger.info("🚫 Sweep gate did not fire and no fallback conditions — no trade")
@@ -725,8 +722,8 @@ class EnsembleTrader:
         
         if is_ema_tech_fallback:
             bot_logger.info(f"🔄 FALLBACK ENTRY: EMA+Tech agree on {signal_result['signal']} (no sweep required)")
-        elif is_bias_fallback:
-            bot_logger.info(f"🔄 FALLBACK ENTRY: 5M bias {sweep_bias} matches signal (no sweep required)")
+        elif is_trend_fallback:
+            bot_logger.info(f"🔄 FALLBACK ENTRY: Strong trend ADX={sweep_adx:.0f} + EMA+Bias={sweep_bias} (no sweep required)")
 
         # EMA crossover must not oppose signal direction (HOLD = neutral, allowed)
         if ema_dir in ('BUY', 'SELL') and ema_dir != signal_result['signal']:
