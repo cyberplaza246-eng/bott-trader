@@ -426,7 +426,7 @@ class EnsembleTrader:
             elif (sweep_regime in ('trend_up', 'trend_down')
                   and sweep_bias in ('BUY', 'SELL')
                   and ema_dir == sweep_bias
-                  and sweep_signal.get('adx', 0) >= 14
+                  and sweep_signal.get('adx', 0) >= 10
                   and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY')):
                 final_signal = sweep_bias
                 final_confidence = 0.52
@@ -822,7 +822,7 @@ class EnsembleTrader:
             sr in ('trend_up', 'trend_down') and
             sweep_bias == signal_result['signal'] and
             ema_dir == signal_result['signal'] and
-            sweep_adx >= 14 and
+            sweep_adx >= 10 and
             tech_dir != opposing_dir
         )
         
