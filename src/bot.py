@@ -580,7 +580,11 @@ class TradingBot:
                 self.ensemble.cross_pair.update_prices(pair, df)
                 
                 # Log detailed analysis
-                regime = signal_result.get('regime', 'unknown')
+                learner_regime = signal_result.get('learner_regime', signal_result.get('regime', 'unknown'))
+                sweep_regime = signal_result.get(
+                    'sweep_regime',
+                    signal_result.get('models', {}).get('sweep', {}).get('regime', 'unknown')
+                )
                 bot_logger.info(f"\n{pair} [{timeframe_key}] Analysis:")
                 bot_logger.info(f"  Signal: {signal_result['signal']}")
                 bot_logger.info(f"  Confidence: {signal_result['confidence']:.1%}")
@@ -590,7 +594,9 @@ class TradingBot:
                     f"(MSS={'\u2713' if sweep_model.get('mss_confirmed') else '\u2717'}) | "
                     f"Context: {signal_result['models_agreement']} models aligned"
                 )
-                bot_logger.info(f"  Market Regime: {regime}")
+                bot_logger.info(
+                    f"  Market Regime: learner={learner_regime} | sweep={sweep_regime}"
+                )
                 bot_logger.info(f"  Details: {signal_result['detailed_reason']}")
 
                 # Active position management: exit stale/reversal trades to free slots

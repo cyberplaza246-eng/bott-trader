@@ -522,6 +522,88 @@ class TestIntegrationSmoke:
         )
 
 
+class TestEnsembleRegimeSeparation:
+    """Regression tests for learner vs sweep regime handling."""
+
+    def test_get_trading_signal_keeps_both_regimes_distinct(self):
+        from src.core.ensemble_trader import EnsembleTrader
+
+        ensemble = EnsembleTrader.__new__(EnsembleTrader)
+        ensemble.broker = None
+        ensemble.technical = MagicMock()
+        ensemble.learner = MagicMock()
+        ensemble.sweep = MagicMock()
+        ensemble.ema_crossover = MagicMock()
+        ensemble.sentiment = MagicMock()
+        ensemble.volume = MagicMock()
+        ensemble.multi_tf = MagicMock()
+        ensemble.sr_detector = MagicMock()
+        ensemble.candle_detector = MagicMock()
+        ensemble.scalping = MagicMock()
+        ensemble.cross_pair = MagicMock()
+        ensemble.rl_agent = MagicMock()
+        ensemble.intelligent = MagicMock()
+        ensemble.advanced_strategies = MagicMock()
+        ensemble.lstm_available = False
+        ensemble.rl_available = False
+        ensemble.intelligent_available = False
+        ensemble.advanced_strats_available = False
+
+        df = make_ohlcv(300, start_price=26800, volatility=10, freq='1min')
+        df['ema_200'] = df['close'] - 20
+        df['rsi'] = 55.0
+        df['adx'] = 28.0
+        df['atr'] = 15.0
+        df['volume'] = np.maximum(df['volume'], 1)
+
+        ensemble.technical.calculate_indicators.return_value = df
+        ensemble.learner.detect_regime.return_value = 'volatile'
+        ensemble.sweep.get_signal.return_value = {
+            'signal': 'SKIP',
+            'confidence': 0.0,
+            'regime': 'trend_up',
+            'bias': 'BUY',
+            'adx': 29.7,
+            'mss': {'confirmed': False},
+        }
+        ensemble.ema_crossover.get_signal.return_value = {
+            'signal': 'BUY',
+            'confidence': 0.75,
+        }
+        ensemble.technical.get_signal.return_value = {
+            'signal': 'HOLD',
+            'confidence': 0.5,
+        }
+        ensemble.sentiment.get_pair_sentiment.return_value = {
+            'sentiment_score': 0.0,
+            'news_count': 0,
+        }
+        ensemble.volume.get_volume_signal.return_value = {'signal': 'HOLD', 'confidence': 0.0}
+        ensemble.sr_detector.get_sr_signal.return_value = {'signal': 'HOLD', 'levels': {}}
+        ensemble.candle_detector.get_pattern_signal.return_value = {'signal': 'HOLD', 'patterns': []}
+        ensemble.scalping.get_signal.return_value = {
+            'signal': 'HOLD',
+            'confidence': 0.0,
+            'setup': 'none',
+            'risk_reward': {},
+        }
+
+        with patch('src.core.ensemble_trader.bot_logger.info') as log_info:
+            result = ensemble.get_trading_signal(df, 'MNQ')
+
+        assert result['signal'] == 'SKIP'
+        assert result['regime'] == 'volatile'
+        assert result['learner_regime'] == 'volatile'
+        assert result['sweep_regime'] == 'trend_up'
+        assert 'SweepRegime: trend_up' in result['detailed_reason']
+        assert 'LearnerRegime: volatile' in result['detailed_reason']
+        assert any(
+            'No sweep - checking fallback' in str(call.args[0])
+            and 'regime=trend_up, learner_regime=volatile' in str(call.args[0])
+            for call in log_info.call_args_list
+        )
+
+
 # ═══════════════════════════════════════════════════════════════════
 #  LiquiditySweepAnalyzer Tests
 # ═══════════════════════════════════════════════════════════════════

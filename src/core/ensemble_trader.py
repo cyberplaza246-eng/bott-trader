@@ -246,10 +246,19 @@ class EnsembleTrader:
         if direction == 'SELL':
             signed_dist_atr = -signed_dist_atr
 
-        if signed_dist_atr > self.entry_max_chase_atr:
+        # Relax limit when sweep engine confirms a strong trend — in a trend, price
+        # will always be extended from short EMAs; that extension IS the setup.
+        sweep_regime = signal_result.get('sweep_regime', 'unknown')
+        effective_max_chase = (
+            self.entry_max_chase_atr * 2.5
+            if sweep_regime in ('trend_up', 'trend_down')
+            else self.entry_max_chase_atr
+        )
+
+        if signed_dist_atr > effective_max_chase:
             bot_logger.info(
                 f"🚫 Entry too late/chased: {direction} is {signed_dist_atr:.2f} ATR from {ema_col} "
-                f"(max {self.entry_max_chase_atr:.2f})"
+                f"(max {effective_max_chase:.2f}, sweep_regime={sweep_regime})"
             )
             return False
 
@@ -281,8 +290,10 @@ class EnsembleTrader:
         # ── Step 1: Calculate indicators ─────────────────────────────
         df_enriched = self.technical.calculate_indicators(df)
 
-        # Detect market regime (for adaptive learner)
-        regime = self.learner.detect_regime(df_enriched)
+        # Detect the learner's coarse regime class separately from the
+        # sweep engine's structural regime so downstream logic can use the
+        # right signal context without mixing categories.
+        learner_regime = self.learner.detect_regime(df_enriched)
 
         # ── Step 2: Fetch 5M data + spread (shared across models) ────
         df_5m = None
@@ -311,6 +322,7 @@ class EnsembleTrader:
         )
         sweep_direction = sweep_signal.get('signal', 'SKIP')
         sweep_confidence = sweep_signal.get('confidence', 0.0)
+        sweep_regime = sweep_signal.get('regime', 'unknown')
 
         # ── Step 4: Run confirmation models ──────────────────────────
         ema_signal = self.ema_crossover.get_signal(df_enriched, pair=pair)
@@ -382,7 +394,10 @@ class EnsembleTrader:
             if sweep_bias not in ('BUY', 'SELL'):
                 sweep_bias = 'HOLD'
             
-            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, SweepBias={sweep_bias} (regime={regime})")
+            bot_logger.info(
+                f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, "
+                f"SweepBias={sweep_bias} (regime={sweep_regime}, learner_regime={learner_regime})"
+            )
             
             # Fallback 1: EMA + Technical agree on direction (strongest non-sweep signal)
             if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
@@ -519,11 +534,11 @@ class EnsembleTrader:
 
             # ── Regime confidence modifier from learner ──────────────
             old_confidence = final_confidence
-            regime_modifier = self.learner.get_regime_confidence_modifier(regime)
+            regime_modifier = self.learner.get_regime_confidence_modifier(learner_regime)
             final_confidence *= regime_modifier
             if regime_modifier != 1.0:
                 bot_logger.info(
-                    f"🎭 Regime modifier ({regime}): x{regime_modifier:.3f} ({old_confidence:.1%} → {final_confidence:.1%})"
+                    f"🎭 Regime modifier ({learner_regime}): x{regime_modifier:.3f} ({old_confidence:.1%} → {final_confidence:.1%})"
                 )
 
             # Count how many context models agree (for logging & compatibility)
@@ -605,11 +620,15 @@ class EnsembleTrader:
                     hour = datetime.utcnow().hour
                     vol_ratio = float(df_enriched['volume'].iloc[-1] / (df_enriched['volume'].rolling(20).mean().iloc[-1] + 1)) if 'volume' in df_enriched.columns else 1.0
 
+                    rl_regime = 'trending' if (
+                        learner_regime == 'trending' or sweep_regime in ('trend_up', 'trend_down')
+                    ) else ('volatile' if learner_regime == 'volatile' else 'ranging')
+
                     rl_state = self.rl_agent.build_state(
                         ensemble_confidence=final_confidence,
                         model_agreement=models_agreement,
                         total_models=4,
-                        regime='trending' if regime in ('trend_up', 'trend_down') else 'ranging',
+                        regime=rl_regime,
                         rsi=rsi_val, adx=adx_val,
                         atr=atr_val, atr_median=atr_med,
                         ema200_dist=ema200_dist,
@@ -647,7 +666,8 @@ class EnsembleTrader:
         reason_parts.append(f"Tech: {technical_signal['signal']} ({technical_signal['confidence']:.0%})")
         if self.intelligent_available:
             reason_parts.append(f"ML: {intelligent_signal.get('signal', 'HOLD')} ({intelligent_signal.get('confidence', 0):.0%})")
-        reason_parts.append(f"Regime: {regime}")
+        reason_parts.append(f"SweepRegime: {sweep_regime}")
+        reason_parts.append(f"LearnerRegime: {learner_regime}")
         if models_agreement > 0:
             reason_parts.append(f"Context: {models_agreement} models aligned")
         detailed_reason = " | ".join(reason_parts)
@@ -661,7 +681,9 @@ class EnsembleTrader:
             'models_agreement': models_agreement,
             'total_models': len(context_signals) + 1,  # context models + sweep
             'min_agreement_required': MIN_MODELS_AGREEMENT,
-            'regime': regime,
+            'regime': learner_regime,
+            'learner_regime': learner_regime,
+            'sweep_regime': sweep_regime,
             'sweep_bias': sweep_bias,
             'detailed_reason': detailed_reason,
             'enriched_df': df_enriched,
