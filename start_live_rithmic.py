@@ -257,7 +257,8 @@ class LiveRithmicTrader:
                 return True
             
             # Live mode: connect to Rithmic
-            os.environ['RITHMIC_DISABLE_YAHOO_FALLBACK'] = 'true'
+            # Respect existing env setting. Do not force-disable fallback here;
+            # lock-contention on Rithmic history plant may require warm-start data.
             self.broker = RithmicConnector()
             self.broker.initialize()
             
@@ -317,8 +318,22 @@ class LiveRithmicTrader:
         """Load local 5m history CSV as indicator warm-start (no Yahoo usage)."""
         try:
             data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
-            path = os.path.join(data_dir, f'{symbol}_5m.csv')
-            if not os.path.exists(path):
+            # Prefer exact symbol file, but allow equivalent fallback aliases.
+            # NQ and MNQ share the same underlying and are safe for indicator warm-up.
+            candidates = [f'{symbol}_5m.csv']
+            if symbol == 'NQ':
+                candidates.append('MNQ_5m.csv')
+            elif symbol == 'MNQ':
+                candidates.append('NQ_5m.csv')
+
+            path = None
+            for name in candidates:
+                p = os.path.join(data_dir, name)
+                if os.path.exists(p):
+                    path = p
+                    break
+
+            if path is None:
                 return None
 
             df = pd.read_csv(path)
