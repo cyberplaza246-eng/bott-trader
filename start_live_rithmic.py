@@ -106,33 +106,6 @@ class LiveRithmicTrader:
         # signal profile for NQ entries while still executing actual NQ orders.
         'NQ': 'MNQ',
     }
-
-    @staticmethod
-    def _env_bool(name: str, default: bool) -> bool:
-        value = os.getenv(name)
-        if value is None:
-            return default
-        return str(value).strip().lower() in ('1', 'true', 'yes', 'on')
-
-    @staticmethod
-    def _env_int(name: str, default: int) -> int:
-        value = os.getenv(name)
-        if value is None:
-            return default
-        try:
-            return int(value)
-        except Exception:
-            return default
-
-    @staticmethod
-    def _env_float(name: str, default: float) -> float:
-        value = os.getenv(name)
-        if value is None:
-            return default
-        try:
-            return float(value)
-        except Exception:
-            return default
     
     def __init__(self, symbol: str = 'NQ', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False):
         self.skip_confirm = skip_confirm
@@ -164,7 +137,6 @@ class LiveRithmicTrader:
         self.daily_trades = 0
         self.current_date = None
         self.trades: List[Dict] = []
-        self.daily_entries_by_symbol: Dict[str, int] = {}
         self._warmup_log_state: Dict[str, tuple] = {}
         self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'NQ,MES').split(',') if s.strip()]
         self.fill_confirm_grace_seconds = float(os.getenv('FILL_CONFIRM_GRACE_SECONDS', '60'))
@@ -174,12 +146,6 @@ class LiveRithmicTrader:
         # Require multiple flat readings before removing to avoid transient API gaps.
         self.consecutive_flat_count: Dict[str, int] = {}
         self.FLAT_READINGS_REQUIRED = 3  # Must see flat N times in a row
-
-        # NQ-specific guardrails: same underlying as MNQ, but much larger dollar exposure.
-        self.nq_require_sweep = self._env_bool('NQ_REQUIRE_SWEEP', True)
-        self.nq_min_confidence = self._env_float('NQ_MIN_CONFIDENCE', 0.65)
-        self.nq_max_daily_entries = self._env_int('NQ_MAX_DAILY_ENTRIES', 2)
-        self.nq_max_contracts = self._env_int('NQ_MAX_CONTRACTS', 1)
         
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
@@ -505,7 +471,6 @@ class LiveRithmicTrader:
             self.current_date = today
             self.daily_pnl = 0.0
             self.daily_trades = 0
-            self.daily_entries_by_symbol = {}
             print(f"\n📅 New trading day: {today}")
         
         if self.daily_pnl <= -self.daily_loss_limit:
@@ -533,17 +498,6 @@ class LiveRithmicTrader:
             
             # Get ensemble signal (includes sweep gate, ML, advanced strategies)
             signal_result = self.ensemble.get_trading_signal(df_enriched, signal_profile_symbol)
-
-            if symbol == 'NQ':
-                sweep_signal = ((signal_result.get('models', {}) or {}).get('sweep', {}) or {}).get('signal', 'SKIP')
-                sweep_fired = sweep_signal in ('BUY', 'SELL')
-                todays_nq_entries = self.daily_entries_by_symbol.get(symbol, 0)
-                if todays_nq_entries >= self.nq_max_daily_entries:
-                    bot_logger.info(f"🚫 NQ daily entry cap reached: {todays_nq_entries}/{self.nq_max_daily_entries}")
-                    return None
-                if self.nq_require_sweep and not sweep_fired:
-                    bot_logger.info("🚫 NQ requires real sweep confirmation — fallback entry blocked")
-                    return None
             
             # Check if should trade
             if not self.ensemble.should_trade(signal_result):
@@ -551,12 +505,6 @@ class LiveRithmicTrader:
             
             signal = signal_result['signal']
             confidence = signal_result['confidence']
-
-            if symbol == 'NQ' and confidence < self.nq_min_confidence:
-                bot_logger.info(
-                    f"🚫 NQ confidence too low ({confidence:.1%} < {self.nq_min_confidence:.1%})"
-                )
-                return None
             
             if signal not in ('BUY', 'SELL'):
                 return None
@@ -676,8 +624,6 @@ class LiveRithmicTrader:
         order_size = self._next_order_size()
         # Hard per-symbol contract cap (e.g., NQ max 2 contracts total).
         symbol_cap = int(MAX_CONTRACTS_PER_SYMBOL.get(symbol, 3))
-        if symbol == 'NQ':
-            symbol_cap = min(symbol_cap, self.nq_max_contracts)
         current_symbol_contracts = self._symbol_open_contracts(symbol)
         remaining_symbol_capacity = max(0, symbol_cap - current_symbol_contracts)
         if remaining_symbol_capacity <= 0:
@@ -717,7 +663,6 @@ class LiveRithmicTrader:
                 trailing_enabled=True,
             )
             self.positions[order_id] = pos
-            self.daily_entries_by_symbol[symbol] = self.daily_entries_by_symbol.get(symbol, 0) + 1
             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
             return True
         
@@ -746,7 +691,6 @@ class LiveRithmicTrader:
                 trailing_enabled=bool(result.get('supports_stop_modify', True)),
             )
             self.positions[order_id] = pos
-            self.daily_entries_by_symbol[symbol] = self.daily_entries_by_symbol.get(symbol, 0) + 1
             self.pending_fill_confirm_until[order_id] = (
                 datetime.now(timezone.utc) + timedelta(seconds=self.fill_confirm_grace_seconds)
             )
