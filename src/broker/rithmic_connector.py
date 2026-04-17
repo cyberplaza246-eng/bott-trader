@@ -70,6 +70,7 @@ class RithmicConnector(BaseBroker):
         self._connected = False
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._thread: Optional[threading.Thread] = None
+        self._loop_started = threading.Event()
         self._client = None  # async_rithmic.RithmicClient
 
         # Thread-safe caches (written by async callbacks, read by sync methods)
@@ -83,6 +84,7 @@ class RithmicConnector(BaseBroker):
         self._state_lock = threading.Lock()
         self._positions: Dict[str, Any] = {}  # symbol → position info
         self._account_info: Dict[str, Any] = {"balance": 0.0, "equity": 0.0}
+        self._pnl_permission_denied = False
 
         # Resolved front-month contract symbols: "MES" → "MESH6"
         self._resolved_contracts: Dict[str, str] = {}
@@ -147,6 +149,9 @@ class RithmicConnector(BaseBroker):
             return
 
         try:
+            if os.name == 'nt' and hasattr(asyncio, 'WindowsSelectorEventLoopPolicy'):
+                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
             # Resolve gateway URL
             url = self._gateway or RITHMIC_GATEWAYS.get(self._system, "")
             if not url:
@@ -160,6 +165,9 @@ class RithmicConnector(BaseBroker):
                 target=self._run_event_loop, daemon=True, name="rithmic-io"
             )
             self._thread.start()
+
+            if not self._loop_started.wait(timeout=5):
+                raise RuntimeError("Rithmic event loop thread failed to start")
 
             # Connect (blocks until done or timeout)
             self._run_sync(self._async_connect(url), timeout=30)
@@ -254,13 +262,14 @@ class RithmicConnector(BaseBroker):
 
         # Try Rithmic historical bars first with retry logic
         if self._connected:
-            max_retries = 3
+            max_retries = int(os.getenv("RITHMIC_HISTORY_MAX_RETRIES", "2"))
+            inner_timeout = float(os.getenv("RITHMIC_HISTORY_INNER_TIMEOUT_SECS", "15"))
             for attempt in range(max_retries):
                 try:
-                    # Give more time on retries — the first timeout cancels
-                    # the library's internal lock holder, so the next attempt
-                    # has a clean slate.
-                    rpc_timeout = 12 + attempt * 4  # 12s, 16s, 20s
+                    # IMPORTANT: outer timeout must exceed inner async timeout,
+                    # otherwise run_sync can timeout first and leave overlapping
+                    # history requests that contend on async_rithmic's lock.
+                    rpc_timeout = inner_timeout + 5 + attempt * 4
                     df = self._run_sync(
                         self._async_get_candles(symbol, timeframe_minutes, num_candles),
                         timeout=rpc_timeout,
@@ -635,6 +644,7 @@ class RithmicConnector(BaseBroker):
     def _run_event_loop(self) -> None:
         """Target for the background IO thread."""
         asyncio.set_event_loop(self._loop)
+        self._loop_started.set()
         self._loop.run_forever()
 
     def _run_sync(self, coro, timeout: float = 15) -> Any:
@@ -687,8 +697,19 @@ class RithmicConnector(BaseBroker):
         self._forced_logout_times: List[float] = []
         self._patch_forced_logout_detection()
 
-        # Subscribe to PnL updates
-        await self._client.subscribe_to_pnl_updates()
+        # Subscribe to PnL updates (some prop accounts do not grant this permission).
+        try:
+            await self._client.subscribe_to_pnl_updates()
+        except Exception as e:
+            msg = str(e).lower()
+            if "no permission to this account" in msg or "1088" in msg:
+                self._pnl_permission_denied = True
+                bot_logger.warning(
+                    "Rithmic PnL subscription not permitted for this account (rpCode 1088). "
+                    "Continuing without account/instrument PnL updates."
+                )
+            else:
+                raise
 
         # Resolve front-month contracts and subscribe to market data
         from async_rithmic import DataType
@@ -840,7 +861,24 @@ class RithmicConnector(BaseBroker):
                             self._connected = False
                             self._connection_dead.set()
                         return True
-                return await _orig(response)
+                try:
+                    return await _orig(response)
+                except Exception as e:
+                    # Some accounts cannot access PnL templates for the selected account.
+                    # Ignore this specific entitlement error so the rest of the connector
+                    # (market data, history, orders) stays healthy.
+                    msg = str(e).lower()
+                    if _name == "pnl" and (
+                        "no permission to this account" in msg or "1088" in msg
+                    ):
+                        if not self._pnl_permission_denied:
+                            bot_logger.warning(
+                                "Rithmic PnL plant denied account access (rpCode 1088). "
+                                "Disabling account PnL refresh for this session."
+                            )
+                        self._pnl_permission_denied = True
+                        return True
+                    raise
 
             plant._process_response = _wrapped
 
@@ -876,6 +914,7 @@ class RithmicConnector(BaseBroker):
         # cancellation releases the internal lock so _recv_loop can recover.
         if self._history_async_lock is None:
             self._history_async_lock = asyncio.Lock()
+        inner_timeout = float(os.getenv("RITHMIC_HISTORY_INNER_TIMEOUT_SECS", "15"))
         async with self._history_async_lock:
             try:
                 bars = await asyncio.wait_for(
@@ -887,11 +926,11 @@ class RithmicConnector(BaseBroker):
                         bar_type=bar_type,
                         bar_type_periods=period,
                     ),
-                    timeout=15.0,  # Allow time for library's 5s lock wait + data transfer
+                    timeout=inner_timeout,  # Allow time for library lock wait + data transfer
                 )
             except asyncio.TimeoutError:
                 bot_logger.warning(
-                    f"⏱️ History request for {symbol} timed out (15s) — "
+                    f"⏱️ History request for {symbol} timed out ({inner_timeout:.0f}s) — "
                     f"likely async_rithmic internal lock deadlock"
                 )
                 # Give _recv_loop time to reacquire the now-released lock
@@ -1186,7 +1225,7 @@ class RithmicConnector(BaseBroker):
 
     def _refresh_account_pnl(self) -> None:
         """Sync account balance/equity from Rithmic PnL plant."""
-        if not self._connected:
+        if not self._connected or self._pnl_permission_denied:
             return
         try:
             summaries = self._run_sync(
@@ -1205,6 +1244,14 @@ class RithmicConnector(BaseBroker):
                     elif "margin_balance" in data:
                         self._account_info["equity"] = float(data["margin_balance"])
         except Exception as e:
+            msg = str(e).lower()
+            if "no permission to this account" in msg or "1088" in msg:
+                self._pnl_permission_denied = True
+                bot_logger.warning(
+                    "Rithmic account summary not permitted for this account (rpCode 1088). "
+                    "Using cached/default balance and equity values."
+                )
+                return
             error_logger.error(f"Rithmic account PnL refresh error: {e}")
 
     # ══════════════════════════════════════════════════════════════
