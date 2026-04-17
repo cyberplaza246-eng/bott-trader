@@ -119,8 +119,14 @@ class RithmicConnector(BaseBroker):
         self._password = os.getenv("RITHMIC_PASSWORD", "")
         self._system = os.getenv("RITHMIC_SYSTEM", "Rithmic Paper Trading")
         self._gateway = os.getenv("RITHMIC_GATEWAY", "")
+        self._requested_account_id = os.getenv("RITHMIC_ACCOUNT_ID", "").strip()
+        self._strict_account_match = (
+            os.getenv("RITHMIC_STRICT_ACCOUNT_MATCH", "false").lower() == "true"
+        )
+        self._selected_account_id: Optional[str] = None
         self._app_name = "AiScalpBot"
         self._app_version = "1.0"
+        self._connection_dead = threading.Event()  # set when reconnect exhausted
         self._disable_yahoo_fallback = (
             os.getenv("RITHMIC_DISABLE_YAHOO_FALLBACK", "false").lower() == "true"
         )
@@ -203,6 +209,7 @@ class RithmicConnector(BaseBroker):
                 "positions": len(self._positions),
                 "broker": "rithmic",
                 "system": self._system,
+                "account_id": self._get_account_id(),
             }
 
     # ── Market data ───────────────────────────────────────────────
@@ -619,7 +626,7 @@ class RithmicConnector(BaseBroker):
     # ══════════════════════════════════════════════════════════════
 
     async def _async_connect(self, url: str) -> None:
-        from async_rithmic import RithmicClient, OrderPlacement, DataType
+        from async_rithmic import RithmicClient, OrderPlacement, DataType, ReconnectionSettings
 
         self._client = RithmicClient(
             user=self._user,
@@ -629,6 +636,12 @@ class RithmicConnector(BaseBroker):
             app_version=self._app_version,
             url=url,
             manual_or_auto=OrderPlacement.AUTO,
+            reconnection_settings=ReconnectionSettings(
+                max_retries=2,
+                backoff_type="linear",
+                interval=30,
+                max_delay=60,
+            ),
         )
 
         # Register callbacks for real-time data
@@ -636,15 +649,23 @@ class RithmicConnector(BaseBroker):
         self._client.on_time_bar += self._on_time_bar
         self._client.on_account_pnl_update += self._on_account_pnl
         self._client.on_instrument_pnl_update += self._on_instrument_pnl
+        self._client.on_disconnected += self._on_disconnected
 
         # Connect all plants (ticker, order, history, pnl)
         await self._client.connect()
+
+        # Install ForcedLogout storm detector on each plant.
+        self._forced_logout_times: List[float] = []
+        self._patch_forced_logout_detection()
 
         # Subscribe to PnL updates
         await self._client.subscribe_to_pnl_updates()
 
         # Resolve front-month contracts and subscribe to market data
         from async_rithmic import DataType
+
+        # Choose account once per connection so order routing is deterministic.
+        self._selected_account_id = self._select_account_id()
         for sym in self._get_watch_symbols():
             rith_sym, exchange = self._resolve_symbol_raw(sym)
             # Resolve front-month contract (e.g., "MES" → "MESH6")
@@ -742,6 +763,57 @@ class RithmicConnector(BaseBroker):
                     del self._positions[our_sym]
         except Exception as e:
             error_logger.error(f"Instrument PnL callback error: {e}")
+
+    async def _on_disconnected(self, plant_type) -> None:
+        """Called when a plant's WebSocket disconnects after exhausting retries."""
+        error_logger.error(
+            f"Rithmic {plant_type} plant disconnected (retries exhausted). "
+            "Signalling bot to shut down."
+        )
+        self._connected = False
+        self._connection_dead.set()
+
+    @property
+    def is_connection_dead(self) -> bool:
+        """True when reconnection retries are exhausted and bot should stop."""
+        return self._connection_dead.is_set()
+
+    def _patch_forced_logout_detection(self) -> None:
+        """Monkey-patch each plant to detect ForcedLogout storms.
+
+        If >5 ForcedLogout messages arrive within 30 seconds we set
+        ``_connection_dead`` so the main loop exits cleanly.
+        We also force-close each plant's WebSocket to stop the
+        reconnect loop from inside the library.
+        """
+        MAX_LOGOUTS = 5
+        WINDOW_SECS = 30.0
+
+        for name, plant in self._client.plants.items():
+            original = plant._process_response
+
+            async def _wrapped(response, _orig=original, _name=name):
+                if getattr(response, "template_id", None) == 77:
+                    now = time.time()
+                    self._forced_logout_times.append(now)
+                    # Trim old entries outside the window
+                    cutoff = now - WINDOW_SECS
+                    self._forced_logout_times = [
+                        t for t in self._forced_logout_times if t > cutoff
+                    ]
+                    if len(self._forced_logout_times) >= MAX_LOGOUTS:
+                        if not self._connection_dead.is_set():
+                            error_logger.error(
+                                f"ForcedLogout storm detected ({len(self._forced_logout_times)} "
+                                f"in {WINDOW_SECS}s). Another session is using these credentials. "
+                                "Shutting down."
+                            )
+                            self._connected = False
+                            self._connection_dead.set()
+                        return True
+                return await _orig(response)
+
+            plant._process_response = _wrapped
 
     async def _async_get_candles(
         self,
@@ -933,10 +1005,54 @@ class RithmicConnector(BaseBroker):
         return trading_symbol
 
     def _get_account_id(self) -> Optional[str]:
-        """Return the first available account ID from Rithmic."""
+        """Return selected account id for all account-scoped broker calls."""
+        if self._selected_account_id:
+            return self._selected_account_id
         if self._client and self._client.accounts:
-            return self._client.accounts[0].account_id
+            self._selected_account_id = self._client.accounts[0].account_id
+            return self._selected_account_id
         return None
+
+    def _select_account_id(self) -> Optional[str]:
+        """Select account id from env (if provided) or default to first account."""
+        if not self._client or not getattr(self._client, "accounts", None):
+            bot_logger.warning("No Rithmic accounts available after connect")
+            return None
+
+        account_ids: List[str] = []
+        for acct in self._client.accounts:
+            acct_id = getattr(acct, "account_id", "")
+            if acct_id:
+                account_ids.append(str(acct_id))
+
+        if not account_ids:
+            bot_logger.warning("No valid Rithmic account IDs returned by API")
+            return None
+
+        if self._requested_account_id:
+            for acct_id in account_ids:
+                if acct_id == self._requested_account_id:
+                    bot_logger.info(
+                        f"Rithmic account selected from RITHMIC_ACCOUNT_ID: {acct_id}"
+                    )
+                    return acct_id
+            if self._strict_account_match:
+                raise RuntimeError(
+                    "RITHMIC_ACCOUNT_ID strict match enabled but requested account was not found. "
+                    f"requested={self._requested_account_id}, available={account_ids}"
+                )
+            bot_logger.warning(
+                "RITHMIC_ACCOUNT_ID not found in connected accounts. "
+                f"requested={self._requested_account_id}, available={account_ids}. "
+                f"Defaulting to first account={account_ids[0]}"
+            )
+        else:
+            bot_logger.info(
+                f"Rithmic account defaulting to first available: {account_ids[0]} "
+                f"(available={account_ids})"
+            )
+
+        return account_ids[0]
 
     def _get_cached_price(self, symbol: str) -> float:
         """Get current cached price for a symbol."""

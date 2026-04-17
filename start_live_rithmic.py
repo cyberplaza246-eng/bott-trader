@@ -290,6 +290,8 @@ class LiveRithmicTrader:
             acct = self.broker.get_account_info()
             print(f"✅ Rithmic Connected!")
             print(f"   System: {acct.get('system', 'Unknown')}")
+            if acct.get('account_id'):
+                print(f"   Account: {acct.get('account_id')}")
             print(f"   Balance: ${acct.get('balance', 0):,.2f}")
             print(f"   Equity: ${acct.get('equity', 0):,.2f}")
             print(f"   Mode: ⚠️  LIVE - Real money at risk!")
@@ -694,8 +696,8 @@ class LiveRithmicTrader:
             self.pending_fill_confirm_until[order_id] = (
                 datetime.now(timezone.utc) + timedelta(seconds=self.fill_confirm_grace_seconds)
             )
-            print(f"✅ ORDER FILLED: {direction.upper()} {symbol}")
-            print(f"   Entry: {pos.entry_price:.2f}")
+            print(f"🟡 ORDER SUBMITTED: {direction.upper()} {symbol}")
+            print(f"   Ref Entry: {pos.entry_price:.2f}")
             print(f"   Size: {order_size} contract(s)")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
@@ -709,7 +711,8 @@ class LiveRithmicTrader:
                         post_net_qty = int(self.broker.get_net_position_size(symbol))
                         observed_delta = post_net_qty - pre_net_qty
                         if observed_delta == expected_delta:
-                            print(f"   Broker net qty: {post_net_qty} (delta {observed_delta:+d}) ✅")
+                            print(f"✅ BROKER FILL CONFIRMED: {direction.upper()} {symbol}")
+                            print(f"   Broker net qty: {post_net_qty} (delta {observed_delta:+d})")
                             verified = True
                             break
                     except Exception:
@@ -963,6 +966,14 @@ class LiveRithmicTrader:
         
         try:
             while True:
+                # Check if Rithmic connection is permanently lost
+                if hasattr(self.broker, 'is_connection_dead') and self.broker.is_connection_dead:
+                    print("\n" + "=" * 60)
+                    print("❌ FORCED LOGOUT — Another app is using these credentials.")
+                    print("   Close TradeSea/R Trader, wait 60s, then relaunch.")
+                    print("=" * 60)
+                    break
+
                 # Check daily limits
                 if not self.check_daily_limits():
                     print(f"⏸️  Limits reached - waiting...")
@@ -1060,7 +1071,11 @@ class LiveRithmicTrader:
                             risk = abs(candidate['entry'] - candidate['sl']) * spec['point_value']
                             print(f"   Risk: ${risk:.2f} per contract")
 
-                time.sleep(10)
+                # Sleep in short intervals so we can check connection_dead quickly
+                for _ in range(10):
+                    if hasattr(self.broker, 'is_connection_dead') and self.broker.is_connection_dead:
+                        break
+                    time.sleep(1)
                 
         except KeyboardInterrupt:
             print("\n\n⏹️  Trading stopped by user")
