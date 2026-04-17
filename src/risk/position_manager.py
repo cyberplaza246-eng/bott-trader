@@ -590,9 +590,14 @@ class RiskManager:
                 )
                 contracts = margin_cap
 
-        # Cap 4: hard absolute cap (Lucid eval safety)
-        hard_cap = int(os.getenv('MAX_CONTRACTS', '2'))
+        # Cap 4: hard absolute cap
+        hard_cap = int(os.getenv('MAX_CONTRACTS', '3'))
         contracts = min(contracts, hard_cap)
+
+        # Cap 5: per-symbol cap (from strategy_config)
+        from config.strategy_config import MAX_CONTRACTS_PER_SYMBOL
+        symbol_cap = MAX_CONTRACTS_PER_SYMBOL.get(symbol, hard_cap)
+        contracts = min(contracts, symbol_cap)
 
         actual_risk = risk_per_contract * contracts
 

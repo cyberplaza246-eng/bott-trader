@@ -32,7 +32,7 @@ TRADERSPOST_ACCOUNT_ID = os.getenv('TRADERSPOST_ACCOUNT_ID', '')
 
 # Trading Parameters
 RISK_PER_TRADE_PERCENT = float(os.getenv('RISK_PER_TRADE_PERCENT', 1.0))
-MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 4))
+MAX_CONCURRENT_TRADES = int(os.getenv('MAX_CONCURRENT_TRADES', 3))  # 3 positions max total
 DAILY_LOSS_LIMIT_PERCENT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', 3))
 INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', 50000 if ASSET_CLASS == 'futures' else 50))
 
@@ -123,6 +123,12 @@ SCALPING_SPREAD_LIMITS = {
     'USD/JPY': 2.5,   # Max 2.5 pips
     'MES': 2.0,       # Max 2 ticks (0.50 points)
     'NQ': 4.0,        # Max 4 ticks (1.0 point)
+}
+
+# Per-symbol max contracts (hard cap per symbol across all open positions)
+MAX_CONTRACTS_PER_SYMBOL = {
+    'MES': 3,     # 3 micro contracts max
+    'NQ': 2,      # 2 full NQ contracts max
 }
 
 # Confluence bonus: both timeframes agree → boost confidence
