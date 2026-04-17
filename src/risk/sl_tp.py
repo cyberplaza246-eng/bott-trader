@@ -48,12 +48,14 @@ TP_MAX_PIPS_5M = 35.0         # Hard cap: 35 pips TP for 5M scalps
 SYMBOL_SL_ATR_MULT = {
     'MES': 3.0,
     'NQ': 2.0,     # Optimizer: 2.0×ATR SL (PF 1.59, Calmar 3.38)
+    'MNQ': 2.0,    # Same as NQ (same underlying)
 }
 
 # Per-symbol TP R-multiple used when structure target is unavailable/invalid.
 SYMBOL_TP_R_MULT = {
     'MES': 2.0,
     'NQ': 3.0,     # Optimizer: 6.0×ATR TP / 2.0×ATR SL = 3.0R
+    'MNQ': 3.0,    # Same as NQ
 }
 DEFAULT_TP_R_MULT = 2.5
 

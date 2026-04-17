@@ -42,7 +42,7 @@ AUTOTRADING_ENABLED = TRADING_MODE == 'live'
 
 # Symbols to Trade — auto-selected by asset class
 FOREX_PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY']
-FUTURES_SYMBOLS = ['MES', 'NQ']  # MES micro + NQ full contract
+FUTURES_SYMBOLS = ['MES', 'NQ', 'MNQ']  # MES micro + NQ full + MNQ micro
 PAIRS = FUTURES_SYMBOLS if ASSET_CLASS == 'futures' else FOREX_PAIRS
 
 # Timeframes (in minutes) — dual-timeframe scalping
@@ -104,6 +104,19 @@ SCALPING_PAIRS = {
         'ema_slow': 21,                # Optimizer: EMA 8/21 crossover
         'trailing_enabled': False,     # Optimizer: no trailing stop for NQ
     },
+    'MNQ': {
+        'session_atr_min': 2.0,        # Same as NQ (same underlying)
+        'spread_sim': 0.50,            # 2 ticks spread
+        'pip_size': 0.25,
+        'cooldown_seconds': 60,        # Same as NQ
+        'max_hold_candles': 120,       # 10 hours max hold
+        'adx_min': 25,                 # Same as NQ
+        'skip_friday': False,
+        'bad_hours_utc': [],
+        'ema_fast': 8,                 # Same as NQ
+        'ema_slow': 21,
+        'trailing_enabled': False,     # Same as NQ
+    },
 }
 
 # Session windows for scalping (UTC hours)
@@ -114,6 +127,7 @@ SCALPING_SESSION_WINDOWS = {
     'USD/JPY': {'start': 0, 'end': 0},    # 24/7 trading
     'MES': {'start': 0, 'end': 0},        # 24/7 — bad_hours_utc handles filtering
     'NQ': {'start': 13, 'end': 21},    # RTH only (optimizer: best risk-adj)
+    'MNQ': {'start': 13, 'end': 21},   # Same as NQ
 }
 
 # Spread limits for scalping (in tick/pip units)
@@ -123,12 +137,14 @@ SCALPING_SPREAD_LIMITS = {
     'USD/JPY': 2.5,   # Max 2.5 pips
     'MES': 2.0,       # Max 2 ticks (0.50 points)
     'NQ': 4.0,        # Max 4 ticks (1.0 point)
+    'MNQ': 4.0,       # Max 4 ticks (same as NQ)
 }
 
 # Per-symbol max contracts (hard cap per symbol across all open positions)
 MAX_CONTRACTS_PER_SYMBOL = {
     'MES': 3,     # 3 micro contracts max
     'NQ': 2,      # 2 full NQ contracts max
+    'MNQ': 3,     # 3 micro NQ contracts max
 }
 
 # Confluence bonus: both timeframes agree → boost confidence
@@ -178,6 +194,7 @@ HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.55))
 SYMBOL_TP_R_MULT = {
     'MES': 2.5,   # 2.5R — from sweep (PF 1.89)
     'NQ': 3.0,    # 3.0R — from optimizer (SL=2.0×ATR, TP=6.0×ATR, PF 1.47)
+    'MNQ': 3.0,   # Same as NQ (same underlying)
 }
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
 

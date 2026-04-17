@@ -132,10 +132,14 @@ class LiveRithmicTrader:
         self.current_date = None
         self.trades: List[Dict] = []
         self._warmup_log_state: Dict[str, tuple] = {}
-        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'NQ,MES').split(',') if s.strip()]
-        self.fill_confirm_grace_seconds = float(os.getenv('FILL_CONFIRM_GRACE_SECONDS', '20'))
+        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'NQ,MNQ,MES').split(',') if s.strip()]
+        self.fill_confirm_grace_seconds = float(os.getenv('FILL_CONFIRM_GRACE_SECONDS', '60'))
         # order_id -> UTC timestamp; during grace we do not auto-remove on broker delta=0.
         self.pending_fill_confirm_until: Dict[str, datetime] = {}
+        # order_id -> int; count consecutive sync cycles where broker shows flat.
+        # Require multiple flat readings before removing to avoid transient API gaps.
+        self.consecutive_flat_count: Dict[str, int] = {}
+        self.FLAT_READINGS_REQUIRED = 3  # Must see flat N times in a row
         
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
@@ -805,6 +809,7 @@ class LiveRithmicTrader:
         
         Queries Rithmic for the actual open position count and removes
         any positions from self.positions that have been closed by SL/TP.
+        Requires multiple consecutive flat readings to avoid false removals.
         """
         if self.paper_mode or not self.broker:
             return
@@ -828,29 +833,51 @@ class LiveRithmicTrader:
                 # During grace window, keep local position to avoid false phantom removals.
                 if pending_until and now_utc < pending_until:
                     if net_qty > 0:
+                        # Broker confirmed the fill — clear grace and flat counter.
                         self.pending_fill_confirm_until.pop(order_id, None)
+                        self.consecutive_flat_count.pop(order_id, None)
+                        bot_logger.info(f"✅ Broker confirmed position {order_id} (net_qty={net_qty})")
                     continue
 
-                # Once grace expires, if broker still shows flat, remove local stale position.
-                if net_qty == 0:
-                    bot_logger.info(f"🔄 Position sync: {order_id} closed/absent on broker")
-                    d = pos.direction.upper()
-                    self.trades.append({
-                        'entry_time': pos.entry_time.isoformat() if pos.entry_time else '',
-                        'exit_time': now_utc.isoformat(),
-                        'symbol': pos.symbol,
-                        'direction': d,
-                        'entry': pos.entry_price,
-                        'exit': 0,
-                        'pnl': 0,
-                        'exit_type': 'BROKER_SYNC',
-                        'sl': pos.sl,
-                        'tp': pos.tp,
-                    })
-                    del self.positions[order_id]
-                    self.pending_fill_confirm_until.pop(order_id, None)
-                    removed_any = True
-                    print(f"🔄 Position {order_id} removed (broker flat)")
+                if net_qty > 0:
+                    # Position is alive on broker — reset flat counter.
+                    self.consecutive_flat_count.pop(order_id, None)
+                    continue
+
+                # Broker shows flat. Increment the consecutive flat counter.
+                flat_count = self.consecutive_flat_count.get(order_id, 0) + 1
+                self.consecutive_flat_count[order_id] = flat_count
+
+                if flat_count < self.FLAT_READINGS_REQUIRED:
+                    if flat_count == 1:
+                        bot_logger.info(
+                            f"🔍 Position {order_id} broker flat (reading {flat_count}/{self.FLAT_READINGS_REQUIRED})"
+                        )
+                    continue
+
+                # Multiple consecutive flat readings — safe to remove.
+                bot_logger.info(
+                    f"🔄 Position sync: {order_id} confirmed absent after "
+                    f"{flat_count} consecutive flat readings"
+                )
+                d = pos.direction.upper()
+                self.trades.append({
+                    'entry_time': pos.entry_time.isoformat() if pos.entry_time else '',
+                    'exit_time': now_utc.isoformat(),
+                    'symbol': pos.symbol,
+                    'direction': d,
+                    'entry': pos.entry_price,
+                    'exit': 0,
+                    'pnl': 0,
+                    'exit_type': 'BROKER_SYNC',
+                    'sl': pos.sl,
+                    'tp': pos.tp,
+                })
+                del self.positions[order_id]
+                self.pending_fill_confirm_until.pop(order_id, None)
+                self.consecutive_flat_count.pop(order_id, None)
+                removed_any = True
+                print(f"🔄 Position {order_id} removed (broker flat x{flat_count})")
 
             if removed_any:
                 print(f"📊 Position sync: {len(self.positions)}/{self.max_positions} active")
@@ -1032,13 +1059,13 @@ def main():
     
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
     parser.add_argument('--symbol', default='NQ', choices=['NQ', 'MES', 'MNQ'], help='Single symbol mode')
-    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
+    parser.add_argument('--symbols', nargs='+', default=['NQ', 'MNQ'], choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ NQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
     
     args = parser.parse_args()
 
-    symbols = args.symbols if args.symbols else [args.symbol]
+    symbols = args.symbols
     trader = LiveRithmicTrader(symbol=symbols[0], symbols=symbols, paper_mode=args.paper, skip_confirm=args.yes)
     
     if not trader.connect():

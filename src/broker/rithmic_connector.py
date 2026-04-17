@@ -957,37 +957,83 @@ class RithmicConnector(BaseBroker):
                 self._client.list_positions(account_id=self._get_account_id()),
                 timeout=10,
             )
-            with self._state_lock:
-                self._positions.clear()
+
+            # Log raw position data for debugging phantom removals
+            if positions:
+                for p in positions:
+                    raw = _response_to_dict_safe(p)
+                    bot_logger.debug(
+                        f"[POS_RAW] symbol={raw.get('symbol')} "
+                        f"buy_qty={raw.get('buy_qty')} sell_qty={raw.get('sell_qty')} "
+                        f"net_qty={raw.get('net_qty')} quantity={raw.get('quantity')} "
+                        f"keys={list(raw.keys())[:20]}"
+                    )
+
+            new_positions: Dict[str, Any] = {}
+            if positions:
                 for p in positions:
                     data = _response_to_dict_safe(p)
                     symbol = data.get("symbol", "")
                     our_sym = self._reverse_resolve(symbol)
+
+                    # Try multiple field name patterns — async_rithmic versions differ
                     qty = int(data.get("buy_qty", 0)) - int(data.get("sell_qty", 0))
+                    if qty == 0:
+                        # Fallback: some versions use net_qty or quantity
+                        qty = int(data.get("net_qty", 0))
+                    if qty == 0:
+                        qty = int(data.get("quantity", 0))
+
                     if qty != 0:
-                        self._positions[our_sym] = {
+                        new_positions[our_sym] = {
                             "symbol": our_sym,
                             "size": qty,
-                            "avg_price": float(data.get("avg_open_fill_price", 0)),
-                            "unrealized_pnl": float(data.get("open_pnl", 0)),
+                            "avg_price": float(data.get("avg_open_fill_price", data.get("avg_price", 0))),
+                            "unrealized_pnl": float(data.get("open_pnl", data.get("pnl", 0))),
                         }
-            
-            # Clean up orders for closed symbols
+
+            with self._state_lock:
+                # Only clear if we got a valid (non-empty) response, or keep stale
+                # data to prevent phantom removal on transient API failures.
+                if positions is not None:
+                    self._positions = new_positions
+                # If positions is None (timeout/error), keep existing _positions.
+
+            # Clean up orders for closed symbols (with age guard)
             self._cleanup_closed_orders()
-            
+
         except Exception as e:
             error_logger.error(f"Rithmic refresh positions error: {e}")
 
     def _cleanup_closed_orders(self) -> None:
-        """Remove orders from _orders dict when their symbol has no position."""
+        """Remove orders from _orders dict when their symbol has no position.
+
+        Only removes orders older than 120 seconds to avoid cleaning up orders
+        whose fill hasn't propagated to the PnL plant yet.
+        """
         with self._state_lock:
             open_symbols = {sym for sym, pos in self._positions.items() if pos.get('size', 0) != 0}
-        
+
+        min_age_secs = 120  # Don't remove orders placed less than 2 min ago
+        now_str = datetime.now(timezone.utc).isoformat()
+
         with self._order_lock:
-            closed_order_ids = [
-                oid for oid, info in self._orders.items()
-                if info.get('symbol', '') not in open_symbols
-            ]
+            closed_order_ids = []
+            for oid, info in self._orders.items():
+                if info.get('symbol', '') in open_symbols:
+                    continue
+                # Check order age — skip recent orders
+                order_time_str = info.get('time', '')
+                if order_time_str:
+                    try:
+                        order_time = datetime.fromisoformat(order_time_str)
+                        age = (datetime.now(timezone.utc) - order_time).total_seconds()
+                        if age < min_age_secs:
+                            continue
+                    except (ValueError, TypeError):
+                        pass
+                closed_order_ids.append(oid)
+
             for oid in closed_order_ids:
                 removed = self._orders.pop(oid, None)
                 if removed:
