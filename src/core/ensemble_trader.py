@@ -91,12 +91,24 @@ class EnsembleTrader:
         except Exception:
             return default
 
+    @staticmethod
+    def _env_bool(name: str, default: bool) -> bool:
+        v = os.getenv(name)
+        if v is None:
+            return default
+        return str(v).strip().lower() in ('1', 'true', 'yes', 'on')
+
     def __init__(self, newsapi_key=None, broker=None):
         # RSI filter thresholds (configurable at runtime via env vars)
         self.rsi_buy_block = self._env_float('RSI_BUY_BLOCK', 70.0)       # Block BUY when RSI overbought (standard 70)
         self.rsi_sell_block = self._env_float('RSI_SELL_BLOCK', 30.0)      # Block SELL when RSI oversold (standard 30)
         self.rsi_buy_block_high_vol = self._env_float('RSI_BUY_BLOCK_HIGH_VOL', self.rsi_buy_block)
         self.rsi_sell_block_high_vol = self._env_float('RSI_SELL_BLOCK_HIGH_VOL', self.rsi_sell_block)
+
+        # Entry timing filter: avoid chasing late entries or jumping too early.
+        self.entry_timing_filter_enabled = self._env_bool('ENTRY_TIMING_FILTER_ENABLED', True)
+        self.entry_max_chase_atr = self._env_float('ENTRY_MAX_CHASE_ATR', 1.10)
+        self.entry_max_early_atr = self._env_float('ENTRY_MAX_EARLY_ATR', 0.80)
 
         # ── Primary: sweep gate ──────────────────────────────────────
         self.sweep = LiquiditySweepAnalyzer()
@@ -196,6 +208,59 @@ class EnsembleTrader:
         bot_logger.info(f"   Strats:  AdvancedStrategies ({'active' if self.advanced_strats_available else 'disabled'})")
         bot_logger.info(f"   SL/TP:   DynamicSLTP ({'active' if self.sltp_available else 'disabled'})")
         bot_logger.info("   Context: 8 models for learning (no entry influence)")
+
+    def _passes_entry_timing_filter(self, signal_result: dict) -> bool:
+        """Reject entries that are too extended (late) or too displaced (early)."""
+        if not self.entry_timing_filter_enabled:
+            return True
+
+        direction = signal_result.get('signal', 'SKIP')
+        if direction not in ('BUY', 'SELL'):
+            return True
+
+        df_enriched = signal_result.get('enriched_df')
+        if df_enriched is None or len(df_enriched) < 20:
+            return True
+
+        close = float(df_enriched['close'].iloc[-1])
+        atr = None
+        if 'atr' in df_enriched.columns and not pd.isna(df_enriched['atr'].iloc[-1]):
+            atr = float(df_enriched['atr'].iloc[-1])
+        if atr is None or atr <= 0:
+            return True
+
+        ema_col = next(
+            (c for c in ('ema_20', 'ema_21', 'ema_fast', 'ema_50', 'ema_200') if c in df_enriched.columns),
+            None,
+        )
+        if not ema_col:
+            return True
+
+        ema_val = float(df_enriched[ema_col].iloc[-1])
+        if pd.isna(ema_val):
+            return True
+
+        # Signed distance from EMA in ATR units.
+        # BUY: positive means above EMA, SELL: positive means below EMA.
+        signed_dist_atr = (close - ema_val) / atr
+        if direction == 'SELL':
+            signed_dist_atr = -signed_dist_atr
+
+        if signed_dist_atr > self.entry_max_chase_atr:
+            bot_logger.info(
+                f"🚫 Entry too late/chased: {direction} is {signed_dist_atr:.2f} ATR from {ema_col} "
+                f"(max {self.entry_max_chase_atr:.2f})"
+            )
+            return False
+
+        if signed_dist_atr < -self.entry_max_early_atr:
+            bot_logger.info(
+                f"🚫 Entry too early: {direction} is {signed_dist_atr:.2f} ATR from {ema_col} "
+                f"(min {-self.entry_max_early_atr:.2f})"
+            )
+            return False
+
+        return True
 
     def get_trading_signal(self, df, pair):
         """
@@ -768,6 +833,9 @@ class EnsembleTrader:
             bot_logger.info(
                 f"📊 Confidence {effective_confidence:.2%} < threshold {threshold:.2%}"
             )
+            return False
+
+        if not self._passes_entry_timing_filter(signal_result):
             return False
 
         return True
