@@ -261,7 +261,12 @@ class LiveRithmicTrader:
             # lock-contention on Rithmic history plant may require warm-start data.
             self.broker = RithmicConnector()
             self.broker.initialize()
-            
+
+            # Always allow Yahoo fallback in live mode — Rithmic history plant
+            # lock deadlocks are common and we must not stall with 0 bars.
+            self.broker._disable_yahoo_fallback = False
+            self.broker._fallback_cooldown_secs = 15  # recover quickly after lock errors
+
             if not self.broker.connected:
                 print("❌ Rithmic not connected - check credentials in .env")
                 print(f"   RITHMIC_USER_ID: {os.getenv('RITHMIC_USER_ID', 'NOT SET')}")
@@ -297,16 +302,25 @@ class LiveRithmicTrader:
             min_bars = self.lookback + self.ema_len + 15  # 75 bars needed
             if df is None or len(df) < min_bars:
                 rith_bars = 0 if df is None else len(df)
+                # Try local CSV warm-start first
                 local_df = self._get_local_history_candles(symbol, count)
                 merged = self._merge_candles(local_df, df, count)
                 merged_bars = 0 if merged is None else len(merged)
+
+                # If still insufficient, try Yahoo Finance directly as last resort
+                if merged is None or len(merged) < min_bars:
+                    yahoo_df = self._get_yahoo_candles(count, symbol=symbol)
+                    if yahoo_df is not None and len(yahoo_df) > 0:
+                        merged = self._merge_candles(yahoo_df, merged, count)
+                        merged_bars = 0 if merged is None else len(merged)
+
                 # Avoid repeating the same warm-up message every loop.
                 state_key = (rith_bars, merged_bars)
                 if self._warmup_log_state.get(symbol) != state_key:
                     self._warmup_log_state[symbol] = state_key
                     print(
                         f"⚠️  {symbol} Rithmic returned {rith_bars} bars, need {min_bars} - "
-                        f"using local warm history ({merged_bars} bars total)"
+                        f"using fallback warm history ({merged_bars} bars total)"
                     )
                 return merged
             return df
