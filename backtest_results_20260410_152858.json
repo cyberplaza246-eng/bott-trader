@@ -1,0 +1,44 @@
+{
+  "0.45": {
+    "threshold": 0.45,
+    "threshold_pct": 45.0,
+    "trades": 48,
+    "wins": 15,
+    "losses": 33,
+    "win_rate": 31.25,
+    "pnl": 0,
+    "profit_factor": 0.5925403403579931,
+    "drawdown": -1.4592346076541618,
+    "final_balance": 49445.4800000001,
+    "avg_win": 0,
+    "avg_loss": 0
+  },
+  "0.5": {
+    "threshold": 0.5,
+    "threshold_pct": 50.0,
+    "trades": 44,
+    "wins": 14,
+    "losses": 30,
+    "win_rate": 31.818181818181817,
+    "pnl": 0,
+    "profit_factor": 0.6083414161008729,
+    "drawdown": -1.3767752554759514,
+    "final_balance": 49515.44000000009,
+    "avg_win": 0,
+    "avg_loss": 0
+  },
+  "0.55": {
+    "threshold": 0.55,
+    "threshold_pct": 55.00000000000001,
+    "trades": 37,
+    "wins": 13,
+    "losses": 24,
+    "win_rate": 35.13513513513514,
+    "pnl": 0,
+    "profit_factor": 0.7061105722599417,
+    "drawdown": -1.1293971989413198,
+    "final_balance": 49709.120000000075,
+    "avg_win": 0,
+    "avg_loss": 0
+  }
+}

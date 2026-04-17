@@ -937,6 +937,20 @@ class TradingBot:
             lot_size = round(lot_size * rl_lot_mult, 2)
             bot_logger.info(f"  🤖 RL lot adjustment: ×{rl_lot_mult:.1f} → {lot_size}")
 
+        # Mixed lot sizing: 1st trade size 1, 2nd trade size 2, 3rd/4th trades size 1
+        # When 2nd trade opens (1 already open), use 2x contract size
+        if self.mode == 'live' and self.broker:
+            try:
+                all_positions = self.broker.get_open_positions()
+                current_trade_count = len(all_positions) if all_positions else 0
+                
+                # If this will be the 2nd trade (1 already open), use 2x lot size
+                if current_trade_count == 1:
+                    lot_size = round(lot_size * 2.0, 2)
+                    bot_logger.info(f"  🔄 2nd trade lot sizing: ×2.0 (1@2, 3@1 pattern) → {lot_size}")
+            except Exception as e:
+                bot_logger.debug(f"Could not apply mixed lot sizing: {e}")
+
         # Scalping: minimum lot 0.01
         lot_size = max(0.01, lot_size)
         

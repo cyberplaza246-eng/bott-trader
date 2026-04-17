@@ -877,7 +877,7 @@ class LiveRithmicTrader:
                 cycle_candidates: List[Dict[str, Any]] = []
 
                 for symbol in self.symbols:
-                    df = self.get_candles(symbol=symbol, count=100)
+                    df = self.get_candles(symbol=symbol, count=250)
                     if df is None or len(df) < self.lookback + self.ema_len + 15:
                         print(f"⚠️  {symbol} insufficient data, waiting...")
                         continue

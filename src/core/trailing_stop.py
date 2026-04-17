@@ -147,7 +147,9 @@ class TrailingStopManager:
                 continue  # Not tracked (existed before bot started)
 
             info = self._tracking[ticket]
-            current_price = pos.get('current_price', 0)
+            # Different brokers expose different position schemas.
+            # Prefer direct position price fields, then fall back to live quote.
+            current_price = self._resolve_current_price(broker, pos, info)
             if not current_price:
                 continue
 
@@ -182,6 +184,31 @@ class TrailingStopManager:
                     results.append(result)
 
         return results
+
+    def _resolve_current_price(self, broker, pos, info):
+        """Resolve current market price from position payload or broker quote."""
+        for key in ('current_price', 'price_current', 'last_price', 'mark_price'):
+            value = pos.get(key)
+            if value is not None and value > 0:
+                return value
+
+        pair = info.get('pair') or pos.get('pair') or pos.get('symbol')
+        if not pair:
+            return 0
+
+        try:
+            quote = broker.get_latest_price(pair)
+            if quote:
+                # Prefer last trade; fall back to side-aware bid/ask.
+                if quote.get('last') is not None and quote.get('last') > 0:
+                    return quote['last']
+                if info.get('direction') == 'BUY':
+                    return quote.get('bid') or quote.get('ask') or 0
+                return quote.get('ask') or quote.get('bid') or 0
+        except Exception:
+            return 0
+
+        return 0
 
     # ── Partial Close Logic ─────────────────────────────────────────
 
@@ -234,7 +261,16 @@ class TrailingStopManager:
                 f"closing {close_volume} of {volume} lots"
             )
 
-            result = broker.close_position(pair=pair, volume=close_volume, ticket=ticket)
+            # Broker connectors differ in close_position signature:
+            # MT5 uses (pair, volume, ticket), while others use (symbol, size, ticket).
+            result = None
+            try:
+                result = broker.close_position(pair=pair, volume=close_volume, ticket=ticket)
+            except TypeError:
+                try:
+                    result = broker.close_position(symbol=pair, size=close_volume, ticket=ticket)
+                except TypeError:
+                    result = broker.close_position(ticket=ticket)
             if result:
                 info['partial_closed'] = True
                 info['volume'] = round(volume - close_volume, 2)

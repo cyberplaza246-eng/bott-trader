@@ -1,0 +1,59 @@
+# Ultimate AI Trading Bot Requirements
+# The greatest AI auto trader ever
+
+# Core ML/AI
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+scipy>=1.10.0
+
+# Data Sources
+alpha-vantage>=0.0.1
+requests>=2.31.0
+yfinance>=0.2.0
+
+# Technical Analysis
+ta-lib>=0.4.25
+pandas-ta>=0.3.14b
+
+# Reinforcement Learning
+gym>=0.26.0
+stable-baselines3>=2.0.0
+
+# Visualization (optional)
+plotly>=5.15.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Configuration
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# Logging and Utils
+colorlog>=6.7.0
+tqdm>=4.65.0
+
+# Broker Integration (examples - choose your broker)
+# ib-insync>=0.9.70  # Interactive Brokers
+# alpaca-py>=0.7.0   # Alpaca
+# td-ameritrade-python-api>=0.3.3  # TD Ameritrade
+
+# Database (optional)
+# sqlalchemy>=2.0.0
+# psycopg2-binary>=2.9.0  # PostgreSQL
+# pymongo>=4.3.0  # MongoDB
+
+# Web Interface (optional)
+# fastapi>=0.100.0
+# uvicorn>=0.23.0
+# streamlit>=1.25.0
+
+# Social Media Sentiment (optional)
+# tweepy>=4.14.0
+# praw>=7.7.0  # Reddit
+# textblob>=0.17.1
+
+# Prediction Markets (optional)
+# web3>=6.0.0  # For Polymarket/DeFi integration

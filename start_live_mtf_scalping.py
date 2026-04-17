@@ -68,24 +68,27 @@ from src.utils.logger import bot_logger, trades_logger
 
 # ── Trading Hours Logic ─────────────────────────────────────────────
 def is_market_open_et(now=None):
-    """Return True if in trading session (9:30 AM - 4:30 PM EST Mon-Fri)."""
+    """Return True if in CME Globex futures trading session (ET)."""
     if now is None:
         now = datetime.now(pytz.timezone('US/Eastern'))
     else:
         now = now.astimezone(pytz.timezone('US/Eastern'))
-    wd = now.weekday()  # 0=Mon, 6=Sun
-    hour, minute = now.hour, now.minute
-    time_mins = hour * 60 + minute
-    
-    # No trading on weekends
-    if wd >= 5:  # Saturday or Sunday
+    wd = now.weekday()  # 0=Mon, 4=Fri, 5=Sat, 6=Sun
+    time_mins = now.hour * 60 + now.minute
+
+    # CME Globex index futures hours (ET):
+    # Open Sunday 6:00 PM, close Friday 5:00 PM.
+    # Daily maintenance break: 5:00 PM - 6:00 PM ET (Mon-Thu).
+    if wd == 5:  # Saturday closed all day
         return False
-    
-    # EXTENDED SESSION: 9:30 AM - 4:30 PM EST (Mon-Fri)
-    session_start = 9 * 60 + 30   # 9:30 AM = 570 mins
-    session_end = 16 * 60 + 30    # 4:30 PM = 990 mins
-    
-    return session_start <= time_mins < session_end
+    if wd == 6 and time_mins < (18 * 60):  # Sunday closed until 6:00 PM
+        return False
+    if wd == 4 and time_mins >= (17 * 60):  # Friday closed after 5:00 PM
+        return False
+    if (17 * 60) <= time_mins < (18 * 60):  # Daily break
+        return False
+
+    return True
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -121,10 +124,19 @@ RESISTANCE_LOOKBACK = 20   # 5M bars for swing high/low
 # Pullback settings
 MAX_PULLBACK_ATR = 1.5     # Max distance from EMA for pullback (matches backtest)
 
+# Trailing stop settings
+TRAILING_ENABLED = True
+TRAIL_MOVE_TO_BE_TP_FRACTION = 0.50      # Move SL to breakeven after 50% of TP distance
+TRAIL_LOCK_TP_FRACTION = 0.75            # Start locking profit after 75% of TP distance
+TRAIL_LOCK_PROFIT_TP_FRACTION = 0.35     # Lock 35% of TP distance as minimum secured profit
+TRAIL_ATR_MULT = 0.8                     # Dynamic trail distance from current price
+TRAIL_EXTEND_TP = True                   # Allow runners by extending TP when touched
+TRAIL_EXTEND_TP_ATR_MULT = 1.0           # TP extension distance in ATR
+
 # Risk Management
-DAILY_LOSS_LIMIT = 300.0           # Stop trading after $300 daily loss
+DAILY_LOSS_LIMIT = 500.0           # Stop trading after $500 daily loss
 MAX_LOSS_PER_TRADE = 250.0         # Force close if unrealized loss > $250
-MAX_TRADES_PER_DAY = 5             # Reduced from 6
+MAX_TRADES_PER_DAY = 100           # Maximum trades per day
 MAX_POSITIONS = 1                  # ONLY 1 position at a time
 CONTRACTS = 1
 
@@ -139,9 +151,9 @@ SYMBOL_SPECS = {
     'MGC': {'point_value': 10.0, 'tick_size': 0.10},  # Micro Gold
 }
 
-# Default symbols to trade (Micros only - safer position sizing)
-# Using single symbol to reduce Rithmic API load and avoid lock timeouts
-DEFAULT_SYMBOLS = ['MNQ']
+# Default symbols to trade (Micros and full-size Nasdaq)
+# Using multiple symbols will increase API load and require careful risk management
+DEFAULT_SYMBOLS = ['MES', 'MNQ']
 
 
 @dataclass
@@ -260,6 +272,98 @@ class LiveMTFScalper:
         # Log file
         mode = "paper" if paper_mode else "live"
         self.log_file = f'logs/{mode}_mtf_multi_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+
+    @staticmethod
+    def _trend_label(trend: str) -> str:
+        if trend == 'bullish':
+            return 'BUY'
+        if trend == 'bearish':
+            return 'SELL'
+        return 'HOLD'
+
+    @staticmethod
+    def _side_label(direction: str) -> str:
+        if direction == 'long':
+            return 'BUY'
+        if direction == 'short':
+            return 'SELL'
+        return direction.upper()
+
+    @staticmethod
+    def _round_to_tick(price: float, tick_size: float) -> float:
+        return round(round(price / tick_size) * tick_size, 2)
+
+    def update_trailing_stops(self, symbol: str, current_price: float, atr: float):
+        """Update SL/TP to protect open profit and trail winners."""
+        if not TRAILING_ENABLED or symbol not in self.positions:
+            return
+
+        pos = self.positions[symbol]
+        spec = SYMBOL_SPECS[symbol]
+        tick = spec['tick_size']
+        atr = max(float(atr), tick * 2)
+
+        tp_distance = abs(pos.tp - pos.entry_price)
+        if tp_distance <= 0:
+            return
+
+        new_sl = pos.sl
+        new_tp = pos.tp
+
+        if pos.direction == 'long':
+            profit_distance = current_price - pos.entry_price
+            if profit_distance <= 0:
+                return
+
+            # Stage 1: move to breakeven once trade reaches partial TP progress.
+            if profit_distance >= tp_distance * TRAIL_MOVE_TO_BE_TP_FRACTION:
+                be_sl = pos.entry_price + tick
+                new_sl = max(new_sl, be_sl)
+
+            # Stage 2: lock real profit and trail further as trade advances.
+            if profit_distance >= tp_distance * TRAIL_LOCK_TP_FRACTION:
+                lock_sl = pos.entry_price + (tp_distance * TRAIL_LOCK_PROFIT_TP_FRACTION)
+                dyn_sl = current_price - (atr * TRAIL_ATR_MULT)
+                new_sl = max(new_sl, lock_sl, dyn_sl)
+
+            if TRAIL_EXTEND_TP and current_price >= (pos.tp - tick):
+                new_tp = max(new_tp, current_price + (atr * TRAIL_EXTEND_TP_ATR_MULT))
+        else:
+            profit_distance = pos.entry_price - current_price
+            if profit_distance <= 0:
+                return
+
+            if profit_distance >= tp_distance * TRAIL_MOVE_TO_BE_TP_FRACTION:
+                be_sl = pos.entry_price - tick
+                new_sl = min(new_sl, be_sl)
+
+            if profit_distance >= tp_distance * TRAIL_LOCK_TP_FRACTION:
+                lock_sl = pos.entry_price - (tp_distance * TRAIL_LOCK_PROFIT_TP_FRACTION)
+                dyn_sl = current_price + (atr * TRAIL_ATR_MULT)
+                new_sl = min(new_sl, lock_sl, dyn_sl)
+
+            if TRAIL_EXTEND_TP and current_price <= (pos.tp + tick):
+                new_tp = min(new_tp, current_price - (atr * TRAIL_EXTEND_TP_ATR_MULT))
+
+        new_sl = self._round_to_tick(new_sl, tick)
+        new_tp = self._round_to_tick(new_tp, tick)
+
+        sl_changed = abs(new_sl - pos.sl) >= tick
+        tp_changed = abs(new_tp - pos.tp) >= tick
+        if not sl_changed and not tp_changed:
+            return
+
+        pos.sl = new_sl
+        pos.tp = new_tp
+
+        print(f"   🔒 {symbol} trail update: SL={pos.sl:.2f} TP={pos.tp:.2f}")
+        if not self.paper_mode and self.broker:
+            try:
+                modified = self.broker.modify_position(pos.order_id, sl=pos.sl, tp=pos.tp)
+                if not modified:
+                    print(f"   ⚠️ {symbol} trailing modify rejected by broker for order {pos.order_id}")
+            except Exception as e:
+                print(f"   ⚠️ {symbol} trailing modify failed: {e}")
         
     def connect(self) -> bool:
         """Initialize Rithmic connection."""
@@ -396,7 +500,7 @@ class LiveMTFScalper:
         """Check if long entry conditions are met."""
         # 5M Trend Filter
         if ctx_5m['trend'] != 'bullish':
-            if verbose: print(f"      ❌ 5M trend not bullish: {ctx_5m['trend']}")
+            if verbose: print(f"      ❌ 5M bias not BUY: {self._trend_label(ctx_5m['trend'])}")
             return False
         if ctx_5m['adx'] < ADX_THRESHOLD:
             if verbose: print(f"      ❌ ADX {ctx_5m['adx']:.1f} < {ADX_THRESHOLD}")
@@ -418,9 +522,9 @@ class LiveMTFScalper:
         atr = row_1m['atr']
         candle_open = row_1m['open']
         
-        # BULLISH CANDLE CONFIRMATION - don't long during a dip
+        # BUY candle confirmation - don't buy during a dip
         if price <= candle_open:
-            if verbose: print(f"      ❌ Bearish candle (close {price:.2f} <= open {candle_open:.2f}) - wait for bullish")
+            if verbose: print(f"      ❌ SELL candle (close {price:.2f} <= open {candle_open:.2f}) - wait for BUY")
             return False
         
         # Price above EMA9 (with small tolerance)
@@ -467,7 +571,7 @@ class LiveMTFScalper:
                            ctx_5m['adx'] >= 25)  # Strong momentum override
         
         if ctx_5m['trend'] != 'bearish' and not is_counter_trend:
-            if verbose: print(f"      ❌ 5M trend not bearish: {ctx_5m['trend']} (DI diff={di_diff:.1f}, need {DI_COUNTER_TREND}+ for counter-trend)")
+            if verbose: print(f"      ❌ 5M bias not SELL: {self._trend_label(ctx_5m['trend'])} (DI diff={di_diff:.1f}, need {DI_COUNTER_TREND}+ for counter-trend)")
             return False
         if is_counter_trend:
             if verbose: print(f"      ⚡ COUNTER-TREND: DI- dominates by {di_diff:.1f} pts")
@@ -491,9 +595,9 @@ class LiveMTFScalper:
         atr = row_1m['atr']
         candle_open = row_1m['open']
         
-        # BEARISH CANDLE CONFIRMATION - don't short during a bounce
+        # SELL candle confirmation - don't sell during a bounce
         if price >= candle_open:
-            if verbose: print(f"      ❌ Bullish candle (close {price:.2f} >= open {candle_open:.2f}) - wait for bearish")
+            if verbose: print(f"      ❌ BUY candle (close {price:.2f} >= open {candle_open:.2f}) - wait for SELL")
             return False
         
         # Price below EMA9 (with small tolerance)
@@ -574,7 +678,7 @@ class LiveMTFScalper:
             actual_tp_distance = tp_final - entry_price
             actual_rr = actual_tp_distance / sl_distance if sl_distance > 0 else 0
             if actual_rr < 1.5:
-                print(f"   ⚠️ {symbol}: Skipping LONG - R:R only 1:{actual_rr:.1f} after resistance cap")
+                print(f"   ⚠️ {symbol}: Skipping BUY - R:R only 1:{actual_rr:.1f} after resistance cap")
                 return None
             
             return {
@@ -598,7 +702,7 @@ class LiveMTFScalper:
             actual_tp_distance = entry_price - tp_final
             actual_rr = actual_tp_distance / sl_distance if sl_distance > 0 else 0
             if actual_rr < 1.5:
-                print(f"   ⚠️ {symbol}: Skipping SHORT - R:R only 1:{actual_rr:.1f} after support cap")
+                print(f"   ⚠️ {symbol}: Skipping SELL - R:R only 1:{actual_rr:.1f} after support cap")
                 return None
             
             return {
@@ -625,7 +729,7 @@ class LiveMTFScalper:
         
         if self.paper_mode:
             order_id = f"paper_{symbol}_{int(time.time())}"
-            print(f"📝 [PAPER] {direction.upper()} {symbol} @ {entry:.2f}")
+            print(f"📝 [PAPER] {self._side_label(direction)} {symbol} @ {entry:.2f}")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             
             self.positions[symbol] = Position(
@@ -655,14 +759,14 @@ class LiveMTFScalper:
             )
             
             if result and result.get('ticket'):
-                print(f"✅ {direction.upper()} {symbol} @ {entry:.2f}")
+                print(f"✅ {self._side_label(direction)} {symbol} @ {entry:.2f}")
                 print(f"   Order ID: {result['ticket']}")
                 print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
                 
                 # Send email notification
                 send_email(
-                    f"Trade: {direction.upper()} {symbol}",
-                    f"Trade Placed!\n\nSymbol: {symbol}\nDirection: {direction.upper()}\nEntry: {entry:.2f}\nSL: {sl:.2f}\nTP: {tp:.2f}\nOrder ID: {result['ticket']}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                    f"Trade: {self._side_label(direction)} {symbol}",
+                    f"Trade Placed!\n\nSymbol: {symbol}\nDirection: {self._side_label(direction)}\nEntry: {entry:.2f}\nSL: {sl:.2f}\nTP: {tp:.2f}\nOrder ID: {result['ticket']}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
                 )
                 
                 self.positions[symbol] = Position(
@@ -836,13 +940,13 @@ class LiveMTFScalper:
             pnl = (position.entry_price - exit_price) * point_value * position.size
         self.daily_pnl += pnl
         emoji = "✅" if pnl > 0 else "❌"
-        print(f"{emoji} Closed {symbol} {position.direction.upper()} @ {exit_price:.2f} ({reason})")
+        print(f"{emoji} Closed {symbol} {self._side_label(position.direction)} @ {exit_price:.2f} ({reason})")
         print(f"   P&L: ${pnl:+.2f} | Daily: ${self.daily_pnl:+.2f}")
         
         # Send email notification for closed trade
         send_email(
             f"Closed: {symbol} ({reason})",
-            f"Trade Closed!\n\nSymbol: {symbol}\nDirection: {position.direction.upper()}\nEntry: {position.entry_price:.2f}\nExit: {exit_price:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}\nDaily P&L: ${self.daily_pnl:+.2f}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+            f"Trade Closed!\n\nSymbol: {symbol}\nDirection: {self._side_label(position.direction)}\nEntry: {position.entry_price:.2f}\nExit: {exit_price:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}\nDaily P&L: ${self.daily_pnl:+.2f}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
         )
         
         # Log trade
@@ -871,7 +975,7 @@ class LiveMTFScalper:
         print(f"{'='*70}")
         print(f"Strategy: 5M Trend + 1M Entry")
         print(f"Symbols: {', '.join(self.symbols)}")
-        print(f"Session: 9:30 AM - 4:30 PM EST")
+        print(f"Session: CME Globex (Sun 6:00 PM - Fri 5:00 PM ET, daily 5-6 PM break)")
         print(f"Max Position: {MAX_POSITIONS} (no overlap)")
         print(f"R:R Ratio: 1:{TP_MULT:.1f} (SL={ATR_MULT:.1f}×ATR, TP={TP_MULT:.1f}×SL)")
         print(f"Daily Loss Limit: ${DAILY_LOSS_LIMIT}")
@@ -961,7 +1065,7 @@ class LiveMTFScalper:
                     # Show 5M trend status
                     trend = ctx_5m.get('trend', 'none')
                     adx = ctx_5m.get('adx', 0)
-                    print(f"   {symbol}: 5M trend={trend} ADX={adx:.1f}")
+                    print(f"   {symbol}: 5M signal-bias={self._trend_label(trend)} ADX={adx:.1f}")
                     
                     # Get current price
                     price_data = self.broker.get_latest_price(symbol)
@@ -984,6 +1088,8 @@ class LiveMTFScalper:
                     
                     # Check for exit on existing position
                     if symbol in self.positions:
+                        latest_atr = float(df_1m.iloc[-1].get('atr', 0.0))
+                        self.update_trailing_stops(symbol, current_price, latest_atr)
                         exit_reason = self.check_exit(symbol, current_price)
                         if exit_reason:
                             # Close via broker and use current_price as exit
@@ -995,7 +1101,7 @@ class LiveMTFScalper:
                     if symbol not in self.positions and len(self.positions) < MAX_POSITIONS:
                         signal = self.check_entry_signal(symbol, df_1m, ctx_5m)
                         if signal:
-                            print(f"🎯 Signal: {signal['direction'].upper()} {symbol} @ {signal['entry']:.2f}")
+                            print(f"🎯 Signal: {self._side_label(signal['direction'])} {symbol} @ {signal['entry']:.2f}")
                             print(f"   SL: {signal['sl']:.2f} | TP: {signal['tp']:.2f}")
                             self.place_order(signal)
                             time.sleep(2)  # Delay after order

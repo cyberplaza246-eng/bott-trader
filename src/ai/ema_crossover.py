@@ -38,7 +38,7 @@ class EMACrossoverAnalyzer:
             dict with signal, confidence, reason
         """
         try:
-            if df is None or len(df) < 200:
+            if df is None or len(df) < 60:
                 result = {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Insufficient data'}
                 bot_logger.info(f"[EMA] Returning: {result}")
                 return result
@@ -46,11 +46,12 @@ class EMACrossoverAnalyzer:
             close = df['close']
             high = df['high']
             low = df['low']
+            has_ema200 = len(df) >= 200
 
             # -- EMAs -----------------------------------------------
             ema20 = close.ewm(span=20, adjust=False).mean()
             ema50 = close.ewm(span=50, adjust=False).mean()
-            ema200 = close.ewm(span=200, adjust=False).mean()
+            ema200 = close.ewm(span=200, adjust=False).mean() if has_ema200 else None
 
             # -- ATR(14) --------------------------------------------
             prev_close = close.shift(1)
@@ -72,13 +73,15 @@ class EMACrossoverAnalyzer:
             cur_ema50 = float(ema50.iloc[-1])
             prev_ema20 = float(ema20.iloc[-2])
             prev_ema50 = float(ema50.iloc[-2])
-            cur_ema200 = float(ema200.iloc[-1])
+            cur_ema200 = float(ema200.iloc[-1]) if has_ema200 else None
             cur_rsi = float(rsi.iloc[-1])
             cur_atr = float(atr.iloc[-1])
             cur_price = float(close.iloc[-1])
 
-            if pd.isna(cur_rsi) or pd.isna(cur_ema200) or pd.isna(cur_atr):
+            if pd.isna(cur_rsi) or pd.isna(cur_atr):
                 return {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Indicators warming up'}
+            if cur_ema200 is not None and pd.isna(cur_ema200):
+                cur_ema200 = None
 
             # -- ATR trend: count consecutive rises/falls ----------
             atr_diff = atr.diff()
@@ -105,8 +108,8 @@ class EMACrossoverAnalyzer:
             confidence = 0.0
             reasons = []
 
-            above_200 = cur_price > cur_ema200
-            below_200 = cur_price < cur_ema200
+            above_200 = cur_ema200 is not None and cur_price > cur_ema200
+            below_200 = cur_ema200 is not None and cur_price < cur_ema200
 
             # Crossover detection
             bullish_cross = cur_ema20 > cur_ema50 and prev_ema20 <= prev_ema50
@@ -136,7 +139,9 @@ class EMACrossoverAnalyzer:
                 # (RSI filter removed — RSI handled by LiquiditySweep model only)
 
                 # EMA200 alignment
-                if above_200:
+                if cur_ema200 is None:
+                    pass  # Skip EMA200 filter when insufficient data
+                elif above_200:
                     confidence += 0.10
                     reasons.append('Price > EMA200 — with trend')
                 else:
@@ -170,7 +175,9 @@ class EMACrossoverAnalyzer:
                 # (RSI filter removed — RSI handled by LiquiditySweep model only)
 
                 # EMA200 alignment
-                if below_200:
+                if cur_ema200 is None:
+                    pass  # Skip EMA200 filter when insufficient data
+                elif below_200:
                     confidence += 0.10
                     reasons.append('Price < EMA200 — with trend')
                 else:

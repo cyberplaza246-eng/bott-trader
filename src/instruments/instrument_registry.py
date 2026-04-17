@@ -92,7 +92,7 @@ _MES = InstrumentSpec(
     contract_multiplier=5.0,
     commission_rt=0.62,          # Typical micro commission RT
     spread_default=0.25,         # 1 tick typical
-    atr_minimum=2.0,             # ~2 points min ATR (filters low-vol noise)
+    atr_minimum=1.5,             # ~1.5 points min ATR (allows quieter sessions)
     sl_max_ticks_1m=40,          # 10 points = $12.50 on MES
     sl_max_ticks_5m=80,          # 20 points = $25.00 (2.5×ATR at median ATR ~4pts)
     tp_max_ticks_1m=80,          # 20 points = $25.00
@@ -170,12 +170,12 @@ _NQ = InstrumentSpec(
     contract_multiplier=20.0,
     commission_rt=2.04,
     spread_default=0.50,
-    atr_minimum=15.0,
-    sl_max_ticks_1m=40,
-    sl_max_ticks_5m=80,
-    tp_max_ticks_1m=60,
-    tp_max_ticks_5m=120,
-    sweep_tolerance_ticks=8,
+    atr_minimum=5.0,             # Same index as MNQ, same volatility profile
+    sl_max_ticks_1m=80,          # 20 points (same as MNQ — same underlying)
+    sl_max_ticks_5m=300,         # 75 points (same as MNQ)
+    tp_max_ticks_1m=120,         # 30 points (same as MNQ)
+    tp_max_ticks_5m=500,         # 125 points (same as MNQ)
+    sweep_tolerance_ticks=5,     # 1.25 points (same as MNQ)
     session_start=dt_time(23, 0),
     session_end=dt_time(22, 0),
     maintenance_start=dt_time(21, 0),

@@ -31,45 +31,45 @@ ACCOUNT_TIERS = {
     'micro': {
         'min_balance': 0,
         'max_balance': 200,
-        'max_concurrent_trades': 3,    # 3 concurrent trades allowed
+        'max_concurrent_trades': 4,    # 4 concurrent trades allowed (3 @ size 1, 1 @ size 2)
         'max_lot_size': 0.01,
-        'max_contracts': 1,
+        'max_contracts': 2,
         'risk_percent': 1.0,       # Conservative at small size
         'description': 'Micro ($0-$200)',
     },
     'mini': {
         'min_balance': 200,
         'max_balance': 1000,
-        'max_concurrent_trades': 3,
+        'max_concurrent_trades': 4,
         'max_lot_size': 0.03,
-        'max_contracts': 1,
+        'max_contracts': 2,
         'risk_percent': 1.0,
         'description': 'Mini ($200-$1K)',
     },
     'standard': {
         'min_balance': 1000,
         'max_balance': 5000,
-        'max_concurrent_trades': 3,
+        'max_concurrent_trades': 4,
         'max_lot_size': 0.04,
-        'max_contracts': 1,
+        'max_contracts': 2,
         'risk_percent': 1.5,       # Can afford slightly more risk
         'description': 'Standard ($1K-$5K)',
     },
     'professional': {
         'min_balance': 5000,
         'max_balance': 25000,
-        'max_concurrent_trades': 3,
+        'max_concurrent_trades': 4,
         'max_lot_size': 0.05,
-        'max_contracts': 1,
+        'max_contracts': 2,
         'risk_percent': 2.0,
         'description': 'Professional ($5K-$25K)',
     },
     'elite': {
         'min_balance': 25000,
         'max_balance': float('inf'),
-        'max_concurrent_trades': 3,
+        'max_concurrent_trades': 4,
         'max_lot_size': 0.05,
-        'max_contracts': 2,         # Scale up only at elite tier
+        'max_contracts': 2,         # 4 concurrent trades (3 @ size 1, 1 @ size 2)
         'risk_percent': 2.0,
         'description': 'Elite ($25K+)',
     },
