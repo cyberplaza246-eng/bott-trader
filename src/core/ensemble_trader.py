@@ -825,7 +825,6 @@ class EnsembleTrader:
             sweep_adx >= 14 and
             tech_dir != opposing_dir
         )
-        )
         
         is_fallback_entry = is_ema_tech_fallback or is_trend_fallback or is_regime_ema_fallback
         
