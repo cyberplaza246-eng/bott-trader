@@ -1010,30 +1010,30 @@ class LiveRithmicTrader:
 
                 if len(self.positions) < self.max_positions and cycle_candidates:
                     priority_rank = {sym: idx for idx, sym in enumerate(self.symbol_priority)}
-                    # NQ needs 8% higher confidence than micros to be selected
-                    NQ_CONFIDENCE_PENALTY = 0.08
-                    def _adjusted_confidence(s):
-                        c = float(s.get('confidence', 0.0))
-                        if s.get('symbol', '') == 'NQ':
-                            c -= NQ_CONFIDENCE_PENALTY
-                        return c
-                    best = max(
+                    # Sort candidates: highest confidence first, then by priority.
+                    sorted_candidates = sorted(
                         cycle_candidates,
                         key=lambda s: (
-                            _adjusted_confidence(s),
-                            -priority_rank.get(s.get('symbol', ''), 999),
+                            -float(s.get('confidence', 0.0)),
+                            priority_rank.get(s.get('symbol', ''), 999),
                         ),
                     )
-                    if len(cycle_candidates) > 1:
-                        print(
-                            f"🏆 Best setup this cycle: {best['symbol']} "
-                            f"({best.get('confidence', 0.0):.1%} confidence, priority={self.symbol_priority})"
+                    if len(sorted_candidates) > 1:
+                        names = ', '.join(
+                            f"{s['symbol']}({s.get('confidence', 0.0):.0%})"
+                            for s in sorted_candidates
                         )
-                    if self.place_order(best):
-                        spec = self._spec(best['symbol'])
-                        print(f"📊 {best['symbol']} ATR: {best['atr']:.2f}")
-                        risk = abs(best['entry'] - best['sl']) * spec['point_value']
-                        print(f"   Risk: ${risk:.2f} per contract")
+                        print(f"🏆 Cycle candidates: {names}")
+
+                    # Trade ALL qualifying signals (up to max positions)
+                    for candidate in sorted_candidates:
+                        if len(self.positions) >= self.max_positions:
+                            break
+                        if self.place_order(candidate):
+                            spec = self._spec(candidate['symbol'])
+                            print(f"📊 {candidate['symbol']} ATR: {candidate['atr']:.2f}")
+                            risk = abs(candidate['entry'] - candidate['sl']) * spec['point_value']
+                            print(f"   Risk: ${risk:.2f} per contract")
 
                 time.sleep(10)
                 
