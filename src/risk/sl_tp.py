@@ -44,16 +44,16 @@ TP_MAX_PIPS_1M = 20.0         # Hard cap: 20 pips TP for 1M scalps
 TP_MAX_PIPS_5M = 35.0         # Hard cap: 35 pips TP for 5M scalps
 
 # Per-symbol ATR fallback / TP R-multiples tuned from recent sweep.
-# MES favored wider stop + moderate TP; MNQ favored tighter TP.
+# MES favored wider stop + moderate TP; NQ same signals, 10× tick value.
 SYMBOL_SL_ATR_MULT = {
     'MES': 3.0,
-    'MNQ': 2.5,
+    'NQ': 2.0,     # Optimizer: 2.0×ATR SL (PF 1.59, Calmar 3.38)
 }
 
 # Per-symbol TP R-multiple used when structure target is unavailable/invalid.
 SYMBOL_TP_R_MULT = {
     'MES': 2.0,
-    'MNQ': 1.2,
+    'NQ': 3.0,     # Optimizer: 6.0×ATR TP / 2.0×ATR SL = 3.0R
 }
 DEFAULT_TP_R_MULT = 2.5
 

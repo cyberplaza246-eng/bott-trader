@@ -42,7 +42,7 @@ AUTOTRADING_ENABLED = TRADING_MODE == 'live'
 
 # Symbols to Trade — auto-selected by asset class
 FOREX_PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY']
-FUTURES_SYMBOLS = ['MES', 'MNQ']  # Start with micros for eval
+FUTURES_SYMBOLS = ['MES', 'NQ']  # MES micro + NQ full contract
 PAIRS = FUTURES_SYMBOLS if ASSET_CLASS == 'futures' else FOREX_PAIRS
 
 # Timeframes (in minutes) — dual-timeframe scalping
@@ -91,15 +91,18 @@ SCALPING_PAIRS = {
         'skip_friday': False,
         'bad_hours_utc': [],           # No hour restrictions — trade 24/7
     },
-    'MNQ': {
+    'NQ': {
         'session_atr_min': 2.0,        # Lowered ATR for quiet/Sunday trading
         'spread_sim': 0.50,            # 2 ticks spread
         'pip_size': 0.25,
-        'cooldown_seconds': 300,
+        'cooldown_seconds': 60,        # 12 bars × 5min = 60s (optimizer: cd=12)
         'max_hold_candles': 120,       # 10 hours max hold
-        'adx_min': 22,                 # Tightened from 20 (MTF backtest: PF 1.33 validated)
+        'adx_min': 25,                 # From optimizer sweep (PF 1.47, Calmar 3.38)
         'skip_friday': False,
-        'bad_hours_utc': [],           # No hour restrictions — trade 24/7
+        'bad_hours_utc': [],           # Session filter handled by SCALPING_SESSION_WINDOWS
+        'ema_fast': 8,                 # Optimizer: EMA 8/21 crossover
+        'ema_slow': 21,                # Optimizer: EMA 8/21 crossover
+        'trailing_enabled': False,     # Optimizer: no trailing stop for NQ
     },
 }
 
@@ -110,7 +113,7 @@ SCALPING_SESSION_WINDOWS = {
     'GBP/USD': {'start': 0, 'end': 0},    # 24/7 trading
     'USD/JPY': {'start': 0, 'end': 0},    # 24/7 trading
     'MES': {'start': 0, 'end': 0},        # 24/7 — bad_hours_utc handles filtering
-    'MNQ': {'start': 0, 'end': 0},
+    'NQ': {'start': 13, 'end': 21},    # RTH only (optimizer: best risk-adj)
 }
 
 # Spread limits for scalping (in tick/pip units)
@@ -119,7 +122,7 @@ SCALPING_SPREAD_LIMITS = {
     'GBP/USD': 2.5,   # Max 2.5 pips
     'USD/JPY': 2.5,   # Max 2.5 pips
     'MES': 2.0,       # Max 2 ticks (0.50 points)
-    'MNQ': 4.0,       # Max 4 ticks (1.0 point)
+    'NQ': 4.0,        # Max 4 ticks (1.0 point)
 }
 
 # Confluence bonus: both timeframes agree → boost confidence
@@ -156,11 +159,11 @@ INDICATORS = {
 # Risk Management (ATR-based — no fixed pips)
 # Optimal params from rithmic_backtest.py sweep + walk-forward validation:
 #   MES: SL=2.5×ATR, TP=2.5R (6.25×ATR), ADX>25, PF 1.89
-#   MNQ: SL=2.5×ATR, TP=1.5R (3.75×ATR), ADX>20, PF 1.76
+#   NQ: SL=2.0×ATR, TP=3.0R (6.0×ATR), ADX>25, PF 1.47
 STOP_LOSS_MULTIPLIER = 2.5    # SL = 2.5 x ATR(14) — from sweep
 TAKE_PROFIT_RATIO = 2.5      # TP = 2.5 x SL (default, MES uses this)
 TP_EXPANDING = 3.0            # Wider TP in expanding volatility
-TP_CONTRACTING = 1.5          # Tighter TP in contracting volatility (MNQ default)
+TP_CONTRACTING = 1.5          # Tighter TP in contracting volatility
 MIN_RISK_REWARD_RATIO = 1.5   # Minimum R:R to enter
 MICRO_TAKE_PROFIT_RATIO = float(os.getenv('MICRO_TAKE_PROFIT_RATIO', 2.5))
 HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.55))
@@ -168,7 +171,7 @@ HIGH_CERTAINTY_THRESHOLD = float(os.getenv('HIGH_CERTAINTY_THRESHOLD', 0.55))
 # Per-symbol TP ratio (R-multiple of SL distance)
 SYMBOL_TP_R_MULT = {
     'MES': 2.5,   # 2.5R — from sweep (PF 1.89)
-    'MNQ': 1.5,   # 1.5R — MNQ is more mean-reverting (PF 1.76)
+    'NQ': 3.0,    # 3.0R — from optimizer (SL=2.0×ATR, TP=6.0×ATR, PF 1.47)
 }
 MAX_DAILY_LOSS_AMOUNT = INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PERCENT / 100)
 

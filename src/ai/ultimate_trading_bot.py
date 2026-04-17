@@ -41,7 +41,7 @@ class UltimateBotConfig:
     MAX_CONCURRENT_TRADES = 3
 
     # Symbols to trade
-    FUTURES_SYMBOLS = ['MES', 'MNQ']
+    FUTURES_SYMBOLS = ['MES', 'NQ']
     STOCK_SYMBOLS = ['SPY', 'QQQ', 'IWM']
 
     # AI Model weights in ensemble

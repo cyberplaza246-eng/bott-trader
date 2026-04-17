@@ -17,9 +17,17 @@ from src.utils.logger import bot_logger
 class EMACrossoverAnalyzer:
     """ATR / EMA alignment model — confirms momentum via volatility growth."""
 
-    def get_signal(self, df):
+    def get_signal(self, df, pair=None):
         from src.utils.logger import bot_logger
         bot_logger.info("[EMA] get_signal called")
+
+        # Per-symbol EMA periods (MNQ optimized to 8/21)
+        from config.strategy_config import SCALPING_PAIRS
+        pair_cfg = SCALPING_PAIRS.get(pair, {}) if pair else {}
+        ema_short_period = pair_cfg.get('ema_fast', 20)
+        ema_medium_period = pair_cfg.get('ema_slow', 50)
+        ema_long_period = 200
+
         """Analyse latest candles for EMA alignment + ATR momentum.
 
         Scoring:
@@ -49,9 +57,9 @@ class EMACrossoverAnalyzer:
             has_ema200 = len(df) >= 200
 
             # -- EMAs -----------------------------------------------
-            ema20 = close.ewm(span=20, adjust=False).mean()
-            ema50 = close.ewm(span=50, adjust=False).mean()
-            ema200 = close.ewm(span=200, adjust=False).mean() if has_ema200 else None
+            ema20 = close.ewm(span=ema_short_period, adjust=False).mean()
+            ema50 = close.ewm(span=ema_medium_period, adjust=False).mean()
+            ema200 = close.ewm(span=ema_long_period, adjust=False).mean() if has_ema200 else None
 
             # -- ATR(14) --------------------------------------------
             prev_close = close.shift(1)

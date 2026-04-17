@@ -50,7 +50,7 @@ MODEL_NAMES = [
 SIGNAL_MAP = {'BUY': 1.0, 'SELL': -1.0, 'HOLD': 0.0, 'SKIP': 0.0}
 REGIME_MAP = {'trending': 0, 'ranging': 1, 'volatile': 2}
 SESSION_MAP = {'asian': 0, 'london': 1, 'ny_overlap': 2, 'new_york': 3, 'off_hours': 4}
-PAIR_MAP = {'EUR/USD': 0, 'GBP/USD': 1, 'USD/JPY': 2, 'MES': 3, 'MNQ': 4}
+PAIR_MAP = {'EUR/USD': 0, 'GBP/USD': 1, 'USD/JPY': 2, 'MES': 3, 'NQ': 4}
 
 # Minimum trades before the ML model activates (need enough data to learn from)
 # Lowered from 200 → 50: faster activation with GBM regularization (max_depth=3, min_samples_leaf=5)
@@ -188,7 +188,7 @@ class MLTradeScorer:
         # ── 7. Pair encoding (2 features) ────────────────────────────
         pair_norm = pair.upper().replace(' ', '') if pair else 'EUR/USD'
         features.append(1.0 if ('EUR' in pair_norm or 'MES' in pair_norm) else 0.0)
-        features.append(1.0 if ('GBP' in pair_norm or 'MNQ' in pair_norm) else 0.0)
+        features.append(1.0 if ('GBP' in pair_norm or 'NQ' in pair_norm) else 0.0)
 
         # ── 8. Signal direction (1 feature) ──────────────────────────
         ensemble_sig = signal_result.get('signal', 'SKIP')

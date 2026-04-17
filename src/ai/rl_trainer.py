@@ -380,7 +380,7 @@ def train_ultimate_model(symbols, episodes=1000, save_path="models/ultimate_td3"
 
 if __name__ == "__main__":
     # Train the ultimate model
-    symbols = ['MES', 'MNQ', 'SPY', 'QQQ']
+    symbols = ['MES', 'NQ', 'SPY', 'QQQ']
     agent, rewards = train_ultimate_model(symbols, episodes=1000)
 
     print("Training completed!")

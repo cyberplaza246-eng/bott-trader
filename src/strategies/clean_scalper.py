@@ -67,11 +67,11 @@ class CleanScalper:
             'sl_ticks': 12,      # Optimized
             'tp_ticks': 30,      # 2.5 R:R - best for MES
         },
-        'MNQ': {
+        'NQ': {
             'tick_size': 0.25,
-            'tick_value': 0.50,  # $0.50 per tick
+            'tick_value': 5.00,  # $5.00 per tick (full NQ)
             'sl_ticks': 30,      # Optimized
-            'tp_ticks': 60,      # 2.0 R:R - best for MNQ
+            'tp_ticks': 60,      # 2.0 R:R - best for NQ
         },
     }
 

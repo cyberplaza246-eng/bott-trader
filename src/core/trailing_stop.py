@@ -61,8 +61,16 @@ class TrailingStopManager:
             scalping_mode: If True, use tighter breakeven/trail/partial settings
             quick_wins:  If True, use ULTRA tight settings (takes small wins fast)
         """
-        # Enhanced profit protection mode: More aggressive settings for 5m scalping
-        if quick_wins:
+        # Check per-symbol trailing disable (from optimizer)
+        from config.strategy_config import SCALPING_PAIRS
+        pair_cfg = SCALPING_PAIRS.get(pair, {})
+        trailing_disabled = not pair_cfg.get('trailing_enabled', True)
+
+        if trailing_disabled:
+            effective_breakeven_r = 999.0     # Never triggers
+            effective_trail_mult = 0.0        # No trail
+            effective_partial_pct = 999.0     # Never triggers
+        elif quick_wins:
             effective_breakeven_r = 0.5       # Breakeven at 0.5R (protect early profits)
             effective_trail_mult = 0.4        # Trail at 0.4× ATR (~2.5 pts on MES)
             effective_partial_pct = 0.40      # Partial close at 40% of TP distance

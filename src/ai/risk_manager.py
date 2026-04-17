@@ -187,9 +187,9 @@ class UltimateRiskManager:
 
         # Assume some correlations (would be calculated from historical data)
         correlations = {
-            ('MES', 'MNQ'): 0.7,
+            ('MES', 'NQ'): 0.7,
             ('MES', 'SPY'): 0.8,
-            ('MNQ', 'QQQ'): 0.75
+            ('NQ', 'QQQ'): 0.75
         }
 
         for existing_symbol in existing_symbols:
@@ -307,7 +307,7 @@ class UltimateRiskManager:
                          for pos in self.positions.values())
 
         for symbol, position in self.positions.items():
-            if symbol in ['MES', 'MNQ']:
+            if symbol in ['MES', 'NQ']:
                 sector = 'futures'
             elif symbol in ['SPY', 'QQQ', 'IWM']:
                 sector = 'equities'

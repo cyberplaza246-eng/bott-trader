@@ -248,7 +248,7 @@ class EnsembleTrader:
         sweep_confidence = sweep_signal.get('confidence', 0.0)
 
         # ── Step 4: Run confirmation models ──────────────────────────
-        ema_signal = self.ema_crossover.get_signal(df_enriched)
+        ema_signal = self.ema_crossover.get_signal(df_enriched, pair=pair)
         technical_signal = self.technical.get_signal(df_enriched)
 
         # ── Step 4b: Run IntelligentTrader ML analysis ───────────────

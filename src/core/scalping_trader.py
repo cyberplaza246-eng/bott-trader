@@ -26,7 +26,7 @@ class ScalpingTrader:
         'EUR/USD': 20,
         'USD/JPY': 20,
         'MES': 10,      # Futures scalps — tighter hold times
-        'MNQ': 10,
+        'NQ': 10,
     }
     DEFAULT_HOLD_MINUTES = 15
     

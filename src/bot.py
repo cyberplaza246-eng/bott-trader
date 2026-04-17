@@ -65,8 +65,8 @@ class TradingBot:
         # Futures: MES and ES are same underlying, MNQ and NQ likewise
         'MES': 'ES',
         'ES': 'MES',
-        'MNQ': 'NQ',
         'NQ': 'MNQ',
+        'MNQ': 'NQ',
     }
 
     # ── Spread Limits — built from instrument registry ─────────────
