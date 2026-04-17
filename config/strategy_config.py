@@ -143,7 +143,7 @@ SCALPING_SPREAD_LIMITS = {
 # Per-symbol max contracts (hard cap per symbol across all open positions)
 MAX_CONTRACTS_PER_SYMBOL = {
     'MES': 3,     # 3 micro contracts max
-    'NQ': 2,      # 2 full NQ contracts max
+    'NQ': 1,      # 1 full NQ contract max
     'MNQ': 3,     # 3 micro NQ contracts max
 }
 
