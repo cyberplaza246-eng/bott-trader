@@ -814,8 +814,20 @@ class EnsembleTrader:
             sweep_adx >= 30 and
             tech_dir != opposing_dir
         )
+
+        # Fallback 3: Structural regime + EMA + Bias agree, moderate ADX (mirrors get_trading_signal logic)
+        sr = str(signal_result.get('sweep_regime', '') or '').lower()
+        is_regime_ema_fallback = (
+            not sweep_fired and
+            sr in ('trend_up', 'trend_down') and
+            sweep_bias == signal_result['signal'] and
+            ema_dir == signal_result['signal'] and
+            sweep_adx >= 14 and
+            tech_dir != opposing_dir
+        )
+        )
         
-        is_fallback_entry = is_ema_tech_fallback or is_trend_fallback
+        is_fallback_entry = is_ema_tech_fallback or is_trend_fallback or is_regime_ema_fallback
         
         if not sweep_fired and not is_fallback_entry:
             bot_logger.info("🚫 Sweep gate did not fire and no fallback conditions — no trade")
@@ -825,6 +837,8 @@ class EnsembleTrader:
             bot_logger.info(f"🔄 FALLBACK ENTRY: EMA+Tech agree on {signal_result['signal']} (no sweep required)")
         elif is_trend_fallback:
             bot_logger.info(f"🔄 FALLBACK ENTRY: Strong trend ADX={sweep_adx:.0f} + EMA+Bias={sweep_bias} (no sweep required)")
+        elif is_regime_ema_fallback:
+            bot_logger.info(f"🔄 FALLBACK ENTRY: Regime={sr} + EMA+Bias={sweep_bias} ADX={sweep_adx:.0f} (no sweep required)")
 
         # EMA crossover must not oppose signal direction (HOLD = neutral, allowed)
         if ema_dir in ('BUY', 'SELL') and ema_dir != signal_result['signal']:
