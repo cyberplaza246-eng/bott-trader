@@ -40,10 +40,19 @@ else:
 sys.path.insert(0, str(BASE_DIR))
 
 # Load .env from next to the exe / script
-from dotenv import load_dotenv
 _env_path = BASE_DIR / '.env'
-if _env_path.exists():
-    load_dotenv(_env_path)
+try:
+    from dotenv import load_dotenv
+    if _env_path.exists():
+        load_dotenv(_env_path)
+except ImportError:
+    # python-dotenv not installed — load .env manually
+    if _env_path.exists():
+        for line in _env_path.read_text().splitlines():
+            line = line.strip()
+            if line and not line.startswith('#') and '=' in line:
+                k, v = line.split('=', 1)
+                os.environ.setdefault(k.strip(), v.strip())
 
 import customtkinter as ctk
 

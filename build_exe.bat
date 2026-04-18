@@ -26,6 +26,7 @@ pyinstaller --onefile --windowed --name BottTrader ^
     --hidden-import="sklearn.svm" ^
     --hidden-import="pandas_ta" ^
     --hidden-import="customtkinter" ^
+    --hidden-import="dotenv" ^
     --hidden-import="pystray" ^
     --hidden-import="plyer.platforms.win.notification" ^
     --collect-data customtkinter ^
