@@ -6,6 +6,7 @@ A standalone GUI application that wraps LiveRithmicTrader with:
   - Instrument selection (MES, MNQ, NQ)
   - Paper / Live toggle
   - Settings panel (confidence, SL/TP, risk, max positions)
+  - Trade History tab (symbol, side, entry/exit, P&L)
   - Scrolling log output
   - System tray support (minimize to tray)
   - Trade notifications (Windows toast)
@@ -17,7 +18,7 @@ Usage:
     pyinstaller --onefile ...       # See build_exe.bat
 """
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 import os
 import sys
@@ -29,6 +30,27 @@ import time
 import webbrowser
 from datetime import datetime
 from pathlib import Path
+
+# ─── PyInstaller: explicit imports so the bundler finds them ───
+# These are used at runtime by start_live_rithmic / src modules.
+# Without these top-level imports PyInstaller won't include them.
+try:
+    import pandas              # noqa: F401
+    import numpy               # noqa: F401
+    import pandas_ta            # noqa: F401
+    import sklearn              # noqa: F401
+    import sklearn.ensemble     # noqa: F401
+    import sklearn.svm          # noqa: F401
+    import sklearn.preprocessing  # noqa: F401
+    import scipy                # noqa: F401
+    import flask                # noqa: F401
+    import flask_cors           # noqa: F401
+    import requests             # noqa: F401
+    import yfinance             # noqa: F401
+    import feedparser           # noqa: F401
+    import apscheduler          # noqa: F401
+except ImportError:
+    pass  # OK — some may be missing in dev; PyInstaller will still bundle them
 
 # Resolve base directory (works both as script and as PyInstaller exe)
 if getattr(sys, 'frozen', False):
@@ -275,12 +297,12 @@ def _notify(title: str, message: str):
 
 # Pattern matching for trade log lines
 _TRADE_PATTERNS = [
-    ('BUY', '🟢'),
-    ('SELL', '🔴'),
-    ('TAKE_PROFIT', '💰'),
-    ('STOP_LOSS', '⛔'),
-    ('trail', '🔒'),
-    ('Daily loss limit', '⚠️'),
+    ('BUY', '\U0001f7e2'),
+    ('SELL', '\U0001f534'),
+    ('TAKE_PROFIT', '\U0001f4b0'),
+    ('STOP_LOSS', '\u26d4'),
+    ('trail', '\U0001f512'),
+    ('Daily loss limit', '\u26a0\ufe0f'),
 ]
 
 
@@ -288,7 +310,6 @@ def _check_trade_notification(text: str):
     """Fire a notification if the log line indicates a trade event."""
     for keyword, icon in _TRADE_PATTERNS:
         if keyword in text:
-            # First 120 chars as message
             _notify(f"{icon} BottTrader", text[:120])
             return
 
@@ -313,7 +334,6 @@ class BottTraderApp(ctk.CTk):
         self._tray_icon = None
         self._running = False
         self._settings = load_settings()
-
         self._trade_history = load_trade_history()
 
         self._build_ui()
@@ -364,26 +384,26 @@ class BottTraderApp(ctk.CTk):
         ctk.CTkLabel(mode_frame, text="Mode", font=ctk.CTkFont(weight="bold")).pack(anchor='w', padx=8, pady=(6, 2))
         self._mode_var = ctk.StringVar(value='paper')
         ctk.CTkRadioButton(mode_frame, text="Paper", variable=self._mode_var, value='paper').pack(anchor='w', padx=12, pady=2)
-        ctk.CTkRadioButton(mode_frame, text="Live ⚠️", variable=self._mode_var, value='live').pack(anchor='w', padx=12, pady=2)
+        ctk.CTkRadioButton(mode_frame, text="Live \u26a0\ufe0f", variable=self._mode_var, value='live').pack(anchor='w', padx=12, pady=2)
 
         # Status
         status_frame = ctk.CTkFrame(top_frame)
         status_frame.pack(side='left', fill='y', padx=(0, 16))
         ctk.CTkLabel(status_frame, text="Status", font=ctk.CTkFont(weight="bold")).pack(anchor='w', padx=8, pady=(6, 2))
-        self._status_label = ctk.CTkLabel(status_frame, text="⏹ Stopped", text_color='#8b949e',
+        self._status_label = ctk.CTkLabel(status_frame, text="\u23f9 Stopped", text_color='#8b949e',
                                            font=ctk.CTkFont(size=13))
         self._status_label.pack(anchor='w', padx=12, pady=2)
 
         # Buttons
         btn_frame = ctk.CTkFrame(top_frame, fg_color='transparent')
         btn_frame.pack(side='right', padx=8)
-        self._start_btn = ctk.CTkButton(btn_frame, text="▶  Start", width=110, fg_color='#238636',
+        self._start_btn = ctk.CTkButton(btn_frame, text="\u25b6  Start", width=110, fg_color='#238636',
                                          hover_color='#2ea043', command=self._on_start)
         self._start_btn.pack(pady=4)
-        self._stop_btn = ctk.CTkButton(btn_frame, text="⏹  Stop", width=110, fg_color='#da3633',
+        self._stop_btn = ctk.CTkButton(btn_frame, text="\u23f9  Stop", width=110, fg_color='#da3633',
                                         hover_color='#f85149', state='disabled', command=self._on_stop)
         self._stop_btn.pack(pady=4)
-        self._dash_btn = ctk.CTkButton(btn_frame, text="📊  Dashboard", width=110,
+        self._dash_btn = ctk.CTkButton(btn_frame, text="\U0001f4ca  Dashboard", width=110,
                                         command=self._on_dashboard)
         self._dash_btn.pack(pady=4)
 
@@ -407,14 +427,14 @@ class BottTraderApp(ctk.CTk):
 
         setting_defs = [
             ('ensemble_confidence_threshold', 'Confidence Threshold', 0.40, 0.80, 0.01),
-            ('stop_loss_multiplier', 'SL Multiplier (×ATR)', 1.0, 5.0, 0.1),
-            ('take_profit_ratio', 'TP Ratio (×SL)', 1.0, 5.0, 0.1),
+            ('stop_loss_multiplier', 'SL Multiplier (\u00d7ATR)', 1.0, 5.0, 0.1),
+            ('take_profit_ratio', 'TP Ratio (\u00d7SL)', 1.0, 5.0, 0.1),
             ('risk_per_trade_percent', 'Risk per Trade %', 0.5, 3.0, 0.1),
             ('max_concurrent_trades', 'Max Concurrent Trades', 1, 5, 1),
             ('daily_loss_limit_percent', 'Daily Loss Limit %', 1.0, 10.0, 0.5),
-            ('max_contracts_mes', 'Max Contracts — MES', 1, 5, 1),
-            ('max_contracts_mnq', 'Max Contracts — MNQ', 1, 5, 1),
-            ('max_contracts_nq', 'Max Contracts — NQ', 1, 3, 1),
+            ('max_contracts_mes', 'Max Contracts \u2014 MES', 1, 5, 1),
+            ('max_contracts_mnq', 'Max Contracts \u2014 MNQ', 1, 5, 1),
+            ('max_contracts_nq', 'Max Contracts \u2014 NQ', 1, 3, 1),
         ]
 
         for i, (key, label, lo, hi, step) in enumerate(setting_defs):
@@ -460,7 +480,7 @@ class BottTraderApp(ctk.CTk):
             card.grid(row=0, column=i, padx=4, pady=4, sticky='nsew')
             ctk.CTkLabel(card, text=label, font=ctk.CTkFont(size=10),
                           text_color='#8b949e').pack(pady=(6, 0))
-            lbl = ctk.CTkLabel(card, text='—', font=ctk.CTkFont(size=16, weight='bold'),
+            lbl = ctk.CTkLabel(card, text='\u2014', font=ctk.CTkFont(size=16, weight='bold'),
                                 text_color=color)
             lbl.pack(pady=(0, 6))
             self._summary_labels[key] = lbl
@@ -493,14 +513,12 @@ class BottTraderApp(ctk.CTk):
 
     def _refresh_history_display(self):
         """Rebuild the trade history rows and update summary cards."""
-        # Clear existing rows
         for widget in self._history_scroll.winfo_children():
             widget.destroy()
 
         col_widths = [130, 60, 50, 80, 80, 80, 80, 80, 70]
         trades = self._trade_history
 
-        # Show most recent first
         for i, t in enumerate(reversed(trades)):
             pnl = t.get('pnl', 0)
             is_win = pnl > 0
@@ -508,21 +526,21 @@ class BottTraderApp(ctk.CTk):
             row = ctk.CTkFrame(self._history_scroll, fg_color=row_bg, height=28)
             row.pack(fill='x', pady=1)
 
-            side = t.get('direction', t.get('side', '—')).upper()
-            side_color = '#3fb950' if side == 'BUY' or side == 'LONG' else '#f85149'
-            pnl_str = f"${pnl:+.2f}" if pnl != 0 else '—'
+            side = t.get('direction', t.get('side', '\u2014')).upper()
+            side_color = '#3fb950' if side in ('BUY', 'LONG') else '#f85149'
+            pnl_str = f"${pnl:+.2f}" if pnl != 0 else '\u2014'
             pnl_color = '#3fb950' if pnl > 0 else '#f85149' if pnl < 0 else '#8b949e'
-            result = '✅ WIN' if pnl > 0 else '❌ LOSS' if pnl < 0 else '⏳'
+            result = '\u2705 WIN' if pnl > 0 else '\u274c LOSS' if pnl < 0 else '\u23f3'
             result_color = '#3fb950' if pnl > 0 else '#f85149' if pnl < 0 else '#d29922'
 
             values = [
-                (str(t.get('time', t.get('entry_time', '—')))[:19], '#c9d1d9'),
-                (t.get('symbol', '—'), '#58a6ff'),
+                (str(t.get('time', t.get('entry_time', '\u2014')))[:19], '#c9d1d9'),
+                (t.get('symbol', '\u2014'), '#58a6ff'),
                 (side, side_color),
                 (f"{t.get('entry', t.get('entry_price', 0)):.2f}", '#c9d1d9'),
-                (f"{t.get('exit', t.get('exit_price', 0)):.2f}" if t.get('exit', t.get('exit_price')) else '—', '#c9d1d9'),
-                (f"{t.get('sl', 0):.2f}" if t.get('sl') else '—', '#c9d1d9'),
-                (f"{t.get('tp', 0):.2f}" if t.get('tp') else '—', '#c9d1d9'),
+                (f"{t.get('exit', t.get('exit_price', 0)):.2f}" if t.get('exit', t.get('exit_price')) else '\u2014', '#c9d1d9'),
+                (f"{t.get('sl', 0):.2f}" if t.get('sl') else '\u2014', '#c9d1d9'),
+                (f"{t.get('tp', 0):.2f}" if t.get('tp') else '\u2014', '#c9d1d9'),
                 (pnl_str, pnl_color),
                 (result, result_color),
             ]
@@ -530,14 +548,13 @@ class BottTraderApp(ctk.CTk):
                 ctk.CTkLabel(row, text=val, width=w, font=ctk.CTkFont(size=11),
                               text_color=color).grid(row=0, column=j, padx=2, pady=2)
 
-        # Update summary
         total = len(trades)
         wins = sum(1 for t in trades if t.get('pnl', 0) > 0)
         losses = sum(1 for t in trades if t.get('pnl', 0) < 0)
         net = sum(t.get('pnl', 0) for t in trades)
         best = max((t.get('pnl', 0) for t in trades), default=0)
         worst = min((t.get('pnl', 0) for t in trades), default=0)
-        wr = f"{wins/total*100:.0f}%" if total > 0 else '—'
+        wr = f"{wins/total*100:.0f}%" if total > 0 else '\u2014'
 
         self._summary_labels['total'].configure(text=str(total))
         self._summary_labels['wins'].configure(text=str(wins))
@@ -545,8 +562,8 @@ class BottTraderApp(ctk.CTk):
         self._summary_labels['winrate'].configure(text=wr)
         net_color = '#3fb950' if net > 0 else '#f85149' if net < 0 else '#58a6ff'
         self._summary_labels['net_pnl'].configure(text=f"${net:+,.2f}", text_color=net_color)
-        self._summary_labels['best'].configure(text=f"${best:+.2f}" if best else '—')
-        self._summary_labels['worst'].configure(text=f"${worst:+.2f}" if worst else '—')
+        self._summary_labels['best'].configure(text=f"${best:+.2f}" if best else '\u2014')
+        self._summary_labels['worst'].configure(text=f"${worst:+.2f}" if worst else '\u2014')
 
         self._history_count_label.configure(text=f"{total} trades recorded")
 
@@ -559,7 +576,7 @@ class BottTraderApp(ctk.CTk):
     def _export_csv(self):
         """Export trade history to CSV."""
         if not self._trade_history:
-            self._append_log("⚠️ No trades to export")
+            self._append_log("\u26a0\ufe0f No trades to export")
             return
         csv_path = BASE_DIR / f"trade_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         try:
@@ -581,15 +598,15 @@ class BottTraderApp(ctk.CTk):
                         'contracts': t.get('contracts', t.get('size', 1)),
                     }
                     writer.writerow(row)
-            self._append_log(f"📄 Exported {len(self._trade_history)} trades to {csv_path.name}")
+            self._append_log(f"\U0001f4c4 Exported {len(self._trade_history)} trades to {csv_path.name}")
         except Exception as e:
-            self._append_log(f"❌ Export error: {e}")
+            self._append_log(f"\u274c Export error: {e}")
 
     def _clear_history(self):
         self._trade_history = []
         save_trade_history([])
         self._refresh_history_display()
-        self._append_log("🗑️ Trade history cleared")
+        self._append_log("\U0001f5d1\ufe0f Trade history cleared")
 
     @staticmethod
     def _fmt_val(key: str, val: float) -> str:
@@ -618,7 +635,7 @@ class BottTraderApp(ctk.CTk):
     def _on_start(self):
         symbols = [sym for sym, var in self._sym_vars.items() if var.get()]
         if not symbols:
-            self._append_log("⚠️  Select at least one instrument!")
+            self._append_log("\u26a0\ufe0f  Select at least one instrument!")
             return
 
         paper = self._mode_var.get() == 'paper'
@@ -631,7 +648,7 @@ class BottTraderApp(ctk.CTk):
                 dlg = CredentialsDialog(self)
                 self.wait_window(dlg)
                 if not dlg.result:
-                    self._append_log("❌ Credentials required for live trading")
+                    self._append_log("\u274c Credentials required for live trading")
                     return
 
         # Apply settings to env vars
@@ -642,9 +659,9 @@ class BottTraderApp(ctk.CTk):
 
         self._stop_event.clear()
         self._set_controls_running(True)
-        self._status_label.configure(text="⏳ Connecting...", text_color='#d29922')
+        self._status_label.configure(text="\u23f3 Connecting...", text_color='#d29922')
         mode_str = "PAPER" if paper else "LIVE"
-        self._append_log(f"🚀 Starting {mode_str} trading: {', '.join(symbols)}")
+        self._append_log(f"\U0001f680 Starting {mode_str} trading: {', '.join(symbols)}")
 
         # Redirect stdout/stderr
         self._orig_stdout = sys.stdout
@@ -670,29 +687,23 @@ class BottTraderApp(ctk.CTk):
                 skip_confirm=True,
             )
             if not self._trader.connect():
-                self._log_queue.put("❌ Connection failed — check credentials")
+                self._log_queue.put("\u274c Connection failed \u2014 check credentials")
                 self._schedule_stopped()
                 return
 
-            self._schedule_status("🟢 Trading", '#3fb950')
+            self._schedule_status("\U0001f7e2 Trading", '#3fb950')
 
-            # Patch the while-True loop: we'll run the method but watch the stop event.
-            # The run() method uses `while True` — we monkey-patch to check our event.
+            # Run the patched main loop
             self._run_with_stop_check(self._trader)
 
         except Exception as e:
-            self._log_queue.put(f"❌ Error: {e}")
+            self._log_queue.put(f"\u274c Error: {e}")
         finally:
             self._schedule_stopped()
 
     def _run_with_stop_check(self, trader):
         """Run the trader's main loop but break out when stop_event is set."""
-        # We can't easily break into the while-True inside run().
-        # Instead, we run it in a thread and use the stop_event to trigger
-        # a graceful broker shutdown, which will cause the loop to error/exit.
         import types
-
-        original_run = trader.run
 
         stop_event = self._stop_event
 
@@ -703,10 +714,10 @@ class BottTraderApp(ctk.CTk):
             print("=" * 70)
             print(f"Symbols:    {', '.join(self_trader.symbols)}")
             print(f"Max Concurrent Trades: {self_trader.max_positions}")
-            print(f"Mode:       {'PAPER' if self_trader.paper_mode else '⚠️ LIVE'}")
+            print(f"Mode:       {'PAPER' if self_trader.paper_mode else '\u26a0\ufe0f LIVE'}")
             print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
             print("=" * 70)
-            print("\n🚀 Starting trading loop...\n")
+            print("\n\U0001f680 Starting trading loop...\n")
 
             last_bar_time = {}
 
@@ -714,17 +725,14 @@ class BottTraderApp(ctk.CTk):
                 while not stop_event.is_set():
                     # Check if Rithmic connection is permanently lost
                     if hasattr(self_trader.broker, 'is_connection_dead') and self_trader.broker.is_connection_dead:
-                        print("\n❌ FORCED LOGOUT — Another app is using these credentials.")
-                        break
-
-                    if not self_trader.check_daily_limits():
-                        print("⏸️  Limits reached - waiting...")
-                        # Wait in small increments so we can check stop_event
-                        for _ in range(60):
-                            if stop_event.is_set():
-                                break
-                            time.sleep(5)
-                        continue
+                        print("\u274c Rithmic connection permanently lost. Attempting reconnect...")
+                        if not self_trader.connect():
+                            print("\u274c Reconnect failed. Waiting 60s...")
+                            for _ in range(60):
+                                if stop_event.is_set():
+                                    break
+                                time.sleep(5)
+                            continue
 
                     self_trader.sync_broker_position()
 
@@ -795,7 +803,7 @@ class BottTraderApp(ctk.CTk):
                         )
                         if len(sorted_candidates) > 1:
                             names = ', '.join(f"{s['symbol']}({s.get('confidence', 0.0):.0%})" for s in sorted_candidates)
-                            print(f"🏆 Cycle candidates: {names}")
+                            print(f"\U0001f3c6 Cycle candidates: {names}")
 
                         SAME_UNDERLYING = {'NQ': 'MNQ', 'MNQ': 'NQ'}
                         open_syms = {p.symbol for p in self_trader.positions.values()}
@@ -805,12 +813,12 @@ class BottTraderApp(ctk.CTk):
                             sym = candidate.get('symbol', '')
                             sibling = SAME_UNDERLYING.get(sym)
                             if sibling and sibling in open_syms:
-                                print(f"   ⏭️ Skipping {sym} — {sibling} already open (same underlying)")
+                                print(f"   \u23ed\ufe0f Skipping {sym} \u2014 {sibling} already open (same underlying)")
                                 continue
                             if self_trader.place_order(candidate):
                                 open_syms.add(sym)
                                 spec = self_trader._spec(candidate['symbol'])
-                                print(f"📊 {candidate['symbol']} ATR: {candidate['atr']:.2f}")
+                                print(f"\U0001f4ca {candidate['symbol']} ATR: {candidate['atr']:.2f}")
                                 risk = abs(candidate['entry'] - candidate['sl']) * spec['point_value']
                                 print(f"   Risk: ${risk:.2f} per contract")
 
@@ -822,12 +830,12 @@ class BottTraderApp(ctk.CTk):
                         time.sleep(1)
 
             except Exception as e:
-                print(f"❌ Trading loop error: {e}")
+                print(f"\u274c Trading loop error: {e}")
             finally:
                 self_trader.save_log()
                 if self_trader.broker:
                     self_trader.broker.shutdown()
-                print("\n⏹️  Trading stopped")
+                print("\n\u23f9\ufe0f  Trading stopped")
 
         # Replace the run method
         trader.run = types.MethodType(patched_run, trader)
@@ -846,13 +854,13 @@ class BottTraderApp(ctk.CTk):
         self._running = False
         self._trader = None
         self._set_controls_running(False)
-        self._status_label.configure(text="⏹ Stopped", text_color='#8b949e')
+        self._status_label.configure(text="\u23f9 Stopped", text_color='#8b949e')
 
     def _on_stop(self):
         if self._trader:
-            self._append_log("⏹ Stopping bot...")
+            self._append_log("\u23f9 Stopping bot...")
             self._stop_event.set()
-            self._status_label.configure(text="⏳ Stopping...", text_color='#d29922')
+            self._status_label.configure(text="\u23f3 Stopping...", text_color='#d29922')
 
     def _set_controls_running(self, running: bool):
         self._running = running
@@ -868,7 +876,7 @@ class BottTraderApp(ctk.CTk):
         if self._dashboard_thread is None or not self._dashboard_thread.is_alive():
             self._dashboard_thread = threading.Thread(target=self._start_dashboard, daemon=True)
             self._dashboard_thread.start()
-            self._append_log("📊 Dashboard starting at http://localhost:5000")
+            self._append_log("\U0001f4ca Dashboard starting at http://localhost:5000")
         webbrowser.open("http://localhost:5000")
 
     def _start_dashboard(self):
@@ -876,7 +884,7 @@ class BottTraderApp(ctk.CTk):
             from src.dashboard.app import start_dashboard
             start_dashboard(port=5000)
         except Exception as e:
-            self._log_queue.put(f"⚠️ Dashboard error: {e}")
+            self._log_queue.put(f"\u26a0\ufe0f Dashboard error: {e}")
 
     # ── Log ──────────────────────────────────────────────────────
     def _append_log(self, text: str):
@@ -893,7 +901,6 @@ class BottTraderApp(ctk.CTk):
                 msg = self._log_queue.get_nowait()
                 self._append_log(msg)
                 _check_trade_notification(msg)
-                self._try_capture_trade(msg)
         except queue.Empty:
             pass
         # Also periodically sync trades from the bot's internal list
@@ -912,12 +919,6 @@ class BottTraderApp(ctk.CTk):
                     self._add_trade(t)
         except Exception:
             pass
-
-    def _try_capture_trade(self, msg: str):
-        """Detect trade events from log messages as a fallback capture method."""
-        # The primary capture is _sync_trader_trades above.
-        # This is a fallback for paper mode or edge cases.
-        pass
 
     # ── Update Check ─────────────────────────────────────────────
     def _check_update_async(self):
