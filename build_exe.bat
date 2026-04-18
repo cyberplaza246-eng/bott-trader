@@ -21,15 +21,34 @@ pyinstaller --onefile --windowed --name BottTrader ^
     --add-data "src;src" ^
     --add-data "config;config" ^
     --add-data "data;data" ^
+    --hidden-import="pandas" ^
+    --hidden-import="numpy" ^
     --hidden-import="sklearn" ^
     --hidden-import="sklearn.ensemble" ^
     --hidden-import="sklearn.svm" ^
+    --hidden-import="sklearn.preprocessing" ^
+    --hidden-import="sklearn.model_selection" ^
+    --hidden-import="scipy" ^
     --hidden-import="pandas_ta" ^
-    --hidden-import="customtkinter" ^
+    --hidden-import="yfinance" ^
+    --hidden-import="requests" ^
+    --hidden-import="flask" ^
+    --hidden-import="flask_cors" ^
+    --hidden-import="feedparser" ^
+    --hidden-import="apscheduler" ^
+    --hidden-import="apscheduler.schedulers.background" ^
+    --hidden-import="async_rithmic" ^
     --hidden-import="dotenv" ^
+    --hidden-import="pythonjsonlogger" ^
+    --hidden-import="customtkinter" ^
     --hidden-import="pystray" ^
     --hidden-import="plyer.platforms.win.notification" ^
-    --collect-data customtkinter ^
+    --collect-all pandas ^
+    --collect-all numpy ^
+    --collect-all sklearn ^
+    --collect-all pandas_ta ^
+    --collect-all customtkinter ^
+    --collect-all async_rithmic ^
     launcher_app.py
 
 echo.

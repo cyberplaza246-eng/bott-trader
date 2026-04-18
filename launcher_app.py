@@ -17,7 +17,7 @@ Usage:
     pyinstaller --onefile ...       # See build_exe.bat
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 import os
 import sys
@@ -58,6 +58,7 @@ import customtkinter as ctk
 
 # ─── Settings Persistence ──────────────────────────────────────
 SETTINGS_FILE = BASE_DIR / 'settings.json'
+TRADE_HISTORY_FILE = BASE_DIR / 'trade_history.json'
 
 DEFAULT_SETTINGS = {
     'ensemble_confidence_threshold': 0.55,
@@ -87,6 +88,23 @@ def load_settings() -> dict:
 def save_settings(settings: dict):
     with open(SETTINGS_FILE, 'w') as f:
         json.dump(settings, f, indent=2)
+
+
+def load_trade_history() -> list:
+    """Load trade history from disk."""
+    if TRADE_HISTORY_FILE.exists():
+        try:
+            with open(TRADE_HISTORY_FILE, 'r') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
+def save_trade_history(trades: list):
+    """Save trade history to disk."""
+    with open(TRADE_HISTORY_FILE, 'w') as f:
+        json.dump(trades, f, indent=2, default=str)
 
 
 def apply_settings_to_env(settings: dict):
@@ -296,6 +314,8 @@ class BottTraderApp(ctk.CTk):
         self._running = False
         self._settings = load_settings()
 
+        self._trade_history = load_trade_history()
+
         self._build_ui()
         self._poll_log()
         self._check_update_async()
@@ -320,6 +340,7 @@ class BottTraderApp(ctk.CTk):
         self._tabs = ctk.CTkTabview(self, anchor='nw')
         self._tabs.pack(fill='both', expand=True, padx=12, pady=(8, 4))
         tab_trade = self._tabs.add("Trading")
+        tab_history = self._tabs.add("Trade History")
         tab_settings = self._tabs.add("Settings")
 
         # ── Trading Tab ──────────────────────────────────────────
@@ -376,6 +397,9 @@ class BottTraderApp(ctk.CTk):
                                          wrap='word')
         self._log_text.pack(fill='both', expand=True, padx=4, pady=4)
 
+        # ── Trade History Tab ─────────────────────────────────────
+        self._build_history_tab(tab_history)
+
         # ── Settings Tab ─────────────────────────────────────────
         self._setting_widgets = {}
         settings_grid = ctk.CTkFrame(tab_settings)
@@ -415,6 +439,157 @@ class BottTraderApp(ctk.CTk):
         ctk.CTkButton(btn_row, text="Save Settings", width=140, command=self._save_settings).pack(side='left', padx=8)
         ctk.CTkButton(btn_row, text="Reset to Defaults", width=140, fg_color='gray',
                        command=self._reset_settings).pack(side='left', padx=8)
+
+    # ── Trade History Tab Builder ────────────────────────────────
+    def _build_history_tab(self, parent):
+        # Summary cards
+        summary_frame = ctk.CTkFrame(parent)
+        summary_frame.pack(fill='x', padx=8, pady=(8, 4))
+
+        self._summary_labels = {}
+        for i, (key, label, color) in enumerate([
+            ('total', 'Total Trades', '#58a6ff'),
+            ('wins', 'Wins', '#3fb950'),
+            ('losses', 'Losses', '#f85149'),
+            ('winrate', 'Win Rate', '#d29922'),
+            ('net_pnl', 'Net P&L', '#58a6ff'),
+            ('best', 'Best Trade', '#3fb950'),
+            ('worst', 'Worst Trade', '#f85149'),
+        ]):
+            card = ctk.CTkFrame(summary_frame)
+            card.grid(row=0, column=i, padx=4, pady=4, sticky='nsew')
+            ctk.CTkLabel(card, text=label, font=ctk.CTkFont(size=10),
+                          text_color='#8b949e').pack(pady=(6, 0))
+            lbl = ctk.CTkLabel(card, text='—', font=ctk.CTkFont(size=16, weight='bold'),
+                                text_color=color)
+            lbl.pack(pady=(0, 6))
+            self._summary_labels[key] = lbl
+            summary_frame.grid_columnconfigure(i, weight=1)
+
+        # Column headers
+        header_frame = ctk.CTkFrame(parent, fg_color='#161b22')
+        header_frame.pack(fill='x', padx=8, pady=(8, 0))
+        columns = ['Time', 'Symbol', 'Side', 'Entry', 'Exit', 'SL', 'TP', 'P&L', 'Result']
+        col_widths = [130, 60, 50, 80, 80, 80, 80, 80, 70]
+        for j, (col, w) in enumerate(zip(columns, col_widths)):
+            ctk.CTkLabel(header_frame, text=col, width=w,
+                          font=ctk.CTkFont(size=11, weight='bold'),
+                          text_color='#8b949e').grid(row=0, column=j, padx=2, pady=4)
+
+        # Scrollable trade rows
+        self._history_scroll = ctk.CTkScrollableFrame(parent, fg_color='#0d1117')
+        self._history_scroll.pack(fill='both', expand=True, padx=8, pady=(0, 4))
+
+        # Buttons row
+        btn_row = ctk.CTkFrame(parent, fg_color='transparent')
+        btn_row.pack(fill='x', padx=8, pady=6)
+        ctk.CTkButton(btn_row, text="Export CSV", width=120, command=self._export_csv).pack(side='left', padx=4)
+        ctk.CTkButton(btn_row, text="Clear History", width=120, fg_color='gray',
+                       command=self._clear_history).pack(side='left', padx=4)
+        self._history_count_label = ctk.CTkLabel(btn_row, text="", text_color='#8b949e')
+        self._history_count_label.pack(side='right', padx=8)
+
+        self._refresh_history_display()
+
+    def _refresh_history_display(self):
+        """Rebuild the trade history rows and update summary cards."""
+        # Clear existing rows
+        for widget in self._history_scroll.winfo_children():
+            widget.destroy()
+
+        col_widths = [130, 60, 50, 80, 80, 80, 80, 80, 70]
+        trades = self._trade_history
+
+        # Show most recent first
+        for i, t in enumerate(reversed(trades)):
+            pnl = t.get('pnl', 0)
+            is_win = pnl > 0
+            row_bg = '#0f1a0f' if is_win else '#1a0f0f' if pnl < 0 else '#0d1117'
+            row = ctk.CTkFrame(self._history_scroll, fg_color=row_bg, height=28)
+            row.pack(fill='x', pady=1)
+
+            side = t.get('direction', t.get('side', '—')).upper()
+            side_color = '#3fb950' if side == 'BUY' or side == 'LONG' else '#f85149'
+            pnl_str = f"${pnl:+.2f}" if pnl != 0 else '—'
+            pnl_color = '#3fb950' if pnl > 0 else '#f85149' if pnl < 0 else '#8b949e'
+            result = '✅ WIN' if pnl > 0 else '❌ LOSS' if pnl < 0 else '⏳'
+            result_color = '#3fb950' if pnl > 0 else '#f85149' if pnl < 0 else '#d29922'
+
+            values = [
+                (str(t.get('time', t.get('entry_time', '—')))[:19], '#c9d1d9'),
+                (t.get('symbol', '—'), '#58a6ff'),
+                (side, side_color),
+                (f"{t.get('entry', t.get('entry_price', 0)):.2f}", '#c9d1d9'),
+                (f"{t.get('exit', t.get('exit_price', 0)):.2f}" if t.get('exit', t.get('exit_price')) else '—', '#c9d1d9'),
+                (f"{t.get('sl', 0):.2f}" if t.get('sl') else '—', '#c9d1d9'),
+                (f"{t.get('tp', 0):.2f}" if t.get('tp') else '—', '#c9d1d9'),
+                (pnl_str, pnl_color),
+                (result, result_color),
+            ]
+            for j, ((val, color), w) in enumerate(zip(values, col_widths)):
+                ctk.CTkLabel(row, text=val, width=w, font=ctk.CTkFont(size=11),
+                              text_color=color).grid(row=0, column=j, padx=2, pady=2)
+
+        # Update summary
+        total = len(trades)
+        wins = sum(1 for t in trades if t.get('pnl', 0) > 0)
+        losses = sum(1 for t in trades if t.get('pnl', 0) < 0)
+        net = sum(t.get('pnl', 0) for t in trades)
+        best = max((t.get('pnl', 0) for t in trades), default=0)
+        worst = min((t.get('pnl', 0) for t in trades), default=0)
+        wr = f"{wins/total*100:.0f}%" if total > 0 else '—'
+
+        self._summary_labels['total'].configure(text=str(total))
+        self._summary_labels['wins'].configure(text=str(wins))
+        self._summary_labels['losses'].configure(text=str(losses))
+        self._summary_labels['winrate'].configure(text=wr)
+        net_color = '#3fb950' if net > 0 else '#f85149' if net < 0 else '#58a6ff'
+        self._summary_labels['net_pnl'].configure(text=f"${net:+,.2f}", text_color=net_color)
+        self._summary_labels['best'].configure(text=f"${best:+.2f}" if best else '—')
+        self._summary_labels['worst'].configure(text=f"${worst:+.2f}" if worst else '—')
+
+        self._history_count_label.configure(text=f"{total} trades recorded")
+
+    def _add_trade(self, trade: dict):
+        """Add a trade to history and refresh display."""
+        self._trade_history.append(trade)
+        save_trade_history(self._trade_history)
+        self.after(0, self._refresh_history_display)
+
+    def _export_csv(self):
+        """Export trade history to CSV."""
+        if not self._trade_history:
+            self._append_log("⚠️ No trades to export")
+            return
+        csv_path = BASE_DIR / f"trade_history_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        try:
+            import csv
+            fields = ['time', 'symbol', 'direction', 'entry', 'exit', 'sl', 'tp', 'pnl', 'contracts']
+            with open(csv_path, 'w', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=fields, extrasaction='ignore')
+                writer.writeheader()
+                for t in self._trade_history:
+                    row = {
+                        'time': t.get('time', t.get('entry_time', '')),
+                        'symbol': t.get('symbol', ''),
+                        'direction': t.get('direction', t.get('side', '')),
+                        'entry': t.get('entry', t.get('entry_price', '')),
+                        'exit': t.get('exit', t.get('exit_price', '')),
+                        'sl': t.get('sl', ''),
+                        'tp': t.get('tp', ''),
+                        'pnl': t.get('pnl', 0),
+                        'contracts': t.get('contracts', t.get('size', 1)),
+                    }
+                    writer.writerow(row)
+            self._append_log(f"📄 Exported {len(self._trade_history)} trades to {csv_path.name}")
+        except Exception as e:
+            self._append_log(f"❌ Export error: {e}")
+
+    def _clear_history(self):
+        self._trade_history = []
+        save_trade_history([])
+        self._refresh_history_display()
+        self._append_log("🗑️ Trade history cleared")
 
     @staticmethod
     def _fmt_val(key: str, val: float) -> str:
@@ -712,15 +887,37 @@ class BottTraderApp(ctk.CTk):
         self._log_text.configure(state='disabled')
 
     def _poll_log(self):
-        """Drain the log queue and append to the textbox. Also check for trade notifications."""
+        """Drain the log queue and append to the textbox. Also check for trade notifications and record trades."""
         try:
             while True:
                 msg = self._log_queue.get_nowait()
                 self._append_log(msg)
                 _check_trade_notification(msg)
+                self._try_capture_trade(msg)
         except queue.Empty:
             pass
+        # Also periodically sync trades from the bot's internal list
+        self._sync_trader_trades()
         self.after(100, self._poll_log)
+
+    def _sync_trader_trades(self):
+        """Pull completed trades from LiveRithmicTrader.trades list into our history."""
+        if not self._trader:
+            return
+        try:
+            bot_trades = getattr(self._trader, 'trades', [])
+            known = len(self._trade_history)
+            if len(bot_trades) > known:
+                for t in bot_trades[known:]:
+                    self._add_trade(t)
+        except Exception:
+            pass
+
+    def _try_capture_trade(self, msg: str):
+        """Detect trade events from log messages as a fallback capture method."""
+        # The primary capture is _sync_trader_trades above.
+        # This is a fallback for paper mode or edge cases.
+        pass
 
     # ── Update Check ─────────────────────────────────────────────
     def _check_update_async(self):
