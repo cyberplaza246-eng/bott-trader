@@ -27,6 +27,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements_desktop.txt
+        
+      - name: Install pandas-ta (best-effort)
+        run: pip install pandas_ta || pip install git+https://github.com/twopirllc/pandas-ta.git || true
+        continue-on-error: true
 
       - name: Build exe with PyInstaller
         run: |
@@ -61,7 +65,8 @@ jobs:
             --collect-all sklearn ^
             --collect-all pandas_ta ^
             --collect-all customtkinter ^
-            --collect-all async_rithmic ^
+            --collect-all flask ^
+            --collect-all yfinance ^
             launcher_app.py
         shell: cmd
 
