@@ -18,10 +18,20 @@ Usage:
     pyinstaller --onefile ...       # See build_exe.bat
 """
 
-__version__ = "1.1.5"
+__version__ = "1.1.7"
 
 import os
 import sys
+
+# ─── Hot-reload: if a newer launcher_app.py exists next to the exe, run it ──
+if getattr(sys, 'frozen', False):
+    _local_launcher = os.path.join(os.path.dirname(sys.executable), 'launcher_app.py')
+    if os.path.isfile(_local_launcher):
+        with open(_local_launcher, 'r', encoding='utf-8') as _f:
+            _code = _f.read()
+        exec(compile(_code, _local_launcher, 'exec'), {'__name__': '__main__', '__file__': _local_launcher})
+        sys.exit(0)
+
 import json
 import threading
 import queue
@@ -147,7 +157,7 @@ CODE_FOLDERS = ["src", "config"]
 CODE_FILES = [
     "start_live_rithmic.py", "start_live.py", "start_live_mtf_scalping.py",
     "start_live_breakout.py", "requirements.txt", "launch_ultimate_bot.py",
-    "place_trade_now.py",
+    "place_trade_now.py", "launcher_app.py",
 ]
 
 
