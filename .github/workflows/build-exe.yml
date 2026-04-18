@@ -67,6 +67,7 @@ jobs:
             --collect-all customtkinter ^
             --collect-all flask ^
             --collect-all yfinance ^
+            --collect-all async_rithmic ^
             launcher_app.py
         shell: cmd
 
