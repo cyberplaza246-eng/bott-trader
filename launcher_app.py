@@ -144,7 +144,11 @@ GITHUB_REPO = "cyberplaza246-eng/bott-trader"
 GITHUB_BRANCH = "main"
 # Folders to sync from GitHub for code-only updates
 CODE_FOLDERS = ["src", "config"]
-CODE_FILES = ["start_live_rithmic.py", "start_live.py", "requirements.txt"]
+CODE_FILES = [
+    "start_live_rithmic.py", "start_live.py", "start_live_mtf_scalping.py",
+    "start_live_breakout.py", "requirements.txt", "launch_ultimate_bot.py",
+    "place_trade_now.py",
+]
 
 
 def check_for_update() -> dict | None:
