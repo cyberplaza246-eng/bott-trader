@@ -18,7 +18,7 @@ Usage:
     pyinstaller --onefile ...       # See build_exe.bat
 """
 
-__version__ = "1.1.1"
+__version__ = "1.1.5"
 
 import os
 import sys
@@ -141,6 +141,10 @@ def apply_settings_to_env(settings: dict):
 
 # ─── Update Checker ─────────────────────────────────────────────
 GITHUB_REPO = "cyberplaza246-eng/bott-trader"
+GITHUB_BRANCH = "main"
+# Folders to sync from GitHub for code-only updates
+CODE_FOLDERS = ["src", "config"]
+CODE_FILES = ["start_live_rithmic.py", "start_live.py", "requirements.txt"]
 
 
 def check_for_update() -> dict | None:
@@ -166,6 +170,80 @@ def check_for_update() -> dict | None:
     except Exception:
         pass
     return None
+
+
+def update_code_from_github(progress_callback=None) -> str:
+    """Download latest src/config/scripts from GitHub and extract next to the exe.
+    Returns a status message string."""
+    import requests
+    import zipfile
+    import shutil
+    import tempfile
+
+    url = f"https://github.com/{GITHUB_REPO}/archive/refs/heads/{GITHUB_BRANCH}.zip"
+
+    if progress_callback:
+        progress_callback("Downloading latest code from GitHub...")
+
+    resp = requests.get(url, timeout=60, stream=True)
+    if resp.status_code != 200:
+        return f"Download failed (HTTP {resp.status_code})"
+
+    # Save to temp file
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
+    total = 0
+    for chunk in resp.iter_content(chunk_size=65536):
+        tmp.write(chunk)
+        total += len(chunk)
+    tmp.close()
+
+    if progress_callback:
+        progress_callback(f"Downloaded {total // 1024}KB, extracting...")
+
+    try:
+        with zipfile.ZipFile(tmp.name, 'r') as zf:
+            # The zip contains a top-level folder like "bott-trader-main/"
+            top_dirs = {name.split('/')[0] for name in zf.namelist() if '/' in name}
+            if len(top_dirs) != 1:
+                return "Unexpected zip structure"
+            prefix = top_dirs.pop() + '/'
+
+            updated = 0
+
+            # Sync folders (src/, config/)
+            for folder in CODE_FOLDERS:
+                folder_prefix = prefix + folder + '/'
+                members = [n for n in zf.namelist()
+                           if n.startswith(folder_prefix) and not n.endswith('/')]
+                if members:
+                    dest_folder = BASE_DIR / folder
+                    # Remove old folder and replace entirely
+                    if dest_folder.exists():
+                        shutil.rmtree(dest_folder)
+                    for member in members:
+                        rel_path = member[len(prefix):]  # e.g. "src/ai/..."
+                        dest = BASE_DIR / rel_path
+                        dest.parent.mkdir(parents=True, exist_ok=True)
+                        with zf.open(member) as src, open(dest, 'wb') as dst:
+                            dst.write(src.read())
+                        updated += 1
+
+            # Sync individual files
+            for fname in CODE_FILES:
+                member = prefix + fname
+                if member in zf.namelist():
+                    with zf.open(member) as src, open(BASE_DIR / fname, 'wb') as dst:
+                        dst.write(src.read())
+                    updated += 1
+
+        return f"Updated {updated} files from GitHub ({GITHUB_BRANCH} branch)"
+    except Exception as e:
+        return f"Extract failed: {e}"
+    finally:
+        try:
+            os.unlink(tmp.name)
+        except OSError:
+            pass
 
 
 # ─── Credentials Dialog ─────────────────────────────────────────
@@ -462,6 +540,17 @@ class BottTraderApp(ctk.CTk):
         ctk.CTkButton(btn_row, text="\U0001f511 Rithmic Login", width=140,
                        command=self._edit_credentials).pack(side='left', padx=8)
 
+        # Second button row — updates
+        btn_row2 = ctk.CTkFrame(tab_settings, fg_color='transparent')
+        btn_row2.pack(pady=(0, 12))
+        self._update_code_btn = ctk.CTkButton(
+            btn_row2, text="\U0001f504 Update Bot Code", width=180,
+            fg_color='#1f6feb', hover_color='#388bfd',
+            command=self._on_update_code)
+        self._update_code_btn.pack(side='left', padx=8)
+        self._update_status_label = ctk.CTkLabel(btn_row2, text="", text_color='#8b949e')
+        self._update_status_label.pack(side='left', padx=8)
+
     # ── Trade History Tab Builder ────────────────────────────────
     def _build_history_tab(self, parent):
         # Summary cards
@@ -639,6 +728,33 @@ class BottTraderApp(ctk.CTk):
         self.wait_window(dlg)
         if dlg.result:
             self._append_log("\u2705 Rithmic credentials saved")
+
+    def _on_update_code(self):
+        """Pull latest bot code from GitHub without re-downloading the exe."""
+        if self._running:
+            self._append_log("\u26a0\ufe0f Stop the bot before updating code")
+            return
+        self._update_code_btn.configure(state='disabled', text="\u23f3 Updating...")
+        self._update_status_label.configure(text="Downloading...", text_color='#d29922')
+        threading.Thread(target=self._do_update_code, daemon=True).start()
+
+    def _do_update_code(self):
+        """Background thread for code update."""
+        def progress(msg):
+            self.after(0, lambda: self._update_status_label.configure(text=msg))
+        try:
+            result = update_code_from_github(progress_callback=progress)
+            self.after(0, lambda: self._finish_update_code(result))
+        except Exception as e:
+            self.after(0, lambda: self._finish_update_code(f"Error: {e}"))
+
+    def _finish_update_code(self, result: str):
+        """UI callback when code update finishes."""
+        self._update_code_btn.configure(state='normal', text="\U0001f504 Update Bot Code")
+        is_success = result.startswith("Updated")
+        color = '#3fb950' if is_success else '#f85149'
+        self._update_status_label.configure(text=result, text_color=color)
+        self._append_log(f"[Update] {result}")
 
     # ── Bot Lifecycle ────────────────────────────────────────────
     def _on_start(self):
