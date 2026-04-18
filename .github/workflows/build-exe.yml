@@ -16,10 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: pip
 
       - name: Install dependencies
@@ -27,10 +27,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements_desktop.txt
-        
-      - name: Install pandas-ta (best-effort)
-        run: pip install pandas_ta || pip install git+https://github.com/twopirllc/pandas-ta.git || true
-        continue-on-error: true
+
+      - name: Verify key packages
+        run: python -c "import pandas; import numpy; import pandas_ta; import flask; print('All key packages OK')"
 
       - name: Build exe with PyInstaller
         run: |
@@ -63,7 +62,8 @@ jobs:
             --collect-all pandas ^
             --collect-all numpy ^
             --collect-all sklearn ^
-            --collect-all pandas_ta ^
+            --collect-submodules pandas_ta ^
+            --collect-data pandas_ta ^
             --collect-all customtkinter ^
             --collect-all flask ^
             --collect-all yfinance ^
