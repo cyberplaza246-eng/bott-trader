@@ -459,6 +459,8 @@ class BottTraderApp(ctk.CTk):
         ctk.CTkButton(btn_row, text="Save Settings", width=140, command=self._save_settings).pack(side='left', padx=8)
         ctk.CTkButton(btn_row, text="Reset to Defaults", width=140, fg_color='gray',
                        command=self._reset_settings).pack(side='left', padx=8)
+        ctk.CTkButton(btn_row, text="\U0001f511 Rithmic Login", width=140,
+                       command=self._edit_credentials).pack(side='left', padx=8)
 
     # ── Trade History Tab Builder ────────────────────────────────
     def _build_history_tab(self, parent):
@@ -631,6 +633,13 @@ class BottTraderApp(ctk.CTk):
         save_settings(self._settings)
         self._append_log("[Settings] Reset to defaults")
 
+    def _edit_credentials(self):
+        """Open the credentials dialog so user can view/edit Rithmic login."""
+        dlg = CredentialsDialog(self)
+        self.wait_window(dlg)
+        if dlg.result:
+            self._append_log("\u2705 Rithmic credentials saved")
+
     # ── Bot Lifecycle ────────────────────────────────────────────
     def _on_start(self):
         symbols = [sym for sym, var in self._sym_vars.items() if var.get()]
@@ -640,16 +649,15 @@ class BottTraderApp(ctk.CTk):
 
         paper = self._mode_var.get() == 'paper'
 
-        if not paper:
-            # Check credentials
-            uid = os.getenv('RITHMIC_USER_ID', '').strip()
-            pw = os.getenv('RITHMIC_PASSWORD', '').strip()
-            if not uid or not pw:
-                dlg = CredentialsDialog(self)
-                self.wait_window(dlg)
-                if not dlg.result:
-                    self._append_log("\u274c Credentials required for live trading")
-                    return
+        # Rithmic credentials needed for both paper and live
+        uid = os.getenv('RITHMIC_USER_ID', '').strip()
+        pw = os.getenv('RITHMIC_PASSWORD', '').strip()
+        if not uid or not pw:
+            dlg = CredentialsDialog(self)
+            self.wait_window(dlg)
+            if not dlg.result:
+                self._append_log("\u274c Credentials required to connect to Rithmic")
+                return
 
         # Apply settings to env vars
         apply_settings_to_env(self._settings)
