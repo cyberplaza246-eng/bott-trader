@@ -714,7 +714,8 @@ class BottTraderApp(ctk.CTk):
             print("=" * 70)
             print(f"Symbols:    {', '.join(self_trader.symbols)}")
             print(f"Max Concurrent Trades: {self_trader.max_positions}")
-            print(f"Mode:       {'PAPER' if self_trader.paper_mode else '\u26a0\ufe0f LIVE'}")
+            mode_label = 'PAPER' if self_trader.paper_mode else '\u26a0\ufe0f LIVE'
+            print(f"Mode:       {mode_label}")
             print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
             print("=" * 70)
             print("\n\U0001f680 Starting trading loop...\n")
