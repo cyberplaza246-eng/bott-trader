@@ -93,11 +93,12 @@ class Position:
 class LiveRithmicTrader:
     """Live trading with Enhanced Breakout Strategy via Rithmic."""
     
-    def __init__(self, symbol: str = 'MES', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False):
+    def __init__(self, symbol: str = 'MES', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False, paper_orders: bool = False):
         self.skip_confirm = skip_confirm
         self.symbols = symbols or [symbol]
         self.symbol = self.symbols[0]
         self.paper_mode = paper_mode
+        self.paper_orders = paper_orders  # Live Rithmic data + simulated orders
         
         for sym in self.symbols:
             if sym not in SYMBOL_SPECS:
@@ -234,7 +235,7 @@ class LiveRithmicTrader:
         """Initialize Rithmic connection (skipped in paper mode)."""
         try:
             # Paper mode: skip Rithmic, use Yahoo Finance for data
-            if self.paper_mode:
+            if self.paper_mode and not self.paper_orders:
                 print("📝 PAPER MODE - Skipping Rithmic connection")
                 print("   Using Yahoo Finance for market data")
                 self.broker = None
@@ -547,9 +548,11 @@ class LiveRithmicTrader:
         sl = signal['sl']
         tp = signal['tp']
         
-        if self.paper_mode:
+        if self.paper_mode or self.paper_orders:
             order_id = f"paper_{int(time.time())}"
-            print(f"📝 [PAPER] {direction.upper()} {symbol} @ {entry:.2f}")
+            tag = "PAPER-ORDERS" if self.paper_orders else "PAPER"
+            side = "LONG" if direction == 'long' else "SHORT"
+            print(f"📝 [{tag}] {side} {symbol} @ {entry:.2f}")
             print(f"   SL: {sl:.2f} | TP: {tp:.2f}")
             
             pos = Position(
@@ -682,7 +685,7 @@ class LiveRithmicTrader:
         Queries Rithmic for the actual open position count and removes
         any positions from self.positions that have been closed by SL/TP.
         """
-        if self.paper_mode or not self.broker:
+        if self.paper_mode or self.paper_orders or not self.broker:
             return
         
         try:
@@ -774,13 +777,21 @@ class LiveRithmicTrader:
         print("=" * 70)
         print(f"Symbols:    {', '.join(self.symbols)}")
         print(f"Contracts:  {self.contracts}")
-        print(f"Mode:       {'PAPER' if self.paper_mode else '⚠️ LIVE'}")
+        if self.paper_orders:
+            mode_str = '📝 PAPER-ORDERS (live data, simulated fills)'
+        elif self.paper_mode:
+            mode_str = 'PAPER'
+        else:
+            mode_str = '⚠️ LIVE'
+        print(f"Mode:       {mode_str}")
         print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
         print(f"Features:   Dynamic SL/TP, Trailing Stops, 8 Confirmation Models")
         print(f"Risk:       Max ${self.daily_loss_limit} daily loss")
         print("=" * 70)
         
-        if not self.paper_mode and not self.skip_confirm:
+        if self.paper_orders:
+            print("\n📝 PAPER-ORDERS MODE - Connected to live Rithmic data, orders are simulated.")
+        elif not self.paper_mode and not self.skip_confirm:
             print("\n⚠️  WARNING: LIVE MODE - Real money at risk!")
             print("Press Ctrl+C within 10 seconds to cancel...")
             try:
@@ -903,13 +914,14 @@ def main():
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
     parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ'], help='Single symbol mode')
     parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ')
-    parser.add_argument('--paper', action='store_true', help='Paper trading mode')
+    parser.add_argument('--paper', action='store_true', help='Paper trading mode (Yahoo data + simulated orders)')
+    parser.add_argument('--paper-orders', action='store_true', dest='paper_orders', help='Live Rithmic data + simulated orders')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
     
     args = parser.parse_args()
 
     symbols = args.symbols if args.symbols else [args.symbol]
-    trader = LiveRithmicTrader(symbol=symbols[0], symbols=symbols, paper_mode=args.paper, skip_confirm=args.yes)
+    trader = LiveRithmicTrader(symbol=symbols[0], symbols=symbols, paper_mode=args.paper, skip_confirm=args.yes, paper_orders=args.paper_orders)
     
     if not trader.connect():
         print("\n❌ Could not connect to Rithmic")
