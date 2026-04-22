@@ -74,6 +74,7 @@ RISK_SETTINGS = {
 SYMBOL_SPECS = {
     'MES': {'point_value': 5.0, 'tick_size': 0.25},
     'MNQ': {'point_value': 2.0, 'tick_size': 0.25},
+    'NQ':  {'point_value': 20.0, 'tick_size': 0.25},
 }
 
 
@@ -362,6 +363,7 @@ class LiveRithmicTrader:
             ticker_map = {
                 'MES': 'ES=F',  # E-mini S&P 500 futures
                 'MNQ': 'NQ=F',  # E-mini Nasdaq futures
+                'NQ':  'NQ=F',  # Nasdaq 100 futures
             }
             target = symbol or self.symbol
             ticker = ticker_map.get(target, f'{target}=F')
@@ -912,8 +914,8 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
-    parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ'], help='Single symbol mode')
-    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ')
+    parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ', 'NQ'], help='Single symbol mode')
+    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode (Yahoo data + simulated orders)')
     parser.add_argument('--paper-orders', action='store_true', dest='paper_orders', help='Live Rithmic data + simulated orders')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
