@@ -1,6 +1,6 @@
 @echo off
 if "%~1"=="--run" goto :run
-title BottTrader - LIVE MES+MNQ (max 4)
+title BottTrader - LIVE MES+MNQ
 cd /d "%~dp0"
 cmd /c "%~f0" --run
 goto :eof
@@ -9,7 +9,7 @@ goto :eof
 setlocal enabledelayedexpansion
 
 echo ============================================
-echo   BottTrader - LIVE MES+MNQ (max 4)
+echo   BottTrader - LIVE MES+MNQ
 echo ============================================
 echo.
 
@@ -20,16 +20,12 @@ for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
     )
 )
 
-set LIVE_MODE=true
-set MAX_POSITIONS=4
-set MAX_CONCURRENT_TRADES=4
-
 echo   Account: %RITHMIC_USER_ID%
 echo   System:  %RITHMIC_SYSTEM%
 echo   Symbols: MES MNQ
-echo   Mode:    PAPER-ORDERS (live data, simulated fills)
+echo   Mode:    LIVE - REAL MONEY
 echo ============================================
 echo.
 
-python start_live_rithmic.py --symbols MES MNQ --paper-orders --yes
+python start_live_rithmic.py --symbols MES MNQ --yes
 

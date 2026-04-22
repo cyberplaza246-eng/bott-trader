@@ -1,6 +1,6 @@
 @echo off
 if "%~1"=="--run" goto :run
-title BottTrader - PAPER NQ only
+title BottTrader - LIVE NQ only
 cd /d "%~dp0"
 cmd /c "%~f0" --run
 goto :eof
@@ -9,7 +9,7 @@ goto :eof
 setlocal enabledelayedexpansion
 
 echo ============================================
-echo   BottTrader - PAPER NQ only
+echo   BottTrader - LIVE NQ only
 echo ============================================
 echo.
 
@@ -23,8 +23,8 @@ for /f "usebackq tokens=1,* delims==" %%A in (".env") do (
 echo   Account: %RITHMIC_USER_ID%
 echo   System:  %RITHMIC_SYSTEM%
 echo   Symbols: NQ
-echo   Mode:    PAPER-ORDERS (live data, simulated fills)
+echo   Mode:    LIVE - REAL MONEY
 echo ============================================
 echo.
 
-python start_live_rithmic.py --symbol NQ --paper-orders --yes
+python start_live_rithmic.py --symbol NQ --yes
