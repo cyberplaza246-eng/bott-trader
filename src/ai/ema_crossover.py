@@ -38,7 +38,7 @@ class EMACrossoverAnalyzer:
             dict with signal, confidence, reason
         """
         try:
-            if df is None or len(df) < 200:
+            if df is None or len(df) < 50:
                 result = {'signal': 'HOLD', 'confidence': 0.0, 'reason': 'Insufficient data'}
                 bot_logger.info(f"[EMA] Returning: {result}")
                 return result

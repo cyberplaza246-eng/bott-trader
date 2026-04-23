@@ -338,9 +338,18 @@ class TradingBot:
         if cooldown_key not in self.last_signal_time:
             return False
         
-        # Use per-pair cooldown from config (ATR-based config has no nested timeframe)
+        # Prefer bar-based cooldowns so live cadence matches backtests.
         pair_config = SCALPING_PAIRS.get(pair, {})
-        cooldown_seconds = pair_config.get('cooldown_seconds', 30)
+        bar_minutes = TIMEFRAMES.get(f"scalp_{'fast' if timeframe_key == '1m' else 'slow'}", 5)
+        bars_key = f"cooldown_bars_{timeframe_key}"
+        cooldown_bars = pair_config.get(bars_key)
+        if cooldown_bars is None:
+            cooldown_bars = pair_config.get('cooldown_bars')
+
+        if cooldown_bars is not None:
+            cooldown_seconds = max(1, int(cooldown_bars)) * int(bar_minutes) * 60
+        else:
+            cooldown_seconds = pair_config.get('cooldown_seconds', 30)
         
         elapsed = (datetime.now() - self.last_signal_time[cooldown_key]).total_seconds()
         return elapsed < cooldown_seconds
@@ -696,6 +705,31 @@ class TradingBot:
                     # Correlation guard (optional)
                     if self.enable_correlation_guard and self._has_correlated_position(pair, signal_result['signal']):
                         continue
+
+                    # ── Pyramid guard: block fallback entries when already in position ──
+                    # Sweep-fired entries may scale in intentionally; fallback (bias-only)
+                    # entries at effectively the same price are just adding to a losing trade.
+                    _sweep_fired = signal_result.get('models', {}).get('sweep', {}).get('signal') in ('BUY', 'SELL')
+                    if not _sweep_fired and self._has_bot_position(pair):
+                        bot_logger.info(
+                            f"🚫 Pyramid guard: {pair} already has an open position "
+                            f"— blocking fallback entry (no sweep)"
+                        )
+                        continue
+
+                    # ── Post-loss cooldown: block re-entry too soon after a loss ──
+                    _loss_cooldown = getattr(self, '_post_loss_cooldown', {})
+                    _loss_time = _loss_cooldown.get(pair)
+                    _LOSS_COOLDOWN_MINUTES = 20
+                    if _loss_time:
+                        _elapsed_since_loss = (datetime.now() - _loss_time).total_seconds() / 60
+                        if _elapsed_since_loss < _LOSS_COOLDOWN_MINUTES:
+                            bot_logger.info(
+                                f"⏳ Post-loss cooldown: {pair} — "
+                                f"{_elapsed_since_loss:.1f}min since last loss "
+                                f"(wait {_LOSS_COOLDOWN_MINUTES}min total)"
+                            )
+                            continue
 
                     # ── RL Agent ──────────────────────────────────────
                     # Run ALL signals through RL so it learns from everything.
@@ -1917,6 +1951,16 @@ class TradingBot:
 
                 # Record with RL Agent
                 self._record_rl_outcome(pair, profit, exit_type)
+
+                # ── Post-loss cooldown: remember when this pair last lost ──
+                if profit <= 0:
+                    if not hasattr(self, '_post_loss_cooldown'):
+                        self._post_loss_cooldown = {}
+                    self._post_loss_cooldown[pair] = datetime.now()
+                    bot_logger.info(
+                        f"⏳ Post-loss cooldown started for {pair} — "
+                        f"no new entries for 20 minutes"
+                    )
 
                 # Clean from trailing stop tracker too
                 if hasattr(self, 'trailing'):

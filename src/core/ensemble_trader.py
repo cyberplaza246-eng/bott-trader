@@ -36,7 +36,7 @@ from src.ai.ml_trade_scorer import MLTradeScorer
 from src.ai.rl_agent import RLTradingAgent
 from src.utils.logger import TradeLogger, bot_logger
 from src.instruments import REGISTRY
-from config.strategy_config import ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGREEMENT
+from config.strategy_config import ASSET_CLASS, ENSEMBLE_CONFIDENCE_THRESHOLD, MIN_MODELS_AGREEMENT
 
 # Import IntelligentTrader with availability check
 try:
@@ -90,6 +90,23 @@ class EnsembleTrader:
             return float(v)
         except Exception:
             return default
+
+    @staticmethod
+    def _looks_like_five_minute_data(df: pd.DataFrame) -> bool:
+        """Best-effort cadence check used for safe 5M fallback."""
+        if df is None or len(df) < 30 or 'datetime' not in df.columns:
+            return False
+        try:
+            dt = pd.to_datetime(df['datetime'], utc=True, errors='coerce').dropna()
+            if len(dt) < 20:
+                return False
+            diffs = dt.sort_values().diff().dropna()
+            if diffs.empty:
+                return False
+            median_seconds = float(diffs.dt.total_seconds().median())
+            return 240 <= median_seconds <= 360
+        except Exception:
+            return False
 
     def __init__(self, newsapi_key=None, broker=None):
         # RSI filter thresholds (configurable at runtime via env vars)
@@ -238,6 +255,15 @@ class EnsembleTrader:
                 except Exception as e:
                     bot_logger.warning(f"⚠️ {pair} spread fetch failed: {e}")
 
+        # If broker 5M is missing, reuse the caller frame only when cadence looks 5M.
+        if (df_5m is None or len(df_5m) < 30) and self._looks_like_five_minute_data(df_enriched):
+            df_5m = df_enriched.tail(250).copy()
+            bot_logger.info(
+                f"📊 {pair} using caller 5M frame fallback: {len(df_5m)} rows"
+            )
+
+        has_valid_5m_bias = df_5m is not None and len(df_5m) >= 30
+
         # ── Step 3: Run sweep gate (PRIMARY — decides entry) ─────────
         sweep_signal = self.sweep.get_signal(
             df_enriched, pair,
@@ -316,33 +342,64 @@ class EnsembleTrader:
             sweep_bias = sweep_signal.get('bias', 'HOLD')
             if sweep_bias not in ('BUY', 'SELL'):
                 sweep_bias = 'HOLD'
+            elif not has_valid_5m_bias:
+                # Do not trust inferred/partial bias when 5M context is unavailable.
+                sweep_bias = 'HOLD'
+                bot_logger.info(f"🚫 5M bias fallback disabled for {pair}: missing/insufficient 5M candles")
             
             bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, SweepBias={sweep_bias} (regime={regime})")
             
-            # Fallback 1: EMA + Technical agree on direction
-            if ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir:
+            # Volatile regimes are too unpredictable for fallback entries
+            _volatile_regimes = ('volatile', 'high_volatility')
+
+            # MSS (Market Structure Shift) from the sweep detector
+            # A confirmed MSS means price has broken the last internal HH/HL (bullish) or LH/LL (bearish)
+            _mss_confirmed = bool(sweep_signal.get('mss', {}).get('confirmed', False))
+
+            # Fallback 1: EMA + Technical agree — only trade trending regimes, not ranging chaos
+            # Require Tech confidence ≥ 40% — low-confidence Tech signals (e.g. 23%) shouldn't gate
+            if (ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir
+                    and technical_signal.get('confidence', 0.0) >= 0.40
+                    and regime not in _volatile_regimes
+                    and regime in ('trend_up', 'trend_down', 'trending')):
                 final_signal = ema_dir
-                final_confidence = 0.62
+                final_confidence = 0.65
                 models_agreement = 2
                 bot_logger.info(
                     f"🔄 No sweep → EMA+Tech fallback: {ema_dir} "
                     f"(EMA={ema_signal['confidence']:.0%}, "
                     f"Tech={technical_signal['confidence']:.0%})"
                 )
-            # Fallback 2: Sweep bias is directional and indicators don't oppose
-            elif sweep_bias in ('BUY', 'SELL') and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY') and tech_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY'):
+            # Fallback 2: Requires MSS + Tech + SweepBias all aligned (no sweep fired but structure shifted)
+            elif (_mss_confirmed
+                    and sweep_bias in ('BUY', 'SELL')
+                    and tech_dir == sweep_bias                    # Tech must actively agree
+                    and technical_signal.get('confidence', 0.0) >= 0.40  # Tech must be confident
+                    and regime not in _volatile_regimes           # No volatile markets
+                    and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY')):  # EMA must not oppose
                 final_signal = sweep_bias
-                final_confidence = 0.62
-                models_agreement = 1
+                final_confidence = 0.65
+                models_agreement = 2
                 bot_logger.info(
-                    f"🔄 No sweep → BIAS fallback: {sweep_bias} "
-                    f"(5M bias strong, EMA={ema_dir}, Tech={tech_dir} not opposing)"
+                    f"🔄 No sweep → MSS+Bias+Tech fallback: {sweep_bias} "
+                    f"(MSS=✓, Tech={tech_dir} {technical_signal['confidence']:.0%}, EMA={ema_dir})"
                 )
             else:
                 final_signal = 'SKIP'
                 final_confidence = 0.0
                 models_agreement = 0
-                bot_logger.info(f"🚫 No sweep and no fallback conditions met - skipping")
+                _skip_reason = []
+                if regime in _volatile_regimes:
+                    _skip_reason.append(f"volatile regime ({regime})")
+                if not _mss_confirmed:
+                    _skip_reason.append("MSS not confirmed")
+                if sweep_bias not in ('BUY', 'SELL'):
+                    _skip_reason.append("no directional bias")
+                if tech_dir != sweep_bias:
+                    _skip_reason.append(f"Tech={tech_dir} doesn't confirm bias={sweep_bias}")
+                if technical_signal.get('confidence', 0.0) < 0.40:
+                    _skip_reason.append(f"Tech confidence too low ({technical_signal.get('confidence', 0.0):.0%})")
+                bot_logger.info(f"🚫 No sweep and no fallback conditions met: {', '.join(_skip_reason) or 'conditions not met'}")
         else:
             final_signal = sweep_direction
             final_confidence = sweep_confidence
@@ -561,12 +618,25 @@ class EnsembleTrader:
         # Cap confidence
         final_confidence = min(1.0, max(0.0, final_confidence))
 
-        # ── S/R Context Advisory (logging only) ──────────────────────
+        # ── S/R Gate: block counter-S/R entries ──────────────────────
+        # Sweep-confirmed entries intentionally pass through S/R (liquidity flip).
+        # Fallback/bias entries must NOT buy resistance or sell support.
+        _sweep_confirmed = sweep_direction in ('BUY', 'SELL')
         price_zone = sr_signal.get('levels', {}).get('price_zone', '')
         if final_signal == 'BUY' and price_zone == 'AT_RESISTANCE':
-            bot_logger.info("⚠️ S/R advisory: BUY near resistance")
+            if _sweep_confirmed:
+                bot_logger.info("⚠️ S/R advisory: BUY near resistance (sweep-confirmed, allowing)")
+            else:
+                bot_logger.info("🚫 S/R block: BUY at resistance — no sweep to confirm breakout, skipping")
+                final_signal = 'SKIP'
+                final_confidence = 0.0
         if final_signal == 'SELL' and price_zone == 'AT_SUPPORT':
-            bot_logger.info("⚠️ S/R advisory: SELL near support")
+            if _sweep_confirmed:
+                bot_logger.info("⚠️ S/R advisory: SELL near support (sweep-confirmed, allowing)")
+            else:
+                bot_logger.info("🚫 S/R block: SELL at support — no sweep to confirm breakdown, skipping")
+                final_signal = 'SKIP'
+                final_confidence = 0.0
 
         # ── Build detailed reason string ─────────────────────────────
         reason_parts = []
@@ -649,6 +719,7 @@ class EnsembleTrader:
             'sweep_sl_tp': sweep_signal.get('sweep_sl_tp'),
             'sweep_wick': (sweep_signal.get('sweep_sl_tp') or {}).get('sweep_wick')
                           or (sweep_signal.get('sweep') or {}).get('sweep_wick'),
+            'pair': pair,  # Include pair for symbol-based detection (e.g., futures vs forex)
         }
 
         if final_signal != 'SKIP':
@@ -679,6 +750,17 @@ class EnsembleTrader:
         # Check if sweep fired or if this is a fallback entry
         sweep_model = signal_result.get('models', {}).get('sweep', {})
         sweep_fired = sweep_model.get('signal') in ('BUY', 'SELL')
+
+        # Futures mode: enforce strict sweep-only entries to avoid wrong-direction
+        # fallback trades when structure confirmation is absent.
+        # Detect futures by symbol: MES, MNQ, ES, NQ, MESO, MNQO, YM, CL, etc.
+        pair = signal_result.get('pair', '')
+        is_futures = pair.upper() in ('MES', 'MNQ', 'ES', 'NQ', 'MESO', 'MNQO', 'YM', 'CL') or \
+                     ASSET_CLASS == 'futures'
+        
+        if is_futures and not sweep_fired:
+            bot_logger.info(f"🚫 Futures mode ({pair}): sweep did not fire — fallback entry disabled")
+            return False
         
         # Check EMA and Technical directions
         ema_model = signal_result.get('models', {}).get('ema_crossover', {})
