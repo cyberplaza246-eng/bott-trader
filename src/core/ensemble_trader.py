@@ -348,7 +348,11 @@ class EnsembleTrader:
                 sweep_bias = 'HOLD'
                 bot_logger.info(f"🚫 5M bias fallback disabled for {pair}: missing/insufficient 5M candles")
             
-            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, SweepBias={sweep_bias} (regime={regime})")
+            # Use 5M-based regime from sweep signal (more reliable than 1M learner regime)
+            sweep_regime = sweep_signal.get('regime', regime) or regime
+            fallback_regime = sweep_regime if sweep_regime not in ('unknown', '') else regime
+
+            bot_logger.info(f"🔍 No sweep - checking fallback: EMA={ema_dir}, Tech={tech_dir}, SweepBias={sweep_bias} (regime={fallback_regime})")
             
             # Volatile regimes are too unpredictable for fallback entries
             _volatile_regimes = ('volatile', 'high_volatility')
@@ -361,8 +365,8 @@ class EnsembleTrader:
             # Require Tech confidence ≥ 20% — low-confidence Tech signals shouldn't gate if models agree
             if (ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir
                     and technical_signal.get('confidence', 0.0) >= 0.20
-                    and regime not in _volatile_regimes
-                    and regime in ('trend_up', 'trend_down', 'trending')):
+                    and fallback_regime not in _volatile_regimes
+                    and fallback_regime in ('trend_up', 'trend_down', 'trending')):
                 final_signal = ema_dir
                 final_confidence = 0.65
                 models_agreement = 2
@@ -376,7 +380,7 @@ class EnsembleTrader:
                     and sweep_bias in ('BUY', 'SELL')
                     and tech_dir == sweep_bias                    # Tech must actively agree
                     and technical_signal.get('confidence', 0.0) >= 0.20  # Tech must be confident
-                    and regime not in _volatile_regimes           # No volatile markets
+                    and fallback_regime not in _volatile_regimes           # No volatile markets
                     and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY')):  # EMA must not oppose
                 final_signal = sweep_bias
                 final_confidence = 0.65
