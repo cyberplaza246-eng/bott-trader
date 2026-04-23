@@ -752,17 +752,6 @@ class EnsembleTrader:
         sweep_model = signal_result.get('models', {}).get('sweep', {})
         sweep_fired = sweep_model.get('signal') in ('BUY', 'SELL')
 
-        # Futures mode: enforce strict sweep-only entries to avoid wrong-direction
-        # fallback trades when structure confirmation is absent.
-        # Detect futures by symbol: MES, MNQ, ES, NQ, MESO, MNQO, YM, CL, etc.
-        pair = signal_result.get('pair', '')
-        is_futures = pair.upper() in ('MES', 'MNQ', 'ES', 'NQ', 'MESO', 'MNQO', 'YM', 'CL') or \
-                     ASSET_CLASS == 'futures'
-        
-        if is_futures and not sweep_fired:
-            bot_logger.info(f"🚫 Futures mode ({pair}): sweep did not fire — fallback entry disabled")
-            return False
-        
         # Check EMA and Technical directions
         ema_model = signal_result.get('models', {}).get('ema_crossover', {})
         tech_model = signal_result.get('models', {}).get('technical', {})
