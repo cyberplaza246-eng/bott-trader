@@ -358,9 +358,9 @@ class EnsembleTrader:
             _mss_confirmed = bool(sweep_signal.get('mss', {}).get('confirmed', False))
 
             # Fallback 1: EMA + Technical agree — only trade trending regimes, not ranging chaos
-            # Require Tech confidence ≥ 40% — low-confidence Tech signals (e.g. 23%) shouldn't gate
+            # Require Tech confidence ≥ 30% — low-confidence Tech signals (e.g. 23%) shouldn't gate
             if (ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir
-                    and technical_signal.get('confidence', 0.0) >= 0.40
+                    and technical_signal.get('confidence', 0.0) >= 0.30
                     and regime not in _volatile_regimes
                     and regime in ('trend_up', 'trend_down', 'trending')):
                 final_signal = ema_dir
@@ -375,7 +375,7 @@ class EnsembleTrader:
             elif (_mss_confirmed
                     and sweep_bias in ('BUY', 'SELL')
                     and tech_dir == sweep_bias                    # Tech must actively agree
-                    and technical_signal.get('confidence', 0.0) >= 0.40  # Tech must be confident
+                    and technical_signal.get('confidence', 0.0) >= 0.30  # Tech must be confident
                     and regime not in _volatile_regimes           # No volatile markets
                     and ema_dir != ('SELL' if sweep_bias == 'BUY' else 'BUY')):  # EMA must not oppose
                 final_signal = sweep_bias
