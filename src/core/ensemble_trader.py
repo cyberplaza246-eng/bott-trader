@@ -362,9 +362,13 @@ class EnsembleTrader:
             _mss_confirmed = bool(sweep_signal.get('mss', {}).get('confirmed', False))
 
             # Fallback 1: EMA + Technical agree — only trade trending regimes, not ranging chaos
-            # Require Tech confidence ≥ 20% — low-confidence Tech signals shouldn't gate if models agree
-            if (ema_dir in ('BUY', 'SELL') and ema_dir == tech_dir
-                    and technical_signal.get('confidence', 0.0) >= 0.20
+            # Require Tech confidence ≥ 20% — Tech=HOLD (neutral) also allowed when SweepBias agrees
+            _opposing_dir = 'SELL' if ema_dir == 'BUY' else 'BUY'
+            _tech_not_opposing = tech_dir != _opposing_dir  # HOLD or same direction is fine
+            _tech_actively_agrees = ema_dir in ('BUY', 'SELL') and tech_dir == ema_dir and technical_signal.get('confidence', 0.0) >= 0.20
+            _ema_bias_agree = ema_dir in ('BUY', 'SELL') and sweep_bias == ema_dir and _tech_not_opposing
+            if ((_tech_actively_agrees or _ema_bias_agree)
+                    and ema_dir in ('BUY', 'SELL')
                     and fallback_regime not in _volatile_regimes
                     and fallback_regime in ('trend_up', 'trend_down', 'trending')):
                 final_signal = ema_dir
@@ -402,7 +406,7 @@ class EnsembleTrader:
                     _skip_reason.append("no directional bias")
                 if tech_dir != sweep_bias:
                     _skip_reason.append(f"Tech={tech_dir} doesn't confirm bias={sweep_bias}")
-                if technical_signal.get('confidence', 0.0) < 0.40:
+                if technical_signal.get('confidence', 0.0) < 0.20:
                     _skip_reason.append(f"Tech confidence too low ({technical_signal.get('confidence', 0.0):.0%})")
                 bot_logger.info(f"🚫 No sweep and no fallback conditions met: {', '.join(_skip_reason) or 'conditions not met'}")
         else:
