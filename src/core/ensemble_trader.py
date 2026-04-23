@@ -332,6 +332,7 @@ class EnsembleTrader:
 
         # ── Step 6: Sweep gate decision ──────────────────────────────
         context_signals = {}  # defined early so result dict always has it
+        sweep_bias = sweep_signal.get('bias', 'HOLD') or 'HOLD'  # always defined
 
         if sweep_direction not in ('BUY', 'SELL'):
             # Sweep didn't fire — check for fallback entries
