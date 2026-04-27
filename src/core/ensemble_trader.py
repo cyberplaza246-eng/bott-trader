@@ -819,15 +819,28 @@ class EnsembleTrader:
         sell_block = self.rsi_sell_block_high_vol if is_high_vol else self.rsi_sell_block
 
         if signal_result['signal'] == 'BUY' and rsi_val > buy_block:
-            bot_logger.info(
-                f"🚫 RSI overbought ({rsi_val:.1f} > {buy_block:.1f}) — blocking BUY"
-            )
-            return False
+            if is_fallback_entry:
+                # Fallback entries are already gated by EMA+bias alignment in a non-volatile regime.
+                # 1M RSI staying above 70 in a trending market indicates trend strength, not exhaustion.
+                # Log a warning but don't block — the RSI gate is more relevant for sweep entries.
+                bot_logger.info(
+                    f"⚠️ RSI elevated ({rsi_val:.1f} > {buy_block:.1f}) but allowing fallback BUY (EMA+bias gated)"
+                )
+            else:
+                bot_logger.info(
+                    f"🚫 RSI overbought ({rsi_val:.1f} > {buy_block:.1f}) — blocking sweep BUY"
+                )
+                return False
         if signal_result['signal'] == 'SELL' and rsi_val < sell_block:
-            bot_logger.info(
-                f"🚫 RSI oversold ({rsi_val:.1f} < {sell_block:.1f}) — blocking SELL"
-            )
-            return False
+            if is_fallback_entry:
+                bot_logger.info(
+                    f"⚠️ RSI elevated ({rsi_val:.1f} < {sell_block:.1f}) but allowing fallback SELL (EMA+bias gated)"
+                )
+            else:
+                bot_logger.info(
+                    f"🚫 RSI oversold ({rsi_val:.1f} < {sell_block:.1f}) — blocking sweep SELL"
+                )
+                return False
 
         # Require minimum model agreement (skip for fallback entries)
         agreement = signal_result.get('models_agreement', 0)
