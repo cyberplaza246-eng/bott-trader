@@ -490,9 +490,12 @@ class LiquiditySweepAnalyzer:
         # Volatility regime modifiers (don't kill bias on low vol)
         if atr_state == 'high_volatility' and regime in ('trend_up', 'trend_down'):
             regime = 'high_volatility'
-        elif atr_state == 'low_volatility':
+        elif atr_state == 'low_volatility' and regime not in ('trend_up', 'trend_down'):
+            # Only label as low_volatility when we don't already have confirmed trend structure.
+            # A trending market with compressed ATR stays 'trend_up'/'trend_down' so that
+            # fallback entries (which require a trending regime) are still evaluated.
+            # Bias is preserved either way; TP ratios can be reduced downstream for low vol.
             regime = 'low_volatility'
-            # Keep bias — low vol trades just get lower TP ratio
 
         sh_str = f"{last_sh['price']:.5f}" if last_sh else 'N/A'
         sl_str = f"{last_sl['price']:.5f}" if last_sl else 'N/A'
