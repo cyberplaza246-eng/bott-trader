@@ -370,7 +370,7 @@ class EnsembleTrader:
             if ((_tech_actively_agrees or _ema_bias_agree)
                     and ema_dir in ('BUY', 'SELL')
                     and fallback_regime not in _volatile_regimes
-                    and fallback_regime in ('trend_up', 'trend_down', 'trending')):
+                    and fallback_regime in ('trend_up', 'trend_down', 'trending', 'range')):
                 final_signal = ema_dir
                 final_confidence = 0.65
                 models_agreement = 2
