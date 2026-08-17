@@ -1,0 +1,13 @@
+{
+  "symbol": "MNQ",
+  "strategy": "breakout",
+  "timeframe": "5m",
+  "trade_count": 333,
+  "win_rate": 0.3574,
+  "profit_factor": 0.7296,
+  "expectancy": -8.95,
+  "total_pnl": -2980.6,
+  "max_drawdown": -3420.5,
+  "sharpe": -2.4679,
+  "final_equity": 47019.4
+}

@@ -1,0 +1,152 @@
+{
+  "symbol": "NQ",
+  "strategy": "ensemble",
+  "oos_summary": {
+    "folds": 4,
+    "profitable_folds": 2,
+    "total_oos_trades": 16,
+    "total_oos_pnl": -519.72,
+    "avg_oos_win_rate": 0.3179,
+    "avg_pnl_per_fold": -129.93,
+    "t_stat": -0.618,
+    "significant": false
+  },
+  "folds": [
+    {
+      "fold": 0,
+      "train_start": "2024-01-01 23:00:00+00:00",
+      "train_end": "2024-06-29 23:00:00+00:00",
+      "test_start": "2024-06-29 23:00:00+00:00",
+      "test_end": "2024-08-28 23:00:00+00:00",
+      "best_params": {},
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 42,
+        "win_rate": 0.3333,
+        "profit_factor": 0.4723,
+        "expectancy": -41.71,
+        "total_pnl": -1751.65,
+        "max_drawdown": -2345.76,
+        "sharpe": -1.4009,
+        "final_equity": 48248.35
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 7,
+        "win_rate": 0.5714,
+        "profit_factor": 2.3999,
+        "expectancy": 63.64,
+        "total_pnl": 445.49,
+        "max_drawdown": -199.36,
+        "sharpe": 1.1464,
+        "final_equity": 50445.49
+      }
+    },
+    {
+      "fold": 1,
+      "train_start": "2024-03-01 23:00:00+00:00",
+      "train_end": "2024-08-28 23:00:00+00:00",
+      "test_start": "2024-08-28 23:00:00+00:00",
+      "test_end": "2024-10-27 23:00:00+00:00",
+      "best_params": {},
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 36,
+        "win_rate": 0.4444,
+        "profit_factor": 0.938,
+        "expectancy": -3.9,
+        "total_pnl": -140.43,
+        "max_drawdown": -1520.79,
+        "sharpe": -0.1061,
+        "final_equity": 49859.57
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 2,
+        "win_rate": 0.5,
+        "profit_factor": 1.1874,
+        "expectancy": 23.62,
+        "total_pnl": 47.24,
+        "max_drawdown": -252.09,
+        "sharpe": 0.1628,
+        "final_equity": 50047.24
+      }
+    },
+    {
+      "fold": 2,
+      "train_start": "2024-04-30 23:00:00+00:00",
+      "train_end": "2024-10-27 23:00:00+00:00",
+      "test_start": "2024-10-27 23:00:00+00:00",
+      "test_end": "2024-12-26 23:00:00+00:00",
+      "best_params": {},
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 27,
+        "win_rate": 0.4815,
+        "profit_factor": 1.2852,
+        "expectancy": 15.6,
+        "total_pnl": 421.25,
+        "max_drawdown": -739.65,
+        "sharpe": 0.3759,
+        "final_equity": 50421.25
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 5,
+        "win_rate": 0.2,
+        "profit_factor": 0.2294,
+        "expectancy": -113.16,
+        "total_pnl": -565.79,
+        "max_drawdown": -565.79,
+        "sharpe": -1.7679,
+        "final_equity": 49434.21
+      }
+    },
+    {
+      "fold": 3,
+      "train_start": "2024-06-29 23:00:00+00:00",
+      "train_end": "2024-12-26 23:00:00+00:00",
+      "test_start": "2024-12-26 23:00:00+00:00",
+      "test_end": "2025-02-24 23:00:00+00:00",
+      "best_params": {},
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 15,
+        "win_rate": 0.4,
+        "profit_factor": 0.8224,
+        "expectancy": -17.73,
+        "total_pnl": -265.97,
+        "max_drawdown": -758.7,
+        "sharpe": -0.25,
+        "final_equity": 49734.03
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "ensemble",
+        "timeframe": "5m",
+        "trade_count": 2,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "expectancy": -223.33,
+        "total_pnl": -446.67,
+        "max_drawdown": -446.67,
+        "sharpe": -1.8739,
+        "final_equity": 49553.33
+      }
+    }
+  ]
+}

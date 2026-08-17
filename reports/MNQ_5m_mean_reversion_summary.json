@@ -1,0 +1,13 @@
+{
+  "symbol": "MNQ",
+  "strategy": "mean_reversion",
+  "timeframe": "5m",
+  "trade_count": 54,
+  "win_rate": 0.3519,
+  "profit_factor": 1.0708,
+  "expectancy": 10.62,
+  "total_pnl": 573.34,
+  "max_drawdown": -3017.25,
+  "sharpe": 0.2908,
+  "final_equity": 50573.34
+}

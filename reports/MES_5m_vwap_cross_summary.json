@@ -1,0 +1,13 @@
+{
+  "symbol": "MES",
+  "strategy": "vwap_cross",
+  "timeframe": "5m",
+  "trade_count": 303,
+  "win_rate": 0.2805,
+  "profit_factor": 0.6159,
+  "expectancy": -32.73,
+  "total_pnl": -9915.87,
+  "max_drawdown": -10000.18,
+  "sharpe": -3.3879,
+  "final_equity": 40084.13
+}

@@ -1,0 +1,13 @@
+{
+  "symbol": "NQ",
+  "strategy": "mean_reversion",
+  "timeframe": "5m",
+  "trade_count": 8,
+  "win_rate": 0.125,
+  "profit_factor": 0.1137,
+  "expectancy": -166.07,
+  "total_pnl": -1328.53,
+  "max_drawdown": -1328.53,
+  "sharpe": -2.6404,
+  "final_equity": 48671.47
+}

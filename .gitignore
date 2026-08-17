@@ -19,6 +19,13 @@ logs/*.log
 
 # Data (large CSVs)
 data/*.csv
+data/*.csv.bak.pre_extended
+
+# Raw order-flow/order-book pilot data (large, re-downloadable from Databento)
+orderflow_data/raw/*.parquet
+
+# Stray duplicate directory (content already captured in legacy/)
+/bott-trader/
 
 # OS
 .DS_Store

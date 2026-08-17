@@ -1,0 +1,13 @@
+{
+  "symbol": "MES",
+  "strategy": "mean_reversion",
+  "timeframe": "5m",
+  "trade_count": 40,
+  "win_rate": 0.3,
+  "profit_factor": 0.825,
+  "expectancy": -28.45,
+  "total_pnl": -1137.89,
+  "max_drawdown": -3210.39,
+  "sharpe": -0.5903,
+  "final_equity": 48862.11
+}

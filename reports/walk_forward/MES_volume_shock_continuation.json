@@ -1,0 +1,386 @@
+{
+  "symbol": "MES",
+  "strategy": "volume_shock_continuation",
+  "oos_summary": {
+    "folds": 10,
+    "profitable_folds": 1,
+    "total_oos_trades": 517,
+    "total_oos_pnl": -13984.02,
+    "avg_oos_win_rate": 0.3077,
+    "avg_pnl_per_fold": -1398.4,
+    "t_stat": -3.703,
+    "significant": false
+  },
+  "folds": [
+    {
+      "fold": 0,
+      "train_start": "2024-01-01 23:00:00+00:00",
+      "train_end": "2024-06-29 23:00:00+00:00",
+      "test_start": "2024-06-29 23:00:00+00:00",
+      "test_end": "2024-08-28 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 160,
+        "win_rate": 0.2875,
+        "profit_factor": 0.3937,
+        "expectancy": -48.54,
+        "total_pnl": -7766.21,
+        "max_drawdown": -8200.11,
+        "sharpe": -3.1019,
+        "final_equity": 42233.79
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 57,
+        "win_rate": 0.386,
+        "profit_factor": 0.8499,
+        "expectancy": -10.7,
+        "total_pnl": -609.76,
+        "max_drawdown": -1624.55,
+        "sharpe": -0.5609,
+        "final_equity": 49390.24
+      }
+    },
+    {
+      "fold": 1,
+      "train_start": "2024-03-01 23:00:00+00:00",
+      "train_end": "2024-08-28 23:00:00+00:00",
+      "test_start": "2024-08-28 23:00:00+00:00",
+      "test_end": "2024-10-27 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 160,
+        "win_rate": 0.3563,
+        "profit_factor": 0.6845,
+        "expectancy": -22.32,
+        "total_pnl": -3571.67,
+        "max_drawdown": -4013.43,
+        "sharpe": -1.3056,
+        "final_equity": 46428.33
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 58,
+        "win_rate": 0.2931,
+        "profit_factor": 0.717,
+        "expectancy": -21.0,
+        "total_pnl": -1217.82,
+        "max_drawdown": -1753.61,
+        "sharpe": -1.0676,
+        "final_equity": 48782.18
+      }
+    },
+    {
+      "fold": 2,
+      "train_start": "2024-04-30 23:00:00+00:00",
+      "train_end": "2024-10-27 23:00:00+00:00",
+      "test_start": "2024-10-27 23:00:00+00:00",
+      "test_end": "2024-12-26 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 167,
+        "win_rate": 0.3353,
+        "profit_factor": 0.8024,
+        "expectancy": -13.96,
+        "total_pnl": -2331.66,
+        "max_drawdown": -3213.68,
+        "sharpe": -0.7406,
+        "final_equity": 47668.34
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 50,
+        "win_rate": 0.24,
+        "profit_factor": 0.3814,
+        "expectancy": -53.5,
+        "total_pnl": -2674.99,
+        "max_drawdown": -2705.3,
+        "sharpe": -3.374,
+        "final_equity": 47325.01
+      }
+    },
+    {
+      "fold": 3,
+      "train_start": "2024-06-29 23:00:00+00:00",
+      "train_end": "2024-12-26 23:00:00+00:00",
+      "test_start": "2024-12-26 23:00:00+00:00",
+      "test_end": "2025-02-24 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 165,
+        "win_rate": 0.3091,
+        "profit_factor": 0.6447,
+        "expectancy": -26.89,
+        "total_pnl": -4436.48,
+        "max_drawdown": -5451.26,
+        "sharpe": -1.5129,
+        "final_equity": 45563.52
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 48,
+        "win_rate": 0.3333,
+        "profit_factor": 0.9469,
+        "expectancy": -3.59,
+        "total_pnl": -172.43,
+        "max_drawdown": -1533.41,
+        "sharpe": -0.1279,
+        "final_equity": 49827.57
+      }
+    },
+    {
+      "fold": 4,
+      "train_start": "2024-08-28 23:00:00+00:00",
+      "train_end": "2025-02-24 23:00:00+00:00",
+      "test_start": "2025-02-24 23:00:00+00:00",
+      "test_end": "2025-04-25 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 156,
+        "win_rate": 0.2885,
+        "profit_factor": 0.6596,
+        "expectancy": -24.79,
+        "total_pnl": -3866.53,
+        "max_drawdown": -5301.7,
+        "sharpe": -1.2487,
+        "final_equity": 46133.47
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 40,
+        "win_rate": 0.4,
+        "profit_factor": 0.571,
+        "expectancy": -27.48,
+        "total_pnl": -1099.18,
+        "max_drawdown": -1304.84,
+        "sharpe": -1.7532,
+        "final_equity": 48900.82
+      }
+    },
+    {
+      "fold": 5,
+      "train_start": "2024-10-27 23:00:00+00:00",
+      "train_end": "2025-04-25 23:00:00+00:00",
+      "test_start": "2025-04-25 23:00:00+00:00",
+      "test_end": "2025-06-24 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 138,
+        "win_rate": 0.3188,
+        "profit_factor": 0.603,
+        "expectancy": -28.13,
+        "total_pnl": -3882.18,
+        "max_drawdown": -4163.94,
+        "sharpe": -1.4688,
+        "final_equity": 46117.82
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 58,
+        "win_rate": 0.3276,
+        "profit_factor": 0.9822,
+        "expectancy": -1.26,
+        "total_pnl": -73.05,
+        "max_drawdown": -1570.73,
+        "sharpe": -0.0351,
+        "final_equity": 49926.95
+      }
+    },
+    {
+      "fold": 6,
+      "train_start": "2024-12-26 23:00:00+00:00",
+      "train_end": "2025-06-24 23:00:00+00:00",
+      "test_start": "2025-06-24 23:00:00+00:00",
+      "test_end": "2025-08-23 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 146,
+        "win_rate": 0.3493,
+        "profit_factor": 0.8592,
+        "expectancy": -9.51,
+        "total_pnl": -1388.2,
+        "max_drawdown": -3419.86,
+        "sharpe": -0.4174,
+        "final_equity": 48611.8
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 53,
+        "win_rate": 0.3774,
+        "profit_factor": 1.0065,
+        "expectancy": 0.46,
+        "total_pnl": 24.2,
+        "max_drawdown": -1410.73,
+        "sharpe": 0.0405,
+        "final_equity": 50024.2
+      }
+    },
+    {
+      "fold": 7,
+      "train_start": "2025-02-24 23:00:00+00:00",
+      "train_end": "2025-08-23 23:00:00+00:00",
+      "test_start": "2025-08-23 23:00:00+00:00",
+      "test_end": "2025-10-22 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 151,
+        "win_rate": 0.3642,
+        "profit_factor": 0.8963,
+        "expectancy": -7.0,
+        "total_pnl": -1056.77,
+        "max_drawdown": -2647.32,
+        "sharpe": -0.3253,
+        "final_equity": 48943.23
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 60,
+        "win_rate": 0.2667,
+        "profit_factor": 0.2713,
+        "expectancy": -54.15,
+        "total_pnl": -3248.71,
+        "max_drawdown": -3481.98,
+        "sharpe": -4.6845,
+        "final_equity": 46751.29
+      }
+    },
+    {
+      "fold": 8,
+      "train_start": "2025-04-25 23:00:00+00:00",
+      "train_end": "2025-10-22 23:00:00+00:00",
+      "test_start": "2025-10-22 23:00:00+00:00",
+      "test_end": "2025-12-21 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 171,
+        "win_rate": 0.3216,
+        "profit_factor": 0.7357,
+        "expectancy": -18.91,
+        "total_pnl": -3233.75,
+        "max_drawdown": -4292.1,
+        "sharpe": -1.0468,
+        "final_equity": 46766.25
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 45,
+        "win_rate": 0.2444,
+        "profit_factor": 0.3371,
+        "expectancy": -45.8,
+        "total_pnl": -2060.95,
+        "max_drawdown": -2517.21,
+        "sharpe": -3.3575,
+        "final_equity": 47939.05
+      }
+    },
+    {
+      "fold": 9,
+      "train_start": "2025-06-24 23:00:00+00:00",
+      "train_end": "2025-12-21 23:00:00+00:00",
+      "test_start": "2025-12-21 23:00:00+00:00",
+      "test_end": "2026-02-19 23:00:00+00:00",
+      "best_params": {
+        "volume_shock_mult": 4.0,
+        "volume_baseline_period": 10
+      },
+      "train_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 158,
+        "win_rate": 0.2975,
+        "profit_factor": 0.5327,
+        "expectancy": -32.9,
+        "total_pnl": -5198.28,
+        "max_drawdown": -6178.82,
+        "sharpe": -2.2111,
+        "final_equity": 44801.72
+      },
+      "test_metrics": {
+        "symbol": "MES",
+        "strategy": "volume_shock_continuation",
+        "timeframe": "5m",
+        "trade_count": 48,
+        "win_rate": 0.2083,
+        "profit_factor": 0.1835,
+        "expectancy": -59.4,
+        "total_pnl": -2851.32,
+        "max_drawdown": -2851.32,
+        "sharpe": -5.2419,
+        "final_equity": 47148.68
+      }
+    }
+  ]
+}

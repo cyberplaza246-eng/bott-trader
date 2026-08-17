@@ -1,0 +1,88 @@
+{
+  "symbol": "NQ",
+  "strategy": "vwap_pullback_trend_v2",
+  "oos_summary": {
+    "folds": 2,
+    "profitable_folds": 1,
+    "total_oos_trades": 3,
+    "total_oos_pnl": 23.88,
+    "avg_oos_win_rate": 0.5,
+    "avg_pnl_per_fold": 11.94,
+    "t_stat": 0.089,
+    "significant": false
+  },
+  "folds": [
+    {
+      "fold": 0,
+      "train_start": "2024-01-01 23:00:00+00:00",
+      "train_end": "2024-06-29 23:00:00+00:00",
+      "test_start": "2024-06-29 23:00:00+00:00",
+      "test_end": "2024-08-28 23:00:00+00:00",
+      "best_params": {
+        "min_adx": 15.0
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "vwap_pullback_trend_v2",
+        "timeframe": "5m",
+        "trade_count": 11,
+        "win_rate": 0.2727,
+        "profit_factor": 1.9155,
+        "expectancy": 67.03,
+        "total_pnl": 737.36,
+        "max_drawdown": -251.12,
+        "sharpe": 0.4656,
+        "final_equity": 50737.36
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "vwap_pullback_trend_v2",
+        "timeframe": "5m",
+        "trade_count": 2,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "expectancy": -72.04,
+        "total_pnl": -144.08,
+        "max_drawdown": -144.08,
+        "sharpe": -1.3098,
+        "final_equity": 49855.92
+      }
+    },
+    {
+      "fold": 2,
+      "train_start": "2024-04-30 23:00:00+00:00",
+      "train_end": "2024-10-27 23:00:00+00:00",
+      "test_start": "2024-10-27 23:00:00+00:00",
+      "test_end": "2024-12-26 23:00:00+00:00",
+      "best_params": {
+        "min_adx": 15.0
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "vwap_pullback_trend_v2",
+        "timeframe": "5m",
+        "trade_count": 10,
+        "win_rate": 0.2,
+        "profit_factor": 1.3061,
+        "expectancy": 30.44,
+        "total_pnl": 304.4,
+        "max_drawdown": -857.44,
+        "sharpe": 0.1995,
+        "final_equity": 50304.4
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "vwap_pullback_trend_v2",
+        "timeframe": "5m",
+        "trade_count": 1,
+        "win_rate": 1.0,
+        "profit_factor": null,
+        "expectancy": 167.96,
+        "total_pnl": 167.96,
+        "max_drawdown": 0.0,
+        "sharpe": 1.3003,
+        "final_equity": 50167.96
+      }
+    }
+  ]
+}

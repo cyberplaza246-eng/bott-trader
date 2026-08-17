@@ -1,0 +1,180 @@
+{
+  "symbols": [
+    "MES",
+    "MNQ"
+  ],
+  "paper_mode": false,
+  "strategy": "enhanced_breakout",
+  "params": {
+    "lookback": 10,
+    "atr_mult": 1.5,
+    "tp_mult": 2.0,
+    "ema_len": 50
+  },
+  "stats": {
+    "trades": 13,
+    "wins": 0,
+    "losses": 13,
+    "win_rate": 0.0,
+    "total_pnl": 0,
+    "profit_factor": 0
+  },
+  "trades": [
+    {
+      "entry_time": "2026-04-27T01:01:08.031447+00:00",
+      "exit_time": "2026-04-27T01:43:16.165858+00:00",
+      "symbol": "MES",
+      "direction": "LONG",
+      "entry": 7190.5,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 7181.88002,
+      "tp": 7207.73997
+    },
+    {
+      "entry_time": "2026-04-27T00:56:09.986290+00:00",
+      "exit_time": "2026-04-27T01:43:16.166368+00:00",
+      "symbol": "MES",
+      "direction": "LONG",
+      "entry": 7186.5,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 7176.52254,
+      "tp": 7206.45492
+    },
+    {
+      "entry_time": "2026-04-27T01:26:18.579406+00:00",
+      "exit_time": "2026-04-27T01:43:16.167387+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27486.25,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27442.3756,
+      "tp": 27538.89928
+    },
+    {
+      "entry_time": "2026-04-27T01:16:23.716105+00:00",
+      "exit_time": "2026-04-27T01:43:16.168652+00:00",
+      "symbol": "MES",
+      "direction": "LONG",
+      "entry": 7193.25,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 7182.38151,
+      "tp": 7214.98699
+    },
+    {
+      "entry_time": "2026-04-27T01:46:34.158936+00:00",
+      "exit_time": "2026-04-27T01:46:44.393174+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27515.0,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27446.97629,
+      "tp": 27596.62845
+    },
+    {
+      "entry_time": "2026-04-27T01:51:28.778821+00:00",
+      "exit_time": "2026-04-27T01:51:38.991291+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27523.0,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27448.0,
+      "tp": 27613.0
+    },
+    {
+      "entry_time": "2026-04-27T01:56:26.280152+00:00",
+      "exit_time": "2026-04-27T01:56:36.548646+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27532.25,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27494.34463,
+      "tp": 27577.73644
+    },
+    {
+      "entry_time": "2026-04-27T02:01:23.253049+00:00",
+      "exit_time": "2026-04-27T02:01:33.534844+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27537.75,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27500.68066,
+      "tp": 27582.23321
+    },
+    {
+      "entry_time": "2026-04-27T02:06:20.668594+00:00",
+      "exit_time": "2026-04-27T02:06:30.916293+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27532.5,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27497.03028,
+      "tp": 27575.06367
+    },
+    {
+      "entry_time": "2026-04-27T02:11:17.716766+00:00",
+      "exit_time": "2026-04-27T02:11:28.024628+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27530.0,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27495.50891,
+      "tp": 27571.38931
+    },
+    {
+      "entry_time": "2026-04-27T02:16:14.882891+00:00",
+      "exit_time": "2026-04-27T02:16:25.135633+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27527.25,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27494.01614,
+      "tp": 27567.13063
+    },
+    {
+      "entry_time": "2026-04-27T02:21:11.815558+00:00",
+      "exit_time": "2026-04-27T02:21:22.107935+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27526.0,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27493.56142,
+      "tp": 27564.9263
+    },
+    {
+      "entry_time": "2026-04-27T02:26:08.935538+00:00",
+      "exit_time": "2026-04-27T02:26:19.179589+00:00",
+      "symbol": "MNQ",
+      "direction": "LONG",
+      "entry": 27521.25,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27489.52144,
+      "tp": 27559.32427
+    }
+  ]
+}

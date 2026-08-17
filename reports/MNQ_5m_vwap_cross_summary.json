@@ -1,0 +1,13 @@
+{
+  "symbol": "MNQ",
+  "strategy": "vwap_cross",
+  "timeframe": "5m",
+  "trade_count": 270,
+  "win_rate": 0.3556,
+  "profit_factor": 0.8717,
+  "expectancy": -10.49,
+  "total_pnl": -2833.55,
+  "max_drawdown": -4954.89,
+  "sharpe": -0.7773,
+  "final_equity": 47166.45
+}

@@ -1,0 +1,386 @@
+{
+  "symbol": "NQ",
+  "strategy": "extreme_displacement_reversion",
+  "oos_summary": {
+    "folds": 10,
+    "profitable_folds": 5,
+    "total_oos_trades": 2066,
+    "total_oos_pnl": 31026.22,
+    "avg_oos_win_rate": 0.0961,
+    "avg_pnl_per_fold": 3102.62,
+    "t_stat": 0.451,
+    "significant": false
+  },
+  "folds": [
+    {
+      "fold": 0,
+      "train_start": "2024-01-01 23:00:00+00:00",
+      "train_end": "2024-06-29 23:00:00+00:00",
+      "test_start": "2024-06-29 23:00:00+00:00",
+      "test_end": "2024-08-28 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 518,
+        "win_rate": 0.0869,
+        "profit_factor": 0.6217,
+        "expectancy": -47.64,
+        "total_pnl": -24677.99,
+        "max_drawdown": -27215.98,
+        "sharpe": -1.4337,
+        "final_equity": 25322.01
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 171,
+        "win_rate": 0.1287,
+        "profit_factor": 1.3212,
+        "expectancy": 68.06,
+        "total_pnl": 11638.2,
+        "max_drawdown": -8696.58,
+        "sharpe": 1.0991,
+        "final_equity": 61638.2
+      }
+    },
+    {
+      "fold": 1,
+      "train_start": "2024-03-01 23:00:00+00:00",
+      "train_end": "2024-08-28 23:00:00+00:00",
+      "test_start": "2024-08-28 23:00:00+00:00",
+      "test_end": "2024-10-27 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 562,
+        "win_rate": 0.105,
+        "profit_factor": 0.9955,
+        "expectancy": -0.79,
+        "total_pnl": -441.91,
+        "max_drawdown": -14316.77,
+        "sharpe": 0.144,
+        "final_equity": 49558.09
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 157,
+        "win_rate": 0.1465,
+        "profit_factor": 1.5673,
+        "expectancy": 131.87,
+        "total_pnl": 20704.2,
+        "max_drawdown": -11494.53,
+        "sharpe": 1.2133,
+        "final_equity": 70704.2
+      }
+    },
+    {
+      "fold": 2,
+      "train_start": "2024-04-30 23:00:00+00:00",
+      "train_end": "2024-10-27 23:00:00+00:00",
+      "test_start": "2024-10-27 23:00:00+00:00",
+      "test_end": "2024-12-26 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 574,
+        "win_rate": 0.1289,
+        "profit_factor": 1.248,
+        "expectancy": 58.01,
+        "total_pnl": 33299.88,
+        "max_drawdown": -18607.47,
+        "sharpe": 0.8192,
+        "final_equity": 83299.88
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 226,
+        "win_rate": 0.0973,
+        "profit_factor": 1.8706,
+        "expectancy": 240.49,
+        "total_pnl": 54350.25,
+        "max_drawdown": -20957.5,
+        "sharpe": 1.5,
+        "final_equity": 104350.25
+      }
+    },
+    {
+      "fold": 3,
+      "train_start": "2024-06-29 23:00:00+00:00",
+      "train_end": "2024-12-26 23:00:00+00:00",
+      "test_start": "2024-12-26 23:00:00+00:00",
+      "test_end": "2025-02-24 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 601,
+        "win_rate": 0.1231,
+        "profit_factor": 1.6039,
+        "expectancy": 208.36,
+        "total_pnl": 125224.31,
+        "max_drawdown": -35356.95,
+        "sharpe": 1.1866,
+        "final_equity": 175224.31
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 143,
+        "win_rate": 0.0769,
+        "profit_factor": 0.9207,
+        "expectancy": -15.78,
+        "total_pnl": -2256.11,
+        "max_drawdown": -9471.07,
+        "sharpe": -0.1054,
+        "final_equity": 47743.89
+      }
+    },
+    {
+      "fold": 4,
+      "train_start": "2024-08-28 23:00:00+00:00",
+      "train_end": "2025-02-24 23:00:00+00:00",
+      "test_start": "2025-02-24 23:00:00+00:00",
+      "test_end": "2025-04-25 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 607,
+        "win_rate": 0.1153,
+        "profit_factor": 1.3152,
+        "expectancy": 133.49,
+        "total_pnl": 81031.09,
+        "max_drawdown": -32976.29,
+        "sharpe": 0.997,
+        "final_equity": 131031.09
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 126,
+        "win_rate": 0.0873,
+        "profit_factor": 1.283,
+        "expectancy": 59.1,
+        "total_pnl": 7446.6,
+        "max_drawdown": -7979.18,
+        "sharpe": 0.742,
+        "final_equity": 57446.6
+      }
+    },
+    {
+      "fold": 5,
+      "train_start": "2024-10-27 23:00:00+00:00",
+      "train_end": "2025-04-25 23:00:00+00:00",
+      "test_start": "2025-04-25 23:00:00+00:00",
+      "test_end": "2025-06-24 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 584,
+        "win_rate": 0.0959,
+        "profit_factor": 1.2442,
+        "expectancy": 84.64,
+        "total_pnl": 49428.81,
+        "max_drawdown": -34445.05,
+        "sharpe": 0.8101,
+        "final_equity": 99428.81
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 118,
+        "win_rate": 0.0593,
+        "profit_factor": 0.8202,
+        "expectancy": -32.94,
+        "total_pnl": -3886.7,
+        "max_drawdown": -12826.64,
+        "sharpe": -0.2796,
+        "final_equity": 46113.3
+      }
+    },
+    {
+      "fold": 6,
+      "train_start": "2024-12-26 23:00:00+00:00",
+      "train_end": "2025-06-24 23:00:00+00:00",
+      "test_start": "2025-06-24 23:00:00+00:00",
+      "test_end": "2025-08-23 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 2.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 1264,
+        "win_rate": 0.1108,
+        "profit_factor": 1.1866,
+        "expectancy": 34.37,
+        "total_pnl": 43444.5,
+        "max_drawdown": -34354.43,
+        "sharpe": 0.7134,
+        "final_equity": 93444.5
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 436,
+        "win_rate": 0.0917,
+        "profit_factor": 0.564,
+        "expectancy": -61.67,
+        "total_pnl": -26888.44,
+        "max_drawdown": -28843.42,
+        "sharpe": -4.1772,
+        "final_equity": 23111.56
+      }
+    },
+    {
+      "fold": 7,
+      "train_start": "2025-02-24 23:00:00+00:00",
+      "train_end": "2025-08-23 23:00:00+00:00",
+      "test_start": "2025-08-23 23:00:00+00:00",
+      "test_end": "2025-10-22 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 396,
+        "win_rate": 0.0682,
+        "profit_factor": 0.8311,
+        "expectancy": -33.33,
+        "total_pnl": -13200.28,
+        "max_drawdown": -27520.98,
+        "sharpe": -0.4164,
+        "final_equity": 36799.72
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 173,
+        "win_rate": 0.0983,
+        "profit_factor": 1.0457,
+        "expectancy": 9.21,
+        "total_pnl": 1592.54,
+        "max_drawdown": -10480.71,
+        "sharpe": 0.3086,
+        "final_equity": 51592.54
+      }
+    },
+    {
+      "fold": 8,
+      "train_start": "2025-04-25 23:00:00+00:00",
+      "train_end": "2025-10-22 23:00:00+00:00",
+      "test_start": "2025-10-22 23:00:00+00:00",
+      "test_end": "2025-12-21 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 2.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 1528,
+        "win_rate": 0.1211,
+        "profit_factor": 0.9635,
+        "expectancy": -8.51,
+        "total_pnl": -13008.12,
+        "max_drawdown": -96486.56,
+        "sharpe": 0.188,
+        "final_equity": 36991.88
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 397,
+        "win_rate": 0.1083,
+        "profit_factor": 0.7044,
+        "expectancy": -47.72,
+        "total_pnl": -18946.44,
+        "max_drawdown": -19561.33,
+        "sharpe": -2.3654,
+        "final_equity": 31053.56
+      }
+    },
+    {
+      "fold": 9,
+      "train_start": "2025-06-24 23:00:00+00:00",
+      "train_end": "2025-12-21 23:00:00+00:00",
+      "test_start": "2025-12-21 23:00:00+00:00",
+      "test_end": "2026-02-19 23:00:00+00:00",
+      "best_params": {
+        "z_threshold": 3.0,
+        "displacement_bars": 8
+      },
+      "train_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 374,
+        "win_rate": 0.0642,
+        "profit_factor": 0.6866,
+        "expectancy": -48.99,
+        "total_pnl": -18323.57,
+        "max_drawdown": -21132.95,
+        "sharpe": -0.8998,
+        "final_equity": 31676.43
+      },
+      "test_metrics": {
+        "symbol": "NQ",
+        "strategy": "extreme_displacement_reversion",
+        "timeframe": "5m",
+        "trade_count": 119,
+        "win_rate": 0.0672,
+        "profit_factor": 0.3982,
+        "expectancy": -106.96,
+        "total_pnl": -12727.89,
+        "max_drawdown": -13983.06,
+        "sharpe": -4.4777,
+        "final_equity": 37272.11
+      }
+    }
+  ]
+}

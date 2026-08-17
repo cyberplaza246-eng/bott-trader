@@ -1,0 +1,24 @@
+{
+  "symbol": "MNQ",
+  "timeframe": "5m",
+  "full_history": {
+    "segment": "full_history",
+    "trade_count": 424,
+    "win_rate": 0.2524,
+    "total_pnl": -6843.36,
+    "t_stat": -1.642,
+    "significant": false
+  },
+  "final_hold_out": {
+    "segment": "final_90_days",
+    "trade_count": 27,
+    "win_rate": 0.1481,
+    "total_pnl": -2021.74,
+    "t_stat": -1.851,
+    "significant": false
+  },
+  "selected_strategy_counts": {
+    "no_trade": 153839,
+    "vwap_pullback_trend": 424
+  }
+}

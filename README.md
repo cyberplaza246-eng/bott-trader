@@ -1,101 +1,63 @@
-# AI-Powered Forex Trading Bot 🤖📈
+# bott-trader — MNQ / NQ / MES Futures Backtester
 
-An intelligent 4-model ensemble trading bot for automatic forex trading using LSTM, sentiment analysis, technical indicators, and volume analysis.
+A clean, from-scratch backtester for micro/mini index futures (MNQ, NQ, MES),
+built around three independent strategy edges plus a regime-switch ensemble.
+Old strategy/backtest code from the previous iteration of this project has
+been archived under `legacy/` (not deleted) rather than deleted outright.
 
-## Quick Start
+## Quick start
 
-1. **Setup**: `cp .env.example .env && pip install -r requirements.txt`
-2. **Configure**: Edit `.env` with your MT5 credentials
-3. **Paper Trade**: `python -m src.bot` (test with virtual money first)
-4. **Go Live**: After 1 week of profitable paper trades, switch to live mode
-
-## Docker Run (No Local Python Setup)
-
-1. **Create env file**: `cp .env.example .env` and update credentials
-2. **Production mode (stable image)**:
-        - `docker compose --profile prod up -d --build bot-prod`
-3. **Development mode (live code mounted)**:
-        - `docker compose --profile dev up --build bot-dev`
-4. **Stop containers**:
-        - `docker compose --profile prod down`
-        - `docker compose --profile dev down`
-
-### When you update code
-
-- **Prod mode**: rebuild and restart
-  - `docker compose --profile prod up -d --build bot-prod`
-- **Dev mode**: code is mounted live; restart container if needed
-  - `docker compose --profile dev restart bot-dev`
-
-## Key Features
-
-- ✅ **4 AI Models**: LSTM + Sentiment + Technical + Volume
-- ✅ **Automatic Trading**: Execute trades 24/5 forex markets
-- ✅ **Risk Management**: Position sizing, stop-loss, take-profit
-- ✅ **Paper Trading**: Test before risking real money
-- ✅ **Backtesting**: Validate strategy on historical data
-- ✅ **Learning**: Retrains weekly on closed trades
-
-## USD/JPY Tuning
-
-If you want to keep USD/JPY enabled but reduce low-quality entries, add these to your `.env`:
-
-- `USDJPY_TUNING_ENABLED=true`
-- `USDJPY_MIN_CONFIDENCE=0.40`
-- `USDJPY_MIN_MODELS_AGREEMENT=2`
-- `USDJPY_MIN_ADX=25`
-
-To make USD/JPY stricter during choppy periods, raise:
-
-- `USDJPY_MIN_CONFIDENCE` to `0.45`
-- `USDJPY_MIN_ADX` to `30`
-
-## Architecture
-
-```
-Fetch Data → Technical Indicators → 4 AI Models (Parallel)
-                                    ├─ LSTM Prediction
-                                    ├─ Sentiment (News/Twitter)
-                                    ├─ Technical Signals
-                                    └─ Volume Analysis
-                                            ↓
-                                    Ensemble Voting (need 3+/4)
-                                            ↓
-                                    Risk Management Check
-                                            ↓
-                                    Execute Trade (MT5)
-                                            ↓
-                                    Monitor & Log Results
+```bash
+pip install -r requirements.txt
+python scripts/run_backtest.py --symbol MNQ --timeframe 5m --strategy ensemble \
+    --start 2025-12-29 --end 2026-03-11
 ```
 
-## Files Structure
+Results (trade log, equity curve, summary metrics) are written to `reports/`.
+
+## Strategies
+
+| Name | Edge |
+|---|---|
+| `trend` | EMA(20/50) crossover confirmed by EMA(200), ATR trailing stop |
+| `mean_reversion` | Bollinger(20,2σ) + RSI(14) fade, gated by ADX < 20 |
+| `breakout` | Donchian(20) channel break with volume confirmation |
+| `ensemble` | ADX regime router: trend when ADX≥25, mean-reversion when ADX<20, breakout evaluated independently and given priority |
+| `vwap_cross` | EMA(10/20) cross + session VWAP filter + 3-candle confirmation delay before entering |
+
+Run any strategy against any symbol/timeframe via `scripts/run_backtest.py
+--strategy {trend,mean_reversion,breakout,ensemble}`.
+
+## Data
+
+`data/MNQ_1m.csv`, `MNQ_5m.csv`, `MES_1m.csv`, `MES_5m.csv` — real OHLCV,
+2025-12-29 to 2026-03-11. **NQ has no standalone feed**: since NQ and MNQ
+track the same index at the same price (same tick size), NQ backtests reuse
+MNQ's price series with NQ's own contract multiplier/margin/commission
+applied (see `config/settings.py: DERIVED_SYMBOLS`). NQ's much larger
+multiplier means it needs a bigger account/risk budget to size any contracts
+at all — expect low or zero trade counts on a small account.
+
+## Structure
 
 ```
-src/
-├── ai/                 # 4 AI models
-├── broker/            # MT5 integration
-├── core/              # Trading engine & paper trading
-├── risk/              # Position sizing & risk management
-├── backtest/          # Historical data testing
-└── utils/             # Logging
-
 config/
-├── strategy_config.py # Trading parameters
-
-logs/
-├── signals.log        # AI signal analysis
-├── trades.log         # Entry/exit history
-└── errors.log         # Error messages
+  instruments.py   # contract specs (MNQ/NQ/MES) via src/instruments registry
+  settings.py       # account size, risk %, default timeframe, symbols
+src/
+  data/loader.py    # CSV loading + NQ-from-MNQ derivation
+  strategies/       # trend_following, mean_reversion, breakout, ensemble
+  backtest/         # engine.py (bar-by-bar sim), metrics.py
+  risk/             # fixed-fractional position sizing
+scripts/run_backtest.py
+tests/              # pytest — engine + strategy signal sanity checks
+reports/            # per-run trade log, equity curve, summary.json
+legacy/             # archived prior implementation (forex bot, live trading
+                     # scripts, old backtest engine) — not deleted, just parked
 ```
 
-## Next Steps
+## Tests
 
-👉 **Read [SETUP.md](SETUP.md) for detailed installation & configuration**
-
----
-
-**Status**: ✅ Fully implemented and ready to deploy
-- 4-model ensemble trading engine
-- Paper trading for risk-free testing
-- Backtest framework for strategy validation
-- Production-ready logging and monitoring
+```bash
+python -m pytest tests/ -v
+```

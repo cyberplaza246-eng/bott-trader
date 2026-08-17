@@ -1,0 +1,13 @@
+{
+  "symbol": "MES",
+  "strategy": "ensemble",
+  "timeframe": "5m",
+  "trade_count": 473,
+  "win_rate": 0.3256,
+  "profit_factor": 0.6445,
+  "expectancy": -12.84,
+  "total_pnl": -6075.03,
+  "max_drawdown": -6076.29,
+  "sharpe": -3.8877,
+  "final_equity": 43924.97
+}

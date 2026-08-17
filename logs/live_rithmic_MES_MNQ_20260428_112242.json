@@ -1,0 +1,84 @@
+{
+  "symbols": [
+    "MES",
+    "MNQ"
+  ],
+  "paper_mode": false,
+  "strategy": "enhanced_breakout",
+  "params": {
+    "lookback": 10,
+    "atr_mult": 1.5,
+    "tp_mult": 2.0,
+    "ema_len": 50
+  },
+  "stats": {
+    "trades": 5,
+    "wins": 0,
+    "losses": 5,
+    "win_rate": 0.0,
+    "total_pnl": 0,
+    "profit_factor": 0
+  },
+  "trades": [
+    {
+      "entry_time": "2026-04-28T15:31:23.419621+00:00",
+      "exit_time": "2026-04-28T15:32:52.749628+00:00",
+      "symbol": "MNQ",
+      "direction": "SHORT",
+      "entry": 27046.75,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27119.29797,
+      "tp": 26959.69243
+    },
+    {
+      "entry_time": "2026-04-28T15:46:13.879551+00:00",
+      "exit_time": "2026-04-28T16:08:16.395963+00:00",
+      "symbol": "MES",
+      "direction": "SHORT",
+      "entry": 7151.75,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 7162.63018,
+      "tp": 7129.98964
+    },
+    {
+      "entry_time": "2026-04-28T15:41:27.386811+00:00",
+      "exit_time": "2026-04-28T16:08:16.396963+00:00",
+      "symbol": "MES",
+      "direction": "SHORT",
+      "entry": 7152.75,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 7164.00539,
+      "tp": 7130.23922
+    },
+    {
+      "entry_time": "2026-04-28T15:36:09.978623+00:00",
+      "exit_time": "2026-04-28T16:08:16.396963+00:00",
+      "symbol": "MNQ",
+      "direction": "SHORT",
+      "entry": 27023.0,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 27098.0,
+      "tp": 26933.0
+    },
+    {
+      "entry_time": "2026-04-28T15:22:53.256460+00:00",
+      "exit_time": "2026-04-28T16:08:16.397962+00:00",
+      "symbol": "MES",
+      "direction": "SHORT",
+      "entry": 7160.25,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 7172.1786,
+      "tp": 7136.39279
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "symbol": "NQ",
+  "strategy": "vwap_cross",
+  "timeframe": "5m",
+  "trade_count": 14,
+  "win_rate": 0.3571,
+  "profit_factor": 2.3164,
+  "expectancy": 149.12,
+  "total_pnl": 2087.69,
+  "max_drawdown": -834.24,
+  "sharpe": 1.0439,
+  "final_equity": 52087.69
+}

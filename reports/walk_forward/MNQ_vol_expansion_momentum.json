@@ -1,0 +1,386 @@
+{
+  "symbol": "MNQ",
+  "strategy": "vol_expansion_momentum",
+  "oos_summary": {
+    "folds": 10,
+    "profitable_folds": 2,
+    "total_oos_trades": 714,
+    "total_oos_pnl": -16961.46,
+    "avg_oos_win_rate": 0.3168,
+    "avg_pnl_per_fold": -1696.15,
+    "t_stat": -2.641,
+    "significant": false
+  },
+  "folds": [
+    {
+      "fold": 0,
+      "train_start": "2024-01-01 23:00:00+00:00",
+      "train_end": "2024-06-29 23:00:00+00:00",
+      "test_start": "2024-06-29 23:00:00+00:00",
+      "test_end": "2024-08-28 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 238,
+        "win_rate": 0.3403,
+        "profit_factor": 0.7614,
+        "expectancy": -22.17,
+        "total_pnl": -5277.08,
+        "max_drawdown": -8346.2,
+        "sharpe": -1.0517,
+        "final_equity": 44722.92
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 89,
+        "win_rate": 0.3596,
+        "profit_factor": 1.0261,
+        "expectancy": 2.13,
+        "total_pnl": 189.96,
+        "max_drawdown": -1880.54,
+        "sharpe": 0.1477,
+        "final_equity": 50189.96
+      }
+    },
+    {
+      "fold": 1,
+      "train_start": "2024-03-01 23:00:00+00:00",
+      "train_end": "2024-08-28 23:00:00+00:00",
+      "test_start": "2024-08-28 23:00:00+00:00",
+      "test_end": "2024-10-27 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 245,
+        "win_rate": 0.3184,
+        "profit_factor": 0.8386,
+        "expectancy": -14.73,
+        "total_pnl": -3609.13,
+        "max_drawdown": -6443.16,
+        "sharpe": -0.6876,
+        "final_equity": 46390.87
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 87,
+        "win_rate": 0.2414,
+        "profit_factor": 0.8528,
+        "expectancy": -13.4,
+        "total_pnl": -1166.11,
+        "max_drawdown": -3618.26,
+        "sharpe": -0.3505,
+        "final_equity": 48833.89
+      }
+    },
+    {
+      "fold": 2,
+      "train_start": "2024-04-30 23:00:00+00:00",
+      "train_end": "2024-10-27 23:00:00+00:00",
+      "test_start": "2024-10-27 23:00:00+00:00",
+      "test_end": "2024-12-26 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 271,
+        "win_rate": 0.2878,
+        "profit_factor": 0.9093,
+        "expectancy": -8.43,
+        "total_pnl": -2285.1,
+        "max_drawdown": -3558.14,
+        "sharpe": -0.2903,
+        "final_equity": 47714.9
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 84,
+        "win_rate": 0.2976,
+        "profit_factor": 0.652,
+        "expectancy": -33.35,
+        "total_pnl": -2801.52,
+        "max_drawdown": -3432.93,
+        "sharpe": -1.9566,
+        "final_equity": 47198.48
+      }
+    },
+    {
+      "fold": 3,
+      "train_start": "2024-06-29 23:00:00+00:00",
+      "train_end": "2024-12-26 23:00:00+00:00",
+      "test_start": "2024-12-26 23:00:00+00:00",
+      "test_end": "2025-02-24 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 260,
+        "win_rate": 0.3,
+        "profit_factor": 0.8407,
+        "expectancy": -14.24,
+        "total_pnl": -3701.88,
+        "max_drawdown": -6070.4,
+        "sharpe": -0.5721,
+        "final_equity": 46298.12
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 66,
+        "win_rate": 0.2879,
+        "profit_factor": 0.4218,
+        "expectancy": -53.51,
+        "total_pnl": -3531.89,
+        "max_drawdown": -3834.9,
+        "sharpe": -3.6581,
+        "final_equity": 46468.11
+      }
+    },
+    {
+      "fold": 4,
+      "train_start": "2024-08-28 23:00:00+00:00",
+      "train_end": "2025-02-24 23:00:00+00:00",
+      "test_start": "2025-02-24 23:00:00+00:00",
+      "test_end": "2025-04-25 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 236,
+        "win_rate": 0.2754,
+        "profit_factor": 0.6606,
+        "expectancy": -31.02,
+        "total_pnl": -7319.81,
+        "max_drawdown": -9498.36,
+        "sharpe": -1.2909,
+        "final_equity": 42680.19
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 63,
+        "win_rate": 0.381,
+        "profit_factor": 0.4976,
+        "expectancy": -46.8,
+        "total_pnl": -2948.2,
+        "max_drawdown": -2983.48,
+        "sharpe": -2.7656,
+        "final_equity": 47051.8
+      }
+    },
+    {
+      "fold": 5,
+      "train_start": "2024-10-27 23:00:00+00:00",
+      "train_end": "2025-04-25 23:00:00+00:00",
+      "test_start": "2025-04-25 23:00:00+00:00",
+      "test_end": "2025-06-24 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 208,
+        "win_rate": 0.3173,
+        "profit_factor": 0.5341,
+        "expectancy": -42.26,
+        "total_pnl": -8789.76,
+        "max_drawdown": -9518.56,
+        "sharpe": -2.6643,
+        "final_equity": 41210.24
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 32,
+        "win_rate": 0.2812,
+        "profit_factor": 0.5099,
+        "expectancy": -54.43,
+        "total_pnl": -1741.81,
+        "max_drawdown": -2254.29,
+        "sharpe": -2.0585,
+        "final_equity": 48258.19
+      }
+    },
+    {
+      "fold": 6,
+      "train_start": "2024-12-26 23:00:00+00:00",
+      "train_end": "2025-06-24 23:00:00+00:00",
+      "test_start": "2025-06-24 23:00:00+00:00",
+      "test_end": "2025-08-23 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 157,
+        "win_rate": 0.3185,
+        "profit_factor": 0.4491,
+        "expectancy": -51.52,
+        "total_pnl": -8088.49,
+        "max_drawdown": -8391.5,
+        "sharpe": -2.9728,
+        "final_equity": 41911.51
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 78,
+        "win_rate": 0.359,
+        "profit_factor": 0.8194,
+        "expectancy": -15.9,
+        "total_pnl": -1239.97,
+        "max_drawdown": -1989.63,
+        "sharpe": -0.7938,
+        "final_equity": 48760.03
+      }
+    },
+    {
+      "fold": 7,
+      "train_start": "2025-02-24 23:00:00+00:00",
+      "train_end": "2025-08-23 23:00:00+00:00",
+      "test_start": "2025-08-23 23:00:00+00:00",
+      "test_end": "2025-10-22 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 173,
+        "win_rate": 0.3526,
+        "profit_factor": 0.6194,
+        "expectancy": -33.64,
+        "total_pnl": -5820.48,
+        "max_drawdown": -6121.76,
+        "sharpe": -1.766,
+        "final_equity": 44179.52
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 82,
+        "win_rate": 0.3049,
+        "profit_factor": 0.7172,
+        "expectancy": -28.45,
+        "total_pnl": -2332.53,
+        "max_drawdown": -3148.8,
+        "sharpe": -1.4175,
+        "final_equity": 47667.47
+      }
+    },
+    {
+      "fold": 8,
+      "train_start": "2025-04-25 23:00:00+00:00",
+      "train_end": "2025-10-22 23:00:00+00:00",
+      "test_start": "2025-10-22 23:00:00+00:00",
+      "test_end": "2025-12-21 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 192,
+        "win_rate": 0.3229,
+        "profit_factor": 0.7188,
+        "expectancy": -25.75,
+        "total_pnl": -4944.75,
+        "max_drawdown": -5457.23,
+        "sharpe": -1.242,
+        "final_equity": 45055.25
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 63,
+        "win_rate": 0.2698,
+        "profit_factor": 0.5678,
+        "expectancy": -40.18,
+        "total_pnl": -2531.51,
+        "max_drawdown": -2916.19,
+        "sharpe": -2.2687,
+        "final_equity": 47468.49
+      }
+    },
+    {
+      "fold": 9,
+      "train_start": "2025-06-24 23:00:00+00:00",
+      "train_end": "2025-12-21 23:00:00+00:00",
+      "test_start": "2025-12-21 23:00:00+00:00",
+      "test_end": "2026-02-19 23:00:00+00:00",
+      "best_params": {
+        "atr_expansion_mult": 1.8,
+        "min_body_range_pct": 0.7
+      },
+      "train_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 222,
+        "win_rate": 0.3153,
+        "profit_factor": 0.7176,
+        "expectancy": -26.04,
+        "total_pnl": -5779.93,
+        "max_drawdown": -6485.0,
+        "sharpe": -1.3669,
+        "final_equity": 44220.07
+      },
+      "test_metrics": {
+        "symbol": "MNQ",
+        "strategy": "vol_expansion_momentum",
+        "timeframe": "5m",
+        "trade_count": 70,
+        "win_rate": 0.3857,
+        "profit_factor": 1.2107,
+        "expectancy": 16.32,
+        "total_pnl": 1142.12,
+        "max_drawdown": -2190.81,
+        "sharpe": 0.6984,
+        "final_equity": 51142.12
+      }
+    }
+  ]
+}

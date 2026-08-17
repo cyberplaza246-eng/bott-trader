@@ -1,0 +1,38 @@
+[
+  {
+    "symbol": "ES",
+    "total_rolls": 65,
+    "explained_by_roll": 62,
+    "large_roll_spread_needs_review": 3,
+    "insufficient_data_to_verify": 0,
+    "instrument_roll_spread_median_pct": 0.6094,
+    "instrument_roll_spread_robust_std_pct": 0.6365
+  },
+  {
+    "symbol": "NQ",
+    "total_rolls": 65,
+    "explained_by_roll": 59,
+    "large_roll_spread_needs_review": 6,
+    "insufficient_data_to_verify": 0,
+    "instrument_roll_spread_median_pct": 0.6045,
+    "instrument_roll_spread_robust_std_pct": 0.5323
+  },
+  {
+    "symbol": "MES",
+    "total_rolls": 29,
+    "explained_by_roll": 26,
+    "large_roll_spread_needs_review": 3,
+    "insufficient_data_to_verify": 0,
+    "instrument_roll_spread_median_pct": 0.9199,
+    "instrument_roll_spread_robust_std_pct": 0.8516
+  },
+  {
+    "symbol": "MNQ",
+    "total_rolls": 29,
+    "explained_by_roll": 24,
+    "large_roll_spread_needs_review": 5,
+    "insufficient_data_to_verify": 0,
+    "instrument_roll_spread_median_pct": 1.0611,
+    "instrument_roll_spread_robust_std_pct": 1.0541
+  }
+]

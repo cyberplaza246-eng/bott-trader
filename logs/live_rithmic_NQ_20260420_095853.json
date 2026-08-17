@@ -1,0 +1,35 @@
+{
+  "symbols": [
+    "NQ"
+  ],
+  "paper_mode": false,
+  "strategy": "enhanced_breakout",
+  "params": {
+    "lookback": 10,
+    "atr_mult": 1.5,
+    "tp_mult": 2.0,
+    "ema_len": 50
+  },
+  "stats": {
+    "trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl": 0,
+    "profit_factor": 0
+  },
+  "trades": [
+    {
+      "entry_time": "2026-04-20T13:59:03.446906+00:00",
+      "exit_time": "2026-04-20T14:00:14.371330+00:00",
+      "symbol": "NQ",
+      "direction": "LONG",
+      "entry": 26785.5,
+      "exit": 0,
+      "pnl": 0,
+      "exit_type": "BROKER_SYNC",
+      "sl": 26736.2674,
+      "tp": 26908.5815
+    }
+  ]
+}

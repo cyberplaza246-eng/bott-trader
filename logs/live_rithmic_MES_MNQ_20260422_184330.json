@@ -1,0 +1,34 @@
+{
+  "symbols": [
+    "MES",
+    "MNQ"
+  ],
+  "paper_mode": false,
+  "strategy": "enhanced_breakout",
+  "params": {
+    "lookback": 10,
+    "atr_mult": 1.5,
+    "tp_mult": 2.0,
+    "ema_len": 50
+  },
+  "stats": {
+    "trades": 1,
+    "wins": 0,
+    "losses": 1,
+    "win_rate": 0.0,
+    "total_pnl": -141.18596000000252,
+    "profit_factor": 0.0
+  },
+  "trades": [
+    {
+      "symbol": "MNQ",
+      "direction": "short",
+      "entry_time": "2026-04-22 22:44:42.267321+00:00",
+      "exit_time": "2026-04-22 22:45:55.273429+00:00",
+      "entry_price": 24788.0,
+      "exit_price": 24857.34298,
+      "exit_type": "STOP_LOSS",
+      "pnl": -141.18596000000252
+    }
+  ]
+}

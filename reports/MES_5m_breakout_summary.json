@@ -1,0 +1,13 @@
+{
+  "symbol": "MES",
+  "strategy": "breakout",
+  "timeframe": "5m",
+  "trade_count": 464,
+  "win_rate": 0.3297,
+  "profit_factor": 0.6848,
+  "expectancy": -10.75,
+  "total_pnl": -4990.06,
+  "max_drawdown": -4991.95,
+  "sharpe": -3.3236,
+  "final_equity": 45009.94
+}
