@@ -1,0 +1,108 @@
+{
+  "config": {
+    "atr": 1.2,
+    "tp": 1.5,
+    "adx": 17,
+    "vol": 0.4,
+    "di_tol": 3.0,
+    "tp_buffer": 0.5,
+    "max_tr": 20,
+    "min_rr": 0.8,
+    "di_counter": 20.0,
+    "counter_adx": 25,
+    "live_like": true,
+    "session_mode": "extended",
+    "name": "D_full_adaptive_rithmic",
+    "strategy_mode": "full_adaptive",
+    "use_15m_bias": true,
+    "bear_adaptive": true,
+    "bull_adaptive": true,
+    "strong_trend_adx": 35,
+    "vwap_adx_min": 35,
+    "soft_15m_bias": true,
+    "15m_bias_mode": "price_ema50",
+    "15m_bias_buffer_pts": 0.0,
+    "vwap_required": false,
+    "strong_trend_skip_macd": false,
+    "strong_trend_min_rr": 0.6,
+    "strong_trend_relax_adx": 35,
+    "bull_rsi_lo": 35,
+    "bull_rsi_hi": 70
+  },
+  "session": "extended",
+  "cache_only": true,
+  "modes": {
+    "A_baseline": {
+      "use_news": false,
+      "use_llm": false,
+      "symbols": {
+        "NQ": {
+          "mode": "A_baseline",
+          "trades": 295,
+          "wr": 46.101694915254235,
+          "pf": 1.2580096190146486,
+          "pnl": 9372.678571428114,
+          "dd": 7.325189507253797,
+          "skipped_news": 0,
+          "skipped_llm": 0,
+          "llm_api_calls": 0,
+          "news_api_calls": 0
+        }
+      }
+    },
+    "B_news_only": {
+      "use_news": true,
+      "use_llm": false,
+      "symbols": {
+        "NQ": {
+          "mode": "B_news_only",
+          "trades": 295,
+          "wr": 46.101694915254235,
+          "pf": 1.2580096190146486,
+          "pnl": 9372.678571428114,
+          "dd": 7.325189507253797,
+          "skipped_news": 0,
+          "skipped_llm": 0,
+          "llm_api_calls": 0,
+          "news_api_calls": 0
+        }
+      }
+    },
+    "C_llm_only": {
+      "use_news": false,
+      "use_llm": true,
+      "symbols": {
+        "NQ": {
+          "mode": "C_llm_only",
+          "trades": 202,
+          "wr": 49.00990099009901,
+          "pf": 1.4809550259703819,
+          "pnl": 11627.4999999992,
+          "dd": 5.584000000000088,
+          "skipped_news": 0,
+          "skipped_llm": 502,
+          "llm_api_calls": 0,
+          "news_api_calls": 0
+        }
+      }
+    },
+    "D_both": {
+      "use_news": true,
+      "use_llm": true,
+      "symbols": {
+        "NQ": {
+          "mode": "D_both",
+          "trades": 202,
+          "wr": 49.00990099009901,
+          "pf": 1.4809550259703819,
+          "pnl": 11627.4999999992,
+          "dd": 5.584000000000088,
+          "skipped_news": 0,
+          "skipped_llm": 502,
+          "llm_api_calls": 0,
+          "news_api_calls": 0
+        }
+      }
+    }
+  }
+}

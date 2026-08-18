@@ -1,0 +1,113 @@
+{
+  "symbol": "MNQ",
+  "data_note": "30s: SYNTHETIC (2x per 1m bar \u2014 imperfect) | 1m: MNQ_1m.csv (65,925) | 5m: 13,190",
+  "period": {
+    "start": "2025-12-29 05:00:00+00:00",
+    "end": "2026-03-11 19:25:00+00:00",
+    "bars_1m": 65925
+  },
+  "params": {
+    "sl_pts": 8.0,
+    "tp_pts": 15.0,
+    "max_hold_sec": 90
+  },
+  "variants": [
+    {
+      "version": "A",
+      "symbol": "MNQ",
+      "trades": 612,
+      "win_rate": 42.0,
+      "profit_factor": 0.73,
+      "expectancy": -1.65,
+      "total_pnl": -1011.92,
+      "max_drawdown": 1015.22,
+      "avg_hold_sec": 108.3,
+      "tp_exits": 35,
+      "sl_exits": 140,
+      "max_hold_exits": 437,
+      "params": {
+        "sl_pts": 8.0,
+        "tp_pts": 15.0,
+        "max_hold_sec": 90
+      },
+      "data": "30s: SYNTHETIC (2x per 1m bar \u2014 imperfect) | 1m: MNQ_1m.csv (65,925) | 5m: 13,190",
+      "period": {
+        "start": "2025-12-29 05:00:00+00:00",
+        "end": "2026-03-11 19:25:00+00:00"
+      }
+    },
+    {
+      "version": "B",
+      "symbol": "MNQ",
+      "trades": 628,
+      "win_rate": 52.1,
+      "profit_factor": 1.68,
+      "expectancy": 2.35,
+      "total_pnl": 1476.59,
+      "max_drawdown": 126.28,
+      "avg_hold_sec": 86.7,
+      "tp_exits": 45,
+      "sl_exits": 55,
+      "max_hold_exits": 528,
+      "params": {
+        "sl_pts": 8.0,
+        "tp_pts": 15.0,
+        "max_hold_sec": 90
+      },
+      "data": "30s: SYNTHETIC (2x per 1m bar \u2014 imperfect) | 1m: MNQ_1m.csv (65,925) | 5m: 13,190",
+      "period": {
+        "start": "2025-12-29 05:00:00+00:00",
+        "end": "2026-03-11 19:25:00+00:00"
+      }
+    },
+    {
+      "version": "C",
+      "symbol": "MNQ",
+      "trades": 624,
+      "win_rate": 45.5,
+      "profit_factor": 1.07,
+      "expectancy": 0.27,
+      "total_pnl": 166.37,
+      "max_drawdown": 258.37,
+      "avg_hold_sec": 88.1,
+      "tp_exits": 19,
+      "sl_exits": 58,
+      "max_hold_exits": 547,
+      "params": {
+        "sl_pts": 8.0,
+        "tp_pts": 15.0,
+        "max_hold_sec": 90
+      },
+      "data": "30s: SYNTHETIC (2x per 1m bar \u2014 imperfect) | 1m: MNQ_1m.csv (65,925) | 5m: 13,190",
+      "period": {
+        "start": "2025-12-29 05:00:00+00:00",
+        "end": "2026-03-11 19:25:00+00:00"
+      }
+    },
+    {
+      "version": "D",
+      "symbol": "MNQ",
+      "trades": 629,
+      "win_rate": 44.2,
+      "profit_factor": 0.95,
+      "expectancy": -0.21,
+      "total_pnl": -131.21,
+      "max_drawdown": 568.96,
+      "avg_hold_sec": 88.1,
+      "tp_exits": 17,
+      "sl_exits": 64,
+      "max_hold_exits": 548,
+      "params": {
+        "sl_pts": 8.0,
+        "tp_pts": 15.0,
+        "max_hold_sec": 90
+      },
+      "data": "30s: SYNTHETIC (2x per 1m bar \u2014 imperfect) | 1m: MNQ_1m.csv (65,925) | 5m: 13,190",
+      "period": {
+        "start": "2025-12-29 05:00:00+00:00",
+        "end": "2026-03-11 19:25:00+00:00"
+      }
+    }
+  ],
+  "live_30s_test": "scripts/test_rithmic_30s_bars.py \u2014 real SECOND_BAR confirmed when credentials set"
+}

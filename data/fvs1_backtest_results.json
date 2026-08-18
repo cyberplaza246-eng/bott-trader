@@ -1,0 +1,26 @@
+{
+  "strategy": "fvs1",
+  "trades": 1,
+  "wins": 1,
+  "losses": 0,
+  "win_rate_pct": 100.0,
+  "profit_factor": Infinity,
+  "total_pnl": 16.78,
+  "expectancy": 16.78,
+  "avg_hold_seconds": 30.0,
+  "round_trip_fee": 1.5,
+  "max_hold_seconds": 90,
+  "sample_trades": [
+    {
+      "entry_time": "2026-01-26 14:58:00+00:00",
+      "direction": "long",
+      "entry": 25842.955,
+      "sl": 25831.53,
+      "tp": 25852.095000000005,
+      "exit": 25852.095000000005,
+      "pnl": 16.78,
+      "reason": "TP",
+      "hold_s": 30.0
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "session": "extended",
+  "base_config": {
+    "atr": 1.2,
+    "tp": 1.5,
+    "adx": 17,
+    "vol": 0.4,
+    "di_tol": 3.0,
+    "tp_buffer": 0.5,
+    "max_tr": 20,
+    "min_rr": 0.8,
+    "di_counter": 20.0,
+    "counter_adx": 25,
+    "live_like": true,
+    "session_mode": "extended",
+    "name": "D_full_adaptive_rithmic",
+    "strategy_mode": "full_adaptive",
+    "use_15m_bias": true,
+    "bear_adaptive": true,
+    "bull_adaptive": true,
+    "strong_trend_adx": 35,
+    "vwap_adx_min": 35,
+    "soft_15m_bias": true,
+    "15m_bias_mode": "price_ema50",
+    "15m_bias_buffer_pts": 0.0,
+    "vwap_required": false,
+    "strong_trend_skip_macd": false,
+    "strong_trend_min_rr": 0.6,
+    "strong_trend_relax_adx": 35,
+    "bull_rsi_lo": 35,
+    "bull_rsi_hi": 70
+  },
+  "variants": {
+    "A": {
+      "label": "live_baseline_soft15m",
+      "overrides": {
+        "use_15m_bias": true,
+        "soft_15m_bias": true,
+        "volatility_filter_points": 45
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 295,
+          "wr": 46.101694915254235,
+          "pf": 1.2580096190146486,
+          "pnl": 9372.678571428114,
+          "dd": 7.325189507253797
+        }
+      }
+    },
+    "B": {
+      "label": "no_15m_bias",
+      "overrides": {
+        "use_15m_bias": false,
+        "soft_15m_bias": true,
+        "volatility_filter_points": 45
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 295,
+          "wr": 44.74576271186441,
+          "pf": 1.1431773383960604,
+          "pnl": 5354.4642857139115,
+          "dd": 11.619222675687915
+        }
+      }
+    },
+    "C": {
+      "label": "hard_15m_bias",
+      "overrides": {
+        "use_15m_bias": true,
+        "soft_15m_bias": false,
+        "volatility_filter_points": 45
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 295,
+          "wr": 46.101694915254235,
+          "pf": 1.2580096190146486,
+          "pnl": 9372.678571428114,
+          "dd": 7.325189507253797
+        }
+      }
+    },
+    "D": {
+      "label": "relaxed_vol_60pt",
+      "overrides": {
+        "use_15m_bias": true,
+        "soft_15m_bias": true,
+        "volatility_filter_points": 60
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 295,
+          "wr": 45.76271186440678,
+          "pf": 1.2205639905658796,
+          "pnl": 8122.678571428114,
+          "dd": 8.633201437200375
+        }
+      }
+    }
+  }
+}

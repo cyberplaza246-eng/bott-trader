@@ -1,0 +1,53 @@
+{
+  "symbol": "MNQ",
+  "results": [
+    {
+      "mode": "1_baseline_mtf",
+      "trades": 331,
+      "wins": 155,
+      "losses": 176,
+      "win_rate": 46.82779456193353,
+      "profit_factor": 0.9452894409398632,
+      "total_pnl": -216.07857142859575,
+      "final_balance": 49783.921428571404,
+      "skipped": {
+        "mtf": 0,
+        "smart": 0,
+        "llm": 0
+      },
+      "llm_calls": 0
+    },
+    {
+      "mode": "2_mtf_smart_rules",
+      "trades": 313,
+      "wins": 151,
+      "losses": 162,
+      "win_rate": 48.242811501597444,
+      "profit_factor": 0.9112742188928837,
+      "total_pnl": -339.59285714285215,
+      "final_balance": 49660.40714285715,
+      "skipped": {
+        "mtf": 0,
+        "smart": 1468,
+        "llm": 0
+      },
+      "llm_calls": 0
+    },
+    {
+      "mode": "3_mtf_smart_deepseek",
+      "trades": 313,
+      "wins": 151,
+      "losses": 162,
+      "win_rate": 48.242811501597444,
+      "profit_factor": 0.9112742188928837,
+      "total_pnl": -339.59285714285215,
+      "final_balance": 49660.40714285715,
+      "skipped": {
+        "mtf": 0,
+        "smart": 1468,
+        "llm": 0
+      },
+      "llm_calls": 0
+    }
+  ]
+}

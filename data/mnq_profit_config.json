@@ -1,0 +1,281 @@
+{
+
+  "name": "D_full_adaptive_rithmic",
+
+  "atr": 1.2,
+
+  "tp": 1.5,
+
+  "adx": 17,
+
+  "vol": 0.4,
+
+  "di_tol": 0.0,
+
+  "tp_buffer": 0.5,
+
+  "max_tr": 20,
+
+  "max_positions_mnq": 2,
+
+  "min_rr": 0.8,
+
+  "di_counter": 20.0,
+
+  "counter_adx": 25,
+
+  "counter_trend_longs": true,
+
+  "flow_counter_trend": {
+
+    "enabled": true,
+
+    "di_margin": 5.0,
+
+    "di_margin_strong_delta": 3.0,
+
+    "delta_strong_abs": 150,
+
+    "regime_di_margin": 3.0,
+
+    "adx_min": 17,
+
+    "delta_min": 100,
+
+    "delta_min_extreme": 50,
+
+    "buy_pct_extreme_low": 0.40,
+
+    "buy_pct_extreme_high": 0.60,
+
+    "buy_pct_short_max": 0.45,
+
+    "buy_pct_long_min": 0.55,
+
+    "regime_scans": 3
+
+  },
+
+  "flow_entry_guard": {
+
+    "enabled": true,
+
+    "long_buy_pct_min": 0.48,
+
+    "short_buy_pct_max": 0.50
+
+  },
+
+  "strategy_mode": "full_adaptive",
+
+  "use_15m_bias": true,
+
+  "15m_entry_gate": false,
+
+  "bear_adaptive": true,
+
+  "bull_adaptive": true,
+
+  "counter_trend_shorts": false,
+
+  "strong_trend_adx": 35,
+
+  "strong_trend_skip_macd": true,
+
+  "strong_trend_relax_adx": 40,
+
+  "strong_trend_min_rr": 0.6,
+
+  "vwap_adx_min": 35,
+
+  "vwap_required": false,
+
+  "soft_15m_bias": true,
+
+  "entry_quality": {
+
+    "enabled": true,
+
+    "short_below_ema9": true,
+
+    "short_macd_negative": true,
+
+    "short_block_green_bars": 2,
+
+    "short_di_margin": 5.0
+
+  },
+
+  "rithmic_window": "2026-05-01 to 2026-06-03",
+
+  "rithmic_bars": 20000,
+
+  "trades_nq": 991,
+
+  "wr_nq": 47.0,
+
+  "pf_nq": 1.20,
+
+  "pnl_nq": 14642.0,
+
+  "trades_mnq": 1013,
+
+  "wr_mnq": 47.0,
+
+  "pf_mnq": 1.20,
+
+  "pnl_mnq": 1222.0,
+
+  "profitability_guards_backtest": {
+
+    "session": "extended",
+
+    "baseline_mnq": {
+
+      "trades": 1015,
+
+      "wr": 46.0,
+
+      "pf": 1.16,
+
+      "avg_hold_min": 5.7
+
+    },
+
+    "di_tol_0_mnq": {
+
+      "trades": 1013,
+
+      "wr": 47.0,
+
+      "pf": 1.20,
+
+      "avg_hold_min": 5.7
+
+    },
+
+    "with_flow_guard_live": "USE_ORDER_FLOW=true blocks long when delta<0 and buy%<48%",
+
+    "note": "di_tol=0 requires DI+>=DI- on 5M trend longs; flow_entry_guard for live tick flow"
+
+  },
+
+  "entry_quality_backtest": {
+
+    "session": "extended",
+
+    "baseline_nq": {
+
+      "trades": 299,
+
+      "wr": 44.1,
+
+      "pf": 1.05,
+
+      "pnl": 1970
+
+    },
+
+    "baseline_mnq": {
+
+      "trades": 317,
+
+      "wr": 47.3,
+
+      "pf": 1.2,
+
+      "pnl": 868
+
+    },
+
+    "with_filters_nq": {
+
+      "trades": 293,
+
+      "wr": 46.4,
+
+      "pf": 1.22,
+
+      "pnl": 7768
+
+    },
+
+    "with_filters_mnq": {
+
+      "trades": 299,
+
+      "wr": 48.2,
+
+      "pf": 1.34,
+
+      "pnl": 1290
+
+    }
+
+  },
+
+  "note": "D tuned Rithmic May-Jun 2026. Live safety 2026-06-12: max_positions_mnq=2 (was 4), counter_trend_shorts=false (live 18% WR), short_di_margin=5, flow short_buy_pct_max=0.50. Profitability guards: di_tol=0, flow_entry_guard, ghost force-sync 30s. Sim: MNQ not NQ. USE_ORDER_FLOW=true required for flow guard.",
+
+  "15m_bias_mode": "price_ema50",
+
+  "scalp_hybrid": {
+    "enabled": true,
+    "name": "ultra_fast_30s",
+    "profit_mode": true,
+    "docs": "docs/PROFITABLE_LIVE.md",
+    "sessions_env": "SCALP_SESSIONS=morning=09:30-12:00;afternoon=13:30-16:00",
+    "sl_pts": 6,
+    "tp_pts": 14,
+    "sl_min": 6,
+    "sl_max": 10,
+    "tp_min": 10,
+    "tp_max": 16,
+    "min_rr": 1.4,
+    "max_hold_sec": 30,
+    "scalp_aggressive": true,
+    "adx_min": 15,
+    "continuation_adx_min": 18,
+    "pullback_atr": 0.85,
+    "setup_bars": 2,
+    "setup_window_sec": 60,
+    "trend_mode": "vwap",
+    "continuation_volume": false,
+    "chase_body_mult": 2.5,
+    "chase_ema_atr": 1.5,
+    "momentum_burst": true,
+    "momentum_burst_adx": 15,
+    "rsi_gate": true,
+    "rsi_min_short": 40,
+    "rsi_max_long": 65,
+    "rsi_relax_adx": 25,
+    "rsi_relax_min_short": 35,
+    "rsi_relax_max_long": 70,
+    "breakeven_pct": 0.35,
+    "backtest_mnq": {
+      "data": "MNQ_1m.csv Dec2025-Mar2026 synthetic 30s",
+      "baseline": {
+        "sl_pts": 8,
+        "tp_pts": 15,
+        "max_hold_sec": 60,
+        "trades": 948,
+        "wr": 45.1,
+        "pf": 1.13,
+        "pnl": 417.03,
+        "avg_hold_sec": 59.6
+      },
+      "optimized": {
+        "sl_pts": 6,
+        "tp_pts": 14,
+        "max_hold_sec": 30,
+        "trades": 1087,
+        "wr": 56.6,
+        "pf": 2.26,
+        "pnl": 1940.75,
+        "avg_hold_sec": 30.0,
+        "max_dd": 45.8
+      }
+    }
+  }
+
+}
+

@@ -33,6 +33,7 @@ Usage:
 
 import os
 import sys
+import json
 import argparse
 import pandas as pd
 import numpy as np
@@ -50,13 +51,15 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SYMBOL_SPECS = {
     'MES': {'point_value': 5.0, 'tick_size': 0.25, 'atr_mult': 1.2},
     'MNQ': {'point_value': 2.0, 'tick_size': 0.25, 'atr_mult': 1.2},
+    'NQ': {'point_value': 20.0, 'tick_size': 0.25, 'atr_mult': 1.2},
 }
 
 # 5M Trend Filter Settings
 TREND_EMA_FAST = 50
 TREND_EMA_SLOW = 200
-ADX_THRESHOLD = 18    # Lowered from 22 to catch more trending moves
+ADX_THRESHOLD = 17
 ADX_PERIOD = 14
+DI_TOLERANCE = 3.0    # Allow DI within N pts of opposite (more trades)
 
 # 1M Entry Settings
 ENTRY_EMA_FAST = 9
@@ -65,16 +68,21 @@ RSI_PERIOD = 14
 RSI_LONG_MIN, RSI_LONG_MAX = 35, 60       # Widened from 40-55
 RSI_SHORT_MIN, RSI_SHORT_MAX = 40, 65     # Widened from 45-60
 MACD_FAST, MACD_SLOW, MACD_SIGNAL = 12, 26, 9
-VOLUME_RATIO_THRESHOLD = 0.5              # Lowered for more trades
+VOLUME_RATIO_THRESHOLD = 0.4
 VOLUME_MA_PERIOD = 20
 BB_PERIOD, BB_STD = 20, 2
 BB_EXTREME_LOW, BB_EXTREME_HIGH = 0.05, 0.95  # Relaxed from 0.1/0.9
 
-# Risk Settings
-TP_MULT = 1.5  # TP = 1.5 × SL (less aggressive, higher win rate)
-TP_BUFFER_ATR_MULT = 0.0  # TP capped exactly at resistance/support (no buffer)
+# Risk Settings — dual-symbol winner (tp13_adx17, Dec–Mar 2026)
+TP_MULT = 1.3
+TP_BUFFER_ATR_MULT = 0.5  # TP below 5M resistance / above 5M support by this × ATR
 RESISTANCE_LOOKBACK = 20  # 5M bars to look back for swing high/low
 DAILY_LOSS_LIMIT = 350.0
+DAILY_LOSS_BY_SYMBOL = {
+    "MNQ": 350.0,
+    "MES": 350.0,
+    "NQ": 3500.0,   # ~10× MNQ — same point SL, larger dollar risk
+}
 MAX_TRADES_PER_DAY = 6
 INITIAL_BALANCE = 50000.0
 
@@ -251,6 +259,7 @@ def add_indicators_1m(df: pd.DataFrame) -> pd.DataFrame:
     df['ema_9'] = calculate_ema(df['close'], ENTRY_EMA_FAST)
     df['ema_21'] = calculate_ema(df['close'], ENTRY_EMA_MED)
     df['rsi'] = calculate_rsi(df['close'], RSI_PERIOD)
+    df['rsi_prev'] = df['rsi'].shift(1)
     df['macd'], df['macd_signal'], df['macd_hist'] = calculate_macd(df['close'])
     df['macd_hist_prev'] = df['macd_hist'].shift(1)
     df['volume_ma'] = df['volume'].rolling(VOLUME_MA_PERIOD).mean()
@@ -305,7 +314,7 @@ def check_long_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
         return False
     if ctx_5m['adx'] < ADX_THRESHOLD:
         return False
-    if ctx_5m['di_plus'] <= ctx_5m['di_minus']:
+    if ctx_5m['di_plus'] < (ctx_5m['di_minus'] - DI_TOLERANCE):
         return False
     
     # 1M Entry Conditions
@@ -349,7 +358,7 @@ def check_short_entry(row_1m: pd.Series, ctx_5m: Dict) -> bool:
         return False
     if ctx_5m['adx'] < ADX_THRESHOLD:
         return False
-    if ctx_5m['di_minus'] <= ctx_5m['di_plus']:
+    if ctx_5m['di_minus'] < (ctx_5m['di_plus'] - DI_TOLERANCE):
         return False
     
     # 1M Entry Conditions
@@ -396,7 +405,7 @@ class MultiTimeframeBacktester:
         self.spec = SYMBOL_SPECS[symbol]
         self.point_value = self.spec['point_value']
         self.atr_mult = self.spec['atr_mult']
-        
+        self.daily_loss_limit = DAILY_LOSS_BY_SYMBOL.get(symbol, DAILY_LOSS_LIMIT)
         self.balance = INITIAL_BALANCE
         self.equity_curve = [INITIAL_BALANCE]
         self.trades: List[Trade] = []
@@ -648,7 +657,7 @@ class MultiTimeframeBacktester:
         self.daily_pnl += trade.pnl
         
         # Check daily loss limit
-        if self.daily_pnl <= -DAILY_LOSS_LIMIT:
+        if self.daily_pnl <= -self.daily_loss_limit:
             self.stopped_for_day = True
     
     def _compute_stats(self) -> Dict:
@@ -699,7 +708,7 @@ class MultiTimeframeBacktester:
                                if hasattr(t.entry_time, 'date') and 
                                sum(tr.pnl for tr in self.trades 
                                    if hasattr(tr.entry_time, 'date') and 
-                                   tr.entry_time.date() == t.entry_time.date()) <= -DAILY_LOSS_LIMIT))
+                                   tr.entry_time.date() == t.entry_time.date()) <= -self.daily_loss_limit))
         
         stats = {
             'symbol': self.symbol,
@@ -779,23 +788,42 @@ def print_results(stats: Dict):
         print(f"\n⚠️  STRATEGY NEEDS OPTIMIZATION")
 
 
+def apply_profit_config() -> None:
+    global TP_MULT, ADX_THRESHOLD, VOLUME_RATIO_THRESHOLD, DI_TOLERANCE, TP_BUFFER_ATR_MULT, MAX_TRADES_PER_DAY
+    path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "mnq_profit_config.json")
+    if not os.path.isfile(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        cfg = json.load(f)
+    TP_MULT = float(cfg.get("tp", TP_MULT))
+    ADX_THRESHOLD = int(cfg.get("adx", ADX_THRESHOLD))
+    VOLUME_RATIO_THRESHOLD = float(cfg.get("vol", VOLUME_RATIO_THRESHOLD))
+    DI_TOLERANCE = float(cfg.get("di_tol", DI_TOLERANCE))
+    TP_BUFFER_ATR_MULT = float(cfg.get("tp_buffer", TP_BUFFER_ATR_MULT))
+    MAX_TRADES_PER_DAY = int(cfg.get("max_tr", MAX_TRADES_PER_DAY))
+    print(f"Config: {cfg.get('name')} TP×{TP_MULT} ADX≥{ADX_THRESHOLD} buffer={TP_BUFFER_ATR_MULT}×ATR")
+
+
 def main():
     parser = argparse.ArgumentParser(description='Multi-Timeframe Scalping Backtest')
-    parser.add_argument('--symbol', type=str, default='MES', choices=['MES', 'MNQ'],
+    parser.add_argument('--symbol', type=str, default='MES', choices=['MES', 'MNQ', 'NQ'],
                         help='Symbol to backtest')
+    parser.add_argument('--use-nq-csv', action='store_true',
+                        help='For NQ: use data/NQ_*.csv instead of MNQ long history')
     args = parser.parse_args()
     
-    # Load data
-    print(f"Loading data for {args.symbol}...")
-    df_1m, df_5m = load_data(args.symbol)
+    if args.symbol == "NQ" and not args.use_nq_csv:
+        data_symbol = "MNQ"
+    else:
+        data_symbol = args.symbol
+    print(f"Loading data for {args.symbol}..." + (f" (via {data_symbol} OHLC)" if data_symbol != args.symbol else ""))
+    df_1m, df_5m = load_data(data_symbol)
     
-    # Run backtest
+    apply_profit_config()
     bt = MultiTimeframeBacktester(args.symbol)
     stats = bt.run(df_1m, df_5m)
     
-    # Print results
     print_results(stats)
-    
     return stats
 
 

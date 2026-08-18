@@ -11,7 +11,7 @@ echo Creating startup shortcut...
 set "SCRIPT_DIR=%~dp0"
 set "STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 set "SHORTCUT=%STARTUP%\AI-Trading-Bot.lnk"
-set "TARGET=%SCRIPT_DIR%run_bot_forever.bat"
+set "TARGET=%SCRIPT_DIR%start_mnq_forever.bat"
 
 REM Create VBS script to make shortcut (Windows doesn't have a native way)
 set "VBS=%TEMP%\create_shortcut.vbs"
@@ -20,7 +20,7 @@ echo Set oWS = WScript.CreateObject^("WScript.Shell"^)
 echo Set oLink = oWS.CreateShortcut^("%SHORTCUT%"^)
 echo oLink.TargetPath = "%TARGET%"
 echo oLink.WorkingDirectory = "%SCRIPT_DIR%"
-echo oLink.Description = "AI Forex Trading Bot"
+echo oLink.Description = "BottTrader MNQ unattended"
 echo oLink.WindowStyle = 7
 echo oLink.Save
 ) > "%VBS%"

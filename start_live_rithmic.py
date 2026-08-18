@@ -39,6 +39,19 @@ from src.broker.rithmic_connector import RithmicConnector
 from src.core.ensemble_trader import EnsembleTrader
 from src.ai.technical_analyzer import TechnicalAnalyzer
 from src.utils.logger import bot_logger, trades_logger
+from config.strategy_config import SCALPING_PAIRS
+
+
+def _load_risk_overrides() -> Dict[str, Any]:
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'risk_overrides.json')
+    try:
+        with open(path, encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+RISK_OVERRIDES = _load_risk_overrides()
 
 # Strategy parameters (validated profitable)
 PARAMS = {
@@ -59,15 +72,20 @@ TRAIL_SETTINGS = {
     'min_step_ticks': int(os.getenv('TRAIL_MIN_STEP_TICKS', '1')),
 }
 
-ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', '3')))
+ENV_MAX_CONCURRENT_TRADES = max(1, int(os.getenv('MAX_CONCURRENT_TRADES', '1')))
+INITIAL_BALANCE = float(os.getenv('INITIAL_BALANCE', '50000'))
+DAILY_LOSS_LIMIT_PCT = float(os.getenv('DAILY_LOSS_LIMIT_PERCENT', '3'))
+LOSS_COOLDOWN_MINUTES = int(os.getenv('LOSS_COOLDOWN_MINUTES', '10'))
+ENSEMBLE_MAX_CONSEC_LOSSES = int(os.getenv('ENSEMBLE_MAX_CONSEC_LOSSES', '3'))
+ENSEMBLE_CONSEC_LOSS_PAUSE_MIN = int(os.getenv('ENSEMBLE_CONSEC_LOSS_PAUSE_MINUTES', '30'))
 
 # Risk settings
 RISK_SETTINGS = {
     'contracts': 1,              # Start with 1 micro
-    'daily_loss_limit': 150.0,   # Max daily loss $150
-    'max_trades_per_day': 50,    # Max trades per day
+    'daily_loss_limit': INITIAL_BALANCE * (DAILY_LOSS_LIMIT_PCT / 100),
+    'max_trades_per_day': 20,    # Conservative daily cap
     'cooldown_bars': 5,          # Bars between trades
-    'max_positions': ENV_MAX_CONCURRENT_TRADES,  # Max concurrent positions
+    'max_positions': ENV_MAX_CONCURRENT_TRADES,
 }
 
 # Symbol specs
@@ -89,12 +107,15 @@ class Position:
     tp: float
     entry_time: datetime
     trailing_enabled: bool = True
+    ensemble_signal: str = 'UNKNOWN'
+    model_signals: Optional[Dict] = None
+    regime: str = 'unknown'
 
 
 class LiveRithmicTrader:
     """Live trading with Enhanced Breakout Strategy via Rithmic."""
     
-    def __init__(self, symbol: str = 'MES', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False, paper_orders: bool = False):
+    def __init__(self, symbol: str = 'MNQ', symbols: Optional[List[str]] = None, paper_mode: bool = False, skip_confirm: bool = False, paper_orders: bool = False):
         self.skip_confirm = skip_confirm
         self.symbols = symbols or [symbol]
         self.symbol = self.symbols[0]
@@ -111,12 +132,16 @@ class LiveRithmicTrader:
         self.tp_mult = PARAMS['tp_mult']
         self.ema_len = PARAMS['ema_len']
         
+        # Session filters from risk overrides / per-symbol config
+        self.skip_friday = RISK_OVERRIDES.get('skip_friday', False)
+        self.bad_hours = RISK_OVERRIDES.get('bad_hours_utc', {'MNQ': [0, 4, 21]})
+        
         # Risk management
         self.contracts = RISK_SETTINGS['contracts']
         self.daily_loss_limit = RISK_SETTINGS['daily_loss_limit']
         self.max_trades_per_day = RISK_SETTINGS['max_trades_per_day']
         self.cooldown_bars = RISK_SETTINGS['cooldown_bars']
-        self.max_positions = RISK_SETTINGS.get('max_positions', 2)
+        self.max_positions = RISK_SETTINGS.get('max_positions', 1)
         
         # State - support multiple positions
         self.positions: Dict[str, Position] = {}  # order_id -> Position
@@ -126,7 +151,10 @@ class LiveRithmicTrader:
         self.current_date = None
         self.trades: List[Dict] = []
         self._warmup_log_state: Dict[str, tuple] = {}
-        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'MNQ,MES').split(',') if s.strip()]
+        self.symbol_priority = [s.strip() for s in os.getenv('SYMBOL_PRIORITY', 'MNQ').split(',') if s.strip()]
+        self.loss_cooldown_until: Dict[str, datetime] = {}
+        self._symbol_consec_losses: Dict[str, int] = {sym: 0 for sym in self.symbols}
+        self._consec_loss_pause_until: Dict[str, datetime] = {}
         
         # Broker connector
         self.broker: Optional[RithmicConnector] = None
@@ -142,6 +170,21 @@ class LiveRithmicTrader:
 
     def _spec(self, symbol: str) -> Dict[str, float]:
         return SYMBOL_SPECS[symbol]
+
+    def _is_trading_session_allowed(self, symbol: str) -> bool:
+        """Block known low-edge sessions (Friday, bad UTC hours)."""
+        now = datetime.now(timezone.utc)
+        pair_cfg = SCALPING_PAIRS.get(symbol, {})
+        skip_friday = pair_cfg.get('skip_friday', self.skip_friday)
+        bad_hours = pair_cfg.get('bad_hours_utc', self.bad_hours.get(symbol, []))
+
+        if skip_friday and now.weekday() == 4:
+            bot_logger.info(f"🚫 Friday filter — skipping {symbol}")
+            return False
+        if now.hour in bad_hours:
+            bot_logger.info(f"🚫 Bad hour {now.hour} UTC — skipping {symbol}")
+            return False
+        return True
 
     def _round_to_tick(self, price: float, tick_size: float) -> float:
         return round(round(price / tick_size) * tick_size, 8)
@@ -256,6 +299,8 @@ class LiveRithmicTrader:
                 print("❌ Rithmic not connected - check credentials in .env")
                 print(f"   RITHMIC_USER_ID: {os.getenv('RITHMIC_USER_ID', 'NOT SET')}")
                 print(f"   RITHMIC_SYSTEM: {os.getenv('RITHMIC_SYSTEM', 'NOT SET')}")
+                if self.broker._last_connect_error:
+                    print(f"   Error: {self.broker._last_connect_error}")
                 return False
             
             # Get account info
@@ -420,6 +465,11 @@ class LiveRithmicTrader:
             self.current_date = today
             self.daily_pnl = 0.0
             self.daily_trades = 0
+            self.loss_cooldown_until.clear()
+            self._symbol_consec_losses = {sym: 0 for sym in self.symbols}
+            self._consec_loss_pause_until.clear()
+            if self.ensemble:
+                self.ensemble.learner.decay_loss_patterns()
             print(f"\n📅 New trading day: {today}")
         
         if self.daily_pnl <= -self.daily_loss_limit:
@@ -433,6 +483,12 @@ class LiveRithmicTrader:
     def check_entry_signal(self, symbol: str, df: pd.DataFrame) -> Optional[Dict]:
         """Check for entry signal using full AI Ensemble."""
         if len(self.positions) >= self.max_positions or self.cooldown > 0:
+            return None
+
+        if self._symbol_in_loss_cooldown(symbol) or self._symbol_in_consec_loss_pause(symbol):
+            return None
+
+        if not self._is_trading_session_allowed(symbol):
             return None
         
         # Use full EnsembleTrader for signal
@@ -502,6 +558,9 @@ class LiveRithmicTrader:
                 'tp': tp,
                 'atr': atr,
                 'confidence': confidence,
+                'ensemble_signal': signal,
+                'model_signals': signal_result.get('models', {}),
+                'regime': signal_result.get('regime', ''),
             }
             
         except Exception as e:
@@ -541,6 +600,75 @@ class LiveRithmicTrader:
         
         return None
     
+    def _symbol_in_loss_cooldown(self, symbol: str) -> bool:
+        until = self.loss_cooldown_until.get(symbol)
+        if until is None:
+            return False
+        now = datetime.now(timezone.utc)
+        if now < until:
+            remaining = int((until - now).total_seconds() // 60) + 1
+            bot_logger.info(f"⏳ {symbol}: loss cooldown — {remaining} min left")
+            return True
+        del self.loss_cooldown_until[symbol]
+        return False
+
+    def _symbol_in_consec_loss_pause(self, symbol: str) -> bool:
+        until = self._consec_loss_pause_until.get(symbol)
+        if until is None:
+            return False
+        now = datetime.now(timezone.utc)
+        if now < until:
+            remaining = int((until - now).total_seconds() // 60) + 1
+            bot_logger.info(
+                f"🛑 {symbol}: consecutive-loss pause — {remaining} min left "
+                f"({self._symbol_consec_losses.get(symbol, 0)} in a row)"
+            )
+            return True
+        del self._consec_loss_pause_until[symbol]
+        self._symbol_consec_losses[symbol] = 0
+        return False
+
+    def _update_loss_protection(self, symbol: str, pnl: float) -> None:
+        if pnl < 0:
+            count = self._symbol_consec_losses.get(symbol, 0) + 1
+            self._symbol_consec_losses[symbol] = count
+            self.loss_cooldown_until[symbol] = (
+                datetime.now(timezone.utc) + timedelta(minutes=LOSS_COOLDOWN_MINUTES)
+            )
+            if count >= ENSEMBLE_MAX_CONSEC_LOSSES:
+                self._consec_loss_pause_until[symbol] = (
+                    datetime.now(timezone.utc) + timedelta(minutes=ENSEMBLE_CONSEC_LOSS_PAUSE_MIN)
+                )
+                print(
+                    f"   🛑 {symbol}: {count} consecutive losses — "
+                    f"pause {ENSEMBLE_CONSEC_LOSS_PAUSE_MIN} min"
+                )
+        elif pnl > 0:
+            self._symbol_consec_losses[symbol] = 0
+
+    def _feed_learner_on_exit(
+        self,
+        pos: Position,
+        pnl: float,
+        exit_type: str,
+        exit_price: float,
+    ) -> None:
+        if not self.ensemble:
+            return
+        trade_signal = (pos.ensemble_signal or '').upper()
+        if trade_signal not in ('BUY', 'SELL'):
+            trade_signal = 'BUY' if pos.direction == 'long' else 'SELL'
+        self.ensemble.record_trade_result({
+            'pair': pos.symbol,
+            'signal': trade_signal,
+            'profit_loss': pnl,
+            'entry_price': pos.entry_price,
+            'exit_price': exit_price,
+            'exit_type': exit_type,
+            'model_signals': pos.model_signals or {},
+            'regime': pos.regime or getattr(self.ensemble.learner, 'current_regime', 'unknown'),
+        })
+
     def place_order(self, signal: Dict) -> bool:
         """Place order with bracket (SL+TP)."""
         symbol = signal['symbol']
@@ -567,6 +695,11 @@ class LiveRithmicTrader:
                 tp=tp,
                 entry_time=datetime.now(timezone.utc),
                 trailing_enabled=True,
+                ensemble_signal=str(signal.get('ensemble_signal', '')).upper() or (
+                    'BUY' if direction == 'long' else 'SELL'
+                ),
+                model_signals=signal.get('model_signals'),
+                regime=str(signal.get('regime', 'unknown')),
             )
             self.positions[order_id] = pos
             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
@@ -595,6 +728,11 @@ class LiveRithmicTrader:
                 tp=tp,
                 entry_time=datetime.now(timezone.utc),
                 trailing_enabled=bool(result.get('supports_stop_modify', True)),
+                ensemble_signal=str(signal.get('ensemble_signal', '')).upper() or (
+                    'BUY' if direction == 'long' else 'SELL'
+                ),
+                model_signals=signal.get('model_signals'),
+                regime=str(signal.get('regime', 'unknown')),
             )
             self.positions[order_id] = pos
             print(f"✅ ORDER FILLED: {direction.upper()} {symbol}")
@@ -676,6 +814,9 @@ class LiveRithmicTrader:
         print(f"{emoji} EXIT {exit_type}: {d.upper()} @ {exit_price:.2f}")
         print(f"   PnL: ${pnl:.2f} | Daily: ${self.daily_pnl:.2f}")
         trades_logger.info(f"EXIT {exit_type} {d} {pos.symbol} @ {exit_price:.2f} PnL=${pnl:.2f}")
+
+        self._feed_learner_on_exit(pos, pnl, exit_type, exit_price)
+        self._update_loss_protection(pos.symbol, pnl)
         
         del self.positions[order_id]
         print(f"   Remaining positions: {len(self.positions)}/{self.max_positions}")
@@ -705,25 +846,23 @@ class LiveRithmicTrader:
             for order_id in closed_ids:
                 pos = self.positions.get(order_id)
                 if pos:
-                    # Position was closed by broker (likely SL or TP hit)
-                    # Since we don't know the exact exit price, estimate from SL/TP
-                    # Rithmic bracket orders typically close at the trigger price
                     bot_logger.info(f"🔄 Position sync: {order_id} closed by broker (SL/TP hit)")
-                    
-                    # Log minimal exit info
-                    d = pos.direction.upper()
+
+                    d_upper = pos.direction.upper()
                     self.trades.append({
                         'entry_time': pos.entry_time.isoformat() if pos.entry_time else '',
                         'exit_time': datetime.now(timezone.utc).isoformat(),
                         'symbol': pos.symbol,
-                        'direction': d,
+                        'direction': d_upper,
                         'entry': pos.entry_price,
-                        'exit': 0,  # Unknown - broker handled it
-                        'pnl': 0,   # Unknown - will update from account later
+                        'exit': 0,
+                        'pnl': 0,
                         'exit_type': 'BROKER_SYNC',
                         'sl': pos.sl,
                         'tp': pos.tp,
                     })
+                    # Breakeven record — exact fill unknown; process_exit path has real PnL
+                    self._feed_learner_on_exit(pos, 0.0, 'BROKER_SYNC', pos.entry_price)
                     
                     del self.positions[order_id]
                     print(f"🔄 Position {order_id} removed (closed by broker)")
@@ -913,17 +1052,34 @@ class LiveRithmicTrader:
 def main():
     import argparse
     
+    env_symbols = [s.strip() for s in os.getenv('TRADING_SYMBOLS', 'MNQ').split(',') if s.strip()] or ['MNQ']
+    default_symbol = env_symbols[0]
+    trading_mode = os.getenv('TRADING_MODE', 'paper').lower()
+
     parser = argparse.ArgumentParser(description='Live Breakout Trading via Rithmic')
-    parser.add_argument('--symbol', default='MES', choices=['MES', 'MNQ', 'NQ'], help='Single symbol mode')
-    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MES MNQ')
+    parser.add_argument('--symbol', default=default_symbol, choices=['MES', 'MNQ', 'NQ'], help='Single symbol mode')
+    parser.add_argument('--symbols', nargs='+', choices=['MES', 'MNQ', 'NQ'], help='Multi-symbol mode, e.g. --symbols MNQ')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode (Yahoo data + simulated orders)')
     parser.add_argument('--paper-orders', action='store_true', dest='paper_orders', help='Live Rithmic data + simulated orders')
     parser.add_argument('--yes', '-y', action='store_true', help='Skip 10-second confirmation')
     
     args = parser.parse_args()
 
-    symbols = args.symbols if args.symbols else [args.symbol]
-    trader = LiveRithmicTrader(symbol=symbols[0], symbols=symbols, paper_mode=args.paper, skip_confirm=args.yes, paper_orders=args.paper_orders)
+    if args.symbols:
+        symbols = args.symbols
+    elif os.getenv('TRADING_SYMBOLS'):
+        symbols = env_symbols
+    else:
+        symbols = [args.symbol]
+
+    paper_mode = args.paper or trading_mode in ('paper', 'backtest')
+    trader = LiveRithmicTrader(
+        symbol=symbols[0],
+        symbols=symbols,
+        paper_mode=paper_mode,
+        skip_confirm=args.yes,
+        paper_orders=args.paper_orders,
+    )
     
     if not trader.connect():
         print("\n❌ Could not connect to Rithmic")

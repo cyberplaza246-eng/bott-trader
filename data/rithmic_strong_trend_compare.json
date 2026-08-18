@@ -1,0 +1,105 @@
+{
+  "session": "extended",
+  "compare": "strong_trend_entry_relax",
+  "base_config": {
+    "atr": 1.2,
+    "tp": 1.5,
+    "adx": 17,
+    "vol": 0.4,
+    "di_tol": 3.0,
+    "tp_buffer": 0.5,
+    "max_tr": 20,
+    "min_rr": 0.8,
+    "di_counter": 20.0,
+    "counter_adx": 25,
+    "live_like": true,
+    "session_mode": "extended",
+    "name": "D_full_adaptive_rithmic",
+    "strategy_mode": "full_adaptive",
+    "use_15m_bias": true,
+    "bear_adaptive": true,
+    "bull_adaptive": true,
+    "strong_trend_adx": 35,
+    "vwap_adx_min": 35,
+    "soft_15m_bias": true,
+    "15m_bias_mode": "price_ema50",
+    "15m_bias_buffer_pts": 0.0,
+    "vwap_required": false,
+    "strong_trend_skip_macd": false,
+    "strong_trend_min_rr": 0.6,
+    "strong_trend_relax_adx": 35,
+    "bull_rsi_lo": 35,
+    "bull_rsi_hi": 70
+  },
+  "variants": {
+    "A": {
+      "label": "baseline",
+      "overrides": {},
+      "symbols": {
+        "NQ": {
+          "trades": 298,
+          "wr": 45.97315436241611,
+          "pf": 1.2397027104540415,
+          "pnl": 8716.035714285463,
+          "dd": 7.784501094642884
+        },
+        "MNQ": {
+          "trades": 324,
+          "wr": 47.53086419753087,
+          "pf": 1.26041289042377,
+          "pnl": 1169.8714285714523,
+          "dd": 0.8471247317942571
+        }
+      }
+    },
+    "B": {
+      "label": "strong_trend_relax",
+      "overrides": {
+        "strong_trend_skip_macd": true,
+        "strong_trend_min_rr": 0.6,
+        "strong_trend_relax_adx": 40
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 310,
+          "wr": 46.774193548387096,
+          "pf": 1.234782798011416,
+          "pnl": 8858.321428570998,
+          "dd": 9.328574979729211
+        },
+        "MNQ": {
+          "trades": 332,
+          "wr": 50.30120481927711,
+          "pf": 1.3558101770085185,
+          "pnl": 1554.1178571428754,
+          "dd": 0.8475421526744868
+        }
+      }
+    },
+    "C": {
+      "label": "strong_trend_relax_rsi80",
+      "overrides": {
+        "strong_trend_skip_macd": true,
+        "strong_trend_min_rr": 0.6,
+        "strong_trend_relax_adx": 40,
+        "bull_rsi_hi": 80
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 311,
+          "wr": 46.62379421221865,
+          "pf": 1.2211869841983543,
+          "pnl": 8572.607142856796,
+          "dd": 7.908141325984966
+        },
+        "MNQ": {
+          "trades": 333,
+          "wr": 50.150150150150154,
+          "pf": 1.341017906269611,
+          "pnl": 1514.0464285714552,
+          "dd": 0.8172206128455893
+        }
+      }
+    }
+  }
+}

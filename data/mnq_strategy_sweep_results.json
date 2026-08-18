@@ -1,0 +1,208 @@
+{
+  "ema_crossover": {
+    "name": "ema_crossover",
+    "baseline": {
+      "trades": 87,
+      "wins": 36,
+      "losses": 51,
+      "win_rate": 41.37931034482759,
+      "total_pnl": -203.78571428571922,
+      "profit_factor": 0.8795535502255967,
+      "avg_win": 41.33705357142844,
+      "avg_loss": -33.1748949579832,
+      "wl_ratio": 1.2460341961529287,
+      "max_drawdown_pct": 1.1026498001096012,
+      "max_consec_losses": 5,
+      "final_balance": 49796.21428571428,
+      "return_pct": -0.40757142857143847,
+      "exit_reasons": {
+        "TIMEOUT": 1,
+        "STOP_LOSS": 51,
+        "TAKE_PROFIT": 35
+      }
+    },
+    "best_params": {
+      "sl": 2.5,
+      "r_mult": 1.5,
+      "cooldown": 60,
+      "adx": 30,
+      "trail": "none",
+      "trades": 36,
+      "wins": 18,
+      "losses": 18,
+      "win_rate": 50.0,
+      "total_pnl": 153.94866071428078,
+      "profit_factor": 1.2564570706131621,
+      "avg_win": 41.902157738095006,
+      "avg_loss": -33.34945436507941,
+      "wl_ratio": 1.2564570706131621,
+      "max_drawdown_pct": 0.2481041493063718,
+      "max_consec_losses": 3,
+      "final_balance": 50153.94866071428,
+      "return_pct": 0.3078973214285615,
+      "exit_reasons": {
+        "TIMEOUT": 1,
+        "STOP_LOSS": 18,
+        "TAKE_PROFIT": 17
+      }
+    },
+    "skip_friday": false
+  },
+  "mtf_scalping": {
+    "name": "mtf_scalping",
+    "stats": {
+      "symbol": "MNQ",
+      "total_trades": 331,
+      "wins": 155,
+      "losses": 176,
+      "win_rate": 46.82779456193353,
+      "profit_factor": 1.1742196658851036,
+      "total_pnl": 611.4214285714042,
+      "gross_profit": 4120.907142857133,
+      "gross_loss": 3509.485714285729,
+      "avg_win": 26.586497695852472,
+      "avg_loss": -19.940259740259823,
+      "max_drawdown_pct": 0.7222011698018838,
+      "final_balance": 50611.421428571404,
+      "return_pct": 1.2228428571428085,
+      "tp_exits": 155,
+      "sl_exits": 176,
+      "be_exits": 0,
+      "tsl_exits": 0,
+      "tsl_pnl": 0,
+      "hyb_exits": 0,
+      "hyb_pnl": 0,
+      "hyb_wins": 0,
+      "days_stopped": 0
+    },
+    "skip_friday": true
+  },
+  "enhanced_ema": {
+    "name": "enhanced_ema",
+    "stats": {
+      "trades": 32,
+      "wins": 5,
+      "losses": 27,
+      "win_rate": 15.625,
+      "total_pnl": -188.9196428571422,
+      "profit_factor": 0.3274102800470452,
+      "avg_win": 18.392857142857064,
+      "avg_loss": -10.403108465608428,
+      "wl_ratio": 1.7680155122540437,
+      "max_drawdown_pct": 0.4588035714285652,
+      "max_consec_losses": 13,
+      "final_balance": 49731.08035714286,
+      "return_pct": -0.37783928571428443,
+      "exit_reasons": {
+        "STOP_LOSS": 17,
+        "TRAILING_BE": 10,
+        "TAKE_PROFIT": 5
+      }
+    },
+    "skip_friday": true
+  },
+  "ensemble": [
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.55,
+      "min_agreement": 3,
+      "bars": 9073,
+      "trades": 22,
+      "win_rate": 4545.454545454545,
+      "profit_factor": 1.0543147310277938,
+      "total_pnl": 0,
+      "max_drawdown": -2.0818612799999534
+    },
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.55,
+      "min_agreement": 4,
+      "bars": 9073,
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "total_pnl": 0,
+      "max_drawdown": 0.0
+    },
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.6,
+      "min_agreement": 3,
+      "bars": 9073,
+      "trades": 14,
+      "win_rate": 6428.571428571429,
+      "profit_factor": 1.8637385651682574,
+      "total_pnl": 0,
+      "max_drawdown": -1.5043538399999814
+    },
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.6,
+      "min_agreement": 4,
+      "bars": 9073,
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "total_pnl": 0,
+      "max_drawdown": 0.0
+    },
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.65,
+      "min_agreement": 3,
+      "bars": 9073,
+      "trades": 7,
+      "win_rate": 7142.857142857143,
+      "profit_factor": 2.3033018371667837,
+      "total_pnl": 0,
+      "max_drawdown": -0.6084799999999959
+    },
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.65,
+      "min_agreement": 4,
+      "bars": 9073,
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "total_pnl": 0,
+      "max_drawdown": 0.0
+    },
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.68,
+      "min_agreement": 3,
+      "bars": 9073,
+      "trades": 5,
+      "win_rate": 6000.0,
+      "profit_factor": 1.558991906621793,
+      "total_pnl": 0,
+      "max_drawdown": -0.6084799999999959
+    },
+    {
+      "name": "sweep_ensemble",
+      "confidence": 0.68,
+      "min_agreement": 4,
+      "bars": 9073,
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "total_pnl": 0,
+      "max_drawdown": 0.0
+    }
+  ],
+  "winner": {
+    "strategy": "sweep_ensemble",
+    "profit_factor": 2.3033018371667837,
+    "win_rate": 7142.857142857143,
+    "total_pnl": 0,
+    "trades": 7,
+    "params": {
+      "confidence": 0.65,
+      "min_agreement": 3,
+      "fallback_enabled": false,
+      "skip_friday": false
+    }
+  },
+  "generated_at": "2026-06-10T14:20:40.605757"
+}

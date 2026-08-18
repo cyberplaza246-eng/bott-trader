@@ -1,0 +1,89 @@
+{
+  "symbol": "NQ",
+  "data_note": "30s: SYNTHETIC (2x per 1m bar \u2014 imperfect) | 1m: NQ_1m_rithmic.csv (20,000) | 5m: 4,018",
+  "period": {
+    "start": "2026-05-01 02:01:00+00:00",
+    "end": "2026-06-03 10:20:00+00:00",
+    "bars_1m": 20000
+  },
+  "params": {
+    "sl_pts": 6.0,
+    "tp_pts": 14.0,
+    "max_hold_sec": 30
+  },
+  "results": {
+    "baseline (strict)": [
+      {
+        "version": "hybrid",
+        "symbol": "NQ",
+        "trades": 87,
+        "win_rate": 72.4,
+        "profit_factor": 2.93,
+        "expectancy": 19.88,
+        "total_pnl": 1729.62,
+        "max_drawdown": 196.22,
+        "avg_hold_sec": 30.0,
+        "tp_exits": 0,
+        "sl_exits": 1,
+        "max_hold_exits": 86,
+        "params": {
+          "pullback_atr": 0.5,
+          "setup_bars": 3,
+          "setup_window_sec": 0,
+          "trend_mode": "both",
+          "continuation_volume_strict": true,
+          "cont_volume_min_ratio": 0.85,
+          "chase_body_mult": 1.5,
+          "chase_ema_atr": 1.0,
+          "momentum_burst_enabled": false,
+          "momentum_burst_adx": 25,
+          "adx_min_pullback": 20,
+          "adx_min_continuation": 25,
+          "aggressive_mode": false,
+          "rsi_gate_cfg": null
+        }
+      }
+    ],
+    "ultra_fast (optimized)": [
+      {
+        "version": "hybrid",
+        "symbol": "NQ",
+        "trades": 300,
+        "win_rate": 72.0,
+        "profit_factor": 2.8,
+        "expectancy": 28.86,
+        "total_pnl": 8658.0,
+        "max_drawdown": 321.22,
+        "avg_hold_sec": 30.0,
+        "tp_exits": 3,
+        "sl_exits": 16,
+        "max_hold_exits": 281,
+        "params": {
+          "pullback_atr": 0.85,
+          "setup_bars": 2,
+          "setup_window_sec": 60,
+          "trend_mode": "vwap",
+          "continuation_volume_strict": false,
+          "cont_volume_min_ratio": 0.85,
+          "chase_body_mult": 2.5,
+          "chase_ema_atr": 1.5,
+          "momentum_burst_enabled": true,
+          "momentum_burst_adx": 15,
+          "adx_min_pullback": 15,
+          "adx_min_continuation": 18,
+          "aggressive_mode": true,
+          "rsi_gate_cfg": {
+            "rsi_gate_enabled": true,
+            "rsi_min_short": 40.0,
+            "rsi_max_long": 65.0,
+            "rsi_relax_adx": 25.0,
+            "rsi_relax_min_short": 35.0,
+            "rsi_relax_max_long": 70.0,
+            "rsi_overbought": 65.0,
+            "rsi_oversold": 35.0
+          }
+        }
+      }
+    ]
+  }
+}

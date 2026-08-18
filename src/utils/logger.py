@@ -15,6 +15,23 @@ class FlushStreamHandler(logging.StreamHandler):
         self.flush()
 
 
+class _ConsoleNewsPolicyFilter(logging.Filter):
+    """Keep news/policy INFO in file logs only — reduces duplicate console noise."""
+
+    _SKIP_INFO_SUBSTRINGS = (
+        "News bias active:",
+        "📰 News bias",
+        "Policy scorer active:",
+        "🏛️ Policy",
+    )
+
+    def filter(self, record):
+        if record.levelno != logging.INFO or record.name != "TradingBot":
+            return True
+        msg = record.getMessage()
+        return not any(s in msg for s in self._SKIP_INFO_SUBSTRINGS)
+
+
 def setup_logger(name, log_file=None, level=logging.INFO):
     """
     Set up a logger with both console and file handlers
@@ -30,6 +47,8 @@ def setup_logger(name, log_file=None, level=logging.INFO):
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     console_handler.setFormatter(console_format)
+    if name == "TradingBot":
+        console_handler.addFilter(_ConsoleNewsPolicyFilter())
     logger.addHandler(console_handler)
     
     # File handler (JSON format for structured logging)

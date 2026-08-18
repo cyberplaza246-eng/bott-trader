@@ -42,8 +42,20 @@ AUTOTRADING_ENABLED = TRADING_MODE == 'live'
 
 # Symbols to Trade — auto-selected by asset class
 FOREX_PAIRS = ['EUR/USD', 'GBP/USD', 'USD/JPY']
-FUTURES_SYMBOLS = ['MES', 'MNQ']  # Start with micros for eval
+_default_futures = os.getenv('TRADING_SYMBOLS', 'MNQ')
+FUTURES_SYMBOLS = [s.strip() for s in _default_futures.split(',') if s.strip()] or ['MNQ']
 PAIRS = FUTURES_SYMBOLS if ASSET_CLASS == 'futures' else FOREX_PAIRS
+
+# Conservative entry controls
+FALLBACK_ENTRIES_ENABLED = os.getenv('FALLBACK_ENTRIES_ENABLED', 'false').lower() == 'true'
+
+
+def adaptive_skip_enabled() -> bool:
+    """Re-read env each call — regime/hour/pair skip gates entries only when true."""
+    return os.getenv('ADAPTIVE_SKIP_ENABLED', 'false').strip().lower() == 'true'
+
+
+ADAPTIVE_SKIP_ENABLED = adaptive_skip_enabled()
 
 # Timeframes (in minutes) — dual-timeframe scalping
 TIMEFRAMES = {
@@ -96,9 +108,9 @@ SCALPING_PAIRS = {
         'spread_sim': 0.50,            # 2 ticks spread
         'pip_size': 0.25,
         'cooldown_seconds': 300,
-        'max_hold_candles': 120,       # 10 hours max hold
-        'adx_min': 20,                 # MNQ needs lower threshold from sweep
-        'skip_friday': False,
+        'max_hold_candles': 120,       # 10 hours max hold (MTF baseline; hybrid uses MAX_HOLD_SECONDS=30)
+        'adx_min': 15,                 # hybrid ultra_fast backtest winner (was 20)
+        'skip_friday': False,           # Friday trading enabled (user requirement)
         'bad_hours_utc': [0, 4, 21],
     },
 }
@@ -193,6 +205,13 @@ BACKTEST_SLIPPAGE_PIPS = float(os.getenv('BACKTEST_SLIPPAGE_PIPS', 0.5))
 # Reinforcement Learning
 RL_ENABLED = os.getenv('RL_ENABLED', 'true').lower() == 'true'
 RL_EXPLORATION_TRADES = int(os.getenv('RL_EXPLORATION_TRADES', 0))  # 0 = exploit-only (agent is pre-trained)
+
+# 15M higher-timeframe bias mode (live MTF scalping + backtest parity)
+# ema_cross (default): bullish when EMA50 > EMA200
+# price_ema50: bullish when close > EMA50 on last 15M bar
+# hybrid: bullish if close > EMA50 OR EMA50 > EMA200; bearish if close < EMA50 AND EMA50 < EMA200
+BIAS_15M_MODE = os.getenv('15M_BIAS_MODE', 'ema_cross')
+BIAS_15M_BUFFER_PTS = float(os.getenv('15M_BIAS_BUFFER_PTS', '0'))
 
 # Model Paths
 LSTM_MODEL_PATH = 'models/lstm_model.h5'

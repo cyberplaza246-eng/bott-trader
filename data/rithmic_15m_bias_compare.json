@@ -1,0 +1,127 @@
+{
+  "session": "extended",
+  "compare": "15m_bias_mode",
+  "base_config": {
+    "atr": 1.2,
+    "tp": 1.5,
+    "adx": 17,
+    "vol": 0.4,
+    "di_tol": 3.0,
+    "tp_buffer": 0.5,
+    "max_tr": 20,
+    "min_rr": 0.8,
+    "di_counter": 20.0,
+    "counter_adx": 25,
+    "live_like": true,
+    "session_mode": "extended",
+    "name": "D_full_adaptive_rithmic",
+    "strategy_mode": "full_adaptive",
+    "use_15m_bias": true,
+    "bear_adaptive": true,
+    "bull_adaptive": true,
+    "strong_trend_adx": 35,
+    "vwap_adx_min": 35,
+    "soft_15m_bias": true,
+    "15m_bias_mode": "ema_cross",
+    "15m_bias_buffer_pts": 0.0,
+    "vwap_required": false
+  },
+  "variants": {
+    "A": {
+      "label": "ema_cross",
+      "overrides": {
+        "use_15m_bias": true,
+        "15m_bias_mode": "ema_cross",
+        "volatility_filter_points": 45
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 293,
+          "wr": 45.73378839590443,
+          "pf": 1.218573260389828,
+          "pnl": 7767.999999999956,
+          "dd": 8.530660931357037
+        },
+        "MNQ": {
+          "trades": 299,
+          "wr": 48.49498327759198,
+          "pf": 1.3396297759467244,
+          "pnl": 1289.5500000000102,
+          "dd": 0.8681908838034599
+        }
+      }
+    },
+    "B": {
+      "label": "price_ema50",
+      "overrides": {
+        "use_15m_bias": true,
+        "15m_bias_mode": "price_ema50",
+        "volatility_filter_points": 45
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 295,
+          "wr": 46.101694915254235,
+          "pf": 1.2580096190146486,
+          "pnl": 9372.678571428114,
+          "dd": 7.325189507253797
+        },
+        "MNQ": {
+          "trades": 320,
+          "wr": 48.75,
+          "pf": 1.3670797874623963,
+          "pnl": 1587.9714285714435,
+          "dd": 0.7192049593419564
+        }
+      }
+    },
+    "C": {
+      "label": "hybrid",
+      "overrides": {
+        "use_15m_bias": true,
+        "15m_bias_mode": "hybrid",
+        "volatility_filter_points": 45
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 284,
+          "wr": 45.07042253521127,
+          "pf": 1.169016380423741,
+          "pnl": 5776.714285714188,
+          "dd": 10.97216451721854
+        },
+        "MNQ": {
+          "trades": 303,
+          "wr": 47.524752475247524,
+          "pf": 1.2616820926416514,
+          "pnl": 1045.6928571428725,
+          "dd": 1.1272070736859356
+        }
+      }
+    },
+    "D": {
+      "label": "no_15m",
+      "overrides": {
+        "use_15m_bias": false,
+        "15m_bias_mode": "ema_cross",
+        "volatility_filter_points": 45
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 295,
+          "wr": 44.74576271186441,
+          "pf": 1.1431773383960604,
+          "pnl": 5354.4642857139115,
+          "dd": 11.619222675687915
+        },
+        "MNQ": {
+          "trades": 321,
+          "wr": 47.0404984423676,
+          "pf": 1.248950751654986,
+          "pnl": 1112.6071428571595,
+          "dd": 0.9086450457733769
+        }
+      }
+    }
+  }
+}

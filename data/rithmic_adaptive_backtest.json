@@ -1,0 +1,100 @@
+{
+  "config": {
+    "atr": 1.2,
+    "tp": 1.5,
+    "adx": 17,
+    "vol": 0.4,
+    "di_tol": 3.0,
+    "tp_buffer": 0.5,
+    "max_tr": 20,
+    "min_rr": 0.8,
+    "di_counter": 20.0,
+    "counter_adx": 25,
+    "live_like": true,
+    "session_mode": "extended",
+    "name": "D_full_adaptive_rithmic",
+    "strategy_mode": "full_adaptive",
+    "use_15m_bias": true,
+    "bear_adaptive": true,
+    "bull_adaptive": true,
+    "strong_trend_adx": 35,
+    "vwap_adx_min": 35,
+    "soft_15m_bias": true,
+    "15m_bias_mode": "price_ema50",
+    "15m_bias_buffer_pts": 0.0,
+    "vwap_required": false,
+    "entry_quality": {
+      "enabled": true,
+      "short_below_ema9": true,
+      "long_above_ema9": false,
+      "short_macd_negative": true,
+      "long_macd_positive": false,
+      "short_block_green_bars": 2,
+      "long_block_red_bars": 0,
+      "short_di_margin": 0.0,
+      "long_di_margin": 0.0,
+      "extended_adx_min": 0,
+      "short_rsi_falling_max": 0,
+      "long_rsi_rising_min": 0
+    },
+    "strong_trend_skip_macd": false,
+    "strong_trend_min_rr": 0.6,
+    "strong_trend_relax_adx": 35,
+    "bull_rsi_lo": 35,
+    "bull_rsi_hi": 70
+  },
+  "symbols": {
+    "MNQ": {
+      "adaptive": {
+        "symbol": "MNQ",
+        "source": "rithmic",
+        "live_like": true,
+        "bars_1m": 20000,
+        "start": "2026-05-01 02:01:00+00:00",
+        "end": "2026-06-03 10:19:00+00:00",
+        "total_trades": 324,
+        "win_rate": 47.53086419753087,
+        "profit_factor": 1.26041289042377,
+        "total_pnl": 1169.8714285714523,
+        "max_drawdown_pct": 0.8471247317942571,
+        "avg_win": 36.76781076066821,
+        "avg_loss": -26.425714285714424
+      },
+      "baseline": {
+        "label": "baseline_live_like",
+        "variant": "A",
+        "total_trades": 309,
+        "win_rate": 46.92556634304207,
+        "profit_factor": 1.2684778435749247,
+        "total_pnl": 1128.9071428571478,
+        "max_drawdown_pct": 0.7244740117747924
+      }
+    },
+    "NQ": {
+      "adaptive": {
+        "symbol": "NQ",
+        "source": "rithmic",
+        "live_like": true,
+        "bars_1m": 20000,
+        "start": "2026-05-01 02:01:00+00:00",
+        "end": "2026-06-03 10:20:00+00:00",
+        "total_trades": 298,
+        "win_rate": 45.97315436241611,
+        "profit_factor": 1.2397027104540415,
+        "total_pnl": 8716.035714285463,
+        "max_drawdown_pct": 7.784501094642884,
+        "avg_win": 329.0357142857112,
+        "avg_loss": -225.85004436557125
+      },
+      "baseline": {
+        "label": "baseline_live_like",
+        "variant": "A",
+        "total_trades": 292,
+        "win_rate": 45.20547945205479,
+        "profit_factor": 1.1629981602714115,
+        "total_pnl": 5847.5357142854045,
+        "max_drawdown_pct": 9.035906571542554
+      }
+    }
+  }
+}

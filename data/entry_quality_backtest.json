@@ -1,0 +1,184 @@
+{
+  "session": "extended",
+  "base": {
+    "atr": 1.2,
+    "tp": 1.5,
+    "adx": 17,
+    "vol": 0.4,
+    "di_tol": 3.0,
+    "tp_buffer": 0.5,
+    "max_tr": 20,
+    "min_rr": 0.8,
+    "di_counter": 20.0,
+    "counter_adx": 25,
+    "live_like": true,
+    "session_mode": "extended",
+    "name": "D_full_adaptive_rithmic",
+    "strategy_mode": "full_adaptive",
+    "use_15m_bias": true,
+    "bear_adaptive": true,
+    "bull_adaptive": true,
+    "strong_trend_adx": 35,
+    "vwap_adx_min": 35,
+    "soft_15m_bias": true,
+    "vwap_required": false,
+    "entry_quality": {
+      "enabled": true,
+      "short_below_ema9": true,
+      "long_above_ema9": false,
+      "short_macd_negative": true,
+      "long_macd_positive": false,
+      "short_block_green_bars": 2,
+      "long_block_red_bars": 0,
+      "short_di_margin": 0.0,
+      "long_di_margin": 0.0,
+      "extended_adx_min": 0,
+      "short_rsi_falling_max": 0,
+      "long_rsi_rising_min": 0
+    }
+  },
+  "candidates": [
+    {
+      "name": "none",
+      "entry_quality": {
+        "enabled": false
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 299,
+          "wr": 44.14715719063545,
+          "pf": 1.0534840826839247,
+          "pnl": 1969.7499999997672,
+          "dd": 14.795381963089
+        },
+        "MNQ": {
+          "trades": 317,
+          "wr": 47.3186119873817,
+          "pf": 1.1959892530377132,
+          "pnl": 867.5464285714406,
+          "dd": 1.3072913816845058
+        }
+      },
+      "score": 31.641310275018093
+    },
+    {
+      "name": "strict_short",
+      "entry_quality": {
+        "enabled": true,
+        "short_below_ema9": true,
+        "short_macd_negative": true,
+        "short_block_green_bars": 2
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 293,
+          "wr": 45.73378839590443,
+          "pf": 1.218573260389828,
+          "pnl": 7767.999999999956,
+          "dd": 8.530660931357037
+        },
+        "MNQ": {
+          "trades": 299,
+          "wr": 48.49498327759198,
+          "pf": 1.3396297759467244,
+          "pnl": 1289.5500000000102,
+          "dd": 0.8681908838034599
+        }
+      },
+      "score": 35.004907530715165
+    },
+    {
+      "name": "strict_short_di",
+      "entry_quality": {
+        "enabled": true,
+        "short_below_ema9": true,
+        "short_macd_negative": true,
+        "short_block_green_bars": 2,
+        "short_di_margin": 5.0
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 270,
+          "wr": 45.18518518518518,
+          "pf": 1.1630439207066394,
+          "pnl": 5149.928571428536,
+          "dd": 9.004259584769168
+        },
+        "MNQ": {
+          "trades": 287,
+          "wr": 47.73519163763066,
+          "pf": 1.2735151168608405,
+          "pnl": 984.0214285714392,
+          "dd": 0.7506403338651664
+        }
+      },
+      "score": 33.65762805795639
+    },
+    {
+      "name": "full_balanced",
+      "entry_quality": {
+        "enabled": true,
+        "short_below_ema9": true,
+        "long_above_ema9": true,
+        "short_macd_negative": true,
+        "long_macd_positive": true,
+        "short_block_green_bars": 2,
+        "long_block_red_bars": 2,
+        "short_di_margin": 5.0,
+        "long_di_margin": 5.0,
+        "extended_adx_min": 22,
+        "short_rsi_falling_max": 60
+      },
+      "symbols": {
+        "NQ": {
+          "trades": 140,
+          "wr": 51.42857142857142,
+          "pf": 1.3538601785489592,
+          "pnl": 6432.571428571173,
+          "dd": 3.731029637200006
+        },
+        "MNQ": {
+          "trades": 145,
+          "wr": 53.79310344827586,
+          "pf": 1.5799053121858604,
+          "pnl": 1079.6428571428332,
+          "dd": 0.4177025199794668
+        }
+      },
+      "score": 39.85982239503292
+    }
+  ],
+  "winner": {
+    "name": "full_balanced",
+    "entry_quality": {
+      "enabled": true,
+      "short_below_ema9": true,
+      "long_above_ema9": true,
+      "short_macd_negative": true,
+      "long_macd_positive": true,
+      "short_block_green_bars": 2,
+      "long_block_red_bars": 2,
+      "short_di_margin": 5.0,
+      "long_di_margin": 5.0,
+      "extended_adx_min": 22,
+      "short_rsi_falling_max": 60
+    },
+    "symbols": {
+      "NQ": {
+        "trades": 140,
+        "wr": 51.42857142857142,
+        "pf": 1.3538601785489592,
+        "pnl": 6432.571428571173,
+        "dd": 3.731029637200006
+      },
+      "MNQ": {
+        "trades": 145,
+        "wr": 53.79310344827586,
+        "pf": 1.5799053121858604,
+        "pnl": 1079.6428571428332,
+        "dd": 0.4177025199794668
+      }
+    },
+    "score": 39.85982239503292
+  }
+}
