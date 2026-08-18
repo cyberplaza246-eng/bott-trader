@@ -27,3 +27,11 @@ Thumbs.db
 # Backup files
 *.bak
 *.log
+
+# Live desk runtime
+data/bot_actions.jsonl
+data/bot_status.json
+data/trade_journal.jsonl
+data/paper_trade_journal.jsonl
+data/trade_suggestions.json
+data/mnq_desk_quote.json

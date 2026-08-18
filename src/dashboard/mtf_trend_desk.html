@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
+<title>MNQ Trend Desk</title>
+<style>
+  :root { --bg:#0b0f14; --card:#141a22; --bd:#2a3340; --tx:#e7eef6; --mut:#8b9aab;
+          --acc:#5aa2ff; --ok:#3ecf8e; --bad:#f07178; --warn:#e0b44e; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:ui-sans-serif,system-ui,sans-serif; background:var(--bg); color:var(--tx); }
+  header { display:flex; justify-content:space-between; align-items:center; padding:18px 22px;
+           border-bottom:1px solid var(--bd); background:var(--card); gap:12px; flex-wrap:wrap; }
+  h1 { font-size:1.35rem; margin:0; font-weight:700; }
+  .sub { color:var(--mut); font-size:.85rem; margin-top:4px; }
+  .wrap { max-width:840px; margin:0 auto; padding:18px 16px 48px; }
+  .card { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:18px; margin-bottom:14px; }
+  .hero { border-color:#3a4a60; }
+  h2 { margin:0 0 12px; font-size:1.02rem; font-weight:650; }
+  table { width:100%; border-collapse:collapse; font-size:.85rem; }
+  th,td { padding:7px 6px; border-bottom:1px solid var(--bd); text-align:left; }
+  th { color:var(--mut); font-weight:500; }
+  .scroll { overflow-x:auto; }
+  .tiny { font-size:.78rem; }
+  .k { color:var(--mut); } .ok { color:var(--ok); } .bad { color:var(--bad); } .warn { color:var(--warn); }
+  .row { display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--bd); gap:10px; }
+  .stats { display:flex; flex-wrap:wrap; gap:8px; }
+  .stat { background:#0d1117; border:1px solid var(--bd); border-radius:8px; padding:9px 11px; min-width:108px; }
+  .stat b { display:block; font-size:1.05rem; }
+  .stat span { font-size:.7rem; color:var(--mut); text-transform:uppercase; letter-spacing:.05em; }
+  .trans { color:var(--mut); font-size:.9rem; margin:10px 0 0; }
+  .foot { color:var(--mut); font-size:.78rem; margin-top:10px; }
+  .headline { font-size:1.05rem; font-weight:650; margin:0 0 10px; }
+  .callout { font-size:1.28rem; font-weight:700; margin:0 0 12px; line-height:1.45; }
+  .callout.buy { color:var(--ok); } .callout.sell { color:var(--bad); } .callout.wait { color:var(--warn); }
+  .rules { background:#0d1117; border:1px solid var(--bd); border-radius:8px; padding:12px 14px; margin-top:10px; font-size:.9rem; line-height:1.55; }
+  textarea { width:100%; background:#0d1117; color:var(--tx); border:1px solid var(--bd);
+             border-radius:8px; padding:10px; font:inherit; }
+  button.ask { background:var(--acc); color:#fff; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; }
+  #gemini-out { white-space:pre-wrap; color:var(--tx); font-size:.9rem; margin-top:10px; min-height:2.4em; }
+  details.block { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:12px 16px; margin-bottom:10px; }
+  details.block > summary { cursor:pointer; color:var(--mut); font-size:.88rem; font-weight:600; }
+  details.block[open] > summary { margin-bottom:12px; color:var(--tx); }
+  details.try { margin-top:8px; }
+  details.try > summary { cursor:pointer; color:var(--mut); font-size:.78rem; }
+  .try a { color:var(--acc); cursor:pointer; text-decoration:none; margin-right:10px; font-size:.8rem; }
+  .help { font-size:.78rem; color:var(--mut); line-height:1.45; margin:0 0 10px; }
+  .pill { font-size:.78rem; font-weight:700; letter-spacing:.04em; padding:6px 10px; border-radius:999px; border:1px solid var(--bd); }
+  .pill.paper { color:#3ecf8e; border-color:#3ecf8e; }
+  .pill.live { color:#f07178; border-color:#f07178; }
+  .pill.idle { color:var(--mut); }
+  .pill.overnight { color:#e0b44e; border-color:#e0b44e; background:rgba(224,180,78,.12); }
+  .feed { font-size:.95rem; line-height:1.45; }
+  .feed .ev { margin:0 0 16px; }
+  .feed .ev:last-child { margin-bottom:0; }
+  .feed .hd { font-weight:700; letter-spacing:.02em; }
+  .feed .ln { color:var(--mut); padding-left:1.7em; }
+  .trade-card { background:#0d1117; border:1px solid var(--bd); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+  .trade-card .hd { font-weight:700; font-size:1.02rem; margin-bottom:8px; }
+  .trade-card .ln { color:var(--mut); }
+  .sltp { margin: 10px 0 4px; }
+  .sltp .lvl { font-size:1.42rem; font-weight:800; line-height:1.35; padding:12px 14px;
+               border-radius:10px; margin:8px 0; letter-spacing:.01em; }
+  .sltp .stop { background:rgba(240,113,120,.18); color:#ff9b9b; border:1px solid #f07178; }
+  .sltp .tgt { background:rgba(62,207,142,.16); color:#3ecf8e; border:1px solid #3ecf8e; }
+  .trade-card .sltp .lvl { font-size:1.28rem; }
+  .feed .sltp .lvl { font-size:1.18rem; margin:6px 0; }
+  .devlog { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.72rem;
+            white-space:pre-wrap; color:var(--mut); max-height:360px; overflow:auto;
+            background:#0d1117; padding:10px 12px; border-radius:8px; line-height:1.45; }
+  details.devblock { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:12px 16px; margin-bottom:14px; }
+  details.devblock > summary { cursor:pointer; color:var(--mut); font-size:.92rem; font-weight:650; }
+  details.devblock[open] > summary { margin-bottom:10px; color:var(--tx); }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>MNQ Trend Desk</h1>
+    <div class="sub">Local desk — Stop and Target are the big colored rows. Hard-refresh (Ctrl+F5) if you do not see them.</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span id="run-pill" class="pill idle">not running</span>
+    <span id="updated" class="k"></span>
+  </div>
+</header>
+<div class="wrap">
+  <div class="card">
+    <h2>Status</h2>
+    <div id="status-sltp" class="sltp"></div>
+    <div id="status"></div>
+  </div>
+  <div class="card" id="overnight-panel" style="display:none">
+    <h2>Overnight zones (paper research)</h2>
+    <p class="help" style="margin-top:0">Tracked Globex levels. Not the locked RTH ema15 windows. Fills are paper only.</p>
+    <div id="zones"></div>
+    <h2 style="margin-top:14px">Last paper fill</h2>
+    <div id="last-fill" class="k">None yet tonight.</div>
+  </div>
+  <div class="card" id="activity-card">
+    <h2>Today's Activity</h2>
+    <div id="open-trade-card"></div>
+    <div id="activity-feed" class="feed"></div>
+  </div>
+  <div class="card hero">
+    <h2>Today's Signal</h2>
+    <div id="signal-callout" class="callout wait"></div>
+    <div id="signal-sltp" class="sltp"></div>
+    <div id="signal-stats" class="stats"></div>
+    <p id="gemini-second" class="foot"></p>
+    <div class="rules" id="signal-rules"></div>
+  </div>
+  <div class="card" id="rth-recipe-card" style="display:none">
+    <h2>Day recipe (after 9:35)</h2>
+    <p class="help" style="margin-top:0">Day recipe: enter only when daily+15m+60m agree. Locked ema15_eod RTH windows. Not tonight’s overnight paper fill. Flatten 15:50 ET after the open.</p>
+    <div id="rth-recipe-body"></div>
+  </div>
+  <div class="card">
+    <h2>Ask Gemini</h2>
+    <p class="help" style="margin-top:0">Second opinion on the live snapshot. Does not place trades or change stops. Enter to send.</p>
+    <textarea id="q" rows="3" placeholder="Ask about the current MNQ snapshot…" onkeydown="onAskKey(event)"></textarea>
+    <div style="margin-top:8px"><button class="ask" onclick="ask()">Ask</button></div>
+    <details class="try">
+      <summary>try</summary>
+      <div style="margin-top:8px">
+        <a onclick="askPreset('Do I buy or sell?')">Do I buy or sell?</a>
+        <a onclick="askPreset('At what price do I enter?')">At what price do I enter?</a>
+        <a onclick="askPreset('Should I skip today?')">Should I skip today?</a>
+      </div>
+    </details>
+    <div id="gemini-out"></div>
+    <div id="gemini-hist" class="qhist"></div>
+  </div>
+  <details class="block"><summary>Historical backtest (not live)</summary>
+    <p class="help">Supporting evidence only. Not the live quote or today's signal.</p>
+    <div class="card">
+      <h2>Is The Strategy Profitable?</h2>
+      <div id="profit-head" class="headline ok"></div>
+      <div id="profit-stats" class="stats"></div>
+      <p class="trans" id="profit-trans"></p>
+      <p class="foot" id="profit-foot"></p>
+    </div>
+    <div class="card">
+      <h2>What Actually Works?</h2>
+      <div id="works"></div>
+      <p class="trans" id="works-trans"></p>
+    </div>
+    <div class="card">
+      <h2>What Kind of Strategy Is This?</h2>
+      <div id="kind-head" class="headline"></div>
+      <p id="kind-body" style="margin:0;line-height:1.55"></p>
+      <p class="trans" id="kind-trans"></p>
+    </div>
+    <p class="help" id="bt-adv"></p>
+    <div id="bt-exp"></div>
+    <p id="suggest-meta" class="k" style="margin:12px 0 8px;font-size:.8rem"></p>
+    <div id="suggestions"></div>
+    <h2 style="margin-top:16px">Trade journal</h2>
+    <p id="trades-empty" class="k" style="margin:0 0 8px;font-size:.8rem"></p>
+    <div class="scroll">
+      <table class="tiny"><thead><tr>
+        <th>Entry</th><th>Exit</th><th>Dir</th><th>In</th><th>Out</th>
+        <th>Stop</th><th>Pullback</th><th>Best run</th><th>Exit</th>
+        <th>15m</th><th>60m</th><th>Daily</th><th>ATR</th><th>P&amp;L</th>
+      </tr></thead><tbody id="trades"></tbody></table>
+    </div>
+    <h2 style="margin-top:16px">Long vs short</h2>
+    <div id="side-exp"></div>
+    <h2 style="margin-top:16px">MFE / MAE</h2>
+    <div id="mfe-exp"></div>
+  </details>
+  <details class="devblock"><summary>Developer Log ▸</summary>
+    <p class="help">Raw Rithmic, websocket, and Python lines. Collapsed so the feed stays readable.</p>
+    <pre id="dev-log-body" class="devlog"></pre>
+  </details>
+</div>
+<script>
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+function fmtTs(v){
+  if(!v) return '—';
+  return String(v).replace('T',' ').slice(5,16);
+}
+function fmtN(v, d){
+  if(v==null || v==='') return '—';
+  const n=Number(v);
+  return Number.isFinite(n) ? n.toFixed(d) : '—';
+}
+function money(v){
+  if(v==null || v==='') return '—';
+  const n=Number(v);
+  if(!Number.isFinite(n)) return '—';
+  const sign = n>=0 ? '+' : '−';
+  return sign + '$' + Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:0});
+}
+function pfCell(s){
+  if(!s || s.n===0) return '<span class="k">no trades</span>';
+  const pf=s.pf==null?'n/a':Number(s.pf).toFixed(2);
+  const pnl=s.total_pnl_usd==null?'—':money(s.total_pnl_usd);
+  const cls=(s.total_pnl_usd||0)>=0?'ok':'bad';
+  return `${s.n} trades · PF ${pf} · <span class="${cls}">${pnl}</span>`;
+}
+function kvRows(map, keys, labels){
+  const m=map||{};
+  return (keys||Object.keys(m)).map(k=>{
+    const s=m[k]||{n:0};
+    return `<div class="row"><span>${esc(labels&&labels[k]||k)}</span><span>${pfCell(s)}</span></div>`;
+  }).join('');
+}
+function mfeBlock(dist){
+  dist=dist||{};
+  const buckets=dist.winner_mfe_buckets||{};
+  const bkeys=['0-15','15-20','20-40','40-80','80-120','120-200','200+'];
+  return `<div class="tiny"><div class="k">Winner run (best unrealized, points)</div>` +
+    bkeys.map(k=>`<div class="row"><span>${k} pts</span><span>${buckets[k]||0}</span></div>`).join('') +
+    `<p class="trans">typical winner ${dist.median_mfe_winners??'—'} pts · ` +
+    `80+ ${dist.pct_winners_mfe_ge_80??'—'}% · typical loser pullback ${dist.median_mae_losers??'—'} pts</p></div>`;
+}
+function stat(label, value, cls){
+  return `<div class="stat"><span>${esc(label)}</span><b class="${cls||''}">${esc(value)}</b></div>`;
+}
+function fmtClock(ts, fallback){
+  if(fallback) return fallback;
+  if(!ts) return '';
+  const d = new Date(ts);
+  if(isNaN(d.getTime())) return String(ts).replace('T',' ').slice(11,19);
+  let h=d.getHours(), m=d.getMinutes();
+  const ap = h>=12 ? 'PM' : 'AM';
+  h = h % 12; if(!h) h = 12;
+  return h + ':' + String(m).padStart(2,'0') + ' ' + ap;
+}
+function fmtPx(v){
+  const n=Number(v);
+  if(!Number.isFinite(n)) return '';
+  return n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function renderLine(x){
+  const s = String(x||'');
+  if(/^stop /i.test(s) || /^sl placed/i.test(s)) return `<div class="sltp"><div class="lvl stop">${esc(s)}</div></div>`;
+  if(/flatten|take profit|^tp |^target |tp cap/i.test(s)) return `<div class="sltp"><div class="lvl tgt">${esc(s)}</div></div>`;
+  return `<div class="ln">${esc(s)}</div>`;
+}
+function renderEvent(ev){
+  const clock = ev.clock || fmtClock(ev.ts);
+  const lines = (ev.lines||[]).map(renderLine).join('');
+  return `<div class="ev"><div class="hd">${esc(ev.emoji||'🟡')} ${esc(clock)}  ${esc(ev.title||'')}</div>${lines}</div>`;
+}
+function overnightTp(){ return '1R TP, flatten 09:25 ET'; }
+function stopPts(entry, sl, pts){
+  let n = Number(pts);
+  if(Number.isFinite(n)) return n;
+  const e=Number(entry), s=Number(sl);
+  if(Number.isFinite(e) && Number.isFinite(s)) return Math.abs(e-s);
+  return null;
+}
+function stopLine(entry, sl, pts){
+  const stop = fmtPx(sl);
+  if(!stop) return '';
+  const n = stopPts(entry, sl, pts);
+  return Number.isFinite(n) ? ('Stop ' + stop + ' (' + n.toFixed(0) + ' pts)') : ('Stop ' + stop);
+}
+function targetLine(overnight, rec){
+  if(overnight) return 'Target ' + overnightTp();
+  const tp = fmtPx(rec && (rec.tp_cap||rec.tp||rec.take_profit));
+  const sl = fmtPx(rec && (rec.stop||rec.sl));
+  if(sl || tp){
+    const bits = [];
+    if(sl) bits.push('SL placed @ ' + sl);
+    if(tp) bits.push('TP cap @ ' + tp);
+    return bits.join(' / ');
+  }
+  return '';
+}
+function sltpHtml(overnight, rec){
+  rec = rec || {};
+  const sl = stopLine(rec.entry||rec.entry_price, rec.stop||rec.sl, rec.atr_stop_pts||rec.stop_pts);
+  const tp = targetLine(overnight, rec);
+  if(!sl && !tp) return '';
+  return '<div class="sltp">' +
+    (sl ? `<div class="lvl stop">${esc(sl)}</div>` : '') +
+    (tp ? `<div class="lvl tgt">${esc(tp)}</div>` : '') +
+    '</div>';
+}
+function openPos(d){
+  return (((d.status||{}).open_positions)||[])[0] || {};
+}
+function isOvernightDesk(d){
+  const run = d.run || {};
+  const st = d.status || {};
+  const sig = (d.cards||{}).signal || {};
+  return !!(sig.overnight || run.state === 'overnight_research' || st.overnight_research || st.session === 'overnight_research');
+}
+function ensureSlTpLines(lines, rec, overnight){
+  const out = (lines||[]).slice();
+  const sl = stopLine(rec.entry||rec.entry_price, rec.stop||rec.sl, rec.atr_stop_pts||rec.stop_pts);
+  const tp = overnight ? ('Target ' + overnightTp()) : targetLine(false, rec);
+  if(overnight && sl){
+    const i = out.findIndex(x => String(x).toLowerCase().startsWith('stop '));
+    if(i>=0) out[i] = sl; else out.splice(1,0,sl);
+  }
+  if(!overnight && tp){
+    const i = out.findIndex(x => /sl placed|tp cap/i.test(String(x)));
+    if(i>=0) out[i] = tp; else out.splice(1,0,tp);
+  } else if(overnight && tp && !out.some(x => /flatten|take profit|^tp |^target /i.test(String(x)))){
+    out.push(tp);
+  }
+  return out;
+}
+function synthOpenCard(d){
+  const pos = openPos(d);
+  if(!pos || !(pos.entry||pos.entry_price||pos.sl||pos.stop)) return null;
+  const overnight = isOvernightDesk(d);
+  const side = String(pos.direction||pos.side||'LONG').toUpperCase();
+  const entry = fmtPx(pos.entry||pos.entry_price) || '—';
+  const qty = pos.size||pos.qty||1;
+  const lines = [
+    side + ' / MNQ · ' + qty,
+    'Entry ' + entry
+  ].concat(ensureSlTpLines([], {
+    entry: pos.entry||pos.entry_price,
+    stop: pos.sl||pos.stop,
+    tp: pos.tp||pos.tp_cap,
+    tp_cap: pos.tp_cap||pos.tp,
+    atr_stop_pts: pos.atr_stop_pts
+  }, overnight)).concat(['Status Open']);
+  return { emoji:'🟢', title: (overnight?'PAPER TRADE — ':'TRADE — ') + side, lines: lines };
+}
+function renderActivity(d){
+  const cardEl = document.getElementById('open-trade-card');
+  const feedEl = document.getElementById('activity-feed');
+  const devEl = document.getElementById('dev-log-body');
+  if(!feedEl) return;
+  const overnight = isOvernightDesk(d);
+  const pos = openPos(d);
+  let card = d.activity_card;
+  if(pos && (pos.entry||pos.entry_price||pos.sl||pos.stop)){
+    const rec = {
+      entry: pos.entry||pos.entry_price||(card&&card.entry),
+      stop: pos.sl||pos.stop||(card&&card.stop),
+      tp: pos.tp||pos.tp_cap,
+      tp_cap: pos.tp_cap||pos.tp,
+      atr_stop_pts: pos.atr_stop_pts
+    };
+    if(card && (card.title||card.lines)){
+      card = Object.assign({}, card, {lines: ensureSlTpLines(card.lines||[], rec, overnight)});
+    } else {
+      card = synthOpenCard(d);
+    }
+  }
+  if(cardEl){
+    if(card && (card.title||card.lines)){
+      cardEl.innerHTML = `<div class="trade-card"><div class="hd">${esc(card.emoji||'🟢')} ${esc(card.title||'PAPER TRADE')}</div>` +
+        sltpHtml(overnight, {
+          entry: pos.entry||pos.entry_price||card.entry,
+          stop: pos.sl||pos.stop||card.stop,
+          tp: pos.tp||pos.tp_cap,
+          tp_cap: pos.tp_cap||pos.tp,
+          atr_stop_pts: pos.atr_stop_pts
+        }) +
+        (card.lines||[]).filter(x=>!/^(stop |target |sl placed|tp )/i.test(String(x)) && !/flatten 09:25|tp cap/i.test(String(x)))
+          .map(x=>`<div class="ln">${esc(x)}</div>`).join('') + '</div>';
+    } else {
+      cardEl.innerHTML = '';
+    }
+  }
+  const events = (d.activity || []).slice().reverse().map(ev=>{
+    if(ev && (ev.kind==='entry' || ev.kind==='paper_trade' || /PAPER|TRADE/i.test(ev.title||''))){
+      return Object.assign({}, ev, {lines: ensureSlTpLines(ev.lines||[], {
+        entry: ev.entry||ev.entry_price||pos.entry,
+        stop: ev.stop||ev.sl||pos.sl||pos.stop,
+        tp: ev.tp||ev.tp_cap||pos.tp,
+        tp_cap: ev.tp_cap||ev.tp||pos.tp_cap||pos.tp,
+        atr_stop_pts: ev.atr_stop_pts||pos.atr_stop_pts
+      }, overnight)});
+    }
+    return ev;
+  });
+  feedEl.innerHTML = events.length
+    ? events.map(renderEvent).join('')
+    : '<div class="k">No activity yet today.</div>';
+  const dev = d.developer || [];
+  if(devEl){
+    if(!dev.length){
+      devEl.textContent = 'No developer lines yet.';
+    } else {
+      devEl.textContent = dev.map(a=>{
+        const t = a.clock || fmtClock(a.ts) || (a.ts||'').replace('T',' ').slice(11,19);
+        const body = (a.lines&&a.lines.length)?a.lines.join(' | '):(a.reason||a.kind||'');
+        return `[${t}] ${a.kind||'dev'}  ${body}`;
+      }).join('\n');
+    }
+  }
+}
+let _deskTimer = null;
+let _deskInFlight = false;
+async function load(){
+  if (_deskInFlight) return;
+  _deskInFlight = true;
+  try {
+  const r = await fetch('/api/desk');
+  const d = await r.json();
+  const cards = d.cards || {};
+  const run = d.run || {};
+  const pill = document.getElementById('run-pill');
+  if (pill) {
+    pill.textContent = run.pill || 'not running';
+    pill.className = 'pill ' + (run.pill_class || 'idle');
+  }
+  document.getElementById('updated').textContent = run.updated_label || '';
+  const st = cards.status || {};
+  const overnight = isOvernightDesk(d);
+  const p0 = openPos(d);
+  let statusRows = (st.rows||[]).slice();
+  const labels = statusRows.map(r=>r[0]);
+  const slTxt = stopLine(p0.entry||p0.entry_price, p0.sl||p0.stop, p0.atr_stop_pts);
+  const tgtTxt = overnight ? overnightTp() : targetLine(false, p0);
+  if(slTxt && !labels.includes('Stop')) statusRows.push(['Stop', slTxt]);
+  if(tgtTxt && !labels.includes('Target') && !labels.includes('Take profit')) statusRows.push(['Target', tgtTxt]);
+  const statusSltp = document.getElementById('status-sltp');
+  if(statusSltp){
+    statusSltp.innerHTML = sltpHtml(overnight, {
+      entry: p0.entry||p0.entry_price,
+      stop: p0.sl||p0.stop,
+      tp: p0.tp||p0.tp_cap,
+      tp_cap: p0.tp_cap||p0.tp,
+      atr_stop_pts: p0.atr_stop_pts
+    }) || (overnight ? sltpHtml(true, {stop: p0.sl||p0.stop, entry: p0.entry, atr_stop_pts: p0.atr_stop_pts}) : '');
+  }
+  document.getElementById('status').innerHTML = statusRows
+    .filter(x => x[0]!=='Stop' && x[0]!=='Target' && x[0]!=='Take profit')
+    .map(x=>`<div class="row"><span class="k">${esc(x[0])}</span><span>${esc(x[1])}</span></div>`)
+    .join('');
+  const ov = d.overnight || {};
+  const ovPanel = document.getElementById('overnight-panel');
+  if (ovPanel) {
+    const show = run.state === 'overnight_research' || ov.active;
+    ovPanel.style.display = show ? 'block' : 'none';
+    if (show) {
+      const zones = ov.zones || [];
+      document.getElementById('zones').innerHTML = zones.length
+        ? zones.map(z=>{
+            const px = z.price==null?'—':Number(z.price).toFixed(2);
+            const t = z.touches==null?0:z.touches;
+            return `<div class="row"><span>${esc(z.name||z.type||'')}</span><span>${px} · ${t} touches</span></div>`;
+          }).join('')
+        : '<div class="k">Waiting for overnight 1m bars…</div>';
+      const fill = ov.last_paper_fill;
+      const lf = document.getElementById('last-fill');
+      if (fill && (fill.entry_price||fill.exit_price)) {
+        const pnl = Number(fill.pnl_usd||0);
+        lf.className = pnl>=0?'ok':'bad';
+        lf.textContent = [
+          (fill.side||'').toUpperCase(),
+          fill.cue||'',
+          fill.zone_name||'',
+          fill.exit_price!=null?('exit '+Number(fill.exit_price).toFixed(2)):'',
+          'P&L $'+pnl.toFixed(2),
+          fill.gemini_note||''
+        ].filter(Boolean).join(' · ');
+      } else {
+        lf.className = 'k';
+        lf.textContent = 'None yet tonight.';
+      }
+    }
+  }
+  const p = cards.profit || {};
+  document.getElementById('profit-head').className = 'headline ' + (p.yes?'ok':'warn');
+  document.getElementById('profit-head').textContent = (p.yes?'✅ ':'') + (p.headline||'');
+  document.getElementById('profit-stats').innerHTML = [
+    stat('Trades', p.trades==null?'—':String(p.trades)),
+    stat('Profit Factor', p.pf==null?'—':Number(p.pf).toFixed(2), p.yes?'ok':''),
+    stat('Total Profit', money(p.total_profit), (p.total_profit||0)>=0?'ok':'bad'),
+    stat('Later Period PF', p.oos_pf==null?'—':Number(p.oos_pf).toFixed(2)),
+    stat('Strategy Type', p.strategy_type||'Trend Following'),
+  ].join('');
+  document.getElementById('profit-trans').textContent = p.translation || '';
+  document.getElementById('profit-foot').textContent = p.footnote || '';
+  const w = cards.works || {};
+  document.getElementById('works').innerHTML =
+    '<div class="k tiny" style="margin-bottom:6px">Best Entry Times</div>' +
+    (w.windows||[]).map(x=>
+      `<div class="row"><span>${esc(x.name)}</span><span>PF ${Number(x.pf).toFixed(2)}${x.flag?' <span class="bad">❌</span>':''}</span></div>`
+    ).join('') +
+    `<div class="row" style="margin-top:8px"><span>Best Setup: 15m + 60m + Daily all agree</span><span>PF ${w.aligned_pf==null?'—':Number(w.aligned_pf).toFixed(2)}</span></div>` +
+    `<div class="row"><span>When trends disagree</span><span>PF ${w.disagree_pf==null?'—':Number(w.disagree_pf).toFixed(2)}</span></div>`;
+  document.getElementById('works-trans').textContent = w.translation || '';
+  const k = cards.kind || {};
+  document.getElementById('kind-head').textContent = k.headline || 'Not a scalp.';
+  document.getElementById('kind-body').textContent = k.body || '';
+  document.getElementById('kind-trans').textContent = k.translation || '';
+  const sig = cards.signal || {};
+  const pos0 = p0;
+  const liveLast = (d.status && d.status.last_price!=null) ? d.status.last_price : sig.last_price;
+  const liveStop = pos0.sl!=null ? pos0.sl : (pos0.stop!=null ? pos0.stop : sig.stop);
+  const liveEntry = pos0.entry!=null ? pos0.entry : (pos0.entry_price!=null ? pos0.entry_price : sig.entry);
+  let livePts = sig.stop_pts;
+  if(livePts==null && liveEntry!=null && liveStop!=null){
+    livePts = Math.abs(Number(liveEntry)-Number(liveStop));
+  }
+  const call = (overnight ? ('PAPER ' + String(pos0.direction|| (d.status&&d.status.open) ||'LONG').toUpperCase()) : (sig.callout||'WAIT')).toUpperCase();
+  let headline = sig.headline || (sig.waiting ? 'Waiting for market data.' : call);
+  if(overnight && liveLast!=null){
+    const side = String(pos0.direction||pos0.side|| (d.status&&d.status.open) || 'LONG').toUpperCase();
+    const src = (d.status&&d.status.quote_source) || 'rithmic';
+    const e = liveEntry==null ? '—' : Number(liveEntry).toFixed(2);
+    const s = liveStop==null ? '—' : Number(liveStop).toFixed(2);
+    const pts = livePts==null ? '' : (' (' + Number(livePts).toFixed(0) + ' pts)');
+    headline = pos0.entry!=null || pos0.sl!=null || (d.status&&d.status.open&&d.status.open!=='flat')
+      ? (`PAPER ${side} — last MNQ ${Number(liveLast).toFixed(2)} (${src}). Entry ${e}, stop ${s}${pts}. ${overnightTp()}.`)
+      : (`PAPER OVERNIGHT — flat. Last MNQ ${Number(liveLast).toFixed(2)} (${src}). ${overnightTp()}. Locked RTH recipe starts 09:35.`);
+  }
+  const el = document.getElementById('signal-callout');
+  el.textContent = headline;
+  el.className = 'callout ' + (
+    (call.indexOf('LONG')>=0 || call==='BUY') && !sig.waiting ? 'buy'
+    : (call.indexOf('SHORT')>=0 || call==='SELL') && !sig.waiting ? 'sell'
+    : overnight ? 'buy' : 'wait'
+  );
+  const px = (sig.refresh_ok===false && !overnight) || liveLast==null ? '—' : Number(liveLast).toFixed(2);
+  const sigSltp = document.getElementById('signal-sltp');
+  if(sigSltp){
+    sigSltp.innerHTML = sltpHtml(overnight, {
+      entry: liveEntry,
+      stop: liveStop,
+      tp: pos0.tp||pos0.tp_cap||sig.tp||sig.tp_cap,
+      tp_cap: pos0.tp_cap||pos0.tp||sig.tp_cap,
+      atr_stop_pts: livePts
+    });
+  }
+  document.getElementById('signal-stats').innerHTML = [
+    stat('Last MNQ', px),
+    overnight ? stat('Flatten', '09:25 ET') : stat('Next window', sig.next_window||'—'),
+    stat('As of', overnight ? ((d.status&&d.status.last_quote_ts_et)||sig.last_bar_ts_et||'—') : (sig.last_bar_ts_et||'—')),
+  ].join('');
+  document.getElementById('gemini-second').textContent = overnight
+    ? 'Gemini second opinion — ask below. Uses the live ticker, not the stale 1m file. Recipe is still the boss. Never an order sent.'
+    : (sig.gemini_callout
+      ? ('Gemini second opinion — ' + sig.gemini_callout + ' Recipe is still the boss. Never an order sent.')
+      : 'Gemini second opinion — ask below. Recipe is still the boss. Never an order sent.');
+  const ovRules = [
+    'Overnight paper: break settled ONH/ONL only. ATR×1.5 stop, 1R TP, flatten 09:25 ET.',
+    'Paper fills only — not a live RTH ema15 order.',
+  ];
+  document.getElementById('signal-rules').innerHTML =
+    (overnight ? ovRules : (sig.rules||[])).map(x=>`<div>${esc(x)}</div>`).join('') +
+    (overnight ? '' : `<div style="margin-top:8px"><span class="k">Valid entry times</span><br>${(sig.windows||[]).map(esc).join('<br>')}</div>`);
+  const rthCard = document.getElementById('rth-recipe-card');
+  const rthBody = document.getElementById('rth-recipe-body');
+  if(rthCard && rthBody){
+    rthCard.style.display = overnight ? 'block' : 'none';
+    if(overnight){
+      const wins = (sig.windows&&sig.windows.length) ? sig.windows : [
+        '9:35 – 10:00 ET','10:15 – 10:40 ET','11:00 – 11:30 ET','12:00 – 12:30 ET','1:30 – 2:00 ET','2:30 – 3:00 ET'
+      ];
+      rthBody.innerHTML =
+        `<div class="k" style="margin-bottom:8px">${esc(sig.rth_recipe_note||'Locked ema15_eod after 9:35 ET.')}</div>` +
+        wins.map(w=>`<div class="row"><span>${esc(w)}</span></div>`).join('');
+    }
+  }
+  renderActivity(d);
+  const hist=d.gemini_questions||[];
+  document.getElementById('gemini-hist').innerHTML = hist.length
+    ? '<div class="k" style="margin-bottom:6px">Recent questions</div>' + hist.slice().reverse().map(q=>{
+        const n=q.repeat>1?` ×${q.repeat}`:'';
+        return `<div class="row"><span>${esc(q.question||'')}${n}</span></div>`;
+      }).join('')
+    : '';
+  const trades=d.trades||[];
+  const liveEmpty=!!(d.expectancy&&d.expectancy.empty);
+  document.getElementById('trades-empty').textContent = trades.length
+    ? trades.length + ' closes from the journal.'
+    : (liveEmpty ? 'Fills after paper or live closes.' : '');
+  document.getElementById('trades').innerHTML = trades.slice().reverse().map(t=>{
+    const pnl=Number(t.pnl_usd||t.pnl||0);
+    const cls=pnl>=0?'ok':'bad';
+    return `<tr>
+      <td>${fmtTs(t.entry_ts_et||t.entry_time)}</td>
+      <td>${fmtTs(t.exit_ts_et||t.exit_time)}</td>
+      <td>${esc((t.direction||t.side||'').toUpperCase())}</td>
+      <td>${fmtN(t.entry_price,2)}</td>
+      <td>${fmtN(t.exit_price,2)}</td>
+      <td>${fmtN(t.stop_distance,1)}</td>
+      <td>${fmtN(t.mae_pts,1)}</td>
+      <td>${fmtN(t.mfe_pts,1)}</td>
+      <td>${esc(t.desk_exit_reason||t.exit_reason||'—')}</td>
+      <td>${esc(t.trend_15m_txt||t.trend_15m||'—')}</td>
+      <td>${esc(t.trend_60m_txt||t.trend_60m||'—')}</td>
+      <td>${esc(t.daily_trend_txt||t.daily_trend||'—')}</td>
+      <td>${fmtN(t.atr_at_entry,1)}</td>
+      <td class="${cls}">$${pnl.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+  const live=d.expectancy||{};
+  const bt=d.backtest_edge||{};
+  const btAll=bt.all||{};
+  document.getElementById('bt-adv').textContent = bt.n_all
+    ? `Locked 3-window historical MNQ (9:35 / 11:00 / 13:30). ${bt.n_all} trades. Afternoon 13:30 stays in the recipe.`
+    : 'Run python scripts/analyze_window_edge.py to fill this panel.';
+  document.getElementById('bt-exp').innerHTML =
+    '<div class="k tiny">When it entered</div>' + kvRows(btAll.by_window, ['09:35','11:00','13:30']) +
+    (live.empty ? '<p class="foot">No live closes yet.</p>' :
+      '<div class="k tiny" style="margin-top:12px">Live journal</div>' + kvRows((live.by_window||{}), ['09:35','11:00','13:30']));
+  document.getElementById('side-exp').innerHTML = kvRows(btAll.by_side, ['long','short'], {long:'Long',short:'Short'});
+  document.getElementById('mfe-exp').innerHTML = mfeBlock(btAll.mfe_mae);
+  const sg=d.suggestions||{};
+  const meta=document.getElementById('suggest-meta');
+  if(!sg.ready){
+    meta.textContent = sg.note || 'Suggestions after 30 real closes. The bot will not change itself.';
+    document.getElementById('suggestions').innerHTML='';
+  }else{
+    meta.textContent = 'Suggestions · advisory only (never auto-applied)';
+    document.getElementById('suggestions').innerHTML = (sg.suggestions||[]).map(x=>{
+      return `<div class="row"><span>${esc(x.tweak||'')}</span><span class="k">${x.n} trades · PF ${x.pf!=null?x.pf:'n/a'}</span></div>`;
+    }).join('') || '<div class="k">No clusters yet</div>';
+  }
+  if(!document.getElementById('gemini-out').dataset.locked){
+    const last=(d.gemini_questions||[]).slice(-1)[0];
+    if(last && last.answer && !document.getElementById('gemini-out').textContent){
+      document.getElementById('gemini-out').textContent = last.answer;
+    }
+  }
+  } finally {
+    _deskInFlight = false;
+  }
+}
+function askPreset(q){
+  document.getElementById('q').value = q;
+  ask();
+}
+function onAskKey(e){
+  if(e.key !== 'Enter') return;
+  const isTextarea = (e.target.tagName || '').toLowerCase() === 'textarea';
+  if(e.shiftKey && isTextarea) return;
+  e.preventDefault();
+  ask();
+}
+async function ask(){
+  const q=document.getElementById('q').value.trim();
+  if(!q) return;
+  const out=document.getElementById('gemini-out');
+  out.dataset.locked='1';
+  out.textContent='Thinking…';
+  const r=await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
+  const d=await r.json();
+  let text=d.answer||d.error||'';
+  try {
+    const desk=await fetch('/api/desk').then(x=>x.json());
+    const st=desk.status||{};
+    const pos=(st.open_positions||[])[0]||{};
+    if(st.overnight_research && st.last_price!=null){
+      const side=String(pos.direction||st.open||'LONG').toUpperCase();
+      const e=pos.entry!=null?Number(pos.entry).toFixed(2):'—';
+      const s=(pos.sl!=null?pos.sl:pos.stop);
+      const sl=s==null?'—':Number(s).toFixed(2);
+      const pts=(pos.entry!=null && s!=null)?(' ('+Math.abs(Number(pos.entry)-Number(s)).toFixed(0)+' pts)'):'';
+      const live=`PAPER ${side} — last MNQ ${Number(st.last_price).toFixed(2)} (${st.quote_source||'rithmic'}). Entry ${e}, stop ${sl}${pts}. ${overnightTp()}.`;
+      if(/30215|file, not live|Next window 09:35/i.test(text) || !text.includes(Number(st.last_price).toFixed(2))){
+        text = live + '\n\n' + String(text).replace(/^WAIT[^\n]*\n*/i, '');
+      }
+    }
+  } catch(e){}
+  out.textContent=text;
+  load();
+}
+load();
+if (!_deskTimer) _deskTimer = setInterval(load, 3000);
+</script>
+</body></html>

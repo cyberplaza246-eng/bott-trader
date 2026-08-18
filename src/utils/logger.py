@@ -7,12 +7,62 @@ import sys
 from datetime import datetime
 from pythonjsonlogger import jsonlogger
 
+from src.utils.redact import redact_secrets
+
 
 class FlushStreamHandler(logging.StreamHandler):
     """StreamHandler that flushes after every emit - ensures real-time console output"""
     def emit(self, record):
         super().emit(record)
         self.flush()
+
+
+class SecretRedactFilter(logging.Filter):
+    """Strip broker passwords and API keys from log messages and exception text."""
+
+    def filter(self, record):
+        try:
+            record.msg = redact_secrets(record.getMessage())
+            record.args = ()
+        except Exception:
+            try:
+                record.msg = redact_secrets(record.msg)
+            except Exception:
+                pass
+        if record.exc_text:
+            record.exc_text = redact_secrets(record.exc_text)
+        elif record.exc_info:
+            try:
+                record.exc_text = redact_secrets(
+                    logging.Formatter().formatException(record.exc_info)
+                )
+            except Exception:
+                record.exc_info = None
+        return True
+
+
+def install_rithmic_log_redaction() -> None:
+    """async_rithmic logs Client(password=...) on plant errors. Never print that."""
+    filt = SecretRedactFilter()
+
+    def _attach(logger: logging.Logger) -> None:
+        if not any(isinstance(f, SecretRedactFilter) for f in logger.filters):
+            logger.addFilter(filt)
+        for handler in logger.handlers:
+            if not any(isinstance(f, SecretRedactFilter) for f in handler.filters):
+                handler.addFilter(filt)
+
+    _attach(logging.getLogger())
+    if logging.lastResort is not None:
+        if not any(isinstance(f, SecretRedactFilter) for f in logging.lastResort.filters):
+            logging.lastResort.addFilter(filt)
+    _attach(logging.getLogger("rithmic"))
+    _attach(logging.getLogger("async_rithmic"))
+    for name, obj in list(logging.Logger.manager.loggerDict.items()):
+        if not str(name).startswith(("rithmic", "async_rithmic")):
+            continue
+        lg = obj if isinstance(obj, logging.Logger) else logging.getLogger(str(name))
+        _attach(lg)
 
 
 class _ConsoleNewsPolicyFilter(logging.Filter):
@@ -47,9 +97,11 @@ def setup_logger(name, log_file=None, level=logging.INFO):
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     console_handler.setFormatter(console_format)
+    console_handler.addFilter(SecretRedactFilter())
     if name == "TradingBot":
         console_handler.addFilter(_ConsoleNewsPolicyFilter())
     logger.addHandler(console_handler)
+    logger.addFilter(SecretRedactFilter())
     
     # File handler (JSON format for structured logging)
     if log_file:
@@ -58,6 +110,7 @@ def setup_logger(name, log_file=None, level=logging.INFO):
         file_handler.setLevel(level)
         file_format = jsonlogger.JsonFormatter('%(timestamp)s %(level)s %(name)s %(message)s')
         file_handler.setFormatter(file_format)
+        file_handler.addFilter(SecretRedactFilter())
         logger.addHandler(file_handler)
     
     return logger

@@ -472,6 +472,7 @@ def load_data(
     csv_1m: Optional[str],
     csv_5m: Optional[str],
     csv_30s: Optional[str],
+    allow_synthetic_30s: bool = False,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str]:
     data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
     p1 = csv_1m or os.path.join(data_dir, "MNQ_1m.csv")
@@ -486,12 +487,17 @@ def load_data(
 
     if csv_30s and os.path.isfile(csv_30s):
         df_30s = normalize_dt(pd.read_csv(csv_30s, parse_dates=["datetime"]))
-        data_note = f"30s: real CSV ({len(df_30s):,} bars) | 1m: {os.path.basename(p1)} ({len(df_1m):,})"
-    else:
+        data_note = f"30s: REAL ({len(df_30s):,} bars) | 1m: {os.path.basename(p1)} ({len(df_1m):,})"
+    elif allow_synthetic_30s:
         df_30s = resample_30s_synthetic(df_1m)
         data_note = (
-            f"30s: SYNTHETIC (2x per 1m bar — imperfect) | "
+            f"30s: SYNTHETIC (2x per 1m bar — not realistic) | "
             f"1m: {os.path.basename(p1)} ({len(df_1m):,}) | 5m: {len(df_5m):,}"
+        )
+    else:
+        raise SystemExit(
+            "Refusing made-up 30s bars. Pass --csv-30s (Databento 1s resampled to 30s) "
+            "or --synthetic-30s if you intentionally want fake intra-minute path."
         )
     return df_1m, df_5m, df_30s, data_note
 

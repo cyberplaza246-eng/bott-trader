@@ -35,7 +35,8 @@ import pandas as pd
 from src.broker.base_broker import BaseBroker
 from src.instruments import get_instrument, is_futures
 from src.ai.order_flow import TickFlowTracker
-from src.utils.logger import bot_logger, error_logger
+from src.utils.logger import bot_logger, error_logger, install_rithmic_log_redaction
+from src.utils.redact import redact_secrets
 
 # Rithmic gateway URLs
 RITHMIC_GATEWAYS = {
@@ -227,12 +228,98 @@ def resample_subminute_to_1m(
     return df_1m if len(df_1m) >= 1 else None
 
 
+def prefer_live_mnq_contract(environ=None) -> None:
+    """June-2026 MNQ/NQ is expired; keep ticker+orders on the live month."""
+    env = environ if environ is not None else os.environ
+    ov = str(env.get("RITHMIC_CONTRACT_OVERRIDES", "") or "")
+    if "MNQ=MNQM6" in ov.upper():
+        env["RITHMIC_CONTRACT_OVERRIDES"] = "MNQ=MNQU6"
+
+
+def history_pnl_skipped(environ=None, quotes_only: bool = False) -> bool:
+    """True when this Lucid session must not touch the history/pnl plants."""
+    if quotes_only:
+        return True
+    env = environ if environ is not None else os.environ
+    if str(env.get("RITHMIC_QUOTES_ONLY", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    ):
+        return True
+    return str(env.get("RITHMIC_SKIP_HISTORY_PNL", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def plant_is_ready(client: Any, name: str) -> bool:
+    """True when async_rithmic has a connected plant (not None)."""
+    if client is None or not name:
+        return False
+    plants = getattr(client, "plants", None)
+    if not plants:
+        return False
+    plant = None
+    try:
+        if hasattr(plants, "get"):
+            plant = plants.get(name)
+        else:
+            plant = plants[name]
+    except Exception:
+        plant = None
+    return plant is not None
+
+
+def apply_lucid_ticker_order_plants(environ=None) -> None:
+    """Ticker + order plants only. Never history/pnl (Lucid 1011 / ForcedLogout)."""
+    env = environ if environ is not None else os.environ
+    env["RITHMIC_QUOTES_ONLY"] = "false"
+    env["RITHMIC_SKIP_HISTORY_PNL"] = "true"
+    env["RITHMIC_ORDER_PLANT_ONLY"] = "false"
+    env["RITHMIC_ALLOW_SIMULATOR"] = "true"
+    env["RITHMIC_DISABLE_YAHOO_FALLBACK"] = "true"
+    prefer_live_mnq_contract(env)
+
+
+def paper_rithmic_brackets_enabled(environ=None) -> bool:
+    env = environ if environ is not None else os.environ
+    return str(env.get("PAPER_RITHMIC_BRACKETS", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def is_forced_logout_text(text: Any) -> bool:
+    msg = str(text or "")
+    upper = msg.upper()
+    return (
+        "FORCEDLOGOUT" in upper
+        or "FORCED LOGOUT" in upper
+        or " 1011" in msg
+        or "RPCODE" in upper and " 13" in msg
+        or "RPCODE 13" in upper
+    )
+
+
+def _is_duplicate_session_text(text: Any) -> bool:
+    msg = str(text or "")
+    lower = msg.lower()
+    return (
+        is_forced_logout_text(msg)
+        or "rpcode" in lower and "13" in msg
+        or "heartbeat_interval" in lower and "nonetype" in lower
+    )
+
+
 class RithmicConnector(BaseBroker):
     """Direct Rithmic R|Protocol broker connector via async_rithmic."""
 
-    def __init__(self, live_mode: bool = False):
+    def __init__(self, live_mode: bool = False, quotes_only: bool = False):
         self._connected = False
         self._live_mode = live_mode
+        self._quotes_only = bool(quotes_only) or (
+            str(os.getenv("RITHMIC_QUOTES_ONLY", "")).strip().lower()
+            in ("1", "true", "yes", "on")
+        )
+        self._history_skip_logged = False
+        self._plant_skip_logged: set = set()
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._thread: Optional[threading.Thread] = None
         self._client = None  # async_rithmic.RithmicClient
@@ -323,16 +410,25 @@ class RithmicConnector(BaseBroker):
                 "(ForcedLogout). Close NinjaTrader/R|Trader/other bot instances, "
                 "wait ~60s, then retry."
             )
-        msg = str(exc).strip()
+        msg = redact_secrets(str(exc).strip())
+        cause = ""
+        if exc.__cause__ is not None:
+            cause = redact_secrets(str(exc.__cause__).strip())
+        blob = f"{msg} {cause} {type(exc).__name__}"
+        if _is_duplicate_session_text(blob):
+            return (
+                "Rithmic kicked a duplicate session (rpCode 13 / ForcedLogout) — "
+                "not a bad password. Close extra start_live / Lucid desktop, "
+                "wait 15s, retry one ticker plant only."
+            )
         if msg:
             return msg
-        if exc.__cause__ is not None:
-            cause_msg = str(exc.__cause__).strip()
-            if cause_msg:
-                return f"{type(exc).__name__}: {cause_msg}"
+        if cause:
+            return f"{type(exc).__name__}: {cause}"
         return f"{type(exc).__module__}.{type(exc).__name__}"
 
     def initialize(self) -> None:
+        install_rithmic_log_redaction()
         if not self._user or not self._password:
             bot_logger.warning(
                 "RITHMIC_USER_ID / RITHMIC_PASSWORD not set — "
@@ -366,10 +462,10 @@ class RithmicConnector(BaseBroker):
                 return
             except Exception as e:
                 self._last_connect_error = self._format_connect_error(e)
+                # Never exc_info here: async_rithmic tracebacks can include user+password.
                 error_logger.error(
                     f"Rithmic connection failed (attempt {attempt}/{max_attempts}): "
-                    f"{self._last_connect_error}",
-                    exc_info=True,
+                    f"{self._last_connect_error}"
                 )
                 self._connected = False
                 self._teardown_io_thread()
@@ -397,7 +493,8 @@ class RithmicConnector(BaseBroker):
             try:
                 self._run_sync(self._client.disconnect(), timeout=10)
             except Exception as e:
-                error_logger.error(f"Rithmic disconnect after failed connect: {e}")
+                error_logger.error(f"Rithmic disconnect after failed connect: {redact_secrets(e)}")
+        self._cancel_pending_async_tasks()
         self._client = None
         self._market_data_ready = False
         self._warned_front_month.clear()
@@ -408,16 +505,39 @@ class RithmicConnector(BaseBroker):
         self._loop = None
         self._thread = None
 
+    def _cancel_pending_async_tasks(self) -> None:
+        """Cancel leftover websocket keepalive tasks so they are not destroyed pending."""
+        loop = self._loop
+        if not loop or not loop.is_running():
+            return
+
+        async def _cancel_all():
+            current = asyncio.current_task()
+            pending = [t for t in asyncio.all_tasks(loop) if t is not current]
+            for task in pending:
+                task.cancel()
+            if pending:
+                await asyncio.gather(*pending, return_exceptions=True)
+
+        try:
+            self._run_sync(_cancel_all(), timeout=5)
+        except Exception:
+            pass
+
     def shutdown(self) -> None:
         if self._client and self._loop and self._loop.is_running():
             try:
                 self._run_sync(self._client.disconnect(), timeout=10)
             except Exception as e:
-                error_logger.error(f"Rithmic disconnect error: {e}")
+                error_logger.error(f"Rithmic disconnect error: {redact_secrets(e)}")
+        self._cancel_pending_async_tasks()
         if self._loop and self._loop.is_running():
             self._loop.call_soon_threadsafe(self._loop.stop)
         if self._thread and self._thread.is_alive():
             self._thread.join(timeout=5)
+        self._loop = None
+        self._thread = None
+        self._client = None
         self._connected = False
         bot_logger.info("Rithmic connector shut down")
 
@@ -485,6 +605,9 @@ class RithmicConnector(BaseBroker):
         df_30s: Optional[pd.DataFrame] = None,
     ) -> Optional[pd.DataFrame]:
         """Build 1M OHLCV from 30s bars when Rithmic MINUTE_BAR history is empty."""
+        if history_pnl_skipped(quotes_only=self._quotes_only):
+            self._log_history_skip_once()
+            return None
         if df_30s is None or len(df_30s) < 4:
             need_30s = max(num_candles * 2, 60)
             df_30s = self.get_candles_seconds(
@@ -505,6 +628,51 @@ class RithmicConnector(BaseBroker):
         self._candle_cache[cache_key] = (time.time(), out)
         return out
 
+    def _log_history_skip_once(self) -> None:
+        if self._history_skip_logged:
+            return
+        self._history_skip_logged = True
+        msg = "history plant denied — using CSV/Databento 1m + ticker last"
+        bot_logger.info(msg)
+        print(msg)
+
+    def _plant_ready(self, name: str) -> bool:
+        return plant_is_ready(self._client, name)
+
+    def _log_missing_plant_once(self, name: str, op: str) -> None:
+        logged = getattr(self, "_plant_skip_logged", None)
+        if logged is None:
+            self._plant_skip_logged = set()
+            logged = self._plant_skip_logged
+        key = (name, op)
+        if key in logged:
+            return
+        logged.add(key)
+        bot_logger.info(f"Rithmic {op} skipped — {name} plant not connected")
+
+    def _missing_plant_error(self, exc: BaseException) -> bool:
+        msg = str(exc)
+        return "NoneType" in msg and "send" in msg
+
+    async def _async_list_positions(self, account_id: Optional[str] = None):
+        """list_positions via PnL plant. None if plant missing — never spam NoneType.send."""
+        if not self._client:
+            return None
+        if not self._plant_ready("pnl") or not self._plant_ready("order"):
+            missing = "pnl" if not self._plant_ready("pnl") else "order"
+            self._log_missing_plant_once(missing, "list_positions")
+            return None
+        try:
+            return await self._client.list_positions(
+                account_id=account_id or self._get_account_id(),
+            )
+        except Exception as e:
+            if self._missing_plant_error(e):
+                self._log_missing_plant_once("pnl", "list_positions")
+                return None
+            error_logger.error(f"Rithmic list_positions failed: {e}")
+            return None
+
     def get_candles(
         self,
         symbol: str,
@@ -512,6 +680,9 @@ class RithmicConnector(BaseBroker):
         num_candles: int = 100,
         end_time: Optional[datetime] = None,
     ) -> Optional[pd.DataFrame]:
+        if history_pnl_skipped(quotes_only=self._quotes_only):
+            self._log_history_skip_once()
+            return None
         # Historical pagination bypasses short-lived cache
         if end_time is None:
             cache_key = f"{symbol}_{timeframe_minutes}"
@@ -642,6 +813,9 @@ class RithmicConnector(BaseBroker):
         lookback_hours: float = 8.0,
     ) -> Optional[pd.DataFrame]:
         """Paginate Rithmic history backwards when session-open returns too few bars."""
+        if history_pnl_skipped(quotes_only=self._quotes_only):
+            self._log_history_skip_once()
+            return None
         target = max(num_candles, 150 if timeframe_minutes == 1 else 50)
         df = self.get_candles(symbol, timeframe_minutes, num_candles=target)
         need = max(num_candles // 2, 30 if timeframe_minutes == 1 else 15)
@@ -747,6 +921,9 @@ class RithmicConnector(BaseBroker):
         df_1m_fallback: Optional[pd.DataFrame] = None,
     ) -> Optional[pd.DataFrame]:
         """Fetch sub-minute OHLCV bars (e.g. 30s) via Rithmic SECOND_BAR or tick aggregation."""
+        if history_pnl_skipped(quotes_only=self._quotes_only):
+            self._log_history_skip_once()
+            return None
         period_seconds = max(1, int(period_seconds))
         min_bars = min(2, num_candles)
         if end_time is None:
@@ -828,6 +1005,9 @@ class RithmicConnector(BaseBroker):
         max_bars: int = 25000,
     ) -> Optional[pd.DataFrame]:
         """Paginate Rithmic history backwards for longer backtests."""
+        if history_pnl_skipped(quotes_only=self._quotes_only):
+            self._log_history_skip_once()
+            return None
         if not self._connected:
             return None
         parts: List[pd.DataFrame] = []
@@ -887,7 +1067,11 @@ class RithmicConnector(BaseBroker):
             bot_logger.warning("Rithmic not connected — order rejected")
             return None
 
-        self._ensure_market_data()
+        order_only = os.getenv("RITHMIC_ORDER_PLANT_ONLY", "").strip().lower() in (
+            "1", "true", "yes", "on",
+        )
+        if not order_only:
+            self._ensure_market_data()
 
         try:
             spec = get_instrument(symbol)
@@ -949,7 +1133,7 @@ class RithmicConnector(BaseBroker):
                     take_profit=take_profit,
                     order_id=order_id,
                 ),
-                timeout=15,
+                timeout=45,
             )
             if result is not None:
                 raw_result = result.get("result") if isinstance(result, dict) else result
@@ -1079,7 +1263,7 @@ class RithmicConnector(BaseBroker):
         route = self.get_trade_route(exchange)
 
         orders = await self._client.list_orders(account_id=account_id)
-        positions = await self._client.list_positions(account_id=account_id)
+        positions = await self._async_list_positions(account_id)
 
         sym_qty: Optional[int] = None
         open_positions: List[str] = []
@@ -1178,9 +1362,9 @@ class RithmicConnector(BaseBroker):
             if order_count <= threshold:
                 continue
 
-            positions = await self._client.list_positions(
-                account_id=self._get_account_id(),
-            )
+            positions = await self._async_list_positions()
+            if positions is None:
+                continue
             list_net = self._list_positions_net_qty(positions, symbol)
             if list_net != 0:
                 bot_logger.info(
@@ -1612,13 +1796,16 @@ class RithmicConnector(BaseBroker):
         empty = {"net": 0, "broker_symbol": "", "exchange": "CME"}
         if not self._client or not symbol:
             return empty
-        try:
-            positions = await self._client.list_positions(
-                account_id=self._get_account_id(),
-            )
-        except Exception as e:
-            error_logger.error(f"Rithmic list_positions failed for {symbol}: {e}")
-            return {**empty, "error": str(e)}
+        positions = await self._async_list_positions()
+        if positions is None:
+            inferred = await self._async_infer_net_from_orders(symbol)
+            return {
+                "net": inferred,
+                "broker_symbol": "",
+                "exchange": "CME",
+                "unknown": inferred == 0,
+                "inferred": True,
+            }
         for p in positions or []:
             data = _response_to_dict_safe(p)
             if not self._position_matches_symbol(data, symbol):
@@ -1633,7 +1820,55 @@ class RithmicConnector(BaseBroker):
                 "broker_symbol": broker_sym,
                 "exchange": exchange,
             }
+        inferred = await self._async_infer_net_from_orders(symbol)
+        if inferred:
+            return {
+                "net": inferred,
+                "broker_symbol": "",
+                "exchange": "CME",
+                "inferred": True,
+            }
         return empty
+
+    async def _async_infer_net_from_orders(self, symbol: str) -> int:
+        """Infer signed net when the PnL plant is missing (Lucid ticker+order)."""
+        if not self._client or not symbol:
+            return 0
+        try:
+            orders = await self._client.list_orders(
+                account_id=self._get_account_id(),
+            ) or []
+        except Exception:
+            return 0
+        working_side = 0
+        latest_bot_fill = None
+        latest_bot_ts = ""
+        for order in orders:
+            data = _response_to_dict_safe(order)
+            if self._reverse_resolve(str(data.get("symbol") or "")) != symbol:
+                continue
+            tag = str(data.get("user_tag") or data.get("basket_id") or "")
+            status = str(data.get("status") or "")
+            side = str(data.get("transaction_type") or "").upper()
+            notify = str(data.get("notify_type") or "").upper()
+            qty = int(float(data.get("quantity") or data.get("qty") or 1))
+            if (tag.endswith("_sl") or tag.endswith("_tp") or tag.endswith("_tp_lit")) and self._is_working_order_status(status):
+                working_side = -qty if side == "SELL" else qty
+            if not tag.startswith("bot_"):
+                continue
+            if tag.startswith("bot_flatten_"):
+                continue
+            if tag.endswith("_sl") or tag.endswith("_tp") or tag.endswith("_tp_lit"):
+                continue
+            if notify == "FILL" or "fill" in status.lower() or status.lower() == "complete":
+                ts = str(data.get("update_time") or data.get("ssboe") or data.get("basket_id") or tag)
+                if ts >= latest_bot_ts:
+                    latest_bot_ts = ts
+                    latest_bot_fill = qty if side == "BUY" else -qty
+        if working_side:
+            # Working SELL stop/limit protects a long.
+            return -working_side if working_side else 0
+        return int(latest_bot_fill or 0)
 
     async def _async_cancel_all_working_bot_orders_for_symbol(
         self,
@@ -1806,6 +2041,12 @@ class RithmicConnector(BaseBroker):
             result["error"] = "not_connected"
             return result
 
+        pos = await self._async_get_broker_position_for_symbol(symbol)
+        result["initial_net"] = int(pos.get("net") or 0)
+        result["final_net"] = result["initial_net"]
+        if pos.get("inferred"):
+            result["inferred"] = True
+
         if cancel_working_first:
             result["cancelled_bot"] = (
                 await self._async_cancel_all_working_bot_orders_for_symbol(symbol)
@@ -1813,9 +2054,6 @@ class RithmicConnector(BaseBroker):
             if result["cancelled_bot"]:
                 await asyncio.sleep(min(verify_delay, 1.0))
 
-        pos = await self._async_get_broker_position_for_symbol(symbol)
-        result["initial_net"] = int(pos.get("net") or 0)
-        result["final_net"] = result["initial_net"]
         if result["initial_net"] == 0:
             result["flat"] = True
             return result
@@ -1865,12 +2103,18 @@ class RithmicConnector(BaseBroker):
             )
             attempt_info["market_order_ok"] = market_ok
             await asyncio.sleep(verify_delay)
+            result["attempts"].append(attempt_info)
+            if market_ok:
+                # PnL plant is often missing on Lucid ticker+order; a filled
+                # flatten market is the close. Do not re-infer from that fill.
+                result["flat"] = True
+                result["final_net"] = 0
+                break
 
             pos_final = await self._async_get_broker_position_for_symbol(symbol)
             net_final = int(pos_final.get("net") or 0)
             attempt_info["net_after"] = net_final
             result["final_net"] = net_final
-            result["attempts"].append(attempt_info)
             if net_final == 0:
                 result["flat"] = True
                 break
@@ -2252,6 +2496,7 @@ class RithmicConnector(BaseBroker):
         from async_rithmic import RithmicClient, OrderPlacement, DataType
         from async_rithmic.objects import RetrySettings
 
+        install_rithmic_log_redaction()
         self._client = RithmicClient(
             user=self._user,
             password=self._password,
@@ -2273,6 +2518,42 @@ class RithmicConnector(BaseBroker):
         self._client.on_account_pnl_update += self._on_account_pnl
         self._client.on_instrument_pnl_update += self._on_instrument_pnl
         self._client.on_exchange_order_notification += self._on_exchange_order_notification
+
+        if self._quotes_only:
+            from async_rithmic.enums import SysInfraType
+
+            bot_logger.info(
+                "Rithmic quotes-only: ticker plant only (no history/order/pnl)"
+            )
+            await self._client.connect(plants=[SysInfraType.TICKER_PLANT])
+            return
+
+        skip_history = os.getenv("RITHMIC_SKIP_HISTORY_PNL", "").strip().lower() in (
+            "1", "true", "yes", "on",
+        )
+        order_only = os.getenv("RITHMIC_ORDER_PLANT_ONLY", "").strip().lower() in (
+            "1", "true", "yes", "on",
+        )
+        if order_only:
+            from async_rithmic.enums import SysInfraType
+
+            bot_logger.info(
+                "Rithmic ORDER plant only (no ticker/history/pnl)"
+            )
+            await self._client.connect(plants=[SysInfraType.ORDER_PLANT])
+            await self._async_configure_execution()
+            return
+        if skip_history:
+            from async_rithmic.enums import SysInfraType
+
+            bot_logger.info(
+                "Rithmic ticker+order only (skipping history/pnl — Lucid history 1011)"
+            )
+            await self._client.connect(
+                plants=[SysInfraType.TICKER_PLANT, SysInfraType.ORDER_PLANT]
+            )
+            await self._async_configure_execution()
+            return
 
         # Connect all plants (ticker, order, history, pnl)
         await self._client.connect()
@@ -2719,14 +3000,8 @@ class RithmicConnector(BaseBroker):
         """Cancel all working bot_* orders when list_positions is flat."""
         if not self._client or not symbol:
             return 0
-        try:
-            positions = await self._client.list_positions(
-                account_id=self._get_account_id(),
-            )
-        except Exception as e:
-            error_logger.error(
-                f"Rithmic list_positions failed orphan cleanup for {symbol}: {e}"
-            )
+        positions = await self._async_list_positions()
+        if positions is None:
             return 0
         if self._list_positions_net_qty(positions, symbol) != 0:
             return 0
@@ -3156,11 +3431,17 @@ class RithmicConnector(BaseBroker):
                     entry_ids.add(str(oid))
         if not self._client:
             return sorted(entry_ids)
+        if not self._plant_ready("order"):
+            self._log_missing_plant_once("order", "list_orders")
+            return sorted(entry_ids)
         try:
             orders = await self._client.list_orders(
                 account_id=self._get_account_id(),
             )
         except Exception as e:
+            if self._missing_plant_error(e):
+                self._log_missing_plant_once("order", "list_orders")
+                return sorted(entry_ids)
             error_logger.error(f"Rithmic list_orders failed collecting entries for {symbol}: {e}")
             return sorted(entry_ids)
         for order in orders or []:
@@ -3199,12 +3480,8 @@ class RithmicConnector(BaseBroker):
         if self._order_within_entry_grace(order_id):
             return None
 
-        try:
-            positions = await self._client.list_positions(
-                account_id=self._get_account_id(),
-            )
-        except Exception as e:
-            error_logger.error(f"Rithmic list_positions failed for {symbol}: {e}")
+        positions = await self._async_list_positions()
+        if positions is None:
             return None
 
         if self._list_positions_net_qty(positions, symbol) != 0:
@@ -3261,12 +3538,8 @@ class RithmicConnector(BaseBroker):
                 "tag_inferred_entries": 0,
             }
 
-        try:
-            positions = await self._client.list_positions(
-                account_id=self._get_account_id(),
-            )
-        except Exception as e:
-            error_logger.error(f"Rithmic list_positions failed reconciling {symbol}: {e}")
+        positions = await self._async_list_positions()
+        if positions is None:
             return {
                 "broker_net": 0,
                 "list_positions_net": 0,
@@ -3276,7 +3549,7 @@ class RithmicConnector(BaseBroker):
                 "stale_cleared": 0,
                 "exposure_source": "flat",
                 "tag_inferred_entries": 0,
-                "error": str(e),
+                "unknown": True,
             }
 
         list_positions_net = self._list_positions_net_qty(positions, symbol)
@@ -3406,13 +3679,18 @@ class RithmicConnector(BaseBroker):
             return None
         try:
             positions = self._run_sync(
-                self._client.list_positions(account_id=self._get_account_id()),
+                self._async_list_positions(),
                 timeout=10,
             )
         except Exception as e:
+            if self._missing_plant_error(e):
+                self._log_missing_plant_once("pnl", "list_positions")
+                return None
             error_logger.error(f"Rithmic list_positions failed for {symbol}: {e}")
             return None
 
+        if positions is None:
+            return None
         if self._list_positions_net_qty(positions, symbol) != 0:
             return True
 
@@ -3438,11 +3716,16 @@ class RithmicConnector(BaseBroker):
             return None
         try:
             positions = self._run_sync(
-                self._client.list_positions(account_id=self._get_account_id()),
+                self._async_list_positions(),
                 timeout=10,
             )
         except Exception as e:
+            if self._missing_plant_error(e):
+                self._log_missing_plant_once("pnl", "list_positions")
+                return None
             error_logger.error(f"Rithmic list_positions failed for {symbol}: {e}")
+            return None
+        if positions is None:
             return None
         return self._list_positions_net_qty(positions, symbol)
 
@@ -3494,11 +3777,17 @@ class RithmicConnector(BaseBroker):
         """Unfilled bot entry parent orders for symbol (excludes SL/TP legs)."""
         if not self._client or not symbol:
             return 0
+        if not self._plant_ready("order"):
+            self._log_missing_plant_once("order", "list_orders")
+            return 0
         try:
             orders = await self._client.list_orders(
                 account_id=self._get_account_id(),
             )
         except Exception as e:
+            if self._missing_plant_error(e):
+                self._log_missing_plant_once("order", "list_orders")
+                return 0
             error_logger.error(f"Rithmic list_orders failed for {symbol}: {e}")
             return 0
 
@@ -3535,12 +3824,8 @@ class RithmicConnector(BaseBroker):
         """Async net exposure check via list_positions. None if query failed."""
         if not self._client or not symbol:
             return None
-        try:
-            positions = await self._client.list_positions(
-                account_id=self._get_account_id(),
-            )
-        except Exception as e:
-            error_logger.error(f"Rithmic list_positions failed for {symbol}: {e}")
+        positions = await self._async_list_positions()
+        if positions is None:
             return None
 
         if self._list_positions_net_qty(positions, symbol) != 0:
@@ -3570,11 +3855,8 @@ class RithmicConnector(BaseBroker):
         """Refresh cached net exposure from Rithmic PnL plant (not just callbacks)."""
         if not self._client:
             return False
-        try:
-            positions = await self._client.list_positions(
-                account_id=self._get_account_id(),
-            )
-        except Exception:
+        positions = await self._async_list_positions()
+        if positions is None:
             return False
 
         updated: Dict[str, Any] = {}
@@ -4287,13 +4569,16 @@ class RithmicConnector(BaseBroker):
             kwargs["target_ticks"] = tp_ticks
 
         if stop_loss > 0 and "stop_ticks" not in kwargs:
-            bot_logger.error(
-                f"Cannot compute stop_ticks for {symbol} (price_ref={price_ref}) — "
-                f"will attempt protective orders after fill"
+            raise RuntimeError(
+                f"Refusing entry-only order for {symbol}: cannot compute stop_ticks "
+                f"(entry={entry_price} sl={stop_loss} ref={price_ref}). "
+                f"SL/TP must go with the entry."
             )
         if take_profit > 0 and "target_ticks" not in kwargs:
-            bot_logger.warning(
-                f"Cannot compute target_ticks for {symbol} (price_ref={price_ref})"
+            raise RuntimeError(
+                f"Refusing entry-only order for {symbol}: cannot compute target_ticks "
+                f"(entry={entry_price} tp={take_profit} ref={price_ref}). "
+                f"SL/TP must go with the entry."
             )
 
         result = await self._client.submit_order(**kwargs)
@@ -4962,9 +5247,11 @@ class RithmicConnector(BaseBroker):
             return
         try:
             positions = self._run_sync(
-                self._client.list_positions(account_id=self._get_account_id()),
+                self._async_list_positions(),
                 timeout=10,
             )
+            if positions is None:
+                return
             updated: Dict[str, Any] = {}
             for p in positions:
                 data = _response_to_dict_safe(p)
@@ -5008,11 +5295,19 @@ class RithmicConnector(BaseBroker):
 
             try:
                 positions = self._run_sync(
-                    self._client.list_positions(account_id=self._get_account_id()),
+                    self._async_list_positions(),
                     timeout=10,
                 )
+                if positions is None:
+                    bot_logger.info(
+                        f"Keeping SL/TP for {oid} — broker position unknown, skipping cleanup ({symbol})"
+                    )
+                    continue
                 broker_net = self._list_positions_net_qty(positions, symbol)
             except Exception as e:
+                if self._missing_plant_error(e):
+                    self._log_missing_plant_once("pnl", "list_positions")
+                    continue
                 error_logger.error(
                     f"list_positions failed during cleanup for {symbol}: {e}"
                 )
@@ -5072,6 +5367,9 @@ class RithmicConnector(BaseBroker):
         """Sync account balance/equity from Rithmic PnL plant."""
         if not self._connected:
             return
+        if not self._plant_ready("pnl"):
+            self._log_missing_plant_once("pnl", "account_summary")
+            return
         try:
             summaries = self._run_sync(
                 self._client.list_account_summary(
@@ -5089,6 +5387,9 @@ class RithmicConnector(BaseBroker):
                     elif "margin_balance" in data:
                         self._account_info["equity"] = float(data["margin_balance"])
         except Exception as e:
+            if self._missing_plant_error(e):
+                self._log_missing_plant_once("pnl", "account_summary")
+                return
             error_logger.error(f"Rithmic account PnL refresh error: {e}")
 
     # ══════════════════════════════════════════════════════════════

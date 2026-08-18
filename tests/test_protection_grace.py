@@ -4,12 +4,14 @@ import asyncio
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from src.broker.rithmic_connector import RithmicConnector
+from src.broker.rithmic_connector import RithmicConnector, plant_is_ready
 
 
 def _bare_connector() -> RithmicConnector:
     conn = object.__new__(RithmicConnector)
     conn._client = AsyncMock()
+    conn._client.plants = {"ticker": object(), "order": object(), "pnl": object()}
+    conn._plant_skip_logged = set()
     conn._get_account_id = MagicMock(return_value="TEST-ACCT")
     conn._reverse_resolve = lambda sym: sym
     conn._async_cancel_protective_leg = AsyncMock(return_value=True)
@@ -187,3 +189,24 @@ def test_verify_skips_flat_cancel_during_grace():
 
     assert sl_ok and tp_ok and not closed
     conn.cancel_all_bot_orders.assert_not_called()
+
+
+def test_plant_is_ready_false_when_pnl_missing():
+    class _Client:
+        plants = {"ticker": object(), "order": object()}
+
+    assert plant_is_ready(_Client(), "order") is True
+    assert plant_is_ready(_Client(), "pnl") is False
+    assert plant_is_ready(None, "pnl") is False
+
+
+def test_list_positions_skips_quietly_without_pnl_plant():
+    conn = _bare_connector()
+    conn._client.plants = {"ticker": object(), "order": object()}
+    conn._plant_skip_logged = set()
+    conn._client.list_positions = AsyncMock(
+        side_effect=AttributeError("'NoneType' object has no attribute 'send'")
+    )
+    result = asyncio.run(conn._async_list_positions())
+    assert result is None
+    conn._client.list_positions.assert_not_called()

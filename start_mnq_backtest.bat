@@ -1,35 +1,25 @@
 @echo off
 cd /d "%~dp0"
 echo ============================================
-echo   BottTrader - Nasdaq hybrid BACKTEST
-echo   MNQ + NQ  ^|  no Rithmic / no live orders
+echo   MNQ 15m EMA EOD — REAL 1m Databento
+echo   No synthetic 30s
 echo ============================================
 echo.
 
 call venv\Scripts\activate.bat
 set PYTHONIOENCODING=utf-8
 
-if "%~1"=="rithmic-csv" (
-    echo --- MNQ  data\MNQ_1m_rithmic.csv ---
-    python scripts/backtest_scalp_hybrid.py --ultra-fast --rth-windows --symbol MNQ --csv-1m data/MNQ_1m_rithmic.csv --csv-5m data/MNQ_5m_rithmic.csv
-    echo.
-    echo --- NQ  data\NQ_1m_rithmic.csv ---
-    python scripts/backtest_scalp_hybrid.py --ultra-fast --rth-windows --symbol NQ --csv-1m data/NQ_1m_rithmic.csv --csv-5m data/NQ_5m_rithmic.csv
-) else if "%~1"=="nq" (
-    echo --- NQ  data\NQ_1m.csv ---
-    python scripts/backtest_scalp_hybrid.py --ultra-fast --rth-windows --symbol NQ --csv-1m data/NQ_1m.csv --csv-5m data/NQ_5m.csv
-) else if "%~1"=="mnq" (
-    echo --- MNQ  data\MNQ_1m.csv ---
-    python scripts/backtest_scalp_hybrid.py --ultra-fast --rth-windows --symbol MNQ
-) else (
-    echo --- MNQ  data\MNQ_1m.csv ---
-    python scripts/backtest_scalp_hybrid.py --ultra-fast --rth-windows --symbol MNQ
-    echo.
-    echo --- NQ  data\NQ_1m.csv ---
-    python scripts/backtest_scalp_hybrid.py --ultra-fast --rth-windows --symbol NQ --csv-1m data/NQ_1m.csv --csv-5m data/NQ_5m.csv
+set ONE_M=data\MNQ_1m.csv
+if not exist "%ONE_M%" (
+    echo Missing %ONE_M%
+    echo Download Databento 1m first.
+    pause
+    exit /b 1
 )
 
+echo 1m: %ONE_M%
 echo.
-echo Saved: data\scalp_hybrid_backtest_MNQ.json  and/or  data\scalp_hybrid_backtest_NQ.json
-echo Optional: start_mnq_backtest.bat rithmic-csv ^| nq ^| mnq
+python scripts/backtest_ema15_official.py %ONE_M%
+echo.
+echo Also saved: data\real_1m_simple_search.json
 pause

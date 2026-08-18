@@ -10,6 +10,8 @@ from src.broker.rithmic_connector import RithmicConnector
 def _bare_connector() -> RithmicConnector:
     conn = object.__new__(RithmicConnector)
     conn._client = AsyncMock()
+    conn._client.plants = {"ticker": object(), "order": object(), "pnl": object()}
+    conn._plant_skip_logged = set()
     conn._get_account_id = MagicMock(return_value="TEST-ACCT")
     conn._reverse_resolve = lambda sym: sym
     conn._async_cancel_protective_leg = AsyncMock(return_value=True)
