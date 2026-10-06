@@ -119,15 +119,27 @@ from src.strategy.scalp_brackets import compute_scalp_bracket_pts, format_scalp_
 from src.strategy.mnq_profit_defaults import (
     apply_profit_env_defaults,
     profit_mode_applied_summary,
+    should_lock_profit_mode,
 )
 from src.strategy.mnq_15m_ema_eod import (
+    ENTRY_WINDOWS,
     Ema15EodState,
     capture_market_snapshot,
     check_ema15_eod_entry,
+    check_ema15_level_entry,
+    ema15_level_mode_from_env,
+    ema15_require_5m_from_env,
+    ema15_sl_tf_from_env,
     explain_ema15_skip,
+    explain_ema15_level_skip,
     load_1m_seed_csv,
+    max_open_lots_from_env,
+    max_trades_day_from_env,
     merge_1m_history,
     overlay_ticker_last_on_1m,
+    release_ema15_window,
+    rollback_ema15_pending_entry,
+    window_label,
 )
 from src.ai.trade_review import (
     TradeReviewJournal,
@@ -270,23 +282,70 @@ def is_scalp_window_open_et(now=None) -> bool:
     return ok
 
 
+def _paper_overnight_boot() -> bool:
+    return str(os.getenv("PAPER_OVERNIGHT", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def _paper_day_hybrid_boot() -> bool:
+    return str(os.getenv("PAPER_DAY_HYBRID", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    ) or str(os.getenv("DAY_HYBRID", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
 def print_profit_mode_banner() -> None:
     """Startup banner so live operator sees the locked profit recipe."""
+    if _paper_overnight_boot() or _paper_day_hybrid_boot():
+        return
     if STRATEGY_MODE == "ema15_eod":
+        from src.strategy.mnq_15m_ema_eod import (
+            ema15_continuous_from_env,
+            ema15_entry_cooldown_mins_from_env,
+            ema15_fixed_sl_from_env,
+            ema15_require_quiet_from_env,
+            ema15_side_mode_from_env,
+        )
+        req5 = ema15_require_5m_from_env()
+        sl_tf = ema15_sl_tf_from_env()
+        stack = "15m+5m" if req5 else "daily+15m+60m"
+        continuous = ema15_continuous_from_env()
+        fixed_sl = ema15_fixed_sl_from_env()
+        quiet = ema15_require_quiet_from_env(True)
+        side = ema15_side_mode_from_env()
+        tp_r = float(os.getenv("EMA15_TP_R", "1.0") or "1.0")
+        tp_pts = float(os.getenv("SCALP_TP_PTS", "500") or "500")
+        max_day = os.getenv("MAX_TRADES_PER_DAY", "20")
         print()
         print("=" * 70)
-        print("  PROFIT MODE: 15m EMA + daily confirm + ATR stop (real 1m)")
-        print(
-            "  Windows 9:35 / 10:15 / 11:00 / 12:00 / 13:30 / 14:30 ET (max 6) | daily+15m+60m must agree"
-        )
-        print(
-            "  SL=clip(ATR15×2, 20–60) | TP cap 500 | flatten 15:50 | no 30s"
-        )
+        if continuous:
+            print(f"  CONTINUOUS FORWARD: {stack} | side={side} | quiet_1m={'ON' if quiet else 'off'}")
+            print(
+                f"  Hunt any minute 09:35–15:50 ET | cooldown "
+                f"{ema15_entry_cooldown_mins_from_env(15)}m | max {max_day}/day"
+            )
+        else:
+            print(f"  PROFIT MODE: {stack} + {'quiet 1m' if quiet else 'no quiet'} + slotted windows")
+            print(
+                "  Windows 9:35 / 10:15 / 11:00 / 12:00 / 13:30 / 14:30 ET | "
+                f"{stack} must agree | EMA15_LEVEL_MODE=0"
+            )
+        if fixed_sl is not None:
+            sl_txt = f"fixed {fixed_sl:g} pts"
+        else:
+            sl_mult = os.getenv("EMA15_SL_ATR_MULT", "1.5")
+            sl_min = os.getenv("EMA15_SL_MIN", "6")
+            sl_max = os.getenv("EMA15_SL_MAX", "25")
+            sl_txt = f"clip({sl_tf} ATR×{sl_mult}, {sl_min}–{sl_max})"
+        if tp_r and tp_r > 0:
+            tp_txt = f"{tp_r:g}R"
+        else:
+            tp_txt = f"{tp_pts:g}pt cap / EOD"
+        print(f"  SL={sl_txt} | TP={tp_txt} | flatten 15:50 | no 30s")
         print(
             "  1m data: CSV + Databento + ticker last — never wait on Rithmic history/SECOND_BAR"
-        )
-        print(
-            "  Honest OOS Jun–Aug: PF 1.59 / +$5,371  |  IS PF 1.41 / +$5,643  |  ~1.8 fills/day"
         )
         print("=" * 70)
         print()
@@ -490,6 +549,13 @@ SCALP_TRAIL_AFTER_BE = os.getenv("SCALP_TRAIL_AFTER_BE", "true").lower() == "tru
 SCALP_TRAIL_MFE_LOCK_PCT = float(os.getenv("SCALP_TRAIL_MFE_LOCK_PCT", "0.25"))
 SCALP_SECURE_LOCK_PCT = float(os.getenv("SCALP_SECURE_LOCK_PCT", "0.5"))
 SCALP_MAX_HOLD_TIGHTEN_PCT = float(os.getenv("SCALP_MAX_HOLD_TIGHTEN_PCT", "0.85"))
+# Dollar profit locks (MNQ: $2/pt → +$100 = 50 pts fav, lock +$15 = 7.5 pts past entry)
+# Independent of SCALP_BREAKEVEN / ema15_eod % trail (works even when those are OFF).
+PROFIT_LOCK_ENABLED = os.getenv("PROFIT_LOCK_ENABLED", "true").lower() in ("1", "true", "yes", "on")
+PROFIT_LOCK_TRIGGER_1_USD = float(os.getenv("PROFIT_LOCK_TRIGGER_1_USD", "100"))
+PROFIT_LOCK_LEVEL_1_USD = float(os.getenv("PROFIT_LOCK_LEVEL_1_USD", "15"))
+PROFIT_LOCK_TRIGGER_2_USD = float(os.getenv("PROFIT_LOCK_TRIGGER_2_USD", "150"))
+PROFIT_LOCK_LEVEL_2_USD = float(os.getenv("PROFIT_LOCK_LEVEL_2_USD", "50"))
 EXIT_CANDLE_COUNT = 100  # min bars for position exit high/low checks (never use 5)
 PAPER_RITHMIC_BRACKETS = os.getenv("PAPER_RITHMIC_BRACKETS", "false").lower() == "true"
 PAPER_USE_RITHMIC = os.getenv("PAPER_USE_RITHMIC", "false").lower() == "true"
@@ -500,8 +566,8 @@ def paper_connects_rithmic() -> bool:
     return paper_uses_rithmic()
 BROKER_PROTECTION_MAX_RETRIES = int(os.getenv("BROKER_PROTECTION_MAX_RETRIES", "5"))
 SCAN_PROTECTION_REPAIR_RETRIES = int(os.getenv("SCAN_PROTECTION_REPAIR_RETRIES", "3"))
-BROKER_FLAT_SYNC_SEC = float(os.getenv("BROKER_FLAT_SYNC_SEC", "30"))
-BROKER_FLAT_SYNC_SCANS = int(os.getenv("BROKER_FLAT_SYNC_SCANS", "2"))
+BROKER_FLAT_SYNC_SEC = float(os.getenv("BROKER_FLAT_SYNC_SEC", "15"))
+BROKER_FLAT_SYNC_SCANS = int(os.getenv("BROKER_FLAT_SYNC_SCANS", "1"))
 
 # Adaptive strategy (from data/mnq_profit_config.json backtest winner)
 STRATEGY_MODE = "baseline"
@@ -730,6 +796,8 @@ def _reload_profit_mode_globals() -> None:
 
 def load_profit_config() -> None:
     """Apply validated MNQ params from data/mnq_profit_config.json."""
+    if _paper_day_hybrid_boot():
+        return
     global ATR_MULT, TP_MULT, ADX_THRESHOLD, MAX_TRADES_PER_DAY
     global MAX_POSITIONS, MAX_POSITIONS_MNQ
     global VOLUME_RATIO_THRESHOLD, TP_BUFFER_ATR_MULT
@@ -753,13 +821,19 @@ def load_profit_config() -> None:
             applied = apply_profit_env_defaults(cfg, os.environ)
             if applied:
                 _reload_profit_mode_globals()
-                print(profit_mode_applied_summary(applied))
+                if not _paper_overnight_boot() and not _paper_day_hybrid_boot():
+                    print(profit_mode_applied_summary(applied))
             cfg_name = cfg.get("name", "custom")
             cfg_wr = float(cfg.get("wr_mnq", cfg.get("wr", 0)))
             ATR_MULT = float(cfg.get("atr", ATR_MULT))
             TP_MULT = float(cfg.get("tp", TP_MULT))
             ADX_THRESHOLD = int(cfg.get("adx", ADX_THRESHOLD))
-            MAX_TRADES_PER_DAY = int(cfg.get("max_tr", MAX_TRADES_PER_DAY))
+            if should_lock_profit_mode(cfg, os.environ):
+                e15 = cfg.get("ema15_eod") or {}
+                if e15.get("max_trades_per_day") is not None and not os.getenv("MAX_TRADES_PER_DAY", "").strip():
+                    MAX_TRADES_PER_DAY = int(e15["max_trades_per_day"])
+            else:
+                MAX_TRADES_PER_DAY = int(cfg.get("max_tr", MAX_TRADES_PER_DAY))
             if "vol" in cfg:
                 VOLUME_RATIO_THRESHOLD = float(cfg["vol"])
             if "tp_buffer" in cfg:
@@ -846,6 +920,8 @@ def load_profit_config() -> None:
         ADX_THRESHOLD = int(env_adx)
     _apply_strategy_mode_env()
     eq_on = entry_quality_enabled(ENTRY_QUALITY)
+    if _paper_overnight_boot():
+        return
     print(
         f"Profit config: ATRx{ATR_MULT} TPx{TP_MULT} ADX>={ADX_THRESHOLD} "
         f"vol>={VOLUME_RATIO_THRESHOLD} TP buffer={TP_BUFFER_ATR_MULT}xATR "
@@ -914,7 +990,9 @@ def _apply_strategy_mode_env() -> None:
     global SCALP_BREAKEVEN_ENABLED, SCALP_TRAIL_AFTER_BE, SCALP_FAST_MODE
     env_mode = os.getenv("STRATEGY_MODE", "").strip().lower()
     env_scalp_mode = SCALP_MODE or env_mode
-    use_ema15 = env_scalp_mode in ("ema15_eod", "ema15", "15m_ema_eod") or env_mode == "ema15_eod"
+    use_ema15 = env_scalp_mode in (
+        "ema15_eod", "ema15", "15m_ema_eod", "level_15_5_1", "level_break_retest", "ema15_level",
+    ) or env_mode in ("ema15_eod", "level_15_5_1")
     use_fvs1 = env_scalp_mode in ("fvs1", "fvs1_log") or env_mode == "fvs1"
     use_hybrid = env_scalp_mode in ("hybrid", "pullback", "continuation", "scalp_hybrid")
     use_scalp_b = USE_SCALP_MOMENTUM or env_mode == "scalp_b"
@@ -933,7 +1011,7 @@ def _apply_strategy_mode_env() -> None:
         if not os.getenv("MNQ_MAX_POSITIONS", "").strip():
             MAX_POSITIONS_MNQ = 2
         if not os.getenv("MAX_TRADES_PER_DAY", "").strip():
-            MAX_TRADES_PER_DAY = 6
+            MAX_TRADES_PER_DAY = 20
         # Learners must not mutate ema15 stops/windows. Suggestions are journal-only.
         USE_ADAPTIVE_LEARNER = False
         USE_LOCAL_PATTERN_LEARNER = False
@@ -947,6 +1025,25 @@ def _apply_strategy_mode_env() -> None:
         SCALP_TRAIL_AFTER_BE = False
         os.environ["SCALP_BREAKEVEN_ENABLED"] = "false"
         os.environ["SCALP_TRAIL_AFTER_BE"] = "false"
+        if ema15_level_mode_from_env():
+            os.environ.setdefault("EMA15_LEVEL_MODE", "1")
+            print(
+                "EMA15 level mode: 15m structure+VWAP+EMA10/20 → 5m confirm → "
+                "PDH/PDL/ONH/ONL/RTH Open interaction → 1m confirm "
+                "(still inside the 6 locked RTH windows)"
+            )
+        else:
+            os.environ.setdefault("EMA15_LEVEL_MODE", "0")
+            req5 = ema15_require_5m_from_env()
+            sl_tf = ema15_sl_tf_from_env()
+            stack = "15m+5m" if req5 else "daily+15m+60m"
+            print(
+                f"EMA15 L6 / non-level: stack {stack}, quiet 1m, "
+                f"stop {sl_tf} ATR×{os.getenv('EMA15_SL_ATR_MULT', '1.5')} "
+                f"clip {os.getenv('EMA15_SL_MIN', '6')}–{os.getenv('EMA15_SL_MAX', '25')}, "
+                f"TP {os.getenv('EMA15_TP_R', '1.0')}R "
+                "(chart levels map-only)"
+            )
         return
     if use_fvs1:
         FVS1_CFG = FVS1Config.from_env()
@@ -1250,10 +1347,13 @@ def bracket_risk_over_limit(
 
 
 load_profit_config()
-print(f"Trading session: {SESSION_MODE.upper()} — {session_mode_label(SESSION_MODE)}")
-if STRATEGY_MODE in ("scalp_hybrid", "ema15_eod"):
-    print(f"Scalp windows: {format_session_windows(SCALP_SESSIONS)}")
-print_profit_mode_banner()
+_overnight_boot = _paper_overnight_boot()
+_day_hybrid_boot = _paper_day_hybrid_boot()
+if not _overnight_boot and not _day_hybrid_boot:
+    print(f"Trading session: {SESSION_MODE.upper()} — {session_mode_label(SESSION_MODE)}")
+    if STRATEGY_MODE in ("scalp_hybrid", "ema15_eod"):
+        print(f"Scalp windows: {format_session_windows(SCALP_SESSIONS)}")
+    print_profit_mode_banner()
 
 
 def _cached_df(
@@ -1306,6 +1406,7 @@ class Position:
     broker_bracket: bool = False  # True when Rithmic native SL/TP attached at entry
     breakeven_hit: bool = False
     secure_tightened: bool = False
+    profit_lock_level: int = 0  # 0=none, 1=lock+$15 after +$100 uPnL, 2=lock+$50 after +$150
     max_favorable_price: float = 0.0  # long: highest seen; short: lowest seen (MFE trail)
     entry_meta: Optional[Dict] = None  # hybrid journal fields (mode, adx, flow, trigger)
 
@@ -1466,6 +1567,7 @@ class LiveMTFScalper:
         self._place_order_lock = threading.Lock()
         self._pending_entries: Dict[str, int] = {}
         self._broker_untracked_block: Dict[str, bool] = {}
+        self._phantom_log_at: Dict[str, float] = {}
         self._scalp_state: Dict[str, ScalpSymbolState] = {}
         self._scalp_hybrid_state: Dict[str, ScalpHybridState] = {}
         self._ema15_state: Dict[str, Ema15EodState] = {}
@@ -1733,7 +1835,11 @@ class LiveMTFScalper:
     def _record_ema15_rejected(self, signal: Dict, detail: str = "") -> None:
         if STRATEGY_MODE != "ema15_eod" or not signal:
             return
+        symbol = str(signal.get("symbol") or "MNQ")
         meta = signal.get("entry_meta") or {}
+        st = self._ema15_state.get(symbol, Ema15EodState())
+        st = rollback_ema15_pending_entry(st, meta.get("window"))
+        self._ema15_state[symbol] = st
         snap = meta.get("market_snapshot") or {}
         trade_id = f"{signal.get('symbol')}_reject_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
         try:
@@ -1858,7 +1964,19 @@ class LiveMTFScalper:
         llm_note = ""
         try:
             if getattr(self.llm_advisor, "enabled", False):
-                llm_note = self.llm_advisor.post_mortem_line(rec) or ""
+                # Never block the hunt loop on Gemini 503 retries after a close.
+                holder: Dict[str, str] = {}
+
+                def _pm() -> None:
+                    try:
+                        holder["note"] = self.llm_advisor.post_mortem_line(rec) or ""
+                    except Exception as ex:
+                        bot_logger.debug(f"ema15 Gemini post-mortem skipped: {ex}")
+
+                t = threading.Thread(target=_pm, daemon=True)
+                t.start()
+                t.join(timeout=3.0)
+                llm_note = holder.get("note") or ""
                 if llm_note:
                     rec["llm_commentary"] = llm_note
                     self.action_log.record(
@@ -1867,6 +1985,11 @@ class LiveMTFScalper:
                         direction=side,
                         reason=llm_note[:240],
                         action="post_mortem",
+                    )
+                elif t.is_alive():
+                    bot_logger.info(
+                        f"{position.symbol}: Gemini post-mortem still running — "
+                        f"continuing hunt without waiting"
                     )
         except Exception as e:
             bot_logger.debug(f"ema15 Gemini post-mortem skipped: {e}")
@@ -2049,6 +2172,20 @@ class LiveMTFScalper:
         )
         if needs_reconcile:
             report = self.broker.reconcile_symbol_exposure(symbol)
+            if report.get("unknown") or report.get("error"):
+                # Keep local exposure; do not treat failed reconcile as flat.
+                return max(local + pending + working, local), {
+                    "local": local,
+                    "pending": pending,
+                    "broker_net": broker_net,
+                    "list_positions_net": list_pos_net,
+                    "open_entries": open_entries,
+                    "tag_inferred": tag_inferred,
+                    "working": working,
+                    "untracked_broker": 0,
+                    "exposure_source": "unknown",
+                    "orphan_cancelled": orphan_cancelled,
+                }
             broker_net = int(report.get("broker_net", broker_net))
             list_pos_net = int(report.get("list_positions_net", list_pos_net))
             open_entries = int(report.get("open_entries", 0))
@@ -2102,6 +2239,30 @@ class LiveMTFScalper:
                     total = max(local + pending, broker_net + working)
                 else:
                     total = local + pending + working
+
+        # Simulator phantoms after manual flatten must not block new entries.
+        if (
+            untracked_broker > 0
+            and local == 0
+            and pending == 0
+            and self.broker
+            and getattr(self.broker, "using_simulator_route", False)
+            and open_entries == 0
+            and tag_inferred == 0
+            and working == 0
+        ):
+            if broker_ok and abs(int(list_pos_net or 0)) != 0:
+                now_t = time.time()
+                last = float(self._phantom_log_at.get(symbol, 0) or 0)
+                if now_t - last >= 120:
+                    self._phantom_log_at[symbol] = now_t
+                    bot_logger.info(
+                        f"{symbol}: ignoring simulator phantom list_positions net={list_pos_net} "
+                        f"(no local/tag/working bot exposure) — entries allowed"
+                    )
+            untracked_broker = 0
+            broker_net = 0
+            total = local + pending + working
 
         return total, {
             "local": local,
@@ -2313,16 +2474,30 @@ class LiveMTFScalper:
             if open_dir:
                 break
         open_count, _ = self._concurrent_exposure(symbol)
-        why = explain_ema15_skip(
-            df_1m,
-            st,
-            now=now or datetime.now(timezone.utc),
-            require_daily=os.getenv("EMA15_REQUIRE_DAILY", "true").lower() == "true",
-            require_60m=os.getenv("EMA15_REQUIRE_60M", "true").lower() == "true",
-            open_count=open_count,
-            open_direction=open_dir,
-            max_trades_day=int(os.getenv("MAX_TRADES_PER_DAY", str(MAX_TRADES_PER_DAY))),
-        )
+        level_mode = ema15_level_mode_from_env()
+        if level_mode:
+            why = explain_ema15_level_skip(
+                df_1m,
+                st,
+                now=now or datetime.now(timezone.utc),
+                open_count=open_count,
+                open_direction=open_dir,
+                max_trades_day=max_trades_day_from_env(MAX_TRADES_PER_DAY),
+                max_open_lots=max_positions_for(symbol) if symbol else max_open_lots_from_env(),
+            )
+        else:
+            why = explain_ema15_skip(
+                df_1m,
+                st,
+                now=now or datetime.now(timezone.utc),
+                require_daily=os.getenv("EMA15_REQUIRE_DAILY", "false").lower() == "true",
+                require_60m=os.getenv("EMA15_REQUIRE_60M", "false").lower() == "true",
+                require_5m=ema15_require_5m_from_env(),
+                open_count=open_count,
+                open_direction=open_dir,
+                max_trades_day=max_trades_day_from_env(MAX_TRADES_PER_DAY),
+                max_open_lots=max_positions_for(symbol) if symbol else max_open_lots_from_env(),
+            )
         note = ""
         if df_1m is not None and not df_1m.empty:
             row = df_1m.iloc[-1]
@@ -2330,7 +2505,8 @@ class LiveMTFScalper:
             if pd.notna(ts):
                 et = ts.tz_convert("US/Eastern").strftime("%H:%M")
                 note = f" | 1m last {et} ET @ {float(row['close']):.2f} ({len(df_1m):,} bars)"
-        line = f"   {symbol} ema15: {why}{note}"
+        tag = "level" if level_mode else "ema15"
+        line = f"   {symbol} {tag}: {why}{note}"
         prev = self._ema15_skip_log.get(symbol)
         now_t = time.time()
         if prev and prev[0] == line and now_t - prev[1] < 20:
@@ -2875,6 +3051,12 @@ class LiveMTFScalper:
         if self.paper_mode or not self.broker:
             return 0
         report = self.broker.reconcile_symbol_exposure(symbol)
+        if report.get("unknown") or report.get("error"):
+            bot_logger.info(
+                f"{symbol}: skip stale purge — reconcile unknown "
+                f"({report.get('error') or 'unknown'})"
+            )
+            return 0
         open_ids = set(report.get("open_order_ids") or [])
         broker_net = int(report.get("broker_net", 0))
         open_entries = int(report.get("open_entries", 0))
@@ -2882,13 +3064,26 @@ class LiveMTFScalper:
         cleared = 0
 
         if broker_net == 0 and open_entries == 0 and working == 0:
+            # Only purge when protective brackets are also gone (manual/broker exit).
             for order_id in list(self.positions.get(symbol, {}).keys()):
+                pos = self.positions[symbol][order_id]
+                sl_ok, tp_ok = self.broker.query_broker_protection(
+                    order_id, stop_loss=pos.sl, take_profit=pos.tp,
+                )
+                if sl_ok or tp_ok:
+                    continue
                 if self._force_clear_stale_position(symbol, order_id):
                     cleared += 1
             return cleared
 
         for order_id in list(self.positions.get(symbol, {}).keys()):
             if order_id not in open_ids:
+                pos = self.positions[symbol][order_id]
+                sl_ok, tp_ok = self.broker.query_broker_protection(
+                    order_id, stop_loss=pos.sl, take_profit=pos.tp,
+                )
+                if sl_ok or tp_ok:
+                    continue
                 if self._force_clear_stale_position(symbol, order_id):
                     cleared += 1
         return cleared
@@ -3009,16 +3204,27 @@ class LiveMTFScalper:
         pos_open = self.broker._broker_symbol_has_position(symbol)
         if pos_open is False:
             return position.broker_bracket
-        if pos_open is None:
-            bot_logger.warning(
-                f"{symbol}: broker position unknown — attempting protective repair anyway"
-            )
 
         sl_ok, tp_ok = self.broker.query_broker_protection(
             position.order_id,
             stop_loss=position.sl,
             take_profit=position.tp,
         )
+        # Already protected — quiet on sim "unknown" list_positions.
+        if sl_ok and tp_ok:
+            position.broker_bracket = True
+            if entry_verify:
+                print(
+                    f"   ✅ VERIFIED: SL @ {position.sl:.2f} | TP @ {position.tp:.2f} on Rithmic"
+                )
+            return True
+        if pos_open is None and not sl_ok and not tp_ok:
+            bot_logger.info(
+                f"{symbol}: broker position unknown and no working SL/TP — "
+                f"skipping protective repair (likely manual close)"
+            )
+            return position.broker_bracket
+
         if not (sl_ok and tp_ok):
             missing = []
             if position.sl > 0 and not sl_ok:
@@ -3150,13 +3356,26 @@ class LiveMTFScalper:
             return True
 
         pos_open = self.broker._broker_symbol_has_position(symbol)
-        if pos_open is None:
+        sl_ok, tp_ok = self.broker.query_broker_protection(
+            order_id,
+            stop_loss=position.sl,
+            take_profit=position.tp,
+        )
+        brackets_working = bool(sl_ok or tp_ok)
+        # Live sim often reports list_positions flat while SL/TP are still working.
+        # Never force-sync a still-protected trade.
+        if brackets_working:
+            self._reset_broker_flat_tracking(flat_key)
+            return False
+        # Protective brackets gone (manual flatten or filled) → clear local immediately.
+        brackets_gone = not brackets_working
+        if pos_open is True and not brackets_gone:
+            self._reset_broker_flat_tracking(flat_key)
+            return False
+        if pos_open is None and not brackets_gone:
             bot_logger.info(
                 f"Keeping {symbol} order {order_id} — broker exposure unknown this scan"
             )
-            return False
-        if pos_open:
-            self._reset_broker_flat_tracking(flat_key)
             return False
 
         now = datetime.now(timezone.utc)
@@ -3165,7 +3384,7 @@ class LiveMTFScalper:
         self._broker_flat_scans[flat_key] = self._broker_flat_scans.get(flat_key, 0) + 1
         flat_duration = self._broker_flat_duration_sec(flat_key)
         flat_scans = self._broker_flat_scans[flat_key]
-        force_sync = self._should_force_sync_ghost(flat_key)
+        force_sync = brackets_gone or self._should_force_sync_ghost(flat_key)
 
         fill_info = self.broker.confirm_bracket_exit_fill(
             order_id,
@@ -4183,7 +4402,8 @@ class LiveMTFScalper:
             flow_streak = self._update_flow_regime_streak(symbol, ctx_5m, flow_snap)
 
         if STRATEGY_MODE == "ema15_eod":
-            if open_count >= 2:
+            max_pos = max_positions_for(symbol)
+            if open_count >= max_pos:
                 return None
             open_dir = None
             books = self.positions.get(symbol) or {}
@@ -4193,19 +4413,39 @@ class LiveMTFScalper:
                     break
             st = self._ema15_state.get(symbol, Ema15EodState())
             now_utc = datetime.now(timezone.utc)
-            signal, st = check_ema15_eod_entry(
-                symbol, df_1m, st,
-                now=now_utc,
-                tp_pts=float(os.getenv("SCALP_TP_PTS", SCALP_TP_PTS)),
-                require_daily=os.getenv("EMA15_REQUIRE_DAILY", "true").lower() == "true",
-                require_60m=os.getenv("EMA15_REQUIRE_60M", "true").lower() == "true",
-                sl_atr_mult=float(os.getenv("EMA15_SL_ATR_MULT", "2.0")),
-                sl_min=float(os.getenv("EMA15_SL_MIN", "20")),
-                sl_max=float(os.getenv("EMA15_SL_MAX", "60")),
-                max_trades_day=int(os.getenv("MAX_TRADES_PER_DAY", "6")),
-                open_count=open_count,
-                open_direction=open_dir,
-            )
+            if ema15_level_mode_from_env():
+                signal, st = check_ema15_level_entry(
+                    symbol, df_1m, st,
+                    now=now_utc,
+                    tp_pts=float(os.getenv("SCALP_TP_PTS", SCALP_TP_PTS)),
+                    tp_r=float(os.getenv("EMA15_TP_R", "1.0")),
+                    max_trades_day=int(os.getenv("MAX_TRADES_PER_DAY", str(max_trades_day_from_env(MAX_TRADES_PER_DAY)))),
+                    open_count=open_count,
+                    open_direction=open_dir,
+                    max_open_lots=max_pos,
+                    sl_atr_mult=float(os.getenv("EMA15_LEVEL_SL_ATR_MULT", "1.5")),
+                    sl_min=float(os.getenv("EMA15_LEVEL_SL_MIN", "8")),
+                    sl_max=float(os.getenv("EMA15_LEVEL_SL_MAX", "30")),
+                )
+            else:
+                signal, st = check_ema15_eod_entry(
+                    symbol, df_1m, st,
+                    now=now_utc,
+                    tp_pts=float(os.getenv("SCALP_TP_PTS", SCALP_TP_PTS)),
+                    tp_r=float(os.getenv("EMA15_TP_R", "1.0")),
+                    require_daily=os.getenv("EMA15_REQUIRE_DAILY", "false").lower() == "true",
+                    require_60m=os.getenv("EMA15_REQUIRE_60M", "false").lower() == "true",
+                    require_5m=ema15_require_5m_from_env(),
+                    sl_atr_mult=float(os.getenv("EMA15_SL_ATR_MULT", "1.5")),
+                    sl_min=float(os.getenv("EMA15_SL_MIN", "6")),
+                    sl_max=float(os.getenv("EMA15_SL_MAX", "25")),
+                    sl_tf=ema15_sl_tf_from_env(),
+                    adx_min=float(os.getenv("EMA15_ADX_MIN", "0")),
+                    max_trades_day=int(os.getenv("MAX_TRADES_PER_DAY", str(max_trades_day_from_env(MAX_TRADES_PER_DAY)))),
+                    open_count=open_count,
+                    open_direction=open_dir,
+                    max_open_lots=max_pos,
+                )
             self._ema15_state[symbol] = st
             if not signal:
                 return None
@@ -4228,10 +4468,7 @@ class LiveMTFScalper:
             if over:
                 print(f"   ❌ {symbol}: {over} — skipping")
                 win = signal.get("entry_meta", {}).get("window")
-                st.trades_today = max(0, st.trades_today - 1)
-                if win is not None:
-                    st.fired_windows = tuple(w for w in st.fired_windows if w != win)
-                st.taken_date = None
+                st = rollback_ema15_pending_entry(st, win)
                 self._ema15_state[symbol] = st
                 return None
             signal.update(calc_trade_dollars({
@@ -4242,9 +4479,13 @@ class LiveMTFScalper:
                 "tp": tp,
             }))
             sl_w = signal.get("entry_meta", {}).get("sl_pts", "")
+            tp_w = signal.get("entry_meta", {}).get("tp_pts", "")
+            mode = signal.get("entry_meta", {}).get("entry_mode", "ema15_eod")
+            lvl = signal.get("entry_meta", {}).get("level_name")
+            lvl_bit = f" @ {lvl}" if lvl else ""
             print(
-                f"   15m+daily EOD {signal['direction'].upper()} "
-                f"SL {sl:.2f} ({sl_w}pt) TP-cap {tp:.2f} hold to 15:50"
+                f"   {mode}{lvl_bit} {signal['direction'].upper()} "
+                f"SL {sl:.2f} ({sl_w}pt) TP {tp:.2f} ({tp_w}pt) — flatten 15:50 only if still open"
             )
             return signal
 
@@ -4983,6 +5224,94 @@ class LiveMTFScalper:
             position.sl = new_sl
         return ok
 
+    def _unrealized_pnl_usd(self, position: Position, price: float) -> float:
+        """Gross unrealized PnL in USD at price (no commission)."""
+        if price <= 0:
+            return 0.0
+        pv = float(SYMBOL_SPECS[position.symbol]["point_value"])
+        qty = max(1, int(position.size))
+        if position.direction == "long":
+            return (price - position.entry_price) * pv * qty
+        return (position.entry_price - price) * pv * qty
+
+    def _lock_sl_price_for_usd(self, position: Position, lock_usd: float) -> float:
+        """SL that locks ~lock_usd of profit (entry ± pts); tick-rounded."""
+        spec = SYMBOL_SPECS[position.symbol]
+        pv = float(spec["point_value"])
+        tick = float(spec["tick_size"])
+        qty = max(1, int(position.size))
+        pts = float(lock_usd) / (pv * qty)
+        if position.direction == "long":
+            raw = position.entry_price + pts
+        else:
+            raw = position.entry_price - pts
+        return round(round(raw / tick) * tick, 8)
+
+    def _update_dollar_profit_locks(
+        self,
+        symbol: str,
+        position: Position,
+        current_price: float,
+        bar_high: float,
+        bar_low: float,
+    ) -> None:
+        """+$100 uPnL → SL locks +$15; +$150 → ratchet SL to lock +$50.
+
+        Uses Rithmic update_stop_loss (native bracket modify or protective
+        cancel/replace). Never widens SL. Per-position; respects max-2 concurrent
+        by only touching each open entry's own stop.
+        """
+        if not PROFIT_LOCK_ENABLED:
+            return
+        if current_price <= 0 and bar_high <= 0 and bar_low <= 0:
+            return
+
+        if position.direction == "long":
+            fav = max(float(bar_high or 0), float(current_price or 0))
+        else:
+            candidates = [p for p in (float(bar_low or 0), float(current_price or 0)) if p > 0]
+            fav = min(candidates) if candidates else 0.0
+        if fav <= 0:
+            return
+
+        upnl = self._unrealized_pnl_usd(position, fav)
+        if upnl >= PROFIT_LOCK_TRIGGER_2_USD:
+            target_level = 2
+            lock_usd = PROFIT_LOCK_LEVEL_2_USD
+        elif upnl >= PROFIT_LOCK_TRIGGER_1_USD:
+            target_level = 1
+            lock_usd = PROFIT_LOCK_LEVEL_1_USD
+        else:
+            return
+
+        new_sl = self._lock_sl_price_for_usd(position, lock_usd)
+        # Already at/above this lock level with a stop at least as tight — mark & skip.
+        if int(getattr(position, "profit_lock_level", 0) or 0) >= target_level:
+            if not self._is_tighter_sl(position, new_sl, position.sl):
+                return
+
+        if not self._is_tighter_sl(position, new_sl, position.sl):
+            # Broker/manual SL may already be tighter; still record level reached.
+            position.profit_lock_level = max(
+                int(getattr(position, "profit_lock_level", 0) or 0), target_level
+            )
+            return
+
+        old_sl = position.sl
+        if not self._apply_stop_update(symbol, position, new_sl):
+            return
+
+        position.profit_lock_level = target_level
+        label = f"L{target_level} lock ${lock_usd:.0f}"
+        print(
+            f"   🔐 {symbol} {label}: uPnL~${upnl:.0f} → SL {old_sl:.2f} → {position.sl:.2f} "
+            f"(entry {position.entry_price:.2f})"
+        )
+        bot_logger.info(
+            f"Profit lock {label} {symbol} {position.order_id}: "
+            f"uPnL~${upnl:.2f} SL {old_sl:.2f} -> {position.sl:.2f}"
+        )
+
     def _update_breakeven_trail(
         self,
         symbol: str,
@@ -5236,11 +5565,14 @@ class LiveMTFScalper:
         print(f"{emoji} Closed {symbol} {position.direction.upper()} @ {exit_price:.2f} ({reason})")
         print(f"   P&L: ${pnl:+.2f} | Daily: ${self.daily_pnl:+.2f}")
         
-        # Send email notification for closed trade
-        send_email(
-            f"Closed: {symbol} ({reason})",
-            f"Trade Closed!\n\nSymbol: {symbol}\nDirection: {position.direction.upper()}\nEntry: {position.entry_price:.2f}\nExit: {exit_price:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}\nDaily P&L: ${self.daily_pnl:+.2f}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
-        )
+        # Send email notification for closed trade (never block the scan loop)
+        try:
+            send_email(
+                f"Closed: {symbol} ({reason})",
+                f"Trade Closed!\n\nSymbol: {symbol}\nDirection: {position.direction.upper()}\nEntry: {position.entry_price:.2f}\nExit: {exit_price:.2f}\nReason: {reason}\nP&L: ${pnl:+.2f}\nDaily P&L: ${self.daily_pnl:+.2f}\nTime: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}"
+            )
+        except Exception as e:
+            bot_logger.warning(f"close email failed: {e}")
         
         # Log trade
         trade = {
@@ -5260,6 +5592,10 @@ class LiveMTFScalper:
         self._record_hybrid_trade_close(position, reason, exit_price, pnl)
         if STRATEGY_MODE == "ema15_eod":
             self._record_ema15_trade_close(position, reason, exit_price, pnl)
+            meta = position.entry_meta or {}
+            symbol_st = self._ema15_state.get(symbol, Ema15EodState())
+            symbol_st = release_ema15_window(symbol_st, meta.get("window"))
+            self._ema15_state[symbol] = symbol_st
         elif STRATEGY_MODE != "ema15_eod":
             self._record_adaptive_trade_close(position, reason, exit_price, pnl)
             try:
@@ -5294,19 +5630,27 @@ class LiveMTFScalper:
             )
 
         if not self.paper_mode and self.broker and self.broker.connected:
-            legs = self.broker.cancel_entry_bracket_legs(
-                order_id, symbol, reason=f"close_{reason}",
-            )
-            orphans = self.broker.cancel_all_bot_orders(symbol)
-            if legs or orphans:
-                bot_logger.info(
-                    f"{symbol} close {order_id}: cancelled bracket legs={legs} "
-                    f"orphan_orders={orphans} ({reason})"
+            try:
+                legs = self.broker.cancel_entry_bracket_legs(
+                    order_id, symbol, reason=f"close_{reason}",
+                )
+                orphans = self.broker.cancel_all_bot_orders(symbol)
+                if legs or orphans:
+                    bot_logger.info(
+                        f"{symbol} close {order_id}: cancelled bracket legs={legs} "
+                        f"orphan_orders={orphans} ({reason})"
+                    )
+            except Exception as e:
+                bot_logger.warning(
+                    f"{symbol} close {order_id}: bracket cleanup failed ({reason}): {e}"
                 )
 
         del bucket[order_id]
         if not bucket:
             del self.positions[symbol]
+        # Clear untracked block so hunting resumes after a close/sync.
+        self._broker_untracked_block.pop(symbol, None)
+        print(f"   🔎 Resuming hunt after {reason} — next quiet setup can enter")
         self._write_desk_status(f"closed {symbol} {reason}")
         return
 
@@ -5336,6 +5680,20 @@ class LiveMTFScalper:
             first = open_pos[0]
             open_label = str(first.get("direction") or "open")
         try:
+            level_payload = {}
+            try:
+                if STRATEGY_MODE == "ema15_eod":
+                    from src.strategy.session_levels import desk_levels_block
+                    df_lvl = None
+                    sym0 = self.symbols[0] if self.symbols else "MNQ"
+                    try:
+                        df_lvl = self._ema15_scan_1m(sym0)
+                    except Exception:
+                        df_lvl = None
+                    level_payload = desk_levels_block(df_lvl)
+                    level_payload["level_mode"] = bool(ema15_level_mode_from_env())
+            except Exception:
+                level_payload = {"level_mode": bool(ema15_level_mode_from_env())}
             write_status({
                 "running": True,
                 "strategy": STRATEGY_MODE,
@@ -5357,6 +5715,12 @@ class LiveMTFScalper:
                 "suggestions_ready": bool(
                     (read_suggestions() or {}).get("ready")
                 ) if STRATEGY_MODE == "ema15_eod" else False,
+                "level_mode": bool(level_payload.get("level_mode")),
+                "chart_levels": level_payload.get("chart_levels") or {},
+                "bias_15m": level_payload.get("bias_15m"),
+                "bias_5m": level_payload.get("bias_5m"),
+                "structure_15m": level_payload.get("structure_15m"),
+                "bias_agree": level_payload.get("bias_agree"),
             })
         except Exception:
             pass
@@ -5500,8 +5864,14 @@ class LiveMTFScalper:
         print(f"{'='*70}")
         print_profit_mode_banner()
         if STRATEGY_MODE == "ema15_eod":
-            print("Strategy: ema15_eod — completed 15m EMA + daily confirm + ATR stop (1m)")
-            print("5M trend filter: unused (locked recipe does not use 5m)")
+            req5 = ema15_require_5m_from_env()
+            sl_tf = ema15_sl_tf_from_env()
+            stack = "15m+5m" if req5 else "daily+15m+60m"
+            print(f"Strategy: ema15_eod L6 — {stack} + quiet 1m + {sl_tf} ATR stop")
+            if req5:
+                print("5M confirm: ON (L6 stack — 15m+5m must agree)")
+            else:
+                print("5M trend filter: unused (legacy daily+15m+60m stack)")
             print("History plant: skipped (Lucid 1011) — CSV/Databento 1m + Rithmic ticker last")
             print("Skip reasons: ON (why 9:35/11:00/… skipped, in English)")
         else:
@@ -5529,9 +5899,47 @@ class LiveMTFScalper:
             others = [s for s in self.symbols if s != "MNQ"]
             print(f"Max Position (other): {MAX_POSITIONS} ({', '.join(others)})")
         if STRATEGY_MODE == "ema15_eod":
+            from src.strategy.mnq_15m_ema_eod import (
+                ema15_continuous_from_env,
+                ema15_entry_cooldown_mins_from_env,
+                ema15_fixed_sl_from_env,
+                ema15_require_quiet_from_env,
+                ema15_side_mode_from_env,
+            )
+            continuous = ema15_continuous_from_env()
+            fixed_sl = ema15_fixed_sl_from_env()
+            quiet = ema15_require_quiet_from_env(True)
+            side = ema15_side_mode_from_env()
+            stack = "15m+5m" if ema15_require_5m_from_env() else "daily+15m+60m"
+            tp_r = float(os.getenv("EMA15_TP_R", "1.0") or "1.0")
+            tp_pts = float(os.getenv("SCALP_TP_PTS", "500") or "500")
+            if continuous:
+                print(
+                    f"Entry: CONTINUOUS 09:35–15:50 ET | {stack} | side={side} | "
+                    f"quiet_1m={'ON' if quiet else 'off'} | "
+                    f"cooldown {ema15_entry_cooldown_mins_from_env(15)}m"
+                )
+            else:
+                print(
+                    f"Entry windows: {len(ENTRY_WINDOWS)} RTH slots — "
+                    + ", ".join(window_label(i) for i in range(len(ENTRY_WINDOWS)))
+                    + " ET (one entry per window max)"
+                )
             print(
-                "Stops: SL=clip(ATR15×2, 20–60) | TP cap 500 | flatten 15:50 | "
-                "no breakeven/trail"
+                f"Daily entry cap: {MAX_TRADES_PER_DAY} | "
+                f"Concurrent lots: {MAX_POSITIONS_MNQ} (MNQ_MAX_POSITIONS — not the daily cap)"
+            )
+            if fixed_sl is not None:
+                sl_txt = f"fixed {fixed_sl:g} pts"
+            else:
+                sl_tf = ema15_sl_tf_from_env()
+                sl_txt = (
+                    f"clip({sl_tf} ATR×{os.getenv('EMA15_SL_ATR_MULT', '1.5')}, "
+                    f"{os.getenv('EMA15_SL_MIN', '6')}–{os.getenv('EMA15_SL_MAX', '25')})"
+                )
+            tp_txt = f"{tp_r:g}R" if tp_r and tp_r > 0 else f"{tp_pts:g}pt cap / EOD"
+            print(
+                f"Stops: SL={sl_txt} | TP={tp_txt} | flatten 15:50 if still open | no breakeven/trail"
             )
         else:
             print(f"R:R Ratio: 1:{TP_MULT:.1f} (SL={ATR_MULT:.1f}×ATR, TP capped {TP_BUFFER_ATR_MULT:.1f}×ATR before structure)")
@@ -5573,7 +5981,7 @@ class LiveMTFScalper:
                 f"(enforce ~±{SCAN_SLEEP_OPEN_SEC + 3}s due to scan cadence)"
             )
         if STRATEGY_MODE == "ema15_eod":
-            print("Breakeven/trail: OFF (locked ema15 — hold to flatten 15:50)")
+            print("Breakeven/trail: OFF (ema15 — SL + 1R TP, flatten 15:50 only if still open)")
         elif SCALP_BREAKEVEN_ENABLED:
             print(
                 f"Breakeven SL: ON @ {SCALP_BREAKEVEN_PCT:.0%} to TP "
@@ -5583,10 +5991,33 @@ class LiveMTFScalper:
             )
         else:
             print("Breakeven SL: OFF (SCALP_BREAKEVEN_ENABLED=false)")
-        if STRATEGY_MODE == "ema15_eod":
+        if PROFIT_LOCK_ENABLED:
             print(
-                "Entry signals: 9:35 / 10:15 / 11:00 / 12:00 / 13:30 / 14:30 ET, "
-                "max 6/day, enter only when daily+15m+60m agree, noon+ still needs sep, ATR×2, hold to 15:50"
+                f"Profit lock: ON — +${PROFIT_LOCK_TRIGGER_1_USD:.0f} uPnL → SL locks "
+                f"+${PROFIT_LOCK_LEVEL_1_USD:.0f}; +${PROFIT_LOCK_TRIGGER_2_USD:.0f} → "
+                f"+${PROFIT_LOCK_LEVEL_2_USD:.0f} (Rithmic stop modify)"
+            )
+        else:
+            print("Profit lock: OFF (PROFIT_LOCK_ENABLED=false)")
+        if STRATEGY_MODE == "ema15_eod":
+            from src.strategy.mnq_15m_ema_eod import (
+                ema15_continuous_from_env,
+                ema15_fixed_sl_from_env,
+                ema15_min_confidence_from_env,
+                ema15_require_quiet_from_env,
+            )
+            stack = "15m+5m" if ema15_require_5m_from_env() else "daily+15m+60m"
+            continuous = ema15_continuous_from_env()
+            fixed_sl = ema15_fixed_sl_from_env()
+            quiet = "quiet 1m" if ema15_require_quiet_from_env(True) else "any 1m"
+            conf = ema15_min_confidence_from_env()
+            tp_r = float(os.getenv("EMA15_TP_R", "1.0") or "1.0")
+            tp_bit = f"{tp_r:g}R" if tp_r and tp_r > 0 else "EOD/500cap"
+            sl_bit = f"fixed {fixed_sl:g}pt" if fixed_sl is not None else f"{ema15_sl_tf_from_env()} ATR stop"
+            when = "continuous 09:35–15:50" if continuous else "slotted windows"
+            print(
+                f"Entry signals: {when}, max {MAX_TRADES_PER_DAY}/day, {stack} agree, "
+                f"{quiet}, conf≥{conf}, noon+ sep, {sl_bit}, {tp_bit}"
             )
             print(
                 f"Trade journal: {self.trade_review.path} "
@@ -5823,12 +6254,12 @@ class LiveMTFScalper:
                         )
                     elif mnq_total > mnq_local:
                         scan_parts.append(
-                            f"Open MNQ: {mnq_total}/{mnq_max} "
+                            f"Lots MNQ: {mnq_total}/{mnq_max} concurrent "
                             f"(local={mnq_local} inferred={tag_inf} working={working})"
                         )
                     else:
                         scan_parts.append(
-                            f"Open MNQ: {mnq_total}/{mnq_max}"
+                            f"Lots MNQ: {mnq_total}/{mnq_max} concurrent"
                         )
 
                 if (
@@ -6315,6 +6746,9 @@ class LiveMTFScalper:
                             continue
                         if self._try_max_hold_exit(symbol, order_id, pos, current_price):
                             continue
+                        self._update_dollar_profit_locks(
+                            symbol, pos, current_price, bar_high, bar_low,
+                        )
                         self._update_breakeven_trail(
                             symbol, pos, current_price, bar_high, bar_low,
                         )
@@ -6332,34 +6766,62 @@ class LiveMTFScalper:
 
                 # Faster scans + second exit pass while a position is open
                 if self.positions:
-                    time.sleep(SCAN_SLEEP_OPEN_SEC)
+                    time.sleep(min(5, SCAN_SLEEP_OPEN_SEC))
                     if not self.paper_mode:
-                        self._repair_all_open_positions()
+                        try:
+                            self._repair_all_open_positions()
+                        except Exception as e:
+                            bot_logger.warning(f"open-position repair skipped: {e}")
                     for sym, bucket in list(self.positions.items()):
                         for order_id, pos in list(bucket.items()):
-                            time.sleep(3)
-                            df_exit = self.get_candles(
-                                sym, timeframe_minutes=1,
-                                count=EXIT_CANDLE_COUNT, min_bars=10,
-                            )
-                            quote = self.broker.get_latest_price(sym)
-                            if df_exit is None or not quote:
-                                if not self.paper_mode:
-                                    print(f"❌ LIVE exit check skipped for {sym} — no Rithmic candles/quote")
+                            if not self.paper_mode:
+                                try:
+                                    if self._sync_broker_closed_position(sym, order_id):
+                                        continue
+                                except Exception as e:
+                                    bot_logger.warning(
+                                        f"{sym} sync after exit failed: {e}"
+                                    )
+                            df_exit = None
+                            quote = None
+                            try:
+                                quote = self.broker.get_latest_price(sym) if self.broker else None
+                            except Exception:
+                                quote = None
+                            if STRATEGY_MODE == "ema15_eod":
+                                try:
+                                    df_exit = self._ema15_scan_1m(sym)
+                                except Exception:
+                                    df_exit = None
+                            if df_exit is None:
+                                try:
+                                    df_exit = self.get_candles(
+                                        sym, timeframe_minutes=1,
+                                        count=EXIT_CANDLE_COUNT, min_bars=10,
+                                    )
+                                except Exception:
+                                    df_exit = None
+                            px = self._resolve_current_price(quote) if quote else 0.0
+                            if px <= 0 and df_exit is not None and not df_exit.empty:
+                                try:
+                                    px = float(df_exit.iloc[-1]["close"])
+                                except Exception:
+                                    px = 0.0
+                            if px <= 0:
+                                if not self.paper_mode and VERBOSE_SKIP_REASONS:
+                                    print(
+                                        f"   ⚠️ {sym}: no live quote this pass — "
+                                        f"still tracking; will sync on broker flat"
+                                    )
                                 continue
-                            row = df_exit.iloc[-1]
-                            px = self._resolve_current_price(quote)
-                            if px > 0:
-                                if self._try_max_hold_exit(sym, order_id, pos, px):
-                                    continue
-                                self._update_breakeven_trail(
-                                    sym, pos, px,
-                                    float(row['high']), float(row['low']),
-                                )
-                                self._try_close_position(
-                                    sym, order_id, pos,
-                                    float(row['high']), float(row['low']), px,
-                                )
+                            row = df_exit.iloc[-1] if df_exit is not None and not df_exit.empty else None
+                            bar_h = float(row["high"]) if row is not None else px
+                            bar_l = float(row["low"]) if row is not None else px
+                            if self._try_max_hold_exit(sym, order_id, pos, px):
+                                continue
+                            self._update_dollar_profit_locks(sym, pos, px, bar_h, bar_l)
+                            self._update_breakeven_trail(sym, pos, px, bar_h, bar_l)
+                            self._try_close_position(sym, order_id, pos, bar_h, bar_l, px)
                 else:
                     time.sleep(SCAN_SLEEP_IDLE_SEC)
                 
@@ -6393,6 +6855,64 @@ class LiveMTFScalper:
         self._mark_desk_stopped("session ended")
 
 
+def _acquire_live_singleton_lock() -> None:
+    """Prevent two bots from fighting the same Lucid login (ForcedLogout / stuck sim)."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    lock_path = os.path.join(root, "data", "live_mtf_singleton.lock")
+    os.makedirs(os.path.dirname(lock_path), exist_ok=True)
+
+    def _pid_alive(pid: int) -> bool:
+        if pid <= 0:
+            return False
+        try:
+            if os.name == "nt":
+                import ctypes
+
+                SYNCHRONIZE = 0x00100000
+                handle = ctypes.windll.kernel32.OpenProcess(SYNCHRONIZE, 0, pid)
+                if handle:
+                    ctypes.windll.kernel32.CloseHandle(handle)
+                    return True
+                return False
+            os.kill(pid, 0)
+            return True
+        except OSError:
+            return False
+
+    if os.path.isfile(lock_path):
+        try:
+            old = int((open(lock_path, "r", encoding="utf-8").read() or "0").strip() or "0")
+        except (OSError, ValueError):
+            old = 0
+        if old and old != os.getpid() and _pid_alive(old):
+            print(
+                f"\n[X] Another bot is already running (pid {old}).\n"
+                f"   Close that window first — two Lucid logins cause ForcedLogout.\n"
+                f"   Lock: {lock_path}\n"
+            )
+            sys.exit(1)
+        try:
+            os.remove(lock_path)
+        except OSError:
+            pass
+
+    with open(lock_path, "w", encoding="utf-8") as fh:
+        fh.write(str(os.getpid()))
+
+    def _release() -> None:
+        try:
+            if os.path.isfile(lock_path):
+                cur = int((open(lock_path, "r", encoding="utf-8").read() or "0").strip() or "0")
+                if cur == os.getpid():
+                    os.remove(lock_path)
+        except (OSError, ValueError):
+            pass
+
+    import atexit
+
+    atexit.register(_release)
+
+
 def main():
     env_symbols = [s.strip() for s in os.getenv('TRADING_SYMBOLS', 'MNQ').split(',') if s.strip()]
     trading_mode = os.getenv('TRADING_MODE', 'paper').lower()
@@ -6406,9 +6926,19 @@ def main():
                         help='Ask MNQ / NQ / both at startup')
     parser.add_argument('--paper', action='store_true', help='Paper trading mode')
     parser.add_argument(
+        '--day-hybrid',
+        action='store_true',
+        help='Day hybrid RTH bot (stacked long pullback + short RTH quiet). Paper/Lucid sim.',
+    )
+    parser.add_argument(
+        '--micro-scalp',
+        action='store_true',
+        help='Micro scalp: $20+ TP after 10s hold, ATR stop. Paper/Lucid sim only.',
+    )
+    parser.add_argument(
         '--overnight-research',
         action='store_true',
-        help='Paper overnight Globex research. Lucid TEST/sim orders (not funded live).',
+        help='Paper research recipe (Globex + RTH once started). Lucid TEST/sim, not funded live.',
     )
     parser.add_argument(
         '--paper-test-fill',
@@ -6427,6 +6957,20 @@ def main():
     )
     parser.add_argument('--test', action='store_true', help='Place test order and cancel immediately')
     args = parser.parse_args()
+
+    paper_mode_early = args.paper and not args.live
+    # One Lucid login only — paper day-hybrid / overnight also collide on ForcedLogout
+    needs_singleton = (
+        args.live
+        or (not paper_mode_early and trading_mode == "live")
+        or args.day_hybrid
+        or args.overnight_research
+        or str(os.getenv("PAPER_DAY_HYBRID", "")).strip().lower() in ("1", "true", "yes", "on")
+        or str(os.getenv("DAY_HYBRID", "")).strip().lower() in ("1", "true", "yes", "on")
+        or str(os.getenv("PAPER_USE_RITHMIC", "")).strip().lower() in ("1", "true", "yes", "on")
+    )
+    if needs_singleton:
+        _acquire_live_singleton_lock()
 
     if args.symbols:
         symbols = args.symbols
@@ -6471,14 +7015,77 @@ def main():
     else:
         paper_mode = args.paper or trading_mode in ('paper', 'backtest')
 
+    from src.strategy.day_hybrid import day_hybrid_from_env
+    from src.strategy.micro_scalp import micro_scalp_from_env
+
+    if args.live and (args.day_hybrid or day_hybrid_from_env()):
+        print(
+            "Day hybrid is paper/Lucid sim only for now. "
+            "Use --paper --day-hybrid (not --live)."
+        )
+        sys.exit(1)
+
+    if args.live and (args.micro_scalp or micro_scalp_from_env()):
+        print(
+            "Micro scalp is paper/Lucid sim only for now. "
+            "Use --paper --micro-scalp (not --live)."
+        )
+        sys.exit(1)
+
+    if args.day_hybrid or day_hybrid_from_env():
+        if args.live:
+            sys.exit(1)
+        os.environ["PAPER_DAY_HYBRID"] = "true"
+        os.environ["DAY_HYBRID"] = "true"
+        os.environ["PAPER_USE_RITHMIC"] = "true"
+        os.environ["PAPER_RITHMIC_BRACKETS"] = "true"
+        os.environ["TRADING_MODE"] = "paper"
+        os.environ["PAPER_OVERNIGHT"] = "false"
+        os.environ["OVERNIGHT_TRADING"] = "false"
+        from src.broker.rithmic_connector import apply_lucid_plants_with_history
+        from src.strategy.day_hybrid_paper_runner import run_day_hybrid_paper
+
+        apply_lucid_plants_with_history()
+        print(
+            "\n>>> DAY HYBRID RTH + LUCID SIM "
+            "(stacked long pullback + short RTH quiet — not overnight bot) <<<\n"
+        )
+        run_day_hybrid_paper(duration_minutes=args.duration)
+        return
+
+    if args.micro_scalp or micro_scalp_from_env():
+        if args.live:
+            sys.exit(1)
+        os.environ["PAPER_MICRO_SCALP"] = "true"
+        os.environ["MICRO_SCALP"] = "true"
+        os.environ["PAPER_USE_RITHMIC"] = "true"
+        os.environ["PAPER_RITHMIC_BRACKETS"] = "true"
+        os.environ["TRADING_MODE"] = "paper"
+        os.environ["PAPER_OVERNIGHT"] = "false"
+        os.environ["OVERNIGHT_TRADING"] = "false"
+        os.environ["PAPER_DAY_HYBRID"] = "false"
+        os.environ["DAY_HYBRID"] = "false"
+        from src.broker.rithmic_connector import apply_lucid_ticker_order_plants
+        from src.strategy.micro_scalp_paper_runner import run_micro_scalp_paper
+
+        apply_lucid_ticker_order_plants()
+        print(
+            "\n>>> MICRO SCALP RTH + LUCID SIM "
+            "($20+ TP after 10s hold — not overnight / not day-hybrid) <<<\n"
+        )
+        run_micro_scalp_paper(duration_minutes=args.duration)
+        return
+
     if resolve_overnight_research(live=bool(args.live), flag=bool(args.overnight_research)):
         os.environ["PAPER_USE_RITHMIC"] = "true"
         os.environ["TRADING_MODE"] = "paper"
-        from src.strategy.overnight_research import enable_overnight_lucid_sim_orders
-        from src.strategy.overnight_paper_runner import run_overnight_paper
-        enable_overnight_lucid_sim_orders(
-            keep_test_fill=bool(args.paper_test_fill),
+        from src.strategy.overnight_research import (
+            enable_overnight_lucid_sim_orders,
+            paper_test_fill_from_env,
         )
+        from src.strategy.overnight_paper_runner import run_overnight_paper
+        keep_test = bool(args.paper_test_fill) or paper_test_fill_from_env()
+        enable_overnight_lucid_sim_orders(keep_test_fill=keep_test)
         from src.broker.rithmic_connector import apply_lucid_ticker_order_plants
         apply_lucid_ticker_order_plants()
         print(
@@ -6487,7 +7094,7 @@ def main():
         )
         run_overnight_paper(
             duration_minutes=args.duration,
-            test_fill=bool(args.paper_test_fill),
+            test_fill=keep_test,
         )
         return
 
