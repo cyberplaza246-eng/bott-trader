@@ -1,0 +1,1 @@
+{"island": "I3_br10_15", "seed": 33, "sl": 1.0, "tp": 1.5, "trail": 0.0, "min_sl": 8.0, "pop": 200, "procs": 2, "cost_mult": 1.25, "immig_after": 30, "restart_after": 120, "params": {"sl": 1.0, "tp": 1.5, "trail": 0.0, "min_sl": 8.0, "cost_mult": 1.25}}

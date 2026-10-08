@@ -1,0 +1,39 @@
+{
+ "stop_pts_quantiles": {
+  "0.1": 39.8,
+  "0.25": 74.5,
+  "0.5": 124.25,
+  "0.75": 190.88,
+  "0.9": 275.7,
+  "0.95": 322.23
+ },
+ "n": 783,
+ "mean_pts": 142.69,
+ "nq_stop_usd_median": 2500.0,
+ "share_nq_stop_ge_500": 0.945,
+ "share_nq_stop_ge_400": 0.954,
+ "share_nq_stop_ge_250": 0.973,
+ "by_sleeve_median_pts": {
+  "breakout": 146.62,
+  "mean_reversion": 26.75,
+  "trend": 79.75
+ },
+ "by_sleeve_n": {
+  "breakout": 620,
+  "mean_reversion": 103,
+  "trend": 60
+ },
+ "sizing_dist": {
+  "1": 414,
+  "2": 156,
+  "3": 114,
+  "4": 82
+ },
+ "holdout_median_pts": 155.25,
+ "holdout_share_nq_ge_500": 0.98,
+ "holdout_share_nq_ge_400": 0.99,
+ "nq_losers": 281,
+ "nq_loser_median": -1530.0,
+ "nq_losers_le_m500": 215,
+ "nq_losers_le_m400": 221
+}

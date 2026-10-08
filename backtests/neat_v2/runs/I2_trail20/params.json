@@ -1,0 +1,1 @@
+{"island": "I2_trail20", "seed": 22, "sl": 2.0, "tp": 0.0, "trail": 2.0, "min_sl": 8.0, "pop": 200, "procs": 2, "cost_mult": 1.25, "immig_after": 30, "restart_after": 120, "params": {"sl": 2.0, "tp": 0.0, "trail": 2.0, "min_sl": 8.0, "cost_mult": 1.25}}

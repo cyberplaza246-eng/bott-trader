@@ -1,0 +1,1 @@
+{"threshold": 0.64, "bad_hours": [0, 4, 21], "intelligent": true, "advanced": true, "lstm": false, "rl": true, "sltp": true, "lookback": 10, "ema_len": 50}
