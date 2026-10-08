@@ -1,0 +1,69 @@
+[10-08 12:21:00] == start restart=0 seed=11000 params={'sl': 1.5, 'tp': 3.0, 'trail': 0.0, 'min_sl': 8.0, 'cost_mult': 1.25} pop=200
+[10-08 12:21:03] r0 gen    1 species  2 thr 2.50 | gen-best train -108.41 val -165.73 tr 4473 | HOF sel -116.16 (train -116.16 val -88.31 net_tr $-4994 net_val $-2435 trades 3360) *IMPROVED* 3.0s
+[10-08 12:21:06] r0 gen    2 species  2 thr 2.40 | gen-best train  -65.39 val  -47.48 tr 1333 | HOF sel  -65.39 (train -65.39 val -47.48 net_tr $-4280 net_val $-2200 trades 1333) *IMPROVED* 2.8s
+[10-08 12:21:09] r0 gen    3 species  3 thr 2.30 | gen-best train  -37.90 val  -91.35 tr 3083 | HOF sel  -40.85 (train -40.85 val +5.68 net_tr $1494 net_val $2696 trades 1147) *IMPROVED* 3.1s
+[10-08 12:21:14] r0 gen    5 species  6 thr 2.10 | gen-best train  -27.30 val  -99.78 tr 968 | HOF sel  -29.33 (train -29.33 val -27.78 net_tr $1762 net_val $9 trades 912) *IMPROVED* 1.9s
+[10-08 12:21:16] r0 gen    6 species  6 thr 2.10 | gen-best train  -20.00 val  -17.93 tr 1724 | HOF sel  -20.00 (train -20.00 val -17.93 net_tr $3090 net_val $717 trades 1724) *IMPROVED* 2.0s
+[10-08 12:21:19] r0 gen    8 species  6 thr 2.10 | gen-best train   -8.41 val  -22.15 tr 966 | HOF sel  -17.97 (train -17.97 val -2.25 net_tr $-105 net_val $891 trades 774) *IMPROVED* 1.7s
+[10-08 12:21:21] r0 gen    9 species  6 thr 2.10 | gen-best train   -8.41 val  -22.15 tr 966 | HOF sel  -10.58 (train -10.58 val -5.78 net_tr $-490 net_val $34 trades 152) *IMPROVED* 1.6s
+[10-08 12:21:22] r0 gen   10 species  6 thr 2.10 | gen-best train   -4.55 val   -8.66 tr 238 | HOF sel   -4.81 (train -4.81 val -4.50 net_tr $50 net_val $232 trades 238) *IMPROVED* 1.6s
+[10-08 12:21:27] r0 gen   13 species  6 thr 2.10 | gen-best train   -0.61 val   -8.01 tr 212 | HOF sel   -3.57 (train -3.28 val -3.57 net_tr $796 net_val $407 trades 229) *IMPROVED* 1.4s
+[10-08 12:21:29] r0 gen   15 species  7 thr 2.10 | gen-best train   -0.61 val   -8.01 tr 212 | HOF sel   -3.57 (train -3.28 val -3.57 net_tr $796 net_val $407 trades 229)  1.4s
+[10-08 12:21:34] r0 gen   18 species  7 thr 2.10 | gen-best train   +2.32 val  -68.54 tr 823 | HOF sel   +0.71 (train +0.71 val +1.26 net_tr $2332 net_val $827 trades 281) *IMPROVED* 1.5s
+[10-08 12:21:36] r0 gen   20 species  7 thr 2.10 | gen-best train   +2.32 val  -68.54 tr 823 | HOF sel   +0.71 (train +0.71 val +1.26 net_tr $2332 net_val $827 trades 281)  1.3s
+[10-08 12:21:43] r0 gen   25 species 10 thr 2.10 | gen-best train   +2.32 val  -68.54 tr 823 | HOF sel   +0.71 (train +0.71 val +1.26 net_tr $2332 net_val $827 trades 281)  1.4s
+[10-08 12:21:50] r0 gen   30 species 10 thr 2.10 | gen-best train   +2.50 val   -7.64 tr 146 | HOF sel   +0.71 (train +0.71 val +1.26 net_tr $2332 net_val $827 trades 281)  1.4s
+[10-08 12:21:56] r0 gen   34 species 10 thr 2.10 | gen-best train   +3.91 val  -15.23 tr 391 | HOF sel   +1.67 (train +1.67 val +6.94 net_tr $1386 net_val $816 trades 247) *IMPROVED* 1.6s
+[10-08 12:21:58] r0 gen   35 species 10 thr 2.10 | gen-best train   +6.10 val   -0.08 tr 337 | HOF sel   +1.67 (train +1.67 val +6.94 net_tr $1386 net_val $816 trades 247)  1.6s
+[10-08 12:22:03] r0 gen   38 species 10 thr 2.10 | gen-best train   +8.38 val  -18.77 tr 388 | HOF sel   +1.87 (train +1.87 val +2.04 net_tr $2164 net_val $701 trades 336) *IMPROVED* 1.6s
+[10-08 12:22:06] r0 gen   40 species 10 thr 2.10 | gen-best train   +8.38 val  -18.77 tr 388 | HOF sel   +1.87 (train +1.87 val +2.04 net_tr $2164 net_val $701 trades 336)  1.5s
+[10-08 12:22:09] r0 gen   42 species 10 thr 2.10 | gen-best train   +8.38 val  -18.77 tr 388 | HOF sel   +3.93 (train +6.57 val +3.93 net_tr $2899 net_val $730 trades 308) *IMPROVED* 1.6s
+[10-08 12:22:15] r0 gen   45 species 10 thr 2.10 | gen-best train   +8.38 val  -18.77 tr 388 | HOF sel   +3.93 (train +6.57 val +3.93 net_tr $2899 net_val $730 trades 308)  1.6s
+[10-08 12:22:22] r0 gen   50 species 10 thr 2.10 | gen-best train   +8.38 val  -18.77 tr 388 | HOF sel   +3.93 (train +6.57 val +3.93 net_tr $2899 net_val $730 trades 308)  1.5s
+[10-08 12:22:31] r0 gen   55 species 10 thr 2.10 | gen-best train   +9.03 val   +0.47 tr 275 | HOF sel   +3.93 (train +6.57 val +3.93 net_tr $2899 net_val $730 trades 308)  2.1s
+[10-08 12:22:40] r0 gen   60 species 10 thr 2.10 | gen-best train   +9.03 val   +0.47 tr 275 | HOF sel   +3.93 (train +6.57 val +3.93 net_tr $2899 net_val $730 trades 308)  1.8s
+[10-08 12:22:42] r0 gen   61 species 11 thr 2.10 | gen-best train   +9.03 val   +0.47 tr 275 | HOF sel   +5.05 (train +5.05 val +5.37 net_tr $2656 net_val $685 trades 275) *IMPROVED* 1.8s
+[10-08 12:22:49] r0 gen   65 species 11 thr 2.10 | gen-best train   +9.84 val   +1.79 tr 280 | HOF sel   +5.05 (train +5.05 val +5.37 net_tr $2656 net_val $685 trades 275)  1.8s
+[10-08 12:22:58] r0 gen   70 species 11 thr 2.10 | gen-best train   +9.84 val   +1.79 tr 280 | HOF sel   +5.05 (train +5.05 val +5.37 net_tr $2656 net_val $685 trades 275)  1.6s
+[10-08 12:23:03] r0 gen   73 species  9 thr 2.10 | gen-best train   +9.84 val   +1.79 tr 280 | HOF sel   +5.29 (train +5.77 val +5.29 net_tr $3239 net_val $1163 trades 284) *IMPROVED* 1.6s
+[10-08 12:23:07] r0 gen   75 species  9 thr 2.10 | gen-best train   +9.84 val   +1.79 tr 280 | HOF sel   +5.29 (train +5.77 val +5.29 net_tr $3239 net_val $1163 trades 284)  1.6s
+[10-08 12:23:13] r0 gen   79 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287) *IMPROVED* 1.8s
+[10-08 12:23:15] r0 gen   80 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.6s
+[10-08 12:23:24] r0 gen   85 species 11 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.0s
+[10-08 12:23:35] r0 gen   90 species  9 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.9s
+[10-08 12:23:44] r0 gen   95 species  6 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.9s
+[10-08 12:23:53] r0 gen  100 species  6 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.7s
+[10-08 12:24:02] r0 gen  105 species  6 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.8s
+[10-08 12:24:09] stagnant 30 gens -> injected 70 immigrants
+[10-08 12:24:11] r0 gen  110 species 11 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.7s
+[10-08 12:24:20] r0 gen  115 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.8s
+[10-08 12:24:30] r0 gen  120 species 11 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.8s
+[10-08 12:24:39] r0 gen  125 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.5s
+[10-08 12:24:48] r0 gen  130 species 11 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.9s
+[10-08 12:24:56] r0 gen  135 species 11 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.0s
+[10-08 12:25:04] stagnant 60 gens -> injected 70 immigrants
+[10-08 12:25:05] r0 gen  140 species 12 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.6s
+[10-08 12:25:13] r0 gen  145 species 13 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.6s
+[10-08 12:25:21] r0 gen  150 species 11 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.6s
+[10-08 12:25:30] r0 gen  155 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.6s
+[10-08 12:25:39] r0 gen  160 species 11 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.7s
+[10-08 12:25:48] r0 gen  165 species  9 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.8s
+[10-08 12:25:54] stagnant 90 gens -> injected 70 immigrants
+[10-08 12:25:56] r0 gen  170 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.5s
+[10-08 12:26:04] r0 gen  175 species  9 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.5s
+[10-08 12:26:13] r0 gen  180 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.5s
+[10-08 12:26:21] r0 gen  185 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.9s
+[10-08 12:26:31] r0 gen  190 species 10 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.9s
+[10-08 12:26:41] r0 gen  195 species  9 thr 2.10 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.0s
+[10-08 12:26:49] stagnant 120 gens -> FULL RESTART with new seed
+[10-08 12:26:50] == start restart=1 seed=11001 params={'sl': 1.5, 'tp': 3.0, 'trail': 0.0, 'min_sl': 8.0, 'cost_mult': 1.25} pop=200
+[10-08 12:26:59] r1 gen    5 species  8 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.8s
+[10-08 12:27:08] r1 gen   10 species  8 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.1s
+[10-08 12:27:19] r1 gen   15 species  8 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.0s
+[10-08 12:27:28] r1 gen   20 species  8 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.2s
+[10-08 12:27:39] r1 gen   25 species  8 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.5s
+[10-08 12:27:50] r1 gen   30 species  7 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.1s
+[10-08 12:27:50] stagnant 30 gens -> injected 70 immigrants
+[10-08 12:28:00] r1 gen   35 species  9 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.8s
+[10-08 12:28:10] r1 gen   40 species 10 thr 2.20 | gen-best train  +10.70 val  +10.32 tr 287 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  1.8s
+[10-08 12:28:21] r1 gen   45 species 10 thr 2.20 | gen-best train  +10.75 val  +10.10 tr 297 | HOF sel  +10.32 (train +10.70 val +10.32 net_tr $3706 net_val $1178 trades 287)  2.0s
