@@ -1,0 +1,1 @@
+{"island": "WF_br15_30_cut2512", "seed": 55, "sl": 1.5, "tp": 3.0, "trail": 0.0, "min_sl": 8.0, "pop": 200, "procs": 1, "cost_mult": 1.25, "fwd_cut": "2025-12-01", "immig_after": 30, "restart_after": 120, "params": {"sl": 1.5, "tp": 3.0, "trail": 0.0, "min_sl": 8.0, "cost_mult": 1.25, "fwd_cut": "2025-12-01"}}
