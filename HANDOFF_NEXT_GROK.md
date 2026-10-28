@@ -20,3 +20,9 @@ Paste this to the next Grok: "Read HANDOFF_NEXT_GROK.md in C:\Users\shawa\Projec
 1. Backtest revamp with daytime trend sleeve OFF and 00:00-09:00 overnight breakouts trimmed (pick on train/walk-forward, test 2026 once).
 2. Decide on OG_REGIME_FIX=0.
 3. Research scripts are in research/clara and research/sixpm (sim.py, rank.py, solo.py, revamp/sens.py etc.). Data: data/MNQ_1m.csv.
+
+## Update Oct 28, 2026 8:40 AM ET
+- Shawayne said YES to the trim tests and asked to try to DOUBLE profit, via bigger size OR more trades per day (raise position/day caps, re-entries, looser breakout entries, more RTH breakout windows).
+- Work in progress on Grok's box: /workspace/clara/revamp/next/ (scripts + results). Rule: pick variants on train (<=2025)/walk-forward, test 2026 once, report net after costs, DD, $2k breach count, account size needed.
+- Nothing changed on the PC or live bots.
+- Also: CRM Residential phone screen (Asst. Property Manager, $28-30/hr) - prep delivered; booking at c.nxtapply.com/schedule/crm-residential-phone-interview.
