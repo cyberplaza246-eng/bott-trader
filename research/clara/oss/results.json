@@ -1,0 +1,83 @@
+[
+ {
+  "strategy": "S1_ORB5_Zarattini",
+  "trades": 466,
+  "net": -1045.0,
+  "PF": 0.98,
+  "win": 27.7,
+  "avgW": 334.5,
+  "avgL": -131.2,
+  "maxLstreak": 14,
+  "ddEOD": 6175.5,
+  "ddTrade": 6175.5,
+  "tpd": 0.99,
+  "breaches": [
+   "2025-03-28",
+   "2026-03-18"
+  ],
+  "train_net": 2916.0,
+  "train_n": 288,
+  "test26_net": -3961.0,
+  "test26_n": 178
+ },
+ {
+  "strategy": "S2_NQ_breakout_brusco",
+  "trades": 516,
+  "net": -13591.5,
+  "PF": 0.77,
+  "win": 40.1,
+  "avgW": 216.2,
+  "avgL": -188.8,
+  "maxLstreak": 10,
+  "ddEOD": 13591.5,
+  "ddTrade": 13591.5,
+  "tpd": 1.1,
+  "breaches": [
+   "2024-11-06"
+  ],
+  "train_net": -9821.0,
+  "train_n": 328,
+  "test26_net": -3770.5,
+  "test26_n": 188
+ },
+ {
+  "strategy": "S3_VWAP_trend",
+  "trades": 7737,
+  "net": -39331.5,
+  "PF": 0.85,
+  "win": 18.0,
+  "avgW": 166.1,
+  "avgL": -42.6,
+  "maxLstreak": 44,
+  "ddEOD": 41277.0,
+  "ddTrade": 42024.0,
+  "tpd": 16.5,
+  "breaches": [
+   "2024-11-22"
+  ],
+  "train_net": -19782.5,
+  "train_n": 4921,
+  "test26_net": -19549.0,
+  "test26_n": 2816
+ },
+ {
+  "strategy": "S4_noise_momentum",
+  "trades": 355,
+  "net": 3059.0,
+  "PF": 1.1,
+  "win": 36.1,
+  "avgW": 270.5,
+  "avgL": -139.0,
+  "maxLstreak": 10,
+  "ddEOD": 5246.5,
+  "ddTrade": 5463.0,
+  "tpd": 0.76,
+  "breaches": [
+   "2025-07-16"
+  ],
+  "train_net": 1626.0,
+  "train_n": 218,
+  "test26_net": 1433.0,
+  "test26_n": 137
+ }
+]

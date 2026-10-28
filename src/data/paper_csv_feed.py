@@ -91,6 +91,8 @@ class PaperCsvFeed:
         self._df_1m: Optional[pd.DataFrame] = None
         self._last_refresh = 0.0
         self._last_meta: Dict[str, Any] = {}
+        self._databento_skip_until = 0.0
+        self._databento_skip_reason = ""
 
     def initialize(self) -> None:
         try:
@@ -106,21 +108,57 @@ class PaperCsvFeed:
     def shutdown(self) -> None:
         return
 
+    @staticmethod
+    def _databento_billing_blocked(err: str) -> bool:
+        e = (err or "").lower()
+        return "402" in e or "delinquent" in e or "unpaid invoice" in e
+
+    def _note_databento_billing_block(self, err: str, now: float) -> None:
+        self._databento_skip_until = now + 6 * 3600
+        self._databento_skip_reason = (err or "").split("\n", 1)[0]
+        print(
+            "MNQ 1m Databento unpaid (402) — skipping refresh 6h; "
+            "using CSV seed + Rithmic history. "
+            "Pay invoice at databento.com/portal/billing",
+            flush=True,
+        )
+
     def refresh(self, force: bool = False) -> Dict[str, Any]:
         now = time.time()
         if not force and now - self._last_refresh < self.refresh_sec:
             return self._last_meta
         self._last_refresh = now
+        if now < self._databento_skip_until:
+            self._last_meta = {
+                "ok": False,
+                "error": self._databento_skip_reason or "databento skipped",
+                "source": "databento_skipped",
+                "path": self.csv_path,
+            }
+            try:
+                self._reload_csv()
+            except Exception as exc:
+                print(f"CSV seed load skipped: {redact_secrets(exc)}")
+                self._df_1m = None
+            return self._last_meta
         try:
             self._last_meta = refresh_mnq_1m(lookback_days=3) or {}
         except Exception as exc:
+            err = str(redact_secrets(exc))
             self._last_meta = {
                 "ok": False,
-                "error": redact_secrets(exc),
+                "error": err,
                 "source": "databento",
                 "path": self.csv_path,
             }
-            print(f"MNQ 1m refresh failed: {self._last_meta['error']}")
+            if self._databento_billing_blocked(err):
+                self._note_databento_billing_block(err, now)
+            else:
+                print(f"MNQ 1m refresh failed: {err}")
+        else:
+            err = str(self._last_meta.get("error") or "")
+            if not self._last_meta.get("ok") and self._databento_billing_blocked(err):
+                self._note_databento_billing_block(err, now)
         try:
             self._reload_csv()
         except Exception as exc:

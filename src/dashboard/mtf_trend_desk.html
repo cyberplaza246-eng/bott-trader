@@ -60,11 +60,16 @@
   .trade-card { background:#0d1117; border:1px solid var(--bd); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
   .trade-card .hd { font-weight:700; font-size:1.02rem; margin-bottom:8px; }
   .trade-card .ln { color:var(--mut); }
+  .trade-card .ln.conf, .feed .ln.conf { color:var(--acc); font-weight:600; cursor:help; }
   .sltp { margin: 10px 0 4px; }
   .sltp .lvl { font-size:1.42rem; font-weight:800; line-height:1.35; padding:12px 14px;
                border-radius:10px; margin:8px 0; letter-spacing:.01em; }
   .sltp .stop { background:rgba(240,113,120,.18); color:#ff9b9b; border:1px solid #f07178; }
   .sltp .tgt { background:rgba(62,207,142,.16); color:#3ecf8e; border:1px solid #3ecf8e; }
+  .now-pnl { font-size:2.6rem; font-weight:800; line-height:1.1; margin:8px 0 4px; letter-spacing:-.02em; }
+  .now-side { font-size:1.15rem; font-weight:700; margin:0 0 6px; }
+  .now-px { font-size:1.35rem; font-weight:650; margin:0 0 4px; }
+  .quiet { color:var(--mut); font-size:.9rem; }
   .trade-card .sltp .lvl { font-size:1.28rem; }
   .feed .sltp .lvl { font-size:1.18rem; margin:6px 0; }
   .devlog { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.72rem;
@@ -73,13 +78,20 @@
   details.devblock { background:var(--card); border:1px solid var(--bd); border-radius:12px; padding:12px 16px; margin-bottom:14px; }
   details.devblock > summary { cursor:pointer; color:var(--mut); font-size:.92rem; font-weight:650; }
   details.devblock[open] > summary { margin-bottom:10px; color:var(--tx); }
+  #chart-wrap { position:relative; width:100%; height:420px; }
+  #mnq-chart { width:100%; height:360px; }
+  #mnq-vol { width:100%; height:60px; }
+  .level-strip { display:flex; flex-wrap:wrap; gap:8px 14px; font-size:.78rem; color:var(--mut); margin-top:10px; }
+  .level-strip b { color:var(--tx); font-weight:650; }
+  .bias-row { font-size:.9rem; margin:0 0 8px; }
 </style>
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
 <header>
   <div>
     <h1>MNQ Trend Desk</h1>
-    <div class="sub">Local desk — Stop and Target are the big colored rows. Hard-refresh (Ctrl+F5) if you do not see them.</div>
+    <div class="sub">Live MNQ. Hard-refresh (Ctrl+F5) after an update.</div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <span id="run-pill" class="pill idle">not running</span>
@@ -87,6 +99,31 @@
   </div>
 </header>
 <div class="wrap">
+  <div class="card hero" id="now-card">
+    <h2>Now</h2>
+    <div id="now-body">
+      <div class="now-side quiet">Loading live quote…</div>
+      <div class="sltp">
+        <div class="lvl stop">Stop ATR × 1.5 (12–40 pts) — set at fill</div>
+        <div class="lvl tgt">Target 1R (same distance as the stop)</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="chart-card">
+    <h2>Session chart</h2>
+    <p class="help" style="margin-top:0">Permanent levels while the day bot runs: PDH · PDL · ONH · ONL · RTH Open · VWAP · 10 EMA · 20 EMA · Volume. Optional OR / day H/L / prev week close when available.</p>
+    <div id="bias-line" class="bias-row quiet">Bias loading…</div>
+    <div id="chart-wrap">
+      <div id="mnq-chart"></div>
+      <div id="mnq-vol"></div>
+    </div>
+    <div id="level-strip" class="level-strip"></div>
+  </div>
+  <div class="card" id="recent-card">
+    <h2>Tonight</h2>
+    <div id="recent-body" class="feed"></div>
+  </div>
+  <details class="block"><summary>More (zones, recipe, full log)</summary>
   <div class="card">
     <h2>Status</h2>
     <div id="status-sltp" class="sltp"></div>
@@ -114,9 +151,10 @@
   </div>
   <div class="card" id="rth-recipe-card" style="display:none">
     <h2>Day recipe (after 9:35)</h2>
-    <p class="help" style="margin-top:0">Day recipe: enter only when daily+15m+60m agree. Locked ema15_eod RTH windows. Not tonight’s overnight paper fill. Flatten 15:50 ET after the open.</p>
+    <p class="help" style="margin-top:0">Day recipe L6: locked 6 RTH windows, stack <strong>15m+5m</strong>, quiet 1m, stop 1m ATR×1.5 clip 6–25, TP 1R (<code>EMA15_LEVEL_MODE=0</code>). Chart levels above are map-only. With <code>EMA15_LEVEL_MODE=1</code>: level interaction becomes an entry gate. Flatten 15:50 ET.</p>
     <div id="rth-recipe-body"></div>
   </div>
+  </details>
   <div class="card">
     <h2>Ask Gemini</h2>
     <p class="help" style="margin-top:0">Second opinion on the live snapshot. Does not place trades or change stops. Enter to send.</p>
@@ -237,16 +275,164 @@ function fmtPx(v){
 }
 function renderLine(x){
   const s = String(x||'');
+  if(/^win confidence:/i.test(s)){
+    const tip = s.replace(/^win confidence:\s*\d+%(?:\s*\(([^)]+)\))?/i, '$1').trim();
+    const title = tip ? esc(tip) : '';
+    return `<div class="ln conf"${title ? ` title="${title}"` : ''}>${esc(s)}</div>`;
+  }
+  if(/^confidence:/i.test(s)){
+    const tip = s.replace(/^confidence:\s*\d+%(?:\s*\(([^)]+)\))?/i, '$1').trim();
+    const title = tip ? esc(tip) : '';
+    return `<div class="ln conf"${title ? ` title="${title}"` : ''}>${esc(s)}</div>`;
+  }
   if(/^stop /i.test(s) || /^sl placed/i.test(s)) return `<div class="sltp"><div class="lvl stop">${esc(s)}</div></div>`;
   if(/flatten|take profit|^tp |^target |tp cap/i.test(s)) return `<div class="sltp"><div class="lvl tgt">${esc(s)}</div></div>`;
   return `<div class="ln">${esc(s)}</div>`;
+}
+function confidenceFromRec(rec){
+  if(!rec) return '';
+  const conf = rec.entry_confidence;
+  if(conf && conf.pct!=null){
+    const sum = conf.summary ? ` (${conf.summary})` : '';
+    return 'Win confidence: '+conf.pct+'%'+sum;
+  }
+  if(rec.entry_confidence_pct!=null) return 'Win confidence: '+rec.entry_confidence_pct+'%';
+  return '';
+}
+function simpleEvents(d){
+  return (d.activity||[]).filter(e=>{
+    const k=String(e.kind||'').toLowerCase();
+    const t=String(e.title||'').toLowerCase();
+    if(['idle','monitoring','data','skip'].includes(k)) return false;
+    if(t.indexOf('no trade')>=0 || t.indexOf('monitoring')>=0 || t.indexOf('market')>=0) return false;
+    return true;
+  }).slice(0,8);
+}
+function overnightWait(d){
+  const ov=d.overnight||{};
+  if(ov.wait_reason && (ov.wait_reason.indexOf('LONG:')>=0 || ov.wait_reason.indexOf('SHORT:')>=0 || ov.wait_reason.indexOf('Need 20')>=0 || ov.wait_reason.indexOf('Already took')>=0 || ov.wait_reason.indexOf('Fill ')>=0)){
+    return ov.wait_reason;
+  }
+  const st=d.status||{};
+  const last=Number(st.last_price);
+  const zones=ov.zones||[];
+  const onh=zones.find(z=>String(z.name||'')==='overnight_high')||{};
+  const onl=zones.find(z=>String(z.name||'')==='overnight_low')||{};
+  const bars=Number(ov.overnight_bars);
+  const hasLast=Number.isFinite(last);
+  function gap(level, wantAbove){
+    const lvl=Number(level);
+    if(!hasLast || !Number.isFinite(lvl)) return '';
+    if(wantAbove){
+      const need=lvl+0.25;
+      const g=need-last;
+      if(g>1) return ' Last '+last.toFixed(2)+' is '+g.toFixed(1)+' pts too low — needs to rise.';
+      if(g<-1) return ' Last '+last.toFixed(2)+' is already '+Math.abs(g).toFixed(1)+' pts above — should fill.';
+      return ' Last '+last.toFixed(2)+' is on the long trigger — last through '+need.toFixed(2)+' fills.';
+    }
+    const need=lvl-0.25;
+    const g=last-need;
+    if(g>1) return ' Last '+last.toFixed(2)+' is '+g.toFixed(1)+' pts too high — needs to fall.';
+    if(g<-1) return ' Last '+last.toFixed(2)+' is already '+Math.abs(g).toFixed(1)+' pts below — should fill.';
+    return ' Last '+last.toFixed(2)+' is on the short trigger — last through '+need.toFixed(2)+' fills.';
+  }
+  function side(label, z, wantAbove){
+    const lvl=z.price;
+    if(lvl==null) return label+': no level yet.';
+    const px=Number(lvl);
+    return label+': need last through '+(wantAbove?'':'the downside at ')+px.toFixed(2)+'.'+gap(px, wantAbove);
+  }
+  if(Number.isFinite(bars) && bars<2){
+    return 'Need a live overnight high and low. Then: long = 1m close above the high, short = 1m close below the low.';
+  }
+  return side('LONG', onh, true)+' '+side('SHORT', onl, false);
+}
+function livePnlFromStatus(st){
+  const pos=(st.open_positions||[])[0]||{};
+  const entry=Number(pos.entry||pos.entry_price);
+  const last=Number(st.last_price);
+  const qty=Number(pos.size||pos.qty||1)||1;
+  const side=String(pos.direction||pos.side||'');
+  if(!pos || !Number.isFinite(entry)) return {open:false};
+  const hasLast=Number.isFinite(last);
+  const pts=hasLast?(side.toLowerCase().indexOf('short')>=0?(entry-last):(last-entry)):null;
+  return {
+    open:true,
+    side:side.toUpperCase()||'TRADE',
+    entry:entry,
+    last:hasLast?last:null,
+    pts:pts,
+    usd:pts==null?null:(pts*2*qty),
+    qty:qty
+  };
+}
+function renderNow(d){
+  const st=d.status||{};
+  const pnl=(d.open_pnl&&d.open_pnl.open)?d.open_pnl:livePnlFromStatus(st);
+  const pos=(st.open_positions||[])[0]||{};
+  const last=pnl.last!=null?pnl.last:st.last_price;
+  const body=document.getElementById('now-body');
+  const recentH=document.querySelector('#recent-card h2');
+  if(recentH) recentH.textContent=st.overnight_research?'Tonight':'Today';
+  if(!body) return;
+  if(!pnl.open){
+    body.innerHTML=
+      `<div class="now-side quiet">No trade on</div>`+
+      `<div class="now-px">${last!=null?('MNQ '+fmtPx(last)):'Waiting for quote'}</div>`+
+      sltpHtml(!!st.overnight_research, pos)+
+      `<p class="quiet">${st.overnight_research?esc(overnightWait(d)):'Waiting for the next day window.'}</p>`;
+    return;
+  }
+  const usdRaw=pnl.usd;
+  const hasPnl=usdRaw!=null && Number.isFinite(Number(usdRaw));
+  const usd=Number(usdRaw);
+  const up=hasPnl && usd>=0;
+  const label=!hasPnl?'Waiting for live quote':(up?('Up $'+Math.abs(usd).toFixed(2)):('Down $'+Math.abs(usd).toFixed(2)));
+  const ticket=String(pos.lucid_ticket||pos.trade_id||'');
+  const onLucid=ticket.indexOf('bot_')===0 || String(st.last_note||'').indexOf('Lucid')>=0;
+  const move=hasPnl
+    ? ((up?'Growing':'Declining')+' · '+Number(pnl.pts).toFixed(2)+' pts from '+fmtPx(pnl.entry))
+    : ('Entry '+fmtPx(pnl.entry));
+  body.innerHTML=
+    `<div class="now-side">${esc((pnl.side||pos.direction||'TRADE').toUpperCase())} MNQ ×${esc(String(pnl.qty||pos.size||1))}</div>`+
+    `<div class="now-px">${last!=null?('MNQ '+fmtPx(last)):'MNQ —'}</div>`+
+    `<div class="now-pnl" style="color:${!hasPnl?'#8b949e':(up?'#3ecf8e':'#ff6b6b')}">${label}</div>`+
+    `<p class="quiet">${esc(move)}</p>`+
+    sltpHtml(!!st.overnight_research, {
+      entry:pnl.entry||pos.entry||pos.entry_price,
+      stop:pos.sl||pos.stop,
+      tp:pos.tp||pos.tp_cap,
+      tp_cap:pos.tp_cap||pos.tp,
+      atr_stop_pts:pos.stop_pts||pos.atr_stop_pts
+    })+
+    (onLucid?'<p class="quiet">On Lucid TEST011 sim</p>':'');
+}
+function renderRecent(d){
+  const el=document.getElementById('recent-body');
+  if(!el) return;
+  const evs=simpleEvents(d);
+  const closed=(d.trades||[]).slice().reverse().slice(0,3);
+  let html=evs.length?evs.map(renderEvent).join(''):'<p class="quiet">No fills yet this session.</p>';
+  if(closed.length){
+    html+='<div class="k" style="margin-top:12px">Closed</div>';
+    html+=closed.map(t=>{
+      const pnl=Number(t.pnl_usd||t.pnl||0);
+      const cls=pnl>=0?'ok':'bad';
+      const word=pnl>=0?'Profit':'Loss';
+      return `<div class="ev"><div class="hd">${pnl>=0?'🟢':'🔴'} ${esc((t.direction||t.side||'').toUpperCase())} closed</div><div class="ln ${cls}">${word} $${pnl.toFixed(2)}</div></div>`;
+    }).join('');
+  }
+  el.innerHTML=html;
 }
 function renderEvent(ev){
   const clock = ev.clock || fmtClock(ev.ts);
   const lines = (ev.lines||[]).map(renderLine).join('');
   return `<div class="ev"><div class="hd">${esc(ev.emoji||'🟡')} ${esc(clock)}  ${esc(ev.title||'')}</div>${lines}</div>`;
 }
-function overnightTp(){ return '1R TP, flatten 09:25 ET'; }
+function overnightTp(rec){
+  const tp = fmtPx(rec && (rec.tp||rec.target||rec.take_profit||rec.tp_cap));
+  return tp ? (tp + ' (1R)') : '1R TP';
+}
 function stopPts(entry, sl, pts){
   let n = Number(pts);
   if(Number.isFinite(n)) return n;
@@ -261,26 +447,173 @@ function stopLine(entry, sl, pts){
   return Number.isFinite(n) ? ('Stop ' + stop + ' (' + n.toFixed(0) + ' pts)') : ('Stop ' + stop);
 }
 function targetLine(overnight, rec){
-  if(overnight) return 'Target ' + overnightTp();
-  const tp = fmtPx(rec && (rec.tp_cap||rec.tp||rec.take_profit));
+  if(overnight) return 'Target ' + overnightTp(rec);
+  const tp = fmtPx(rec && (rec.tp||rec.take_profit||rec.tp_cap));
   const sl = fmtPx(rec && (rec.stop||rec.sl));
   if(sl || tp){
     const bits = [];
     if(sl) bits.push('SL placed @ ' + sl);
-    if(tp) bits.push('TP cap @ ' + tp);
+    if(tp) bits.push('TP placed @ ' + tp + ' (1R)');
     return bits.join(' / ');
   }
   return '';
+}
+function plannedSlTp(overnight){
+  if(overnight){
+    return '<div class="sltp">'+
+      '<div class="lvl stop">Stop ATR × 1.5 (12–40 pts) — set at fill</div>'+
+      '<div class="lvl tgt">Target 1R (same distance as the stop)</div>'+
+      '</div>';
+  }
+  return '<div class="sltp">'+
+    '<div class="lvl stop">Stop ATR × 2 (20–60 pts) — set at fill</div>'+
+    '<div class="lvl tgt">Target 1R (same distance as the stop)</div>'+
+    '</div>';
 }
 function sltpHtml(overnight, rec){
   rec = rec || {};
   const sl = stopLine(rec.entry||rec.entry_price, rec.stop||rec.sl, rec.atr_stop_pts||rec.stop_pts);
   const tp = targetLine(overnight, rec);
-  if(!sl && !tp) return '';
+  const slText = sl || (overnight ? 'Stop ATR × 1.5 (12–40 pts) — set at fill' : 'Stop ATR × 2 (20–60 pts) — set at fill');
+  const tpText = tp || (overnight ? 'Target 1R (same distance as the stop)' : 'Target 1R');
   return '<div class="sltp">' +
-    (sl ? `<div class="lvl stop">${esc(sl)}</div>` : '') +
-    (tp ? `<div class="lvl tgt">${esc(tp)}</div>` : '') +
+    `<div class="lvl stop">${esc(slText)}</div>` +
+    `<div class="lvl tgt">${esc(tpText)}</div>` +
     '</div>';
+}
+let _chart=null,_candle=null,_vol=null,_vwapLine=null,_ema10=null,_ema20=null,_priceLines=[],_volChart=null,_chartLoadedAt=0;
+const LEVEL_COLORS={
+  pdh:'#f07178', pdl:'#f07178', onh:'#e0b44e', onl:'#e0b44e',
+  rth_open:'#5aa2ff', orh:'#8b9aab', orl:'#8b9aab',
+  day_high:'#9b7bff', day_low:'#9b7bff', prev_week_close:'#6a7a8a'
+};
+function ensureChart(){
+  if(_chart || typeof LightweightCharts==='undefined') return;
+  const el=document.getElementById('mnq-chart');
+  const vel=document.getElementById('mnq-vol');
+  if(!el||!vel) return;
+  _chart=LightweightCharts.createChart(el,{
+    layout:{background:{color:'#0d1117'},textColor:'#8b9aab'},
+    grid:{vertLines:{color:'#1a222c'},horzLines:{color:'#1a222c'}},
+    rightPriceScale:{borderColor:'#2a3340'},
+    timeScale:{borderColor:'#2a3340',timeVisible:true,secondsVisible:false},
+    crosshair:{mode:0},
+    height:360
+  });
+  _candle=_chart.addCandlestickSeries({
+    upColor:'#3ecf8e', downColor:'#f07178', borderVisible:false,
+    wickUpColor:'#3ecf8e', wickDownColor:'#f07178'
+  });
+  _vwapLine=_chart.addLineSeries({color:'#c9a227', lineWidth:2, title:'VWAP', priceLineVisible:false, lastValueVisible:true});
+  _ema10=_chart.addLineSeries({color:'#5aa2ff', lineWidth:1, title:'10 EMA', priceLineVisible:false, lastValueVisible:false});
+  _ema20=_chart.addLineSeries({color:'#9b7bff', lineWidth:1, title:'20 EMA', priceLineVisible:false, lastValueVisible:false});
+  _volChart=LightweightCharts.createChart(vel,{
+    layout:{background:{color:'#0d1117'},textColor:'#8b9aab'},
+    grid:{vertLines:{visible:false},horzLines:{visible:false}},
+    rightPriceScale:{visible:false},
+    timeScale:{visible:false},
+    height:60
+  });
+  _vol=_volChart.addHistogramSeries({color:'#3a4a60', priceFormat:{type:'volume'}});
+  _chart.timeScale().subscribeVisibleLogicalRangeChange(range=>{
+    if(range && _volChart) _volChart.timeScale().setVisibleLogicalRange(range);
+  });
+  window.addEventListener('resize', ()=>{
+    if(!_chart) return;
+    const w=el.clientWidth||el.parentElement.clientWidth;
+    _chart.applyOptions({width:w});
+    if(_volChart) _volChart.applyOptions({width:w});
+  });
+}
+function clearPriceLines(){
+  if(!_candle) return;
+  (_priceLines||[]).forEach(pl=>{ try{_candle.removePriceLine(pl);}catch(e){} });
+  _priceLines=[];
+}
+function fmtLvl(v){
+  const n=Number(v);
+  return Number.isFinite(n)?n.toFixed(2):'—';
+}
+function renderLevelStrip(levels, status){
+  const el=document.getElementById('level-strip');
+  const biasEl=document.getElementById('bias-line');
+  if(!el) return;
+  const lv=levels||(status&&status.chart_levels)||{};
+  const keys=[
+    ['pdh','PDH'],['pdl','PDL'],['onh','ONH'],['onl','ONL'],
+    ['rth_open','RTH Open'],['vwap','VWAP'],['ema10','10 EMA'],['ema20','20 EMA'],
+    ['orh','ORH'],['orl','ORL'],['day_high','Day High'],['day_low','Day Low'],
+    ['prev_week_close','Prev Wk']
+  ];
+  el.innerHTML=keys.map(([k,lab])=>{
+    const v=lv[k];
+    if(v==null) return '';
+    return `<span>${lab} <b>${fmtLvl(v)}</b></span>`;
+  }).filter(Boolean).join('');
+  if(biasEl){
+    const b15=status&&status.bias_15m;
+    const b5=status&&status.bias_5m;
+    const st=status&&status.structure_15m;
+    const mode=status&&status.level_mode?'level_15_5_1':'ema15_eod';
+    biasEl.innerHTML=
+      `Mode <b>${esc(mode)}</b> · 15m <b>${esc(b15||'—')}</b>`+
+      (st?` (${esc(st)})`:'')+
+      ` · 5m <b>${esc(b5||'—')}</b>`+
+      ((status&&status.bias_agree)?' · stack agree':'');
+  }
+}
+async function refreshChart(d){
+  ensureChart();
+  if(!_candle) return;
+  const now=Date.now();
+  if(now-_chartLoadedAt<4000 && _priceLines.length){
+    renderLevelStrip((d.status&&d.status.chart_levels)||{}, d.status||{});
+    return;
+  }
+  try{
+    const r=await fetch('/api/chart');
+    const c=await r.json();
+    const bars=c.bars||[];
+    if(bars.length){
+      _candle.setData(bars.map(b=>({time:b.time,open:b.open,high:b.high,low:b.low,close:b.close})));
+      if(_vol) _vol.setData(bars.map(b=>({time:b.time,value:b.volume||0,color:(b.close>=b.open)?'#1f6f4a':'#6b3038'})));
+      if(_vwapLine) _vwapLine.setData(c.vwap||[]);
+      if(_ema10) _ema10.setData(c.ema10||[]);
+      if(_ema20) _ema20.setData(c.ema20||[]);
+      _chart.timeScale().fitContent();
+    }
+    const levels=c.levels||(d.status&&d.status.chart_levels)||{};
+    clearPriceLines();
+    const draw=[
+      ['pdh','PDH'],['pdl','PDL'],['onh','ONH'],['onl','ONL'],['rth_open','RTH Open'],
+      ['orh','ORH'],['orl','ORL'],['day_high','Day High'],['day_low','Day Low'],
+      ['prev_week_close','Prev Wk']
+    ];
+    draw.forEach(([k,lab])=>{
+      const v=Number(levels[k]);
+      if(!Number.isFinite(v)) return;
+      const pl=_candle.createPriceLine({
+        price:v,
+        color:LEVEL_COLORS[k]||'#8b9aab',
+        lineWidth:1,
+        lineStyle:2,
+        axisLabelVisible:true,
+        title:lab
+      });
+      _priceLines.push(pl);
+    });
+    _chartLoadedAt=now;
+    renderLevelStrip(levels, Object.assign({}, d.status||{}, {
+      chart_levels: levels,
+      bias_15m: (d.status&&d.status.bias_15m)||(c.bias&&c.bias.bias_15m),
+      bias_5m: (d.status&&d.status.bias_5m)||(c.bias&&c.bias.bias_5m),
+      structure_15m: (d.status&&d.status.structure_15m)||(c.bias&&c.bias.structure_15m),
+      bias_agree: (d.status&&d.status.bias_agree)!=null?d.status.bias_agree:(c.bias&&c.bias.agree),
+      level_mode: (d.status&&d.status.level_mode)!=null?d.status.level_mode:c.level_mode
+    }));
+  }catch(e){
+    console.warn('chart refresh', e);
+  }
 }
 function openPos(d){
   return (((d.status||{}).open_positions)||[])[0] || {};
@@ -323,7 +656,10 @@ function synthOpenCard(d){
     tp: pos.tp||pos.tp_cap,
     tp_cap: pos.tp_cap||pos.tp,
     atr_stop_pts: pos.atr_stop_pts
-  }, overnight)).concat(['Status Open']);
+  }, overnight));
+  const confLine = confidenceFromRec(pos);
+  if(confLine) lines.push(confLine);
+  lines.push('Status Open');
   return { emoji:'🟢', title: (overnight?'PAPER TRADE — ':'TRADE — ') + side, lines: lines };
 }
 function renderActivity(d){
@@ -417,6 +753,9 @@ async function load(){
   const tgtTxt = overnight ? overnightTp() : targetLine(false, p0);
   if(slTxt && !labels.includes('Stop')) statusRows.push(['Stop', slTxt]);
   if(tgtTxt && !labels.includes('Target') && !labels.includes('Take profit')) statusRows.push(['Target', tgtTxt]);
+  const confTxt = confidenceFromRec(p0);
+  if(confTxt && !labels.includes('Win confidence') && !labels.includes('Confidence'))
+    statusRows.push(['Win confidence', confTxt.replace(/^Win confidence:\s*/i, '')]);
   const statusSltp = document.getElementById('status-sltp');
   if(statusSltp){
     statusSltp.innerHTML = sltpHtml(overnight, {
@@ -530,7 +869,7 @@ async function load(){
   }
   document.getElementById('signal-stats').innerHTML = [
     stat('Last MNQ', px),
-    overnight ? stat('Flatten', '09:25 ET') : stat('Next window', sig.next_window||'—'),
+    overnight ? stat('Exit', 'SL / 1R TP') : stat('Next window', sig.next_window||'—'),
     stat('As of', overnight ? ((d.status&&d.status.last_quote_ts_et)||sig.last_bar_ts_et||'—') : (sig.last_bar_ts_et||'—')),
   ].join('');
   document.getElementById('gemini-second').textContent = overnight
@@ -539,8 +878,8 @@ async function load(){
       ? ('Gemini second opinion — ' + sig.gemini_callout + ' Recipe is still the boss. Never an order sent.')
       : 'Gemini second opinion — ask below. Recipe is still the boss. Never an order sent.');
   const ovRules = [
-    'Overnight paper: break settled ONH/ONL only. ATR×1.5 stop, 1R TP, flatten 09:25 ET.',
-    'Paper fills only — not a live RTH ema15 order.',
+    'Paper research: last-through last 20m high/low. ATR×1.5 stop, 1R TP. No 09:25 flatten — runs through RTH until Ctrl+C.',
+    'Paper fills only — Lucid TEST/sim. Same recipe through RTH. Do not run start_mnq_live.bat together.',
   ];
   document.getElementById('signal-rules').innerHTML =
     (overnight ? ovRules : (sig.rules||[])).map(x=>`<div>${esc(x)}</div>`).join('') +
@@ -558,6 +897,9 @@ async function load(){
         wins.map(w=>`<div class="row"><span>${esc(w)}</span></div>`).join('');
     }
   }
+  renderNow(d);
+  refreshChart(d);
+  renderRecent(d);
   renderActivity(d);
   const hist=d.gemini_questions||[];
   document.getElementById('gemini-hist').innerHTML = hist.length
@@ -664,6 +1006,6 @@ async function ask(){
   load();
 }
 load();
-if (!_deskTimer) _deskTimer = setInterval(load, 3000);
+if (!_deskTimer) _deskTimer = setInterval(load, 2000);
 </script>
 </body></html>

@@ -1,0 +1,9 @@
+# FVS-1 session windows (US/Eastern). Override via FVS1_SESSIONS env.
+# Format: label=HH:MM-HH:MM;label2=HH:MM-HH:MM
+sessions:
+  - label: ny_open
+    start: "09:30"
+    end: "10:00"
+  - label: pm
+    start: "14:00"
+    end: "15:00"

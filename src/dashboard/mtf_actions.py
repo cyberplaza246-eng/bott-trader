@@ -12,13 +12,13 @@ from flask import Flask, jsonify, make_response, render_template_string, request
 from flask_cors import CORS
 
 from src.ai.action_log import (
-    OVERNIGHT_FLATTEN_ET,
-    OVERNIGHT_TP_TEXT,
+    overnight_tp_text,
     ActionLog,
     build_today_activity,
     format_live_entry_brackets,
     format_stop_line,
     is_overnight_rec,
+    take_profit_text,
     read_journal,
     read_status,
 )
@@ -35,6 +35,7 @@ from src.ai.llm_advisor import (
 )
 from src.ai.trade_review import JOURNAL_LIVE, JOURNAL_PAPER, read_suggestions, suggest_min_trades
 from src.ai.overnight_journal import read_overnight_suggestions, read_zones
+from src.strategy.overnight_research import overnight_cap_reached, wait_reason_from_zones
 from src.ai.window_edge import (
     closed_trade_view,
     live_expectancy,
@@ -511,6 +512,40 @@ def last_ask_ok_from_history(
     return ask_looks_successful(str(questions[-1].get("answer") or ""))
 
 
+def open_unrealized(status: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Live MNQ P&L from ticker vs open entry. $2 per point."""
+    status = status or {}
+    opens = status.get("open_positions") or []
+    pos = opens[0] if isinstance(opens, list) and opens and isinstance(opens[0], dict) else {}
+    empty = {"usd": None, "pts": None, "last": None, "side": None, "open": False}
+    if not pos:
+        return empty
+    try:
+        entry = float(pos.get("entry") or pos.get("entry_price"))
+        qty = float(pos.get("size") or pos.get("qty") or 1)
+    except (TypeError, ValueError):
+        return empty
+    side = str(pos.get("direction") or pos.get("side") or "").lower()
+    try:
+        last = float(status.get("last_price"))
+    except (TypeError, ValueError):
+        last = None
+    pts = None
+    usd = None
+    if last is not None:
+        pts = entry - last if "short" in side else last - entry
+        usd = pts * 2.0 * qty
+    return {
+        "open": True,
+        "side": side.upper() or "TRADE",
+        "entry": round(entry, 2),
+        "last": None if last is None else round(last, 2),
+        "pts": None if pts is None else round(pts, 2),
+        "usd": None if usd is None else round(usd, 2),
+        "qty": int(qty) if qty == int(qty) else qty,
+    }
+
+
 def _money(v: Any) -> str:
     try:
         n = float(v)
@@ -842,7 +877,7 @@ def build_status_card(
     else:
         daily_s = f"${float(daily):.2f}"
     live_n = todays_live_trade_count(status, None)
-    trade_label = "Live trades tonight" if overnight else "Live trades"
+    trade_label = "Fills today (ET)" if overnight else "Live trades"
     quote_levels = dict(levels or {})
     if overnight and status.get("quote_age_seconds") is not None:
         try:
@@ -878,7 +913,11 @@ def build_status_card(
             "atr_stop_pts": pos.get("atr_stop_pts"),
         }) if pos else ""
         rows.append(["Stop", stop_line if stop_line else "—"])
-        rows.append(["Target", OVERNIGHT_TP_TEXT])
+        rows.append(["Target", take_profit_text({
+            **pos,
+            "session": "overnight_research",
+            "tp": pos.get("tp") or pos.get("target") or pos.get("take_profit"),
+        }) or overnight_tp_text()])
         fill = status.get("last_paper_fill") or {}
         if fill:
             side = str(fill.get("side") or "")
@@ -905,6 +944,31 @@ def build_status_card(
     note = str(status.get("last_note") or status.get("rithmic_probe") or "").strip()
     if note:
         rows.append(["Note", note])
+    cl = status.get("chart_levels") or {}
+    if isinstance(cl, dict) and cl:
+        bits = []
+        for key, lab in (
+            ("pdh", "PDH"), ("pdl", "PDL"), ("onh", "ONH"), ("onl", "ONL"),
+            ("rth_open", "RTH Open"), ("vwap", "VWAP"),
+        ):
+            if cl.get(key) is not None:
+                try:
+                    bits.append(f"{lab} {float(cl[key]):.2f}")
+                except (TypeError, ValueError):
+                    pass
+        if bits:
+            rows.append(["Levels", " · ".join(bits)])
+    if status.get("bias_15m") or status.get("bias_5m"):
+        struct = status.get("structure_15m")
+        rows.append([
+            "Bias 15m/5m",
+            f"{status.get('bias_15m') or '—'} / {status.get('bias_5m') or '—'}"
+            + (f" ({struct})" if struct else ""),
+        ])
+    if status.get("level_mode"):
+        rows.append(["Entry mode", "level_15_5_1 (windows + levels)"])
+    else:
+        rows.append(["Entry mode", "L6 ema15 15m+5m (levels map-only)"])
     return {
         "headline": bot_s,
         "rows": rows,
@@ -926,6 +990,16 @@ def build_signal_card(
             status,
             price=status.get("last_price") or levels.get("last_price"),
             source=str(status.get("quote_source") or levels.get("source") or "rithmic"),
+            wait_reason=wait_reason_from_zones(
+                read_zones(),
+                fills_tonight=status.get("fills_tonight", status.get("live_trades_today")),
+                session_pnl=status.get("session_recipe_pnl"),
+                cooldown_until=status.get("cooldown_until_et"),
+                already_filled=overnight_cap_reached(
+                    status.get("fills_tonight", status.get("live_trades_today")),
+                    status.get("session_recipe_pnl"),
+                ),
+            ),
         )
     gem_call = None
     if not overnight:
@@ -940,6 +1014,14 @@ def build_signal_card(
         last_price = None
         waiting = True
     rth = (packet or {}).get("rth_levels") or {}
+    overnight_tp = overnight_tp_text()
+    if overnight:
+        opens_now = status.get("open_positions") or []
+        pos0 = opens_now[0] if isinstance(opens_now, list) and opens_now and isinstance(opens_now[0], dict) else {}
+        overnight_tp = take_profit_text({
+            "session": "overnight_research",
+            "tp": pos0.get("tp") or pos0.get("target") or pos0.get("take_profit"),
+        }) or overnight_tp_text()
     return {
         "waiting": waiting,
         "overnight": overnight,
@@ -948,9 +1030,9 @@ def build_signal_card(
         "last_price": last_price,
         "stop": None if refresh_ok is False and not overnight else levels.get("stop"),
         "stop_pts": None if refresh_ok is False and not overnight else levels.get("stop_pts"),
-        "take_profit": OVERNIGHT_TP_TEXT if overnight else levels.get("take_profit"),
-        "flatten_et": OVERNIGHT_FLATTEN_ET if overnight else levels.get("flatten_et"),
-        "next_window": "flatten 09:25" if overnight else levels.get("next_window"),
+        "take_profit": overnight_tp if overnight else levels.get("take_profit"),
+        "flatten_et": "" if overnight else levels.get("flatten_et"),
+        "next_window": f"SL / {overnight_tp_text()}" if overnight else levels.get("next_window"),
         "last_bar_ts_et": levels.get("last_bar_ts_et") or status.get("last_quote_ts_et"),
         "quote_age_min": levels.get("quote_age_min"),
         "quote_age_sec": levels.get("quote_age_sec") or status.get("quote_age_seconds"),
@@ -961,8 +1043,9 @@ def build_signal_card(
         "gemini_callout": gem_call,
         "rules": (
             [
-                "Overnight paper: break settled ONH/ONL only. ATR×1.5 stop, 1R TP, flatten 09:25 ET.",
-                "Lucid TEST/sim orders (not funded live). Locked RTH ema15 is off overnight.",
+                f"Paper research: last-through last 20m high/low. ATR×1.5 stop, {overnight_tp_text()}. "
+                "No 09:25 flatten — runs through RTH until Ctrl+C.",
+                "Lucid TEST/sim orders (not funded live). Do not run start_mnq_live.bat at the same time.",
             ]
             if overnight
             else [
@@ -1039,6 +1122,60 @@ def home():
     return resp
 
 
+_CHART_CACHE: Dict[str, Any] = {"t": 0.0, "mtime": None, "payload": None}
+
+
+@app.get("/api/chart")
+def chart_data():
+    """1m candles + session levels for the desk Lightweight Chart."""
+    from src.strategy.mnq_15m_ema_eod import ema15_level_mode_from_env, load_1m_seed_csv
+    from src.strategy.session_levels import bias_15m_5m, chart_series_payload
+
+    status = read_status() or {}
+    seed_path = os.getenv("EMA15_1M_SEED", "data/MNQ_1m.csv")
+    now = time.time()
+    mtime = None
+    try:
+        mtime = os.path.getmtime(seed_path) if os.path.isfile(seed_path) else None
+    except OSError:
+        mtime = None
+    cached = _CHART_CACHE.get("payload")
+    if (
+        cached
+        and _CHART_CACHE.get("mtime") == mtime
+        and now - float(_CHART_CACHE.get("t") or 0) < 20
+    ):
+        payload = dict(cached)
+    else:
+        df = load_1m_seed_csv(seed_path)
+        if df is not None and len(df) > 2500:
+            df = df.tail(2500).reset_index(drop=True)
+        payload = chart_series_payload(df, lookback_bars=390)
+        bias = bias_15m_5m(df) if df is not None else {}
+        payload["bias"] = bias
+        _CHART_CACHE["t"] = now
+        _CHART_CACHE["mtime"] = mtime
+        _CHART_CACHE["payload"] = dict(payload)
+
+    live_lv = status.get("chart_levels") if isinstance(status, dict) else None
+    if isinstance(live_lv, dict) and live_lv:
+        merged = dict(payload.get("levels") or {})
+        merged.update({k: v for k, v in live_lv.items() if v is not None})
+        payload["levels"] = merged
+    bias = dict(payload.get("bias") or {})
+    if status.get("bias_15m"):
+        bias["bias_15m"] = status.get("bias_15m")
+        bias["bias_5m"] = status.get("bias_5m")
+        bias["structure_15m"] = status.get("structure_15m")
+        bias["agree"] = status.get("bias_agree")
+    payload["bias"] = bias
+    payload["level_mode"] = bool(
+        status.get("level_mode") if status.get("level_mode") is not None else ema15_level_mode_from_env()
+    )
+    payload["last_price"] = status.get("last_price") or (payload.get("levels") or {}).get("last_price")
+    return jsonify(payload)
+
+
 @app.get("/api/desk")
 def desk():
     global _last_ask_ok
@@ -1107,9 +1244,21 @@ def desk():
             "label": facts.get("label"),
         },
         "refresh": refresh,
+        "open_pnl": open_unrealized(status),
         "overnight": {
             "active": overnight_active,
             "zones": status.get("zones") or zones_payload.get("zones") or [],
+            "overnight_bars": int(zones_payload.get("overnight_bars") or 0),
+            "wait_reason": wait_reason_from_zones(
+                zones_payload,
+                fills_tonight=status.get("fills_tonight", status.get("live_trades_today")),
+                session_pnl=status.get("session_recipe_pnl"),
+                cooldown_until=status.get("cooldown_until_et"),
+                already_filled=overnight_cap_reached(
+                    status.get("fills_tonight", status.get("live_trades_today")),
+                    status.get("session_recipe_pnl"),
+                ),
+            ),
             "last_paper_fill": status.get("last_paper_fill"),
             "source": status.get("quote_source"),
             "suggestions": overnight_sugg if overnight_active else {},

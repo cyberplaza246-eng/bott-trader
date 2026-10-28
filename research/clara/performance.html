@@ -1,0 +1,1826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YC3JQRYMJB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-YC3JQRYMJB');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance: Clara Systems</title>
+<meta name="description" content="Complete backtested performance for Clara Core: year-by-year returns, drawdowns, Monte Carlo stress test, and risk models. Every figure reproducible.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://clarasystems.io/performance">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Performance · Clara Systems">
+<meta property="og:description" content="Complete backtested performance for Clara Core: year-by-year returns, drawdowns, Monte Carlo stress test, and risk models. Every figure reproducible.">
+<meta property="og:url" content="https://clarasystems.io/performance">
+<meta property="og:site_name" content="Clara Systems">
+<meta property="og:image" content="https://clarasystems.io/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Performance · Clara Systems">
+<meta name="twitter:description" content="Complete backtested performance for Clara Core: year-by-year returns, drawdowns, Monte Carlo stress test, and risk models. Every figure reproducible.">
+<meta name="robots" content="index, follow">
+
+<style type="text/css">@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Josefin Sans', sans-serif; background: var(--bg); color: #2C2B28; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+:root {
+  --black: #2C2B28; --mid: #3a3835; --soft: #6b6a65;
+  --bg: #f7f6f3; --bg-dark: #141412; --bg-dk2: #1c1c1a;
+  --border: #D0D0CC; --green: #1D9E75; --red: #D85A30;
+  --ow: #E6E4DD; --amber: #BA7517; --nav-h: 62px;
+}
+.site-header { position: sticky; top: 0; z-index: 500; background: rgba(235,233,228,0.97); border-bottom: 1px solid var(--border); box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+.header-logo-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 3rem; height: var(--nav-h); border-bottom: 1px solid var(--border); }
+.header-logo { grid-column: 2; text-align: center; font-size: 22px; font-weight: 300; letter-spacing: .22em; text-transform: uppercase; color: var(--black); text-decoration: none; }
+.header-cta-slot { grid-column: 3; display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem; }
+.header-cta { font-family: 'Josefin Sans', sans-serif; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; padding: 10px 24px; background: #2C2B28; color: #fff; border: none; cursor: pointer; transition: background .15s; }
+.header-cta:hover { background: var(--green); }
+.header-nav-row { height: var(--nav-h); display: flex; align-items: center; justify-content: center; gap: 2.5rem; padding: 0 3rem; }
+.header-nav-row a { font-size: 13px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--black); text-decoration: none; transition: color .15s; white-space: nowrap; }
+.header-nav-row a.nt-nav.active { color: #F0592B; }
+.header-nav-row a.active { color: var(--green); }
+.page-sec { max-width: 920px; margin: 0 auto; padding: 4rem 3rem; }
+
+.bg-lt { background: var(--bg); }
+.bg-alt { background: #eeecea; }
+.bg-dark { background: var(--bg-dark); }
+.full-rule { border: none; border-top: 1px solid var(--border); }
+.ex-box { border: 1px solid var(--border); background: #f0efe9; padding: 1.5rem; margin: 1.25rem 0; }
+.ex-row { display: flex; justify-content: space-between; align-items: center; gap: 1.25rem; padding: .35rem 0; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 400; color: var(--mid); }
+.ex-row:last-child { border-bottom: none; }
+.ex-row span:last-child { color: var(--black); text-align: right; white-space: nowrap; }
+.ex-head { font-size: 10px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); margin-bottom: .75rem; }
+.sec-label { display: block; font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); margin-bottom: 2rem; }
+.bt { font-size: 17px; font-weight: 400; letter-spacing: .02em; color: var(--mid); line-height: 1.85; margin-bottom: 1.4rem; }
+.bt strong { color: var(--black); font-weight: 400; }
+.bt em { font-style: normal; color: var(--black); font-weight: 400; }
+.ilist { margin: 1rem 0 1.4rem; display: flex; flex-direction: column; gap: .85rem; }
+.ilist p { font-size: 16px; font-weight: 400; letter-spacing: .02em; color: var(--mid); padding-left: 1.5rem; line-height: 1.6; }
+.link-arr { display: inline-block; margin-top: 1.5rem; font-size: 13px; font-weight: 400; letter-spacing: .10em; text-transform: uppercase; color: var(--black); text-decoration: none; border-bottom: 1.5px solid var(--black); padding-bottom: 2px; transition: color .15s, border-color .15s; }
+.link-arr:hover { color: var(--green); border-color: var(--green); }
+/* Mobile-only line breaks (hidden on desktop) */
+.h1-br, .ap-br { display: none; }
+.h1r-s { display: none; }
+.h1r-l { display: inline; }
+.htr-s, .rfl-s, .mb-s, .cb-s { display: none; }
+.htr-l, .rfl-l, .mb-l, .cb-l { display: inline; }
+/* Comparison table */
+.comp-table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 14px; }
+.comp-table th { font-size: 10px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); padding: .6rem .75rem; border-bottom: 1px solid var(--border); text-align: center; }
+.comp-table td { padding: .5rem .75rem; border-bottom: 1px solid var(--border); color: var(--mid); font-variant-numeric: tabular-nums; }
+.comp-table td:first-child { color: var(--soft); font-size: 12px; }
+.comp-table td.g { color: var(--green); }
+.comp-table th, .comp-table td { text-align: center; }
+.comp-table tr:last-child td { border-bottom: none; }
+#wd .comp-table { table-layout: fixed; }
+.rz-t { width:100%; border-collapse:collapse; font-size:14px; table-layout:fixed; }
+.rz-t th { font-size:10px; font-weight:400; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); padding:.5rem .4rem; border-bottom:1px solid var(--border); text-align:center; }
+.rz-t td { padding:.45rem .4rem; border-bottom:1px solid var(--border); color:var(--mid); text-align:center; font-variant-numeric:tabular-nums; }
+.rz-t tr:last-child td { border-bottom:none; }
+.comp-block { border: 1px solid var(--border); background: #f0efe9; margin: 1.5rem 0; overflow: hidden; }
+.comp-head { padding: .75rem 1.25rem; border-bottom: 1px solid var(--border); font-size: 10px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); }
+.f-social { margin: 0; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; overflow: visible; }
+.f-social a { color: var(--soft); display: inline-flex; align-items: center; transition: color .15s ease, transform .2s ease; }
+.f-social a:hover { color: var(--green); transform: scale(1.2); }
+footer { background: var(--bg); border-top: 1px solid var(--border); padding: 2.5rem 3rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.25rem; }
+.f-logo { font-size: 12px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); }
+.f-disc { font-size: 12px; font-weight: 400; color: var(--soft); text-align: center; line-height: 1.7; }
+.f-disc a { color: var(--black); text-decoration: none; }
+.f-disc a:hover { color: var(--green); }
+.f-disc a.footer-highlight { -webkit-text-fill-color: transparent; }
+.f-disc a.footer-highlight:hover { -webkit-text-fill-color: transparent; color: inherit; }
+/* HOW TO INTERPRET collapsible */
+.interpret-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: flex-start;
+  background: transparent; border: none; border-bottom: 1.5px solid var(--border);
+  padding: .6rem 0; cursor: pointer; font-family: 'Josefin Sans', sans-serif !important;
+  gap: .75rem;
+}
+.interpret-label {
+  font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--soft); font-family: 'Josefin Sans', sans-serif !important;
+}
+.interpret-toggle:hover .interpret-label { color: var(--black); }
+.interpret-arrow {
+  font-size: 9px; color: var(--soft); transition: transform 300ms ease;
+  flex-shrink: 0; font-family: 'Josefin Sans', sans-serif !important;
+}
+.interpret-toggle:hover .interpret-arrow { color: var(--black); }
+/* Font isolation - page content vs dashboard embed */
+.page-sec, .page-sec * {
+  font-family: 'Josefin Sans', sans-serif !important;
+}
+header, header *, .mob-menu, .mob-menu * {
+  font-family: 'Josefin Sans', sans-serif !important;
+}
+.bt, .sec-label, .ilist p, .link-arr, .comp-table, .comp-table td, .comp-table th,
+.comp-head, .f-logo, .f-disc, .header-logo, .header-nav-row a, .header-cta {
+  font-family: 'Josefin Sans', sans-serif !important;
+}
+/* Dashboard outer card container */
+.dashboard-outer {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 4rem 3rem;
+}
+/* Dashboard wrap - the visible rounded box */
+#dashboardWrap {
+  width: 100%;
+  overflow: hidden;
+  font-family: 'SF Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  background: #ffffff;
+  border: 0.5px solid #e2e1dc;
+  border-radius: 0;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  padding: 1.25rem 1.25rem 2rem;
+}
+#dashboardWrap * {
+  font-family: 'SF Mono', ui-monospace, 'Cascadia Code', 'Fira Code', monospace !important;
+}
+
+/* Logo click animation */
+@keyframes logoFlicker {
+  0%   { color: inherit; }
+  25%  { color: var(--green); }
+  100% { color: inherit; }
+}
+.header-logo.logo-clicked { animation: logoFlicker 400ms ease forwards; }
+/* status tag */
+@keyframes shimmer {
+  0%   { background-position: 150% center; }
+  100% { background-position: -150% center; }
+}
+.launch-tag {
+  position: relative;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 12px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%);
+  background-size: 300% auto; -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  animation: shimmer 3s linear infinite; cursor: pointer;
+  white-space: nowrap; text-decoration: none;
+}
+.launch-tag:hover .launch-tooltip { opacity: 1; pointer-events: auto; }
+.launch-tooltip {
+  position: absolute; top: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); background: var(--black); color: #f0efe9;
+  padding: 10px 16px; border-radius: 0; font-size: 11px; font-weight: 400;
+  letter-spacing: .08em; text-transform: none; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 999;
+  -webkit-text-fill-color: #f0efe9; background-clip: unset;
+  -webkit-background-clip: unset; display: flex; align-items: center; gap: 10px;
+}
+.launch-tooltip::before { content: ''; position: absolute; top: -8px; left: 0; right: 0; height: 8px; background: transparent; }
+.launch-tooltip::after { content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 8px; height: 8px; background: var(--black); }
+.launch-tooltip a { color: #9b9a94; display: flex; align-items: center; transition: color .15s; text-decoration: none; }
+.launch-tooltip a:hover { color: #4ECBA0; }
+/* Logo animation */
+
+/* Footer shimmer links */
+.footer-highlight {
+  background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%);
+  background-size: 300% auto; -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  animation: shimmer 3s linear infinite;
+  text-decoration: none; font-size: 12px; font-weight: 400; letter-spacing: .08em;
+}
+@media (max-width: 768px) {
+  .m-flip.bg-lt { background: #eeecea; }
+  .m-flip.bg-alt { background: var(--bg); } .f-disc { display: block; text-align: center; line-height: 2.05; } }
+
+/* ═══════════ MOBILE RESPONSIVE (≤768px) - does not affect desktop ═══════════ */
+@media (max-width: 768px) {
+  .header-logo-row { padding: 0 1rem; grid-template-columns: 1fr auto 1fr; }
+  .header-logo { font-size: 19px !important; font-weight: 300 !important; letter-spacing: .12em !important; white-space: nowrap; }
+  .header-cta { font-size: 8px !important; padding: 7px !important; line-height: 1.35 !important; text-align: center !important; }
+  .launch-tag { display: none !important; }
+  .ilist p { margin-bottom: 1.1rem !important; }
+  .header-nav-row {
+    gap: 1.1rem;
+    padding: 0 1rem;
+    overflow-x: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .header-nav-row::-webkit-scrollbar { display: none; }
+  .header-nav-row a { font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+  .page-sec { padding: 2.5rem 1.25rem !important; }
+  .dashboard-outer { padding: 2.5rem 1.25rem !important; }
+  .acc-hdr, .acc-thead { grid-template-columns: 16px repeat(5, minmax(0,1fr)) !important; padding: 10px 6px !important; gap: 4px; }
+  .acc-cell, .acc-th { font-size: 10px !important; letter-spacing: 0 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mo-table th, .mo-table td { padding: 4px 3px !important; font-size: 10px !important; }
+  .mo-table th { font-size: 8px !important; letter-spacing: .02em !important; }
+  #gridPnlTable, #gridDdTable, #gridCumTable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #gridPnlTable table, #gridDdTable table, #gridCumTable table { min-width: 430px; }
+  /* frozen first column while the values scroll, like a locked pane */
+  #gridPnlTable td:first-child, #gridPnlTable th:first-child,
+  #gridDdTable td:first-child, #gridDdTable th:first-child,
+  #gridCumTable td:first-child, #gridCumTable th:first-child,
+  .rob-table td:first-child, .rob-table th:first-child,
+  .cmp-grid .cmp-label, .cmp-grid .label-hdr, .cmp-grid .cmp-section-row {
+    position: sticky; left: 0; z-index: 1;
+    justify-content: center !important; text-align: center !important;
+    background: var(--color-background-secondary, #ffffff);
+    box-shadow: 2px 0 3px rgba(0,0,0,0.06);
+  }
+  .rob-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .comp-table { font-size: 11.5px !important; width: 100% !important; display: table !important; table-layout: fixed; }
+  .comp-table th, .comp-table td { padding: .4rem .3rem !important; word-wrap: break-word; }
+  .comp-table td:first-child, .comp-table th:first-child { font-size: 10.5px !important; }
+  .rob-table { min-width: 420px !important; font-size: 10px !important; }
+  .cmp-grid { min-width: 530px !important; }
+  .cmp-cell { font-size: 10px !important; padding: 6px 4px !important; }
+  .cmp-label { font-size: 9px !important; padding: 6px 4px !important; }
+  .mc-tier { width: auto !important; min-width: 0 !important; padding: 2px 6px !important; }
+  .mc-label { font-size: 11px !important; }
+  .mc-val { font-size: 12px !important; }
+  .mc-row { padding-right: 2px; }
+  
+  .lk-s { display: inline !important; } .lk-l { display: none !important; }
+  .h1-br, .ap-br { display: inline !important; }
+  .h1-dot, .ap-dot { display: none !important; }
+  .h1r-s { display: inline !important; white-space: nowrap; }
+  .h1r-l { display: none !important; }
+  .rf-l2 { letter-spacing: 0 !important; white-space: nowrap; }
+  .htr-s, .rfl-s, .mb-s, .cb-s { display: inline !important; white-space: nowrap; }
+  .htr-l, .rfl-l, .mb-l, .cb-l { display: none !important; }
+  .approach-cards { grid-template-columns: 1fr !important; }
+  .th-s { display: inline !important; } .th-l { display: none !important; }
+  .mb-br { display: inline !important; } .d-br { display: none !important; }
+  .m-hide { display: none !important; }
+  .sec-label { line-height: 2.4; }
+  .m-sp { display: inline !important; }
+  .comp-table th { font-size: 9px !important; word-wrap: normal !important; overflow-wrap: normal !important; letter-spacing: .05em !important; }
+  .page-sec table[style*="min-width"] { min-width: 0 !important; table-layout: fixed; width: 100% !important; }
+  .page-sec table[style*="min-width"] th, .page-sec table[style*="min-width"] td { word-wrap: break-word; padding: .45rem .3rem !important; font-size: 12px !important; }
+  table { font-size: 13px !important; }
+  th, td { padding: .6rem .4rem !important; }
+  h1 { font-size: 26px !important; }
+  footer { padding: 2rem 1.25rem !important; }
+}
+@media (max-width: 480px) {
+  .header-logo { font-size: 19px !important; }
+  .header-cta { font-size: 7px !important; padding: 7px !important; }
+  .header-nav-row a { font-size: 11px; }
+  .page-sec { padding: 2rem 1rem !important; }
+}
+
+/* ═══ MOBILE HAMBURGER (≤768px only, no desktop effect) ═══ */
+.ham-btn { display: none; }
+.mob-menu { display: none; }
+@media (max-width: 768px) {
+  .header-nav-row { display: none !important; }
+  .ham-btn {
+    display: inline-flex; flex-direction: column; justify-content: center; gap: 6px;
+    height: 40px; padding: 10px 6px;
+    cursor: pointer;
+    background: none; border: none; border-radius: 0;
+    color: rgba(107,106,102,0.5);
+  }
+  .ham-btn .hb1, .ham-btn .hb2 { display: block; height: 1.5px; background: currentColor; transition: transform .25s ease, width .25s ease; }
+  .ham-btn .hb1 { width: 20px; }
+  .ham-btn .hb2 { width: 13px; }
+  .ham-btn.open .hb1 { transform: translateY(3.75px) rotate(45deg); }
+  .ham-btn.open .hb2 { width: 20px; transform: translateY(-3.75px) rotate(-45deg); }
+  .header-logo-row { position: relative; z-index: 401; background: inherit; }
+  .mob-menu {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #f7f6f3; z-index: 400;
+    padding-top: 140px;
+    overflow-y: auto;
+    text-align: center;
+  }
+  .mob-menu a {
+    display: block; padding: .95rem 1.5rem;
+    font-size: 17px; font-weight: 300; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--black, #2C2B28); text-decoration: none;
+    border-bottom: none;
+  }
+  .mob-menu a.active { color: #1D9E75; }
+  .mob-menu a.nt-nav.active { color: #F0592B; }
+  .mob-menu.open { display: block; }
+  .mm-rule { width: 120px; margin: 1.1rem auto; border-top: 1px solid #dedcd5; }
+  .mm-sec a { font-size: 13px; padding: .75rem 1.5rem; color: var(--soft, #6b6a66); }
+  .header-cta { white-space: normal !important; line-height: 1.25 !important; max-width: 92px; }
+  .cta-br { display: block; height: 0; }
+}
+.th-s { display: none; }
+.th-l { display: inline; }
+.mb-br { display: none; }
+.d-br { display: inline; }
+.m-sp { display: none; }
+.lk-s { display: none; }
+.lk-l { display: inline; }
+.pg-title-band, .pg-title-band + hr { display: none; }
+@media (max-width: 768px) { .pg-title-band, .pg-title-band + hr { display: block; } }
+
+@media (max-width:768px){
+  }
+.stat-row-3 .sk, .stat-h3 .sk { min-height: 26px; display: flex; align-items: flex-end; justify-content: center; }
+
+#mcSimCard, #trade-distribution, #reasons, #verification, #why-we-cap, #our-approach, #ourApproachBtn, #start-date, #risk-at-size, #drawdown-measures { scroll-margin-top: 152px; }
+#sdt th, #fa th, #jt th { position: sticky; top: 126px; background: #f7f6f3; z-index: 2; }
+@media (max-width: 768px) { #mcSimCard, #trade-distribution, #reasons, #verification, #why-we-cap, #our-approach, #ourApproachBtn, #start-date, #risk-at-size, #drawdown-measures { scroll-margin-top: 86px; } #sdt th, #fa th, #jt th { top: 72px; } }
+/* FOOTER, one block on every page. Shape and spacing from the home page. Added Oct 6, 2026. */
+footer { background: var(--bg); border-top: 1px solid var(--border); padding: 2.5rem 3rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.25rem; }
+.f-social { width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; overflow: visible; }
+.f-social a { color: var(--soft); display: inline-flex; align-items: center; transition: color .15s ease, transform .2s ease; }
+.f-social a:hover { color: var(--green); transform: scale(1.2); }
+.f-logo { margin: 0; font-size: 12px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); }
+.f-disc { margin: 0; font-size: 12px; font-weight: 400; color: var(--soft); text-align: center; line-height: 1.7; }
+.f-disc a { color: var(--black); text-decoration: none; }
+.f-disc a:hover { color: var(--green); }
+.f-disc a.footer-highlight { -webkit-text-fill-color: transparent; }
+.f-disc a.footer-highlight:hover { -webkit-text-fill-color: transparent; color: inherit; }
+.footer-highlight { background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%); background-size: 300% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 3s linear infinite; text-decoration: none; font-size: 12px; font-weight: 400; letter-spacing: .08em; }
+.f-note { max-width: 480px; margin-left: auto; margin-right: auto; }
+.mb-br { display: none; }
+.f-links-m { display: none; }
+@media (max-width: 768px) { .f-disc { display: block; text-align: center; line-height: 2.05; } footer { padding: 2rem 1.25rem !important; } .mb-br { display: inline !important; } .f-links-d { display: none !important; } .f-links-m { display: block !important; } }
+</style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xmci3fambi");
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://clarasystems.io/#org","name":"Clara Systems","url":"https://clarasystems.io/","logo":"https://clarasystems.io/apple-touch-icon.png","sameAs":["https://instagram.com/clarasystems_io","https://x.com/clarasystems_io","https://youtube.com/@clarasystems_io","https://www.facebook.com/clarasystems.io","https://t.me/clarasystems_io","https://discord.gg/GxHYxfKz8p"]},{"@type":"WebSite","@id":"https://clarasystems.io/#site","url":"https://clarasystems.io/","name":"Clara Systems","publisher":{"@id":"https://clarasystems.io/#org"}}]}</script>
+</head>
+<body>
+
+
+<header class="site-header">
+  <div class="header-logo-row">
+    <div><button class="ham-btn" id="hamBtn" aria-label="Menu" aria-expanded="false"><span class="hb1"></span><span class="hb2"></span></button></div>
+    <a href="index.html" class="header-logo">CLARA SYSTEMS</a>
+    <div class="header-cta-slot">
+      <button class="header-cta" onclick="location.href='downloads.html'">Download<span class="cta-br"> </span>Free</button>
+    </div>
+  </div>
+  <nav class="header-nav-row">
+    <a href="index.html">HOME</a>
+    <a href="performance.html" class="active">PERFORMANCE</a>
+    <a href="strategy.html">STRATEGY</a>
+    <a href="structure.html">STRUCTURE</a>
+    <a href="pricing.html">WHY FREE</a>
+    <a href="philosophy.html">PHILOSOPHY</a>
+    <a href="ninjatrader.html" class="nt-nav">NINJATRADER</a>
+  </nav>
+<nav class="mob-menu" id="mobMenu">
+    <a href="index.html">HOME</a>
+    <a href="performance.html" class="active">PERFORMANCE</a>
+    <a href="strategy.html">STRATEGY</a>
+    <a href="structure.html">STRUCTURE</a>
+    <a href="pricing.html">WHY FREE</a>
+    <a href="philosophy.html">PHILOSOPHY</a>
+    <a href="ninjatrader.html" class="nt-nav">NINJATRADER</a>
+  <span class="mm-rule" style="display:block"></span><div class="mm-sec"><a href="downloads.html">Downloads</a><a href="faq.html">FAQ</a><a href="verify.html">How To Verify A Strategy</a><a href="mindset.html">Trading &amp; The Mind</a><a href="socials.html">Connect</a></div></nav>
+</header>
+  <div class="bg-lt pg-title-band">
+    <div class="page-sec">
+      <span class="sec-label">Performance</span>
+    </div>
+  </div>
+  <hr class="full-rule">
+
+
+<!-- ATTENTION BAND -->
+<div class="bg-lt m-flip">
+<div class="page-sec">
+      <div>
+    <p style="font-size:21px;font-weight:300;line-height:1.7;color:#1a1917;margin:0;max-width:760px">Most people will not read this page. They will download the strategy, get surprised by normal behavior, and quit at the worst moment. The data below is how you avoid being most people.</p>
+  </div>
+</div>
+</div>
+  <hr class="full-rule">
+
+<!-- READ THIS FIRST - collapsible -->
+<div class="bg-alt m-flip">
+  <div class="page-sec">
+    <button class="interpret-toggle" id="readFirstToggle" onclick="toggleReadFirst()" aria-expanded="false">
+    <span class="interpret-arrow" id="readFirstArrow">▼</span>
+    <span class="interpret-label">Read This First · The Full Risk Picture</span>
+  </button>
+  <div class="interpret-body" id="readFirstBody" style="display:none; margin-top:1.5rem; max-width:760px">
+    <p class="bt">This page covers the backtest in detail. It starts May 6, 2019, the first day MNQ traded, because there is no earlier data to run. That puts the contract's early months inside the record, when MNQ was new and still traded thin, with low volume and few participants. It also puts the whole COVID stretch in: the March 2020 crash, and the volatile, uncertain markets that followed it. Nothing was trimmed to make the equity curve look better. It ends September 30, 2026 because these numbers are updated at the close of each quarter. This set runs through the most recent completed quarter.</p>
+    <p class="bt">This strategy was built around drawdown first. Every number on this page comes from the backtest, and the backtest is a CSV file exported straight from NinjaTrader. The same free platform you run the strategy on. You can run the same backtest yourself, export the same file, and verify it yourself; the Setup Guide shows how to run the backtest for free.</p>
+    <p class="bt">The same is true of every internal setting you will read about on this page and across the site: the filters, the risk limit, the sizing rules. Each one was tested against the full seven-year backtest for its effect on drawdown, win rate, and profit. When a setting made more profit but a deeper drawdown, we chose the lower drawdown and gave up the extra profit.</p>
+    <p class="bt">The drawdown we publish is measured on open equity, including the dip while a position is still open. NinjaTrader's own summary reports a shallower number, $1,652 on the $300 model, because it measures closed trades only. We publish $1,811 instead, calculated from the per-trade excursion data inside the CSV: for every trade, the export records the lowest point it touched while it was open, and our drawdown includes those dips.</p>
+    <p class="bt"><strong>Prop firm account types matter here.</strong> How your firm measures its trailing drawdown decides how much room your account really has: an intraday rule moves the limit up the moment an open trade makes a new high, while an end-of-day rule counts only the closing balance. End of day trailing drawdown is the type you could consider, whatever strategy you run. The full breakdown, with all three rules charted side by side, is on the Structure page, and the give-back section below shows why it matters.</p>
+    <p class="bt"><strong>What the data is for.</strong> The data is the backtest: every trade in the record, in the order they happened, every win, every loss, and every recovery on the record.</p>
+    <p class="bt">That record is a map of the risk. It is how you decide, before a single trade, whether you can afford to run this at all, on which account, and at which model: not just the risk per trade, but what a losing streak costs and how deep a drawdown can run. None of it promises the future; a large sample shows behavior, not guarantees. But that behavior is what sets your expectations in the right place, and it is what you stand on when the losses arrive and the urge to intervene shows up. What remains is the part only you control: match the risk model to your account. The edge is not in any single trade. It shows up across every one of them, and only while the strategy is running. This data is what makes running it possible.</p>
+  </div>
+    <div style="margin-top:2.5rem;">
+    <button class="interpret-toggle" id="interpretToggle" onclick="toggleInterpret()" aria-expanded="false">
+      <span class="interpret-arrow" id="interpretArrow">▼</span>
+      <span class="interpret-label">How To Read The Data · <span class="htr-l">Choosing Your Risk Model</span><span class="htr-s">Risk Models</span></span>
+    </button>
+    <div class="interpret-body" id="interpretBody" style="display:none; margin-top:1.5rem;">
+      <p class="bt">All five risk models are one strategy at five different risk levels. The trades are identical, governed by the same rules: a maximum of two trades a day, stopping after the first daily win. What changes is position size, and with it both the profit and the drawdown.</p>
+      <p class="bt">A risk model is the dollar amount you risk per trade. It is the one setting you choose:</p>
+      <p class="bt">The strategy divides your dollar amount by what the stop costs on one contract. A tighter stop means more contracts; a wider stop means fewer.</p>
+      <p class="bt">Built-in risk filters do the rest: the strategy will not take a trade that risks more than $400 per contract, on any model. The limit is locked in the code; it is not an adjustable setting. It is the maximum planned risk at entry, not a maximum possible loss: an actual loss can exceed it when a fill or a gap lands past the stop. What it protects, and what it costs, has its own section further down the page.</p>
+      <p class="bt">There is also a floor: when a setup is valid, the strategy always trades at least one contract. On the $200 and $300 models, a wide stop can make that single contract cost more than the risk per trade you set. The example below shows how, and the $400-per-contract limit is the ceiling.</p>
+      <div class="ex-box">
+        <div class="ex-head">The $200 model, worked through</div>
+        <div class="ex-row"><span>stop costs $100 <br class="mb-br">per contract</span><span>2 contracts &middot; $200 at risk</span></div>
+        <div class="ex-row"><span>stop costs $300 <br class="mb-br">per contract</span><span>1 contract &middot; $300 at risk</span></div>
+        <div class="ex-row"><span>stop costs $400 <br class="mb-br">per contract</span><span>1 contract &middot; $400 at risk</span></div>
+        <div class="ex-row"><span>stop costs <br class="mb-br">more than $400 <br class="mb-br">per contract</span><span>trade skipped</span></div>
+      </div>
+      <p class="bt">So far, every stop in the record has stayed under the $400 limit. That is why the $200 and $300 models share the same largest single loss, $381. From the $400 model up, losses track the setting: the $400 model's largest single loss was $410.</p>
+      <p class="bt">Even though the $200 and $300 models can lose more than their set risk per trade on a single trade, they still produce the lowest overall drawdown. That lower drawdown is essential for smaller accounts and for prop firm accounts still in the early trailing drawdown phase, where every dollar of buffer matters.</p>
+      <p class="bt">Higher risk models increase both return potential and drawdown. There is no optimal setting, only alignment with your account size, risk tolerance, and prop firm rules.</p>
+      <p class="bt"><strong>Why these five models.</strong> The models are position sizes, not tuned parameters. The strategy logic is identical on every one; the only thing that changes is how many contracts a given stop allows. The risk is set in dollars rather than a fixed number of contracts because dollars keep the risk consistent. With fixed contracts, the same position risks $100 on a tight stop one day and $400 on a wide stop the next; the exposure swings with the market. A fixed dollar amount sizes each trade to its stop, so every trade carries roughly the same risk, whatever the volatility. $200 is the smallest model because of the one-contract floor: below it, the floor keeps the risk and gives away the return. And $800 is the largest model we publish because the largest common prop accounts, 250K, carry a trailing drawdown around $6,500: the $800 model's worst historical drawdown of -$5,374 is the most we would run against that limit and still leave real room. You can size above it. We would not.</p>
+      <p class="bt">You are also free to test any value in between, free, in NinjaTrader. You will find settings that backtest slightly better than the published models, and neighbors that backtest slightly worse. That is contract rounding and sequence luck, not a better strategy.</p>
+      <p class="bt"><strong>This is backtested data, not a live track record.</strong></p>
+      <p class="bt">The risk framework at the end of the dashboard sizes each model against account balances and prop firm drawdown limits, and the Trade Management System on the Strategy page explains the sizing in full.</p>
+      </div>
+    </div>
+  </div>
+</div>
+  <hr class="full-rule">
+
+<!-- ═══════════════ DASHBOARD - INLINE EMBED ═══════════════ -->
+<div class="dashboard-outer">
+<div id="dashboardWrap">
+<style>
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f7f6f3;
+    --color-text-primary: #1a1917;
+    --color-text-secondary: #6b6a65;
+    --color-border-tertiary: #e2e1dc;
+    --color-border-secondary: #cccbc5;
+    --color-border-primary: #a8a7a0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'SF Mono',ui-monospace,'Cascadia Code','Fira Code',monospace;background:var(--bg);color:var(--color-text-primary);padding:0}
+  /* Stacked and centred, matching the index hero: title, then the date line at
+     the SAME size, then the smaller note that labels the tab row below it. */
+  /* gap = title to note (16px), margin-bottom = note to tabs (7px). The note
+     LABELS the tabs, so it sits against them, not against the title. */
+  .hdr{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;margin-bottom:7px}
+  .hdr h1{font-size:17px;font-weight:500;letter-spacing:.03em}
+  .hnote{font-size:11px;font-weight:400;color:var(--color-text-secondary);letter-spacing:.04em;line-height:1.6;max-width:640px}
+  .tabs{display:flex;gap:4px;margin-bottom:1.25rem;border-bottom:0.5px solid var(--color-border-tertiary);flex-wrap:wrap;align-items:flex-end;justify-content:center}
+  .tab{font-size:12px;padding:5px 16px;border:0.5px solid transparent;border-bottom:none;border-radius:0 0 0;cursor:pointer;background:none;color:var(--color-text-secondary);letter-spacing:.03em;margin-bottom:-0.5px;transition:all .15s;font-weight:400;font-family:inherit}
+  .tab:hover{color:#0F6E56;background:#C8F0E0}
+  .tab.active{border-color:#1D9E75;border-bottom-color:var(--color-background-primary);color:#0B5E45;background:#9FE1CB;font-weight:600;box-shadow:0 -3px 14px rgba(29,158,117,0.55)}
+  .tab.cmp-tab{font-size:11px;padding:5px 12px;margin-left:8px;border-style:dashed}
+  .tab.cmp-tab.active{border-style:solid;background:#E1F5EE;color:#085041}
+  .metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+  @media(max-width:640px){.metrics{grid-template-columns:repeat(2,1fr)}.metrics .m:last-child{grid-column:span 2}}
+  .m{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:0;padding:.75rem 1rem;text-align:center}
+  .ml{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:4px}
+  .mv{font-size:19px;font-weight:500}
+  .mv.pos{color:#1D9E75}.mv.neg{color:#D85A30}.mv.neu{color:var(--color-text-primary)}
+  .mvs{font-size:10px;color:var(--color-text-secondary);margin-top:2px}
+  .card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius: 0;padding:1rem}
+  .ct{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);margin-bottom:.75rem;font-weight:500}
+  .half{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+  @media(max-width:640px){.half{grid-template-columns:1fr}}
+  .full{margin-bottom:1rem}
+  .stat-h3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  @media(max-width:480px){.stat-h3{grid-template-columns:1fr 1fr}}
+  .stat{padding:.6rem .75rem;background:var(--color-background-primary);border-radius:0;border:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;height:70px}
+  .tb-group{display:flex;flex-direction:column}
+  .tb-group .stat-row-2,.tb-group .stat-row-3{margin-top:auto;padding-top:10px}
+  .tb-group .stat-row-3 .sk{min-height:0;align-items:center}
+  .tb-grid.tb2{grid-template-columns:1fr 1fr !important}
+  @media(max-width:600px){.tb-grid.tb2{grid-template-columns:1fr !important}}
+  .sk{font-size:9px;color:var(--color-text-secondary);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;white-space:nowrap}
+  .sv{font-size:14px;font-weight:500}
+  .stat-row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .stat-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+  @media(max-width:600px){.stat-row-3{grid-template-columns:1fr 1fr}.stat-row-3 .stat:nth-child(3){grid-column:1/-1}.stat-row-3 .sk{min-height:0}}
+  /* collapsible */
+  .coll-btn{width:100%;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:0;cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;color:var(--color-text-primary);display:flex;align-items:center;gap:0;margin-bottom:0;transition:background .15s,border-radius .01s;overflow:hidden;user-select:none;text-align:left}
+  .coll-btn:hover{background:var(--color-background-secondary)}
+  .coll-icon-box{display:flex;align-items:center;justify-content:center;width:30px;min-width:30px;height:38px;border-right:none;background:transparent;color:#1D9E75;font-size:9px;flex-shrink:0}
+  .coll-icon{display:inline-block;transition:transform .22s cubic-bezier(.4,0,.2,1);line-height:1}
+  .coll-label{flex:1;padding:.7rem 1rem;letter-spacing:.02em}
+  .coll-body{display:none;margin-bottom:1rem}
+  .coll-body.card-body{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-top:none;border-radius:0;padding:1rem;margin-bottom:1rem}
+  .coll-body.plain-body{padding:1rem;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-top:none;border-radius:0;margin-bottom:1rem}
+  /* accordion */
+  .acc-thead{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:6px 14px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:4px}
+  .acc-th{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);font-weight:500;text-align:center}
+  .acc-th:first-child{text-align:center}
+  .acc-item{border:0.5px solid var(--color-border-tertiary);border-radius:0;margin-bottom:6px;overflow:hidden}
+  .acc-hdr{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));align-items:center;padding:12px 14px;cursor:pointer;background:var(--color-background-primary);user-select:none}
+  .acc-hdr:hover{background:var(--color-background-secondary)}
+  .acc-cell{font-size:12px;text-align:center;color:var(--color-text-primary)}
+  .acc-cell:first-child{text-align:center;color:var(--color-text-secondary);font-weight:400}
+  .acc-cell-arrow{font-size:12px;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px}
+  .acc-arrow{display:inline-block;transition:transform .2s;font-size:10px;color:var(--color-text-secondary)}
+  .acc-body{display:none;padding:.75rem 1rem;background:var(--color-background-secondary)}
+  .mo-table{width:100%;font-size:11px;border-collapse:collapse}
+  .mo-table th{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-secondary);padding:5px 8px;text-align:center;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary)}
+  .mo-table th:first-child{text-align:center}
+  .mo-table td{padding:5px 8px;text-align:center;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+  .mo-table td:first-child{text-align:center;color:var(--color-text-secondary)}
+  .mo-total td{font-weight:500;border-top:0.5px solid var(--color-border-primary)!important;border-bottom:none!important;color:var(--color-text-primary)!important}
+  .mo-total td:first-child{color:var(--color-text-primary)!important}
+  .bw-row{display:flex;gap:32px;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--color-border-tertiary);flex-wrap:wrap}
+  .dist-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .dist-label{font-size:11px;color:var(--color-text-secondary);width:76px;flex-shrink:0}
+  .dist-bar-bg{flex:1;height:12px;background:var(--color-background-primary);border-radius:0;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+  .dist-bar-fill{height:100%;border-radius:0}
+  .dist-pct{font-size:11px;color:var(--color-text-secondary);width:36px;text-align:right;flex-shrink:0}
+  .bar-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+  .bar-bg{flex:1;height:4px;background:var(--color-border-tertiary);border-radius: 0;overflow:hidden}
+  .bar-fill{height:100%;border-radius: 0;background:#1D9E75}
+  .bar-fill.red{background:#D85A30}
+  .tb-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+  @media(max-width:600px){.tb-grid{grid-template-columns:1fr}}
+  .tb-group{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:0;padding:.85rem 1rem}
+  .tb-group-title{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);font-weight:500;margin-bottom:8px;padding-bottom:6px;border-bottom:0.5px solid var(--color-border-tertiary)}
+  .tb-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:11px}
+  .tb-row:last-child{border-bottom:none}
+  .tb-key{color:var(--color-text-secondary)}
+  .tb-val{font-weight:500;color:var(--color-text-primary)}
+  .mc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0 8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px;border-left:3px solid transparent;margin-left:-3px}
+  .mc-row.actual{border-left-color:#1D9E75}
+  .mc-row.median{border-left-color:#BA7517}
+  .mc-row.worst{border-left-color:#D85A30}
+  .mc-row:last-child{border-bottom:none}
+  .mc-label{color:var(--color-text-secondary)}
+  .mc-val{font-weight:500}
+  /* Width is 76px: the widest pill ("Worst case") needs 71px, so the highlight
+     stops just past the text instead of running into the label. text-align
+     centres the shorter words inside it; margin-right holds the label off. */
+  .mc-tier{font-size:9px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:100px;margin-left:6px;width:76px;flex-shrink:0;text-align:center;margin-right:14px}
+  .mc-tier.actual{background:#E1F5EE;color:#0F6E56}
+  .mc-tier.median{background:#FAEEDA;color:#854F0B}
+  .mc-tier.worst{background:#FAECE7;color:#993C1D}
+  .mc-note{margin-top:.75rem;padding:.65rem .9rem;background:var(--color-background-primary);border-radius:0;border:0.5px solid var(--color-border-tertiary);font-size:11px;color:var(--color-text-secondary);line-height:1.7}
+  .mc-note strong{color:var(--color-text-primary)}
+  .prose{font-size:12px;color:var(--color-text-secondary);line-height:1.8}
+  .prose p{margin-bottom:.8rem;margin-top:0}
+  .prose-title{font-size:11px;font-weight:600;color:var(--color-text-primary);letter-spacing:.10em;text-transform:uppercase;margin:1rem 0 .4rem}
+  .prose-title:first-child{margin-top:0}
+  .prose ul{padding-left:1.2rem;margin-top:.3rem;margin-bottom:.8rem}
+  .prose li{margin-bottom:.25rem}
+  .approach-section{margin-bottom:1rem;padding-bottom:1rem;border-bottom:0.5px solid var(--color-border-tertiary)}
+  .approach-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+  .approach-h{font-size:11px;letter-spacing:.10em;text-transform:uppercase;font-weight:600;color:var(--color-text-primary);margin-bottom:.6rem}
+  .approach-sub{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#854F0B;margin-bottom:.35rem;font-weight:500}
+  .approach-text{font-size:11px;color:var(--color-text-secondary);line-height:1.8}
+  .approach-text strong{color:var(--color-text-primary)}
+  .approach-text p{margin-bottom:.7rem;margin-top:0}
+  .approach-text p:last-child{margin-bottom:0}
+  .rob-wrap{overflow-x:auto;margin-top:.5rem}
+  .rob-table{width:100%;font-size:11px;border-collapse:collapse;min-width:480px}
+  .rob-table thead tr{border-bottom:0.5px solid var(--color-border-tertiary)}
+  .rob-table th{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);padding:6px 12px;font-weight:500;text-align:center}
+  .rob-table th:first-child{text-align:center}
+  .rob-table td{padding:8px 12px;border-bottom:0.5px solid var(--color-border-tertiary);text-align:center}
+  .rob-table td:first-child{text-align:center;font-weight:500;color:var(--color-text-primary)}
+  .rob-table tbody tr:last-child td{border-bottom:none}
+  .sea-table{width:100%;font-size:11px;border-collapse:collapse;margin-top:.5rem;table-layout:fixed}
+  .sea-table thead tr{border-bottom:0.5px solid var(--color-border-tertiary)}
+  .sea-table th{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);padding:6px 12px;font-weight:500;text-align:center}
+  .sea-table th:first-child{text-align:center}
+  .sea-table td{padding:7px 12px;border-bottom:0.5px solid var(--color-border-tertiary);text-align:center}
+  .sea-table td:first-child{text-align:center;font-weight:500;color:var(--color-text-primary)}
+  .sea-table tbody tr:last-child td{border-bottom:none}
+  .sea-note{font-size:10px;color:var(--color-text-secondary);margin-top:.85rem;padding:.6rem .8rem;background:var(--color-background-primary);border-radius:0;border:0.5px solid var(--color-border-tertiary);line-height:1.65}
+  /* equity snapshot */
+  .eq-wrap{position:relative}
+  .eq-snapshot{position:absolute;top:10px;left:10px;background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:0;padding:10px 14px;pointer-events:none;opacity:0;transition:opacity .15s;min-width:170px;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:10}
+  .eq-snapshot.visible{opacity:1}
+  .eq-snap-date{font-size:11px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px;letter-spacing:.04em}
+  .eq-snap-row{display:flex;justify-content:space-between;align-items:baseline;gap:20px;font-size:11px;padding:3px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+  .eq-snap-row:last-child{border-bottom:none}
+  .eq-snap-label{color:var(--color-text-secondary)}
+  .eq-snap-val{font-weight:500}
+  /* compare */
+  .cmp-note{font-size:11px;color:var(--color-text-secondary);margin-bottom:1.25rem;line-height:1.6}
+  .cmp-scroll{overflow-x:auto}
+  .cmp-grid{display:grid;grid-template-columns:150px repeat(5,minmax(90px,1fr));gap:0;min-width:690px}
+  .cmp-col-hdr{text-align:center;padding:10px 10px 8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-bottom:none;border-radius:0 0 0;margin:0 3px}
+  .cmp-col-hdr.featured{background:#E1F5EE;border-color:#1D9E75;border-width:1.5px;border-bottom:none}
+  .cmp-col-hdr .model-amt{font-size:14px;font-weight:600;color:var(--color-text-primary)}
+  .cmp-col-hdr.featured .model-amt{color:#085041}
+  .cmp-col-hdr .model-sub{font-size:9px;color:var(--color-text-secondary);letter-spacing:.04em;margin-top:2px}
+  .cmp-col-hdr.featured .model-sub{color:#0F6E56}
+  .rec-pill{display:inline-block;background:#1D9E75;color:#fff;font-size:8px;letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:100px;margin-top:4px;font-weight:600}
+  .label-hdr{padding:10px 0 8px;display:flex;align-items:flex-end}
+  .cmp-section-row{grid-column:1/-1;width:150px;text-align:center;padding:10px 0 4px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-primary);font-weight:600;border-top:0.5px solid var(--color-border-tertiary);margin-top:4px}
+  .cmp-section-row:first-of-type{border-top:none;margin-top:0}
+  .cmp-label{font-size:11px;color:var(--color-text-secondary);padding:7px 0;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3}
+  .cmp-cell{font-size:11px;font-weight:500;color:var(--color-text-primary);padding:7px 8px;border-bottom:0.5px solid var(--color-border-tertiary);border-left:0.5px solid var(--color-border-tertiary);text-align:center;margin:0 3px;display:flex;align-items:center;justify-content:center}
+  .cmp-cell.featured{background:rgba(29,158,117,0.04);border-left:1.5px solid #1D9E75;border-right:1.5px solid #1D9E75}
+  .cmp-cell.gv{color:#1D9E75}.cmp-cell.rv{color:#D85A30}.cmp-cell.amber{color:#BA7517}
+  .cmp-footer{padding:6px;margin:0 3px;border-radius:0;border:0.5px solid var(--color-border-tertiary);border-top:none}
+  .cmp-footer.featured{border:1.5px solid #1D9E75;border-top:none;background:rgba(29,158,117,0.04)}
+
+@media (max-width:768px){ .f-risk{max-width:274px} }
+</style>
+
+
+<div class="hdr">
+  <h1>Clara Core:<br class="h1-br"> MNQ backtest<span class="h1-dot"> · </span><br class="h1-br"><span class="h1r-l">May&nbsp;2019 – September&nbsp;2026</span><span class="h1r-s">May&thinsp;2019 – Sept&thinsp;2026</span></h1>
+  <div class="hnote">Each tab is a risk-per-trade model.<br>Max 2 trades per day, and it stops after the first daily win.</div>
+</div>
+
+<div class="tabs" id="tabRow"></div>
+
+<div id="allModels">
+<div id="mainPanel">
+  <div class="metrics" id="metricRow"></div>
+
+  <div class="card full">
+    <div class="ct">Equity curve: <br class="mb-br">monthly cumulative P&amp;L · 89 months</div>
+    <div class="eq-wrap">
+      <div style="position:relative;height:220px"><canvas id="eqChart"></canvas></div>
+      <div class="eq-snapshot" id="eqSnapshot">
+        <div class="eq-snap-date" id="snapDate"></div>
+        <div class="eq-snap-row"><span class="eq-snap-label">Month P&amp;L</span><span class="eq-snap-val" id="snapMonth"></span></div>
+        <div class="eq-snap-row"><span class="eq-snap-label">Cumulative</span><span class="eq-snap-val" id="snapCum"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="full">
+  <button class="coll-btn" onclick="toggleColl('monthly')" style="border-radius:0">
+    <div class="coll-icon-box"><span class="coll-icon" id="monthlyIcon" style="transform:rotate(90deg)">▶</span></div>
+    <span class="coll-label">MONTHLY BREAKDOWN</span>
+  </button>
+  <div class="coll-body card-body" id="monthlyBody" style="display:block">
+    <div class="acc-thead">
+      <div class="acc-th"></div>
+      <div class="acc-th">Year</div><div class="acc-th">P&amp;L</div><div class="acc-th">Max DD</div>
+      <div class="acc-th">Trades</div><div class="acc-th">Win%</div>
+    </div>
+    <div id="accordionItems"></div>
+  </div>
+  </div>
+
+  <div class="full">
+  <button class="coll-btn" onclick="toggleColl('gridCum')">
+    <div class="coll-icon-box"><span class="coll-icon" id="gridCumIcon">▶</span></div>
+    <span class="coll-label"><span class="cb-l">CUMULATIVE BALANCE BY MONTH: ALL YEARS</span><span class="cb-s">BALANCE BY MONTH: ALL YEARS</span></span>
+  </button>
+  <div class="coll-body card-body" id="gridCumBody">
+    <div id="gridCumTable"></div>
+    <div style="margin-top:.75rem;font-size:10px;color:var(--color-text-secondary);line-height:1.6">The account's running total, month by month, from $0 at the start of the record. Green marks a month that ended at a new equity high; a soft orange background marks a month that ended inside a drawdown, below a previous peak. This is the equity curve in numbers: every drawdown arriving, and every recovery. <span id="cumDdNote"></span> Month-end balances never show a drawdown's full depth: the deepest point happens intraday, between month ends. The boxed month can even finish green at a new high, as it does on the $300 model, where the May 1, 2020 low and the recovery that followed landed inside the same month.</div>
+  </div>
+  </div>
+
+  <div class="full">
+  <button class="coll-btn" onclick="toggleColl('gridPnl')">
+    <div class="coll-icon-box"><span class="coll-icon" id="gridPnlIcon">▶</span></div>
+    <span class="coll-label">P&amp;L BY MONTH: ALL YEARS</span>
+  </button>
+  <div class="coll-body card-body" id="gridPnlBody">
+    <div style="font-size:11px;color:var(--color-text-secondary);line-height:1.75;margin-bottom:.85rem">
+      Performance varies across months, sometimes significantly. Short-term variation is normal. The strategy is designed to perform over long periods, not individual months.<br><br>
+      Quieter months are a useful time to get infrastructure in place: setting up prop firm accounts, understanding evaluation and funded-account rules, and getting NinjaTrader and the strategy installed, so that when a stronger month arrives you are ready rather than still working through setup.
+    </div>
+    <div id="gridPnlTable"></div>
+  </div>
+  </div>
+
+  <div class="full">
+  <button class="coll-btn" onclick="toggleColl('gridDd')">
+    <div class="coll-icon-box"><span class="coll-icon" id="gridDdIcon">▶</span></div>
+    <span class="coll-label">MAX DRAWDOWN BY MONTH: ALL YEARS</span>
+  </button>
+  <div class="coll-body card-body" id="gridDdBody">
+    <div id="gridDdTable"></div>
+    <div style="margin-top:.75rem;font-size:10px;color:var(--color-text-secondary);line-height:1.6">Each cell is the deepest drawdown measured inside that calendar month. The full-period max drawdown is deeper than any single month because drawdown windows cross month boundaries: on the $300 model, the -$1,811 ran from an August 7 peak to a September 30 low in 2026.</div>
+  </div>
+  </div>
+
+  <div class="card full" id="trade-distribution">
+    <div class="tb-grid tb2">
+      <div class="tb-group">
+        <div class="ct">Trade loss distribution<span class="m-hide"> · </span> <br class="mb-br"><span id="lossTrades">456</span> losing trades</div>
+        <div id="lossDistWrap"></div>
+        <div class="stat-row-2">
+          <div class="stat"><div class="sk">Avg loss</div><div class="sv" id="avgLoss" style="color:#D85A30"></div></div>
+          <div class="stat"><div class="sk">Largest loss</div><div class="sv" id="lgLoss" style="color:#D85A30"></div></div>
+        </div>
+      </div>
+      <div class="tb-group">
+        <div class="ct">Trade win distribution<span class="m-hide"> · </span> <br class="mb-br"><span id="winTrades">1,112</span> winning trades</div>
+        <div id="winDistWrap"></div>
+        <div class="stat-row-3">
+          <div class="stat"><div class="sk">Avg win</div><div class="sv" id="avgWin" style="color:#1D9E75"></div></div>
+          <div class="stat"><div class="sk">Largest win</div><div class="sv" id="lgWin" style="color:#1D9E75"></div></div>
+          <div class="stat"><div class="sk">Avg P&amp;L/trade</div><div class="sv" id="avgPnl" style="color:#1D9E75"></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:.75rem;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary);font-size:10px;color:var(--color-text-secondary);line-height:1.6">Trade distributions: these count individual trades. Avg P&amp;L per trade is every trade averaged together, winners and losers. It is the number that decides whether the strategy makes money over time, and it is where a high win rate carrying larger losses either survives or does not.</div>
+  </div>
+  </div>
+
+  <div class="card full">
+    <div class="tb-grid tb2">
+      <div class="tb-group">
+        <div class="ct">Daily loss distribution<span class="m-hide"> · </span> <br class="mb-br"><span id="dayLossCount">374</span> losing days</div>
+        <div id="dayLossDistWrap"></div>
+        <div class="stat-row-2">
+          <div class="stat"><div class="sk">Avg losing day</div><div class="sv" id="dayAvgLoss" style="color:#D85A30"></div></div>
+          <div class="stat"><div class="sk">Worst day</div><div class="sv" id="ddWorst" style="color:#D85A30"></div></div>
+        </div>
+      </div>
+      <div class="tb-group">
+        <div class="ct">Daily win distribution<span class="m-hide"> · </span> <br class="mb-br"><span id="dayWinCount">952</span> winning days</div>
+        <div id="dayWinDistWrap"></div>
+        <div class="stat-row-2">
+          <div class="stat"><div class="sk">Avg winning day</div><div class="sv" id="dayAvgWin" style="color:#1D9E75"></div></div>
+          <div class="stat"><div class="sk">Best day</div><div class="sv" id="dayBest" style="color:#1D9E75"></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:.75rem;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary);font-size:10px;color:var(--color-text-secondary);line-height:1.6">Daily distributions: these count days, not trades. A worst day can include two losses: on the $300 model it was -$309 and -$310 on the same day.</div>
+  </div>
+
+  <div class="card full">
+    <div class="tb-grid tb2">
+      <div class="tb-group">
+        <div class="ct">Losing streak distribution<span class="m-hide"> · </span> <br class="mb-br"><span id="losingDays">374</span> losing days</div>
+        <div id="lossStreakBars"></div>
+        <div class="stat-row-2">
+          <div class="stat"><div class="sk">Avg streak</div><div class="sv" id="lossStreakAvg"></div></div>
+          <div class="stat"><div class="sk">Longest</div><div class="sv" id="lossStreakLongest" style="color:#D85A30"></div></div>
+        </div>
+      </div>
+      <div class="tb-group">
+        <div class="ct">Winning streak distribution<span class="m-hide"> · </span> <br class="mb-br"><span id="winningDays">952</span> winning days</div>
+        <div id="winStreakBars"></div>
+        <div class="stat-row-2">
+          <div class="stat"><div class="sk">Avg streak</div><div class="sv" id="winStreakAvg"></div></div>
+          <div class="stat"><div class="sk">Longest</div><div class="sv" id="winStreakLongest" style="color:#1D9E75"></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:.75rem;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary);font-size:10px;color:var(--color-text-secondary);line-height:1.6">Streaks are counted on traded days: consecutive trading days finishing positive or negative. Days without a trade neither break nor extend a streak: a 14-day winning streak is 14 traded days in a row, not 14 calendar days.</div>
+  </div>
+
+  <div class="card full">
+    <div class="ct">Trade behavior</div>
+    <div class="tb-grid">
+      <div class="tb-group"><div class="tb-group-title">Daily trade limits</div>
+        <div class="tb-row"><span class="tb-key">Max trades per day</span><span class="tb-val">2</span></div>
+        <div class="tb-row"><span class="tb-key">Avg trade duration</span><span class="tb-val">1H 58M</span></div>
+      </div>
+      <div class="tb-group"><div class="tb-group-title">Trade frequency</div>
+        <div class="tb-row"><span class="tb-key">% of 1-trade days</span><span class="tb-val">81.7%</span></div>
+        <div class="tb-row"><span class="tb-key">% of 2-trade days</span><span class="tb-val">18.3%</span></div>
+      </div>
+      <div class="tb-group"><div class="tb-group-title">When 2 trades occur</div>
+        <div class="tb-row"><span class="tb-key">Lose 1st → Win 2nd</span><span class="tb-val" style="color:#1D9E75">79.8%</span></div>
+        <div class="tb-row"><span class="tb-key">Lose both</span><span class="tb-val" style="color:#D85A30">20.2%</span></div>
+      </div>
+    </div>
+    <div style="margin-top:.75rem;padding-top:.75rem;border-top:0.5px solid var(--color-border-tertiary);font-size:10px;color:var(--color-text-secondary);line-height:1.6">When the first trade is a loss, the second trade won 79.8% of the time.</div>
+    </div>
+  
+  <div class="card full" id="mcSimCard" >
+    <div class="ct">Monte Carlo drawdown simulation</div>
+    <div class="mc-note" style="margin-bottom:.75rem;margin-top:0">Actual backtest &rarr; what happened. Monte Carlo &rarr; what can happen.<br><strong>What happened</strong> The deepest drawdown in the actual backtest.<br><strong>50th percentile</strong> Half the shuffled runs drew down less, half drew down more.<br><strong>5th percentile</strong> 5% of runs drew down deeper.</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:.75rem">Based on 10,000 shuffled simulations</div>
+    <div class="mc-row actual"><span class="mc-tier actual">Actual</span><span class="mc-label" style="flex:1">What happened</span><span class="mc-val" id="mcActual" style="color:#1D9E75;text-align:right"></span></div>
+    <div class="mc-row median"><span class="mc-tier median">Median</span><span class="mc-label" style="flex:1">50th percentile</span><span class="mc-val" id="mcMedian" style="color:#BA7517;text-align:right"></span></div>
+    <div class="mc-row worst"><span class="mc-tier worst">Downside</span><span class="mc-label" style="flex:1">5th percentile</span><span class="mc-val" id="mcWorst" style="color:#D85A30;text-align:right"></span></div>
+    <div class="mc-row" style="margin-top:0;padding-top:8px;border-top:0.5px solid var(--color-border-secondary)"><span class="mc-label" style="font-weight:500;color:var(--color-text-primary)">Total Full Period Profit</span><span class="mc-val" id="mcProfit" style="color:#1D9E75;text-align:right"></span></div>
+    </div>
+
+</div>
+<!-- Compare Panel -->
+<div id="comparePanel" style="display:none">
+  <div class="cmp-note">Winning and losing streaks are counted on trading days; worst streak loss is the deepest run of consecutive losing trades. Because position size never goes below one contract, a 2-trade day can net positive on one model and negative on another, so streak figures can differ slightly between models, and the smallest models can share the same largest loss and worst day.</div>
+  <div class="cmp-scroll"><div class="cmp-grid cmp-metrics">
+    <div class="label-hdr"></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$200</div><div class="model-sub">Conservative</div></div>
+    <div class="cmp-col-hdr featured"><div class="model-amt">$300</div><div class="model-sub">Balanced</div><div class="rec-pill">Default</div></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$400</div><div class="model-sub">Moderate</div></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$600</div><div class="model-sub">Growth</div></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$800</div><div class="model-sub">Aggressive</div></div>
+    <div class="cmp-section-row">Performance</div>
+    <div class="cmp-label">Net profit</div>
+    <div class="cmp-cell">$39,685</div><div class="cmp-cell featured">$50,730</div><div class="cmp-cell">$68,532</div><div class="cmp-cell">$109,745</div><div class="cmp-cell">$152,533</div>
+    <div class="cmp-label">Win rate</div>
+    <div class="cmp-cell">70.92%</div><div class="cmp-cell featured">70.92%</div><div class="cmp-cell">70.92%</div><div class="cmp-cell">70.92%</div><div class="cmp-cell">70.92%</div>
+    <div class="cmp-label">Profit factor</div>
+    <div class="cmp-cell">1.510</div><div class="cmp-cell featured">1.562</div><div class="cmp-cell">1.580</div><div class="cmp-cell">1.569</div><div class="cmp-cell">1.567</div>
+    <div class="cmp-label">Total trades</div>
+    <div class="cmp-cell">1,568</div><div class="cmp-cell featured">1,568</div><div class="cmp-cell">1,568</div><div class="cmp-cell">1,568</div><div class="cmp-cell">1,568</div>
+    <div class="cmp-section-row">Risk &amp; Drawdown</div>
+    <div class="cmp-label">Max drawdown</div>
+    <div class="cmp-cell rv">-$1,811</div><div class="cmp-cell featured rv">-$1,811</div><div class="cmp-cell rv">-$2,477</div><div class="cmp-cell rv">-$3,776</div><div class="cmp-cell rv">-$5,374</div>
+    <div class="cmp-label">Worst single day</div>
+    <div class="cmp-cell rv">-$620</div><div class="cmp-cell featured rv">-$620</div><div class="cmp-cell rv">-$792</div><div class="cmp-cell rv">-$1,187</div><div class="cmp-cell rv">-$1,583</div>
+    <div class="cmp-label">Worst streak loss</div>
+    <div class="cmp-cell rv">-$879</div><div class="cmp-cell featured rv">-$879</div><div class="cmp-cell rv">-$1,200</div><div class="cmp-cell rv">-$1,896</div><div class="cmp-cell rv">-$2,807</div>
+    <div class="cmp-label">Longest DD (trades)</div>
+    <div class="cmp-cell">64</div><div class="cmp-cell featured">90</div><div class="cmp-cell">90</div><div class="cmp-cell">90</div><div class="cmp-cell">90</div>
+    <div class="cmp-label">Avg trades to recover</div>
+    <div class="cmp-cell">7.6</div><div class="cmp-cell featured">7.5</div><div class="cmp-cell">7.3</div><div class="cmp-cell">7.8</div><div class="cmp-cell">7.6</div>
+    <div class="cmp-section-row">Win / Loss Profile</div>
+    <div class="cmp-label">Avg P&amp;L / trade</div>
+    <div class="cmp-cell">$25</div><div class="cmp-cell featured">$32</div><div class="cmp-cell">$44</div><div class="cmp-cell">$70</div><div class="cmp-cell">$97</div>
+    <div class="cmp-label">Avg win</div>
+    <div class="cmp-cell">$106</div><div class="cmp-cell featured">$127</div><div class="cmp-cell">$168</div><div class="cmp-cell">$272</div><div class="cmp-cell">$379</div>
+    <div class="cmp-label">Avg loss</div>
+    <div class="cmp-cell rv">-$171</div><div class="cmp-cell featured rv">-$198</div><div class="cmp-cell rv">-$259</div><div class="cmp-cell rv">-$423</div><div class="cmp-cell rv">-$590</div>
+    <div class="cmp-label">Largest win</div>
+    <div class="cmp-cell">$974</div><div class="cmp-cell featured">$1,461</div><div class="cmp-cell">$1,948</div><div class="cmp-cell">$2,923</div><div class="cmp-cell">$3,897</div>
+    <div class="cmp-label">Largest loss</div>
+    <div class="cmp-cell rv">-$381</div><div class="cmp-cell featured rv">-$381</div><div class="cmp-cell rv">-$410</div><div class="cmp-cell rv">-$614</div><div class="cmp-cell rv">-$819</div>
+    <div class="cmp-section-row">Streak Statistics</div>
+    <div class="cmp-label">Max winning streak</div>
+    <div class="cmp-cell">16</div><div class="cmp-cell featured">16</div><div class="cmp-cell">16</div><div class="cmp-cell">16</div><div class="cmp-cell">16</div>
+    <div class="cmp-label">Max losing streak</div>
+    <div class="cmp-cell">5</div><div class="cmp-cell featured">5</div><div class="cmp-cell">5</div><div class="cmp-cell">5</div><div class="cmp-cell">5</div>
+    <div class="cmp-label">Avg winning streak</div>
+    <div class="cmp-cell">3.4</div><div class="cmp-cell featured">3.4</div><div class="cmp-cell">3.4</div><div class="cmp-cell">3.4</div><div class="cmp-cell">3.4</div>
+    <div class="cmp-label">Avg losing streak</div>
+    <div class="cmp-cell">1.3</div><div class="cmp-cell featured">1.3</div><div class="cmp-cell">1.3</div><div class="cmp-cell">1.3</div><div class="cmp-cell">1.3</div>
+    <div class="cmp-section-row">Monte Carlo<br>10,000 Simulations</div>
+    <div class="cmp-label">Actual drawdown</div>
+    <div class="cmp-cell gv">-$1,811</div><div class="cmp-cell featured gv">-$1,811</div><div class="cmp-cell gv">-$2,477</div><div class="cmp-cell gv">-$3,776</div><div class="cmp-cell gv">-$5,374</div>
+    <div class="cmp-label">Median drawdown</div>
+    <div class="cmp-cell amber">-$2,329</div><div class="cmp-cell featured amber">-$2,597</div><div class="cmp-cell amber">-$3,432</div><div class="cmp-cell amber">-$5,578</div><div class="cmp-cell amber">-$7,679</div>
+    <div class="cmp-label">Downside-case drawdown</div>
+    <div class="cmp-cell rv">-$3,451</div><div class="cmp-cell featured rv">-$3,860</div><div class="cmp-cell rv">-$5,054</div><div class="cmp-cell rv">-$8,273</div><div class="cmp-cell rv">-$11,322</div>
+    <div class="cmp-label">Return on downside-case DD</div>
+    <div class="cmp-cell">11.5&times;</div><div class="cmp-cell featured">13.1&times;</div><div class="cmp-cell">13.6&times;</div><div class="cmp-cell">13.3&times;</div><div class="cmp-cell">13.5&times;</div>
+    <div></div>
+    <div class="cmp-footer"></div><div class="cmp-footer featured"></div><div class="cmp-footer"></div><div class="cmp-footer"></div><div class="cmp-footer"></div>
+  </div></div>
+</div>
+  <div id="yearByModel" style="display:none">
+    <div class="cmp-note">Year by year, every model. The comparison above shows totals; this shows when the money came. Default configuration.</div>
+    <div class="cmp-scroll"><div class="cmp-grid">
+    <div class="label-hdr"></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$200</div><div class="model-sub">Conservative</div></div>
+    <div class="cmp-col-hdr featured"><div class="model-amt">$300</div><div class="model-sub">Balanced</div><div class="rec-pill">Default</div></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$400</div><div class="model-sub">Moderate</div></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$600</div><div class="model-sub">Growth</div></div>
+    <div class="cmp-col-hdr"><div class="model-amt">$800</div><div class="model-sub">Aggressive</div></div>
+    
+    <div class="cmp-label">2019*</div><div class="cmp-cell">$533</div><div class="cmp-cell featured">$821</div><div class="cmp-cell">$1,309</div><div class="cmp-cell">$2,461</div><div class="cmp-cell">$2,982</div>
+    <div class="cmp-label">2020</div><div class="cmp-cell">$2,730</div><div class="cmp-cell featured">$3,373</div><div class="cmp-cell">$4,769</div><div class="cmp-cell">$7,308</div><div class="cmp-cell">$9,735</div>
+    <div class="cmp-label">2021</div><div class="cmp-cell">$5,329</div><div class="cmp-cell featured">$8,199</div><div class="cmp-cell">$12,777</div><div class="cmp-cell">$20,290</div><div class="cmp-cell">$28,324</div>
+    <div class="cmp-label">2022</div><div class="cmp-cell">$6,440</div><div class="cmp-cell featured">$7,321</div><div class="cmp-cell">$9,559</div><div class="cmp-cell">$15,707</div><div class="cmp-cell">$21,711</div>
+    <div class="cmp-label">2023</div><div class="cmp-cell">$5,340</div><div class="cmp-cell featured">$8,060</div><div class="cmp-cell">$10,879</div><div class="cmp-cell">$17,000</div><div class="cmp-cell">$24,019</div>
+    <div class="cmp-label">2024</div><div class="cmp-cell">$7,539</div><div class="cmp-cell featured">$9,288</div><div class="cmp-cell">$12,069</div><div class="cmp-cell">$19,372</div><div class="cmp-cell">$26,924</div>
+    <div class="cmp-label">2025</div><div class="cmp-cell">$8,854</div><div class="cmp-cell featured">$10,615</div><div class="cmp-cell">$14,053</div><div class="cmp-cell">$21,812</div><div class="cmp-cell">$31,060</div>
+    <div class="cmp-label">2026**</div><div class="cmp-cell">$2,920</div><div class="cmp-cell featured">$3,053</div><div class="cmp-cell">$3,117</div><div class="cmp-cell">$5,795</div><div class="cmp-cell">$7,778</div>
+    <div class="cmp-label">Total</div><div class="cmp-cell gv">$39,685</div><div class="cmp-cell gv featured">$50,730</div><div class="cmp-cell gv">$68,532</div><div class="cmp-cell gv">$109,745</div><div class="cmp-cell gv">$152,533</div>
+    <div></div>
+    <div class="cmp-footer"></div><div class="cmp-footer featured"></div><div class="cmp-footer"></div><div class="cmp-footer"></div><div class="cmp-footer"></div>
+    </div></div>
+    <p class="cmp-note" style="margin-top:.75rem">*2019 starts May 6, MNQ's first trading day. **2026 covers January through September. Every backtested year positive across every model. The full trade logs are downloadable and show it exactly.</p>
+  </div>
+<!-- Understanding Monte Carlo - sits between the MC numbers and the framework, and
+     shows in EVERY view (single model and Compare All), because none of it is
+     specific to the comparison. Numbers, then what they mean, then what to do. -->
+<div class="full">
+  <span id="mc-explained"></span><button id="mcexBtn" class="coll-btn" onclick="toggleColl('mcex')">
+    <div class="coll-icon-box"><span class="coll-icon" id="mcexIcon">▶</span></div>
+    <span class="coll-label">UNDERSTANDING MONTE CARLO</span>
+  </button>
+  <div class="coll-body plain-body" id="mcexBody">
+  <div class="approach-section">
+    <div class="approach-h">Methodology</div>
+    <div class="approach-text">
+      <p>Monte Carlo analysis performed using 10,000 randomized simulations of the strategy's 1,568 historical trades (May 2019 – September 2026).</p>
+      <p>Each simulation randomly reorders the same trades and calculates the resulting maximum drawdown. This illustrates how trade sequence affects drawdown risk when trade outcomes remain constant.</p>
+      <p style="font-weight:500;color:var(--color-text-primary)">Same trades. Same total profit. <br class="mb-br">Different order. Different drawdown.</p>
+      <p>Results represent statistical analysis of historical data and do not predict future performance.</p>
+    </div>
+  </div>
+  <div class="approach-section">
+    <div class="approach-h">Why it matters</div>
+    <div class="approach-text">
+      <p>It helps answer: if the order of my trades were different, or if I hit a concentrated streak of losses, would I still be profitable, and would the account survive it?</p>
+    </div>
+  </div>
+  <div class="approach-section">
+    <div class="approach-h">Important context</div>
+    <div class="approach-text">
+      <p>The strategy executes with consistent rules: same instrument, same session, same entry model, same risk per trade. It trades near the open rather than at a different hour each day, so conditions are broadly comparable across the record. Even so, consistent systems still vary depending on how wins and losses are distributed over time, changing market conditions, and macroeconomic events.</p>
+      <p>This analysis does not change the strategy: it uses the same trades in a different order.</p>
+      <p><strong>This is a tool for risk awareness, <br class="mb-br">not prediction.</strong></p>
+      <p>There is no single correct approach. The appropriate model depends on how you prioritize capital preservation versus growth, and how your account is structured.</p>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- Our Approach -->
+<div class="full">
+  <span id="our-approach"></span><button id="ourApproachBtn" class="coll-btn" onclick="toggleColl('approach')">
+    <div class="coll-icon-box"><span class="coll-icon" id="approachIcon">▶</span></div>
+    <span class="coll-label"><span class="rfl-l">RISK FRAMEWORK:<br class="ap-br"> <span class="rf-l2">HOW TO SIZE THE MODELS TO AN ACCOUNT</span></span><span class="rfl-s">SIZING MODELS TO AN ACCOUNT</span></span>
+  </button>
+  <div class="coll-body plain-body" id="approachBody">
+  <div class="approach-section">
+    <div class="approach-text">
+      <p>All configurations and guidelines on this site are based on this historical backtested data.</p>
+      <p><strong>Markets evolve.</strong> Performance will vary over time due to changing conditions, volatility, and broader market environments. There are no guarantees. All results shown are backtested and provided for transparency, not prediction.</p>
+      <p>You are responsible for your own trading decisions, risk management, and how you choose to apply the strategy.</p>
+    </div>
+  </div>
+  <div class="approach-section">
+    <div class="approach-h">Why the median drawdown</div>
+    <div class="approach-text">The framework sizes accounts to the median simulated drawdown rather than the actual backtest. The actual drawdown is a single run of history. The median sits above it, and sizing to the higher number leaves a buffer for a future that will not replay the past exactly: trade order can differ, and so can what stops cost. The 5th percentile, the simulated downside, is the same idea, more conservative: a planning figure, not the worst that can happen. The true worst case is unknowable. The three approaches below show where each number fits.</div>
+  </div>
+  <div class="approach-section">
+    <div class="approach-h">ONE WAY TO STRUCTURE CAPITAL</div>
+    <div class="approach-text">Different risk profiles can be applied depending on the role of each account within a portfolio. This is shared as an example of structured implementation, not a recommendation.</div>
+    <div class="approach-sub" style="margin-top:.75rem;color:#D85A30">Cash &amp; Retirement Accounts <br class="mb-br">(Downside-Case Drawdown)</div>
+    <div class="approach-text"><strong>Starting Capital: $5,000 and up<span class="ap-dot"> · </span><br class="ap-br">Risk per Trade: $300</strong><br>Simulated downside drawdown, the 5th percentile, around -$3,860. Holding account capital above that figure with a buffer on top sizes the model for slow growth behind a buffer rather than short-term performance.</div>
+    <div class="approach-sub" style="margin-top:.75rem;color:#BA7517">Cash &amp; Prop Accounts <br class="mb-br">(Median Drawdown)</div>
+    <div class="approach-text"><strong>Starting Capital: $2,500–$5,000<span class="ap-dot"> · </span><br class="ap-br">Risk per Trade: $200 / $300 / $400</strong><br>Most accounts are structured around the median drawdown. Objective: consistent performance with controlled risk.</div>
+    <div class="approach-sub" style="margin-top:.75rem;color:#1D9E75">Higher-Risk Allocation, <br class="mb-br">Prop Only (Actual Drawdown)</div>
+    <div class="approach-text"><strong>10%–20% of total portfolio<span class="ap-dot"> · </span><br class="ap-br">Risk per Trade: $600</strong><br>Starting Capital: $2,000–$2,500 on 50K accounts &amp; $4,000 on 150K accounts. Objective: improve capital efficiency while keeping total portfolio risk controlled.<br><br>In some cases, a single account within the portfolio runs at $600 risk on a 50K account, fully aware of the higher probability of drawdown limits being reached. This is a deliberate allocation decision, not a recommendation.</div>
+  </div>
+  <div class="approach-section">
+    <div class="approach-h">CHOOSING THE ACCOUNT: <br class="mb-br">PROP FIRM OR CASH</div>
+    <div class="approach-text">
+      <p>A prop firm account risks the evaluation fee, $85 to $200, for $2,000 to $2,500 of drawdown room. A cash account risks every dollar in it. That difference is why the profiles above lean on prop firm accounts for the higher-risk models and reserve cash and retirement accounts for the conservative sizing.</p>
+      <p>If you go with a prop firm account, check how its trailing drawdown is measured before you buy it. An end-of-day rule moves the limit once per day, on the closing balance. An intraday rule moves the limit on the highest point an open trade touches. We suggest end of day over intraday; regardless of the strategy you run, it is the better option. How prop firms measure drawdown is covered in detail on the <a href="structure.html" style="color:var(--black);text-decoration:underline">Structure page</a>.</p>
+    </div>
+  </div>
+  <div class="approach-section">
+    <div class="approach-h">RISK SCALING APPROACH</div>
+    <div class="approach-text">
+      <p>As accounts grow and build a buffer, risk per trade can be increased gradually.</p>
+      <p>Capital protection stays first; added exposure comes second.</p>
+      <p>Risk is not increased to chase returns; it rises only as the account's buffer supports it.</p>
+      <p>The strategy remains the same. Only the risk allocation changes.</p>
+    </div>
+  </div>
+  <div class="approach-section">
+    <div class="approach-h">OUR ROLE</div>
+    <div class="approach-text">
+      <p>Clear data &middot; A structure for execution &middot; A framework for your decisions, sized to your own risk tolerance.</p>
+      <p style="margin-top:.75rem">Transparency is the foundation. Understanding the strategy matters more than selling it.<br class="ap-br"> <strong>Your financial well-being <br class="mb-br">always comes first.</strong></p>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const fmt=n=>(n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString();
+const mcData={0:{actual:-1811,median:-2329,worst:-3451,profit:39685},1:{actual:-1811,median:-2597,worst:-3860,profit:50730},2:{actual:-2477,median:-3432,worst:-5054,profit:68532},3:{actual:-3776,median:-5578,worst:-8273,profit:109745},4:{actual:-5374,median:-7679,worst:-11322,profit:152533}};
+
+const moNames12=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const years5=[2019,2020,2021,2022,2023,2024,2025,2026];
+
+function renderGrids(idx){
+  const mo=modelData[idx].monthly;
+  const gridStyle='width:100%;font-size:11px;border-collapse:collapse';
+  const thStyle='font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);padding:5px 10px;text-align:center;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary)';
+  const thFirst='font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--color-text-secondary);padding:5px 10px;text-align:center;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary)';
+  const tdBase='padding:5px 10px;text-align:center;border-bottom:0.5px solid var(--color-border-tertiary)';
+  const tdFirst='padding:5px 10px;text-align:center;font-weight:500;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)';
+
+  // P&L grid – with two-level rounding adjustment
+  const m=modelData[idx];
+
+  let pnlHtml=`<table style="${gridStyle}"><thead><tr><th style="${thFirst}">Month</th>${years5.map(y=>`<th style="${thStyle}">${y}</th>`).join('')}</tr></thead><tbody>`;
+  moNames12.forEach((mn,mi)=>{
+    pnlHtml+=`<tr><td style="${tdFirst}">${mn}</td>`;
+    years5.forEach(yr=>{
+      const rows=mo?mo[yr]?.rows:null;
+      let val=(rows&&rows[mi])?rows[mi].p:null;
+      const color=val===null?'var(--color-text-secondary)':val>=0?'#1D9E75':'#D85A30';
+      pnlHtml+=`<td style="${tdBase};color:${color}">${val===null?'–':fmt(val)}</td>`;
+    });
+    pnlHtml+=`</tr>`;
+  });
+  pnlHtml+=`</tbody></table>`;
+  document.getElementById('gridPnlTable').innerHTML=pnlHtml;
+
+  // DD grid
+  let ddHtml=`<table style="${gridStyle}"><thead><tr><th style="${thFirst}">Month</th>${years5.map(y=>`<th style="${thStyle}">${y}</th>`).join('')}</tr></thead><tbody>`;
+  moNames12.forEach((mn,mi)=>{
+    ddHtml+=`<tr><td style="${tdFirst}">${mn}</td>`;
+    years5.forEach(yr=>{
+      const row=mo?mo[yr]?.rows[mi]:null;
+      const val=row?row.dd:null;
+      ddHtml+=`<td style="${tdBase};color:#D85A30">${val===null?'–':fmt(val)}</td>`;
+    });
+    ddHtml+=`</tr>`;
+  });
+  ddHtml+=`</tbody></table>`;
+  document.getElementById('gridDdTable').innerHTML=ddHtml;
+
+  // Cumulative balance grid - accumulate chronologically first, then render month-rows.
+  // ddTrough: the month containing the deepest point of each model's full-period max
+  // drawdown, computed from the trade exports (open-equity method). m is 0-indexed.
+  const ddTrough={0:{y:2026,m:8},1:{y:2026,m:8},2:{y:2020,m:8},3:{y:2020,m:8},4:{y:2020,m:8}};
+  const cum={}; let cRun=0,cPeak=0;
+  years5.forEach(yr=>{ cum[yr]=[];
+    for(let mi=0;mi<12;mi++){
+      const rows=mo?mo[yr]?.rows:null;
+      const p=(rows&&rows[mi])?rows[mi].p:null;
+      if(p===null){ cum[yr][mi]=null; continue; }
+      cRun+=p; const isPeak=cRun>cPeak; if(isPeak)cPeak=cRun;
+      cum[yr][mi]={v:cRun,peak:isPeak,under:cRun<cPeak};
+    }
+  });
+  const tr=ddTrough[idx];
+  let cumHtml=`<table style="${gridStyle}"><thead><tr><th style="${thFirst}">Month</th>${years5.map(y=>`<th style="${thStyle}">${y}</th>`).join('')}</tr></thead><tbody>`;
+  moNames12.forEach((mn,mi)=>{
+    cumHtml+=`<tr><td style="${tdFirst}">${mn}</td>`;
+    years5.forEach(yr=>{
+      const x=cum[yr][mi];
+      const color=x===null?'var(--color-text-secondary)':(x.peak?'#1D9E75':'var(--color-text-primary)');
+      const tint=(x&&x.under)?';background:rgba(216,90,48,0.08)':'';
+      const box=(tr&&yr===tr.y&&mi===tr.m)?';box-shadow:inset 0 0 0 1.5px #D85A30':'';
+      cumHtml+=`<td style="${tdBase};color:${color}${tint}${box}">${x===null?'–':fmt(x.v)}</td>`;
+    });
+    cumHtml+=`</tr>`;
+  });
+  cumHtml+=`</tbody></table>`;
+  document.getElementById('gridCumTable').innerHTML=cumHtml;
+  const cumNote=document.getElementById('cumDdNote');
+  if(cumNote&&tr){ cumNote.textContent='The boxed cell marks the month containing the deepest point of the max drawdown for this model ('+fmt(modelData[idx].dd)+').'; }
+}
+
+const moNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const moLabels=[];const moFull=[];[2019,2020,2021,2022,2023,2024,2025,2026].forEach(yr=>moNames.forEach((mn,mi)=>{if(yr===2019&&mi<4)return;if(yr===2026&&mi>8)return;moLabels.push(mi===0||(yr===2019&&mi===4)?String(yr):'');moFull.push(mn+' '+yr);}));
+
+const monthly200={2019:{rows:[{m:'Jan',p:null,dd:null,t:0,w:0,pf:0},{m:'Feb',p:null,dd:null,t:0,w:0,pf:0},{m:'Mar',p:null,dd:null,t:0,w:0,pf:0},{m:'Apr',p:null,dd:null,t:0,w:0,pf:0},{m:'May',p:426,dd:-126,t:8,w:6,pf:3.22},{m:'Jun',p:271,dd:-140,t:6,w:6,pf:0},{m:'Jul',p:-49,dd:-145,t:3,w:1,pf:0.39},{m:'Aug',p:-24,dd:-466,t:10,w:6,pf:0.96},{m:'Sep',p:-199,dd:-201,t:2,w:0,pf:0},{m:'Oct',p:135,dd:-83,t:2,w:2,pf:0},{m:'Nov',p:0,dd:0,t:0,w:0,pf:0},{m:'Dec',p:-27,dd:-173,t:3,w:1,pf:0.74}],best:'$426 (May)',worst:'-$199 (Sep)'},2020:{rows:[{m:'Jan',p:-16,dd:-300,t:8,w:3,pf:0.97},{m:'Feb',p:201,dd:-472,t:15,w:11,pf:1.25},{m:'Mar',p:610,dd:-526,t:17,w:13,pf:1.66},{m:'Apr',p:-595,dd:-745,t:25,w:15,pf:0.61},{m:'May',p:629,dd:-234,t:22,w:18,pf:2.16},{m:'Jun',p:1173,dd:-222,t:16,w:13,pf:3.53},{m:'Jul',p:59,dd:-700,t:23,w:13,pf:1.04},{m:'Aug',p:-305,dd:-565,t:18,w:9,pf:0.74},{m:'Sep',p:513,dd:-485,t:17,w:13,pf:1.66},{m:'Oct',p:96,dd:-404,t:20,w:14,pf:1.1},{m:'Nov',p:-43,dd:-525,t:21,w:14,pf:0.96},{m:'Dec',p:408,dd:-522,t:17,w:9,pf:1.47}],best:'$1,173 (Jun)',worst:'-$595 (Apr)'},2021:{rows:[{m:'Jan',p:873,dd:-518,t:17,w:12,pf:1.97},{m:'Feb',p:-325,dd:-687,t:23,w:16,pf:0.74},{m:'Mar',p:289,dd:-712,t:24,w:17,pf:1.25},{m:'Apr',p:680,dd:-128,t:10,w:9,pf:15.2},{m:'May',p:533,dd:-334,t:22,w:17,pf:1.85},{m:'Jun',p:413,dd:-165,t:11,w:8,pf:4.24},{m:'Jul',p:1269,dd:-319,t:19,w:16,pf:3.45},{m:'Aug',p:245,dd:-480,t:19,w:14,pf:1.37},{m:'Sep',p:363,dd:-281,t:11,w:9,pf:2.03},{m:'Oct',p:625,dd:-582,t:21,w:15,pf:1.71},{m:'Nov',p:258,dd:-447,t:20,w:14,pf:1.32},{m:'Dec',p:106,dd:-520,t:17,w:12,pf:1.12}],best:'$1,269 (Jul)',worst:'-$325 (Feb)'},2022:{rows:[{m:'Jan',p:425,dd:-1072,t:20,w:11,pf:1.2},{m:'Feb',p:-57,dd:-755,t:24,w:16,pf:0.97},{m:'Mar',p:434,dd:-315,t:22,w:16,pf:1.33},{m:'Apr',p:370,dd:-1047,t:23,w:17,pf:1.21},{m:'May',p:890,dd:-588,t:18,w:12,pf:1.74},{m:'Jun',p:625,dd:-737,t:17,w:11,pf:1.45},{m:'Jul',p:793,dd:-533,t:22,w:14,pf:1.49},{m:'Aug',p:219,dd:-754,t:27,w:20,pf:1.18},{m:'Sep',p:823,dd:-417,t:18,w:13,pf:1.96},{m:'Oct',p:1114,dd:-471,t:21,w:17,pf:3.38},{m:'Nov',p:724,dd:-1010,t:18,w:13,pf:1.69},{m:'Dec',p:80,dd:-360,t:15,w:10,pf:1.14}],best:'$1,114 (Oct)',worst:'-$57 (Feb)'},2023:{rows:[{m:'Jan',p:65,dd:-926,t:23,w:14,pf:1.04},{m:'Feb',p:332,dd:-332,t:17,w:14,pf:1.8},{m:'Mar',p:566,dd:-413,t:19,w:11,pf:1.61},{m:'Apr',p:451,dd:-286,t:19,w:17,pf:2.37},{m:'May',p:323,dd:-424,t:14,w:10,pf:1.65},{m:'Jun',p:403,dd:-396,t:17,w:11,pf:1.5},{m:'Jul',p:98,dd:-897,t:22,w:12,pf:1.08},{m:'Aug',p:302,dd:-775,t:27,w:17,pf:1.19},{m:'Sep',p:248,dd:-251,t:13,w:10,pf:2.07},{m:'Oct',p:1295,dd:-414,t:26,w:20,pf:2.1},{m:'Nov',p:866,dd:-294,t:21,w:17,pf:2.83},{m:'Dec',p:391,dd:-279,t:12,w:10,pf:3.41}],best:'$1,295 (Oct)',worst:'$65 (Jan)'},2024:{rows:[{m:'Jan',p:1137,dd:-363,t:20,w:15,pf:3.1},{m:'Feb',p:129,dd:-447,t:15,w:11,pf:1.24},{m:'Mar',p:326,dd:-347,t:15,w:11,pf:1.56},{m:'Apr',p:652,dd:-438,t:22,w:16,pf:1.83},{m:'May',p:340,dd:-482,t:19,w:14,pf:1.4},{m:'Jun',p:-20,dd:-410,t:17,w:11,pf:0.98},{m:'Jul',p:1851,dd:-348,t:20,w:16,pf:4.1},{m:'Aug',p:1880,dd:-257,t:19,w:15,pf:3.9},{m:'Sep',p:889,dd:-203,t:14,w:12,pf:5.99},{m:'Oct',p:-455,dd:-996,t:26,w:17,pf:0.67},{m:'Nov',p:763,dd:-378,t:19,w:14,pf:1.99},{m:'Dec',p:47,dd:-639,t:17,w:13,pf:1.05}],best:'$1,880 (Aug)',worst:'-$455 (Oct)'},2025:{rows:[{m:'Jan',p:936,dd:-502,t:20,w:17,pf:2.16},{m:'Feb',p:1569,dd:-255,t:18,w:15,pf:3.73},{m:'Mar',p:1395,dd:-475,t:20,w:16,pf:2.53},{m:'Apr',p:648,dd:-957,t:22,w:14,pf:1.32},{m:'May',p:745,dd:-311,t:21,w:16,pf:1.86},{m:'Jun',p:206,dd:-499,t:17,w:13,pf:1.28},{m:'Jul',p:351,dd:-387,t:23,w:15,pf:1.42},{m:'Aug',p:-133,dd:-721,t:24,w:17,pf:0.89},{m:'Sep',p:1049,dd:-540,t:15,w:11,pf:2.39},{m:'Oct',p:1255,dd:-380,t:23,w:18,pf:2.62},{m:'Nov',p:471,dd:-420,t:18,w:14,pf:1.42},{m:'Dec',p:362,dd:-707,t:16,w:10,pf:1.31}],best:'$1,569 (Feb)',worst:'-$133 (Aug)'},2026:{rows:[{m:'Jan',p:980,dd:-502,t:18,w:14,pf:2.13},{m:'Feb',p:735,dd:-493,t:14,w:11,pf:1.82},{m:'Mar',p:685,dd:-845,t:23,w:16,pf:1.38},{m:'Apr',p:81,dd:-750,t:24,w:16,pf:1.05},{m:'May',p:575,dd:-459,t:20,w:15,pf:1.48},{m:'Jun',p:835,dd:-373,t:12,w:9,pf:2.11},{m:'Jul',p:589,dd:-993,t:17,w:12,pf:1.45},{m:'Aug',p:-1266,dd:-1411,t:20,w:9,pf:0.32},{m:'Sep',p:-294,dd:-959,t:18,w:10,pf:0.83},{m:'Oct',p:null,dd:null,t:0,w:0,pf:0},{m:'Nov',p:null,dd:null,t:0,w:0,pf:0},{m:'Dec',p:null,dd:null,t:0,w:0,pf:0}],best:'$980 (Jan)',worst:'-$1,266 (Aug)'}};
+const monthly300={2019:{rows:[{m:'Jan',p:null,dd:null,t:0,w:0,pf:0},{m:'Feb',p:null,dd:null,t:0,w:0,pf:0},{m:'Mar',p:null,dd:null,t:0,w:0,pf:0},{m:'Apr',p:null,dd:null,t:0,w:0,pf:0},{m:'May',p:579,dd:-249,t:8,w:6,pf:2.51},{m:'Jun',p:489,dd:-210,t:6,w:6,pf:0},{m:'Jul',p:-74,dd:-218,t:3,w:1,pf:0.39},{m:'Aug',p:15,dd:-651,t:10,w:6,pf:1.02},{m:'Sep',p:-355,dd:-359,t:2,w:0,pf:0},{m:'Oct',p:203,dd:-125,t:2,w:2,pf:0},{m:'Nov',p:0,dd:0,t:0,w:0,pf:0},{m:'Dec',p:-36,dd:-204,t:3,w:1,pf:0.76}],best:'$579 (May)',worst:'-$355 (Sep)'},2020:{rows:[{m:'Jan',p:69,dd:-449,t:8,w:3,pf:1.08},{m:'Feb',p:299,dd:-621,t:15,w:11,pf:1.32},{m:'Mar',p:466,dd:-526,t:17,w:13,pf:1.44},{m:'Apr',p:-869,dd:-1095,t:25,w:15,pf:0.6},{m:'May',p:883,dd:-397,t:22,w:18,pf:2.03},{m:'Jun',p:1397,dd:-321,t:16,w:13,pf:3.44},{m:'Jul',p:422,dd:-820,t:23,w:13,pf:1.21},{m:'Aug',p:-623,dd:-876,t:18,w:9,pf:0.66},{m:'Sep',p:668,dd:-485,t:17,w:13,pf:1.85},{m:'Oct',p:36,dd:-569,t:20,w:14,pf:1.03},{m:'Nov',p:-171,dd:-725,t:21,w:14,pf:0.88},{m:'Dec',p:796,dd:-575,t:17,w:9,pf:1.64}],best:'$1,397 (Jun)',worst:'-$869 (Apr)'},2021:{rows:[{m:'Jan',p:1369,dd:-622,t:17,w:12,pf:2.37},{m:'Feb',p:-519,dd:-957,t:23,w:16,pf:0.71},{m:'Mar',p:77,dd:-1162,t:24,w:17,pf:1.05},{m:'Apr',p:1123,dd:-219,t:10,w:9,pf:12.72},{m:'May',p:470,dd:-339,t:22,w:17,pf:1.56},{m:'Jun',p:802,dd:-201,t:11,w:8,pf:7.28},{m:'Jul',p:2588,dd:-381,t:19,w:16,pf:5.23},{m:'Aug',p:662,dd:-646,t:19,w:14,pf:1.76},{m:'Sep',p:441,dd:-285,t:11,w:9,pf:2.25},{m:'Oct',p:771,dd:-560,t:21,w:15,pf:1.76},{m:'Nov',p:309,dd:-471,t:20,w:14,pf:1.36},{m:'Dec',p:106,dd:-520,t:17,w:12,pf:1.12}],best:'$2,588 (Jul)',worst:'-$519 (Feb)'},2022:{rows:[{m:'Jan',p:912,dd:-1072,t:20,w:11,pf:1.43},{m:'Feb',p:-27,dd:-725,t:24,w:16,pf:0.99},{m:'Mar',p:589,dd:-335,t:22,w:16,pf:1.45},{m:'Apr',p:645,dd:-1047,t:23,w:17,pf:1.37},{m:'May',p:890,dd:-588,t:18,w:12,pf:1.74},{m:'Jun',p:625,dd:-737,t:17,w:11,pf:1.45},{m:'Jul',p:793,dd:-533,t:22,w:14,pf:1.49},{m:'Aug',p:368,dd:-754,t:27,w:20,pf:1.27},{m:'Sep',p:687,dd:-553,t:18,w:13,pf:1.69},{m:'Oct',p:1115,dd:-471,t:21,w:17,pf:3.38},{m:'Nov',p:724,dd:-1010,t:18,w:13,pf:1.69},{m:'Dec',p:0,dd:-568,t:15,w:10,pf:1}],best:'$1,115 (Oct)',worst:'-$27 (Feb)'},2023:{rows:[{m:'Jan',p:208,dd:-1097,t:23,w:14,pf:1.1},{m:'Feb',p:406,dd:-332,t:17,w:14,pf:1.98},{m:'Mar',p:750,dd:-785,t:19,w:11,pf:1.55},{m:'Apr',p:847,dd:-286,t:19,w:17,pf:2.87},{m:'May',p:361,dd:-627,t:14,w:10,pf:1.52},{m:'Jun',p:811,dd:-537,t:17,w:11,pf:1.84},{m:'Jul',p:415,dd:-1158,t:22,w:12,pf:1.27},{m:'Aug',p:480,dd:-738,t:27,w:17,pf:1.26},{m:'Sep',p:261,dd:-400,t:13,w:10,pf:1.74},{m:'Oct',p:1908,dd:-437,t:26,w:20,pf:2.62},{m:'Nov',p:917,dd:-590,t:21,w:17,pf:1.97},{m:'Dec',p:696,dd:-402,t:12,w:10,pf:5.2}],best:'$1,908 (Oct)',worst:'$208 (Jan)'},2024:{rows:[{m:'Jan',p:1795,dd:-726,t:20,w:15,pf:3.04},{m:'Feb',p:-59,dd:-691,t:15,w:11,pf:0.93},{m:'Mar',p:28,dd:-720,t:15,w:11,pf:1.03},{m:'Apr',p:1211,dd:-525,t:22,w:16,pf:2.32},{m:'May',p:382,dd:-705,t:19,w:14,pf:1.31},{m:'Jun',p:108,dd:-526,t:17,w:11,pf:1.09},{m:'Jul',p:1999,dd:-348,t:20,w:16,pf:3.98},{m:'Aug',p:2604,dd:-408,t:19,w:15,pf:4.36},{m:'Sep',p:993,dd:-214,t:14,w:12,pf:6.57},{m:'Oct',p:-453,dd:-994,t:26,w:17,pf:0.69},{m:'Nov',p:684,dd:-455,t:19,w:14,pf:1.74},{m:'Dec',p:-4,dd:-667,t:17,w:13,pf:1}],best:'$2,604 (Aug)',worst:'-$453 (Oct)'},2025:{rows:[{m:'Jan',p:1203,dd:-502,t:20,w:17,pf:2.49},{m:'Feb',p:1503,dd:-443,t:18,w:15,pf:3.12},{m:'Mar',p:1422,dd:-475,t:20,w:16,pf:2.56},{m:'Apr',p:648,dd:-957,t:22,w:14,pf:1.32},{m:'May',p:771,dd:-311,t:21,w:16,pf:1.89},{m:'Jun',p:176,dd:-474,t:17,w:13,pf:1.21},{m:'Jul',p:514,dd:-473,t:23,w:15,pf:1.54},{m:'Aug',p:-129,dd:-836,t:24,w:17,pf:0.9},{m:'Sep',p:1748,dd:-684,t:15,w:11,pf:2.94},{m:'Oct',p:1839,dd:-380,t:23,w:18,pf:3.02},{m:'Nov',p:471,dd:-420,t:18,w:14,pf:1.42},{m:'Dec',p:449,dd:-707,t:16,w:10,pf:1.39}],best:'$1,839 (Oct)',worst:'-$129 (Aug)'},2026:{rows:[{m:'Jan',p:980,dd:-502,t:18,w:14,pf:2.13},{m:'Feb',p:735,dd:-493,t:14,w:11,pf:1.82},{m:'Mar',p:685,dd:-845,t:23,w:16,pf:1.38},{m:'Apr',p:214,dd:-852,t:24,w:16,pf:1.13},{m:'May',p:575,dd:-459,t:20,w:15,pf:1.48},{m:'Jun',p:835,dd:-373,t:12,w:9,pf:2.11},{m:'Jul',p:589,dd:-993,t:17,w:12,pf:1.45},{m:'Aug',p:-1266,dd:-1411,t:20,w:9,pf:0.32},{m:'Sep',p:-294,dd:-959,t:18,w:10,pf:0.83},{m:'Oct',p:null,dd:null,t:0,w:0,pf:0},{m:'Nov',p:null,dd:null,t:0,w:0,pf:0},{m:'Dec',p:null,dd:null,t:0,w:0,pf:0}],best:'$980 (Jan)',worst:'-$1,266 (Aug)'}};
+const monthly400={2019:{rows:[{m:'Jan',p:null,dd:null,t:0,w:0,pf:0},{m:'Feb',p:null,dd:null,t:0,w:0,pf:0},{m:'Mar',p:null,dd:null,t:0,w:0,pf:0},{m:'Apr',p:null,dd:null,t:0,w:0,pf:0},{m:'May',p:733,dd:-373,t:8,w:6,pf:2.27},{m:'Jun',p:707,dd:-280,t:6,w:6,pf:0},{m:'Jul',p:-99,dd:-290,t:3,w:1,pf:0.39},{m:'Aug',p:208,dd:-877,t:10,w:6,pf:1.19},{m:'Sep',p:-512,dd:-517,t:2,w:0,pf:0},{m:'Oct',p:271,dd:-166,t:2,w:2,pf:0},{m:'Nov',p:0,dd:0,t:0,w:0,pf:0},{m:'Dec',p:1,dd:-204,t:3,w:1,pf:1.01}],best:'$733 (May)',worst:'-$512 (Sep)'},2020:{rows:[{m:'Jan',p:290,dd:-599,t:8,w:3,pf:1.26},{m:'Feb',p:535,dd:-548,t:15,w:11,pf:1.53},{m:'Mar',p:602,dd:-526,t:17,w:13,pf:1.49},{m:'Apr',p:-969,dd:-1354,t:25,w:15,pf:0.69},{m:'May',p:1194,dd:-589,t:22,w:18,pf:2.03},{m:'Jun',p:2102,dd:-483,t:16,w:13,pf:3.03},{m:'Jul',p:728,dd:-1286,t:23,w:13,pf:1.25},{m:'Aug',p:-1258,dd:-1435,t:18,w:9,pf:0.59},{m:'Sep',p:632,dd:-696,t:17,w:13,pf:1.62},{m:'Oct',p:144,dd:-831,t:20,w:14,pf:1.08},{m:'Nov',p:-70,dd:-809,t:21,w:14,pf:0.96},{m:'Dec',p:839,dd:-1116,t:17,w:9,pf:1.45}],best:'$2,102 (Jun)',worst:'-$1,258 (Aug)'},2021:{rows:[{m:'Jan',p:2223,dd:-984,t:17,w:12,pf:2.49},{m:'Feb',p:-307,dd:-1108,t:23,w:16,pf:0.86},{m:'Mar',p:225,dd:-1474,t:24,w:17,pf:1.1},{m:'Apr',p:1483,dd:-329,t:10,w:9,pf:11.32},{m:'May',p:770,dd:-461,t:22,w:17,pf:1.54},{m:'Jun',p:1064,dd:-268,t:11,w:8,pf:7.26},{m:'Jul',p:3488,dd:-407,t:19,w:16,pf:5.33},{m:'Aug',p:787,dd:-1065,t:19,w:14,pf:1.63},{m:'Sep',p:765,dd:-562,t:11,w:9,pf:2.4},{m:'Oct',p:1488,dd:-773,t:21,w:15,pf:2.13},{m:'Nov',p:827,dd:-581,t:20,w:14,pf:1.77},{m:'Dec',p:-36,dd:-794,t:17,w:12,pf:0.97}],best:'$3,488 (Jul)',worst:'-$307 (Feb)'},2022:{rows:[{m:'Jan',p:1775,dd:-905,t:20,w:11,pf:1.77},{m:'Feb',p:-335,dd:-1047,t:24,w:16,pf:0.86},{m:'Mar',p:657,dd:-508,t:22,w:16,pf:1.39},{m:'Apr',p:518,dd:-1047,t:23,w:17,pf:1.27},{m:'May',p:758,dd:-706,t:18,w:12,pf:1.54},{m:'Jun',p:689,dd:-737,t:17,w:11,pf:1.49},{m:'Jul',p:1639,dd:-730,t:22,w:14,pf:1.76},{m:'Aug',p:499,dd:-1182,t:27,w:20,pf:1.29},{m:'Sep',p:1381,dd:-772,t:18,w:13,pf:1.99},{m:'Oct',p:1355,dd:-471,t:21,w:17,pf:3.9},{m:'Nov',p:921,dd:-1324,t:18,w:13,pf:1.66},{m:'Dec',p:-298,dd:-823,t:15,w:10,pf:0.75}],best:'$1,775 (Jan)',worst:'-$335 (Feb)'},2023:{rows:[{m:'Jan',p:815,dd:-1291,t:23,w:14,pf:1.31},{m:'Feb',p:785,dd:-332,t:17,w:14,pf:2.67},{m:'Mar',p:1194,dd:-1186,t:19,w:11,pf:1.65},{m:'Apr',p:1163,dd:-378,t:19,w:17,pf:3.01},{m:'May',p:1030,dd:-616,t:14,w:10,pf:2.35},{m:'Jun',p:1039,dd:-741,t:17,w:11,pf:1.78},{m:'Jul',p:408,dd:-1672,t:22,w:12,pf:1.18},{m:'Aug',p:446,dd:-1209,t:27,w:17,pf:1.16},{m:'Sep',p:459,dd:-644,t:13,w:10,pf:1.82},{m:'Oct',p:1622,dd:-753,t:26,w:20,pf:1.87},{m:'Nov',p:1122,dd:-898,t:21,w:17,pf:1.88},{m:'Dec',p:796,dd:-558,t:12,w:10,pf:3.45}],best:'$1,622 (Oct)',worst:'$408 (Jul)'},2024:{rows:[{m:'Jan',p:2095,dd:-1089,t:20,w:15,pf:2.49},{m:'Feb',p:46,dd:-1137,t:15,w:11,pf:1.04},{m:'Mar',p:3,dd:-835,t:15,w:11,pf:1},{m:'Apr',p:944,dd:-918,t:22,w:16,pf:1.61},{m:'May',p:1026,dd:-1046,t:19,w:14,pf:1.6},{m:'Jun',p:356,dd:-579,t:17,w:11,pf:1.27},{m:'Jul',p:2798,dd:-451,t:20,w:16,pf:4.75},{m:'Aug',p:3347,dd:-513,t:19,w:15,pf:4.13},{m:'Sep',p:1324,dd:-384,t:14,w:12,pf:4.94},{m:'Oct',p:-880,dd:-1509,t:26,w:17,pf:0.6},{m:'Nov',p:1079,dd:-620,t:19,w:14,pf:2.01},{m:'Dec',p:-69,dd:-812,t:17,w:13,pf:0.95}],best:'$3,347 (Aug)',worst:'-$880 (Oct)'},2025:{rows:[{m:'Jan',p:1286,dd:-502,t:20,w:17,pf:2.59},{m:'Feb',p:2490,dd:-530,t:18,w:15,pf:3.79},{m:'Mar',p:2114,dd:-614,t:20,w:16,pf:2.92},{m:'Apr',p:473,dd:-957,t:22,w:14,pf:1.21},{m:'May',p:862,dd:-480,t:21,w:16,pf:1.82},{m:'Jun',p:86,dd:-804,t:17,w:13,pf:1.06},{m:'Jul',p:492,dd:-860,t:23,w:15,pf:1.3},{m:'Aug',p:277,dd:-795,t:24,w:17,pf:1.21},{m:'Sep',p:2383,dd:-645,t:15,w:11,pf:3.22},{m:'Oct',p:2634,dd:-425,t:23,w:18,pf:3.34},{m:'Nov',p:500,dd:-420,t:18,w:14,pf:1.45},{m:'Dec',p:456,dd:-796,t:16,w:10,pf:1.37}],best:'$2,634 (Oct)',worst:'$86 (Jun)'},2026:{rows:[{m:'Jan',p:1227,dd:-502,t:18,w:14,pf:2.42},{m:'Feb',p:735,dd:-493,t:14,w:11,pf:1.82},{m:'Mar',p:696,dd:-1303,t:23,w:16,pf:1.29},{m:'Apr',p:780,dd:-1015,t:24,w:16,pf:1.38},{m:'May',p:311,dd:-575,t:20,w:15,pf:1.2},{m:'Jun',p:659,dd:-439,t:12,w:9,pf:1.71},{m:'Jul',p:589,dd:-993,t:17,w:12,pf:1.45},{m:'Aug',p:-1625,dd:-1770,t:20,w:9,pf:0.27},{m:'Sep',p:-255,dd:-959,t:18,w:10,pf:0.88},{m:'Oct',p:null,dd:null,t:0,w:0,pf:0},{m:'Nov',p:null,dd:null,t:0,w:0,pf:0},{m:'Dec',p:null,dd:null,t:0,w:0,pf:0}],best:'$1,227 (Jan)',worst:'-$1,625 (Aug)'}};
+const monthly600={2019:{rows:[{m:'Jan',p:null,dd:null,t:0,w:0,pf:0},{m:'Feb',p:null,dd:null,t:0,w:0,pf:0},{m:'Mar',p:null,dd:null,t:0,w:0,pf:0},{m:'Apr',p:null,dd:null,t:0,w:0,pf:0},{m:'May',p:1466,dd:-500,t:8,w:6,pf:2.91},{m:'Jun',p:1114,dd:-420,t:6,w:6,pf:0},{m:'Jul',p:-132,dd:-435,t:3,w:1,pf:0.46},{m:'Aug',p:337,dd:-1412,t:10,w:6,pf:1.19},{m:'Sep',p:-711,dd:-717,t:2,w:0,pf:0},{m:'Oct',p:459,dd:-291,t:2,w:2,pf:0},{m:'Nov',p:0,dd:0,t:0,w:0,pf:0},{m:'Dec',p:-72,dd:-409,t:3,w:1,pf:0.76}],best:'$1,466 (May)',worst:'-$711 (Sep)'},2020:{rows:[{m:'Jan',p:182,dd:-951,t:8,w:3,pf:1.1},{m:'Feb',p:982,dd:-1169,t:15,w:11,pf:1.61},{m:'Mar',p:1411,dd:-751,t:17,w:13,pf:1.72},{m:'Apr',p:-1659,dd:-2393,t:25,w:15,pf:0.66},{m:'May',p:2124,dd:-987,t:22,w:18,pf:2.13},{m:'Jun',p:3362,dd:-752,t:16,w:13,pf:3.09},{m:'Jul',p:863,dd:-2106,t:23,w:13,pf:1.19},{m:'Aug',p:-1983,dd:-2271,t:18,w:9,pf:0.58},{m:'Sep',p:1151,dd:-1162,t:17,w:13,pf:1.64},{m:'Oct',p:119,dd:-1295,t:20,w:14,pf:1.04},{m:'Nov',p:-343,dd:-1584,t:21,w:14,pf:0.89},{m:'Dec',p:1099,dd:-1734,t:17,w:9,pf:1.37}],best:'$3,362 (Jun)',worst:'-$1,983 (Aug)'},2021:{rows:[{m:'Jan',p:4000,dd:-1481,t:17,w:12,pf:2.92},{m:'Feb',p:-687,dd:-1804,t:23,w:16,pf:0.81},{m:'Mar',p:45,dd:-2581,t:24,w:17,pf:1.01},{m:'Apr',p:2490,dd:-438,t:10,w:9,pf:14},{m:'May',p:1165,dd:-800,t:22,w:17,pf:1.53},{m:'Jun',p:1720,dd:-402,t:11,w:8,pf:6.78},{m:'Jul',p:5562,dd:-751,t:19,w:16,pf:5.2},{m:'Aug',p:1515,dd:-1617,t:19,w:14,pf:1.75},{m:'Sep',p:1181,dd:-843,t:11,w:9,pf:2.32},{m:'Oct',p:2326,dd:-1028,t:21,w:15,pf:2.23},{m:'Nov',p:1117,dd:-942,t:20,w:14,pf:1.58},{m:'Dec',p:-144,dd:-1202,t:17,w:12,pf:0.94}],best:'$5,562 (Jul)',worst:'-$687 (Feb)'},2022:{rows:[{m:'Jan',p:2782,dd:-1347,t:20,w:11,pf:1.79},{m:'Feb',p:-330,dd:-1732,t:24,w:16,pf:0.92},{m:'Mar',p:984,dd:-843,t:22,w:16,pf:1.33},{m:'Apr',p:1118,dd:-2093,t:23,w:17,pf:1.38},{m:'May',p:1967,dd:-943,t:18,w:12,pf:2.05},{m:'Jun',p:1470,dd:-1632,t:17,w:11,pf:1.6},{m:'Jul',p:2193,dd:-1172,t:22,w:14,pf:1.63},{m:'Aug',p:379,dd:-2050,t:27,w:20,pf:1.12},{m:'Sep',p:2029,dd:-1100,t:18,w:13,pf:1.9},{m:'Oct',p:2226,dd:-752,t:21,w:17,pf:3.88},{m:'Nov',p:1081,dd:-2334,t:18,w:13,pf:1.44},{m:'Dec',p:-192,dd:-1286,t:15,w:10,pf:0.89}],best:'$2,782 (Jan)',worst:'-$330 (Feb)'},2023:{rows:[{m:'Jan',p:850,dd:-2062,t:23,w:14,pf:1.2},{m:'Feb',p:1128,dd:-664,t:17,w:14,pf:2.28},{m:'Mar',p:1559,dd:-1770,t:19,w:11,pf:1.51},{m:'Apr',p:1971,dd:-655,t:19,w:17,pf:3.17},{m:'May',p:1188,dd:-1255,t:14,w:10,pf:1.81},{m:'Jun',p:1827,dd:-1105,t:17,w:11,pf:1.79},{m:'Jul',p:666,dd:-2718,t:22,w:12,pf:1.19},{m:'Aug',p:523,dd:-1891,t:27,w:17,pf:1.11},{m:'Sep',p:634,dd:-1008,t:13,w:10,pf:1.7},{m:'Oct',p:3505,dd:-1190,t:26,w:20,pf:2.15},{m:'Nov',p:1770,dd:-1389,t:21,w:17,pf:1.84},{m:'Dec',p:1379,dd:-960,t:12,w:10,pf:3.83}],best:'$3,505 (Oct)',worst:'$523 (Aug)'},2024:{rows:[{m:'Jan',p:3336,dd:-1646,t:20,w:15,pf:2.55},{m:'Feb',p:117,dd:-1699,t:15,w:11,pf:1.06},{m:'Mar',p:122,dd:-1440,t:15,w:11,pf:1.05},{m:'Apr',p:2001,dd:-1396,t:22,w:16,pf:1.86},{m:'May',p:1140,dd:-1668,t:19,w:14,pf:1.4},{m:'Jun',p:374,dd:-1025,t:17,w:11,pf:1.15},{m:'Jul',p:4143,dd:-697,t:20,w:16,pf:3.92},{m:'Aug',p:6193,dd:-815,t:19,w:15,pf:4.92},{m:'Sep',p:2061,dd:-587,t:14,w:12,pf:5.01},{m:'Oct',p:-1506,dd:-2514,t:26,w:17,pf:0.59},{m:'Nov',p:1444,dd:-1031,t:19,w:14,pf:1.73},{m:'Dec',p:-53,dd:-990,t:17,w:13,pf:0.97}],best:'$6,193 (Aug)',worst:'-$1,506 (Oct)'},2025:{rows:[{m:'Jan',p:2273,dd:-770,t:20,w:17,pf:2.77},{m:'Feb',p:3543,dd:-886,t:18,w:15,pf:3.21},{m:'Mar',p:3337,dd:-951,t:20,w:16,pf:2.66},{m:'Apr',p:646,dd:-1655,t:22,w:14,pf:1.17},{m:'May',p:1514,dd:-720,t:21,w:16,pf:1.79},{m:'Jun',p:-36,dd:-1222,t:17,w:13,pf:0.98},{m:'Jul',p:1084,dd:-1247,t:23,w:15,pf:1.44},{m:'Aug',p:70,dd:-1632,t:24,w:17,pf:1.03},{m:'Sep',p:3606,dd:-1328,t:15,w:11,pf:2.83},{m:'Oct',p:3750,dd:-668,t:23,w:18,pf:2.84},{m:'Nov',p:1064,dd:-715,t:18,w:14,pf:1.56},{m:'Dec',p:961,dd:-1231,t:16,w:10,pf:1.47}],best:'$3,750 (Oct)',worst:'-$36 (Jun)'},2026:{rows:[{m:'Jan',p:1563,dd:-1004,t:18,w:14,pf:1.9},{m:'Feb',p:1095,dd:-720,t:14,w:11,pf:1.75},{m:'Mar',p:1987,dd:-1588,t:23,w:16,pf:1.62},{m:'Apr',p:1059,dd:-1677,t:24,w:16,pf:1.32},{m:'May',p:519,dd:-964,t:20,w:15,pf:1.19},{m:'Jun',p:1541,dd:-701,t:12,w:9,pf:2.15},{m:'Jul',p:167,dd:-2035,t:17,w:12,pf:1.07},{m:'Aug',p:-2188,dd:-2415,t:20,w:9,pf:0.32},{m:'Sep',p:52,dd:-1404,t:18,w:10,pf:1.02},{m:'Oct',p:null,dd:null,t:0,w:0,pf:0},{m:'Nov',p:null,dd:null,t:0,w:0,pf:0},{m:'Dec',p:null,dd:null,t:0,w:0,pf:0}],best:'$1,987 (Mar)',worst:'-$2,188 (Aug)'}};
+const monthly850={2019:{rows:[{m:'Jan',p:null,dd:null,t:0,w:0,pf:0},{m:'Feb',p:null,dd:null,t:0,w:0,pf:0},{m:'Mar',p:null,dd:null,t:0,w:0,pf:0},{m:'Apr',p:null,dd:null,t:0,w:0,pf:0},{m:'May',p:1751,dd:-746,t:8,w:6,pf:2.52},{m:'Jun',p:1435,dd:-560,t:6,w:6,pf:0},{m:'Jul',p:-204,dd:-580,t:3,w:1,pf:0.42},{m:'Aug',p:527,dd:-1886,t:10,w:6,pf:1.23},{m:'Sep',p:-1023,dd:-1033,t:2,w:0,pf:0},{m:'Oct',p:594,dd:-374,t:2,w:2,pf:0},{m:'Nov',p:0,dd:0,t:0,w:0,pf:0},{m:'Dec',p:-98,dd:-538,t:3,w:1,pf:0.75}],best:'$1,751 (May)',worst:'-$1,023 (Sep)'},2020:{rows:[{m:'Jan',p:581,dd:-1258,t:8,w:3,pf:1.24},{m:'Feb',p:967,dd:-1641,t:15,w:11,pf:1.4},{m:'Mar',p:1683,dd:-1235,t:17,w:13,pf:1.59},{m:'Apr',p:-2124,dd:-3043,t:25,w:15,pf:0.68},{m:'May',p:2856,dd:-1371,t:22,w:18,pf:2.04},{m:'Jun',p:4829,dd:-1114,t:16,w:13,pf:3.06},{m:'Jul',p:1215,dd:-2780,t:23,w:13,pf:1.19},{m:'Aug',p:-2904,dd:-3247,t:18,w:9,pf:0.56},{m:'Sep',p:1709,dd:-1542,t:17,w:13,pf:1.73},{m:'Oct',p:73,dd:-1729,t:20,w:14,pf:1.02},{m:'Nov',p:-610,dd:-2298,t:21,w:14,pf:0.87},{m:'Dec',p:1460,dd:-2465,t:17,w:9,pf:1.36}],best:'$4,829 (Jun)',worst:'-$2,904 (Aug)'},2021:{rows:[{m:'Jan',p:4958,dd:-2127,t:17,w:12,pf:2.58},{m:'Feb',p:-792,dd:-2371,t:23,w:16,pf:0.83},{m:'Mar',p:199,dd:-3507,t:24,w:17,pf:1.04},{m:'Apr',p:3271,dd:-657,t:10,w:9,pf:12.38},{m:'May',p:2098,dd:-1018,t:22,w:17,pf:1.73},{m:'Jun',p:2276,dd:-603,t:11,w:8,pf:5.88},{m:'Jul',p:7589,dd:-1052,t:19,w:16,pf:5.12},{m:'Aug',p:1831,dd:-2422,t:19,w:14,pf:1.62},{m:'Sep',p:1569,dd:-1124,t:11,w:9,pf:2.26},{m:'Oct',p:3057,dd:-1416,t:21,w:15,pf:2.07},{m:'Nov',p:1992,dd:-1352,t:20,w:14,pf:1.81},{m:'Dec',p:276,dd:-1610,t:17,w:12,pf:1.09}],best:'$7,589 (Jul)',worst:'-$792 (Feb)'},2022:{rows:[{m:'Jan',p:3439,dd:-2125,t:20,w:11,pf:1.64},{m:'Feb',p:-990,dd:-2817,t:24,w:16,pf:0.83},{m:'Mar',p:1594,dd:-1031,t:22,w:16,pf:1.39},{m:'Apr',p:1860,dd:-2566,t:23,w:17,pf:1.45},{m:'May',p:2624,dd:-1411,t:18,w:12,pf:1.94},{m:'Jun',p:1690,dd:-1851,t:17,w:11,pf:1.52},{m:'Jul',p:2986,dd:-1531,t:22,w:14,pf:1.59},{m:'Aug',p:654,dd:-2804,t:27,w:20,pf:1.15},{m:'Sep',p:2907,dd:-1620,t:18,w:13,pf:1.9},{m:'Oct',p:3606,dd:-943,t:21,w:17,pf:4.76},{m:'Nov',p:1558,dd:-3343,t:18,w:13,pf:1.45},{m:'Dec',p:-217,dd:-1751,t:15,w:10,pf:0.91}],best:'$3,606 (Oct)',worst:'-$990 (Feb)'},2023:{rows:[{m:'Jan',p:1821,dd:-2602,t:23,w:14,pf:1.31},{m:'Feb',p:1636,dd:-996,t:17,w:14,pf:2.26},{m:'Mar',p:2404,dd:-2404,t:19,w:11,pf:1.57},{m:'Apr',p:2605,dd:-941,t:19,w:17,pf:2.91},{m:'May',p:1702,dd:-1668,t:14,w:10,pf:1.87},{m:'Jun',p:2252,dd:-1469,t:17,w:11,pf:1.72},{m:'Jul',p:845,dd:-3803,t:22,w:12,pf:1.17},{m:'Aug',p:780,dd:-2772,t:27,w:17,pf:1.12},{m:'Sep',p:975,dd:-1289,t:13,w:10,pf:1.87},{m:'Oct',p:4862,dd:-1884,t:26,w:20,pf:2.15},{m:'Nov',p:2443,dd:-2004,t:21,w:17,pf:1.84},{m:'Dec',p:1694,dd:-1395,t:12,w:10,pf:3.11}],best:'$4,862 (Oct)',worst:'$780 (Aug)'},2024:{rows:[{m:'Jan',p:4295,dd:-2392,t:20,w:15,pf:2.41},{m:'Feb',p:58,dd:-2389,t:15,w:11,pf:1.02},{m:'Mar',p:408,dd:-1796,t:15,w:11,pf:1.14},{m:'Apr',p:2674,dd:-1957,t:22,w:16,pf:1.82},{m:'May',p:1901,dd:-2232,t:19,w:14,pf:1.52},{m:'Jun',p:463,dd:-1435,t:17,w:11,pf:1.14},{m:'Jul',p:5907,dd:-1033,t:20,w:16,pf:3.84},{m:'Aug',p:8241,dd:-1124,t:19,w:15,pf:4.5},{m:'Sep',p:2716,dd:-959,t:14,w:12,pf:4.19},{m:'Oct',p:-2139,dd:-3395,t:26,w:17,pf:0.58},{m:'Nov',p:2480,dd:-1157,t:19,w:14,pf:2.04},{m:'Dec',p:-80,dd:-1656,t:17,w:13,pf:0.97}],best:'$8,241 (Aug)',worst:'-$2,139 (Oct)'},2025:{rows:[{m:'Jan',p:2805,dd:-1547,t:20,w:17,pf:2.34},{m:'Feb',p:4922,dd:-1194,t:18,w:15,pf:3.26},{m:'Mar',p:3935,dd:-1412,t:20,w:16,pf:2.35},{m:'Apr',p:1418,dd:-2379,t:22,w:14,pf:1.26},{m:'May',p:2423,dd:-960,t:21,w:16,pf:1.98},{m:'Jun',p:201,dd:-1727,t:17,w:13,pf:1.07},{m:'Jul',p:1701,dd:-1755,t:23,w:15,pf:1.51},{m:'Aug',p:651,dd:-1737,t:24,w:17,pf:1.23},{m:'Sep',p:4771,dd:-1868,t:15,w:11,pf:2.75},{m:'Oct',p:5171,dd:-956,t:23,w:18,pf:2.84},{m:'Nov',p:1150,dd:-971,t:18,w:14,pf:1.42},{m:'Dec',p:1912,dd:-1713,t:16,w:10,pf:1.72}],best:'$5,171 (Oct)',worst:'$201 (Jun)'},2026:{rows:[{m:'Jan',p:2827,dd:-1505,t:18,w:14,pf:2.22},{m:'Feb',p:1957,dd:-1150,t:14,w:11,pf:2.1},{m:'Mar',p:1417,dd:-2577,t:23,w:16,pf:1.28},{m:'Apr',p:1190,dd:-2407,t:24,w:16,pf:1.24},{m:'May',p:1248,dd:-1353,t:20,w:15,pf:1.37},{m:'Jun',p:2004,dd:-878,t:12,w:9,pf:1.96},{m:'Jul',p:569,dd:-2697,t:17,w:12,pf:1.17},{m:'Aug',p:-3736,dd:-4025,t:20,w:9,pf:0.27},{m:'Sep',p:302,dd:-1555,t:18,w:10,pf:1.07},{m:'Oct',p:null,dd:null,t:0,w:0,pf:0},{m:'Nov',p:null,dd:null,t:0,w:0,pf:0},{m:'Dec',p:null,dd:null,t:0,w:0,pf:0}],best:'$2,827 (Jan)',worst:'-$3,736 (Aug)'}};
+
+const modelData={
+  0:{label:'$200',profit:39685,dd:-1811,win:'70.92%',pf:1.510,trades:1568,wins:1112,losses:456,avgLoss:-171,lgLoss:-381,avgWin:106,lgWin:974,avgPnl:25,ddWorst:-620,ddDur:'&ndash;',ddRec:'&ndash;',lossDist:[{l:'$0&ndash;$100',w:19.5},{l:'$100&ndash;$200',w:47.1},{l:'$200&ndash;$300',w:26.3},{l:'$300&ndash;$400',w:7},{l:'$400&ndash;$500',w:0},{l:'$500+',w:0}],winDist:[{l:'$0&ndash;$100',w:60.3},{l:'$100&ndash;$200',w:26.3},{l:'$200&ndash;$300',w:8.7},{l:'$300&ndash;$400',w:1.6},{l:'$400&ndash;$500',w:1.3},{l:'$500+',w:1.8}],years:[{yr:'2019',p:533,t:34,wr:64.7,dd:-656,pf:1.47},{yr:'2020',p:2730,t:219,wr:66.2,dd:-931,pf:1.24},{yr:'2021',p:5329,t:214,wr:74.3,dd:-712,pf:1.65},{yr:'2022',p:6440,t:245,wr:69.4,dd:-1072,pf:1.42},{yr:'2023',p:5340,t:230,wr:70.9,dd:-929,pf:1.57},{yr:'2024',p:7539,t:223,wr:74.0,dd:-1077,pf:1.88},{yr:'2025',p:8854,t:237,wr:74.3,dd:-957,pf:1.75},{yr:'2026',p:2920,t:166,wr:67.5,dd:-1811,pf:1.24}],dayLoss:[{l:'$0&ndash;$100',w:30.2},{l:'$100&ndash;$200',w:46.3},{l:'$200&ndash;$300',w:14.3},{l:'$300&ndash;$400',w:5.6},{l:'$400&ndash;$500',w:1.6},{l:'$500+',w:2.1}],dayWin:[{l:'$0&ndash;$100',w:60.4},{l:'$100&ndash;$200',w:25.9},{l:'$200&ndash;$300',w:8.5},{l:'$300&ndash;$400',w:1.9},{l:'$400&ndash;$500',w:1.5},{l:'$500+',w:1.7}],dayAvgWin:105,dayAvgLoss:-160,dayBest:974,monthly:monthly200},
+  1:{label:'$300',profit:50730,dd:-1811,win:'70.92%',pf:1.562,trades:1568,wins:1112,losses:456,avgLoss:-198,lgLoss:-381,avgWin:127,lgWin:1461,avgPnl:32,ddWorst:-620,ddDur:'&ndash;',ddRec:'&ndash;',lossDist:[{l:'$0&ndash;$100',w:17.1},{l:'$100&ndash;$200',w:29.6},{l:'$200&ndash;$300',w:44.7},{l:'$300&ndash;$400',w:8.6},{l:'$400&ndash;$500',w:0},{l:'$500+',w:0}],winDist:[{l:'$0&ndash;$100',w:58.1},{l:'$100&ndash;$200',w:24.6},{l:'$200&ndash;$300',w:9},{l:'$300&ndash;$400',w:3.1},{l:'$400&ndash;$500',w:1.7},{l:'$500+',w:3.5}],years:[{yr:'2019',p:821,t:34,wr:64.7,dd:-943,pf:1.45},{yr:'2020',p:3373,t:219,wr:66.2,dd:-1406,pf:1.23},{yr:'2021',p:8199,t:214,wr:74.3,dd:-1162,pf:1.82},{yr:'2022',p:7321,t:245,wr:69.4,dd:-1072,pf:1.46},{yr:'2023',p:8060,t:230,wr:70.9,dd:-1158,pf:1.67},{yr:'2024',p:9288,t:223,wr:74.0,dd:-1152,pf:1.84},{yr:'2025',p:10615,t:237,wr:74.3,dd:-957,pf:1.85},{yr:'2026',p:3053,t:166,wr:67.5,dd:-1811,pf:1.25}],dayLoss:[{l:'$0&ndash;$100',w:24.6},{l:'$100&ndash;$200',w:41.4},{l:'$200&ndash;$300',w:20.3},{l:'$300&ndash;$400',w:5.6},{l:'$400&ndash;$500',w:4.5},{l:'$500+',w:3.5}],dayWin:[{l:'$0&ndash;$100',w:58.4},{l:'$100&ndash;$200',w:23.9},{l:'$200&ndash;$300',w:9},{l:'$300&ndash;$400',w:3.4},{l:'$400&ndash;$500',w:1.8},{l:'$500+',w:3.5}],dayAvgWin:126,dayAvgLoss:-186,dayBest:1461,monthly:monthly300},
+  2:{label:'$400',profit:68532,dd:-2477,win:'70.92%',pf:1.580,trades:1568,wins:1112,losses:456,avgLoss:-259,lgLoss:-410,avgWin:168,lgWin:1948,avgPnl:44,ddWorst:-792,ddDur:'&ndash;',ddRec:'&ndash;',lossDist:[{l:'$0&ndash;$100',w:13.4},{l:'$100&ndash;$200',w:9.6},{l:'$200&ndash;$300',w:32},{l:'$300&ndash;$400',w:43.4},{l:'$400&ndash;$500',w:1.5},{l:'$500+',w:0}],winDist:[{l:'$0&ndash;$100',w:55.7},{l:'$100&ndash;$200',w:21.7},{l:'$200&ndash;$300',w:7.6},{l:'$300&ndash;$400',w:5.2},{l:'$400&ndash;$500',w:2.7},{l:'$500+',w:7.2}],years:[{yr:'2019',p:1309,t:34,wr:64.7,dd:-1229,pf:1.53},{yr:'2020',p:4769,t:219,wr:66.2,dd:-2477,pf:1.23},{yr:'2021',p:12777,t:214,wr:74.3,dd:-1474,pf:1.92},{yr:'2022',p:9559,t:245,wr:69.4,dd:-1324,pf:1.49},{yr:'2023',p:10879,t:230,wr:70.9,dd:-1672,pf:1.65},{yr:'2024',p:12069,t:223,wr:74.0,dd:-1831,pf:1.79},{yr:'2025',p:14053,t:237,wr:74.3,dd:-957,pf:1.94},{yr:'2026',p:3117,t:166,wr:67.5,dd:-2130,pf:1.22}],dayLoss:[{l:'$0&ndash;$100',w:20.1},{l:'$100&ndash;$200',w:24.9},{l:'$200&ndash;$300',w:21.9},{l:'$300&ndash;$400',w:21.7},{l:'$400&ndash;$500',w:2.4},{l:'$500+',w:9.1}],dayWin:[{l:'$0&ndash;$100',w:55.8},{l:'$100&ndash;$200',w:20.5},{l:'$200&ndash;$300',w:8.2},{l:'$300&ndash;$400',w:5.5},{l:'$400&ndash;$500',w:2.9},{l:'$500+',w:7.1}],dayAvgWin:169,dayAvgLoss:-247,dayBest:1948,monthly:monthly400},
+  3:{label:'$600',profit:109745,dd:-3776,win:'70.92%',pf:1.569,trades:1568,wins:1112,losses:456,avgLoss:-423,lgLoss:-614,avgWin:272,lgWin:2923,avgPnl:70,ddWorst:-1187,ddDur:'&ndash;',ddRec:'&ndash;',lossDist:[{l:'$0&ndash;$100',w:8.6},{l:'$100&ndash;$200',w:7.7},{l:'$200&ndash;$300',w:4.8},{l:'$300&ndash;$400',w:10.1},{l:'$400&ndash;$500',w:21.7},{l:'$500+',w:47.1}],winDist:[{l:'$0&ndash;$100',w:34.8},{l:'$100&ndash;$200',w:27.4},{l:'$200&ndash;$300',w:10.6},{l:'$300&ndash;$400',w:7.6},{l:'$400&ndash;$500',w:4.2},{l:'$500+',w:15.4}],years:[{yr:'2019',p:2461,t:34,wr:64.7,dd:-1900,pf:1.65},{yr:'2020',p:7308,t:219,wr:66.2,dd:-3776,pf:1.22},{yr:'2021',p:20290,t:214,wr:74.3,dd:-2581,pf:1.9},{yr:'2022',p:15707,t:245,wr:69.4,dd:-2334,pf:1.5},{yr:'2023',p:17000,t:230,wr:70.9,dd:-2718,pf:1.61},{yr:'2024',p:19372,t:223,wr:74.0,dd:-2951,pf:1.77},{yr:'2025',p:21812,t:237,wr:74.3,dd:-1772,pf:1.84},{yr:'2026',p:5795,t:166,wr:67.5,dd:-2701,pf:1.26}],dayLoss:[{l:'$0&ndash;$100',w:11.7},{l:'$100&ndash;$200',w:13},{l:'$200&ndash;$300',w:11.9},{l:'$300&ndash;$400',w:14.6},{l:'$400&ndash;$500',w:22.5},{l:'$500+',w:26.3}],dayWin:[{l:'$0&ndash;$100',w:35},{l:'$100&ndash;$200',w:28.2},{l:'$200&ndash;$300',w:10},{l:'$300&ndash;$400',w:7.1},{l:'$400&ndash;$500',w:4.2},{l:'$500+',w:15.5}],dayAvgWin:270,dayAvgLoss:-404,dayBest:2923,monthly:monthly600},
+  4:{label:'$800',profit:152533,dd:-5374,win:'70.92%',pf:1.567,trades:1568,wins:1112,losses:456,avgLoss:-590,lgLoss:-819,avgWin:379,lgWin:3897,avgPnl:97,ddWorst:-1583,ddDur:'&ndash;',ddRec:'&ndash;',lossDist:[{l:'$0&ndash;$100',w:5.5},{l:'$100&ndash;$200',w:5.5},{l:'$200&ndash;$300',w:5.7},{l:'$300&ndash;$400',w:4.6},{l:'$400&ndash;$500',w:2.6},{l:'$500+',w:76.1}],winDist:[{l:'$0&ndash;$100',w:7.5},{l:'$100&ndash;$200',w:45.6},{l:'$200&ndash;$300',w:9.2},{l:'$300&ndash;$400',w:11.2},{l:'$400&ndash;$500',w:5.2},{l:'$500+',w:21.4}],years:[{yr:'2019',p:2982,t:34,wr:64.7,dd:-2496,pf:1.57},{yr:'2020',p:9735,t:219,wr:66.2,dd:-5374,pf:1.21},{yr:'2021',p:28324,t:214,wr:74.3,dd:-3507,pf:1.92},{yr:'2022',p:21711,t:245,wr:69.4,dd:-3343,pf:1.48},{yr:'2023',p:24019,t:230,wr:70.9,dd:-3803,pf:1.63},{yr:'2024',p:26924,t:223,wr:74.0,dd:-3891,pf:1.77},{yr:'2025',p:31060,t:237,wr:74.3,dd:-2521,pf:1.88},{yr:'2026',p:7778,t:166,wr:67.5,dd:-4415,pf:1.24}],dayLoss:[{l:'$0&ndash;$100',w:7.5},{l:'$100&ndash;$200',w:7.5},{l:'$200&ndash;$300',w:10.7},{l:'$300&ndash;$400',w:10.2},{l:'$400&ndash;$500',w:7.5},{l:'$500+',w:56.7}],dayWin:[{l:'$0&ndash;$100',w:8.1},{l:'$100&ndash;$200',w:45.4},{l:'$200&ndash;$300',w:9.1},{l:'$300&ndash;$400',w:10.3},{l:'$400&ndash;$500',w:5.6},{l:'$500+',w:21.5}],dayAvgWin:379,dayAvgLoss:-558,dayBest:3897,monthly:monthly850},
+};
+const streakData={0:{winDays:948,lossDays:378,winDist:[31.2, 18.4, 13.1, 11.0, 7.4, 5.0, 13.8],lossDist:[74.5, 19.1, 4.6, 1.4, 0.4, 0.0, 0.0],winAvg:3.4,winLongest:16,lossAvg:1.3,lossLongest:5},1:{winDays:952,lossDays:374,winDist:[31.2, 18.3, 12.9, 10.8, 7.5, 5.0, 14.3],lossDist:[74.6, 19.0, 4.7, 1.4, 0.4, 0.0, 0.0],winAvg:3.4,winLongest:16,lossAvg:1.3,lossLongest:5},2:{winDays:952,lossDays:374,winDist:[31.3, 18.1, 12.8, 10.3, 8.2, 5.3, 13.9],lossDist:[75.4, 18.1, 4.6, 1.4, 0.4, 0.0, 0.0],winAvg:3.4,winLongest:16,lossAvg:1.3,lossLongest:5},3:{winDays:957,lossDays:369,winDist:[31.1, 18.2, 12.1, 11.1, 7.9, 5.4, 14.3],lossDist:[76.4, 17.5, 4.3, 1.4, 0.4, 0.0, 0.0],winAvg:3.4,winLongest:16,lossAvg:1.3,lossLongest:5},4:{winDays:952,lossDays:374,winDist:[31.1, 18.6, 11.8, 11.1, 8.2, 5.4, 13.9],lossDist:[75.0, 18.6, 4.6, 1.4, 0.4, 0.0, 0.0],winAvg:3.4,winLongest:16,lossAvg:1.3,lossLongest:5}};
+
+function renderDist(id,data,color){document.getElementById(id).innerHTML=data.map(d=>`<div class="dist-row"><div class="dist-label">${d.l}</div><div class="dist-bar-bg"><div class="dist-bar-fill" style="width:${Math.max(0.3,d.w)}%;background:${color};opacity:${d.w>30?1:d.w>15?0.85:d.w>5?0.7:0.5}"></div></div><div class="dist-pct">${d.w.toFixed(1)}%</div></div>`).join('')}
+
+function renderStreakBars(id,data,isWin){
+  const labels=['1','2','3','4','5','6','7+'];
+  document.getElementById(id).innerHTML=data.map((w,i)=>`<div class="bar-row"><span style="font-size:10px;color:var(--color-text-secondary);width:20px">${labels[i]}</span><div class="bar-bg"><div class="bar-fill${isWin?'':' red'}" style="width:${Math.max(0,w)}%"></div></div><div class="dist-pct">${w.toFixed(1)}%</div></div>`).join('');
+}
+function renderStreaks(idx){
+  const s=streakData[idx];
+  document.getElementById('losingDays').textContent=s.lossDays;
+  document.getElementById('winningDays').textContent=s.winDays;
+  document.getElementById('dayLossCount').textContent=s.lossDays;
+  document.getElementById('dayWinCount').textContent=s.winDays;
+  const md=modelData[idx];
+  document.getElementById('dayAvgLoss').textContent=fmt(md.dayAvgLoss);
+  document.getElementById('dayAvgWin').textContent=fmt(md.dayAvgWin);
+  document.getElementById('dayBest').textContent=fmt(md.dayBest);
+  renderStreakBars('lossStreakBars',s.lossDist,false);
+  renderStreakBars('winStreakBars',s.winDist,true);
+  document.getElementById('lossStreakAvg').textContent=s.lossAvg.toFixed(1);
+  document.getElementById('lossStreakLongest').textContent=s.lossLongest;
+  document.getElementById('winStreakAvg').textContent=s.winAvg.toFixed(1);
+  document.getElementById('winStreakLongest').textContent=s.winLongest;
+}
+
+
+/* Build flat monthly array.
+   Level 1: 2025 yearly total adjusted so all 5 years sum to net profit.
+   Level 2: December adjusted so all 12 months sum to yearly total.
+   Result: monthly breakdown + equity curve always match top-line figures. */
+function buildFlatFromMonthly(monthlyObj, yearsArr, netProfit){
+  /* Data is pre-reconciled server-side: monthly sums to yearly sums to total exactly.
+     Just flatten the monthly P&L values in order. 2026 has 6 months. */
+  const yrs=[2019,2020,2021,2022,2023,2024,2025,2026];
+  const result=[];
+  for(const yr of yrs){
+    const rows=monthlyObj[yr]?.rows||[];
+    rows.forEach((r,mi)=>{
+      if(yr===2019 && mi<4) return;   // before MNQ launch (May 2019)
+      if(yr===2026 && mi>8) return;   // after data cutoff (Sep 2026)
+      result.push(r.p===null ? 0 : r.p);  // in-window no-trade month counts as flat $0
+    });
+  }
+  return result;
+}
+
+let cur=1,eqC,openYr=null,cmpOpen=false;
+let curMonthlyData=buildFlatFromMonthly(modelData[1].monthly,modelData[1].years,modelData[1].profit);
+
+Object.values(modelData).forEach((m,i)=>{const b=document.createElement('button');b.className='tab'+(i===cur?' active':'');b.textContent=m.label;b.onclick=()=>setModel(i);document.getElementById('tabRow').appendChild(b)});
+const cmpBtn=document.createElement('button');
+cmpBtn.className='tab cmp-tab';cmpBtn.textContent='Compare all ↗';
+cmpBtn.onclick=()=>{
+  cmpOpen=!cmpOpen;
+  document.getElementById('allModels').style.display=cmpOpen?'none':'block';
+  document.getElementById('comparePanel').style.display=cmpOpen?'block':'none';
+    var _yb=document.getElementById('yearByModel'); if(_yb) _yb.style.display=cmpOpen?'block':'none';
+  cmpBtn.classList.toggle('active',cmpOpen);
+  document.querySelectorAll('.tab:not(.cmp-tab)').forEach(t=>t.style.opacity=cmpOpen?'0.45':'1');
+
+};
+document.getElementById('tabRow').appendChild(cmpBtn);
+
+function toggleColl(id){
+  const body=document.getElementById(id+'Body');
+  const icon=document.getElementById(id+'Icon');
+  const btn=body?body.previousElementSibling:null;
+  const isOpen=body.style.display==='block';
+  body.style.display=isOpen?'none':'block';
+  if(icon)icon.style.transform=isOpen?'rotate(0deg)':'rotate(90deg)';
+  if(btn&&btn.classList.contains('coll-btn')){btn.style.borderRadius='0';}
+}
+
+function setModel(idx){
+  if(cmpOpen){
+    cmpOpen=false;
+    document.getElementById('allModels').style.display='block';
+    document.getElementById('comparePanel').style.display='none';
+    var _yb2=document.getElementById('yearByModel'); if(_yb2) _yb2.style.display='none';
+    cmpBtn.classList.remove('active');
+    document.querySelectorAll('.tab:not(.cmp-tab)').forEach(t=>t.style.opacity='1');
+  }
+  cur=idx;curMonthlyData=buildFlatFromMonthly(modelData[idx].monthly,modelData[idx].years,modelData[idx].profit);
+  document.querySelectorAll('.tab:not(.cmp-tab)').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  const m=modelData[idx],mc=mcData[idx];
+  document.getElementById('metricRow').innerHTML=`
+    <div class="m"><div class="ml">Net profit</div><div class="mv pos">${fmt(m.profit)}</div></div>
+    <div class="m"><div class="ml">Max drawdown</div><div class="mv neg">${fmt(m.dd)}</div></div>
+    <div class="m"><div class="ml">Win rate</div><div class="mv neu">${m.win}</div></div>
+    <div class="m"><div class="ml">Profit factor</div><div class="mv neu">${m.pf.toFixed(2)}</div></div>
+    <div class="m"><div class="ml">Total trades</div><div class="mv neu">${m.trades.toLocaleString()}</div></div>`;
+  renderDist('lossDistWrap',m.lossDist,'#D85A30');renderDist('winDistWrap',m.winDist,'#1D9E75');
+  renderDist('dayLossDistWrap',m.dayLoss,'#D85A30');renderDist('dayWinDistWrap',m.dayWin,'#1D9E75');
+  renderStreaks(idx);
+  document.getElementById('lossTrades').textContent=m.losses.toLocaleString('en-US');document.getElementById('winTrades').textContent=m.wins.toLocaleString('en-US');
+  document.getElementById('avgLoss').textContent=fmt(m.avgLoss);document.getElementById('lgLoss').textContent=fmt(m.lgLoss);
+  document.getElementById('avgWin').textContent=fmt(m.avgWin);document.getElementById('lgWin').textContent=fmt(m.lgWin);document.getElementById('avgPnl').textContent=fmt(m.avgPnl);
+  document.getElementById('ddWorst').textContent=fmt(m.ddWorst);
+  document.getElementById('mcActual').textContent=fmt(mc.actual);
+  document.getElementById('mcMedian').textContent=fmt(mc.median);
+  document.getElementById('mcWorst').textContent=fmt(mc.worst);
+  document.getElementById('mcProfit').textContent=fmt(mc.profit);
+  renderGrids(idx);
+  if(eqC){let c=0;eqC.data.datasets[0].data=curMonthlyData.map(v=>{c+=v;return c});eqC.update('none');}
+  buildAccordion(idx);
+}
+
+function buildCharts(){
+  let c=0;const cumData=curMonthlyData.map(v=>{c+=v;return c});
+  const canvas=document.getElementById('eqChart');
+  eqC=new Chart(canvas,{type:'line',data:{labels:moLabels,datasets:[{data:cumData,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.1)',fill:true,tension:0.35,pointRadius:0,pointHoverRadius:6,pointHoverBackgroundColor:'#1D9E75',pointHoverBorderColor:'#fff',pointHoverBorderWidth:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{enabled:false}},onHover:(event,elements)=>{if(elements.length>0){showSnapshot(elements[0].index,event);}else{hideSnapshot();}},scales:{x:{grid:{color:'rgba(136,135,128,0.08)'},ticks:{color:'#888780',font:{size:11},maxRotation:0,autoSkip:false}},y:{grid:{color:'rgba(136,135,128,0.1)'},ticks:{color:'#888780',font:{size:11},callback:v=>'$'+(Math.abs(v)>=1000?(v/1000).toFixed(0)+'k':v)}}}}});
+  canvas.addEventListener('mouseleave',hideSnapshot);
+}
+
+function showSnapshot(dataIdx,event){
+  const snap=document.getElementById('eqSnapshot');
+  const snapLabel=moFull[dataIdx]||'';
+  const monthPnl=curMonthlyData[dataIdx];
+  let cum=0;for(let i=0;i<=dataIdx;i++)cum+=curMonthlyData[i];
+  document.getElementById('snapDate').textContent=snapLabel;
+  const mp=document.getElementById('snapMonth');mp.textContent=fmt(monthPnl);mp.style.color=monthPnl>=0?'#1D9E75':'#D85A30';
+  document.getElementById('snapCum').textContent=fmt(cum);
+  const wrapRect=document.querySelector('.eq-wrap').getBoundingClientRect();
+  const snapW=190, gap=12;
+  /* Follow mouse X – use native DOM event coords from Chart.js wrapper */
+  const nativeX = (event.native ? event.native.clientX : event.clientX);
+  const mouseX = nativeX - wrapRect.left;
+  let left = mouseX - snapW / 2;
+  if(left < 4) left = 4;
+  if(left + snapW > wrapRect.width - 4) left = wrapRect.width - snapW - 4;
+  /* Always above cursor */
+  const nativeY = (event.native ? event.native.clientY : event.clientY);
+  let top = nativeY - wrapRect.top - snap.offsetHeight - gap;
+  if(top < 4) top = 4;
+  snap.style.left=left+'px';snap.style.top=top+'px';snap.classList.add('visible');
+}
+function hideSnapshot(){document.getElementById('eqSnapshot').classList.remove('visible');}
+
+function buildAccordion(idx){
+  openYr=null;const m=modelData[idx],mo=m.monthly;
+  /* Two-level adjusted totals – matches equity curve exactly */
+  // year totals come directly from pre-reconciled data
+  document.getElementById('accordionItems').innerHTML=m.years.map(y=>{
+    const yr=+y.yr,mdata=mo?mo[yr]:null;
+    const totW=mdata?mdata.rows.reduce((s,mm)=>s+mm.w,0):null;
+    const totT=mdata?mdata.rows.reduce((s,mm)=>s+mm.t,0):y.t;
+    const wr=mdata?((totW/totT)*100).toFixed(1)+'%':y.wr+'%';
+    /* FINAL (D2): data-driven notes at the foot of each year panel. Leading null run = inception,
+       trailing null run = not yet published, in-window zero-trade month = skip note. */
+    const moFullNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    let yrNotes=[];
+    if(mdata){
+      const rws=mdata.rows;
+      let lead=0; while(lead<12&&rws[lead].p===null)lead++;
+      let trail=0; while(trail<12&&rws[11-trail].p===null)trail++;
+      if(lead>0&&lead<12) yrNotes.push('MNQ began trading on May 6, 2019. There is no data before that date.');
+      if(trail>0&&trail<12){ const li=11-trail; const lastDay=new Date(yr,li+1,0).getDate(); yrNotes.push('Figures run through '+moFullNames[li]+' '+lastDay+', '+yr+'. They are updated at the close of each quarter.'); }
+      rws.forEach((mm,mi)=>{ if(mm.p===0&&mm.t===0) yrNotes.push(moFullNames[mi]+' shows $0 because no trade met the entry criteria that month.'); });
+    }
+    const notesHtml=yrNotes.length?'<div style="border-top:1px solid rgba(44,43,40,.16);margin-top:.6rem;padding-top:.55rem">'+yrNotes.map(n=>'<div style="font-size:11px;color:var(--color-text-secondary);line-height:1.7;text-align:left;padding:.15rem 0">'+n+'</div>').join('')+'</div>':'';
+    const body=mdata?`<div class="acc-body" data-yr="${yr}">
+      <table class="mo-table"><thead><tr><th>Month</th><th>P&amp;L</th><th>Win%</th><th>Trades</th><th>Max DD</th><th>PF</th></tr></thead>
+      <tbody>${mdata.rows.map((mm,mi)=>{
+        if(mm.p===null){return `<tr><td>${mm.m}</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>`;}
+        const wrTxt=mm.t>0?((mm.w/mm.t)*100).toFixed(0)+'%':'–';
+        const pfTxt=(mm.t===0||mm.w===mm.t)?'–':mm.pf;
+        return `<tr><td>${mm.m}</td><td style="color:${mm.p>=0?'#1D9E75':'#D85A30'}">${fmt(mm.p)}</td><td>${wrTxt}</td><td>${mm.t}</td><td style="color:#D85A30">${fmt(mm.dd)}</td><td>${pfTxt}</td></tr>`;
+      }).join('')}
+      <tr class="mo-total"><td>Full Year</td><td style="color:${y.p>=0?'#1D9E75':'#D85A30'}">${fmt(y.p)}</td><td>${wr}</td><td>${totT}</td><td style="color:#D85A30">${fmt(y.dd)}</td><td>${y.pf}</td></tr></tbody></table>
+      <div class="bw-row"><div><span style="color:var(--color-text-secondary);font-size:11px">Best month: </span><strong style="color:#1D9E75;font-size:11px">${mdata.best}</strong></div><div><span style="color:var(--color-text-secondary);font-size:11px">Worst month: </span><strong style="color:${mdata.worst.includes('-')?'#D85A30':'#1D9E75'};font-size:11px">${mdata.worst}</strong></div></div>
+      ${notesHtml}
+    </div>`:'';
+    return `<div class="acc-item" data-yr="${yr}"><div class="acc-hdr" onclick="toggleAcc(${yr},${!!mdata})">
+      <div class="acc-cell-arrow" style="justify-content:center">${mdata?`<span class="acc-arrow" data-yr="${yr}">▼</span>`:''}</div>
+      <div class="acc-cell" style="text-align:center;font-weight:400;color:var(--color-text-secondary)">${yr}</div>
+      <div class="acc-cell" style="color:#1D9E75">${fmt(y.p)}</div>
+      <div class="acc-cell" style="color:#D85A30">${fmt(y.dd)}</div>
+      <div class="acc-cell">${totT}</div><div class="acc-cell">${wr}</div>
+    </div>${body}</div>`;
+  }).join('');
+}
+function toggleAcc(yr,has){if(!has)return;const was=openYr===yr;openYr=was?null:yr;document.querySelectorAll('.acc-item').forEach(item=>{const y=+item.dataset.yr,open=y===openYr;const b=item.querySelector('.acc-body'),a=item.querySelector('.acc-arrow');if(b)b.style.display=open?'block':'none';if(a)a.style.transform=open?'rotate(180deg)':'rotate(0deg)';})}
+
+setModel(cur);buildCharts();renderGrids(cur);
+</script>
+
+</div>
+</div>
+
+
+
+<!-- Understanding MC -->
+</div>
+<!-- ═══════════════ END DASHBOARD ═══════════════ -->
+
+<hr class="full-rule">
+
+<!-- DEEP DIVE BAND -->
+<div class="bg-lt m-flip">
+<div class="page-sec">
+      <div>
+    <p style="font-size:21px;font-weight:300;line-height:1.7;color:#1a1917;margin:0;max-width:760px">The dashboard above is the record. Everything below is the deep dive: what the risk limit costs, how drawdown is measured, and the questions the numbers raise, answered one by one.</p>
+  </div>
+</div>
+</div>
+  <hr class="full-rule">
+
+<!-- THE OUT-OF-SAMPLE RECORD -->
+<div class="bg-alt m-flip">
+  <div class="page-sec">
+    <span id="why-we-cap" style="display:block"></span>
+<span class="sec-label">2026 Onward &middot; The Out-Of-Sample Record</span>
+    <p class="bt">The backtest ends where this begins. Everything below is what the strategy has done since, quarter by quarter, whether it made money or lost it. The right-hand column is the one that matters: it says what we changed in response.</p>
+
+    <div class="comp-block">
+      <div class="comp-head">$300 model<span class="m-hide"> &middot; </span> <br class="mb-br">quarter by quarter</div>
+      <table class="comp-table" style="table-layout:fixed;">
+        <tr><th style="text-align:center">Quarter</th><th style="text-align:center">Trades</th><th style="text-align:center">Net</th><th style="text-align:center">Worst <br class="mb-br"> drawdown</th><th style="text-align:center">What we <br class="mb-br"> changed</th></tr>
+        <tr><td style="text-align:center">Q1 2026</td><td style="text-align:center">55</td><td style="text-align:center" class="g">+$2,400</td><td style="text-align:center" class="rv">-$845</td><td style="text-align:center">Nothing</td></tr>
+        <tr><td style="text-align:center">Q2 2026</td><td style="text-align:center">56</td><td style="text-align:center" class="g">+$1,624</td><td style="text-align:center" class="rv">-$852</td><td style="text-align:center">Nothing</td></tr>
+        <tr><td style="text-align:center">Q3 2026</td><td style="text-align:center">55</td><td style="text-align:center" class="rv">-$971</td><td style="text-align:center" class="rv">-$1,811</td><td style="text-align:center">Nothing</td></tr>
+      </table>
+    </div>
+
+    <p class="bt">The third quarter lost money and set the deepest drawdown in the whole record, deeper than anything in the seven backtested years before it. August alone lost $1,267, the worst month since the strategy began. The record runs to the last trade on September 30, so it ends at that low rather than after a recovery.</p>
+    <p class="bt">A seven-year total hides how it got there. The table below adds one year at a time, so each row is the whole record up to that point. It answers a question a single headline figure cannot: were these numbers always like this, or did one good stretch carry them?</p>
+
+    <div style="border:1px solid var(--border);margin:1rem 0;background:#f0efe9;">
+      <button onclick="lxT(this)" style="width:100%;text-align:left;background:none;border:none;padding:.85rem 1rem;font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.06em;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:.6rem;"><span style="display:inline-block;transition:transform .15s;font-size:10px;color:#1D9E75;">&#9654;</span>The record, one year at a time</button>
+      <div style="display:none;padding:0 1rem .9rem;">
+        <table class="rz-t" id="cum"><tr><th>Through</th><th>Net profit</th><th>Max drawdown</th><th>Win rate</th><th>Profit factor</th><th>Trades</th></tr>
+<tr><td>2019</td><td>+$821</td><td>-$943</td><td>64.71%</td><td>1.45</td><td>34</td></tr>
+<tr><td>2019&ndash;2020</td><td>+$4,193</td><td>-$1,406</td><td>66.01%</td><td>1.25</td><td>253</td></tr>
+<tr><td>2019&ndash;2021</td><td>+$12,393</td><td>-$1,406</td><td>69.81%</td><td>1.46</td><td>467</td></tr>
+<tr><td>2019&ndash;2022</td><td>+$19,714</td><td>-$1,406</td><td>69.66%</td><td>1.46</td><td>712</td></tr>
+<tr><td>2019&ndash;2023</td><td>+$27,774</td><td>-$1,406</td><td>69.96%</td><td>1.51</td><td>942</td></tr>
+<tr><td>2019&ndash;2024</td><td>+$37,062</td><td>-$1,406</td><td>70.73%</td><td>1.56</td><td>1,165</td></tr>
+<tr><td>2019&ndash;2025</td><td>+$47,677</td><td>-$1,406</td><td>71.33%</td><td>1.61</td><td>1,402</td></tr>
+<tr><td>2019&ndash;2026</td><td>+$50,730</td><td>-$1,811</td><td>70.92%</td><td>1.56</td><td>1,568</td></tr>
+        </table>
+        <p class="bt" style="font-size:13px;color:var(--soft);margin-top:1rem;">$300 model. 2019 covers May onward and 2026 covers January through September. Every figure is the whole record up to that year's end, not that year on its own.</p>
+      </div>
+    </div>
+
+    <p class="bt">Three things in that table are worth more than the headline. The win rate lands near 70% in 2021 and stays there for five years, which is what a real property looks like as the sample grows. The worst drawdown sits at -$1,406 for five straight years and then breaks to -$1,811 this year, which is the clearest way to say that a worst drawdown is only ever the worst so far. And the profit factor moves against us as well as for us: 1.45, down to 1.25 through 2020, back to 1.61 by the end of 2025, and 1.56 now.</p>
+
+    <p class="bt">We changed nothing, and that is the point of the column. A strategy rebuilt after every rough patch is a strategy fitted to the past. Leaving it alone is how you find out whether it was ever real.</p>
+    <p class="bt">There is a reason this is rare. A quarter like the third one is the quarter a seller goes quiet. The winning months get posted, the losing stretch does not get mentioned, and if it is mentioned at all the market gets the blame. You find out how a strategy actually behaves after you have paid for it, which is the worst possible time to find out. Everything above is the opposite arrangement: the bad quarter is published on the same page as the good ones, in the same table, while it is still open and before you have spent anything.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WHY WE LIMIT RISK -->
+<div class="bg-lt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">Why We Limit Risk</span>
+    <p class="bt">One thing will not change with the quarters. Clara Core will not take a trade that risks more than $400 per contract. The limit applies on every model and is locked in the code, so it is not a setting you can adjust.</p>
+    <p class="bt">We did not arrive at it by optimizing a backtest. We were not willing to lose more than that on a single trade, and the strategy was built to that standard rather than fitted to it afterwards. That is also why we do not publish a version without it: there is nothing to compare against, because the limit was never a setting we tried both ways and then chose between.</p>
+    <p class="bt">We do not optimize for the biggest backtest number. We optimize for the version we would trust with a real account through a market we have not seen yet.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- 2026 FORWARD VALIDATION -->
+<div class="bg-alt m-flip">
+<div class="page-sec">
+  <span id="drawdown-measures" style="display:block"></span><span class="sec-label">How We Measure Drawdown</span>
+  <p class="bt">The same trades can produce three different drawdown figures depending on where you measure from. Here are all three, from the same file you can download.</p>
+
+  <div class="comp-block">
+    <div class="comp-head">$300 model<span class="m-hide"> · </span><span class="m-sp"> </span>May 2019 – September 2026<span class="m-hide"> · </span> <br class="mb-br">the same trades, three measurements</div>
+    <table class="comp-table">
+      <tr><th>How it is measured</th><th>Worst drawdown</th><th>Who this is for</th></tr>
+      <tr><td>End-of-day balance only</td><td class="rv">-$1,651.90</td><td>An account whose limit trails on the daily close</td></tr>
+      <tr><td>Closed trades, trade by trade</td><td class="rv">-$1,651.90</td><td>What NinjaTrader's own summary reports</td></tr>
+      <tr><td>Including the dip while a trade is open</td><td class="rv">-$1,810.50</td><td><strong>What we publish in the dashboard and every headline figure</strong></td></tr>
+    </table>
+  </div>
+
+  <p class="bt"><strong>We publish the third one.</strong> Closed-trade drawdown only counts the result after a trade closes: if a trade dips to -$300 during its life but closes at +$200, it records the +$200 and never shows the dip. That is the number NinjaTrader reports, and it is the flattering one. We publish the deepest point the position reached while it was open instead. It is reconstructed from the per-trade excursion data in the export, not from a tick-by-tick equity record.</p>
+
+  <p class="bt">One caution on prop firm accounts: if you already have one, evaluation or funded, and plan to run Clara Core or any strategy on it, know which type of trailing drawdown the account uses, intraday or end of day. How prop firms measure drawdown is covered in detail on the <a href="structure.html" style="color:var(--black);text-decoration:underline">Structure page</a>. We suggest end of day over intraday.</p>
+
+  <p class="bt" style="margin-top:2rem">The table shows how long a single drawdown took to recover to a new peak, per year. Some drawdowns lasted one to two months.</p>
+  <div style="overflow-x:auto;margin-top:1.5rem">
+    <table class="comp-table" style="min-width:420px">
+      <tr><th style="text-align:center">Year <br class="mb-br">($300 model)</th><th>Deepest drawdown from peak</th><th>Longest peak-to-recovery</th></tr>
+      <tr><td>2019 (May–Dec)</td><td class="rv">-$943</td><td>36 days</td></tr>
+      <tr><td>2020</td><td class="rv">-$1,406</td><td>188 days</td></tr>
+      <tr><td>2021</td><td class="rv">-$1,162</td><td>46 days</td></tr>
+      <tr><td>2022</td><td class="rv">-$1,072</td><td>64 days</td></tr>
+      <tr><td>2023</td><td class="rv">-$1,158</td><td>35 days</td></tr>
+      <tr><td>2024</td><td class="rv">-$1,152</td><td>63 days</td></tr>
+      <tr><td>2025</td><td class="rv">-$957</td><td>42 days</td></tr>
+      <tr><td>2026 (Jan–Sep)</td><td class="rv">-$1,811</td><td>54 days, still open</td></tr>
+    </table>
+  </div>
+  <p class="bt" style="font-size:13px;color:var(--soft);margin-top:1rem">Deepest drawdown is measured inside each year, the same way the dashboard does it, so a drawdown that crosses New Year counts in each year only as far as it had fallen by then. Recovery is calendar days from the peak before a drawdown until a new peak is made, assigned to the year the drawdown bottomed.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- THE GIVE-BACK -->
+<div class="bg-lt">
+<div class="page-sec">
+  <span class="sec-label">The Give-Back</span>
+  <p class="bt">Clara Core has no fixed take profit. Trades can close on a trailing stop, a breakeven move in slight profit, or the daily session close, so no trade is ever closed at its best point. The gap between a trade's highest point and where it finally closed is the give-back. NinjaTrader records the give-back value as End Trade Drawdown, the ETD column in the exported CSV file.</p>
+
+  <p class="bt">A strategy with a fixed target does not have a big give-back. If the target is $100, you can expect $100 minus fees, and the give-back is close to zero. We made the opposite choice deliberately. Letting trades run is where the large winners come from, and the same choice helps produce the lower drawdown and the higher win rate the backtest shows. The cost is that every trade hands something back on the way out.</p>
+
+  <p class="bt">The give-back matters most on an intraday-trailing prop account: when a trade makes a new high, the limit moves up with it, so every dollar handed back is room consumed. An end-of-day account never sees it. We suggest end of day over intraday. How prop firms measure drawdown is covered in detail on the <a href="structure.html" style="color:var(--black);text-decoration:underline">Structure page</a>.</p>
+
+  <p class="bt">The table below takes the single worst give-back in each year: the highest point the trade reached, where it finally closed, and the difference between the two. That difference is the give-back. Across all 1,568 trades the average give-back was about <strong>$136</strong> and the median about <strong>$99</strong>.</p>
+
+  <p class="bt">2019 covers May onward and 2026 covers January through September. 2019 is the only year whose worst case still closed green: it reached +$465 and kept +$111.30. The other seven went briefly green, between +$48 and +$201, gave all of it back, and closed red on a stop. All eight exited on a stop, none on the daily close.</p>
+
+  <p class="bt">A trade that touches +$160 and closes red is not a malfunction. Exits adapt to conditions: some trades trail tight and keep nearly everything, others are given room and hand most of it back. No single trade is meant to look perfect. Across 1,568 trades, that mix is what produces the low drawdown and the win rate that carries the edge.</p>
+
+  <div class="comp-block">
+    <div class="comp-head">$300 model · worst give-back in each year</div>
+    <table class="comp-table">
+      <tr><th>Year</th><th>Reached</th><th>Closed at</th><th>Given back</th><th style="border-left:1px solid var(--border);padding-left:1rem">Year average</th></tr>
+      <tr><td>2019</td><td class="g">+$465.00</td><td class="g">+$111.30</td><td class="rv">$353.70</td><td style="border-left:1px solid var(--border);padding-left:1rem">$169.30</td></tr>
+      <tr><td>2020</td><td class="g">+$48.00</td><td class="rv">-$325.90</td><td class="rv">$373.90</td><td style="border-left:1px solid var(--border);padding-left:1rem">$142.32</td></tr>
+      <tr><td>2021</td><td class="g">+$134.00</td><td class="rv">-$290.80</td><td class="rv">$424.80</td><td style="border-left:1px solid var(--border);padding-left:1rem">$124.55</td></tr>
+      <tr><td>2022</td><td class="g">+$124.50</td><td class="rv">-$381.40</td><td class="rv">$505.90</td><td style="border-left:1px solid var(--border);padding-left:1rem">$130.14</td></tr>
+      <tr><td>2023</td><td class="g">+$125.00</td><td class="rv">-$302.80</td><td class="rv">$427.80</td><td style="border-left:1px solid var(--border);padding-left:1rem">$138.77</td></tr>
+      <tr><td>2024</td><td class="g">+$142.00</td><td class="rv">-$283.80</td><td class="rv">$425.80</td><td style="border-left:1px solid var(--border);padding-left:1rem">$143.93</td></tr>
+      <tr><td>2025</td><td class="g">+$116.50</td><td class="rv">-$346.90</td><td class="rv">$463.40</td><td style="border-left:1px solid var(--border);padding-left:1rem">$131.60</td></tr>
+      <tr><td>2026</td><td class="g">+$200.50</td><td class="rv">-$217.90</td><td class="rv">$418.40</td><td style="border-left:1px solid var(--border);padding-left:1rem">$140.05</td></tr>
+    </table>
+  </div>
+
+  <p class="bt" style="font-size:13px;color:var(--color-text-secondary)">One thing to know about these figures. NinjaTrader's End Trade Drawdown compares a gross high against a net close, so the trade's commission sits inside the give-back. On the 2019 trade, $5.70 of the $353.70 is commission and the price give-back alone was $348.00. We publish the exported figure unmodified rather than adjusting it, so that what you see here matches what you get when you open the file yourself.</p>
+
+  <a href="strategy.html#trade-exits" class="link-arr">How the exits work →</a>
+</div>
+</div>
+
+
+<hr class="full-rule">
+
+
+<!-- SCALING & BUFFER -->
+<div class="bg-alt">
+<div class="page-sec">
+  <span id="risk-at-size" style="display:block"></span>
+  <span class="sec-label">Risk Awareness &amp; <br class="mb-br">Drawdown Impact On Account Size</span>
+  <p class="bt" style="margin-top:2.5rem">The tables below show how to look at risk and its impact on an account, each from a different angle. The goal is awareness of what risk looked like over time.</p>
+  <div style="font-size:11px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin:2.5rem 0 1.25rem;">Risk At Account Size</div>
+  <p class="bt">The same drawdown feels completely different depending on the type of account and the account balance. A 50K prop firm account costs $85 to $200, and its true size is its available drawdown, $2,000 to $2,500 depending on the firm. In simple terms: on that account the real risk is the $85 to $200 it cost to open. Fund a cash account with $2,000 and the real risk is the full $2,000. Lowering risk on a cash account means having a bigger account balance. The table below runs account balances from $2,000 to $100,000 against three max drawdown figures: the actual backtest at -$1,811, the Monte Carlo median at -$2,597, and the Monte Carlo 5th percentile, the simulated downside, at -$3,860. Each line shows what each drawdown would be as a percentage of that account balance. This is not meant to scare you off; it is to bring awareness to how you need to think about risk when choosing the account size you run.</p>
+  <div style="border:1px solid var(--border);margin:1rem 0;background:#f0efe9;">
+    <button onclick="lxT(this)" style="width:100%;text-align:left;background:none;border:none;padding:.85rem 1rem;font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.06em;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:.6rem;"><span style="display:inline-block;transition:transform .15s;font-size:10px;color:#1D9E75;">▶</span>Drawdown as a share of your account</button>
+    <div style="display:none;padding:0 1rem .9rem;">
+      <table class="rz-t" id="fa"><tr><th>Your account</th><th>Historical -$1,811</th><th>MC median -$2,597</th><th>MC downside case -$3,860</th></tr>
+<tr><td>$2,000</td><td>90.5%</td><td>over the account</td><td>over the account</td></tr>
+<tr><td>$2,500</td><td>72.4%</td><td>over the account</td><td>over the account</td></tr>
+<tr><td>$5,000</td><td>36.2%</td><td>51.9%</td><td>77.2%</td></tr>
+<tr><td>$7,500</td><td>24.1%</td><td>34.6%</td><td>51.5%</td></tr>
+<tr><td>$10,000</td><td>18.1%</td><td>26.0%</td><td>38.6%</td></tr>
+<tr><td>$12,500</td><td>14.5%</td><td>20.8%</td><td>30.9%</td></tr>
+<tr><td>$15,000</td><td>12.1%</td><td>17.3%</td><td>25.7%</td></tr>
+<tr><td>$17,500</td><td>10.3%</td><td>14.8%</td><td>22.1%</td></tr>
+<tr><td>$20,000</td><td>9.1%</td><td>13.0%</td><td>19.3%</td></tr>
+<tr><td>$25,000</td><td>7.2%</td><td>10.4%</td><td>15.4%</td></tr>
+<tr><td>$30,000</td><td>6.0%</td><td>8.7%</td><td>12.9%</td></tr>
+<tr><td>$35,000</td><td>5.2%</td><td>7.4%</td><td>11.0%</td></tr>
+<tr><td>$40,000</td><td>4.5%</td><td>6.5%</td><td>9.7%</td></tr>
+<tr><td>$45,000</td><td>4.0%</td><td>5.8%</td><td>8.6%</td></tr>
+<tr><td>$50,000</td><td>3.6%</td><td>5.2%</td><td>7.7%</td></tr>
+<tr><td>$60,000</td><td>3.0%</td><td>4.3%</td><td>6.4%</td></tr>
+<tr><td>$70,000</td><td>2.6%</td><td>3.7%</td><td>5.5%</td></tr>
+<tr><td>$80,000</td><td>2.3%</td><td>3.2%</td><td>4.8%</td></tr>
+<tr><td>$90,000</td><td>2.0%</td><td>2.9%</td><td>4.3%</td></tr>
+<tr><td>$100,000</td><td>1.8%</td><td>2.6%</td><td>3.9%</td></tr>
+</table>
+    </div>
+  </div>
+  <div style="font-size:11px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin:3rem 0 1.25rem;">The Journey, Level By Level</div>
+  <p class="bt">This table replays the backtest on a $2,000 account running the $300 model, from May 2019 to September 2026. It shows when the account reached each balance, and what the worst drawdown from that point felt like as a percentage of the account.</p>
+  <p class="bt">The safer way to run this is using prop firm accounts, where the $2,000 to $2,500 of drawdown room costs $85 to $200 to replace, or a cash account funded at $5,000 and up, depending on your risk tolerance. On prop firm accounts, pick one whose drawdown is measured on the end-of-day balance rather than intraday. Scaling is the same idea, over time stepping up the risk model as equity grows. The published models, $200 through $800, are that staircase. None of this is a recommendation; it is what the numbers say about account size and the impact of its max drawdown over the seven years.</p>
+  <div style="border:1px solid var(--border);margin:1rem 0;background:#f0efe9;">
+    <button onclick="lxT(this)" style="width:100%;text-align:left;background:none;border:none;padding:.85rem 1rem;font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.06em;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:.6rem;"><span style="display:inline-block;transition:transform .15s;font-size:10px;color:#1D9E75;">▶</span>The journey, level by level</button>
+    <div style="display:none;padding:0 1rem .9rem;">
+      <table class="rz-t" id="jt"><tr><th>Balance reached</th><th>When</th><th>Worst drawdown</th><th>Felt as</th></tr>
+<tr><td>$2,000+</td><td>May 2019</td><td>-$249</td><td>12.4%</td></tr>
+<tr><td>$2,500+</td><td>May 2019</td><td>-$1,406</td><td>56.2%</td></tr>
+<tr><td>$5,000+</td><td>Jun 2020</td><td>-$1,373</td><td>27.5%</td></tr>
+<tr><td>$7,500+</td><td>Jan 2021</td><td>-$1,162</td><td>15.5%</td></tr>
+<tr><td>$10,000+</td><td>Jul 2021</td><td>-$646</td><td>6.5%</td></tr>
+<tr><td>$12,500+</td><td>Aug 2021</td><td>-$560</td><td>4.5%</td></tr>
+<tr><td>$15,000+</td><td>Jan 2022</td><td>-$1,072</td><td>7.1%</td></tr>
+<tr><td>$17,500+</td><td>Jun 2022</td><td>-$754</td><td>4.3%</td></tr>
+<tr><td>$20,000+</td><td>Oct 2022</td><td>-$1,119</td><td>5.6%</td></tr>
+<tr><td>$25,000+</td><td>Jun 2023</td><td>-$1,158</td><td>4.6%</td></tr>
+<tr><td>$30,000+</td><td>Jan 2024</td><td>-$847</td><td>2.8%</td></tr>
+<tr><td>$35,000+</td><td>Jul 2024</td><td>-$1,152</td><td>3.3%</td></tr>
+<tr><td>$40,000+</td><td>Jan 2025</td><td>-$957</td><td>2.4%</td></tr>
+<tr><td>$45,000+</td><td>Jun 2025</td><td>-$895</td><td>2.0%</td></tr>
+<tr><td>$50,000+</td><td>Jan 2026</td><td>-$1,811</td><td>3.6%</td></tr>
+</table>
+    </div>
+  </div>
+
+  <span id="start-date" style="display:block"></span>
+  <div style="font-size:11px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin:3rem 0 1.25rem;">The Start-Date Study</div>
+  <p class="bt">What if you had started at the worst possible time? We took every month from June 2019 through April 2026, 83 start dates, and asked what happened to an account that began the $300 model on the 1st of that month. Some caught drawdowns immediately, some caught the best runs. All 76 start dates with a full year of data finished their first 12 months positive.</p>
+  <div style="border:1px solid var(--border);margin:1rem 0;background:#f0efe9;">
+    <button onclick="lxT(this)" style="width:100%;text-align:left;background:none;border:none;padding:.85rem 1rem;font-family:'Josefin Sans',sans-serif;font-size:13px;font-weight:400;letter-spacing:.06em;color:var(--black);cursor:pointer;display:flex;align-items:center;gap:.6rem;"><span style="display:inline-block;transition:transform .15s;font-size:10px;color:#1D9E75;">▶</span>All 83 start dates</button>
+    <div style="display:none;padding:0 1rem .9rem;">
+      <table class="rz-t" id="sdt"><tr><th>Started</th><th>First 12 months</th><th>Total to Sep 2026</th><th>Worst drawdown</th></tr>
+<tr><td>Jun 2019</td><td>+$1,088</td><td>+$50,150</td><td>-$1,811</td></tr>
+<tr><td>Jul 2019</td><td>+$1,996</td><td>+$49,661</td><td>-$1,811</td></tr>
+<tr><td>Aug 2019</td><td>+$2,492</td><td>+$49,736</td><td>-$1,811</td></tr>
+<tr><td>Sep 2019</td><td>+$1,854</td><td>+$49,721</td><td>-$1,811</td></tr>
+<tr><td>Oct 2019</td><td>+$2,878</td><td>+$50,076</td><td>-$1,811</td></tr>
+<tr><td>Nov 2019</td><td>+$2,712</td><td>+$49,873</td><td>-$1,811</td></tr>
+<tr><td>Dec 2019</td><td>+$2,541</td><td>+$49,873</td><td>-$1,811</td></tr>
+<tr><td>Jan 2020</td><td>+$3,373</td><td>+$49,909</td><td>-$1,811</td></tr>
+<tr><td>Feb 2020</td><td>+$4,673</td><td>+$49,841</td><td>-$1,811</td></tr>
+<tr><td>Mar 2020</td><td>+$3,854</td><td>+$49,541</td><td>-$1,811</td></tr>
+<tr><td>Apr 2020</td><td>+$3,466</td><td>+$49,076</td><td>-$1,811</td></tr>
+<tr><td>May 2020</td><td>+$5,458</td><td>+$49,945</td><td>-$1,811</td></tr>
+<tr><td>Jun 2020</td><td>+$5,045</td><td>+$49,063</td><td>-$1,811</td></tr>
+<tr><td>Jul 2020</td><td>+$4,451</td><td>+$47,666</td><td>-$1,811</td></tr>
+<tr><td>Aug 2020</td><td>+$6,617</td><td>+$47,244</td><td>-$1,811</td></tr>
+<tr><td>Sep 2020</td><td>+$7,902</td><td>+$47,866</td><td>-$1,811</td></tr>
+<tr><td>Oct 2020</td><td>+$7,675</td><td>+$47,198</td><td>-$1,811</td></tr>
+<tr><td>Nov 2020</td><td>+$8,410</td><td>+$47,162</td><td>-$1,811</td></tr>
+<tr><td>Dec 2020</td><td>+$8,890</td><td>+$47,333</td><td>-$1,811</td></tr>
+<tr><td>Jan 2021</td><td>+$8,199</td><td>+$46,537</td><td>-$1,811</td></tr>
+<tr><td>Feb 2021</td><td>+$7,743</td><td>+$45,168</td><td>-$1,811</td></tr>
+<tr><td>Mar 2021</td><td>+$8,236</td><td>+$45,687</td><td>-$1,811</td></tr>
+<tr><td>Apr 2021</td><td>+$8,748</td><td>+$45,610</td><td>-$1,811</td></tr>
+<tr><td>May 2021</td><td>+$8,270</td><td>+$44,487</td><td>-$1,811</td></tr>
+<tr><td>Jun 2021</td><td>+$8,690</td><td>+$44,017</td><td>-$1,811</td></tr>
+<tr><td>Jul 2021</td><td>+$8,512</td><td>+$43,215</td><td>-$1,811</td></tr>
+<tr><td>Aug 2021</td><td>+$6,718</td><td>+$40,627</td><td>-$1,811</td></tr>
+<tr><td>Sep 2021</td><td>+$6,423</td><td>+$39,965</td><td>-$1,811</td></tr>
+<tr><td>Oct 2021</td><td>+$6,669</td><td>+$39,523</td><td>-$1,811</td></tr>
+<tr><td>Nov 2021</td><td>+$7,012</td><td>+$38,752</td><td>-$1,811</td></tr>
+<tr><td>Dec 2021</td><td>+$7,427</td><td>+$38,443</td><td>-$1,811</td></tr>
+<tr><td>Jan 2022</td><td>+$7,321</td><td>+$38,337</td><td>-$1,811</td></tr>
+<tr><td>Feb 2022</td><td>+$6,617</td><td>+$37,425</td><td>-$1,811</td></tr>
+<tr><td>Mar 2022</td><td>+$7,050</td><td>+$37,451</td><td>-$1,811</td></tr>
+<tr><td>Apr 2022</td><td>+$7,211</td><td>+$36,862</td><td>-$1,811</td></tr>
+<tr><td>May 2022</td><td>+$7,413</td><td>+$36,217</td><td>-$1,811</td></tr>
+<tr><td>Jun 2022</td><td>+$6,884</td><td>+$35,327</td><td>-$1,811</td></tr>
+<tr><td>Jul 2022</td><td>+$7,070</td><td>+$34,703</td><td>-$1,811</td></tr>
+<tr><td>Aug 2022</td><td>+$6,692</td><td>+$33,910</td><td>-$1,811</td></tr>
+<tr><td>Sep 2022</td><td>+$6,804</td><td>+$33,542</td><td>-$1,811</td></tr>
+<tr><td>Oct 2022</td><td>+$6,378</td><td>+$32,854</td><td>-$1,811</td></tr>
+<tr><td>Nov 2022</td><td>+$7,172</td><td>+$31,740</td><td>-$1,811</td></tr>
+<tr><td>Dec 2022</td><td>+$7,364</td><td>+$31,016</td><td>-$1,811</td></tr>
+<tr><td>Jan 2023</td><td>+$8,060</td><td>+$31,016</td><td>-$1,811</td></tr>
+<tr><td>Feb 2023</td><td>+$9,648</td><td>+$30,808</td><td>-$1,811</td></tr>
+<tr><td>Mar 2023</td><td>+$9,183</td><td>+$30,401</td><td>-$1,811</td></tr>
+<tr><td>Apr 2023</td><td>+$8,460</td><td>+$29,651</td><td>-$1,811</td></tr>
+<tr><td>May 2023</td><td>+$8,824</td><td>+$28,804</td><td>-$1,811</td></tr>
+<tr><td>Jun 2023</td><td>+$8,845</td><td>+$28,443</td><td>-$1,811</td></tr>
+<tr><td>Jul 2023</td><td>+$8,142</td><td>+$27,633</td><td>-$1,811</td></tr>
+<tr><td>Aug 2023</td><td>+$9,727</td><td>+$27,218</td><td>-$1,811</td></tr>
+<tr><td>Sep 2023</td><td>+$11,851</td><td>+$26,738</td><td>-$1,811</td></tr>
+<tr><td>Oct 2023</td><td>+$12,583</td><td>+$26,477</td><td>-$1,811</td></tr>
+<tr><td>Nov 2023</td><td>+$10,221</td><td>+$24,568</td><td>-$1,811</td></tr>
+<tr><td>Dec 2023</td><td>+$9,989</td><td>+$23,652</td><td>-$1,811</td></tr>
+<tr><td>Jan 2024</td><td>+$9,288</td><td>+$22,955</td><td>-$1,811</td></tr>
+<tr><td>Feb 2024</td><td>+$8,696</td><td>+$21,160</td><td>-$1,811</td></tr>
+<tr><td>Mar 2024</td><td>+$10,257</td><td>+$21,219</td><td>-$1,811</td></tr>
+<tr><td>Apr 2024</td><td>+$11,651</td><td>+$21,191</td><td>-$1,811</td></tr>
+<tr><td>May 2024</td><td>+$11,089</td><td>+$19,980</td><td>-$1,811</td></tr>
+<tr><td>Jun 2024</td><td>+$11,478</td><td>+$19,598</td><td>-$1,811</td></tr>
+<tr><td>Jul 2024</td><td>+$11,546</td><td>+$19,490</td><td>-$1,811</td></tr>
+<tr><td>Aug 2024</td><td>+$10,060</td><td>+$17,491</td><td>-$1,811</td></tr>
+<tr><td>Sep 2024</td><td>+$7,327</td><td>+$14,887</td><td>-$1,811</td></tr>
+<tr><td>Oct 2024</td><td>+$8,082</td><td>+$13,894</td><td>-$1,811</td></tr>
+<tr><td>Nov 2024</td><td>+$10,375</td><td>+$14,347</td><td>-$1,811</td></tr>
+<tr><td>Dec 2024</td><td>+$10,162</td><td>+$13,663</td><td>-$1,811</td></tr>
+<tr><td>Jan 2025</td><td>+$10,615</td><td>+$13,668</td><td>-$1,811</td></tr>
+<tr><td>Feb 2025</td><td>+$10,391</td><td>+$12,464</td><td>-$1,811</td></tr>
+<tr><td>Mar 2025</td><td>+$9,624</td><td>+$10,962</td><td>-$1,811</td></tr>
+<tr><td>Apr 2025</td><td>+$8,887</td><td>+$9,539</td><td>-$1,811</td></tr>
+<tr><td>May 2025</td><td>+$8,453</td><td>+$8,891</td><td>-$1,811</td></tr>
+<tr><td>Jun 2025</td><td>+$8,257</td><td>+$8,121</td><td>-$1,811</td></tr>
+<tr><td>Jul 2025</td><td>+$8,916</td><td>+$7,944</td><td>-$1,811</td></tr>
+<tr><td>Aug 2025</td><td>+$8,991</td><td>+$7,431</td><td>-$1,811</td></tr>
+<tr><td>Sep 2025</td><td>+$7,854</td><td>+$7,560</td><td>-$1,811</td></tr>
+<tr><td>Oct 2025</td><td>partial year</td><td>+$5,812</td><td>-$1,811</td></tr>
+<tr><td>Nov 2025</td><td>partial year</td><td>+$3,972</td><td>-$1,811</td></tr>
+<tr><td>Dec 2025</td><td>partial year</td><td>+$3,501</td><td>-$1,811</td></tr>
+<tr><td>Jan 2026</td><td>partial year</td><td>+$3,053</td><td>-$1,811</td></tr>
+<tr><td>Feb 2026</td><td>partial year</td><td>+$2,073</td><td>-$1,811</td></tr>
+<tr><td>Mar 2026</td><td>partial year</td><td>+$1,338</td><td>-$1,811</td></tr>
+<tr><td>Apr 2026</td><td>partial year</td><td>+$653</td><td>-$1,811</td></tr>
+</table>
+    </div>
+  </div>
+  <p class="bt" style="margin-top:2rem">Then we made the bad timing deliberate. We restarted the clock at the equity peak right before every major drawdown in the record, the nine worst possible days to begin, where the first thing a new account lives through is the full drawdown. Every one that has run a full year since finished it positive. The ninth is the deepest in the record and it is still running: it began on August 7, 2026 and the account has not yet made a new high, so there is no recovery time and no first year to report. It is in the table because leaving it out would make the other eight look like the whole story.</p>
+  <div class="comp-block" id="wd">
+    <div class="comp-head">$300 model<span class="m-hide"> · </span> <br class="mb-br">starting at the peak <br class="mb-br">before each major drawdown</div>
+    <table class="comp-table">
+      <tr><th>Start date</th><th>Drawdown<br>lived first</th><th>1st month</th><th>Days until<br>back above zero</th><th>Next<br>12 months</th></tr>
+      <tr><td>Aug 7, 2019</td><td class="rv">-$1,101</td><td class="rv">-$463</td><td>188</td><td class="g">+$2,130</td></tr>
+      <tr><td>Mar 30, 2020</td><td class="rv">-$1,406</td><td class="rv">-$1,132</td><td>71</td><td class="g">+$3,018</td></tr>
+      <tr><td>Jul 23, 2020</td><td class="rv">-$1,373</td><td class="rv">-$696</td><td>139</td><td class="g">+$5,301</td></tr>
+            <tr><td>Mar 22, 2021</td><td class="rv">-$1,162</td><td class="g">+$204</td><td>29</td><td class="g">+$7,708</td></tr>
+      <tr><td>Jan 4, 2022</td><td class="rv">-$1,072</td><td class="rv">-$432</td><td>64</td><td class="g">+$5,815</td></tr>
+      <tr><td>Dec 29, 2022</td><td class="rv">-$1,119</td><td class="g">+$196</td><td>22</td><td class="g">+$7,895</td></tr>
+      <tr><td>Jun 30, 2023</td><td class="rv">-$1,158</td><td class="g">+$440</td><td>18</td><td class="g">+$8,142</td></tr>
+      <tr><td>Oct 4, 2024</td><td class="rv">-$1,152</td><td class="rv">-$796</td><td>60</td><td class="g">+$7,643</td></tr>
+      <tr><td>Aug 7, 2026</td><td class="rv">-$1,811</td><td>&ndash;</td><td>not yet</td><td>&ndash;</td></tr>
+    </table>
+  </div>
+
+</div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WHEN WE WOULD STOP -->
+<div class="bg-lt">
+<div class="page-sec">
+    <span id="when-we-stop" style="display:block"></span><span class="sec-label">When We Would Stop</span>
+  <p class="bt">The way to tell variance from a broken edge is to fix a drawdown tripwire in advance. Ours is the Monte Carlo 5th percentile, the potential worst case: about -$3,860 on the $300 model, the figure in the dashboard above.</p>
+  <p class="bt">Crossing it is a trigger to stop adding risk and investigate, not proof the edge is dead. Two things can put a strategy past that line: variance, a losing run that a working edge still produces from time to time, or edge decay, the market changing in a way that makes the edge itself weaker. Telling them apart means measuring recent behavior against this published record: the win rate, the size of the losses, and how long recovery is taking.</p>
+  <p class="bt">If the recent numbers still look like the record, it is variance, and variance is what a working edge does. If they stop looking like it, we stop running it and say so, here and on our channels.</p>
+</div>
+</div>
+
+<hr class="full-rule">
+
+<!-- REASONS NOT TO USE -->
+<div class="bg-alt">
+<div class="page-sec">
+    <span id="reasons" style="display:block"></span><span class="sec-label">Reasons Not To Use Clara Core</span>
+  <p class="bt">Clara Core is not for everyone, and we would rather tell you that now than let you find out the hard way.</p>
+  <p class="bt" style="margin-bottom:.4rem;"><strong>Don't use it if:</strong></p>
+  <div class="ilist">
+    <p>You need a strategy with a positive risk-to-reward ratio. Clara Core's average loss is larger than its average win; it profits only from a high win rate, and that is a fragile edge.</p>
+    <p>You can't sit through a losing stretch without intervening. Some historical drawdowns lasted one to two months before recovering. If you would turn it off mid-drawdown, this is probably not the right strategy for you.</p>
+    <p>You're trading money you can't afford to lose, or funding an account with borrowed money. This is high-variance futures trading.</p>
+    <p>You want fast, guaranteed, or linear returns. The data shows the opposite: uneven, sequential, and dependent on staying in the strategy.</p>
+    <p>You expect live support or a community chat. Clara Core is self-directed: the setup guide walks every step, but there is nobody on the other end of a chat.</p>
+    <p>You won't take the time to read the performance data and understand what you're running. If you skip that, you'll be surprised by normal behavior, and surprise is what makes people quit at the worst moment.</p>
+  </div>
+  <p class="bt">If several of those describe you, the honest answer is that Clara Core, as it is today, isn't the right tool for you. That's not a sales tactic; it's the same transparency we apply to everything else here.</p>
+  <p class="bt">That said, even if Clara Core is not the strategy you end up running, there is real value here that costs nothing. Run it on a simulation account and you are practicing the part of trading almost nobody trains: consistent execution. Turning the strategy on every day, letting it trade, watching it win and lose without stepping in builds the habits any strategy demands, automated or manual. Losing is part of trading; every strategy carries losses and drawdowns that can last days, weeks, or months, and watching it happen at zero financial risk is how you learn how you handle them.</p>
+  <p class="bt">You also learn the tools. How to use NinjaTrader, how to enable a strategy, how to read a backtest, and how to verify a published number before you trust it, from anyone. You learn about prop firms and risk management, and how to apply both to a strategy built on published data. Every future strategy uses the same tools, and none of it has to come from us; you never have to buy anything here. But when the time comes to buy something, you will know exactly what to look for, and you will not spend money or months on a strategy sold without the data to back it. Test-drive all of it here, free, for as long as you like, then decide if any of it is for you.</p>
+  <p class="bt">Before you decide anything, read Trading &amp; The Mind. It is the conversation we wish someone had had with us before our first trade: why trading is not easy, why money is personal, why losing is part of the business, and what automation actually solves. Whether you end up running Clara Core, something we release later, or nothing at all, that page is how you find out if trading is for you. Automated trading is the easier way to find out: there is no decision to make on every candle, only one, once. You turn it on and you leave it alone. Clara Core is a free place to start, at no cost and no financial risk.</p>
+<a href="mindset.html" class="link-arr">Trading &amp; The Mind &rarr;</a>
+</div>
+</div>
+
+<hr class="full-rule">
+
+<!-- VERIFICATION -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span id="verification" style="display:block"></span><span class="sec-label">Verification</span>
+    <p class="bt">This report is generated directly from NinjaTrader strategy data, including all entries, exits, and execution fees. Every trade carries a $1.90 round-turn commission per contract, $0.95 per side. That is NinjaTrader's free-account rate, all-in, and it is the highest commission anyone running this strategy is likely to pay. We publish at the highest rate on purpose, so that almost everyone's real commission comes in lower than the figures you see here.</p>
+    <p class="bt">A full raw trade export is available for download. You can upload this data into any analysis tool to review the strategy behavior yourself.</p>
+    <a href="downloads.html#trade-logs" class="link-arr">Download Full Trade Log →</a>
+
+    <div style="font-size:11px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin:2.5rem 0 1.25rem;">The Cross-Check: NinjaTrader vs TradingView</div>
+    <p class="bt">To check the record against a completely separate platform, we ran the identical strategy in TradingView and put the two side by side. Since TradingView's 2-minute chart reaches back only about five to six years, this comparison runs on the window both platforms cover, January 2021 through September 2026, on the $300 model. The start is anchored at January 1, 2021 deliberately: TradingView&#39;s 2-minute history is a sliding window that moves forward every day, and a clean January start is one you can still reproduce yourself for months to come. Both runs carry the same $1.90 round-turn fee, so the only differences are the platforms themselves.</p>
+    <p class="bt">One structural difference is worth pointing out: TradingView uses the MNQ continuous contract (MNQ1!), a synthetic stitched feed, while NinjaTrader uses the actual front-month contract with real rollover dates. Different data sources, different candle closes, occasionally a different tick.</p>
+    <p class="bt">NinjaTrader took 1,315 trades and TradingView took 1,316, and the two lists pair up on 1,314 of them: a <strong>99.8% match</strong> between two independent data sources with different rollover handling. The two platforms disagreed on only three days in nearly six years, and the final results ended $33 apart.</p>
+
+    <div style="margin-top:2rem;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:14px;min-width:480px;">
+        <tr>
+          <th style="text-align:center;font-weight:400;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:var(--soft);padding:.75rem .5rem;border-bottom:1px solid var(--border);">$300 model<span class="m-hide"> · </span> <br class="mb-br"><span class="th-l">Jan 2021 – Sep 2026</span><span class="th-s">Jan/21 – Sep/26</span><span class="m-hide"> · </span> <br class="mb-br"><span class="th-s">fee </span>$1.90 RT</th>
+          <th style="text-align:center;font-weight:400;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:var(--soft);padding:.75rem .5rem;border-bottom:1px solid var(--border);">NinjaTrader</th>
+          <th style="text-align:center;font-weight:400;letter-spacing:.06em;text-transform:uppercase;font-size:11px;color:var(--soft);padding:.75rem .5rem;border-bottom:1px solid var(--border);">TradingView</th>
+        </tr>
+        <tr><td style="text-align:center;padding:.7rem .5rem;border-bottom:1px solid var(--border);font-weight:300;">Total trades</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">1,315</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">1,316</td></tr>
+        <tr><td style="text-align:center;padding:.7rem .5rem;border-bottom:1px solid var(--border);font-weight:300;">Win rate</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">71.86%</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">71.73%</td></tr>
+        <tr><td style="text-align:center;padding:.7rem .5rem;border-bottom:1px solid var(--border);font-weight:300;">Profit factor</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">1.63</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">1.63</td></tr>
+        <tr><td style="text-align:center;padding:.7rem .5rem;border-bottom:1px solid var(--border);font-weight:300;">Net P&amp;L</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">$46,537</td><td style="padding:.7rem .5rem;border-bottom:1px solid var(--border);text-align:center;">$46,503</td></tr>
+        <tr><td style="text-align:center;padding:.7rem .5rem;font-weight:300;">Max drawdown</td><td style="padding:.7rem .5rem;text-align:center;">-$1,811</td><td style="padding:.7rem .5rem;text-align:center;">-$1,816</td></tr>
+      </table>
+    </div>
+    <p class="bt" style="font-size:13px;color:var(--soft);margin-top:1rem;">Three days of difference across the whole overlap, win rate within 0.13 points, profit factor identical, net within $33, and the worst drawdowns within $6 of each other. NinjaTrader's drawdown here is measured on open equity, the way it is everywhere on this page; TradingView reports it the same way. The strategy behaves the same on two unrelated data feeds.</p>
+
+    <div><a href="downloads.html#cross-check" class="link-arr">Download both exports →</a></div>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- OUTLIER TRADE -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">The Outlier Trade</span>
+    <p class="bt">The largest single win in this record is <strong>$1,461.30</strong>, taken on January 4, 2022 (with three contracts). A tight stop of about $90 sized three contracts on the $300 model; the strategy went short at 10:02 AM New York time into a session that sold off almost without pause, and the trailing exit followed the move down for $489 per contract, closing at 11:36. It was also the best single day in the record. The average winning trade is $126.75, so that one trade is over <strong>eleven times</strong> a normal win.</p>
+    <p class="bt">Trades like it are rare. Only four trades in the whole record cleared $1,000, about one in every four hundred.</p>
+    <p class="bt">We point at it because a single outsized trade can carry a backtest and make everything around it look better than it is. This one does not. Take it out completely and the seven-year net goes from $50,730 to <strong>$49,269</strong>. It accounts for under 3% of the total. The edge is in all the other trades, and it would still be there if this one had never happened.</p>
+    <p class="bt">The same holds for every outlier in the record. Only those four trades won more than $1,000. Cap all four at the average win of $126.75 and here is the whole difference: net profit goes from $50,730 to $46,347, and the worst drawdown does not move at all. It stays at -$1,811, because the deepest stretch in the record has nothing to do with those four trades. Outliers are not the average trade, but they are not accidents either; letting winners run is how the strategy trades, and these are what that looks like when conditions line up.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- SLIPPAGE -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">Slippage</span>
+    <p class="bt">The published figures include commission but do not model slippage, and we would rather say that plainly than pretend otherwise. A few things work in your favor here. MNQ is one of the most liquid instruments in the world, so in normal conditions slippage is minimal; it is during high-volatility sessions that entry and exit prices can differ from the bar-close price the backtest filled at. Slippage is heaviest at the market open and around high-impact news. The strategy never enters during the first 20 minutes after the open. Most high-impact news lands around 8:30 AM, an hour before the market opens, so the entry window sits clear of it. FOMC days are skipped entirely, a skip the backtest supports.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- CLOSING -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <p class="bt">Performance comes from <br class="mb-br">disciplined execution repeated over time, <br class="mb-br">not from any single trade.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<footer>
+  <div class="f-logo">Clara Systems &middot; US-based</div>
+  <div class="f-social">
+    <a href="https://instagram.com/clarasystems_io" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.31-1.46.72-2.13 1.38C1.35 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.66 1.34 1.07 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.13-1.38.66-.67 1.07-1.34 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.13C21.32 1.35 20.65.94 19.86.63 19.1.33 18.22.13 16.95.07 15.67.01 15.26 0 12 0m0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8m7.85-10.41a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0"/></svg>
+    </a>
+    <a href="https://x.com/clarasystems_io" target="_blank" rel="noopener" aria-label="X">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.2 2h3.4l-7.4 8.5L23 22h-6.8l-5.3-7-6.1 7H1.4l7.9-9L1 2h7l4.8 6.4L18.2 2zm-1.2 18h1.9L7.1 4H5.1L17 20z"/>
+      </svg>
+    </a>
+    <a href="https://discord.gg/GxHYxfKz8p" target="_blank" rel="noopener" aria-label="Discord">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3c-.2.4-.5.9-.6 1.3a18.3 18.3 0 0 0-5.5 0C9.1 3.9 8.8 3.4 8.6 3a19.7 19.7 0 0 0-4.9 1.4C1.3 8.2.6 11.9 1 15.5a19.9 19.9 0 0 0 6.1 3.1c.5-.7.9-1.4 1.3-2.2-.7-.3-1.4-.6-2-1 .2-.1.3-.2.5-.3a14.2 14.2 0 0 0 12.2 0l.5.3c-.6.4-1.3.7-2 1 .4.8.8 1.5 1.3 2.2a19.8 19.8 0 0 0 6.1-3.1c.5-4.2-.7-7.9-3-11.1zM8.5 13.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4c1.2 0 2.1 1.1 2.1 2.4s-.9 2.4-2.1 2.4zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4c1.2 0 2.1 1.1 2.1 2.4s-.9 2.4-2.1 2.4z"/>
+      </svg>
+    </a>
+    <a href="https://t.me/clarasystems_io" target="_blank" rel="noopener" aria-label="Telegram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(12,12) scale(1.25) translate(-12,-12)"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></g></svg>
+    </a>
+    <a href="https://youtube.com/@clarasystems_io" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.8 15.5V8.5l6.3 3.5-6.3 3.5z"/>
+      </svg>
+    </a>
+    <a href="https://www.facebook.com/clarasystems.io" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12z"/></svg></a>
+    <a href="https://reddit.com/user/ClaraSystems" target="_blank" rel="noopener" aria-label="Reddit"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.74c.69 0 1.25.56 1.25 1.25a1.25 1.25 0 0 1-2.5.06l-2.6-.55-.8 3.75c1.83.07 3.48.63 4.68 1.49.3-.31.73-.5 1.2-.5.97 0 1.76.79 1.76 1.76 0 .72-.43 1.33-1.01 1.61a3.11 3.11 0 0 1 .04.52c0 2.7-3.13 4.87-7 4.87-3.88 0-7-2.17-7-4.87 0-.18 0-.36.04-.53A1.75 1.75 0 0 1 4.03 12c0-.97.79-1.76 1.76-1.76.47 0 .9.19 1.2.5 1.21-.86 2.9-1.42 4.77-1.46l.83-3.95a.36.36 0 0 1 .14-.22.36.36 0 0 1 .26-.06l2.78.59a1.25 1.25 0 0 1 1.24-.9zM9.25 12a1.25 1.25 0 0 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm5.5 0a1.25 1.25 0 0 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm-5.47 3.99a.33.33 0 0 0-.23.57c.84.84 2.49.91 2.96.91.48 0 2.13-.07 2.97-.91a.33.33 0 0 0 0-.47.33.33 0 0 0-.46 0c-.53.53-1.67.72-2.5.72-.83 0-1.97-.19-2.5-.72a.33.33 0 0 0-.24-.1z"/></svg></a>
+    </div>
+  <div class="f-disc f-links-d" style="margin-top:1.1rem">
+    <a class="footer-highlight" href="philosophy.html#faceless">Who We Are</a> &nbsp;·&nbsp; <a class="footer-highlight" href="verify.html">How To Verify A Strategy</a> &nbsp;·&nbsp; <a class="footer-highlight" href="mindset.html" style="white-space:nowrap">Trading &amp; The Mind</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="downloads.html">Downloads &amp; Resources</a> &nbsp;·&nbsp; <a class="footer-highlight" href="downloads.html#referrals">Referrals &amp; Discounts</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="faq.html">FAQ</a> &nbsp;·&nbsp; <a class="footer-highlight" href="socials.html">Connect</a>
+  </div>
+  <div class="f-disc f-links-m" style="margin-top:1.1rem">
+    <a class="footer-highlight" href="philosophy.html#faceless">Who We Are</a> &nbsp;·&nbsp; <a class="footer-highlight" href="verify.html">How To Verify A Strategy</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="downloads.html">Downloads &amp; Resources</a> &nbsp;·&nbsp; <a class="footer-highlight" href="downloads.html#referrals">Referrals &amp; Discounts</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="mindset.html" style="white-space:nowrap">Trading &amp; The Mind</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="faq.html">FAQ</a> &nbsp;·&nbsp; <a class="footer-highlight" href="socials.html">Connect</a>
+  </div>
+  <div style="width:52px;height:1px;background:#D0D0CC;margin:1.6rem auto 1.3rem;"></div>
+  <div class="f-disc f-note">
+    Clara Systems may earn a commission <br class="mb-br">if you use our referral links, <br class="d-br">
+    at no extra cost to you. <br class="mb-br">It's a free way to help us and we appreciate it.<br>
+    Our referral partners are listed in the <a href="legal.html">legal page</a>.
+  </div>
+  <div class="f-disc f-note f-risk" style="margin-top:14px">
+    Trading futures involves substantial <br class="mb-br">risk of loss and is not suitable for everyone.<br>
+      Past performance, whether simulated or actual, is not indicative of future results.<br>
+      <br>
+      Clara Systems provides <br class="mb-br">software and educational information.<br>
+      We do not provide financial advice, manage customer funds, <br class="d-br">or trade on anyone's behalf.<br>
+      <a href="legal.html">Legal &amp; Disclosures</a>
+  </div>
+<div class="f-disc" style="margin-top:14px">&copy; 2026 Clara Systems. All rights reserved.</div>
+</footer>
+
+<script>
+function toggleReadFirst(){
+  var b=document.getElementById('readFirstBody');
+  var a=document.getElementById('readFirstArrow');
+  var t=document.getElementById('readFirstToggle');
+  var open=b.style.display!=='none';
+  b.style.display=open?'none':'block';
+  a.style.transform=open?'rotate(0deg)':'rotate(180deg)';
+  t.setAttribute('aria-expanded', String(!open));
+}
+function toggleInterpret() {
+  var body = document.getElementById('interpretBody');
+  var arrow = document.getElementById('interpretArrow');
+  var toggle = document.getElementById('interpretToggle');
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+}
+</script>
+<script>
+/* Logo click flicker */
+document.querySelectorAll('.header-logo').forEach(function(el) {
+  el.addEventListener('click', function() {
+    el.classList.remove('logo-clicked');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('logo-clicked');
+    el.addEventListener('animationend', function() {
+      el.classList.remove('logo-clicked');
+    }, { once: true });
+  });
+});
+</script>
+<!-- logo-click-handler -->
+<script>
+/* Auto-open Our Approach if arriving from strategy/structure page */
+var __openApproach = false;
+try {
+  if (sessionStorage.getItem('openApproach') === '1') {
+    __openApproach = true;
+    sessionStorage.removeItem('openApproach');
+  }
+} catch (e) {}
+if (__openApproach) {
+  window.addEventListener('load', function() {
+    var body = document.getElementById('approachBody');
+    var icon = document.getElementById('approachIcon');
+    var btn  = document.getElementById('ourApproachBtn');
+    if (body && body.style.display !== 'block') {
+      body.style.display = 'block';
+      if (icon) icon.style.transform = 'rotate(90deg)';
+      if (btn)  btn.style.borderRadius = '0';
+      setTimeout(function() { btn && btn.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200);
+    }
+  });
+}
+</script>
+
+<script>
+(function(){var b=document.getElementById('hamBtn'),m=document.getElementById('mobMenu');
+if(b&&m){b.addEventListener('click',function(){b.classList.toggle('open');m.classList.toggle('open');b.setAttribute('aria-expanded',m.classList.contains('open'));});}})();
+</script>
+<script>function lxT(b){var x=b.nextElementSibling;var open=x.style.display!=='none';x.style.display=open?'none':'block';b.firstElementChild.style.transform=open?'rotate(0deg)':'rotate(90deg)';}</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a515af1a1b3c689d',t:'MTc5MzE0NTg3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

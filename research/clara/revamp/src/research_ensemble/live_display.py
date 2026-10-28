@@ -1,0 +1,579 @@
+"""DISPLAY-ONLY per-bar readout for the REVAMP research ensemble (live console).
+
+Prints the market bias and the decision reasoning on every new 5m bar, in the
+spirit of the original bot's skip-reason / gate output. Nothing in here feeds
+back into trading: it only reads the same 5m dataframe the strategy uses and a
+read-only snapshot of the trader's gate state, and returns text lines.
+
+Numbers come from the same indicator functions the strategy uses
+(src/research_ensemble/indicators.py) and from the same EnsembleStrategy /
+sleeve strategies, so the readout matches what the router sees.
+
+Toggle: env REVAMP_VERBOSE
+  unset / 1  -> compact plain-English readout, 'now X | needs Y' per active sleeve (default)
+  2          -> detailed 6-line block (indicator values per sleeve)
+  0          -> off
+"""
+from __future__ import annotations
+
+import os
+from typing import Any, Dict, List, Optional
+
+import numpy as np
+import pandas as pd
+
+from src.research_ensemble.ensemble import ADX_PERIOD, EnsembleStrategy
+from src.research_ensemble.indicators import adx, bollinger_bands, ema, rsi
+from src.research_ensemble.live_signals import dataframe_for_research
+from src.research_ensemble.session import format_ts_et, rth_mask
+
+SLEEVE_LABEL = {"trend": "trend", "breakout": "breakout", "mean_reversion": "mean reversion"}
+INDENT = "   "
+
+
+def revamp_verbose_level() -> int:
+    """REVAMP_VERBOSE: unset/1 -> 1 (compact, default), 2 -> detailed, 0 -> off."""
+    raw = os.getenv("REVAMP_VERBOSE")
+    if raw is None or str(raw).strip() == "":
+        return 1
+    v = str(raw).strip().lower()
+    if v in ("0", "false", "no", "off"):
+        return 0
+    if v in ("2", "full", "detail", "detailed", "verbose"):
+        return 2
+    try:
+        return 2 if int(v) >= 2 else (1 if int(v) == 1 else 0)
+    except ValueError:
+        return 1
+
+
+def revamp_verbose_enabled() -> bool:
+    """REVAMP_VERBOSE env toggle; default ON (compact)."""
+    return revamp_verbose_level() > 0
+
+
+def _f(v: Any) -> float:
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return float("nan")
+    return x
+
+
+def _side(v: int) -> str:
+    return "BUY" if v > 0 else ("SELL" if v < 0 else "")
+
+
+def compute_revamp_snapshot(df: pd.DataFrame, strategy: Optional[EnsembleStrategy] = None) -> Dict[str, Any]:
+    """Read-only indicator snapshot of the last bar. Never mutates `df`."""
+    strat = strategy or EnsembleStrategy()
+    rdf = dataframe_for_research(df)  # makes its own copy
+    if len(rdf) < 2:
+        raise ValueError("not enough bars for display")
+    close, high, low, vol = rdf["close"], rdf["high"], rdf["low"], rdf["volume"]
+
+    tr_ = strat._trend
+    bo_ = strat._breakout
+    mr_ = strat._mean_reversion
+
+    ema_f = ema(close, tr_.fast)
+    ema_s = ema(close, tr_.slow)
+    ema_t = ema(close, tr_.trend)
+    adx_s = adx(high, low, close, ADX_PERIOD)
+    up, mid, lo = bollinger_bands(close, mr_.bb_period, mr_.bb_std)
+    rsi_s = rsi(close, mr_.rsi_period)
+    don_hi = high.rolling(bo_.donchian_period).max().shift(1)  # prior channel, as strategy
+    don_lo = low.rolling(bo_.donchian_period).min().shift(1)
+    next_hi = high.rolling(bo_.donchian_period).max()  # level the NEXT bar must close beyond
+    next_lo = low.rolling(bo_.donchian_period).min()
+    avg_vol = vol.rolling(bo_.volume_lookback).mean()
+
+    # Sleeve raw entries on the last bar (before ADX routing / RTH gate)
+    t_sig = tr_.generate_signals(rdf)
+    m_sig = mr_.generate_signals(rdf)
+    b_sig = bo_.generate_signals(rdf)
+    final = strat.generate_signals(rdf)  # authoritative router output
+
+    i = -1
+    c = _f(close.iloc[i])
+    adx_v = _f(adx_s.iloc[i])
+    trending = adx_v >= strat.adx_trend_min
+    ranging = adx_v < strat.adx_range_max
+
+    # EMA20/50 state + bars since last cross
+    diff = (ema_f - ema_s)
+    sign = np.sign(diff.values)
+    cur_sign = sign[-1]
+    bars_since = 0
+    for k in range(len(sign) - 1, 0, -1):
+        if sign[k - 1] != cur_sign:
+            break
+        bars_since += 1
+
+    t_e = int(t_sig.entries.iloc[i])
+    m_e = int(m_sig.entries.iloc[i])
+    b_e = int(b_sig.entries.iloc[i])
+    bo_allowed = strat.breakout_in_range or not ranging
+    routed = 0
+    routed_sleeve = ""
+    if b_e != 0 and bo_allowed:
+        routed, routed_sleeve = b_e, "breakout"
+    elif trending and t_e != 0:
+        routed, routed_sleeve = t_e, "trend"
+    elif ranging and m_e != 0:
+        routed, routed_sleeve = m_e, "mean_reversion"
+
+    ts = rdf.index[i]
+    in_rth = bool(rth_mask(rdf.index).iloc[i])
+
+    vol_v = _f(vol.iloc[i])
+    avg_v = _f(avg_vol.iloc[i])
+    vol_ratio = vol_v / avg_v if np.isfinite(avg_v) and avg_v > 0 else float("nan")
+
+    prev_c = _f(close.iloc[i - 1])
+    return {
+        "time": ts,
+        "time_et": format_ts_et(ts, "%H:%M ET"),
+        "in_rth": in_rth,
+        "close": c,
+        "ema_fast": _f(ema_f.iloc[i]), "ema_slow": _f(ema_s.iloc[i]), "ema_trend": _f(ema_t.iloc[i]),
+        "fast_n": tr_.fast, "slow_n": tr_.slow, "trend_n": tr_.trend,
+        "ema_bars_since_cross": bars_since,
+        "ema_cross_up": bool(diff.iloc[i] > 0 and diff.iloc[i - 1] <= 0),
+        "ema_cross_down": bool(diff.iloc[i] < 0 and diff.iloc[i - 1] >= 0),
+        "adx": adx_v,
+        "adx_trend_min": float(strat.adx_trend_min),
+        "adx_range_max": float(strat.adx_range_max),
+        "trending": bool(trending), "ranging": bool(ranging),
+        "breakout_allowed": bool(bo_allowed),
+        "don_hi": _f(don_hi.iloc[i]), "don_lo": _f(don_lo.iloc[i]),
+        "prev_beyond_hi": bool(prev_c > _f(don_hi.iloc[i - 1])),
+        "prev_beyond_lo": bool(prev_c < _f(don_lo.iloc[i - 1])),
+        "next_hi": _f(next_hi.iloc[i]), "next_lo": _f(next_lo.iloc[i]),
+        "don_n": bo_.donchian_period,
+        "vol_ratio": vol_ratio, "vol_mult": float(bo_.volume_mult),
+        "bb_up": _f(up.iloc[i]), "bb_mid": _f(mid.iloc[i]), "bb_lo": _f(lo.iloc[i]),
+        "rsi": _f(rsi_s.iloc[i]),
+        "rsi_os": float(mr_.rsi_oversold), "rsi_ob": float(mr_.rsi_overbought),
+        "trend_entry": t_e, "mr_entry": m_e, "bo_entry": b_e,
+        "routed_entry": routed, "routed_sleeve": routed_sleeve,
+        "final_entry": int(final.entries.iloc[i]),
+        "rth_only": bool(getattr(strat, "rth_only", True)),
+    }
+
+
+# ---------------------------------------------------------------- formatting
+
+def _bias(s: Dict[str, Any]) -> str:
+    c, f, sl, t = s["close"], s["ema_fast"], s["ema_slow"], s["ema_trend"]
+    above = c > t
+    fast_up = f > sl
+    px = f"price {c:.2f} {'above' if above else 'below'} EMA{s['trend_n']} {t:.2f} ({c - t:+.1f})"
+    cross = f"EMA{s['fast_n']} {'>' if fast_up else '<'} EMA{s['slow_n']}"
+    if above and fast_up:
+        return f"Bias    : BUY ({px}, {cross})"
+    if (not above) and (not fast_up):
+        return f"Bias    : SELL ({px}, {cross})"
+    return f"Bias    : NEUTRAL (mixed: {px}, but {cross})"
+
+
+def _regime(s: Dict[str, Any]) -> str:
+    a, lo, hi = s["adx"], s["adx_range_max"], s["adx_trend_min"]
+    if s["trending"]:
+        r = f"TREND (ADX>={hi:.0f}): trend + breakout sleeves active"
+    elif s["ranging"]:
+        r = f"RANGE (ADX<{lo:.0f}): mean reversion active, breakout off"
+    else:
+        r = f"TRANSITION ({lo:.0f}-{hi:.0f}): trend + MR off, breakout only"
+    sess = f"RTH {s['time_et']}" if s["in_rth"] else f"outside RTH ({s['time_et']})"
+    return f"Regime  : ADX {a:.1f} -> {r} | {sess}"
+
+
+def _trend_line(s: Dict[str, Any]) -> str:
+    f, sl = s["ema_fast"], s["ema_slow"]
+    fn, sn, tn = s["fast_n"], s["slow_n"], s["trend_n"]
+    rel = "above" if f > sl else "below"
+    head = f"Trend   : EMA{fn} {f:.2f} {rel} EMA{sn} {sl:.2f} ({f - sl:+.1f})"
+    if s["ema_cross_up"]:
+        tail = "CROSS UP this bar" + (f", close > EMA{tn} -> BUY setup" if s["trend_entry"] > 0
+                                      else f", but close < EMA{tn} -> filtered")
+    elif s["ema_cross_down"]:
+        tail = "CROSS DOWN this bar" + (f", close < EMA{tn} -> SELL setup" if s["trend_entry"] < 0
+                                        else f", but close > EMA{tn} -> filtered")
+    else:
+        tail = f"no fresh cross ({s['ema_bars_since_cross']} bars since last)"
+    off = "" if s["trending"] else " [off: ADX<%.0f]" % s["adx_trend_min"]
+    return f"{head}, {tail}{off}"
+
+
+def _vol_txt(s: Dict[str, Any]) -> str:
+    vr, vm = s["vol_ratio"], s["vol_mult"]
+    return f"vol {vr:.2f}x avg (need >{vm:.2f}x)" if np.isfinite(vr) else "vol n/a"
+
+
+def _vol_ok(s: Dict[str, Any]) -> bool:
+    return bool(np.isfinite(s["vol_ratio"]) and s["vol_ratio"] > s["vol_mult"])
+
+
+def _breakout_detail(s: Dict[str, Any]) -> str:
+    c, hi, lo = s["close"], s["don_hi"], s["don_lo"]
+    if s["bo_entry"] > 0:
+        return f"BREAK above high {hi:.2f}, {_vol_txt(s)} -> BUY setup"
+    if s["bo_entry"] < 0:
+        return f"BREAK below low {lo:.2f}, {_vol_txt(s)} -> SELL setup"
+    if np.isfinite(hi) and c > hi:
+        why = "already above high (not a fresh break)" if s["prev_beyond_hi"] else "close above high, volume too low"
+        return f"{why} {hi:.2f}, {_vol_txt(s)}"
+    if np.isfinite(lo) and c < lo:
+        why = "already below low (not a fresh break)" if s["prev_beyond_lo"] else "close below low, volume too low"
+        return f"{why} {lo:.2f}, {_vol_txt(s)}"
+    return f"high {hi:.2f} (+{hi - c:.2f}) / low {lo:.2f} (-{c - lo:.2f}), {_vol_txt(s)}"
+
+
+def _breakout_short(s: Dict[str, Any]) -> str:
+    """Compact 'why no breakout' for the Decision line."""
+    c, hi, lo = s["close"], s["don_hi"], s["don_lo"]
+    vr, vm = s["vol_ratio"], s["vol_mult"]
+    if np.isfinite(hi) and c > hi:
+        if s["prev_beyond_hi"]:
+            return f"no breakout: already above high {hi:.2f} (not fresh)"
+        return f"no breakout: above high {hi:.2f} but vol {vr:.2f}x <= {vm:.2f}x"
+    if np.isfinite(lo) and c < lo:
+        if s["prev_beyond_lo"]:
+            return f"no breakout: already below low {lo:.2f} (not fresh)"
+        return f"no breakout: below low {lo:.2f} but vol {vr:.2f}x <= {vm:.2f}x"
+    if (hi - c) <= (c - lo):
+        txt = f"no breakout: high {hi:.2f} is {hi - c:.2f} pts away"
+    else:
+        txt = f"no breakout: low {lo:.2f} is {c - lo:.2f} pts away"
+    if not _vol_ok(s) and np.isfinite(vr):
+        txt += f", vol {vr:.2f}x <= {vm:.2f}x"
+    return txt
+
+
+def _breakout_line(s: Dict[str, Any]) -> str:
+    off = "" if s["breakout_allowed"] else " [off: ADX<%.0f]" % s["adx_range_max"]
+    return f"Breakout: Donchian{s['don_n']} {_breakout_detail(s)}{off}"
+
+
+def _mr_detail(s: Dict[str, Any]) -> str:
+    c, up, lo, r = s["close"], s["bb_up"], s["bb_lo"], s["rsi"]
+    os_, ob = s["rsi_os"], s["rsi_ob"]
+    if s["mr_entry"] > 0:
+        return f"close {c:.2f} <= lower {lo:.2f}, RSI {r:.1f} < {os_:.0f} -> BUY setup"
+    if s["mr_entry"] < 0:
+        return f"close {c:.2f} >= upper {up:.2f}, RSI {r:.1f} > {ob:.0f} -> SELL setup"
+    if c <= lo:
+        return f"close at/below lower {lo:.2f}, RSI {r:.1f} (need <{os_:.0f} on a fresh touch)"
+    if c >= up:
+        return f"close at/above upper {up:.2f}, RSI {r:.1f} (need >{ob:.0f} on a fresh touch)"
+    if (up - c) <= (c - lo):
+        near = f"upper {up:.2f} is {up - c:.2f} pts away"
+    else:
+        near = f"lower {lo:.2f} is {c - lo:.2f} pts away"
+    return f"inside bands, {near}, RSI {r:.1f} (need <{os_:.0f} / >{ob:.0f})"
+
+
+def _mr_line(s: Dict[str, Any]) -> str:
+    off = "" if s["ranging"] else " [off: ADX>=%.0f]" % s["adx_range_max"]
+    return f"MeanRev : BB(20,2) {_mr_detail(s)}{off}"
+
+
+def gate_block_reason(gates: Optional[Dict[str, Any]]) -> Optional[str]:
+    """First account/risk gate that blocks a new entry this bar (same order as live)."""
+    if not gates:
+        return None
+    dll = _f(gates.get("daily_loss_limit"))
+    pnl = _f(gates.get("daily_pnl"))
+    if np.isfinite(dll) and np.isfinite(pnl) and pnl <= -dll:
+        return f"daily loss limit hit (${pnl:.2f} / -${dll:.0f})"
+    mt = gates.get("max_trades")
+    if mt is not None and int(mt) > 0 and int(gates.get("daily_trades") or 0) >= int(mt):
+        return f"max trades/day {int(gates.get('daily_trades') or 0)}/{int(mt)}"
+    open_n, max_n = gates.get("open_count"), gates.get("max_positions")
+    if open_n is not None and max_n is not None and int(open_n) >= int(max_n):
+        return f"max concurrent reached ({int(open_n)}/{int(max_n)} open)"
+    cd = int(gates.get("cooldown") or 0)
+    if cd > 0:
+        return f"cooldown ({cd} bar{'s' if cd != 1 else ''} left)"
+    lc = int(gates.get("loss_cooldown_min") or 0)
+    if lc > 0:
+        return f"loss cooldown ({lc} min left)"
+    cp = int(gates.get("consec_pause_min") or 0)
+    if cp > 0:
+        return f"consecutive-loss pause ({cp} min left, {int(gates.get('consec_losses') or 0)} in a row)"
+    sb = gates.get("session_block")
+    if sb:
+        return str(sb)
+    return None
+
+
+def _no_setup_reason(s: Dict[str, Any]) -> str:
+    a = s["adx"]
+    # Only treat cash-session clock as a hard block when RTH-only gate is on
+    if s.get("rth_only", True) and not s["in_rth"]:
+        base = f"outside RTH ({s['time_et']}, entries only 09:30-16:00 ET)"
+        if s["routed_entry"] != 0:
+            base += f"; {_side(s['routed_entry'])} {SLEEVE_LABEL[s['routed_sleeve']]} setup ignored"
+        return base
+    bo_short = _breakout_short(s)
+    if s["ranging"]:
+        return f"ADX {a:.1f} ranging, no MR fade: {_mr_detail(s)}"
+    if not s["trending"]:
+        return f"ADX {a:.1f} in transition (trend/MR off); {bo_short}"
+    if s["ema_cross_up"] or s["ema_cross_down"]:
+        trend_txt = f"EMA cross filtered by EMA{s['trend_n']}"
+    else:
+        trend_txt = f"no EMA{s['fast_n']}/{s['slow_n']} cross ({s['ema_bars_since_cross']} bars)"
+    return f"{trend_txt}; {bo_short}"
+
+
+def _decision(s: Dict[str, Any], gates: Optional[Dict[str, Any]], signal: Optional[Dict[str, Any]],
+              checked: bool) -> str:
+    if signal:
+        side = str(signal.get("ensemble_signal") or "").upper() or (
+            "BUY" if signal.get("direction") == "long" else "SELL")
+        sleeve = SLEEVE_LABEL.get(str(signal.get("exit_sleeve") or ""), str(signal.get("exit_sleeve") or "?"))
+        tp = _f(signal.get("tp"))
+        tp_txt = f"{tp:.2f}" if np.isfinite(tp) and tp > 0 else "ATR trail"
+        return (f"Decision: {side} ({sleeve}) @ {_f(signal.get('entry')):.2f} | "
+                f"SL {_f(signal.get('sl')):.2f} | TP {tp_txt}")
+    setup = s["final_entry"]
+    gate = gate_block_reason(gates)
+    if setup != 0:
+        lbl = f"{_side(setup)} setup ({SLEEVE_LABEL.get(s['routed_sleeve'], s['routed_sleeve'] or '?')})"
+        if gate:
+            return f"Decision: NO TRADE: {lbl} blocked by {gate}"
+        return f"Decision: NO TRADE: {lbl} rejected by live checks (see log)"
+    if gate:
+        return f"Decision: NO TRADE: {gate}"
+    return f"Decision: NO TRADE: {_no_setup_reason(s)}"
+
+
+def format_revamp_block(snapshot: Dict[str, Any], gates: Optional[Dict[str, Any]] = None,
+                        signal: Optional[Dict[str, Any]] = None, checked: bool = True) -> List[str]:
+    """Return 6 console lines (indented, plain ASCII)."""
+    s = snapshot
+    lines = [_bias(s), _regime(s), _trend_line(s), _breakout_line(s), _mr_line(s),
+             _decision(s, gates, signal, checked)]
+    return [INDENT + ln for ln in lines]
+
+
+# ------------------------------------------------------- compact (default)
+
+COMPACT_MAX = 87  # chars after the 3-space indent -> whole line <= 90
+
+
+def _w(x: float) -> int:
+    """Whole number, half rounds up (prices / points in the compact readout)."""
+    return int(np.floor(float(x) + 0.5))
+
+
+def _pts(d: float) -> str:
+    return f"{_w(abs(d))} pts"
+
+
+def _mode_word(s: Dict[str, Any]) -> str:
+    if s["trending"]:
+        return "Trending"
+    if s["ranging"]:
+        return "Choppy"
+    return "In between"
+
+
+def _bias_word(s: Dict[str, Any]) -> str:
+    above = s["close"] > s["ema_trend"]
+    fast_up = s["ema_fast"] > s["ema_slow"]
+    if above and fast_up:
+        return "BUY"
+    if (not above) and (not fast_up):
+        return "SELL"
+    return "NEUTRAL"
+
+
+def _sleeve_word(sleeve: str) -> str:
+    return SLEEVE_LABEL.get(sleeve or "", sleeve or "?")
+
+
+def _plain_gate(gates: Optional[Dict[str, Any]], s: Dict[str, Any]):
+    """(line-1 result, 'because ...' text) for the first blocking gate, else (None, None)."""
+    g = gates or {}
+    dll, pnl = _f(g.get("daily_loss_limit")), _f(g.get("daily_pnl"))
+    if np.isfinite(dll) and np.isfinite(pnl) and pnl <= -dll:
+        return "Stopped: daily loss limit", "the daily loss limit was hit"
+    mt = g.get("max_trades")
+    if mt is not None and int(mt) > 0 and int(g.get("daily_trades") or 0) >= int(mt):
+        return "Stopped: max trades for today", "the max trades for today was reached"
+    if s.get("rth_only", True) and not s["in_rth"]:
+        return (f"Closed: outside trading hours ({s['time_et']})",
+                f"it is outside trading hours ({s['time_et']})")
+    if g.get("session_block"):
+        return f"Closed: {g['session_block']}", f"of the {g['session_block']}"
+    open_n, max_n = g.get("open_count"), g.get("max_positions")
+    if open_n is not None and max_n is not None and int(open_n) >= int(max_n):
+        n = int(open_n)
+        return (f"Blocked: {n} trade{'s' if n != 1 else ''} already open",
+                f"{n} trade{'s are' if n != 1 else ' is'} already open")
+    cd = int(g.get("cooldown") or 0)
+    if cd > 0:
+        return (f"Paused: cooldown {cd} bar{'s' if cd != 1 else ''}",
+                f"of the cooldown ({cd} bar{'s' if cd != 1 else ''} left)")
+    lc = int(g.get("loss_cooldown_min") or 0)
+    if lc > 0:
+        return f"Paused: after a loss ({lc} min)", f"of the after-loss pause ({lc} min left)"
+    cp = int(g.get("consec_pause_min") or 0)
+    if cp > 0:
+        n = int(g.get("consec_losses") or 0)
+        return f"Paused: {n} losses in a row ({cp} min)", f"of {n} losses in a row ({cp} min pause left)"
+    return None, None
+
+
+def _fit(options: List[str]) -> str:
+    for o in options:
+        if len(o) <= COMPACT_MAX:
+            return o
+    return options[-1]
+
+
+def _bias_first(s: Dict[str, Any], buy_part: str, buy_dist: float, sell_part: str, sell_dist: float) -> List[str]:
+    bias = _bias_word(s)
+    if bias == "SELL" or (bias == "NEUTRAL" and sell_dist < buy_dist):
+        return [sell_part, buy_part]
+    return [buy_part, sell_part]
+
+
+def _price_breakout_line(s: Dict[str, Any]) -> str:
+    """Price: now X | needs above H to BUY (d) | below L to SELL (d) -- breakout sleeve."""
+    c, hi, lo = s["close"], s["next_hi"], s["next_lo"]
+    beyond_hi = bool(np.isfinite(s["don_hi"]) and c > s["don_hi"])  # broke out on this bar
+    beyond_lo = bool(np.isfinite(s["don_lo"]) and c < s["don_lo"])
+
+    def side_txt(buy: bool, short: bool) -> str:
+        if buy and beyond_hi:
+            lvl = _w(s["don_hi"])
+            return f"already above {lvl}" if short else f"already above {lvl} (BUY needs a pullback)"
+        if (not buy) and beyond_lo:
+            lvl = _w(s["don_lo"])
+            return f"already below {lvl}" if short else f"already below {lvl} (SELL needs a bounce)"
+        return f"above {_w(hi)} to BUY ({_pts(hi - c)})" if buy else f"below {_w(lo)} to SELL ({_pts(c - lo)})"
+
+    opts = []
+    for short in (False, True):
+        a1, a2 = _bias_first(s, side_txt(True, short), abs(hi - c), side_txt(False, short), abs(c - lo))
+        opts.append(f"Price: {_w(c)} | needs {a1} | {a2}" if not a1.startswith("already")
+                    else f"Price: {_w(c)} | {a1} | needs {a2}" if not a2.startswith("already")
+                    else f"Price: {_w(c)} | {a1} | {a2}")
+    opts.append(opts[-1].split(" | ")[0] + " | " + opts[-1].split(" | ")[1])
+    return _fit(opts)
+
+
+def _price_mr_line(s: Dict[str, Any]) -> str:
+    """Price vs Bollinger bands -- mean-reversion sleeve (choppy)."""
+    c, up, lo = s["close"], s["bb_up"], s["bb_lo"]
+    buy = (f"at/below {_w(lo)} for a BUY dip (now there)" if c <= lo
+           else f"dip to {_w(lo)} to BUY ({_pts(c - lo)})")
+    sell = (f"at/above {_w(up)} for a SELL pop (now there)" if c >= up
+            else f"pop to {_w(up)} to SELL ({_pts(up - c)})")
+    parts = _bias_first(s, buy, abs(c - lo), sell, abs(up - c))
+    return _fit([f"Price: {_w(c)} | needs {parts[0]} | {parts[1]}",
+                 f"Price: {_w(c)} | needs {parts[0]}"])
+
+
+def _volume_line(s: Dict[str, Any]) -> str:
+    vr, vm = s["vol_ratio"], s["vol_mult"]
+    if not np.isfinite(vr):
+        return f"Volume: n/a | needs {vm:.1f}x"
+    now = f"{vr:.1f}x"
+    if now == f"{vm:.1f}x":
+        now = f"{vr:.2f}x"  # avoid '1.5x | needs 1.5x' when it is 1.47x
+    return f"Volume: {now} | needs {vm:.1f}x" + (" (OK)" if _vol_ok(s) else "")
+
+
+def _ema_line(s: Dict[str, Any]) -> str:
+    f, sl, fn, sn, tn = s["ema_fast"], s["ema_slow"], s["fast_n"], s["slow_n"], s["trend_n"]
+    gap = _pts(f - sl)
+    if s["ema_cross_up"] or s["ema_cross_down"]:
+        up = s["ema_cross_up"]
+        state = f"EMA cross: {fn} crossed {'above' if up else 'below'} {sn} this bar"
+        if s["trend_entry"] != 0:
+            return f"{state} | {'BUY' if up else 'SELL'} setup"
+        return f"{state} | filtered: price {'below' if up else 'above'} {tn} EMA"
+    fast_up = f > sl
+    side = "SELL" if fast_up else "BUY"
+    filt_ok = (side == "SELL" and s["close"] < s["ema_trend"]) or (side == "BUY" and s["close"] > s["ema_trend"])
+    state = f"EMA cross: {fn} {'above' if fast_up else 'below'} {sn} by {gap} (no new cross)"
+    need = f"needs a fresh cross {'down' if fast_up else 'up'} to {side}"
+    if filt_ok:
+        return _fit([f"{state} | {need}", f"EMA cross: {fn} {'above' if fast_up else 'below'} {sn} | {need}"])
+    extra = f" + price {'under' if side == 'SELL' else 'over'} {tn} EMA"
+    short_need = f"needs cross {'down' if fast_up else 'up'}{extra} to {side}"
+    rel = 'above' if fast_up else 'below'
+    return _fit([f"{state} | {need}{extra}",
+                 f"EMA cross: {fn} {rel} {sn} ({gap}) | {short_need}",
+                 f"EMA cross: {fn} {rel} {sn} | {short_need}"])
+
+
+def _rsi_line(s: Dict[str, Any]) -> str:
+    r = s["rsi"]
+    if not np.isfinite(r):
+        return "RSI: n/a"
+    lbl = "oversold" if r < s["rsi_os"] else ("overbought" if r > s["rsi_ob"] else "neutral")
+    shown = f"{r:.0f}"
+    if shown in (f"{s['rsi_os']:.0f}", f"{s['rsi_ob']:.0f}"):
+        shown = f"{r:.1f}"  # avoid '30 (oversold)' when the raw value is 29.6
+    off = "" if s["ranging"] else f" [off now: {_mode_word(s).lower()}]"
+    need = f"needs under {s['rsi_os']:.0f} to BUY dip, over {s['rsi_ob']:.0f} to SELL pop"
+    short_need = f"needs under {s['rsi_os']:.0f} to BUY, over {s['rsi_ob']:.0f} to SELL"
+    return _fit([f"RSI: {shown} ({lbl}) | {need}{off}", f"RSI: {shown} ({lbl}) | {short_need}{off}",
+                 f"RSI: {shown} | {need}{off}", f"RSI: {shown} ({lbl}){off}"])
+
+
+def format_revamp_compact(snapshot: Dict[str, Any], gates: Optional[Dict[str, Any]] = None,
+                          signal: Optional[Dict[str, Any]] = None, checked: bool = True) -> List[str]:
+    """Default readout: decision line, optional entry/skip line, then 'now X | needs Y'
+    lines for the ACTIVE sleeves only (RSI always shown). Each line <= ~90 chars."""
+    s = snapshot
+    bias, mode = _bias_word(s), _mode_word(s)
+    extra: Optional[str] = None
+    if signal:
+        side = str(signal.get("ensemble_signal") or "").upper() or (
+            "BUY" if signal.get("direction") == "long" else "SELL")
+        result = f"{side} ({_sleeve_word(str(signal.get('exit_sleeve') or ''))})"
+        tp = _f(signal.get("tp"))
+        tp_txt = f"{tp:.2f}" if np.isfinite(tp) and tp > 0 else "trailing stop (no fixed target)"
+        extra = f"Entry {_f(signal.get('entry')):.2f} | Stop {_f(signal.get('sl')):.2f} | Target {tp_txt}"
+    else:
+        gate_res, because = _plain_gate(gates, s)
+        # When overnight/Globex allowed, final_entry already includes outside-RTH setups
+        setup = s["final_entry"] if (s.get("rth_only", True) is False or s["in_rth"]) else s["routed_entry"]
+        sleeve = s["routed_sleeve"]
+        if setup != 0 and gate_res:
+            result = gate_res
+            extra = f"{_side(setup)} {_sleeve_word(sleeve)} skipped because {because}"
+        elif setup != 0:
+            result = f"Skipped: {_side(setup)} {_sleeve_word(sleeve)}"
+            extra = f"{_side(setup)} {_sleeve_word(sleeve)} found but rejected by live checks (see log)"
+        else:
+            result = gate_res or "No trade"
+    lines = [f"Bias: {bias} | {mode} | {result}"]
+    if extra:
+        lines.append(extra)
+    if s["ranging"]:  # mean-reversion sleeve active
+        lines.append(_price_mr_line(s))
+    if s["breakout_allowed"]:  # breakout sleeve active (default: ADX >= 20)
+        lines.append(_price_breakout_line(s))
+        lines.append(_volume_line(s))
+    if s["trending"]:  # trend sleeve active
+        lines.append(_ema_line(s))
+    lines.append(_rsi_line(s))
+    return [INDENT + ln for ln in lines]
+
+
+def render_revamp_block(df: pd.DataFrame, gates: Optional[Dict[str, Any]] = None,
+                        signal: Optional[Dict[str, Any]] = None, checked: bool = True,
+                        strategy: Optional[EnsembleStrategy] = None, level: int = 2) -> List[str]:
+    """level 1 = compact readout (3-6 short lines), level 2 = detailed 6-line block."""
+    snap = compute_revamp_snapshot(df, strategy)
+    if level == 1:
+        return format_revamp_compact(snap, gates, signal, checked)
+    return format_revamp_block(snap, gates, signal, checked)

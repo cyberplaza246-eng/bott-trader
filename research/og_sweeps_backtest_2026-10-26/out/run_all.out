@@ -1,0 +1,257 @@
+signals 7932 fine bars 666675
+BASE {
+"ALL": {
+"gross": {
+"n": 118,
+"net": -1805.0,
+"wr": 42.37,
+"avg_w": 99.74,
+"avg_l": -99.88,
+"pf": 0.73,
+"maxdd": 2162.5,
+"avg": -15.3
+},
+"bot": {
+"n": 118,
+"net": -2100.0,
+"wr": 42.37,
+"avg_w": 97.24,
+"avg_l": -102.38,
+"pf": 0.7,
+"maxdd": 2392.5,
+"avg": -17.8
+},
+"real": {
+"n": 118,
+"net": -2109.64,
+"wr": 42.37,
+"avg_w": 97.14,
+"avg_l": -102.45,
+"pf": 0.7,
+"maxdd": 2408.64,
+"avg": -17.88
+}
+},
+"2024 (Sep22-Dec)": {
+"gross": {
+"n": 6,
+"net": 52.5,
+"wr": 50.0,
+"avg_w": 69.83,
+"avg_l": -52.33,
+"pf": 1.33,
+"maxdd": 73.0,
+"avg": 8.75
+},
+"bot": {
+"n": 6,
+"net": 37.5,
+"wr": 50.0,
+"avg_w": 67.33,
+"avg_l": -54.83,
+"pf": 1.23,
+"maxdd": 75.5,
+"avg": 6.25
+},
+"real": {
+"n": 6,
+"net": 39.06,
+"wr": 50.0,
+"avg_w": 67.59,
+"avg_l": -54.57,
+"pf": 1.24,
+"maxdd": 75.24,
+"avg": 6.51
+}
+},
+"2025": {
+"gross": {
+"n": 78,
+"net": -707.5,
+"wr": 44.87,
+"avg_w": 91.5,
+"avg_l": -90.93,
+"pf": 0.82,
+"maxdd": 907.0,
+"avg": -9.07
+},
+"bot": {
+"n": 78,
+"net": -902.5,
+"wr": 44.87,
+"avg_w": 89.0,
+"avg_l": -93.43,
+"pf": 0.78,
+"maxdd": 1072.0,
+"avg": -11.57
+},
+"real": {
+"n": 78,
+"net": -911.34,
+"wr": 44.87,
+"avg_w": 89.0,
+"avg_l": -93.64,
+"pf": 0.77,
+"maxdd": 1083.96,
+"avg": -11.68
+}
+},
+"2026 YTD": {
+"gross": {
+"n": 34,
+"net": -1150.0,
+"wr": 35.29,
+"avg_w": 131.25,
+"avg_l": -123.86,
+"pf": 0.58,
+"maxdd": 1255.5,
+"avg": -33.82
+},
+"bot": {
+"n": 34,
+"net": -1235.0,
+"wr": 35.29,
+"avg_w": 128.75,
+"avg_l": -126.36,
+"pf": 0.56,
+"maxdd": 1320.5,
+"avg": -36.32
+},
+"real": {
+"n": 34,
+"net": -1237.36,
+"wr": 35.29,
+"avg_w": 128.26,
+"avg_l": -126.21,
+"pf": 0.55,
+"maxdd": 1324.68,
+"avg": -36.39
+}
+},
+"2026 Jan-Sep": {
+"gross": {
+"n": 34,
+"net": -1150.0,
+"wr": 35.29,
+"avg_w": 131.25,
+"avg_l": -123.86,
+"pf": 0.58,
+"maxdd": 1255.5,
+"avg": -33.82
+},
+"bot": {
+"n": 34,
+"net": -1235.0,
+"wr": 35.29,
+"avg_w": 128.75,
+"avg_l": -126.36,
+"pf": 0.56,
+"maxdd": 1320.5,
+"avg": -36.32
+},
+"real": {
+"n": 34,
+"net": -1237.36,
+"wr": 35.29,
+"avg_w": 128.26,
+"avg_l": -126.21,
+"pf": 0.55,
+"maxdd": 1324.68,
+"avg": -36.39
+}
+},
+"2026 Oct (live bars)": {
+"gross": {
+"n": 0,
+"net": 0.0,
+"wr": 0,
+"avg_w": 0,
+"avg_l": 0,
+"pf": 0,
+"maxdd": 0,
+"avg": 0
+},
+"bot": {
+"n": 0,
+"net": 0.0,
+"wr": 0,
+"avg_w": 0,
+"avg_l": 0,
+"pf": 0,
+"maxdd": 0,
+"avg": 0
+},
+"real": {
+"n": 0,
+"net": 0.0,
+"wr": 0,
+"avg_w": 0,
+"avg_l": 0,
+"pf": 0,
+"maxdd": 0,
+"avg": 0
+}
+}
+}
+FUNNEL {'bars_total': 666675, 'sweep_signals(buy/sell)': 7932, 'sweep_with_signal': 7932, 'pass_all_model_gates(should_trade)': 154, 'pass if conf gate off': 4310, 'pass if conf+rsi off': 4386, 'pass if conf+rsi+ema off': 5290, 'pass if conf+rsi+ema+agree off': 7932, 'final conf>=0.64 only': 162, 'sweep_conf>=0.64 only': 1160, 'rsi blocks (of conf>=.64)': 8, 'trades taken in sim': 118}
+{'name': 'BASE (live config)', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'RSI block OFF', 'n': 125, 'net_bot': -2010.0, 'net_real': -2022.0, 'wr': 44.0, 'pf': 0.72, 'maxdd': 2528.0, 'avg_w': 95.0, 'avg_l': -103.0, 'net_gross': -1697.0, 'real_y2024': 55.0, 'n_y2024': 7, 'real_y2025': -842.0, 'n_y2025': 80, 'real_y2026': -1235.0, 'n_y2026': 38}
+{'name': 'RSI block 78/22', 'n': 125, 'net_bot': -2010.0, 'net_real': -2022.0, 'wr': 44.0, 'pf': 0.72, 'maxdd': 2528.0, 'avg_w': 95.0, 'avg_l': -103.0, 'net_gross': -1697.0, 'real_y2024': 55.0, 'n_y2024': 7, 'real_y2025': -842.0, 'n_y2025': 80, 'real_y2026': -1235.0, 'n_y2026': 38}
+{'name': 'Conf gate 0.60', 'n': 215, 'net_bot': -1494.0, 'net_real': -1479.0, 'wr': 47.4, 'pf': 0.87, 'maxdd': 3121.0, 'avg_w': 97.0, 'avg_l': -101.0, 'net_gross': -957.0, 'real_y2024': 489.0, 'n_y2024': 17, 'real_y2025': -993.0, 'n_y2025': 125, 'real_y2026': -975.0, 'n_y2026': 73}
+{'name': 'Conf gate 0.55', 'n': 331, 'net_bot': -3528.0, 'net_real': -3481.0, 'wr': 48.3, 'pf': 0.81, 'maxdd': 5652.0, 'avg_w': 95.0, 'avg_l': -109.0, 'net_gross': -2701.0, 'real_y2024': 751.0, 'n_y2024': 30, 'real_y2025': -2145.0, 'n_y2025': 184, 'real_y2026': -2087.0, 'n_y2026': 117}
+{'name': 'Conf gate 0.50', 'n': 431, 'net_bot': -8410.0, 'net_real': -8336.0, 'wr': 46.6, 'pf': 0.69, 'maxdd': 9147.0, 'avg_w': 90.0, 'avg_l': -115.0, 'net_gross': -7332.0, 'real_y2024': 83.0, 'n_y2024': 36, 'real_y2025': -3562.0, 'n_y2025': 227, 'real_y2026': -4856.0, 'n_y2026': 168}
+{'name': 'Conf gate 0.40', 'n': 594, 'net_bot': -12320.0, 'net_real': -12204.0, 'wr': 48.0, 'pf': 0.68, 'maxdd': 13147.0, 'avg_w': 92.0, 'avg_l': -124.0, 'net_gross': -10836.0, 'real_y2024': -883.0, 'n_y2024': 53, 'real_y2025': -5637.0, 'n_y2025': 315, 'real_y2026': -5684.0, 'n_y2026': 226}
+{'name': 'Conf gate OFF', 'n': 2094, 'net_bot': -9482.0, 'net_real': -8960.0, 'wr': 51.8, 'pf': 0.92, 'maxdd': 10188.0, 'avg_w': 90.0, 'avg_l': -105.0, 'net_gross': -4248.0, 'real_y2024': -972.0, 'n_y2024': 199, 'real_y2025': -3246.0, 'n_y2025': 1104, 'real_y2026': -4742.0, 'n_y2026': 791}
+{'name': 'Conf gate 0.70', 'n': 47, 'net_bot': -606.0, 'net_real': -634.0, 'wr': 44.7, 'pf': 0.78, 'maxdd': 1269.0, 'avg_w': 109.0, 'avg_l': -112.0, 'net_gross': -488.0, 'real_y2024': 0.0, 'n_y2024': 0, 'real_y2025': -281.0, 'n_y2025': 32, 'real_y2026': -353.0, 'n_y2026': 15}
+{'name': 'Conf gate 0.75', 'n': 0}
+{'name': 'Gate on raw sweep conf>=0.64 (no model adjust)', 'n': 466, 'net_bot': -11822.0, 'net_real': -11742.0, 'wr': 46.6, 'pf': 0.64, 'maxdd': 12673.0, 'avg_w': 94.0, 'avg_l': -129.0, 'net_gross': -10658.0, 'real_y2024': -1532.0, 'n_y2024': 45, 'real_y2025': -5614.0, 'n_y2025': 262, 'real_y2026': -4596.0, 'n_y2026': 159}
+{'name': 'EMA-oppose block OFF', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Min models agree 2', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Min models agree 4', 'n': 112, 'net_bot': -2256.0, 'net_real': -2267.0, 'wr': 41.1, 'pf': 0.66, 'maxdd': 2671.0, 'avg_w': 96.0, 'avg_l': -102.0, 'net_gross': -1976.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -1333.0, 'n_y2025': 74, 'real_y2026': -973.0, 'n_y2026': 32}
+{'name': 'Tokyo block OFF', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Bad UTC hours filter OFF', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Profit lock OFF', 'n': 118, 'net_bot': -1632.0, 'net_real': -1641.0, 'wr': 39.0, 'pf': 0.78, 'maxdd': 2092.0, 'avg_w': 125.0, 'avg_l': -103.0, 'net_gross': -1336.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -927.0, 'n_y2025': 78, 'real_y2026': -753.0, 'n_y2026': 34}
+{'name': 'Profit lock activate 150 keep 50', 'n': 118, 'net_bot': -2144.0, 'net_real': -2153.0, 'wr': 39.0, 'pf': 0.71, 'maxdd': 2604.0, 'avg_w': 114.0, 'avg_l': -103.0, 'net_gross': -1848.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -1136.0, 'n_y2025': 78, 'real_y2026': -1056.0, 'n_y2026': 34}
+{'name': 'Profit lock activate 60 keep 20', 'n': 118, 'net_bot': -1556.0, 'net_real': -1566.0, 'wr': 50.8, 'pf': 0.73, 'maxdd': 2018.0, 'avg_w': 70.0, 'avg_l': -99.0, 'net_gross': -1261.0, 'real_y2024': 132.0, 'n_y2024': 6, 'real_y2025': -818.0, 'n_y2025': 78, 'real_y2026': -880.0, 'n_y2026': 34}
+{'name': 'Cooldown OFF (win0/loss0, no loss pause)', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Cooldown 3 bars after loss', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'TP = 1.0R (RR 1:1)', 'n': 118, 'net_bot': -2202.0, 'net_real': -2212.0, 'wr': 43.2, 'pf': 0.67, 'maxdd': 2315.0, 'avg_w': 90.0, 'avg_l': -102.0, 'net_gross': -1908.0, 'real_y2024': 4.0, 'n_y2024': 6, 'real_y2025': -837.0, 'n_y2025': 78, 'real_y2026': -1379.0, 'n_y2026': 34}
+{'name': 'TP = 1.5R', 'n': 118, 'net_bot': -2092.0, 'net_real': -2102.0, 'wr': 41.5, 'pf': 0.7, 'maxdd': 2568.0, 'avg_w': 101.0, 'avg_l': -102.0, 'net_gross': -1797.0, 'real_y2024': 92.0, 'n_y2024': 6, 'real_y2025': -837.0, 'n_y2025': 78, 'real_y2026': -1357.0, 'n_y2026': 34}
+{'name': 'TP = 2R', 'n': 118, 'net_bot': -3393.0, 'net_real': -3403.0, 'wr': 36.4, 'pf': 0.54, 'maxdd': 3625.0, 'avg_w': 91.0, 'avg_l': -98.0, 'net_gross': -3098.0, 'real_y2024': 64.0, 'n_y2024': 6, 'real_y2025': -1867.0, 'n_y2025': 78, 'real_y2026': -1599.0, 'n_y2026': 34}
+{'name': 'TP = 3R', 'n': 118, 'net_bot': -3956.0, 'net_real': -3966.0, 'wr': 33.9, 'pf': 0.47, 'maxdd': 4162.0, 'avg_w': 87.0, 'avg_l': -96.0, 'net_gross': -3661.0, 'real_y2024': 38.0, 'n_y2024': 6, 'real_y2025': -2210.0, 'n_y2025': 78, 'real_y2026': -1793.0, 'n_y2026': 34}
+{'name': 'TP = 0.8R', 'n': 118, 'net_bot': -2526.0, 'net_real': -2536.0, 'wr': 45.8, 'pf': 0.62, 'maxdd': 2812.0, 'avg_w': 76.0, 'avg_l': -103.0, 'net_gross': -2232.0, 'real_y2024': 179.0, 'n_y2024': 6, 'real_y2025': -1153.0, 'n_y2025': 78, 'real_y2026': -1562.0, 'n_y2026': 34}
+{'name': 'SL x0.7 (tighter, TP kept)', 'n': 120, 'net_bot': -1518.0, 'net_real': -1529.0, 'wr': 34.2, 'pf': 0.73, 'maxdd': 1896.0, 'avg_w': 102.0, 'avg_l': -72.0, 'net_gross': -1218.0, 'real_y2024': -14.0, 'n_y2024': 6, 'real_y2025': -686.0, 'n_y2025': 80, 'real_y2026': -829.0, 'n_y2026': 34}
+{'name': 'SL x1.3 (wider, TP kept)', 'n': 118, 'net_bot': -2215.0, 'net_real': -2225.0, 'wr': 49.2, 'pf': 0.72, 'maxdd': 2635.0, 'avg_w': 99.0, 'avg_l': -133.0, 'net_gross': -1920.0, 'real_y2024': -4.0, 'n_y2024': 6, 'real_y2025': -167.0, 'n_y2025': 78, 'real_y2026': -2053.0, 'n_y2026': 34}
+{'name': 'Size 1 contract always', 'n': 118, 'net_bot': -1727.0, 'net_real': -1696.0, 'wr': 42.4, 'pf': 0.73, 'maxdd': 1995.0, 'avg_w': 91.0, 'avg_l': -92.0, 'net_gross': -1432.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -408.0, 'n_y2025': 78, 'real_y2026': -1328.0, 'n_y2026': 34}
+{'name': 'Max 1 position at a time', 'n': 90, 'net_bot': -996.0, 'net_real': -1006.0, 'wr': 45.6, 'pf': 0.8, 'maxdd': 1401.0, 'avg_w': 100.0, 'avg_l': -104.0, 'net_gross': -771.0, 'real_y2024': 82.0, 'n_y2024': 5, 'real_y2025': -124.0, 'n_y2025': 55, 'real_y2026': -965.0, 'n_y2026': 30}
+{'name': 'Max 2 positions', 'n': 113, 'net_bot': -1846.0, 'net_real': -1852.0, 'wr': 42.5, 'pf': 0.72, 'maxdd': 2188.0, 'avg_w': 100.0, 'avg_l': -102.0, 'net_gross': -1563.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -654.0, 'n_y2025': 73, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Session loss limits OFF', 'n': 118, 'net_bot': -2100.0, 'net_real': -2110.0, 'wr': 42.4, 'pf': 0.7, 'maxdd': 2409.0, 'avg_w': 97.0, 'avg_l': -102.0, 'net_gross': -1805.0, 'real_y2024': 39.0, 'n_y2024': 6, 'real_y2025': -911.0, 'n_y2025': 78, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Longs only', 'n': 61, 'net_bot': -1633.0, 'net_real': -1642.0, 'wr': 39.3, 'pf': 0.58, 'maxdd': 1975.0, 'avg_w': 94.0, 'avg_l': -105.0, 'net_gross': -1480.0, 'real_y2024': 17.0, 'n_y2024': 2, 'real_y2025': -1142.0, 'n_y2025': 44, 'real_y2026': -516.0, 'n_y2026': 15}
+{'name': 'Shorts only', 'n': 59, 'net_bot': -439.0, 'net_real': -442.0, 'wr': 45.8, 'pf': 0.86, 'maxdd': 1239.0, 'avg_w': 100.0, 'avg_l': -98.0, 'net_gross': -292.0, 'real_y2024': 23.0, 'n_y2024': 4, 'real_y2025': 257.0, 'n_y2025': 36, 'real_y2026': -721.0, 'n_y2026': 19}
+{'name': 'Skip Sunday', 'n': 114, 'net_bot': -1940.0, 'net_real': -1949.0, 'wr': 43.0, 'pf': 0.71, 'maxdd': 2186.0, 'avg_w': 98.0, 'avg_l': -104.0, 'net_gross': -1656.0, 'real_y2024': -23.0, 'n_y2024': 5, 'real_y2025': -689.0, 'n_y2025': 75, 'real_y2026': -1237.0, 'n_y2026': 34}
+{'name': 'Day session (9:30-16:00 ET) only', 'n': 14, 'net_bot': -14.0, 'net_real': -13.0, 'wr': 57.1, 'pf': 0.99, 'maxdd': 625.0, 'avg_w': 120.0, 'avg_l': -163.0, 'net_gross': 21.0, 'real_y2024': 97.0, 'n_y2024': 1, 'real_y2025': 338.0, 'n_y2025': 7, 'real_y2026': -448.0, 'n_y2026': 6}
+{'name': 'Overnight session only', 'n': 104, 'net_bot': -2086.0, 'net_real': -2097.0, 'wr': 40.4, 'pf': 0.65, 'maxdd': 2316.0, 'avg_w': 93.0, 'avg_l': -97.0, 'net_gross': -1826.0, 'real_y2024': -58.0, 'n_y2024': 5, 'real_y2025': -1249.0, 'n_y2025': 71, 'real_y2026': -790.0, 'n_y2026': 28}
+TOP SINGLES                                 name    n  net_real    pf
+35  Day session (9:30-16:00 ET) only   14     -13.0  0.99
+33                       Shorts only   59    -442.0  0.86
+8                     Conf gate 0.70   47    -634.0  0.78
+29          Max 1 position at a time   90   -1006.0  0.80
+3                     Conf gate 0.60  215   -1479.0  0.87
+26        SL x0.7 (tighter, TP kept)  120   -1529.0  0.73
+{'name': 'Day session (9:30-16:00 ET) only + Shorts only', 'n': 8, 'net_bot': 84.0, 'net_real': 84.0, 'wr': 62.5, 'pf': 1.15, 'maxdd': 496.0, 'avg_w': 131.0, 'avg_l': -190.0, 'net_gross': 104.0, 'real_y2024': 97.0, 'n_y2024': 1, 'real_y2025': 305.0, 'n_y2025': 2, 'real_y2026': -318.0, 'n_y2026': 5}
+{'name': 'Day session (9:30-16:00 ET) only + Conf gate 0.70', 'n': 6, 'net_bot': -224.0, 'net_real': -224.0, 'wr': 50.0, 'pf': 0.6, 'maxdd': 563.0, 'avg_w': 113.0, 'avg_l': -188.0, 'net_gross': -208.0, 'real_y2024': 0.0, 'n_y2024': 0, 'real_y2025': 162.0, 'n_y2025': 2, 'real_y2026': -386.0, 'n_y2026': 4}
+{'name': 'Day session (9:30-16:00 ET) only + Max 1 position at a time', 'n': 12, 'net_bot': -28.0, 'net_real': -27.0, 'wr': 58.3, 'pf': 0.97, 'maxdd': 479.0, 'avg_w': 115.0, 'avg_l': -166.0, 'net_gross': 2.0, 'real_y2024': 97.0, 'n_y2024': 1, 'real_y2025': 177.0, 'n_y2025': 6, 'real_y2026': -301.0, 'n_y2026': 5}
+{'name': 'Day session (9:30-16:00 ET) only + Conf gate 0.60', 'n': 35, 'net_bot': 706.0, 'net_real': 713.0, 'wr': 62.9, 'pf': 1.35, 'maxdd': 1161.0, 'avg_w': 124.0, 'avg_l': -155.0, 'net_gross': 794.0, 'real_y2024': 767.0, 'n_y2024': 3, 'real_y2025': 682.0, 'n_y2025': 17, 'real_y2026': -736.0, 'n_y2026': 15}
+{'name': 'Shorts only + Conf gate 0.70', 'n': 28, 'net_bot': 58.0, 'net_real': 48.0, 'wr': 50.0, 'pf': 1.03, 'maxdd': 733.0, 'avg_w': 116.0, 'avg_l': -113.0, 'net_gross': 128.0, 'real_y2024': 0.0, 'n_y2024': 0, 'real_y2025': 200.0, 'n_y2025': 19, 'real_y2026': -152.0, 'n_y2026': 9}
+{'name': 'Shorts only + Max 1 position at a time', 'n': 48, 'net_bot': -287.0, 'net_real': -290.0, 'wr': 45.8, 'pf': 0.88, 'maxdd': 906.0, 'avg_w': 100.0, 'avg_l': -96.0, 'net_gross': -167.0, 'real_y2024': 66.0, 'n_y2024': 3, 'real_y2025': 219.0, 'n_y2025': 27, 'real_y2026': -575.0, 'n_y2026': 18}
+{'name': 'Shorts only + Conf gate 0.60', 'n': 115, 'net_bot': -598.0, 'net_real': -586.0, 'wr': 49.6, 'pf': 0.9, 'maxdd': 1601.0, 'avg_w': 88.0, 'avg_l': -97.0, 'net_gross': -310.0, 'real_y2024': -74.0, 'n_y2024': 9, 'real_y2025': 61.0, 'n_y2025': 66, 'real_y2026': -573.0, 'n_y2026': 40}
+{'name': 'Conf gate 0.70 + Max 1 position at a time', 'n': 40, 'net_bot': -352.0, 'net_real': -377.0, 'wr': 47.5, 'pf': 0.84, 'maxdd': 1012.0, 'avg_w': 105.0, 'avg_l': -113.0, 'net_gross': -252.0, 'real_y2024': 0.0, 'n_y2024': 0, 'real_y2025': -287.0, 'n_y2025': 27, 'real_y2026': -90.0, 'n_y2026': 13}
+{'name': 'Max 1 position at a time + Conf gate 0.60', 'n': 162, 'net_bot': -587.0, 'net_real': -578.0, 'wr': 51.2, 'pf': 0.93, 'maxdd': 1663.0, 'avg_w': 92.0, 'avg_l': -104.0, 'net_gross': -182.0, 'real_y2024': 83.0, 'n_y2024': 11, 'real_y2025': 214.0, 'n_y2025': 92, 'real_y2026': -875.0, 'n_y2026': 59}
+{'name': 'Day session (9:30-16:00 ET) only + Shorts only + Conf gate 0.70', 'n': 4, 'net_bot': -111.0, 'net_real': -112.0, 'wr': 50.0, 'pf': 0.74, 'maxdd': 434.0, 'avg_w': 161.0, 'avg_l': -217.0, 'net_gross': -101.0, 'real_y2024': 0.0, 'n_y2024': 0, 'real_y2025': 144.0, 'n_y2025': 1, 'real_y2026': -256.0, 'n_y2026': 3}
+{'name': 'Day session (9:30-16:00 ET) only + Shorts only + Max 1 position at a time', 'n': 6, 'net_bot': 70.0, 'net_real': 69.0, 'wr': 66.7, 'pf': 1.16, 'maxdd': 349.0, 'avg_w': 124.0, 'avg_l': -212.0, 'net_gross': 85.0, 'real_y2024': 97.0, 'n_y2024': 1, 'real_y2025': 144.0, 'n_y2025': 1, 'real_y2026': -172.0, 'n_y2026': 4}
+{'name': 'Day session (9:30-16:00 ET) only + Shorts only + Conf gate 0.60', 'n': 21, 'net_bot': 224.0, 'net_real': 227.0, 'wr': 66.7, 'pf': 1.19, 'maxdd': 879.0, 'avg_w': 100.0, 'avg_l': -169.0, 'net_gross': 276.0, 'real_y2024': 97.0, 'n_y2024': 1, 'real_y2025': 457.0, 'n_y2025': 8, 'real_y2026': -328.0, 'n_y2026': 12}
+{'name': 'Day session (9:30-16:00 ET) only + Conf gate 0.70 + Max 1 position at a time', 'n': 5, 'net_bot': -77.0, 'net_real': -78.0, 'wr': 60.0, 'pf': 0.81, 'maxdd': 417.0, 'avg_w': 113.0, 'avg_l': -209.0, 'net_gross': -64.0, 'real_y2024': 0.0, 'n_y2024': 0, 'real_y2025': 162.0, 'n_y2025': 2, 'real_y2026': -239.0, 'n_y2026': 3}
+{'name': 'Day session (9:30-16:00 ET) only + Max 1 position at a time + Conf gate 0.60', 'n': 30, 'net_bot': -264.0, 'net_real': -259.0, 'wr': 60.0, 'pf': 0.86, 'maxdd': 1014.0, 'avg_w': 89.0, 'avg_l': -156.0, 'net_gross': -190.0, 'real_y2024': 165.0, 'n_y2024': 2, 'real_y2025': 521.0, 'n_y2025': 16, 'real_y2026': -945.0, 'n_y2026': 12}
+{'name': 'Shorts only + Conf gate 0.70 + Max 1 position at a time', 'n': 24, 'net_bot': 68.0, 'net_real': 59.0, 'wr': 50.0, 'pf': 1.05, 'maxdd': 587.0, 'avg_w': 111.0, 'avg_l': -107.0, 'net_gross': 128.0, 'real_y2024': 0.0, 'n_y2024': 0, 'real_y2025': 65.0, 'n_y2025': 16, 'real_y2026': -6.0, 'n_y2026': 8}
+{'name': 'Shorts only + Max 1 position at a time + Conf gate 0.60', 'n': 86, 'net_bot': -38.0, 'net_real': -32.0, 'wr': 53.5, 'pf': 0.99, 'maxdd': 1107.0, 'avg_w': 85.0, 'avg_l': -98.0, 'net_gross': 176.0, 'real_y2024': -25.0, 'n_y2024': 6, 'real_y2025': 429.0, 'n_y2025': 49, 'real_y2026': -436.0, 'n_y2026': 31}
+DONE

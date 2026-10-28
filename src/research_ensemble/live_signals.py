@@ -44,11 +44,13 @@ def classify_last_sleeve(df: pd.DataFrame, strategy: EnsembleStrategy | None = N
           sleeve ('trend'|'mean_reversion'|'breakout'), trailing (bool), atr
     """
     strat = strategy or EnsembleStrategy()
-    # Force revamp flags from env when strategy was built with defaults
+    # Force revamp / session flags from env when strategy was built with defaults
     if _rx.revamp_enabled():
         strat.revamp_exits = True
         strat.breakout_target_r = _rx.revamp_breakout_target_r()
         strat.mr_target = _rx.revamp_mr_target()
+    if strategy is None:
+        strat.rth_only = _rx.rth_only_from_env()
 
     research_df = dataframe_for_research(df)
     if len(research_df) < 220:
@@ -86,7 +88,9 @@ def classify_last_sleeve(df: pd.DataFrame, strategy: EnsembleStrategy | None = N
     tp = None if (tgt_raw is None or (isinstance(tgt_raw, float) and np.isnan(tgt_raw))) else float(tgt_raw)
 
     # Revamp breakout: fixed R target, no trail. Revamp MR: bb_far fixed, no trail.
-    # Trend (and original breakout): trail-only.
+    # Revamp trend: fixed REVAMP_TREND_TP_R (default 1.5R) target, no trail (2026-10-08,
+    # box backtest next_ideas.py rule 2: tp = close +/- 1.5 x |close - sl|; $ lock still runs).
+    # Original (non-revamp) trend / trend with REVAMP_TREND_TP_R=0: trail-only.
     if sleeve == "breakout" and strat.revamp_exits and strat.breakout_target_r:
         trailing = False
         if tp is None:
@@ -100,6 +104,12 @@ def classify_last_sleeve(df: pd.DataFrame, strategy: EnsembleStrategy | None = N
     else:
         trailing = True
         tp = None
+        trend_r = _rx.revamp_trend_target_r() if strat.revamp_exits else None
+        if trend_r and np.isfinite(sl):
+            risk = abs(close - sl)
+            if risk > 0:
+                trailing = False
+                tp = close + entry * float(trend_r) * risk
 
     if not np.isfinite(sl):
         return None

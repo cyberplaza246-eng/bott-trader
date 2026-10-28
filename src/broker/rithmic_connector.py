@@ -25,6 +25,8 @@ import re
 import threading
 import time
 import uuid
+
+_REPLACE_SEQ_RE = re.compile(r"_r\d+$")
 from collections import deque
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
@@ -33,6 +35,22 @@ import numpy as np
 import pandas as pd
 
 from src.broker.base_broker import BaseBroker
+from src.broker.rithmic_stability import (
+    ThreadSingleFlight,
+    history_requests_paused,
+    install_async_rithmic_patches,
+    install_order_plant_patches,
+    install_rithmic_disconnect_log_filter,
+    mark_order_plant_reconnected,
+    ORDER_HEALTH,
+    install_repeated_error_collapser,
+    note_order_plant_reconnected,
+    order_reconnect_backoff,
+    record_order_plant_failure,
+    record_order_plant_success,
+    set_order_plant_reconnect_callback,
+    is_in_progress_error,
+)
 from src.instruments import get_instrument, is_futures
 from src.ai.order_flow import TickFlowTracker
 from src.utils.logger import bot_logger, error_logger, install_rithmic_log_redaction
@@ -79,11 +97,35 @@ _PROTECTIVE_TERMINAL_STATUSES = frozenset({
     "complete", "completed", "filled", "cancelled", "canceled",
     "rejected", "expired", "failure", "failed", "inactive",
 })
+# Lucid/Rithmic live child tickets (list_orders + native brackets).
+_LIVE_PRICE_TYPES = frozenset({
+    "limit", "stop", "stop limit", "stop_limit", "stoplimit",
+    "stop market", "stop_market", "stopmarket",
+    "market if touched", "market_if_touched", "mit",
+    "limit if touched", "limit_if_touched", "lit",
+    "bracket",
+})
+# Only cancel tickets the bot owns. Untagged/manual SL/TP must be left alone.
+_BOT_OWNED_TAG_PREFIXES = ("bot_",)
 # After entry, PnL/position snapshots can lag — do not treat "no position" as flat yet.
 _ENTRY_POSITION_GRACE_SEC = float(os.getenv("RITHMIC_ENTRY_POSITION_GRACE_SEC", "30"))
+# Entry with no confirmed fill whose SL/TP vanished (user cancel/replace on
+# Lucid in progress) must stay "gone" this long before tracking is dropped.
+_LEGS_GONE_CONFIRM_SEC = float(os.getenv("RITHMIC_LEGS_GONE_CONFIRM_SEC", "45"))
+# ...and be seen gone on at least this many consecutive cleanup passes. Lucid
+# list_positions is routinely 0 for open sim fills, so "flat" alone is never
+# evidence a trade closed — only a confirmed exit fill or legs truly gone.
+_LEGS_GONE_CONFIRM_PASSES = int(os.getenv("RITHMIC_LEGS_GONE_CONFIRM_PASSES", "3"))
+# Old behaviour cancelled WORKING SL/TP when list_positions read flat for a
+# while ("orphan wipe"). That stripped protection off open winners. Off.
+_ALLOW_FLAT_ORPHAN_WIPE = os.getenv("RITHMIC_ALLOW_FLAT_ORPHAN_WIPE", "0").strip().lower() in (
+    "1", "true", "yes", "on",
+)
 # When list_positions is flat but SL/TP fill is unconfirmed, force-sync tracked state.
 _BROKER_FLAT_FORCE_SYNC_SEC = float(os.getenv("BROKER_FLAT_SYNC_SEC", "30"))
 _SCAN_PROTECTION_REPAIR_RETRIES = int(os.getenv("SCAN_PROTECTION_REPAIR_RETRIES", "3"))
+# Re-entry guard so get_candles can single-flight without wrapping itself forever.
+_candle_flight_tls = threading.local()
 
 
 class SubMinuteBarAggregator:
@@ -236,6 +278,14 @@ def prefer_live_mnq_contract(environ=None) -> None:
         env["RITHMIC_CONTRACT_OVERRIDES"] = "MNQ=MNQU6"
 
 
+
+def _rithmic_bar_time(value):
+    """async_rithmic builds bar_end_datetime with datetime.fromtimestamp(marker),
+    which is naive LOCAL machine time (New York on Paragan). Make it real UTC."""
+    if isinstance(value, datetime) and value.tzinfo is None:
+        return value.astimezone(timezone.utc)
+    return value
+
 def history_pnl_skipped(environ=None, quotes_only: bool = False) -> bool:
     """True when this Lucid session must not touch the history/pnl plants."""
     if quotes_only:
@@ -269,14 +319,23 @@ def plant_is_ready(client: Any, name: str) -> bool:
 
 
 def apply_lucid_ticker_order_plants(environ=None) -> None:
-    """Ticker + order plants only. Never history/pnl (Lucid 1011 / ForcedLogout)."""
+    """Lucid: ticker + order + pnl (skip history only — SL/TP on positions need pnl)."""
     env = environ if environ is not None else os.environ
     env["RITHMIC_QUOTES_ONLY"] = "false"
-    env["RITHMIC_SKIP_HISTORY_PNL"] = "true"
+    env["RITHMIC_SKIP_HISTORY"] = "true"
+    env["RITHMIC_SKIP_HISTORY_PNL"] = "false"
     env["RITHMIC_ORDER_PLANT_ONLY"] = "false"
     env["RITHMIC_ALLOW_SIMULATOR"] = "true"
     env["RITHMIC_DISABLE_YAHOO_FALLBACK"] = "true"
     prefer_live_mnq_contract(env)
+
+
+def apply_lucid_plants_with_history(environ=None) -> None:
+    """Lucid paper day bots: ticker+order+pnl+history so 1m stack is not stuck on stale CSV."""
+    apply_lucid_ticker_order_plants(environ)
+    env = environ if environ is not None else os.environ
+    env["RITHMIC_SKIP_HISTORY"] = "false"
+    env["RITHMIC_SKIP_HISTORY_PNL"] = "false"
 
 
 def paper_rithmic_brackets_enabled(environ=None) -> bool:
@@ -680,6 +739,19 @@ class RithmicConnector(BaseBroker):
         num_candles: int = 100,
         end_time: Optional[datetime] = None,
     ) -> Optional[pd.DataFrame]:
+        # Live loop and ensemble share one replay per symbol/timeframe.
+        if end_time is None and not getattr(_candle_flight_tls, "on", False):
+            def _run():
+                _candle_flight_tls.on = True
+                try:
+                    return self.get_candles(
+                        symbol, timeframe_minutes, num_candles, end_time,
+                    )
+                finally:
+                    _candle_flight_tls.on = False
+
+            return ThreadSingleFlight().do(f"{symbol}_{timeframe_minutes}", _run)
+
         if history_pnl_skipped(quotes_only=self._quotes_only):
             self._log_history_skip_once()
             return None
@@ -713,10 +785,16 @@ class RithmicConnector(BaseBroker):
                 self._fallback_until = None
                 self._lock_error_count = 0
 
-        # Try Rithmic historical bars first with retry logic
-        if self._connected:
+        # Try Rithmic historical bars first with retry logic.
+        # Skip entirely while the history plant is down so a reconnect does
+        # not start another replay on a socket that is about to be replaced.
+        history_paused = self._connected and history_requests_paused(self._client)
+        if history_paused:
+            self._log_missing_plant_once("history", "candles")
+        if self._connected and not history_paused:
             self._ensure_market_data()
             max_retries = 2
+            abort_history = False
             count_retries = [num_candles, min(num_candles, 120), min(num_candles, 60)]
             seen_counts: set = set()
             for try_count in count_retries:
@@ -746,6 +824,12 @@ class RithmicConnector(BaseBroker):
                                     0 if df is None else len(df),
                                 )
                     except Exception as e:
+                        if is_in_progress_error(e) or "permission denied" in str(e).lower():
+                            bot_logger.warning(
+                                f"Rithmic candles for {symbol}: {e} — not retrying this replay"
+                            )
+                            abort_history = True
+                            break
                         error_msg = str(e).lower()
                         is_lock_error = "lock" in error_msg or "timeout" in error_msg
 
@@ -779,6 +863,8 @@ class RithmicConnector(BaseBroker):
                         else:
                             bot_logger.warning(f"Rithmic candles error for {symbol}: {e}")
                         break
+                if abort_history:
+                    break
                 if latest_partial_df is not None and len(latest_partial_df) >= 10:
                     break
 
@@ -836,6 +922,14 @@ class RithmicConnector(BaseBroker):
             parts.append(df)
         end = datetime.now(timezone.utc)
         min_start = end - timedelta(hours=lookback_hours)
+        try:  # 2026-10-11: reach back over weekend / daily halt by trading time
+            from src.broker.rithmic_stability import history_start_for_bars
+
+            min_start = min(min_start, history_start_for_bars(
+                end, timeframe_minutes, num_candles, calendar_hours=lookback_hours, pad=1.2,
+            ))
+        except Exception:
+            pass
         max_pages = 6
         chunk = min(800, max(target, 200))
         empty_pages = 0
@@ -1150,6 +1244,10 @@ class RithmicConnector(BaseBroker):
                     "native_stop_attached": native_stop_attached,
                     "native_target_attached": native_target_attached,
                     "supports_stop_modify": native_stop_attached and not result.get("protective_sl_order_id"),
+                    # Protective STOP/STOP-LIMIT can still be trailed via update_stop_loss cancel/replace.
+                    "can_update_stop": bool(
+                        native_stop_attached or result.get("protective_sl_order_id")
+                    ),
                     "bracket_mode": result.get("bracket_mode", "unknown") if isinstance(result, dict) else "unknown",
                     "time": datetime.now(timezone.utc).isoformat(),
                 }
@@ -1176,6 +1274,10 @@ class RithmicConnector(BaseBroker):
                         order_info["stop_ticks"] = result["stop_ticks"]
                     if result.get("target_ticks"):
                         order_info["target_ticks"] = result["target_ticks"]
+                    if result.get("stop_loss"):
+                        order_info["stop_loss"] = result["stop_loss"]
+                    if result.get("take_profit"):
+                        order_info["take_profit"] = result["take_profit"]
                     if result.get("protective_sl_order_id"):
                         order_info["protective_sl_order_id"] = result["protective_sl_order_id"]
                     if result.get("protective_tp_order_id"):
@@ -1218,6 +1320,10 @@ class RithmicConnector(BaseBroker):
             return {}
         if not summary:
             return {}
+        if os.getenv("RITHMIC_SKIP_DIAGNOSTICS", "").strip().lower() in (
+            "1", "true", "yes", "on",
+        ):
+            return summary
 
         acct = summary.get("account_id", "?")
         route = summary.get("trade_route", "?")
@@ -1467,6 +1573,8 @@ class RithmicConnector(BaseBroker):
                     "take_profit": take_profit,
                 })
                 order.update(result)
+                order["stop_loss"] = stop_loss
+                order["take_profit"] = take_profit
                 order["native_stop_attached"] = bool(
                     result.get("native_stop_attached")
                     or result.get("protective_sl_order_id")
@@ -1475,16 +1583,35 @@ class RithmicConnector(BaseBroker):
                     result.get("native_target_attached")
                     or result.get("protective_tp_order_id")
                 )
-                order["supports_stop_modify"] = bool(result.get("native_stop_attached"))
+                order["supports_stop_modify"] = bool(result.get("native_stop_attached")) and not bool(
+                    result.get("protective_sl_order_id") or order.get("protective_sl_order_id")
+                )
+                order["can_update_stop"] = bool(
+                    order.get("native_stop_attached")
+                    or result.get("native_stop_attached")
+                    or result.get("protective_sl_order_id")
+                    or order.get("protective_sl_order_id")
+                )
+            if str(result.get("bracket_mode") or "") == "position_flat":
+                bot_logger.warning(
+                    f"Rithmic protective ensure skipped for {order_id} {symbol}: "
+                    f"broker reported flat"
+                )
+                return False
             sl_ok, tp_ok = self.query_broker_protection(
                 order_id, stop_loss=stop_loss, take_profit=take_profit,
             )
+            # Trust freshly submitted protective ids when Lucid list_orders lags.
+            if not sl_ok and result.get("protective_sl_order_id"):
+                sl_ok = True
+            if not tp_ok and result.get("protective_tp_order_id"):
+                tp_ok = True
             self._sync_protection_flags_from_broker(order_id, sl_ok, tp_ok)
             bot_logger.info(
                 f"Rithmic protective orders ensured for {order_id} {symbol}: "
                 f"SL={'yes' if sl_ok else 'no'} TP={'yes' if tp_ok else 'no'} (broker-checked)"
             )
-            return sl_ok and tp_ok
+            return bool(sl_ok and (tp_ok or take_profit <= 0))
         except Exception as e:
             error_logger.error(f"Rithmic ensure_protective_orders error: {e}")
             return False
@@ -1526,13 +1653,25 @@ class RithmicConnector(BaseBroker):
                 stop_loss = float(order.get("stop_loss") or 0)
             if take_profit <= 0:
                 take_profit = float(order.get("take_profit") or 0)
+        # If we already booked protective STOP+LIMIT, trust those ids first —
+        # Lucid get_stop_and_target often throws on every poll with empty message.
+        with self._order_lock:
+            has_prot = bool(
+                order.get("protective_sl_order_id")
+                and order.get("protective_tp_order_id")
+            )
+        if has_prot:
+            return True, True
         try:
             return self._run_sync(
                 self._async_query_broker_protection(order_id, stop_loss, take_profit),
                 timeout=12,
             )
         except Exception as e:
-            error_logger.error(f"Rithmic query_broker_protection error for {order_id}: {e}")
+            msg = str(e or "").strip() or type(e).__name__
+            bot_logger.warning(
+                f"Rithmic query_broker_protection soft-fail {order_id}: {msg}"
+            )
             return self._protection_leg_status(order_id)
 
     def _sync_protection_flags_from_broker(
@@ -1603,13 +1742,13 @@ class RithmicConnector(BaseBroker):
             )
             broker_pos = None
         if broker_pos is False:
-            cancelled = self.cancel_all_bot_orders(symbol)
-            if cancelled:
-                bot_logger.info(
-                    f"Rithmic {order_id} {symbol}: flat before verify — cancelled "
-                    f"{cancelled} working bot_* order(s)"
-                )
-            return False, False, False
+            # Do not wipe all bot_* tickets — Lucid list_positions is often empty
+            # while protective legs are still resting.
+            bot_logger.info(
+                f"Rithmic {order_id} {symbol}: list_positions flat before verify — "
+                f"continuing (will not cancel working SL/TP)"
+            )
+            broker_pos = None
 
         for attempt in range(max_attempts):
             if self._run_sync(
@@ -1792,19 +1931,24 @@ class RithmicConnector(BaseBroker):
         self,
         symbol: str,
     ) -> Dict[str, Any]:
-        """Signed net qty and exact broker contract from list_positions."""
+        """Signed net qty and exact broker contract from list_positions.
+
+        When the PnL plant is missing (Lucid ticker+order), do NOT invent a signed
+        net from historical fills — that caused startup flatten to BUY/SELL market
+        and open a naked position with no SL/TP.
+        """
         empty = {"net": 0, "broker_symbol": "", "exchange": "CME"}
         if not self._client or not symbol:
             return empty
         positions = await self._async_list_positions()
         if positions is None:
-            inferred = await self._async_infer_net_from_orders(symbol)
             return {
-                "net": inferred,
+                "net": 0,
                 "broker_symbol": "",
                 "exchange": "CME",
-                "unknown": inferred == 0,
+                "unknown": True,
                 "inferred": True,
+                "pnl_unavailable": True,
             }
         for p in positions or []:
             data = _response_to_dict_safe(p)
@@ -1820,14 +1964,7 @@ class RithmicConnector(BaseBroker):
                 "broker_symbol": broker_sym,
                 "exchange": exchange,
             }
-        inferred = await self._async_infer_net_from_orders(symbol)
-        if inferred:
-            return {
-                "net": inferred,
-                "broker_symbol": "",
-                "exchange": "CME",
-                "inferred": True,
-            }
+        # Empty list_positions with PnL plant up = flat (do not invent from fills).
         return empty
 
     async def _async_infer_net_from_orders(self, symbol: str) -> int:
@@ -1870,14 +2007,803 @@ class RithmicConnector(BaseBroker):
             return -working_side if working_side else 0
         return int(latest_bot_fill or 0)
 
+    def _listed_order_matches_symbol(self, data: Dict[str, Any], symbol: str) -> bool:
+        """Match MNQ working orders on base, front-month, or reverse-mapped symbols."""
+        broker_sym = str(
+            data.get("symbol")
+            or data.get("exchange_symbol")
+            or data.get("exchangeSymbol")
+            or ""
+        )
+        if self._reverse_resolve(broker_sym) == symbol:
+            return True
+        if broker_sym.upper() == str(symbol or "").upper():
+            return True
+        base = str(symbol or "").upper()
+        return bool(base) and broker_sym.upper().startswith(base) and len(broker_sym) > len(base)
+
+    @staticmethod
+    def _listed_order_ids(data: Dict[str, Any]) -> tuple:
+        refs = RithmicConnector._listed_cancel_refs(data)
+        listed_id = (
+            refs["user_tag"]
+            or refs["basket_id"]
+            or refs["exchange_order_id"]
+            or str(data.get("order_id") or data.get("orderId") or "")
+        )
+        return refs["tag"], listed_id, refs["status"]
+
+    @staticmethod
+    def _listed_cancel_refs(data: Dict[str, Any]) -> Dict[str, str]:
+        """IDs Lucid/Rithmic list_orders actually returns (template 352)."""
+        user_tag = str(data.get("user_tag") or data.get("userTag") or "").strip()
+        basket_id = str(data.get("basket_id") or data.get("basketId") or "").strip()
+        exchange_id = str(
+            data.get("exchange_order_id") or data.get("exchangeOrderId") or ""
+        ).strip()
+        raw_order_id = str(data.get("order_id") or data.get("orderId") or "").strip()
+        # Lucid often copies exchange_order_id into order_id. Template 316
+        # cancel requires basket_id; async_rithmic get_order(order_id=) matches
+        # user_tag only, so an exchange id here is not a cancel key.
+        if raw_order_id and raw_order_id == exchange_id:
+            raw_order_id = ""
+        status = str(
+            data.get("status")
+            or data.get("order_status")
+            or data.get("orderStatus")
+            or ""
+        )
+        return {
+            "user_tag": user_tag,
+            "basket_id": basket_id,
+            "exchange_order_id": exchange_id,
+            "status": status,
+            "tag": user_tag or basket_id,
+        }
+
+    @staticmethod
+    def _listed_related_basket_ids(data: Dict[str, Any]) -> List[str]:
+        ids: List[str] = []
+        for key in ("basket_id", "basketId", "original_basket_id", "originalBasketId"):
+            val = str(data.get(key) or "").strip()
+            if val and val not in ids:
+                ids.append(val)
+        linked = data.get("linked_basket_ids") or data.get("linkedBasketIds") or ""
+        parts: List[str] = []
+        if isinstance(linked, (list, tuple)):
+            parts = [str(x) for x in linked]
+        else:
+            parts = str(linked).replace(";", ",").split(",")
+        for part in parts:
+            val = part.strip()
+            if val and val not in ids:
+                ids.append(val)
+        return ids
+
+    @staticmethod
+    def _is_bot_owned_user_tag(tag: str) -> bool:
+        """True when user_tag / basket tag is a bot ticket (bot_* / overnight prefixes)."""
+        t = str(tag or "").strip()
+        if not t:
+            return False
+        return any(t.startswith(prefix) for prefix in _BOT_OWNED_TAG_PREFIXES)
+
+    @classmethod
+    def _is_bot_owned_listed_order(
+        cls,
+        data: Dict[str, Any],
+        *,
+        known_baskets: Optional[set] = None,
+        entry_order_id: str = "",
+    ) -> bool:
+        """True only for bot-owned working rows — never untagged manual SL/TP."""
+        refs = cls._listed_cancel_refs(data)
+        user_tag = refs["user_tag"]
+        if cls._is_bot_owned_user_tag(user_tag):
+            return True
+        if cls._is_bot_owned_user_tag(refs["basket_id"]):
+            return True
+        entry = str(entry_order_id or "").strip()
+        if entry and user_tag and (
+            user_tag == entry
+            or user_tag.startswith(f"{entry}_")
+        ):
+            return True
+        if known_baskets:
+            for bid in cls._listed_related_basket_ids(data):
+                if bid in known_baskets:
+                    return True
+        return False
+
+    def _known_bot_baskets_for_entry(self, entry_order_id: str) -> set:
+        """Basket ids tracked locally for a bot entry (siblings after SL/TP fill)."""
+        known: set = set()
+        entry = str(entry_order_id or "").strip()
+        if not entry:
+            return known
+        with self._order_lock:
+            info = self._orders.get(entry) or {}
+            for key in (
+                "basket_id",
+                "entry_basket_id",
+                "protective_sl_basket_id",
+                "protective_tp_basket_id",
+            ):
+                val = str(info.get(key) or "").strip()
+                if val:
+                    known.add(val)
+            for key in ("protective_sl_order_id", "protective_tp_order_id"):
+                leg = str(info.get(key) or "").strip()
+                # Local leg ids are usually bot_* tags, not numeric baskets.
+                if leg and not self._is_bot_owned_user_tag(leg) and leg.isdigit():
+                    known.add(leg)
+            for suffix in ("_sl", "_tp", "_tp_lit"):
+                leg_rec = self._orders.get(f"{entry}{suffix}") or {}
+                bid = str(leg_rec.get("basket_id") or "").strip()
+                if bid:
+                    known.add(bid)
+            # Replaced / repaired SL legs (<entry>_rN_sl) keep their own baskets.
+            for leg in list(info.get("sl_leg_history") or ()) + [
+                str(info.get("protective_sl_order_id") or "")
+            ]:
+                leg_rec = self._orders.get(str(leg)) or {}
+                bid = str(leg_rec.get("basket_id") or "").strip()
+                if bid:
+                    known.add(bid)
+            # Baskets snapshotted when the entry closed (after _orders.pop).
+            closed_rec = self._closed_entry_registry().get(entry) or {}
+            known |= set(closed_rec.get("baskets") or ())
+        return known
+
+    # ── Closed-entry registry (orphan SL/TP cleanup after tracking is dropped) ──
+
+    def _closed_entry_registry(self) -> Dict[str, Dict[str, Any]]:
+        reg = getattr(self, "_closed_entries", None)
+        if reg is None:
+            reg = {}
+            self._closed_entries = reg
+        return reg
+
+    def remember_closed_entry(self, entry_order_id: str, symbol: str = "") -> None:
+        """Snapshot basket ids / leg ids for a bot entry that is closed.
+
+        Lucid blanks user_tag on resting stops/limits, and the only link back
+        to the entry is the basket id stored in _orders. Once _orders.pop()
+        runs that link is gone and the leftover sell/buy limit or stop stays on
+        the chart forever. Remember it so orphan sweeps can still cancel it.
+        """
+        entry = str(entry_order_id or "").strip()
+        if not entry or entry.endswith(("_sl", "_tp", "_tp_lit")):
+            return
+        baskets = self._known_bot_baskets_for_entry(entry)
+        with self._order_lock:
+            info = dict(self._orders.get(entry) or {})
+        legs = {
+            str(info.get(k) or "").strip()
+            for k in ("protective_sl_order_id", "protective_tp_order_id")
+        }
+        legs |= {str(x).strip() for x in (info.get("sl_leg_history") or ())}
+        legs.discard("")
+        sym = str(symbol or info.get("symbol") or "")
+        with self._order_lock:
+            reg = self._closed_entry_registry()
+            rec = reg.get(entry) or {
+                "baskets": set(), "legs": set(), "symbol": sym,
+                "closed_at": time.time(), "clean_passes": 0,
+            }
+            rec["baskets"] = set(rec.get("baskets") or ()) | baskets
+            rec["legs"] = set(rec.get("legs") or ()) | legs
+            rec["symbol"] = rec.get("symbol") or sym
+            rec["clean_passes"] = 0
+            reg[entry] = rec
+            if len(reg) > 200:
+                for old in sorted(reg, key=lambda k: reg[k].get("closed_at", 0))[: len(reg) - 200]:
+                    reg.pop(old, None)
+
+    def _leg_tag_for_basket(self, basket_id: str) -> str:
+        """Resolve a blank-tag fill back to '<entry>_sl' / '<entry>_tp' via stored baskets."""
+        bid = str(basket_id or "").strip()
+        if not bid:
+            return ""
+        with self._order_lock:
+            for oid, info in self._orders.items():
+                info = info or {}
+                if str(info.get("protective_sl_basket_id") or "") == bid:
+                    return f"{oid}_sl"
+                if str(info.get("protective_tp_basket_id") or "") == bid:
+                    return f"{oid}_tp"
+                soid = str(oid)
+                if soid.endswith(("_sl", "_tp")) and str(info.get("basket_id") or "") == bid:
+                    return soid
+        return ""
+
+    def _tracked_bot_entry_ids(self, symbol: str) -> set:
+        """Bot entry tickets the connector still tracks for symbol (not legs/flatten)."""
+        out: set = set()
+        with self._order_lock:
+            for oid, info in self._orders.items():
+                soid = str(oid)
+                if not self._is_bot_entry_user_tag(soid) or soid.startswith("bot_flatten_"):
+                    continue
+                if (info or {}).get("symbol") != symbol:
+                    continue
+                out.add(soid)
+        return out
+
+    def _tracked_entry_qty(self, entry_ids: set) -> int:
+        with self._order_lock:
+            total = 0
+            for oid in entry_ids:
+                info = self._orders.get(str(oid)) or {}
+                try:
+                    total += abs(int(info.get("size") or 1))
+                except (TypeError, ValueError):
+                    total += 1
+            return total
+
+    async def _async_sibling_leg_is_orphan(self, entry_id: str, symbol: str) -> bool:
+        """After one of entry_id's own SL/TP legs filled, is its sibling orphaned?
+
+        The old check ("symbol still has a position → keep sibling") is wrong
+        with >1 concurrent MNQ trade: the *other* trade keeps the symbol open,
+        so the closed trade's sell-limit/stop was left working forever.
+        The sibling is orphaned when remaining broker size is fully covered
+        by the other tracked entries.
+        """
+        net = await self._async_list_positions_net_or_none(symbol)
+        if net is None:
+            return True  # PnL plant unknown (ticker+order) — same as before
+        net = abs(int(net))
+        if net == 0:
+            return True
+        others = self._tracked_bot_entry_ids(symbol) - {str(entry_id)}
+        return net <= self._tracked_entry_qty(others)
+
+    # ── Manual SL/TP adjust on Lucid: keep tracking (rebind / adopt legs) ──
+    #
+    # Moving a bot SL/TP on Lucid either modifies the same basket (Lucid then
+    # reports it with a BLANK user_tag) or cancels it and books a new basket
+    # (cancel/replace). Every leg lookup used to key on user_tag first, so an
+    # adjusted leg looked cancelled: fills were ignored ("leg not confirmed
+    # filled"), and with list_positions=0 the entry was declared closed while
+    # still open. These helpers make list_orders the source of truth.
+
+    def _leg_basket_for_tag(self, leg_tag: str) -> str:
+        """Locally cached basket id for '<entry>_sl' / '<entry>_tp' (no network)."""
+        tag = str(leg_tag or "").strip()
+        if not tag:
+            return ""
+        with self._order_lock:
+            stored = str((self._orders.get(tag) or {}).get("basket_id") or "").strip()
+            if stored:
+                return stored
+            for suf, key in (
+                ("_tp_lit", "protective_tp_basket_id"),
+                ("_sl", "protective_sl_basket_id"),
+                ("_tp", "protective_tp_basket_id"),
+            ):
+                if tag.endswith(suf):
+                    parent = self._orders.get(tag[: -len(suf)]) or {}
+                    return str(parent.get(key) or "").strip()
+        return ""
+
+    @staticmethod
+    def _listed_row_side(data: Dict[str, Any]) -> str:
+        raw = str(data.get("transaction_type") or data.get("transactionType") or "").upper().strip()
+        return {"1": "BUY", "2": "SELL"}.get(raw, raw)
+
+    @staticmethod
+    def _listed_row_qty(data: Dict[str, Any]) -> Optional[int]:
+        for key in ("quantity", "total_unfilled_size", "qty", "stop_quantity", "target_quantity"):
+            val = data.get(key)
+            if val in (None, ""):
+                continue
+            try:
+                q = abs(int(float(val)))
+            except (TypeError, ValueError):
+                continue
+            if q > 0:
+                return q
+        return None
+
+    @classmethod
+    def _listed_row_leg_price(cls, data: Dict[str, Any], leg: str) -> float:
+        keys = (
+            ("trigger_price", "triggerPrice", "stop_price", "stopPrice", "price")
+            if leg == "sl"
+            else ("price", "limit_price", "limitPrice", "target_price")
+        )
+        for key in keys:
+            val = data.get(key)
+            if val in (None, ""):
+                continue
+            try:
+                px = float(val)
+            except (TypeError, ValueError):
+                continue
+            if px > 0:
+                return px
+        return 0.0
+
+    def _listed_row_leg_kind(self, data: Dict[str, Any]) -> str:
+        """'sl' for stop / stop-limit rows, 'tp' for plain limit rows, '' otherwise."""
+        ptype = self._listed_price_type(data)
+        if self._price_type_is_stop(ptype):
+            return "sl"
+        if self._price_type_is_limit_only(ptype):
+            return "tp"
+        return ""
+
+    @staticmethod
+    def _entry_close_side(info: Dict[str, Any]) -> str:
+        side = str((info or {}).get("type") or "").strip().lower()
+        if side in ("buy", "long", "0"):
+            return "SELL"
+        if side in ("sell", "short", "1"):
+            return "BUY"
+        return ""
+
+    async def _async_rebind_symbol_legs(self, symbol: str) -> Dict[str, Dict[str, Any]]:
+        """Rebind every tracked entry's SL/TP to what is actually working on Lucid.
+
+        1. Bound leg (tag or cached basket) still working → refresh its price
+           (user moved it: same basket, often blank tag).
+        2. Leg missing (user cancelled / replaced it) → adopt an unclaimed,
+           blank-tag, closing-side stop (SL) or limit (TP) of size <= entry
+           size, closest to the old price. Its basket is cached so fills,
+           OCO sibling cancel and post-close cleanup all reach it.
+        Rows owned by another tracked entry or by a closed entry are never
+        adopted; tagged manual tickets are never adopted unless
+        ADOPT_TAGGED_MANUAL_LEGS=1.
+        """
+        out: Dict[str, Dict[str, Any]] = {}
+        if not symbol or not self._client:
+            return out
+        with self._order_lock:
+            confirmed = {
+                k for k, v in (getattr(self, "_confirmed_exit_fills", None) or {}).items()
+                if (v or {}).get("confirmed")
+            }
+        entries = sorted(self._tracked_bot_entry_ids(symbol) - confirmed)
+        if not entries:
+            return out
+        rows = await self._async_list_working_listed_orders(symbol, empty_as_working=True)
+        if not isinstance(rows, list):
+            return out
+        rows = [r for r in rows if isinstance(r, dict)]
+        adopt_tagged = os.getenv("ADOPT_TAGGED_MANUAL_LEGS", "0").strip().lower() in (
+            "1", "true", "yes", "on",
+        )
+        claimed: set = set()
+        with self._order_lock:
+            for rec in self._closed_entry_registry().values():
+                claimed |= set(rec.get("baskets") or ())
+
+        bound: Dict[tuple, Dict[str, Any]] = {}
+        for e in entries:
+            with self._order_lock:
+                info = dict(self._orders.get(e) or {})
+            for leg in ("sl", "tp"):
+                tags = {f"{e}_{leg}"} | ({f"{e}_tp_lit"} if leg == "tp" else set())
+                extra = str(info.get(f"protective_{leg}_order_id") or "").strip()
+                if extra:
+                    tags.add(extra)
+                hint = self._leg_basket_for_tag(f"{e}_{leg}")
+                for data in rows:
+                    refs = self._listed_cancel_refs(data)
+                    if refs["user_tag"] in tags or (hint and refs["basket_id"] == hint):
+                        bound[(e, leg)] = data
+                        if refs["basket_id"]:
+                            claimed.add(refs["basket_id"])
+                        break
+
+        for e in entries:
+            with self._order_lock:
+                info = dict(self._orders.get(e) or {})
+            close_side = self._entry_close_side(info)
+            try:
+                size = abs(int(info.get("size") or 1))
+            except (TypeError, ValueError):
+                size = 1
+            rec: Dict[str, Any] = {"rebound": []}
+            for leg in ("sl", "tp"):
+                price_key = "stop_loss" if leg == "sl" else "take_profit"
+                old_px = float(info.get(price_key) or 0)
+                data = bound.get((e, leg))
+                adopted = False
+                if data is None and close_side:
+                    best = None
+                    for cand in rows:
+                        refs = self._listed_cancel_refs(cand)
+                        basket = refs["basket_id"]
+                        if not basket or basket in claimed:
+                            continue
+                        tag = refs["user_tag"]
+                        if tag and (self._is_bot_owned_user_tag(tag) or not adopt_tagged):
+                            continue
+                        if self._is_bot_owned_user_tag(basket):
+                            continue
+                        if self._listed_row_leg_kind(cand) != leg:
+                            continue
+                        if self._listed_row_side(cand) != close_side:
+                            continue
+                        qty = self._listed_row_qty(cand)
+                        if qty is not None and qty > size:
+                            continue
+                        px = self._listed_row_leg_price(cand, leg)
+                        dist = abs(px - old_px) if (px > 0 and old_px > 0) else float("inf")
+                        if best is None or dist < best[0]:
+                            best = (dist, cand)
+                    if best is not None:
+                        data = best[1]
+                        adopted = True
+                        claimed.add(self._listed_cancel_refs(data)["basket_id"])
+                if data is None:
+                    rec[f"{leg}_working"] = False
+                    rec[leg] = old_px
+                    continue
+                refs = self._listed_cancel_refs(data)
+                basket = refs["basket_id"]
+                px = self._listed_row_leg_price(data, leg)
+                with self._order_lock:
+                    live = self._orders.get(e)
+                    if live is None:
+                        continue
+                    if basket:
+                        prev = str(live.get(f"protective_{leg}_basket_id") or "")
+                        live[f"protective_{leg}_basket_id"] = basket
+                        leg_rec = self._orders.setdefault(f"{e}_{leg}", {"ticket": f"{e}_{leg}"})
+                        leg_rec["basket_id"] = basket
+                        if adopted:
+                            hist = list(live.get("adopted_leg_baskets") or [])
+                            if basket not in hist:
+                                hist.append(basket)
+                            live["adopted_leg_baskets"] = hist
+                            if prev and prev != basket:
+                                old = list(live.get("replaced_leg_baskets") or [])
+                                old.append(prev)
+                                live["replaced_leg_baskets"] = old
+                    if not live.get(f"protective_{leg}_order_id"):
+                        live[f"protective_{leg}_order_id"] = f"{e}_{leg}"
+                    if px > 0 and abs(px - old_px) > 1e-9:
+                        live[price_key] = px
+                rec[f"{leg}_working"] = True
+                rec[leg] = px if px > 0 else old_px
+                rec[f"{leg}_basket"] = basket
+                if adopted:
+                    rec["rebound"].append(leg)
+                    bot_logger.warning(
+                        f"Rebound {e} {leg.upper()} to broker leg basket={basket} "
+                        f"@ {px:.2f} (user replaced it on Lucid; was {old_px:.2f})"
+                    )
+                elif px > 0 and abs(px - old_px) > 1e-9:
+                    bot_logger.info(
+                        f"{e} {leg.upper()} adjusted on broker {old_px:.2f} -> {px:.2f} "
+                        f"(basket={basket or '-'}) — tracking follows"
+                    )
+            out[e] = rec
+        return out
+
+    def sync_tracked_brackets(self, symbol: str) -> Dict[str, Dict[str, Any]]:
+        """Public: rebind tracked entries to their working SL/TP; return live prices.
+
+        {entry: {"sl": px, "tp": px, "sl_working": bool, "tp_working": bool, ...}}
+        Empty dict when unknown (not connected / list_orders failed).
+        """
+        if not self._connected or not symbol:
+            return {}
+        try:
+            return self._run_sync(self._async_rebind_symbol_legs(symbol), timeout=20) or {}
+        except Exception as e:
+            error_logger.error(f"sync_tracked_brackets failed for {symbol}: {e}")
+            return {}
+
+    async def _async_leg_fill_price(self, leg_id: str, fallback: float = 0.0) -> float:
+        """Fill price for a leg — by user_tag snapshot, else by its cached basket."""
+        snap = await self._async_get_order_snapshot(leg_id)
+        if snap is not None and self._is_filled_order_snapshot(snap):
+            px = self._fill_price_from_order(snap, 0)
+            if px > 0:
+                return px
+        hint = self._leg_basket_for_tag(leg_id)
+        if hint and self._client:
+            try:
+                orders = await self._client.list_orders(account_id=self._get_account_id()) or []
+            except Exception:
+                orders = []
+            for row in orders:
+                data = _response_to_dict_safe(row)
+                if self._listed_cancel_refs(data)["basket_id"] != hint:
+                    continue
+                if self._listed_order_is_filled(data):
+                    px = self._fill_price_from_listed_order(data, 0)
+                    if px > 0:
+                        return px
+        return float(fallback or 0.0)
+
+    def _all_tracked_bot_baskets(self) -> set:
+        """Every basket id we stored for bot entries / protective legs (Lucid often blanks user_tag)."""
+        known: set = set()
+        with self._order_lock:
+            for oid, info in list(self._orders.items()):
+                if not (
+                    self._is_bot_owned_user_tag(str(oid))
+                    or str(oid).endswith(("_sl", "_tp", "_tp_lit"))
+                ):
+                    continue
+                for key in (
+                    "basket_id",
+                    "entry_basket_id",
+                    "protective_sl_basket_id",
+                    "protective_tp_basket_id",
+                ):
+                    val = str((info or {}).get(key) or "").strip()
+                    if val:
+                        known.add(val)
+        return known
+
+    @staticmethod
+    def _listed_price_type(data: Optional[Dict[str, Any]]) -> str:
+        if not data:
+            return ""
+        return str(
+            data.get("price_type")
+            or data.get("priceType")
+            or data.get("order_type")
+            or data.get("orderType")
+            or ""
+        ).strip()
+
+    @staticmethod
+    def _looks_like_live_price_type(raw: str) -> bool:
+        text = str(raw or "").strip().lower().replace("-", " ")
+        compact = " ".join(text.split())
+        underscored = compact.replace(" ", "_")
+        if compact in _LIVE_PRICE_TYPES or underscored in _LIVE_PRICE_TYPES:
+            return True
+        if compact in {"1", "3", "4"}:
+            return True
+        tokens = set(compact.replace("/", " ").split())
+        return bool(tokens & {"stop", "mit", "lit", "limit", "bracket"})
+
+    def _listed_order_is_working(
+        self,
+        status: str,
+        *,
+        empty_as_working: bool,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """True for every live child: limit, stop, stop-limit, MIT, native brackets."""
+        normalized = str(status or "").lower().strip()
+        price_type = self._listed_price_type(data)
+        live_type = self._looks_like_live_price_type(normalized) or self._looks_like_live_price_type(
+            price_type
+        )
+        if normalized in _PROTECTIVE_TERMINAL_STATUSES and not self._looks_like_live_price_type(
+            normalized
+        ):
+            return False
+        if live_type:
+            return True
+        if not normalized:
+            return bool(empty_as_working)
+        return self._is_working_order_status(status)
+
+    @staticmethod
+    def _listed_order_kind(data: Dict[str, Any]) -> str:
+        refs = RithmicConnector._listed_cancel_refs(data)
+        side = str(
+            data.get("transaction_type") or data.get("transactionType") or ""
+        ).upper().strip()
+        ptype = RithmicConnector._listed_price_type(data).upper().replace("_", " ").strip()
+        if not ptype:
+            status = refs["status"].upper().replace("_", " ").strip()
+            if RithmicConnector._looks_like_live_price_type(status):
+                ptype = status
+        if not ptype:
+            ptype = "UNKNOWN"
+        return f"{side} {ptype}".strip()
+
+    @classmethod
+    def _listed_order_brief(cls, data: Dict[str, Any]) -> str:
+        """One-line id for leftover chart tickets (debug / clear logs)."""
+        refs = cls._listed_cancel_refs(data)
+        kind = cls._listed_order_kind(data)
+        px = (
+            data.get("price")
+            or data.get("trigger_price")
+            or data.get("triggerPrice")
+            or data.get("stop_price")
+            or data.get("stopPrice")
+            or ""
+        )
+        tag = refs["user_tag"] or "(blank)"
+        basket = refs["basket_id"] or "?"
+        return f"{kind} tag={tag} basket={basket} px={px}"
+
+    async def _async_list_working_listed_orders(
+        self,
+        symbol: str,
+        *,
+        empty_as_working: bool = True,
+    ) -> List[Dict[str, Any]]:
+        """Working MNQ rows: buy/sell stop, stop-limit, MIT, limit, native brackets."""
+        if not self._client or not symbol:
+            return []
+        try:
+            orders = await self._client.list_orders(
+                account_id=self._get_account_id(),
+            ) or []
+        except Exception as e:
+            error_logger.error(
+                f"Rithmic list_orders failed listing working {symbol}: {e}"
+            )
+            return []
+        working: List[Dict[str, Any]] = []
+        seen_baskets = set()
+        for order in orders:
+            data = _response_to_dict_safe(order)
+            if not self._listed_order_matches_symbol(data, symbol):
+                continue
+            refs = self._listed_cancel_refs(data)
+            if not self._listed_order_is_working(
+                refs["status"], empty_as_working=empty_as_working, data=data,
+            ):
+                continue
+            working.append(data)
+            if refs["basket_id"]:
+                seen_baskets.add(refs["basket_id"])
+        for data in await self._async_iter_native_bracket_rows():
+            if not self._native_bracket_row_matches(data, symbol):
+                continue
+            if not self._native_bracket_row_is_live(data):
+                continue
+            basket_id = str(data.get("basket_id") or data.get("basketId") or "").strip()
+            if basket_id and basket_id in seen_baskets:
+                continue
+            working.append(data)
+            if basket_id:
+                seen_baskets.add(basket_id)
+        return working
+
+    async def _async_resolve_basket_for_tag(
+        self,
+        user_tag: str,
+        *,
+        symbol: str = "",
+    ) -> str:
+        """Find Lucid basket_id for a bot leg — required for template-316 cancel."""
+        tag = str(user_tag or "").strip()
+        if not tag:
+            return ""
+        with self._order_lock:
+            stored = str((self._orders.get(tag) or {}).get("basket_id") or "").strip()
+            if stored:
+                return stored
+            if tag.endswith(("_sl", "_tp", "_tp_lit")):
+                parent = self._entry_id_for_leg_tag(tag) or tag.rsplit("_", 1)[0]
+                parent_rec = self._orders.get(parent) or {}
+                key = (
+                    "protective_sl_basket_id"
+                    if tag.endswith("_sl")
+                    else "protective_tp_basket_id"
+                )
+                stored = str(parent_rec.get(key) or "").strip()
+                if stored:
+                    return stored
+        if not self._client:
+            return ""
+        try:
+            orders = await self._client.list_orders(
+                account_id=self._get_account_id(),
+            ) or []
+        except Exception:
+            return ""
+        for row in orders:
+            data = _response_to_dict_safe(row)
+            if symbol and not self._listed_order_matches_symbol(data, symbol):
+                continue
+            refs = self._listed_cancel_refs(data)
+            row_tag = refs["user_tag"]
+            if row_tag != tag and not row_tag.endswith(tag):
+                continue
+            basket = refs["basket_id"]
+            if not basket:
+                for bid in self._listed_related_basket_ids(data):
+                    if bid:
+                        basket = bid
+                        break
+            if basket:
+                with self._order_lock:
+                    rec = self._orders.setdefault(tag, {"ticket": tag})
+                    rec["basket_id"] = basket
+                    if tag.endswith(("_sl", "_tp", "_tp_lit")):
+                        parent = self._entry_id_for_leg_tag(tag) or tag.rsplit("_", 1)[0]
+                        if parent.startswith("bot_"):
+                            parent_rec = self._orders.setdefault(parent, {"ticket": parent})
+                            pkey = (
+                                "protective_sl_basket_id"
+                                if tag.endswith("_sl")
+                                else "protective_tp_basket_id"
+                            )
+                            parent_rec[pkey] = basket
+                return basket
+        return ""
+
+    async def _async_cancel_order_on_plant(
+        self,
+        *,
+        symbol: str,
+        reason: str,
+        basket_id: str = "",
+        user_tag: str = "",
+    ) -> bool:
+        """Send template-316 cancel. Prefer basket_id — that is what Lucid honors."""
+        if not self._client:
+            return False
+        basket_id = str(basket_id or "").strip()
+        user_tag = str(user_tag or "").strip()
+        if not basket_id and not user_tag:
+            return False
+        # Lucid RequestCancelOrder only has basket_id. Tag-only cancel looks up
+        # via get_order and often misses resting STOP ("trigger pending") legs.
+        if not basket_id and user_tag:
+            basket_id = await self._async_resolve_basket_for_tag(
+                user_tag, symbol=symbol,
+            )
+        if not basket_id:
+            bot_logger.warning(
+                f"Cannot cancel {symbol} tag={user_tag or '-'} ({reason}) — "
+                f"no basket_id (Buy/Sell Stop will stay on chart)"
+            )
+            return False
+        account_id = self._get_account_id()
+        try:
+            response = await self._client.cancel_order(
+                basket_id=basket_id,
+                account_id=account_id,
+            )
+            if self._rithmic_response_ok(response):
+                bot_logger.info(
+                    f"Cancelled Lucid working order {symbol} basket={basket_id} "
+                    f"tag={user_tag or '-'} ({reason})"
+                )
+                return True
+            last = response[-1] if isinstance(response, list) and response else response
+            error_logger.error(
+                f"Rithmic cancel rejected {symbol} basket={basket_id} "
+                f"tag={user_tag or '-'}: {_response_to_dict_safe(last)}"
+            )
+        except Exception as e:
+            if self._is_order_not_found_error(e):
+                bot_logger.warning(
+                    f"Cancel missed {symbol} basket={basket_id} "
+                    f"tag={user_tag or '-'} ({reason}): {e}"
+                )
+                return False
+            error_logger.error(
+                f"Cancel Lucid order failed {symbol} basket={basket_id} "
+                f"tag={user_tag or '-'} ({reason}): {e}"
+            )
+            return False
+        return False
+
     async def _async_cancel_all_working_bot_orders_for_symbol(
         self,
         symbol: str,
+        *,
+        force: bool = False,
+        entry_order_id: str = "",
     ) -> int:
-        """Cancel working bot_* entry and protective legs for symbol."""
+        """Cancel working bot-owned orders for symbol.
+
+        force=True (SL/TP leftover cleanup): buy and sell, limit and stop,
+        empty status treated as working, entry grace ignored. Still bot-owned
+        only — never untagged/manual tickets, never account-wide cancel_all.
+        """
         if not self._client or not symbol:
             return 0
-        if self.symbol_has_preserved_bot_orders(symbol):
+        if not force and self.symbol_has_preserved_bot_orders(symbol):
             bot_logger.info(
                 f"Skipping bulk cancel for {symbol} — entry grace or active bot entry tracking"
             )
@@ -1892,54 +2818,255 @@ class RithmicConnector(BaseBroker):
             )
             return 0
 
+        known_baskets = self._known_bot_baskets_for_entry(entry_order_id)
+        # Lucid often blanks user_tag on resting stops/limits — still cancel by
+        # basket ids we saved at submit time (otherwise orphans pile up as Buy Stops).
+        known_baskets |= self._all_tracked_bot_baskets()
+        # Cleanup for ONE closed entry must not strip the other concurrent
+        # trade's legs (incl. legs the user adjusted / re-placed on Lucid).
+        protected_baskets: set = set()
+        protected_prefixes: tuple = ()
+        if entry_order_id:
+            with self._order_lock:
+                done = {
+                    k for k, v in (getattr(self, "_confirmed_exit_fills", None) or {}).items()
+                    if (v or {}).get("confirmed")
+                }
+            others = self._tracked_bot_entry_ids(symbol) - {str(entry_order_id)} - done
+            for other in others:
+                protected_baskets |= self._known_bot_baskets_for_entry(other)
+            protected_baskets -= self._known_bot_baskets_for_entry(entry_order_id)
+            protected_prefixes = tuple(f"{o}_" for o in others) + tuple(others)
         cancelled = 0
+        skipped_manual = 0
+        skipped_briefs: List[str] = []
+        seen_baskets = set()
         for order in orders:
             data = _response_to_dict_safe(order)
-            our_sym = self._reverse_resolve(data.get("symbol", ""))
-            if our_sym != symbol:
+            if not self._listed_order_matches_symbol(data, symbol):
                 continue
-            tag = str(data.get("user_tag") or data.get("basket_id") or "")
-            if not tag.startswith("bot_"):
-                continue
-            status = str(data.get("status") or "")
-            if not self._is_working_order_status(status):
-                continue
-            parent_entry = self._protective_parent_entry_id(tag)
-            if parent_entry and self._order_within_entry_grace(parent_entry):
-                continue
-            if self._is_bot_entry_user_tag(tag) and self._order_within_entry_grace(tag):
-                continue
-            cancel_id = tag if tag.startswith("bot_") else str(
-                data.get("order_id") or data.get("basket_id") or tag
+            refs = self._listed_cancel_refs(data)
+            user_tag = refs["user_tag"]
+            status = refs["status"]
+            if protected_baskets or protected_prefixes:
+                if (refs["basket_id"] and refs["basket_id"] in protected_baskets) or (
+                    user_tag and protected_prefixes and (
+                        user_tag in protected_prefixes
+                        or user_tag.startswith(tuple(p for p in protected_prefixes if p.endswith("_")))
+                    )
+                ):
+                    continue
+            bot_owned = self._is_bot_owned_listed_order(
+                data,
+                known_baskets=known_baskets,
+                entry_order_id=entry_order_id,
             )
-            is_protective = (
-                tag.endswith("_sl")
-                or tag.endswith("_tp")
-                or tag.endswith("_tp_lit")
-                or "_sl" in tag
-                or "_tp" in tag
+            # Flat force-cancel: blank-tag stop/limit are Lucid orphans, not manual.
+            # If price_type is blank too, still treat as orphan when force (chart marks).
+            blank_orphan = False
+            if force and not bot_owned and not user_tag:
+                ptype = self._listed_price_type(data)
+                blank_orphan = (
+                    self._price_type_is_stop(ptype)
+                    or self._price_type_is_limit_only(ptype)
+                    or not ptype
+                )
+            if not bot_owned and not blank_orphan:
+                if self._listed_order_is_working(
+                    status, empty_as_working=force, data=data,
+                ):
+                    skipped_manual += 1
+                    skipped_briefs.append(self._listed_order_brief(data))
+                continue
+            if not self._listed_order_is_working(
+                status, empty_as_working=force, data=data,
+            ):
+                continue
+            parent_entry = (
+                self._protective_parent_entry_id(user_tag) if user_tag.startswith("bot_") else ""
             )
-            if is_protective:
-                ok = await self._async_cancel_protective_leg(
-                    cancel_id,
-                    symbol=symbol,
-                    reason="pre_flatten",
-                    require_flat=False,
-                    cancel_path="pre_flatten",
-                )
-            else:
-                ok = await self._async_cancel_working_bot_order(
-                    cancel_id,
-                    symbol=symbol,
-                    reason="pre_flatten",
-                )
-            if ok:
+            if (
+                not force
+                and parent_entry
+                and self._order_within_entry_grace(parent_entry)
+            ):
+                continue
+            if (
+                not force
+                and self._is_bot_entry_user_tag(user_tag)
+                and self._order_within_entry_grace(user_tag)
+            ):
+                continue
+            cancel_ids = self._listed_related_basket_ids(data)
+            if not cancel_ids and not user_tag and not refs["basket_id"]:
+                continue
+            is_protective = bool(user_tag) and (
+                user_tag.endswith("_sl")
+                or user_tag.endswith("_tp")
+                or user_tag.endswith("_tp_lit")
+                or "_sl" in user_tag
+                or "_tp" in user_tag
+            )
+            if blank_orphan:
+                is_protective = True
+            targets = cancel_ids or ([refs["basket_id"]] if refs["basket_id"] else [""])
+            row_ok = False
+            for target_basket in targets:
+                if target_basket and target_basket in seen_baskets:
+                    continue
+                extra = {"basket_id": target_basket} if target_basket else {}
+                bot_tag = user_tag if user_tag.startswith("bot_") else ""
+                if is_protective:
+                    ok = await self._async_cancel_protective_leg(
+                        bot_tag or target_basket,
+                        symbol=symbol,
+                        reason="pre_flatten",
+                        require_flat=False,
+                        cancel_path="pre_flatten",
+                        **extra,
+                    )
+                else:
+                    ok = await self._async_cancel_order_on_plant(
+                        symbol=symbol,
+                        reason="pre_flatten",
+                        basket_id=target_basket,
+                        user_tag=bot_tag,
+                    )
+                if ok:
+                    row_ok = True
+                    if target_basket:
+                        seen_baskets.add(target_basket)
+                        known_baskets.add(target_basket)
+            if row_ok:
                 cancelled += 1
+                if blank_orphan:
+                    bot_logger.info(
+                        f"Cancelled untagged chart orphan {symbol}: "
+                        f"{self._listed_order_brief(data)}"
+                    )
+        if force:
+            # Only native rows already linked to this bot entry / known baskets.
+            cancelled += await self._async_cancel_native_bracket_rows(
+                symbol,
+                seen_baskets,
+                known_baskets_owned=known_baskets,
+                entry_order_id=entry_order_id,
+            )
+        if skipped_manual:
+            uniq = sorted(set(skipped_briefs))
+            bot_logger.info(
+                f"leaving {skipped_manual} manual working orders alone ({symbol}): "
+                + "; ".join(uniq[:4])
+            )
         if cancelled:
             bot_logger.info(
-                f"Cancelled {cancelled} working bot_* order(s) for {symbol}"
+                f"Cancelled {cancelled} working bot order(s) for {symbol}"
             )
         return cancelled
+
+    async def _async_iter_native_bracket_rows(self) -> List[Dict[str, Any]]:
+        if not self._client:
+            return []
+        account_id = self._get_account_id()
+        rows: List[Dict[str, Any]] = []
+        for method_name in ("list_brackets", "list_bracket_stops"):
+            method = getattr(self._client, method_name, None)
+            if not callable(method):
+                continue
+            try:
+                found = await method(account_id=account_id)
+            except Exception as e:
+                error_logger.error(f"Rithmic {method_name} failed: {e}")
+                continue
+            if not isinstance(found, (list, tuple)):
+                continue
+            for row in found:
+                rows.append(_response_to_dict_safe(row))
+        return rows
+
+    def _native_bracket_row_matches(self, data: Dict[str, Any], symbol: str) -> bool:
+        broker_sym = str(
+            data.get("symbol")
+            or data.get("exchange_symbol")
+            or data.get("exchangeSymbol")
+            or ""
+        ).strip()
+        if not broker_sym:
+            return True
+        return self._listed_order_matches_symbol(data, symbol)
+
+    @staticmethod
+    def _native_bracket_row_is_live(data: Dict[str, Any]) -> bool:
+        refs = RithmicConnector._listed_cancel_refs(data)
+        status = refs["status"].lower().strip()
+        if status in _PROTECTIVE_TERMINAL_STATUSES and not RithmicConnector._looks_like_live_price_type(
+            status
+        ):
+            return False
+        live_keys = (
+            "target_quantity", "stop_quantity", "targetQuantity", "stopQuantity",
+            "target_price", "stop_price", "targetPrice", "stopPrice",
+            "target_ticks", "stop_ticks", "targetTicks", "stopTicks",
+            "stop_trigger", "stopTrigger",
+        )
+        for key in live_keys:
+            val = data.get(key)
+            if val in (None, "", 0, "0"):
+                continue
+            return True
+        ptype = RithmicConnector._listed_price_type(data)
+        if RithmicConnector._looks_like_live_price_type(ptype) or (
+            RithmicConnector._looks_like_live_price_type(refs["status"])
+        ):
+            return True
+        side = str(data.get("transaction_type") or data.get("transactionType") or "").strip()
+        return bool(side and refs["basket_id"])
+
+    async def _async_cancel_native_bracket_rows(
+        self,
+        symbol: str,
+        known_baskets: set,
+        *,
+        known_baskets_owned: Optional[set] = None,
+        entry_order_id: str = "",
+    ) -> int:
+        """Cancel native target/stop rows that belong to bot tickets only."""
+        cancelled = 0
+        owned = set(known_baskets_owned or ()) | set(known_baskets or ())
+        for data in await self._async_iter_native_bracket_rows():
+            if not self._native_bracket_row_matches(data, symbol):
+                continue
+            if not self._native_bracket_row_is_live(data):
+                continue
+            if not self._is_bot_owned_listed_order(
+                data,
+                known_baskets=owned,
+                entry_order_id=entry_order_id,
+            ):
+                continue
+            basket_id = str(data.get("basket_id") or data.get("basketId") or "").strip()
+            if not basket_id or basket_id in known_baskets:
+                continue
+            ok = await self._async_cancel_order_on_plant(
+                symbol=symbol,
+                reason="native_bracket_row",
+                basket_id=basket_id,
+            )
+            if ok:
+                cancelled += 1
+                known_baskets.add(basket_id)
+        return cancelled
+
+    async def _async_cancel_all_orders_on_account(self, *, reason: str) -> bool:
+        """Disabled: account-wide cancel_all wipes user-placed SL/TP.
+
+        Kept as a no-op so older call sites stay safe. Use targeted bot-owned
+        cancels only.
+        """
+        bot_logger.warning(
+            f"Skip Rithmic cancel_all_orders ({reason}) — would wipe manual working orders"
+        )
+        return False
 
     async def _async_try_exit_position(
         self,
@@ -2026,6 +3153,7 @@ class RithmicConnector(BaseBroker):
         max_attempts: int = 5,
         verify_delay: float = 1.5,
         cancel_working_first: bool = True,
+        allow_market_close: bool = True,
     ) -> Dict[str, Any]:
         result: Dict[str, Any] = {
             "symbol": symbol,
@@ -2041,18 +3169,63 @@ class RithmicConnector(BaseBroker):
             result["error"] = "not_connected"
             return result
 
+        listed_net = await self._async_list_positions_net_or_none(symbol)
         pos = await self._async_get_broker_position_for_symbol(symbol)
-        result["initial_net"] = int(pos.get("net") or 0)
+        # Leftover working TP/SL must not be treated as live size.
+        if not allow_market_close and listed_net is not None:
+            result["initial_net"] = int(listed_net)
+        elif not allow_market_close:
+            result["initial_net"] = 0
+        else:
+            result["initial_net"] = int(pos.get("net") or 0)
         result["final_net"] = result["initial_net"]
         if pos.get("inferred"):
             result["inferred"] = True
+        if pos.get("pnl_unavailable") or pos.get("unknown") or listed_net is None:
+            # PnL plant down: never market-flatten from guessed size (opens naked).
+            allow_market_close = False
+            result["initial_net"] = 0
+            result["final_net"] = 0
+            result["pnl_unavailable"] = True
+            bot_logger.warning(
+                f"Rithmic flatten {symbol}: PnL/list_positions unavailable — "
+                f"cancelling working bot orders only (no market flatten)"
+            )
 
+        force_working = (not allow_market_close) or result["initial_net"] == 0
         if cancel_working_first:
             result["cancelled_bot"] = (
-                await self._async_cancel_all_working_bot_orders_for_symbol(symbol)
+                await self._async_cancel_all_working_bot_orders_for_symbol(
+                    symbol, force=force_working,
+                )
             )
             if result["cancelled_bot"]:
                 await asyncio.sleep(min(verify_delay, 1.0))
+
+        if not allow_market_close:
+            leftover = await self._async_list_working_listed_orders(
+                symbol, empty_as_working=True,
+            )
+            bot_leftover = [
+                row for row in leftover
+                if self._is_bot_owned_listed_order(row)
+            ]
+            manual_n = len(leftover) - len(bot_leftover)
+            if manual_n:
+                briefs = [
+                    self._listed_order_brief(row)
+                    for row in leftover
+                    if not self._is_bot_owned_listed_order(row)
+                ]
+                bot_logger.info(
+                    f"leaving {manual_n} manual working orders alone ({symbol}): "
+                    + "; ".join(sorted(set(briefs))[:4])
+                )
+            result["flat"] = result["initial_net"] == 0
+            result["working_remaining"] = len(bot_leftover)
+            if bot_leftover:
+                result["error"] = "working_orders_remain"
+            return result
 
         if result["initial_net"] == 0:
             result["flat"] = True
@@ -2121,6 +3294,12 @@ class RithmicConnector(BaseBroker):
 
         if result["flat"]:
             with self._order_lock:
+                flat_ids = [
+                    k for k, v in self._orders.items() if v.get("symbol") == symbol
+                ]
+            for k in flat_ids:
+                self.remember_closed_entry(k, symbol)
+            with self._order_lock:
                 self._orders = {
                     k: v for k, v in self._orders.items()
                     if v.get("symbol") != symbol
@@ -2132,13 +3311,15 @@ class RithmicConnector(BaseBroker):
         return self.cancel_all_bot_orders(symbol)
 
     def cancel_all_bot_orders(self, symbol: str) -> int:
-        """Cancel every working order with bot_* user_tag for symbol."""
+        """Cancel every working bot-owned order for symbol (incl. basket-tracked)."""
         if not self._connected or not symbol:
             return 0
         try:
             return int(
                 self._run_sync(
-                    self._async_cancel_all_working_bot_orders_for_symbol(symbol),
+                    self._async_cancel_all_working_bot_orders_for_symbol(
+                        symbol, force=True,
+                    ),
                     timeout=30,
                 )
                 or 0
@@ -2149,14 +3330,959 @@ class RithmicConnector(BaseBroker):
             )
             return 0
 
-    def cancel_entry_bracket_legs(
+    def clear_chart_stops(
+        self,
+        symbol: str,
+        *,
+        include_limits: bool = True,
+        rounds: int = 4,
+        keep_entry_ids: Optional[set] = None,
+        only_if_flat: bool = False,
+    ) -> int:
+        """Cancel every bot Buy/Sell Stop (+ Limits) on the chart until gone.
+
+        Lucid template-316 needs basket_id — resolves from list_orders each round.
+        When keep_entry_ids is empty (fully flat wipe), also cancel untagged
+        stop/limit rows (Lucid often blanks user_tag on resting brackets).
+        Tagged non-bot tickets are left alone.
+        keep_entry_ids: do not cancel legs for these live bot tickets.
+        only_if_flat: abort if list_positions shows any size.
+        """
+        if not self._connected or not symbol:
+            return 0
+        try:
+            return int(
+                self._run_sync(
+                    self._async_clear_chart_stops(
+                        symbol,
+                        include_limits=include_limits,
+                        rounds=rounds,
+                        keep_entry_ids={str(x) for x in (keep_entry_ids or set()) if x},
+                        only_if_flat=only_if_flat,
+                    ),
+                    timeout=90,
+                )
+                or 0
+            )
+        except Exception as e:
+            error_logger.error(f"clear_chart_stops failed for {symbol}: {e}")
+            return 0
+
+    async def _async_clear_chart_stops(
+        self,
+        symbol: str,
+        *,
+        include_limits: bool = True,
+        rounds: int = 4,
+        keep_entry_ids: Optional[set] = None,
+        only_if_flat: bool = False,
+    ) -> int:
+        keep = {str(x) for x in (keep_entry_ids or set()) if x}
+        if only_if_flat:
+            net = await self._async_list_positions_net_or_none(symbol)
+            if net is None or int(net) != 0:
+                bot_logger.info(
+                    f"clear_chart_stops skip {symbol} — not flat "
+                    f"(net={net if net is not None else 'unknown'})"
+                )
+                return 0
+        total = 0
+        keep_baskets = self._kept_leg_baskets(keep) if keep else set()
+        try:
+            net_now = await self._async_list_positions_net_or_none(symbol)
+        except Exception:
+            net_now = None
+        protected_stops: List[str] = []
+        for round_i in range(max(1, int(rounds))):
+            listed = await self._async_list_working_listed_orders(
+                symbol, empty_as_working=True,
+            )
+            targets: List[Dict[str, Any]] = []
+            skipped_manual: List[str] = []
+            kept_stop_qty = self._kept_stop_qty(listed, keep, keep_baskets)
+            for data in listed or []:
+                refs = self._listed_cancel_refs(data)
+                tag = refs["user_tag"]
+                bot_owned = self._is_bot_owned_listed_order(data)
+                # Full flat wipe: treat blank-tag stop/limit as bot orphans
+                # (Lucid blanks user_tag on resting brackets → looked "manual").
+                blank_orphan = (
+                    not keep
+                    and not tag
+                    and (
+                        self._price_type_is_stop(self._listed_price_type(data))
+                        or (
+                            include_limits
+                            and self._price_type_is_limit_only(
+                                self._listed_price_type(data)
+                            )
+                        )
+                    )
+                )
+                if not bot_owned and not blank_orphan:
+                    if tag:
+                        # Named non-bot ticket — leave alone
+                        skipped_manual.append(self._listed_order_brief(data))
+                    elif not keep:
+                        # Blank but not stop/limit (or limits excluded) — note it
+                        skipped_manual.append(self._listed_order_brief(data))
+                    continue
+                entry = self._entry_id_for_leg_tag(tag)
+                if entry and entry in keep:
+                    continue
+                if tag and (tag in keep or _REPLACE_SEQ_RE.sub("", tag) in keep):
+                    continue
+                if keep and refs["basket_id"] and refs["basket_id"] in keep_baskets:
+                    continue  # blank/odd tag but basket belongs to a live trade
+                ptype = self._listed_price_type(data)
+                is_stop = self._price_type_is_stop(ptype)
+                is_limit = self._price_type_is_limit_only(ptype)
+                if is_stop or tag.endswith("_sl"):
+                    if not self._stop_cancel_allowed(net_now, entry, kept_stop_qty):
+                        protected_stops.append(self._listed_order_brief(data))
+                        continue
+                    targets.append(data)
+                elif include_limits and (
+                    is_limit or tag.endswith(("_tp", "_tp_lit")) or blank_orphan
+                ):
+                    targets.append(data)
+            if skipped_manual:
+                uniq = sorted(set(skipped_manual))
+                # Throttle: first info immediate; then every 5 min/symbol or on order-set change.
+                now = time.time()
+                leave_marks = getattr(self, "_manual_leave_log", None)
+                if leave_marks is None:
+                    leave_marks = {}
+                    self._manual_leave_log = leave_marks
+                leave_key = tuple(uniq)
+                prev_leave = leave_marks.get(symbol)
+                if (
+                    prev_leave is None
+                    or prev_leave[0] != leave_key
+                    or (now - float(prev_leave[1])) >= 300.0
+                ):
+                    bot_logger.info(
+                        f"leaving {len(uniq)} tagged/non-stop manual order(s) alone "
+                        f"({symbol}): " + "; ".join(uniq[:4])
+                    )
+                    leave_marks[symbol] = (leave_key, now)
+            if not targets:
+                break
+            seen: set = set()
+            round_n = 0
+            for data in targets:
+                refs = self._listed_cancel_refs(data)
+                tag = refs["user_tag"]
+                basket = refs["basket_id"]
+                if not basket:
+                    basket = await self._async_resolve_basket_for_tag(
+                        tag, symbol=symbol,
+                    )
+                if not basket:
+                    for bid in self._listed_related_basket_ids(data):
+                        if bid:
+                            basket = bid
+                            break
+                key = basket or tag
+                if not key or key in seen:
+                    continue
+                seen.add(key)
+                ok = await self._async_cancel_protective_leg(
+                    tag or basket,
+                    symbol=symbol,
+                    reason="clear_chart",
+                    require_flat=False,
+                    cancel_path="clear_chart_stops",
+                    basket_id=basket,
+                )
+                if not ok and basket:
+                    ok = await self._async_cancel_order_on_plant(
+                        symbol=symbol,
+                        reason="clear_chart_stops:clear_chart",
+                        basket_id=basket,
+                        user_tag=tag,
+                    )
+                if ok:
+                    round_n += 1
+                    total += 1
+                    brief = self._listed_order_brief(data)
+                    if not tag:
+                        bot_logger.info(
+                            f"Cancelled untagged chart orphan {symbol}: {brief}"
+                        )
+            bot_logger.info(
+                f"clear_chart_stops {symbol} round {round_i + 1}: "
+                f"cancelled {round_n} (targets={len(targets)})"
+            )
+            if round_n == 0:
+                if keep or net_now != 0:
+                    break  # bulk wipe only when the broker is confirmed flat
+                bulk = await self._async_cancel_all_working_bot_orders_for_symbol(
+                    symbol, force=True,
+                )
+                total += int(bulk or 0)
+                if not bulk:
+                    break
+            await asyncio.sleep(0.35)
+        if protected_stops:
+            self._log_protected_stops(symbol, net_now, protected_stops)
+        return total
+
+    def _kept_stop_qty(self, listed, keep: set, keep_baskets: set) -> int:
+        """Contracts covered by working stop rows that belong to live (kept) trades."""
+        qty = 0
+        for data in listed or []:
+            if not self._price_type_is_stop(self._listed_price_type(data)):
+                continue
+            refs = self._listed_cancel_refs(data)
+            owner = self._entry_id_for_leg_tag(refs["user_tag"])
+            if (owner and owner in keep) or (refs["basket_id"] and refs["basket_id"] in keep_baskets):
+                qty += int(self._listed_row_qty(data) or 1)
+        return qty
+
+    def _stop_cancel_allowed(self, net_now: Optional[int], entry: str, kept_stop_qty: int) -> bool:
+        """A cleanup path may cancel a stop only if it cannot leave size unprotected.
+
+        OK when the broker is confirmed flat, when the stop belongs to an entry
+        already known closed (its TP/SL filled), or when every open contract is
+        still covered by a live trade's own working stop (surplus stop).
+        """
+        if net_now == 0:
+            return True
+        if entry and entry in self._closed_entry_registry():
+            return True
+        if net_now is not None and kept_stop_qty >= abs(int(net_now)) > 0:
+            return True
+        return False
+
+    def _log_protected_stops(self, symbol: str, net_now, briefs: List[str]) -> None:
+        marks = self.__dict__.setdefault("_protected_stop_log", {})
+        key = (symbol, tuple(sorted(set(briefs))), net_now)
+        now = time.time()
+        if marks.get(symbol, (None, 0.0))[0] == key and now - marks[symbol][1] < 300:
+            return
+        marks[symbol] = (key, now)
+        bot_logger.warning(
+            f"Kept {len(set(briefs))} stop(s) on {symbol}: broker net={net_now} not flat and "
+            f"not otherwise covered - cleanup never strips a stop from open size: "
+            + "; ".join(sorted(set(briefs))[:3])
+        )
+
+    # -- Adopt broker exposure the bot is not tracking (restart / lost tracking) --
+    def adopt_untracked_position(
+        self, symbol: str, *, default_stop_pts: float, planned_sl: float = 0.0,
+        planned_tp: float = 0.0, tp_r: float = 0.0, max_risk_usd: float = 0.0,
+    ) -> Optional[Dict[str, Any]]:
+        """Rebuild a tracked entry for untracked broker size; make sure it has a stop AND a TP."""
+        if not self._connected or not symbol:
+            return None
+        try:
+            return self._run_sync(
+                self._async_adopt_untracked_position(
+                    symbol, float(default_stop_pts), float(planned_sl or 0),
+                    planned_tp=float(planned_tp or 0), tp_r=float(tp_r or 0),
+                    max_risk_usd=float(max_risk_usd or 0),
+                ),
+                timeout=45,
+            )
+        except Exception as e:
+            error_logger.error(f"adopt_untracked_position failed for {symbol}: {e}")
+            return None
+
+    @staticmethod
+    def _adopt_point_value(spec: Any) -> float:
+        """USD per 1.0 price point per contract (MNQ = 2.0)."""
+        try:
+            tv = float(getattr(spec, "tick_value_usd", 0) or 0)
+            ts = float(getattr(spec, "tick_size", 0) or 0)
+            if tv > 0 and ts > 0:
+                return tv / ts
+        except (TypeError, ValueError):
+            pass
+        return 0.0
+
+    def _adopt_tp_price(
+        self, is_long: bool, avg: float, sl_px: float, planned_tp: float, tp_r: float, tick: float,
+    ) -> float:
+        """TP for an adopted trade: planned TP if valid, else entry +/- tp_r x stop distance."""
+        if avg <= 0:
+            return 0.0
+        if planned_tp > 0 and ((is_long and planned_tp > avg) or (not is_long and planned_tp < avg)):
+            tp = float(planned_tp)
+        else:
+            risk = abs(float(avg) - float(sl_px or 0)) if sl_px and sl_px > 0 else 0.0
+            if risk <= 0:
+                return 0.0
+            r = float(tp_r) if tp_r and tp_r > 0 else float(os.getenv("ADOPT_TP_R", "1.5") or 1.5)
+            if r <= 0:
+                return 0.0
+            tp = avg + r * risk if is_long else avg - r * risk
+        return self._round_to_tick(tp, tick, mode="up" if is_long else "down")
+
+    async def _async_adopt_untracked_position(
+        self, symbol: str, default_stop_pts: float, planned_sl: float = 0.0,
+        planned_tp: float = 0.0, tp_r: float = 0.0, max_risk_usd: float = 0.0,
+    ) -> Optional[Dict[str, Any]]:
+        positions = await self._async_list_positions()
+        if positions is None:
+            return None
+        net, avg = 0, 0.0
+        for p in positions or []:
+            data = _response_to_dict_safe(p)
+            if self._position_matches_symbol(data, symbol):
+                net = int(self._position_qty_from_broker_data(data))
+                try:
+                    avg = float(data.get("avg_open_fill_price") or 0)
+                except (TypeError, ValueError):
+                    avg = 0.0
+                break
+        if net == 0:
+            return None
+        tracked = self._tracked_bot_entry_ids(symbol)
+        untracked = abs(net) - (self._tracked_entry_qty(tracked) if tracked else 0)
+        # (2026-10-11b: no early return here - the direction-aware precheck below decides;
+        # an old adopted trade on the OTHER side must not hide a new manual position.)
+        # 2026-10-11b ADOPT-SAFE: direction-aware manual qty, re-check net, never stack
+        # a second adopted bracket on the same manual position (resize/merge instead).
+        _safe = await self._async_adopt_safe_precheck(symbol, int(net), float(avg or 0))
+        if _safe.get("return_now"):
+            return _safe.get("result")
+        untracked = int(_safe.get("manual") or 0)
+        if untracked <= 0:
+            return None
+        is_long = net > 0
+        side = "BUY" if is_long else "SELL"
+        close_side = "SELL" if is_long else "BUY"
+        kept_baskets = self._kept_leg_baskets(tracked) if tracked else set()
+        closed = self._closed_entry_registry()
+        listed = await self._async_list_working_listed_orders(symbol, empty_as_working=True)
+        owners: set = set()
+        sl_row = tp_row = None
+        for data in listed or []:
+            if self._listed_row_side(data) != close_side:
+                continue
+            refs = self._listed_cancel_refs(data)
+            owner = self._entry_id_for_leg_tag(refs["user_tag"])
+            if (owner and owner in tracked) or (refs["basket_id"] and refs["basket_id"] in kept_baskets):
+                continue  # belongs to a trade we already track
+            kind = self._listed_row_leg_kind(data)
+            if kind == "sl" and sl_row is None:
+                sl_row = data
+            elif kind == "tp" and tp_row is None:
+                tp_row = data
+            if owner and owner not in closed:
+                owners.add(owner)
+        ticket = next(iter(owners)) if len(owners) == 1 else f"bot_adopt_{uuid.uuid4().hex[:10]}"
+        market = self._live_market_price(symbol)
+        if avg <= 0:
+            avg = market
+        if avg <= 0:
+            return None
+        sl_px = self._listed_row_leg_price(sl_row, "sl") if sl_row else 0.0
+        tp_px = self._listed_row_leg_price(tp_row, "tp") if tp_row else 0.0
+        with self._order_lock:
+            closed.pop(ticket, None)
+            rec = self._orders.setdefault(ticket, {"ticket": ticket})
+            rec.update({
+                "ticket": ticket, "symbol": symbol, "type": side, "size": int(untracked),
+                "entry_price": float(avg), "stop_loss": float(sl_px), "take_profit": float(tp_px),
+                "adopted": True, "time": datetime.now(timezone.utc).isoformat(),
+            })
+            for row, leg, px in ((sl_row, "sl", sl_px), (tp_row, "tp", tp_px)):
+                if row is None:
+                    continue
+                refs = self._listed_cancel_refs(row)
+                rec[f"protective_{leg}_order_id"] = refs["user_tag"] or refs["basket_id"]
+                if refs["basket_id"]:
+                    rec[f"protective_{leg}_basket_id"] = refs["basket_id"]
+                if leg == "sl":
+                    rec["native_stop_attached"] = True
+                    rec["last_valid_sl"] = float(px)
+                else:
+                    rec["native_target_attached"] = True
+        placed = False
+        if sl_row is None:
+            spec = get_instrument(symbol)
+            tick = float(spec.tick_size)
+            if planned_sl > 0 and ((is_long and planned_sl < avg) or (not is_long and planned_sl > avg)):
+                stop = planned_sl
+            else:
+                dist = max(tick * 8, float(default_stop_pts))
+                stop = avg - dist if is_long else avg + dist
+            round_mode = "down" if is_long else "up"
+            # 2026-10-11: a NEW stop respects the per-trade $ cap (an existing manual SL is never moved).
+            pv = self._adopt_point_value(spec)
+            if max_risk_usd > 0 and pv > 0:
+                cap_dist = max(tick * 8, float(max_risk_usd) / (pv * max(1, int(untracked))))
+                if abs(avg - stop) > cap_dist:
+                    old_stop = stop
+                    stop = avg - cap_dist if is_long else avg + cap_dist
+                    round_mode = "up" if is_long else "down"  # round toward entry: stay under cap
+                    bot_logger.warning(
+                        f"ADOPT {symbol}: stop {old_stop:.2f} risks more than ${max_risk_usd:.0f} "
+                        f"on x{untracked} - tightened to {stop:.2f}"
+                    )
+            stop = self._round_to_tick(stop, tick, mode=round_mode)
+            with self._order_lock:
+                self._orders[ticket]["stop_loss"] = stop
+                self._orders[ticket]["last_valid_sl"] = stop
+            placed = await self._async_repair_missing_stop(ticket, symbol, side, int(untracked), stop)
+            with self._order_lock:
+                sl_px = float((self._orders.get(ticket) or {}).get("stop_loss") or stop)
+        # 2026-10-11: adopted trades used to get only a stop (TP=none). Place a TP LIMIT
+        # (same standalone LIMIT the bot uses for its own trades) when none is working.
+        # A TP already resting at the broker (manual or bot) is kept - never duplicated.
+        tp_placed = False
+        tp_note = "none"
+        sl_working = sl_row is not None or placed
+        # 2026-10-11b: default OFF (a bot TP + the user's own TP both filled = new position).
+        place_tp = os.getenv("ADOPT_PLACE_TP", "0").strip().lower() in ("1", "true", "yes", "on")
+        if tp_row is not None:
+            tp_note = "existing " + format(tp_px, ".2f")
+        elif not place_tp:
+            tp_note = "none (ADOPT_PLACE_TP=0)"
+        elif not sl_working:
+            tp_note = "none (no working SL - TP skipped)"
+        else:
+            spec_tp = get_instrument(symbol)
+            tick_tp = float(spec_tp.tick_size)
+            target = self._adopt_tp_price(is_long, float(avg), float(sl_px), float(planned_tp or 0),
+                                          float(tp_r or 0), tick_tp)
+            tp_qty = await self._async_adopt_allowed_qty(ticket, symbol, side, "tp")
+            if target > 0 and tp_qty <= 0:
+                tp_note = "none (TP already covered / position changed)"
+                target = 0.0
+            if target > 0:
+                prot = await self._async_submit_protective_orders(
+                    symbol=symbol,
+                    entry_side=side,
+                    qty=int(min(int(untracked), int(tp_qty))),
+                    stop_loss=0,
+                    take_profit=target,
+                    prefix=ticket,
+                    price_ref=self._live_market_price(symbol),
+                ) or {}
+                tp_id = prot.get("protective_tp_order_id")
+                if prot.get("tp_filled_immediately"):
+                    tp_placed, tp_px = True, float(target)
+                    tp_note = f"NEW {target:.2f} (filled immediately)"
+                elif tp_id:
+                    tp_placed, tp_px = True, float(target)
+                    with self._order_lock:
+                        rec = self._orders.setdefault(ticket, {"ticket": ticket})
+                        rec["take_profit"] = float(target)
+                        rec["protective_tp_order_id"] = str(tp_id)
+                        rec["native_target_attached"] = True
+                    tp_note = f"NEW {target:.2f}"
+                else:
+                    tp_note = f"FAILED {target:.2f}"
+                    error_logger.error(
+                        f"ADOPT {ticket} {symbol}: TP LIMIT @ {target:.2f} not accepted - "
+                        f"SL stays; set a TP by hand if you want one"
+                    )
+            elif not tp_note.startswith("none (TP already"):
+                tp_note = "none (could not compute)"
+        bot_logger.warning(
+            f"ADOPTED untracked {symbol} {side} x{untracked} @ {avg:.2f} as {ticket}: "
+            f"SL={'existing ' if sl_row is not None else ('NEW ' if placed else 'FAILED ')}{sl_px:.2f} "
+            f"TP={tp_note}"
+        )
+        return {
+            "ticket": ticket, "symbol": symbol, "type": side, "size": int(untracked),
+            "open_price": float(avg), "sl": float(sl_px), "tp": float(tp_px),
+            "sl_placed": bool(placed), "sl_existing": sl_row is not None,
+            "tp_placed": bool(tp_placed), "tp_existing": tp_row is not None,
+        }
+
+    # -- 2026-10-11b ADOPT-SAFE: adopted (manual) protection can never open/enlarge size --
+    @staticmethod
+    def _adopt_entry_is_long(info: Dict[str, Any]) -> Optional[bool]:
+        t = str((info or {}).get("type") or "").strip().lower()
+        if t in ("buy", "long", "0"):
+            return True
+        if t in ("sell", "short", "1"):
+            return False
+        return None
+
+    def _adopt_safe_plan(self, symbol: str, net: int) -> Dict[str, Any]:
+        """Split broker net into bot-owned vs manual size (signed, per side)."""
+        plan: Dict[str, Any] = {"skip": "", "manual": 0, "merge_into": "",
+                                "adopted_same": [], "adopted_opp": [], "bot_same": 0}
+        net = int(net or 0)
+        if net == 0:
+            plan["skip"] = "broker flat"
+            return plan
+        is_long = net > 0
+        ids = self._tracked_bot_entry_ids(symbol)
+        with self._order_lock:
+            infos = {oid: dict(self._orders.get(oid) or {}) for oid in ids}
+        bot_same = bot_opp = 0
+        for oid, info in infos.items():
+            try:
+                size = abs(int(info.get("size") or 1))
+            except (TypeError, ValueError):
+                size = 1
+            d = self._adopt_entry_is_long(info)
+            same = (d is None) or (d == is_long)
+            if info.get("adopted"):
+                (plan["adopted_same"] if same else plan["adopted_opp"]).append(oid)
+                continue
+            if same:
+                bot_same += size
+            else:
+                bot_opp += size
+        plan["bot_same"] = bot_same
+        if bot_opp > 0:
+            plan["skip"] = (f"bot's own trade(s) x{bot_opp} are on the other side of broker "
+                            f"net {net} - cannot tell which size is yours")
+            return plan
+        manual = abs(net) - bot_same
+        if manual <= 0:
+            plan["skip"] = f"all broker size ({abs(net)}) belongs to the bot's own trades"
+            return plan
+        plan["manual"] = int(manual)
+        if plan["adopted_same"]:
+            plan["merge_into"] = sorted(plan["adopted_same"])[0]
+        return plan
+
+    async def _async_adopt_safe_precheck(self, symbol: str, net: int, avg: float) -> Dict[str, Any]:
+        """Re-check net, split manual size, merge into an existing adopted trade."""
+        try:
+            again = await self._async_list_positions()
+        except Exception:
+            again = None
+        net2 = self._list_positions_net_qty(again, symbol) if again is not None else None
+        if net2 is None or int(net2) != int(net):
+            bot_logger.warning(
+                f"ADOPT-SAFE {symbol}: broker net changed {net} -> {net2} while adopting - skipped"
+            )
+            return {"return_now": True, "result": None}
+        plan = self._adopt_safe_plan(symbol, int(net))
+        if plan["skip"]:
+            bot_logger.warning(f"ADOPT-SAFE {symbol}: not adopting - {plan['skip']}")
+            return {"return_now": True, "result": None}
+        if plan["adopted_opp"]:
+            # Old adopted trade is the other way round: its legs are dangerous now.
+            await self._async_reconcile_adopted_protection(symbol, net_override=int(net), force=True)
+        if plan["merge_into"]:
+            ticket = plan["merge_into"]
+            with self._order_lock:
+                rec = self._orders.setdefault(ticket, {"ticket": ticket})
+                old = int(rec.get("size") or 0)
+                rec["size"] = int(plan["manual"])
+                if avg > 0:
+                    rec["entry_price"] = float(avg)
+                snap = dict(rec)
+            await self._async_reconcile_adopted_protection(symbol, net_override=int(net))
+            bot_logger.warning(
+                f"ADOPT-SAFE {symbol}: manual size {old} -> {plan['manual']} merged into {ticket} "
+                f"(no second bracket stacked)"
+            )
+            return {"return_now": True, "result": {
+                "ticket": ticket, "symbol": symbol, "type": snap.get("type", "BUY"),
+                "size": int(plan["manual"]), "open_price": float(snap.get("entry_price") or avg),
+                "sl": float(snap.get("stop_loss") or 0), "tp": float(snap.get("take_profit") or 0),
+                "sl_placed": False, "sl_existing": True, "tp_placed": False,
+                "tp_existing": bool(snap.get("take_profit")), "merged": True,
+            }}
+        return {"return_now": False, "manual": int(plan["manual"])}
+
+    def _adopt_row_qty(self, row: Dict[str, Any]) -> int:
+        q = self._listed_row_qty(row)
+        return int(q) if q else 1
+
+    def _adopt_own_rows(self, oid: str, listed: List[Dict[str, Any]], close_side: str) -> List[Dict[str, Any]]:
+        """Bot-placed working legs of adopted entry oid (never the user's own orders)."""
+        own_baskets = self._known_bot_baskets_for_entry(oid)
+        out = []
+        for row in listed or []:
+            if self._listed_row_side(row) != close_side:
+                continue
+            refs = self._listed_cancel_refs(row)
+            tag = refs["user_tag"]
+            if tag:
+                if self._is_bot_owned_user_tag(tag) and self._entry_id_for_leg_tag(tag) == oid:
+                    out.append(row)
+                continue  # user's own tagged order - never ours to cancel/resize
+            if refs["basket_id"] and refs["basket_id"] in own_baskets:
+                out.append(row)
+        return out
+
+    async def _async_adopt_allowed_qty(
+        self, oid: str, symbol: str, side: str, kind: str,
+        net: Optional[int] = None, listed: Optional[List[Dict[str, Any]]] = None,
+    ) -> int:
+        """Max qty adopted entry oid may have working for leg kind ('sl'/'tp')."""
+        if net is None:
+            net = await self._async_list_positions_net_or_none(symbol)
+        if net is None or int(net) == 0:
+            return 0
+        is_long = str(side).lower() in ("buy", "long")
+        if (int(net) > 0) != is_long:
+            return 0
+        plan = self._adopt_safe_plan(symbol, int(net))
+        if plan["skip"]:
+            return 0
+        manual = int(plan["manual"])
+        if listed is None:
+            listed = await self._async_list_working_listed_orders(symbol, empty_as_working=True)
+        close_side = "SELL" if is_long else "BUY"
+        own_ids = {id(r) for r in self._adopt_own_rows(oid, listed, close_side)}
+        tracked = self._tracked_bot_entry_ids(symbol)
+        other_adopted = [a for a in plan["adopted_same"] if a != oid]
+        other_adopted_baskets: set = set()
+        for a in other_adopted:
+            other_adopted_baskets |= self._known_bot_baskets_for_entry(a)
+        bot_baskets = self._kept_leg_baskets(tracked) if tracked else set()
+        covered = 0
+        for row in listed or []:
+            if id(row) in own_ids or self._listed_row_side(row) != close_side:
+                continue
+            if self._listed_row_leg_kind(row) != kind:
+                continue
+            refs = self._listed_cancel_refs(row)
+            tag, basket = refs["user_tag"], refs["basket_id"]
+            if tag and self._is_bot_owned_user_tag(tag):
+                if self._entry_id_for_leg_tag(tag) in other_adopted:
+                    covered += self._adopt_row_qty(row)
+                continue  # bot trade's own leg: covers bot size, already excluded
+            if not tag and basket and basket in bot_baskets:
+                if basket in other_adopted_baskets:
+                    covered += self._adopt_row_qty(row)
+                continue
+            covered += self._adopt_row_qty(row)  # the user's own SL/TP
+        return max(0, manual - covered)
+
+    async def _async_reconcile_adopted_protection(
+        self, symbol: str, net_override: Optional[int] = None, force: bool = False,
+    ) -> Dict[str, Any]:
+        """Keep adopted SL/TP qty == real manual size; cancel them when flat/flipped."""
+        out: Dict[str, Any] = {"symbol": symbol, "stale": [], "resized": [], "cancelled": 0}
+        with self._order_lock:
+            adopted = {
+                str(oid): dict(info or {}) for oid, info in self._orders.items()
+                if (info or {}).get("adopted") and (info or {}).get("symbol") == symbol
+                and self._is_bot_entry_user_tag(str(oid))
+            }
+        if not adopted:
+            return out
+        net = net_override
+        if net is None:
+            net = await self._async_list_positions_net_or_none(symbol)
+        if net is None:
+            out["skipped"] = "net unknown"
+            return out
+        net = int(net)
+        snap = None
+        try:
+            with self._state_lock:
+                raw = (self._positions or {}).get(symbol)
+            if raw is not None:
+                snap = int(raw.get("size", 0) or 0)
+        except Exception:
+            snap = None
+        listed = await self._async_list_working_listed_orders(symbol, empty_as_working=True)
+        seen = self.__dict__.setdefault("_adopt_stale_seen", {})
+        confirm = float(os.getenv("ADOPT_STALE_CONFIRM_SEC", "4") or 4)
+        now = time.time()
+        for oid, info in sorted(adopted.items()):
+            is_long = self._adopt_entry_is_long(info)
+            if is_long is None:
+                continue
+            side = "BUY" if is_long else "SELL"
+            close_side = "SELL" if is_long else "BUY"
+            flat = net == 0 and (snap is None or snap == 0)
+            flipped = net != 0 and ((net > 0) != is_long)
+            own = self._adopt_own_rows(oid, listed, close_side)
+            if flat or flipped:
+                why = "flat" if flat else f"flipped (net {net})"
+                first = seen.get(oid)
+                if not force and (first is None or now - first < confirm):
+                    if first is None:
+                        seen[oid] = now
+                        bot_logger.warning(f"ADOPT-SAFE {oid} {symbol}: broker {why} - confirming before cancel")
+                    continue
+                seen.pop(oid, None)
+                for row in own:
+                    refs = self._listed_cancel_refs(row)
+                    if await self._async_cancel_order_on_plant(
+                        symbol=symbol, reason=f"adopt_safe:{'flat' if flat else 'flip'}",
+                        basket_id=refs["basket_id"], user_tag=refs["user_tag"],
+                    ):
+                        out["cancelled"] += 1
+                with self._order_lock:
+                    rec = self._orders.get(oid)
+                    if rec is not None:
+                        rec["adopt_stale"] = True
+                bot_logger.warning(
+                    f"ADOPT-SAFE {oid} {symbol}: your position is {why} - cancelled "
+                    f"{len(own)} adopted SL/TP order(s) so they cannot open a new trade"
+                )
+                out["stale"].append(oid)
+                continue
+            seen.pop(oid, None)
+            for kind in ("sl", "tp"):
+                rows_k = [r for r in own if self._listed_row_leg_kind(r) == kind]
+                if not rows_k:
+                    continue
+                total = sum(self._adopt_row_qty(r) for r in rows_k)
+                allowed = await self._async_adopt_allowed_qty(oid, symbol, side, kind, net=net, listed=listed)
+                if total == allowed:
+                    continue
+                if total < allowed and kind == "tp" and os.getenv(
+                    "ADOPT_PLACE_TP", "0"
+                ).strip().lower() not in ("1", "true", "yes", "on"):
+                    continue  # never grow a TP unless adopted TPs are switched on
+                px = self._listed_row_leg_price(rows_k[0], kind)
+                for row in rows_k:
+                    refs = self._listed_cancel_refs(row)
+                    if await self._async_cancel_order_on_plant(
+                        symbol=symbol, reason=f"adopt_safe:resize_{kind}",
+                        basket_id=refs["basket_id"], user_tag=refs["user_tag"],
+                    ):
+                        out["cancelled"] += 1
+                if allowed > 0 and px > 0:
+                    market = self._live_market_price(symbol)
+                    if kind == "sl":
+                        new_id = await self._async_place_fresh_sl(oid, symbol, side, int(allowed), px, market)
+                        if new_id:
+                            with self._order_lock:
+                                rec = self._orders.setdefault(oid, {})
+                                rec["protective_sl_order_id"] = new_id
+                                rec["stop_loss"] = px
+                                rec["last_valid_sl"] = px
+                    else:
+                        with self._order_lock:
+                            rec = self._orders.setdefault(oid, {})
+                            seq = int(rec.get("sl_replace_seq") or 0) + 1
+                            rec["sl_replace_seq"] = seq
+                        prot = await self._async_submit_protective_orders(
+                            symbol=symbol, entry_side=side, qty=int(allowed), stop_loss=0,
+                            take_profit=px, prefix=f"{oid}_r{seq}", price_ref=market,
+                        ) or {}
+                        if prot.get("protective_tp_order_id"):
+                            with self._order_lock:
+                                self._orders.setdefault(oid, {})["protective_tp_order_id"] = str(
+                                    prot["protective_tp_order_id"])
+                bot_logger.warning(
+                    f"ADOPT-SAFE {oid} {symbol}: {kind.upper()} qty {total} != allowed {allowed} "
+                    f"(real open size / your own orders) - resized to {allowed}"
+                )
+                out["resized"].append((oid, kind, total, allowed))
+        plan = self._adopt_safe_plan(symbol, net) if net else {"skip": "flat"}
+        if not plan.get("skip") and len(plan.get("adopted_same") or []) == 1:
+            only = plan["adopted_same"][0]
+            with self._order_lock:
+                rec = self._orders.get(only)
+                if rec is not None and only not in out["stale"]:
+                    rec["size"] = int(plan["manual"])
+            out["sizes"] = {only: int(plan["manual"])}
+        return out
+
+    def reconcile_adopted_protection(self, symbol: str) -> Dict[str, Any]:
+        """Sync wrapper (start_live calls this every sync cycle while adopted trades exist)."""
+        if not self._connected or not symbol:
+            return {"symbol": symbol, "stale": [], "resized": [], "cancelled": 0, "skipped": "not_connected"}
+        try:
+            return self._run_sync(self._async_reconcile_adopted_protection(symbol), timeout=40) or {}
+        except Exception as e:
+            error_logger.error(f"reconcile_adopted_protection failed for {symbol}: {e}")
+            return {"symbol": symbol, "stale": [], "resized": [], "cancelled": 0, "error": str(e)}
+
+    def release_closed_entry(
         self,
         entry_order_id: str,
         symbol: str,
         *,
         reason: str = "position_closed",
     ) -> int:
-        """Cancel working SL/TP legs for one bot entry (safe when position is flat)."""
+        """Bot confirmed this entry is closed: cancel ALL its legs, drop tracking.
+
+        Unlike acknowledge_flat_position this never bulk-cancels the symbol,
+        so a second concurrent MNQ trade keeps its SL/TP.
+        """
+        oid = str(entry_order_id or "").strip()
+        if not oid or not symbol:
+            return 0
+        self.remember_closed_entry(oid, symbol)
+        cancelled = 0
+        if self._connected:
+            with self._order_lock:
+                info = dict(self._orders.get(oid) or {})
+            try:
+                cancelled = int(
+                    self._run_sync(
+                        self._async_cancel_remaining_bracket_legs(
+                            oid, symbol, info or None, reason=reason, force=True,
+                        ),
+                        timeout=25,
+                    )
+                    or 0
+                )
+            except Exception as e:
+                error_logger.error(f"release_closed_entry cancel failed for {oid} {symbol}: {e}")
+        with self._order_lock:
+            removed = self._orders.pop(oid, None)
+        if removed or cancelled:
+            bot_logger.info(
+                f"Released closed entry {oid} ({symbol}): cancelled {cancelled} leg(s) ({reason})"
+            )
+        return cancelled
+
+    def sweep_orphan_working_orders(
+        self,
+        symbol: str,
+        live_entry_ids: Optional[set] = None,
+        *,
+        reason: str = "orphan_sweep",
+    ) -> Dict[str, Any]:
+        """Cancel working bot SL/TP/limit/stop rows not owned by a live entry.
+
+        live_entry_ids: entries the bot still tracks as open (their legs are
+        always kept). Untracked broker exposure is never stripped of
+        protection: if broker size exceeds tracked size the broad sweep is
+        skipped. Manual (tagged non-bot) tickets are never touched.
+        """
+        if not self._connected or not symbol:
+            return {"symbol": symbol, "cancelled": 0, "skipped": "not_connected"}
+        try:
+            return self._run_sync(
+                self._async_sweep_orphan_working_orders(
+                    symbol,
+                    {str(x) for x in (live_entry_ids or set()) if x},
+                    reason=reason,
+                ),
+                timeout=120,
+            ) or {"symbol": symbol, "cancelled": 0}
+        except Exception as e:
+            error_logger.error(f"sweep_orphan_working_orders failed for {symbol}: {e}")
+            return {"symbol": symbol, "cancelled": 0, "error": str(e)}
+
+    async def _async_sweep_orphan_working_orders(
+        self,
+        symbol: str,
+        live_entry_ids: set,
+        *,
+        reason: str = "orphan_sweep",
+    ) -> Dict[str, Any]:
+        result: Dict[str, Any] = {"symbol": symbol, "cancelled": 0, "skipped": ""}
+        keep = set(live_entry_ids or set())
+        # Entries the connector still tracks (grace / brackets settling) stay protected.
+        with self._order_lock:
+            confirmed = {
+                k for k, v in self._confirmed_exit_fills.items()
+                if (v or {}).get("confirmed")
+            }
+        keep |= (self._tracked_bot_entry_ids(symbol) - confirmed)
+
+        cancelled = 0
+        # 1) Legs of entries known to be closed — always safe (their size is gone).
+        with self._order_lock:
+            closed = [
+                (eid, dict(rec)) for eid, rec in self._closed_entry_registry().items()
+                if (rec.get("symbol") in ("", symbol)) and eid not in keep
+            ]
+        now = time.time()
+        for eid, rec in closed:
+            if now - float(rec.get("closed_at") or now) > 1800 or int(rec.get("clean_passes") or 0) >= 3:
+                with self._order_lock:
+                    self._closed_entry_registry().pop(eid, None)
+                continue
+            n = await self._async_cancel_remaining_bracket_legs(
+                eid, symbol, reason=f"{reason}:closed_entry", force=True,
+            )
+            cancelled += int(n or 0)
+            with self._order_lock:
+                live_rec = self._closed_entry_registry().get(eid)
+                if live_rec is not None:
+                    live_rec["clean_passes"] = 0 if n else int(live_rec.get("clean_passes") or 0) + 1
+
+        # 1b) More closing stops than open size (dup re-places / replace races) -> trim extras.
+        try:
+            cancelled += await self._async_trim_excess_stops(symbol, reason=f"{reason}:dup_stops")
+        except Exception as e:
+            error_logger.error(f"trim excess stops {symbol} failed: {e}")
+
+        # 2) Broad sweep of bot-owned rows that no live entry owns.
+        net = await self._async_list_positions_net_or_none(symbol)
+        if net is None:
+            result["skipped"] = "net_unknown"
+        else:
+            tracked_qty = self._tracked_entry_qty(keep) if keep else 0
+            if keep and tracked_qty < len(keep):
+                tracked_qty = len(keep)
+            ok_marks = getattr(self, "_orphan_sweep_ok_at", None)
+            if ok_marks is None:
+                ok_marks = {}
+                self._orphan_sweep_ok_at = ok_marks
+            prev_ok = ok_marks.get(symbol)
+            if abs(int(net)) > tracked_qty:
+                ok_marks.pop(symbol, None)
+                result["skipped"] = f"untracked_exposure net={net} tracked={tracked_qty}"
+                # Throttle: first warn immediate; then every 5 min/symbol or on net/tracked change.
+                warn_marks = getattr(self, "_orphan_untracked_warn", None)
+                if warn_marks is None:
+                    warn_marks = {}
+                    self._orphan_untracked_warn = warn_marks
+                warn_key = (int(net), int(tracked_qty))
+                prev_warn = warn_marks.get(symbol)
+                if (
+                    prev_warn is None
+                    or prev_warn[0] != warn_key
+                    or (now - float(prev_warn[1])) >= 300.0
+                ):
+                    bot_logger.warning(
+                        f"Orphan sweep {symbol}: broker net={net} > tracked={tracked_qty} — "
+                        f"leaving working orders (would strip protection) ({reason})"
+                    )
+                    warn_marks[symbol] = (warn_key, now)
+            elif prev_ok is None or not (1.5 <= now - prev_ok <= 180):
+                # Lucid briefly reports flat after fills: require the size check
+                # to hold on two passes before touching anything not tied to a
+                # known-closed entry.
+                if prev_ok is None or now - prev_ok > 180:
+                    ok_marks[symbol] = now
+                result["skipped"] = "awaiting_stable_net"
+            elif not keep:
+                include_untagged = os.getenv("ORPHAN_SWEEP_UNTAGGED", "1").strip().lower() not in (
+                    "0", "false", "no", "off",
+                )
+                if include_untagged:
+                    cancelled += await self._async_clear_chart_stops(
+                        symbol, include_limits=True, rounds=3, only_if_flat=True,
+                    )
+                else:
+                    cancelled += await self._async_cancel_all_working_bot_orders_for_symbol(
+                        symbol, force=False,
+                    )
+            else:
+                cancelled += await self._async_clear_chart_stops(
+                    symbol, include_limits=True, rounds=2, keep_entry_ids=keep,
+                )
+            if not result["skipped"]:
+                ok_marks[symbol] = now
+        result["cancelled"] = cancelled
+        result["kept_entries"] = sorted(keep)
+        if cancelled:
+            bot_logger.info(
+                f"Orphan sweep {symbol}: cancelled {cancelled} working order(s) "
+                f"keep={sorted(keep)} ({reason})"
+            )
+        return result
+
+    def cancel_entry_bracket_legs(
+        self,
+        entry_order_id: str,
+        symbol: str,
+        *,
+        reason: str = "position_closed",
+        force: bool = True,
+    ) -> int:
+        """Cancel working SL/TP legs for one bot entry.
+
+        force=True by default — required on Lucid ticker+order (no PnL plant)
+        or legs are left forever as orphan stops/limits.
+        """
         if not self._connected or not entry_order_id or not symbol:
             return 0
         try:
@@ -2166,6 +4292,7 @@ class RithmicConnector(BaseBroker):
                         str(entry_order_id),
                         symbol,
                         reason=reason,
+                        force=force,
                     ),
                     timeout=20,
                 )
@@ -2195,6 +4322,54 @@ class RithmicConnector(BaseBroker):
             )
             return 0
 
+    def list_working_orders(self, symbol: str) -> List[Dict[str, Any]]:
+        """Working tickets: buy/sell stop, stop-limit, limit, MIT, native brackets.
+
+        Raises on list failure so callers can fail closed instead of treating
+        an unknown book as empty.
+        """
+        if not self._connected or not symbol:
+            return []
+        rows = self._run_sync(
+            self._async_list_working_listed_orders(symbol, empty_as_working=True),
+            timeout=20,
+        )
+        return list(rows or [])
+
+    def cancel_working_orders_after_exit(
+        self,
+        symbol: str,
+        entry_order_id: str = "",
+        *,
+        reason: str = "position_closed",
+        already_flat: bool = False,
+    ) -> int:
+        """Cancel leftover working MNQ orders after a paper/broker exit.
+
+        already_flat=True means paper size is 0. Then leftover wipe may call
+        flatten_symbol with no market close to clear working tickets.
+        """
+        if not self._connected or not symbol:
+            return 0
+        try:
+            return int(
+                self._run_sync(
+                    self._async_cancel_working_orders_after_exit(
+                        symbol,
+                        str(entry_order_id or ""),
+                        reason=reason,
+                        already_flat=already_flat,
+                    ),
+                    timeout=90,
+                )
+                or 0
+            )
+        except Exception as e:
+            error_logger.error(
+                f"Cancel working orders after exit failed for {symbol}: {e}"
+            )
+            return 0
+
     def flatten_symbol(
         self,
         symbol: str,
@@ -2202,6 +4377,7 @@ class RithmicConnector(BaseBroker):
         max_attempts: int = 5,
         verify_delay: float = 1.5,
         cancel_working_first: bool = True,
+        allow_market_close: bool = True,
     ) -> Dict[str, Any]:
         """Cancel working bot orders, flatten net exposure, verify until flat."""
         if not self._connected or not symbol:
@@ -2215,6 +4391,7 @@ class RithmicConnector(BaseBroker):
                         max_attempts=max_attempts,
                         verify_delay=verify_delay,
                         cancel_working_first=cancel_working_first,
+                        allow_market_close=allow_market_close,
                     ),
                     timeout=timeout,
                 )
@@ -2259,11 +4436,49 @@ class RithmicConnector(BaseBroker):
                 timeout=10,
             )
             with self._order_lock:
+                all_ids = [(k, v.get("symbol", "")) for k, v in self._orders.items()]
+            for k, sym in all_ids:
+                self.remember_closed_entry(k, sym)
+            with self._order_lock:
                 self._orders.clear()
             return True
         except Exception as e:
             error_logger.error(f"Rithmic close_all error: {e}")
             return False
+
+    @staticmethod
+    def _order_is_long(order: Dict[str, Any]) -> Optional[bool]:
+        side = str(order.get("type") or order.get("side") or "").upper()
+        if side in ("BUY", "LONG"):
+            return True
+        if side in ("SELL", "SHORT"):
+            return False
+        try:
+            e = float(order.get("entry_price") or 0)
+            t = float(order.get("take_profit") or 0)
+            if e > 0 and t > 0:
+                return t > e
+        except (TypeError, ValueError):
+            pass
+        return None
+
+    @staticmethod
+    def _stop_on_profit_side(is_long: Optional[bool], entry: float, sl: float) -> bool:
+        """True when SL sits at/through entry (break-even or locked profit).
+
+        Native bracket stop_ticks are an UNSIGNED offset from entry, so such a
+        stop cannot be expressed natively: abs(entry - sl) gets mirrored to the
+        LOSS side (the 'trail moves up then jumps back' bug).
+        """
+        if is_long is None or entry <= 0 or sl <= 0:
+            return False
+        return sl >= entry if is_long else sl <= entry
+
+    @staticmethod
+    def _stop_is_looser(is_long: Optional[bool], new_sl: float, cur_sl: float) -> bool:
+        if is_long is None or cur_sl <= 0 or new_sl <= 0:
+            return False
+        return new_sl < cur_sl - 1e-9 if is_long else new_sl > cur_sl + 1e-9
 
     def modify_position(
         self,
@@ -2285,9 +4500,19 @@ class RithmicConnector(BaseBroker):
                 return False
 
             if not order.get("supports_stop_modify", True):
-                bot_logger.warning(
-                    f"Rithmic modify_position skipped: order {order_id} has no native stop from entry"
-                )
+                # No native bracket stop: manage via protective stop replace instead
+                # (never a dead end for future stop management).
+                if sl is not None:
+                    is_long_o = self._order_is_long(order)
+                    return self.update_stop_loss(
+                        ticket=order_id,
+                        symbol=order.get("symbol", ""),
+                        side="BUY" if is_long_o else "SELL",
+                        size=int(order.get("size") or 1),
+                        new_sl=float(sl),
+                        take_profit=tp,
+                        _from_modify=True,
+                    )
                 return False
 
             if sl is None and tp is None:
@@ -2296,6 +4521,21 @@ class RithmicConnector(BaseBroker):
 
             spec = get_instrument(order["symbol"])
             if sl is not None:
+                is_long = self._order_is_long(order)
+                entry_px = float(order.get("entry_price") or 0)
+                if self._stop_on_profit_side(is_long, entry_px, float(sl)):
+                    bot_logger.info(
+                        f"Rithmic modify_position {order_id}: SL {sl} is at/through entry "
+                        f"{entry_px} - native stop_ticks cannot express it (would mirror to "
+                        f"loss side); use protective replace"
+                    )
+                    return False
+                if self._stop_is_looser(is_long, float(sl), float(order.get("stop_loss") or 0)):
+                    bot_logger.warning(
+                        f"Rithmic modify_position {order_id}: refusing to loosen SL "
+                        f"{order.get('stop_loss')} -> {sl} (ratchet only)"
+                    )
+                    return False
                 stop_ticks = abs(round(
                     (order["entry_price"] - sl) / spec.tick_size
                 ))
@@ -2336,8 +4576,9 @@ class RithmicConnector(BaseBroker):
         size: int,
         new_sl: float,
         take_profit: Optional[float] = None,
+        _from_modify: bool = False,
     ) -> bool:
-        """Tighten stop-loss on broker (native bracket modify or protective cancel/replace)."""
+        """Tighten stop-loss on broker (native bracket modify or protective place-then-cancel)."""
         if not self._connected or new_sl <= 0:
             return False
         order_id = str(ticket)
@@ -2349,8 +4590,23 @@ class RithmicConnector(BaseBroker):
                 order.get("protective_sl_order_id")
                 or order.get("bracket_mode") == "protective_fallback"
             )
+            is_long = str(side).upper() in ("BUY", "LONG")
+            entry_px = float(order.get("entry_price") or 0)
+            cur_sl = float(order.get("stop_loss") or 0)
 
-        if supports_modify and not has_protective:
+        # Ratchet only: never loosen the broker stop once it has been tightened.
+        if self._stop_is_looser(is_long, float(new_sl), cur_sl):
+            bot_logger.warning(
+                f"Rithmic update_stop_loss {order_id}: refusing to loosen SL "
+                f"{cur_sl:.2f} -> {float(new_sl):.2f} (ratchet only)"
+            )
+            return False
+        # Break-even / profit-lock stops cannot be native ticks (unsigned offset
+        # from entry would mirror them to the loss side) -> absolute stop replace.
+        profit_side = self._stop_on_profit_side(is_long, entry_px, float(new_sl))
+
+        # User rule: SL only moves to lock profit, via gated place-then-cancel path.
+        if False and supports_modify and not has_protective and not profit_side and not _from_modify:
             return self.modify_position(ticket=order_id, sl=new_sl, tp=tp if tp > 0 else None)
 
         try:
@@ -2376,6 +4632,230 @@ class RithmicConnector(BaseBroker):
             error_logger.error(f"Rithmic update_stop_loss error for {order_id}: {e}")
             return False
 
+    def cancel_take_profit(
+        self,
+        ticket: str,
+        symbol: str,
+        *,
+        reason: str = "past_tp_trail",
+    ) -> bool:
+        """Cancel working TP leg(s) for an open position; never cancel SL.
+
+        Used when price trades beyond the original take-profit so winners can
+        run under ATR trailing with SL floored at the old TP price.
+        """
+        if not self._connected or not ticket or not symbol:
+            return False
+        try:
+            return bool(
+                self._run_sync(
+                    self._async_cancel_take_profit(
+                        str(ticket),
+                        str(symbol),
+                        reason=reason,
+                    ),
+                    timeout=20,
+                )
+            )
+        except Exception as e:
+            error_logger.error(
+                f"Rithmic cancel_take_profit failed for {ticket} {symbol}: {e}"
+            )
+            return False
+
+    async def _async_cancel_take_profit(
+        self,
+        order_id: str,
+        symbol: str,
+        *,
+        reason: str = "past_tp_trail",
+    ) -> bool:
+        """Cancel protective/native TP tags only; leave SL working."""
+        _, tp_ids = self._bracket_leg_ids(order_id)
+        with self._order_lock:
+            order = dict(self._orders.get(order_id, {}) or {})
+            extra = order.get("protective_tp_order_id")
+            if extra and extra not in tp_ids:
+                tp_ids = list(tp_ids) + [str(extra)]
+
+        # Deduplicate while preserving order
+        seen = set()
+        unique_tp_ids = []
+        for tp_id in tp_ids:
+            if not tp_id or tp_id in seen:
+                continue
+            seen.add(tp_id)
+            unique_tp_ids.append(tp_id)
+
+        if not unique_tp_ids:
+            with self._order_lock:
+                stored = self._orders.get(order_id)
+                if stored is not None:
+                    stored["take_profit"] = 0
+                    stored["native_target_attached"] = False
+                    stored.pop("protective_tp_order_id", None)
+            return True
+
+        cancelled_or_gone = False
+        cancel_failed = False
+        for tp_id in unique_tp_ids:
+            try:
+                working = await self._async_is_order_working(tp_id)
+            except Exception:
+                working = True  # attempt cancel anyway
+            if not working:
+                cancelled_or_gone = True
+                continue
+            ok = await self._async_cancel_protective_leg(
+                tp_id,
+                symbol=symbol,
+                reason=reason,
+                require_flat=False,
+                cancel_path="past_tp_clear",
+            )
+            if ok:
+                cancelled_or_gone = True
+            else:
+                cancel_failed = True
+
+        if cancelled_or_gone and not cancel_failed:
+            with self._order_lock:
+                stored = self._orders.get(order_id)
+                if stored is not None:
+                    stored["take_profit"] = 0
+                    stored["native_target_attached"] = False
+                    stored.pop("protective_tp_order_id", None)
+            bot_logger.info(
+                f"Rithmic cancelled TP for open {order_id} {symbol} "
+                f"(reason={reason}); SL left working"
+            )
+            return True
+
+        if cancelled_or_gone:
+            # Partial success — still clear local TP state so we do not re-arm.
+            with self._order_lock:
+                stored = self._orders.get(order_id)
+                if stored is not None:
+                    stored["take_profit"] = 0
+                    stored["native_target_attached"] = False
+                    stored.pop("protective_tp_order_id", None)
+            bot_logger.warning(
+                f"Rithmic partial TP cancel for {order_id} {symbol} (reason={reason})"
+            )
+            return True
+
+        bot_logger.error(
+            f"Rithmic could not cancel any TP leg for {order_id} {symbol} "
+            f"(reason={reason})"
+        )
+        return False
+
+    def _live_market_price(self, symbol: str) -> float:
+        """Live last (else bid/ask mid) for stop validation. Never entry/fill price."""
+        quote = None
+        try:
+            with self._quote_lock:
+                q = (getattr(self, "_quotes", {}) or {}).get(symbol)
+                quote = dict(q) if q else None
+        except Exception:
+            quote = None
+        if not quote:
+            try:
+                quote = self.get_latest_price(symbol) or {}
+            except Exception:
+                quote = {}
+        last = float(quote.get("last") or 0)
+        if last > 0:
+            return last
+        bid = float(quote.get("bid") or 0)
+        ask = float(quote.get("ask") or 0)
+        if bid > 0 and ask > 0:
+            return (bid + ask) / 2.0
+        return float(bid or ask or 0)
+
+    @staticmethod
+    def _stop_valid_vs_market(is_long: bool, stop: float, market: float, tick: float) -> bool:
+        """Closing stop must sit on the far side of the live market (>=1 tick)."""
+        if market <= 0:
+            return True  # unknown: let broker decide; old stop is never cancelled first
+        if is_long:
+            return stop <= market - tick + 1e-9
+        return stop >= market + tick - 1e-9
+
+    def _log_sl_skip_once(self, order_id: str, msg: str) -> None:
+        seen = self.__dict__.setdefault("_sl_skip_logged", {})
+        if seen.get(order_id) == msg:
+            return
+        seen[order_id] = msg
+        bot_logger.warning(msg)
+
+    async def _async_working_sl_ids(self, order_id: str, exclude: str = "") -> List[str]:
+        ids: List[str] = []
+        sl_ids, _ = self._bracket_leg_ids(order_id)
+        with self._order_lock:
+            hist = list((self._orders.get(order_id, {}) or {}).get("sl_leg_history") or [])
+        for sl_id in list(sl_ids) + hist:
+            if not sl_id or sl_id == exclude or sl_id in ids:
+                continue
+            try:
+                working = await self._async_is_order_working(sl_id)
+            except Exception:
+                working = True  # unknown -> treat as live so we never think we're naked
+            if working:
+                ids.append(sl_id)
+        return ids
+
+    async def _async_place_fresh_sl(
+        self, order_id: str, symbol: str, side: str, qty: int, stop: float, market: float,
+    ) -> Optional[str]:
+        """Submit a NEW stop leg under a fresh tag (old legs untouched). Returns tag or None."""
+        with self._order_lock:
+            _adopted = bool((self._orders.get(order_id) or {}).get("adopted"))
+        if _adopted:
+            # 2026-10-11b ADOPT-SAFE: a stop for a manual trade is only placed while that
+            # side is really open, and never for more than the manual size.
+            net = await self._async_list_positions_net_or_none(symbol)
+            is_long = str(side).lower() in ("buy", "long")
+            if net is None or int(net) == 0 or (int(net) > 0) != is_long:
+                bot_logger.warning(
+                    f"ADOPT-SAFE {order_id} {symbol}: stop NOT placed - broker net={net} "
+                    f"(flat / other side / unknown)"
+                )
+                return None
+            plan = self._adopt_safe_plan(symbol, int(net))
+            if plan["skip"]:
+                bot_logger.warning(f"ADOPT-SAFE {order_id} {symbol}: stop NOT placed - {plan['skip']}")
+                return None
+            if int(qty) > int(plan["manual"]):
+                bot_logger.warning(
+                    f"ADOPT-SAFE {order_id} {symbol}: stop qty {qty} -> {plan['manual']} (manual size)"
+                )
+                qty = int(plan["manual"])
+        with self._order_lock:
+            stored = self._orders.setdefault(order_id, {})
+            seq = int(stored.get("sl_replace_seq") or 0) + 1
+            stored["sl_replace_seq"] = seq
+        prefix = f"{order_id}_r{seq}"
+        protective = await self._async_submit_protective_orders(
+            symbol=symbol,
+            entry_side=side,
+            qty=int(qty),
+            stop_loss=stop,
+            take_profit=0,
+            prefix=prefix,
+            price_ref=market,
+        )
+        new_id = protective.get("protective_sl_order_id")
+        if not new_id:
+            return None
+        with self._order_lock:
+            stored = self._orders.setdefault(order_id, {})
+            hist = list(stored.get("sl_leg_history") or [])
+            if new_id not in hist:
+                hist.append(new_id)
+            stored["sl_leg_history"] = hist
+        return str(new_id)
+
     async def _async_replace_protective_sl(
         self,
         order_id: str,
@@ -2384,80 +4864,382 @@ class RithmicConnector(BaseBroker):
         qty: int,
         new_sl: float,
     ) -> bool:
-        """Cancel working fallback SL and submit a tighter stop (simulator + protective_fallback)."""
+        """Tighten SL safely: validate vs LIVE price, place new stop FIRST, then cancel old.
+
+        If the new stop is rejected (or would be on the wrong side of the live
+        market) the existing stop is left working untouched.
+        """
+        spec = get_instrument(symbol)
+        tick = float(spec.tick_size)
+        is_long = str(side).lower() in ("buy", "long")
+        market = self._live_market_price(symbol)
+        sl_mode = "down" if is_long else "up"
+        stop = self._round_to_tick(float(new_sl), tick, mode=sl_mode)
         with self._order_lock:
-            order = self._orders.get(order_id, {})
-            sl_id = order.get("protective_sl_order_id") or f"{order_id}_sl"
-            price_ref = float(order.get("entry_price") or 0)
-
-        if await self._async_is_order_working(sl_id):
-            await self._async_cancel_protective_leg(
-                sl_id,
-                symbol=symbol,
-                reason="sl_tighten",
-                require_flat=False,
-                cancel_path="replace_sl",
+            _o = self._orders.get(order_id, {}) or {}
+            entry_px = float(_o.get("entry_price") or 0)
+            cur_sl = float(_o.get("stop_loss") or 0)
+        buf_ticks = int(os.getenv("SL_MOVE_MIN_BUFFER_TICKS", "4"))
+        reason = ""
+        if market <= 0:
+            reason = "no live price"
+        elif entry_px <= 0:
+            reason = "no entry price"
+        elif not (market > entry_px if is_long else market < entry_px):
+            reason = f"trade not in profit (live {market:.2f} vs entry {entry_px:.2f})"
+        elif not self._stop_on_profit_side(is_long, entry_px, stop):
+            reason = f"stop {stop:.2f} would not lock profit (entry {entry_px:.2f})"
+        elif cur_sl > 0 and not (stop > cur_sl + 1e-9 if is_long else stop < cur_sl - 1e-9):
+            reason = f"not tighter than current {cur_sl:.2f}"
+        elif not self._stop_valid_vs_market(is_long, stop, market, tick * max(1, buf_ticks)):
+            reason = f"within {buf_ticks} ticks of / wrong side of live {market:.2f}"
+        if reason:
+            self._log_sl_skip_once(
+                order_id,
+                f"SL move skipped for {order_id} {symbol} -> {stop:.2f}: {reason} - keeping current stop",
             )
-            await asyncio.sleep(0.3)
+            return False
 
-        protective = await self._async_submit_protective_orders(
-            symbol=symbol,
-            entry_side=side,
-            qty=int(qty),
-            stop_loss=new_sl,
-            take_profit=0,
-            prefix=order_id,
-            price_ref=price_ref,
-        )
-        new_sl_id = protective.get("protective_sl_order_id")
-        if not new_sl_id:
+        self._mark_sl_change(order_id)
+        old_ids = await self._async_working_sl_ids(order_id)
+        new_id = await self._async_place_fresh_sl(order_id, symbol, side, qty, stop, market)
+        if not new_id:
+            self._mark_sl_change(order_id)
+            error_logger.error(
+                f"SL tighten rejected for {order_id} {symbol} @ {stop:.2f} - "
+                f"previous stop(s) left working: {old_ids or 'NONE'}"
+            )
             return False
 
         with self._order_lock:
             stored = self._orders.setdefault(order_id, {})
-            stored["stop_loss"] = new_sl
-            stored["protective_sl_order_id"] = new_sl_id
+            stored["stop_loss"] = stop
+            stored["protective_sl_order_id"] = new_id
             stored["native_stop_attached"] = True
+            stored["last_valid_sl"] = stop
+        self.__dict__.setdefault("_sl_skip_logged", {}).pop(order_id, None)
+
+        for sl_id in old_ids:
+            if sl_id == new_id:
+                continue
+            try:
+                await self._async_cancel_protective_leg(
+                    sl_id,
+                    symbol=symbol,
+                    reason="sl_tighten",
+                    require_flat=False,
+                    cancel_path="replace_sl",
+                )
+            except Exception as e:
+                error_logger.error(f"cancel old SL {sl_id} after replace failed: {e}")
+        self._mark_sl_change(order_id)
+        return True
+
+    # ── Duplicate-stop guard (2026-10-19) ───────────────────────────────────
+    # Duplicate closing stops at one price all fill together: one closes the trade, the rest
+    # open NEW positions the other way. Broker list_orders + list_positions decide coverage.
+
+    SL_CHANGE_QUIET_SEC = 15.0
+
+    def _mark_sl_change(self, order_id: str) -> None:
+        with self._order_lock:
+            self._orders.setdefault(order_id, {})["sl_change_ts"] = time.time()
+
+    def _sl_change_recent(self, symbol: str) -> bool:
+        now = time.time()
+        with self._order_lock:
+            for info in self._orders.values():
+                if (info or {}).get("symbol") not in ("", None, symbol):
+                    continue
+                if now - float((info or {}).get("sl_change_ts") or 0) < self.SL_CHANGE_QUIET_SEC:
+                    return True
+        return False
+
+    async def _async_closing_stop_rows(self, symbol: str, close_side: str) -> Optional[List[Dict[str, Any]]]:
+        """Working stop / stop-limit rows on close_side for symbol; None if list_orders failed."""
+        if not self._client or not symbol:
+            return None
+        try:
+            orders = await self._client.list_orders(account_id=self._get_account_id()) or []
+        except Exception as e:
+            error_logger.error(f"Rithmic list_orders failed (stop coverage {symbol}): {e}")
+            return None
+        rows: List[Dict[str, Any]] = []
+        for order in orders:
+            data = _response_to_dict_safe(order)
+            if not self._listed_order_matches_symbol(data, symbol):
+                continue
+            if self._listed_order_is_filled(data):
+                continue
+            refs = self._listed_cancel_refs(data)
+            if not self._listed_order_is_working(refs["status"], empty_as_working=True, data=data):
+                continue
+            if self._listed_row_side(data) != close_side or self._listed_row_leg_kind(data) != "sl":
+                continue
+            rows.append(data)
+        return rows
+
+    async def _async_uncovered_stop_qty(self, symbol: str, side: str) -> Optional[int]:
+        """Open size on `side` not yet covered by working closing stops (0 if flat / other side).
+        None when the broker position or order list is unknown."""
+        net = await self._async_list_positions_net_or_none(symbol)
+        if net is None:
+            return None
+        is_long = str(side).lower() in ("buy", "long")
+        if int(net) == 0 or (int(net) > 0) != is_long:
+            return 0
+        rows = await self._async_closing_stop_rows(symbol, "SELL" if is_long else "BUY")
+        if rows is None:
+            return None
+        covered = sum(int(self._listed_row_qty(r) or 1) for r in rows)
+        return max(0, abs(int(net)) - covered)
+
+    def _current_sl_refs(self, symbol: str) -> Tuple[set, set]:
+        """(tags, baskets) of each tracked entry's CURRENT protective stop on symbol."""
+        tags, baskets = set(), set()
+        with self._order_lock:
+            for oid, info in self._orders.items():
+                info = info or {}
+                if info.get("symbol") != symbol or not self._is_bot_entry_user_tag(str(oid)):
+                    continue
+                sl_id = str(info.get("protective_sl_order_id") or "")
+                if sl_id:
+                    tags.add(sl_id)
+                    b = str((self._orders.get(sl_id) or {}).get("basket_id") or "")
+                    if b:
+                        baskets.add(b)
+                b = str(info.get("protective_sl_basket_id") or "")
+                if b:
+                    baskets.add(b)
+        return tags, baskets
+
+    async def _async_trim_excess_stops(self, symbol: str, reason: str = "trim") -> int:
+        """Cancel closing stops whose total qty exceeds the open position. Keeps current stops."""
+        if self._sl_change_recent(symbol):
+            return 0
+        net = await self._async_list_positions_net_or_none(symbol)
+        if net is None or int(net) == 0:
+            return 0  # flat cleanup belongs to the orphan sweep (needs a stable flat)
+        close_side = "BUY" if int(net) < 0 else "SELL"
+        rows = await self._async_closing_stop_rows(symbol, close_side)
+        if not rows:
+            return 0
+        need = abs(int(net))
+        covered = sum(int(self._listed_row_qty(r) or 1) for r in rows)
+        if covered <= need:
+            return 0
+        cur_tags, cur_baskets = self._current_sl_refs(symbol)
+
+        def is_current(r: Dict[str, Any]) -> bool:
+            refs = self._listed_cancel_refs(r)
+            return refs["user_tag"] in cur_tags or bool(refs["basket_id"] and refs["basket_id"] in cur_baskets)
+
+        # non-current legs first (newest first), current stops last
+        ordered = [r for _, r in sorted(enumerate(rows), key=lambda p: (is_current(p[1]), -p[0]))]
+        cancelled = 0
+        for r in ordered:
+            if covered <= need:
+                break
+            refs = self._listed_cancel_refs(r)
+            tag, basket = refs["user_tag"], refs["basket_id"]
+            q = int(self._listed_row_qty(r) or 1)
+            if covered - q < need:
+                continue  # never strip below the open size
+            ok = await self._async_cancel_protective_leg(
+                tag or basket, symbol=symbol, reason=reason, require_flat=False,
+                cancel_path="trim_excess_stops", basket_id=basket,
+            )
+            if ok:
+                covered -= q
+                cancelled += 1
+        if cancelled:
+            bot_logger.warning(
+                f"Duplicate stops {symbol}: cancelled {cancelled} extra {close_side} stop(s) - "
+                f"position {abs(int(net))}, stops now cover {covered} ({reason})"
+            )
+        return cancelled
+
+    def repair_missing_stop(
+        self, ticket: str, symbol: str, side: str, size: int, stop_loss: float,
+    ) -> bool:
+        """Open position with no working SL -> re-place stop at last valid tracked SL.
+
+        Returns True when a stop is (now) working. Throttled to one attempt / 5s / ticket.
+        """
+        if not self._connected or stop_loss <= 0:
+            return False
+        order_id = str(ticket)
+        last = self.__dict__.setdefault("_sl_repair_ts", {})
+        now = time.time()
+        if now - float(last.get(order_id) or 0) < 5.0:
+            return False
+        last[order_id] = now
+        if self._broker_symbol_has_position(symbol) is False:
+            return False
+        try:
+            ok = bool(self._run_sync(
+                self._async_repair_missing_stop(order_id, symbol, side, int(size), float(stop_loss)),
+                timeout=20,
+            ))
+        except Exception as e:
+            error_logger.error(f"repair_missing_stop {order_id} failed: {e}")
+            ok = False
+        if not ok:
+            self._maybe_manual_stop_banner(order_id, symbol, side, int(size), float(stop_loss))
+        return ok
+
+    def _maybe_manual_stop_banner(
+        self, order_id: str, symbol: str, side: str, size: int, stop_loss: float,
+    ) -> None:
+        """After 3 failed order-plant reconnects: one loud line per minute, max."""
+        h = ORDER_HEALTH
+        if not h.degraded or h.reconnect_attempts < 3:
+            return
+        now = time.monotonic()
+        if now - h.last_banner < 60.0:
+            return
+        h.last_banner = now
+        with self._order_lock:
+            stored = self._orders.get(str(order_id), {}) or {}
+            stop = float(stored.get("last_valid_sl") or stored.get("stop_loss") or stop_loss or 0)
+        is_long = str(side).lower() in ("buy", "long")
+        error_logger.critical(
+            f"!!!!! MANUAL ACTION NEEDED: {symbol} {'LONG' if is_long else 'SHORT'} {size} is UNPROTECTED - "
+            f"order connection still down after {h.reconnect_attempts} reconnects. In R|Trader Pro place a "
+            f"{'SELL' if is_long else 'BUY'} STOP for {size} {symbol} at {stop:.2f} NOW !!!!!"
+        )
+
+    async def _async_repair_missing_stop(
+        self, order_id: str, symbol: str, side: str, qty: int, stop_loss: float,
+    ) -> bool:
+        if await self._async_working_sl_ids(order_id):
+            return True  # list_orders lag: a stop IS working, do not double up
+        with self._order_lock:
+            _adopted = bool((self._orders.get(order_id) or {}).get("adopted"))
+        if not _adopted:
+            # Tag lookups miss legs Lucid re-tags / lags on, so "no working SL" is often false.
+            # Decide from broker truth: only place what the open size is really missing.
+            need = await self._async_uncovered_stop_qty(symbol, side)
+            if need is None:
+                self._log_sl_skip_once(
+                    order_id,
+                    f"SL repair {order_id} {symbol}: broker position/orders unknown - not placing "
+                    f"a stop that could double up (retry next sync)",
+                )
+                return False
+            if need <= 0:
+                self._log_sl_skip_once(
+                    order_id,
+                    f"SL repair {order_id} {symbol}: broker already has stop(s) covering the open "
+                    f"size (or is flat) - no new stop",
+                )
+                return True
+            qty = min(int(qty), int(need))
+        if _adopted:
+            # 2026-10-11b ADOPT-SAFE: qty = what is really open on that side and not
+            # already covered by the user's own stop; flat / flipped / unknown -> none.
+            allowed = await self._async_adopt_allowed_qty(order_id, symbol, side, "sl")
+            if allowed <= 0:
+                bot_logger.warning(
+                    f"ADOPT-SAFE {order_id} {symbol}: NOT placing stop - broker position "
+                    f"flat/flipped/unknown or already covered by your own stop"
+                )
+                return False
+            qty = min(int(qty), int(allowed))
+        with self._order_lock:
+            stored = self._orders.get(order_id, {}) or {}
+            tracked = float(stored.get("last_valid_sl") or stored.get("stop_loss") or 0)
+        stop = tracked if tracked > 0 else float(stop_loss)
+        spec = get_instrument(symbol)
+        tick = float(spec.tick_size)
+        is_long = str(side).lower() in ("buy", "long")
+        market = self._live_market_price(symbol)
+        stop = self._round_to_tick(stop, tick, mode="down" if is_long else "up")
+        if not self._stop_valid_vs_market(is_long, stop, market, tick):
+            # Market already through the tracked stop: nearest valid stop (4 ticks away).
+            buf = tick * 4
+            stop = self._round_to_tick(
+                market - buf if is_long else market + buf, tick,
+                mode="down" if is_long else "up",
+            )
+            error_logger.error(
+                f"UNPROTECTED {order_id} {symbol}: tracked SL already crossed by market "
+                f"{market:.2f}; placing emergency stop @ {stop:.2f}"
+            )
+        error_logger.error(
+            f"UNPROTECTED {order_id} {symbol}: no working SL - re-placing stop @ {stop:.2f}"
+        )
+        self._mark_sl_change(order_id)
+        new_id = await self._async_place_fresh_sl(order_id, symbol, side, qty, stop, market)
+        self._mark_sl_change(order_id)
+        if not new_id:
+            error_logger.error(f"SL repair rejected for {order_id} {symbol} @ {stop:.2f}")
+            return False
+        with self._order_lock:
+            stored = self._orders.setdefault(order_id, {})
+            stored["stop_loss"] = stop
+            stored["protective_sl_order_id"] = new_id
+            stored["native_stop_attached"] = True
+            stored["last_valid_sl"] = stop
+        bot_logger.warning(f"SL repaired for {order_id} {symbol} @ {stop:.2f} ({new_id})")
         return True
 
     # ── Position queries ──────────────────────────────────────────
 
     def get_open_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get open positions with ticket IDs for bot tracking.
-        
+
         Rithmic returns aggregate positions by symbol, so we match against
         our _orders dict to reconstruct individual tickets.
+
+        Lucid simulator often reports list_positions=0 briefly after a fill
+        (and sometimes while brackets are still working). Include orders that
+        are still inside the entry-protection grace window so callers do not
+        falsely treat a brand-new fill as closed.
         """
         self._refresh_positions()
-        
+
         result = []
         with self._state_lock:
             # Get symbols that have open positions
             open_symbols = {sym for sym, pos in self._positions.items() if pos.get('size', 0) != 0}
-        
+            positions_snapshot = dict(self._positions)
+
         with self._order_lock:
-            # Return individual orders as "positions" if their symbol still has net exposure
-            for order_id, order_info in self._orders.items():
-                order_symbol = order_info.get('symbol', '')
-                if order_symbol in open_symbols:
-                    # This order is still active (symbol has position)
-                    pos_data = self._positions.get(order_symbol, {})
-                    result.append({
-                        'ticket': order_id,
-                        'pair': order_symbol,
-                        'symbol': order_symbol,
-                        'type': order_info.get('type', 'BUY'),
-                        'size': order_info.get('size', 1),
-                        'open_price': order_info.get('entry_price', pos_data.get('avg_price', 0)),
-                        'sl': order_info.get('stop_loss', 0),
-                        'tp': order_info.get('take_profit', 0),
-                        'open_time': order_info.get('time', ''),
-                        'unrealized_pnl': pos_data.get('unrealized_pnl', 0) / max(1, len([o for o in self._orders.values() if o.get('symbol') == order_symbol])),
-                    })
-        
+            orders_snapshot = list(self._orders.items())
+
+        for order_id, order_info in orders_snapshot:
+            order_symbol = order_info.get('symbol', '')
+            if not order_symbol:
+                continue
+            in_open = order_symbol in open_symbols
+            in_grace = self._order_within_entry_grace(order_id)
+            # Keep recently filled bot entries visible even when PnL plant lags.
+            if not in_open and not in_grace:
+                continue
+            pos_data = positions_snapshot.get(order_symbol, {})
+            same_sym = max(
+                1,
+                len([o for _, o in orders_snapshot if o.get('symbol') == order_symbol]),
+            )
+            result.append({
+                'ticket': order_id,
+                'pair': order_symbol,
+                'symbol': order_symbol,
+                'type': order_info.get('type', 'BUY'),
+                'size': order_info.get('size', 1),
+                'open_price': order_info.get('entry_price', pos_data.get('avg_price', 0)),
+                'sl': order_info.get('stop_loss', 0),
+                'tp': order_info.get('take_profit', 0),
+                'open_time': order_info.get('time', ''),
+                'unrealized_pnl': pos_data.get('unrealized_pnl', 0) / same_sym,
+                'in_entry_grace': in_grace,
+                'broker_net_known': order_symbol in open_symbols,
+            })
+
         if symbol:
             result = [p for p in result if p.get('symbol') == symbol]
-        
+
         return result
 
     def get_bot_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
@@ -2486,17 +5268,123 @@ class RithmicConnector(BaseBroker):
         if not self._loop or not self._loop.is_running():
             raise RuntimeError("Rithmic event loop not running")
         future = asyncio.run_coroutine_threadsafe(coro, self._loop)
-        return future.result(timeout=timeout)
+        try:
+            return future.result(timeout=timeout)
+        except (TimeoutError, concurrent.futures.TimeoutError):
+            # Leaving the task running keeps the history replay "in progress"
+            # and the next fetch is rejected.
+            future.cancel()
+            raise
 
     # ══════════════════════════════════════════════════════════════
     #  INTERNAL: async Rithmic operations
     # ══════════════════════════════════════════════════════════════
 
+    # -- 2026-10-26 order-plant watchdog: reconnect a stuck ORDER plant ---------
+    def _request_order_plant_reconnect(self, reason: str) -> None:
+        """Thread-safe: schedule an order-plant reconnect on the IO loop."""
+        loop = getattr(self, "_loop", None)
+        if loop is None or not loop.is_running() or getattr(self, "_client", None) is None:
+            return
+        if getattr(self, "_quotes_only", False):
+            return
+        try:
+            loop.call_soon_threadsafe(self._kick_order_plant_reconnect, reason)
+        except RuntimeError:
+            pass
+
+    def _kick_order_plant_reconnect(self, reason: str) -> None:
+        h = ORDER_HEALTH
+        if h.in_progress or time.monotonic() < h.next_allowed:
+            return
+        h.in_progress = True
+
+        async def _run():
+            try:
+                await self._async_reconnect_order_plant(reason)
+            finally:
+                h.in_progress = False
+
+        asyncio.ensure_future(_run())
+
+    async def _async_reconnect_order_plant(self, reason: str) -> bool:
+        h = ORDER_HEALTH
+        client = getattr(self, "_client", None)
+        plant = (getattr(client, "plants", None) or {}).get("order") if client else None
+        if plant is None:
+            return False
+        h.reconnect_attempts += 1
+        n = h.reconnect_attempts
+        wait = order_reconnect_backoff(n)
+        h.next_allowed = time.monotonic() + wait
+        bot_logger.warning(
+            f"Rithmic order connection stuck ({reason}) - reconnecting order plant "
+            f"(attempt {n}); prices keep streaming meanwhile"
+        )
+        for step, timeout in ((plant._stop_background_tasks, 10), (plant._logout, 5), (plant._disconnect, 5)):
+            try:
+                await asyncio.wait_for(step(), timeout=timeout)
+            except Exception:
+                pass
+        try:
+            plant._disconnect_event.clear()
+            plant._reconnected_event.set()
+        except Exception:
+            pass
+        try:
+            await asyncio.wait_for(plant._connect(), timeout=15)
+            await plant._start_background_tasks()
+            await asyncio.wait_for(plant._login(), timeout=30)
+        except Exception as e:
+            h.next_allowed = time.monotonic() + wait
+            bot_logger.warning(
+                f"Rithmic order plant reconnect attempt {n} failed ({type(e).__name__}: {str(e)[:80]}) "
+                f"- next try in {wait:.0f}s"
+            )
+            return False
+        mark_order_plant_reconnected()
+        note_order_plant_reconnected()
+        self._post_reconnect_resync = True
+        self.__dict__.setdefault("_sl_repair_ts", {}).clear()
+        h.next_allowed = time.monotonic() + wait
+        bot_logger.warning(
+            f"Rithmic order plant reconnected (attempt {n}) - re-checking stops/targets on open positions"
+        )
+        return True
+
+    # -- plant connection events (one clean line per disconnect) --------------
+    def _on_plant_disconnected(self, plant_type) -> None:
+        down = self.__dict__.setdefault("_plants_down", set())
+        name = getattr(plant_type, "name", str(plant_type))
+        if name not in down:
+            down.add(name)
+            bot_logger.warning(
+                f"Rithmic {name} disconnected - auto-reconnecting; working SL/TP stay on the exchange"
+            )
+
+    def _on_plant_connected(self, plant_type) -> None:
+        install_rithmic_disconnect_log_filter()
+        down = self.__dict__.setdefault("_plants_down", set())
+        name = getattr(plant_type, "name", str(plant_type))
+        if name in down:
+            down.discard(name)
+            if "ORDER" in name.upper() or "PNL" in name.upper():
+                mark_order_plant_reconnected()
+                self._post_reconnect_resync = True
+            bot_logger.warning(f"Rithmic {name} reconnected - resyncing orders/positions once")
+
     async def _async_connect(self, url: str) -> None:
         from async_rithmic import RithmicClient, OrderPlacement, DataType
-        from async_rithmic.objects import RetrySettings
+        from async_rithmic.objects import ReconnectionSettings, RetrySettings
 
         install_rithmic_log_redaction()
+        install_async_rithmic_patches()
+        install_order_plant_patches()
+        install_rithmic_disconnect_log_filter()
+        install_repeated_error_collapser((bot_logger, error_logger))
+        if os.getenv("RITHMIC_ORDER_AUTO_RECONNECT", "1").strip().lower() not in ("0", "false", "no", "off"):
+            set_order_plant_reconnect_callback(self._request_order_plant_reconnect)
+        reconnect_floor = float(os.getenv("RITHMIC_RECONNECT_MIN_DELAY", "45"))
         self._client = RithmicClient(
             user=self._user,
             password=self._password,
@@ -2510,6 +5398,13 @@ class RithmicConnector(BaseBroker):
                 timeout=self._request_timeout,
                 jitter_range=(1.0, 2.5),
             ),
+            reconnection_settings=ReconnectionSettings(
+                max_retries=None,
+                backoff_type="linear",
+                interval=reconnect_floor,
+                max_delay=120,
+                jitter_range=(2.0, 8.0),
+            ),
         )
 
         # Register callbacks for real-time data
@@ -2518,6 +5413,8 @@ class RithmicConnector(BaseBroker):
         self._client.on_account_pnl_update += self._on_account_pnl
         self._client.on_instrument_pnl_update += self._on_instrument_pnl
         self._client.on_exchange_order_notification += self._on_exchange_order_notification
+        self._client.on_disconnected += self._on_plant_disconnected
+        self._client.on_connected += self._on_plant_connected
 
         if self._quotes_only:
             from async_rithmic.enums import SysInfraType
@@ -2528,9 +5425,15 @@ class RithmicConnector(BaseBroker):
             await self._client.connect(plants=[SysInfraType.TICKER_PLANT])
             return
 
-        skip_history = os.getenv("RITHMIC_SKIP_HISTORY_PNL", "").strip().lower() in (
+        skip_history_pnl = os.getenv("RITHMIC_SKIP_HISTORY_PNL", "").strip().lower() in (
             "1", "true", "yes", "on",
         )
+        skip_history = skip_history_pnl or str(
+            os.getenv("RITHMIC_SKIP_HISTORY", "")
+        ).strip().lower() in ("1", "true", "yes", "on")
+        skip_pnl = skip_history_pnl or str(
+            os.getenv("RITHMIC_SKIP_PNL", "")
+        ).strip().lower() in ("1", "true", "yes", "on")
         order_only = os.getenv("RITHMIC_ORDER_PLANT_ONLY", "").strip().lower() in (
             "1", "true", "yes", "on",
         )
@@ -2543,7 +5446,7 @@ class RithmicConnector(BaseBroker):
             await self._client.connect(plants=[SysInfraType.ORDER_PLANT])
             await self._async_configure_execution()
             return
-        if skip_history:
+        if skip_history and skip_pnl:
             from async_rithmic.enums import SysInfraType
 
             bot_logger.info(
@@ -2554,8 +5457,34 @@ class RithmicConnector(BaseBroker):
             )
             await self._async_configure_execution()
             return
+        if skip_history and not skip_pnl:
+            from async_rithmic.enums import SysInfraType
+
+            bot_logger.info(
+                "Rithmic Lucid plants: ticker + order + pnl (history skipped) "
+                "— position Stop Loss / Take Profit need pnl plant"
+            )
+            await self._client.connect(
+                plants=[
+                    SysInfraType.TICKER_PLANT,
+                    SysInfraType.ORDER_PLANT,
+                    SysInfraType.PNL_PLANT,
+                ]
+            )
+            await self._async_configure_execution()
+            try:
+                await self._client.subscribe_to_pnl_updates()
+            except Exception as pnl_exc:
+                bot_logger.warning(
+                    f"Rithmic pnl subscribe failed (positions may lag): {pnl_exc}"
+                )
+            return
 
         # Connect all plants (ticker, order, history, pnl)
+        bot_logger.info(
+            "Rithmic Lucid plants: ticker + order + pnl + history "
+            "(1m bars for day hybrid / paper seed)"
+        )
         await self._client.connect()
 
         await self._async_configure_execution()
@@ -2742,6 +5671,7 @@ class RithmicConnector(BaseBroker):
                 self._quotes[our_sym] = {
                     "bid": 0.0, "ask": 0.0, "last": 0.0,
                     "bid_size": 0.0, "ask_size": 0.0,
+                    "updated_at": 0.0,
                 }
 
             if data.get("data_type") == DataType.BBO:
@@ -2757,9 +5687,11 @@ class RithmicConnector(BaseBroker):
                     self._quotes[our_sym]["bid_size"] = float(bid_size)
                 if ask_size is not None:
                     self._quotes[our_sym]["ask_size"] = float(ask_size)
+                self._quotes[our_sym]["updated_at"] = time.time()
             elif data.get("data_type") == DataType.LAST_TRADE:
                 if "trade_price" in data:
                     self._quotes[our_sym]["last"] = float(data["trade_price"])
+                    self._quotes[our_sym]["updated_at"] = time.time()
 
         if data.get("data_type") == DataType.BBO:
             self._tick_flow.record_bbo(our_sym, data)
@@ -2793,7 +5725,7 @@ class RithmicConnector(BaseBroker):
 
         key = f"{our_sym}_{bar_type}"
         bar = {
-            "datetime": data.get("bar_end_datetime", datetime.now(timezone.utc)),
+            "datetime": _rithmic_bar_time(data.get("bar_end_datetime", datetime.now(timezone.utc))),
             "open": float(data.get("open_price", 0)),
             "high": float(data.get("high_price", 0)),
             "low": float(data.get("low_price", 0)),
@@ -2821,7 +5753,13 @@ class RithmicConnector(BaseBroker):
             error_logger.error(f"Account PnL callback error: {e}")
 
     async def _on_exchange_order_notification(self, response) -> None:
-        """Cancel sibling protective leg when SL or TP fills (OCO-style cleanup)."""
+        """Cancel ALL remaining protective legs when SL or TP fills (OCO cleanup).
+
+        Per-entry: a fill of this bot_id's SL or TP always cancels the sibling
+        STOP/STOP-LIMIT/LIMIT (and any blank-tag baskets). Never gate on
+        list_positions lag — that left working stop-limits on the chart after TP.
+        Other concurrent entries keep their own legs (cancel is tag/basket scoped).
+        """
         try:
             from async_rithmic.enums import ExchangeOrderNotificationType
 
@@ -2830,49 +5768,79 @@ class RithmicConnector(BaseBroker):
             notify_type = data.get("notify_type", getattr(response, "notify_type", None))
             if notify_type != ExchangeOrderNotificationType.FILL:
                 return
-            if user_tag.endswith("_sl"):
-                sibling_id = user_tag[:-3] + "_tp"
-                leg = "SL"
-                entry_id = user_tag[:-3]
-            elif user_tag.endswith("_tp"):
-                sibling_id = user_tag[:-3] + "_sl"
-                leg = "TP"
-                entry_id = user_tag[:-3]
-            else:
-                return
-
-            if not await self._async_is_leg_filled(user_tag):
-                bot_logger.warning(
-                    f"Keeping SL/TP — {user_tag} fill notification but leg not confirmed filled"
-                )
-                return
-
-            fill_snap = await self._async_get_order_snapshot(user_tag)
-            fill_price = self._fill_price_from_order(fill_snap, 0)
-            self._record_exit_fill(entry_id, leg, fill_price, user_tag)
             bot_logger.info(
-                f"Broker-confirmed bracket {leg} fill: entry={entry_id} leg={user_tag} "
-                f"price={fill_price:.2f} account={self._get_account_id()} "
-                f"route={self.get_trade_route('CME')}"
+                f"Exchange FILL notification tag={user_tag or '-'} "
+                f"basket={data.get('basket_id') or getattr(response, 'basket_id', '') or '-'} "
+                f"px={data.get('fill_price') or data.get('avg_fill_price') or '-'}"
             )
+            if not user_tag:
+                # Lucid often blanks user_tag on resting legs — map basket → leg.
+                user_tag = self._leg_tag_for_basket(
+                    str(data.get("basket_id") or getattr(response, "basket_id", "") or "")
+                )
+            entry_id = ""
+            sibling_id = ""
+            leg = ""
+            for suffix, filled_leg, sibling_suf in (
+                ("_tp_lit", "TP", "_sl"),
+                ("_tp2", "TP", "_sl"),
+                ("_tp", "TP", "_sl"),
+                ("_sl", "SL", "_tp"),
+            ):
+                if user_tag.endswith(suffix):
+                    entry_id = user_tag[: -len(suffix)]
+                    sibling_id = entry_id + sibling_suf
+                    leg = filled_leg
+                    break
+            if not entry_id or not leg:
+                return
+
+            fill_price = 0.0
+            for key in ("fill_price", "avg_fill_price", "fillPrice", "avgFillPrice", "price"):
+                try:
+                    fill_price = float(data.get(key) or 0)
+                except (TypeError, ValueError):
+                    fill_price = 0.0
+                if fill_price > 0:
+                    break
+
+            leg_confirmed = await self._async_is_leg_filled(user_tag)
+            if not leg_confirmed:
+                # Exchange FILL is authoritative for OCO cleanup. Lucid often
+                # cannot re-resolve the tag via get_order; still cancel sibling
+                # so STOP-LIMIT does not linger after TP (or TP after SL).
+                self._remember_detected_exit_fill(entry_id, leg, fill_price, user_tag)
+                bot_logger.warning(
+                    f"Exchange FILL {user_tag} not re-confirmed via get_order — "
+                    f"still cancelling remaining brackets "
+                    f"(notified px={fill_price:.2f})"
+                )
+            else:
+                if fill_price <= 0:
+                    fill_snap = await self._async_get_order_snapshot(user_tag)
+                    fill_price = self._fill_price_from_order(fill_snap, 0)
+                self._record_exit_fill(entry_id, leg, fill_price, user_tag)
+                bot_logger.info(
+                    f"Broker-confirmed bracket {leg} fill: entry={entry_id} leg={user_tag} "
+                    f"price={fill_price:.2f} account={self._get_account_id()} "
+                    f"route={self.get_trade_route('CME')}"
+                )
 
             with self._order_lock:
-                symbol = self._orders.get(entry_id, {}).get("symbol")
-            if symbol:
-                pos_open = await self._async_broker_has_open_position(symbol)
-                if pos_open is None:
-                    bot_logger.warning(
-                        f"Keeping SL/TP {sibling_id} — broker position unknown after "
-                        f"{leg} fill ({user_tag})"
-                    )
-                    return
-                if pos_open:
-                    bot_logger.info(
-                        f"Keeping SL/TP {sibling_id} — position still open on broker "
-                        f"after {leg} fill ({user_tag})"
-                    )
-                    return
+                info = dict(self._orders.get(entry_id) or {})
+                symbol = info.get("symbol")
+            if not symbol:
+                # Closed-entry registry / closed fills may still know the symbol.
+                with self._order_lock:
+                    rec = (self._closed_entry_registry().get(entry_id) or {})
+                    symbol = rec.get("symbol") or None
 
+            if symbol:
+                self.remember_closed_entry(entry_id, symbol)
+
+            # Always cancel THIS entry's sibling + any leftover baskets.
+            # Do not consult _async_sibling_leg_is_orphan: position-plant lag
+            # after a 1-lot TP fill used to skip cancel and leave STOP-LIMIT live.
             await self._async_cancel_protective_leg(
                 sibling_id,
                 symbol=symbol,
@@ -2880,6 +5848,19 @@ class RithmicConnector(BaseBroker):
                 require_flat=False,
                 cancel_path="oco_sibling",
             )
+            if symbol:
+                await self._async_cancel_remaining_bracket_legs(
+                    entry_id,
+                    symbol,
+                    info or None,
+                    reason=f"oco_{leg.lower()}_filled",
+                    force=True,
+                )
+                # Drop local tracking so bot no longer treats STOP-LIMIT as active.
+                with self._order_lock:
+                    self._orders.pop(entry_id, None)
+                    for suf in ("_sl", "_tp", "_tp_lit", "_tp2"):
+                        self._orders.pop(f"{entry_id}{suf}", None)
         except Exception as e:
             error_logger.error(f"Protective OCO handler error: {e}")
 
@@ -2891,9 +5872,10 @@ class RithmicConnector(BaseBroker):
         reason: str = "unspecified",
         require_flat: bool = True,
         cancel_path: str = "unspecified",
+        basket_id: str = "",
     ) -> bool:
-        """Cancel a standalone protective SL/TP order by user_tag."""
-        if not leg_order_id or not self._client:
+        """Cancel a standalone protective SL/TP order by basket_id or user_tag."""
+        if (not leg_order_id and not basket_id) or not self._client:
             return False
 
         if require_flat:
@@ -2921,23 +5903,18 @@ class RithmicConnector(BaseBroker):
                     )
                     return False
 
-        try:
-            await self._client.cancel_order(
-                order_id=leg_order_id,
-                account_id=self._get_account_id(),
-            )
+        ok = await self._async_cancel_order_on_plant(
+            symbol=str(symbol or ""),
+            reason=f"{cancel_path}:{reason}",
+            basket_id=basket_id,
+            user_tag=str(leg_order_id or ""),
+        )
+        if ok:
             bot_logger.info(
-                f"Cancelling SL/TP {leg_order_id} — path={cancel_path}, reason={reason}"
+                f"Cancelling SL/TP {leg_order_id or basket_id} — "
+                f"path={cancel_path}, reason={reason}"
             )
-            return True
-        except Exception as e:
-            if self._is_order_not_found_error(e):
-                bot_logger.debug(
-                    f"Rithmic cancel {leg_order_id} — already gone ({e})"
-                )
-                return True
-            bot_logger.warning(f"Rithmic could not cancel {leg_order_id}: {e}")
-            return False
+        return ok
 
     async def _async_cancel_remaining_bracket_legs(
         self,
@@ -2946,41 +5923,99 @@ class RithmicConnector(BaseBroker):
         order_info: Optional[Dict[str, Any]] = None,
         *,
         reason: str = "position_closed",
+        force: bool = False,
     ) -> int:
-        """Cancel any working SL/TP legs still open for a bot entry."""
+        """Cancel any working SL/TP legs still open for a bot entry.
+
+        Lucid template-316 cancel requires basket_id for resting Buy/Sell Stops —
+        cancelling by user_tag alone often leaves the stop on the chart.
+        """
         if not entry_order_id or not symbol:
             return 0
-        if self._order_within_entry_grace(entry_order_id):
+        if not force and self._order_within_entry_grace(entry_order_id):
             bot_logger.info(
                 f"Keeping SL/TP for {entry_order_id} — entry grace active "
                 f"(path=cancel_remaining_bracket, reason={reason})"
             )
             return 0
-        still_open = await self._async_is_entry_still_open(entry_order_id, symbol)
-        if still_open is True:
-            bot_logger.info(
-                f"Keeping SL/TP for {entry_order_id} — entry still open "
-                f"(path=cancel_remaining_bracket, reason={reason})"
-            )
-            return 0
-        if still_open is None:
-            bot_logger.warning(
-                f"Keeping SL/TP for {entry_order_id} — entry state unknown "
-                f"(path=cancel_remaining_bracket, reason={reason})"
-            )
-            return 0
-        cancelled = 0
-        sl_ids, tp_ids = self._bracket_leg_ids(entry_order_id)
+        if not force:
+            still_open = await self._async_is_entry_still_open(entry_order_id, symbol)
+            if still_open is True:
+                bot_logger.info(
+                    f"Keeping SL/TP for {entry_order_id} — entry still open "
+                    f"(path=cancel_remaining_bracket, reason={reason})"
+                )
+                return 0
+            if still_open is None:
+                bot_logger.warning(
+                    f"Keeping SL/TP for {entry_order_id} — entry state unknown "
+                    f"(path=cancel_remaining_bracket, reason={reason})"
+                )
+                return 0
+
+        entry = str(entry_order_id)
+        wanted_tags = {
+            f"{entry}_sl",
+            f"{entry}_tp",
+            f"{entry}_tp_lit",
+        }
         if order_info:
             for key in ("protective_sl_order_id", "protective_tp_order_id"):
-                leg_id = order_info.get(key)
-                if leg_id and leg_id not in sl_ids + tp_ids:
-                    if leg_id.endswith("_sl") or "_sl" in str(leg_id):
-                        sl_ids.append(str(leg_id))
-                    else:
-                        tp_ids.append(str(leg_id))
+                leg_id = str(order_info.get(key) or "").strip()
+                if leg_id:
+                    wanted_tags.add(leg_id)
+
+        cancelled = 0
+        seen_baskets: set = set()
+        # Primary path: list_orders → cancel by basket_id (honored for STOP / STOP_LIMIT)
+        try:
+            listed = await self._async_list_working_listed_orders(
+                symbol, empty_as_working=True,
+            )
+        except Exception:
+            listed = []
+        for data in listed or []:
+            refs = self._listed_cancel_refs(data)
+            tag = refs["user_tag"]
+            basket = refs["basket_id"]
+            if tag not in wanted_tags and tag != entry and not (
+                tag.startswith(f"{entry}_") and ("_sl" in tag or "_tp" in tag)
+            ):
+                # Also match blank-tag rows whose basket we tracked for this entry
+                known = self._known_bot_baskets_for_entry(entry)
+                if not (basket and basket in known):
+                    continue
+            if basket and basket in seen_baskets:
+                continue
+            ok = await self._async_cancel_protective_leg(
+                tag or basket,
+                symbol=symbol,
+                reason=reason,
+                require_flat=False,
+                cancel_path="cancel_remaining_bracket",
+                basket_id=basket,
+            )
+            if ok:
+                cancelled += 1
+                if basket:
+                    seen_baskets.add(basket)
+                bot_logger.info(
+                    f"Cancelled orphan stop/limit {tag or basket} "
+                    f"basket={basket or '-'} for {symbol} after exit"
+                )
+
+        # Fallback: known protective ids from local tracking (may lack basket)
+        sl_ids, tp_ids = self._bracket_leg_ids(entry)
         for leg_id in sl_ids + tp_ids:
-            if not leg_id or not await self._async_is_order_working(leg_id):
+            if not leg_id:
+                continue
+            if not await self._async_is_order_working(leg_id):
+                continue
+            with self._order_lock:
+                basket_hint = str(
+                    (self._orders.get(leg_id) or {}).get("basket_id") or ""
+                )
+            if basket_hint and basket_hint in seen_baskets:
                 continue
             ok = await self._async_cancel_protective_leg(
                 leg_id,
@@ -2988,9 +6023,12 @@ class RithmicConnector(BaseBroker):
                 reason=reason,
                 require_flat=False,
                 cancel_path="cancel_remaining_bracket",
+                basket_id=basket_hint,
             )
             if ok:
                 cancelled += 1
+                if basket_hint:
+                    seen_baskets.add(basket_hint)
                 bot_logger.info(
                     f"Cancelled orphan stop order {leg_id} for {symbol} after exit"
                 )
@@ -3005,7 +6043,142 @@ class RithmicConnector(BaseBroker):
             return 0
         if self._list_positions_net_qty(positions, symbol) != 0:
             return 0
-        return await self._async_cancel_all_working_bot_orders_for_symbol(symbol)
+        return await self._async_cancel_all_working_bot_orders_for_symbol(
+            symbol, force=True,
+        )
+
+    async def _async_wipe_working_if_already_flat(
+        self,
+        symbol: str,
+        *,
+        reason: str,
+        already_flat: bool,
+        entry_order_id: str = "",
+    ) -> bool:
+        """Retry bot-owned cancels when size is already 0. Never cancel_all."""
+        listed_net = await self._async_list_positions_net_or_none(symbol)
+        if listed_net is not None and int(listed_net) != 0:
+            bot_logger.info(
+                f"Skip leftover wipe for {symbol} — list_positions "
+                f"net={listed_net} still live ({reason})"
+            )
+            return False
+        if listed_net is None and not already_flat:
+            bot_logger.info(
+                f"Skip leftover wipe for {symbol} — size not confirmed "
+                f"flat ({reason})"
+            )
+            return False
+        bot_logger.info(
+            f"Leftover bot-owned wipe for {symbol} "
+            f"listed_net={listed_net if listed_net is not None else 'unavailable'} "
+            f"paper_flat={already_flat} ({reason})"
+        )
+        await self._async_cancel_all_working_bot_orders_for_symbol(
+            symbol, force=True, entry_order_id=entry_order_id,
+        )
+        return True
+
+    async def _async_cancel_working_orders_after_exit(
+        self,
+        symbol: str,
+        entry_order_id: str = "",
+        *,
+        reason: str = "position_closed",
+        already_flat: bool = False,
+    ) -> int:
+        """Cancel leftover bot-owned working buy/sell limit+stop after exit.
+
+        Re-lists until bot-owned book is empty. Manual/untagged tickets are
+        left alone — never account-wide cancel_all.
+        """
+        cancelled = 0
+        entry = str(entry_order_id or "")
+        if entry:
+            cancelled += await self._async_cancel_remaining_bracket_legs(
+                entry,
+                symbol,
+                reason=reason,
+                force=True,
+            )
+        wait = float(getattr(self, "_leftover_retry_wait", 0.55) or 0)
+        attempts = int(getattr(self, "_leftover_retry_attempts", 6) or 6)
+        remaining = 0
+        leftover: List[Dict[str, Any]] = []
+        known_baskets = self._known_bot_baskets_for_entry(entry)
+        for attempt in range(max(1, attempts)):
+            cancelled += await self._async_cancel_all_working_bot_orders_for_symbol(
+                symbol, force=True, entry_order_id=entry,
+            )
+            leftover = await self._async_list_working_listed_orders(
+                symbol, empty_as_working=True,
+            )
+            bot_leftover = [
+                row for row in leftover
+                if self._is_bot_owned_listed_order(
+                    row, known_baskets=known_baskets, entry_order_id=entry,
+                )
+            ]
+            manual_n = len(leftover) - len(bot_leftover)
+            if manual_n:
+                briefs = [
+                    self._listed_order_brief(row)
+                    for row in leftover
+                    if not self._is_bot_owned_listed_order(
+                        row, known_baskets=known_baskets, entry_order_id=entry,
+                    )
+                ]
+                bot_logger.info(
+                    f"leaving {manual_n} manual working orders alone ({symbol}): "
+                    + "; ".join(sorted(set(briefs))[:4])
+                )
+            remaining = len(bot_leftover)
+            if remaining == 0:
+                break
+            kinds = sorted({self._listed_order_kind(row) for row in bot_leftover})
+            bot_logger.warning(
+                f"{remaining} bot-owned working {symbol} order(s) still listed after "
+                f"leftover cancel attempt {attempt + 1}/{attempts} "
+                f"kinds={','.join(kinds) or '?'} ({reason})"
+            )
+            await self._async_wipe_working_if_already_flat(
+                symbol,
+                reason=reason,
+                already_flat=already_flat,
+                entry_order_id=entry,
+            )
+            leftover = await self._async_list_working_listed_orders(
+                symbol, empty_as_working=True,
+            )
+            bot_leftover = [
+                row for row in leftover
+                if self._is_bot_owned_listed_order(
+                    row, known_baskets=known_baskets, entry_order_id=entry,
+                )
+            ]
+            remaining = len(bot_leftover)
+            if remaining == 0:
+                break
+            if attempt + 1 < attempts and wait > 0:
+                await asyncio.sleep(wait)
+        if entry:
+            self.remember_closed_entry(entry, symbol)
+            with self._order_lock:
+                self._orders.pop(entry, None)
+        if remaining:
+            kinds = sorted({self._listed_order_kind(row) for row in bot_leftover})
+            error_logger.error(
+                f"{remaining} leftover bot-owned working {symbol} order(s) still listed "
+                f"after exit ({reason}) kinds={','.join(kinds) or '?'} rows="
+                f"{self._listed_leftover_log_rows(bot_leftover)}"
+            )
+            return 0
+        if cancelled:
+            bot_logger.info(
+                f"Cancelled {cancelled} leftover working bot order(s) for {symbol} "
+                f"after exit ({reason})"
+            )
+        return cancelled
 
     async def _async_cancel_entry_protective_orders(
         self,
@@ -3050,7 +6223,7 @@ class RithmicConnector(BaseBroker):
             data = _response_to_dict_safe(response)
             symbol = data.get("symbol", "")
             our_sym = self._reverse_resolve(symbol)
-            qty = int(data.get("buy_qty", 0)) - int(data.get("sell_qty", 0))
+            qty = self._position_qty_from_broker_data(data)
 
             with self._state_lock:
                 if qty != 0:
@@ -3095,9 +6268,20 @@ class RithmicConnector(BaseBroker):
             if lookback_hours_override is not None
             else float(os.getenv("CANDLE_HISTORY_HOURS", "8"))
         )
-        bar_span = timedelta(minutes=timeframe_minutes * num_candles * 3)
-        calendar_span = timedelta(hours=lookback_hours)
-        start_time = end_time - max(bar_span, calendar_span)
+        # 2026-10-11: count trading time, not wall clock, so a Sunday-night /
+        # post-halt request reaches back over the weekend for enough bars.
+        try:
+            from src.broker.rithmic_stability import history_start_for_bars
+
+            start_time = history_start_for_bars(
+                end_time, timeframe_minutes, num_candles,
+                calendar_hours=lookback_hours,
+                max_days=float(os.getenv("CANDLE_HISTORY_MAX_DAYS", "4")),
+            )
+        except Exception:
+            bar_span = timedelta(minutes=timeframe_minutes * num_candles * 3)
+            calendar_span = timedelta(hours=lookback_hours)
+            start_time = end_time - max(bar_span, calendar_span)
 
         bars = await self._client.get_historical_time_bars(
             symbol=rith_sym,
@@ -3114,7 +6298,7 @@ class RithmicConnector(BaseBroker):
         rows = []
         for b in bars:
             rows.append({
-                "datetime": b.get("bar_end_datetime", b.get("datetime")),
+                "datetime": _rithmic_bar_time(b.get("bar_end_datetime", b.get("datetime"))),
                 "open": float(b.get("open_price", 0)),
                 "high": float(b.get("high_price", 0)),
                 "low": float(b.get("low_price", 0)),
@@ -3128,7 +6312,10 @@ class RithmicConnector(BaseBroker):
 
         df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
         df = df.sort_values("datetime").reset_index(drop=True)
-        return df.tail(num_candles).reset_index(drop=True)
+        out = df.tail(num_candles).reset_index(drop=True)
+        # Bars stamped by bar_end_datetime = finished bars (read by shadow_bar_export only).
+        out.attrs["bar_time"] = "end"
+        return out
 
     async def _async_get_candles_seconds(
         self,
@@ -3158,7 +6345,7 @@ class RithmicConnector(BaseBroker):
         rows = []
         for b in bars:
             rows.append({
-                "datetime": b.get("bar_end_datetime", b.get("datetime")),
+                "datetime": _rithmic_bar_time(b.get("bar_end_datetime", b.get("datetime"))),
                 "open": float(b.get("open_price", 0)),
                 "high": float(b.get("high_price", 0)),
                 "low": float(b.get("low_price", 0)),
@@ -3174,21 +6361,76 @@ class RithmicConnector(BaseBroker):
         df = df.sort_values("datetime").reset_index(drop=True)
         return df.tail(num_candles).reset_index(drop=True)
 
+    def _lucid_paper_route(self) -> bool:
+        return bool(getattr(self, "_using_simulator_route", False)) or history_pnl_skipped(
+            quotes_only=self._quotes_only
+        )
+
+    def _sl_order_type_for_route(self) -> Any:
+        """Lucid sim mis-labels STOP_MARKET as 'Buy Order' — use STOP_LIMIT for visible stops."""
+        from async_rithmic import OrderType
+
+        use_stop_limit = str(
+            os.getenv("RITHMIC_LUCID_SL_STOP_LIMIT", "true")
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        if self._lucid_paper_route() and use_stop_limit:
+            return OrderType.STOP_LIMIT
+        return OrderType.STOP_MARKET
+
+    @staticmethod
+    def _stop_limit_prices(
+        sl_price: float,
+        tick_size: float,
+        *,
+        is_long: bool,
+    ) -> tuple:
+        """(trigger_price, limit_price) for a protective stop."""
+        trigger = sl_price
+        # Limit slightly through the stop so Lucid books a stop-limit, not a plain market stop.
+        slip = tick_size * 2
+        if is_long:
+            limit = sl_price - slip
+        else:
+            limit = sl_price + slip
+        return trigger, limit
+
     @staticmethod
     def _protective_chart_legend(entry_side: str) -> str:
         """Explain how Rithmic labels exit orders on the chart (not a bug)."""
         is_long = entry_side.lower() in ("buy", "long")
         if is_long:
             return (
-                "Rithmic chart (LONG): SELL STOP = SL (exit if price falls), "
-                "SELL LIMIT = TP (exit if price rises). "
-                "Native bracket legs show as bracket; fallback shows as plain stops/limits."
+                "Lucid (LONG): SELL STOP-LIMIT = Stop Loss, SELL LIMIT = Take Profit."
             )
         return (
-            "Rithmic chart (SHORT): BUY STOP = SL (exit if price rises), "
-            "BUY LIMIT = TP (exit if price falls). "
-            "Lucid may label these 'Buy Stop' / 'Buy Limit' — that is correct for a short."
+            "Lucid (SHORT): BUY STOP-LIMIT = Stop Loss, BUY LIMIT = Take Profit "
+            "(not a second entry — both close the short)."
         )
+
+    @staticmethod
+    def _reanchor_brackets_to_fill(
+        signal_ref: float,
+        fill_price: float,
+        stop_loss: float,
+        take_profit: float,
+        *,
+        is_long: bool,
+        tick_size: float,
+    ) -> tuple:
+        """Keep SL/TP distance from signal when market fill differs from bar entry."""
+        if fill_price <= 0 or signal_ref <= 0:
+            return stop_loss, take_profit
+        if abs(fill_price - signal_ref) < tick_size * 0.01:
+            return stop_loss, take_profit
+        sl_dist = abs(signal_ref - stop_loss) if stop_loss > 0 else 0.0
+        tp_dist = abs(take_profit - signal_ref) if take_profit > 0 else 0.0
+        new_sl = stop_loss
+        new_tp = take_profit
+        if stop_loss > 0 and sl_dist > 0:
+            new_sl = fill_price - sl_dist if is_long else fill_price + sl_dist
+        if take_profit > 0 and tp_dist > 0:
+            new_tp = fill_price + tp_dist if is_long else fill_price - tp_dist
+        return new_sl, new_tp
 
     @staticmethod
     def _bracket_ticks(
@@ -3252,12 +6494,23 @@ class RithmicConnector(BaseBroker):
             return None
 
     @staticmethod
+    def _report_type_is_reject(report_type: Any) -> bool:
+        rt = str(report_type or "").lower().strip()
+        return rt in {
+            "reject", "rejected", "failure", "failed",
+            "cancel", "cancelled", "canceled",
+        }
+
+    @staticmethod
     def _is_filled_order_snapshot(order: Any) -> bool:
         """True when Rithmic reports the order completed via fill (not rejected)."""
         if not order:
             return False
         status = str(getattr(order, "status", "") or "").lower()
         report_type = str(getattr(order, "report_type", "") or "").lower()
+        # Lucid often returns status=complete + report_type=reject for bad stops.
+        if RithmicConnector._report_type_is_reject(report_type):
+            return False
         if status in {"rejected", "failed", "failure", "cancelled", "canceled"}:
             return False
         if report_type in {"fill", "filled"}:
@@ -3268,7 +6521,7 @@ class RithmicConnector(BaseBroker):
         self,
         order_id: str,
         *,
-        wait_sec: float = 0.75,
+        wait_sec: float = 1.5,
     ) -> str:
         """Return 'working', 'filled', or 'failed' after a protective-leg submit."""
         if not order_id:
@@ -3277,19 +6530,25 @@ class RithmicConnector(BaseBroker):
         if await self._async_is_order_working(order_id):
             return "working"
         order = await self._async_get_order_snapshot(order_id)
+        if order:
+            report_type = str(getattr(order, "report_type", "") or "").lower()
+            status = str(getattr(order, "status", "") or "").lower()
+            if self._report_type_is_reject(report_type) or status in {
+                "rejected", "failed", "failure", "cancelled", "canceled",
+            }:
+                return "failed"
         if self._is_filled_order_snapshot(order):
             return "filled"
-        if order:
-            status = str(getattr(order, "status", "") or "").lower()
-            if status in {"rejected", "failed", "failure", "cancelled", "canceled"}:
-                return "failed"
+        # One more list_orders poll — Lucid often lags get_order(user_tag).
+        if await self._async_is_order_working(order_id):
+            return "working"
         return "failed"
 
     async def _async_verify_submitted_leg(
         self,
         order_id: str,
         *,
-        wait_sec: float = 0.75,
+        wait_sec: float = 2.0,
         leg: str = "",
     ) -> bool:
         """Wait briefly, then confirm a protective leg is working or already filled."""
@@ -3297,6 +6556,7 @@ class RithmicConnector(BaseBroker):
             order_id, wait_sec=wait_sec,
         )
         if outcome == "working":
+            record_order_plant_success("protective leg working")
             return True
         if outcome == "filled":
             order = await self._async_get_order_snapshot(order_id)
@@ -3316,14 +6576,115 @@ class RithmicConnector(BaseBroker):
                 f"Rithmic protective leg {order_id} not found after submit "
                 f"(may have been rejected before appearing in list_orders)"
             )
+            record_order_plant_failure("protective leg not found after submit")
         return False
+
+    @staticmethod
+    def _listed_order_is_filled(data: Dict[str, Any]) -> bool:
+        refs = RithmicConnector._listed_cancel_refs(data)
+        status = refs["status"].lower()
+        report_type = str(
+            data.get("report_type") or data.get("reportType") or ""
+        ).lower()
+        if RithmicConnector._report_type_is_reject(report_type):
+            return False
+        if status in {"rejected", "failed", "failure", "cancelled", "canceled"}:
+            return False
+        if report_type in {"fill", "filled"}:
+            return True
+        return status in {"complete", "completed", "filled"}
+
+    @staticmethod
+    def _fill_price_from_listed_order(data: Dict[str, Any], fallback: float = 0.0) -> float:
+        for key in (
+            "avg_fill_price", "avgFillPrice", "fill_price", "fillPrice",
+            "price", "trigger_price", "triggerPrice", "limit_price", "limitPrice",
+        ):
+            val = data.get(key)
+            if val in (None, ""):
+                continue
+            try:
+                px = float(val)
+            except (TypeError, ValueError):
+                continue
+            if px > 0:
+                return px
+        return float(fallback or 0.0)
+
+    async def _async_listed_protective_fill_for_entry(
+        self,
+        order_id: str,
+        symbol: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Detect SL/TP fill via list_orders when get_order(user_tag) misses native legs."""
+        if not self._client or not order_id or not symbol:
+            return None
+        sl_ids, tp_ids = self._bracket_leg_ids(order_id)
+        watch = {str(t) for t in sl_ids + tp_ids if t}
+        basket_leg: Dict[str, str] = {}
+        for leg_name in ("sl", "tp"):
+            hint = self._leg_basket_for_tag(f"{order_id}_{leg_name}")
+            if hint:
+                basket_leg[hint] = leg_name.upper()
+        try:
+            orders = await self._client.list_orders(
+                account_id=self._get_account_id(),
+            ) or []
+        except Exception:
+            return None
+        for order in orders:
+            data = _response_to_dict_safe(order)
+            if not self._listed_order_matches_symbol(data, symbol):
+                continue
+            refs = self._listed_cancel_refs(data)
+            tag = refs["user_tag"]
+            by_basket = basket_leg.get(refs["basket_id"]) if refs["basket_id"] else None
+            if tag not in watch and not tag.startswith(f"{order_id}_") and not by_basket:
+                continue
+            if not self._listed_order_is_filled(data):
+                continue
+            ptype = self._listed_price_type(data).lower()
+            if by_basket and not tag.startswith(f"{order_id}_"):
+                leg = by_basket
+            elif tag.endswith("_sl") or "stop" in ptype:
+                leg = "SL"
+            else:
+                leg = "TP"
+            with self._order_lock:
+                info = self._orders.get(order_id, {})
+                fallback = float(info.get("stop_loss") or 0) if leg == "SL" else float(info.get("take_profit") or 0)
+            return {
+                "leg": leg,
+                "exit_price": self._fill_price_from_listed_order(data, fallback),
+                "user_tag": tag,
+                "basket_id": refs["basket_id"],
+            }
+        return None
 
     async def _async_is_leg_filled(self, order_id: str) -> bool:
         """True when a protective order user_tag has filled (terminal fill state)."""
         if not order_id:
             return False
         order = await self._async_get_order_snapshot(order_id)
-        return self._is_filled_order_snapshot(order)
+        if self._is_filled_order_snapshot(order):
+            return True
+        if not self._client:
+            return False
+        try:
+            orders = await self._client.list_orders(
+                account_id=self._get_account_id(),
+            ) or []
+        except Exception:
+            return False
+        hint = self._leg_basket_for_tag(order_id)
+        for row in orders:
+            data = _response_to_dict_safe(row)
+            refs = self._listed_cancel_refs(data)
+            if refs["user_tag"] != order_id and not (hint and refs["basket_id"] == hint):
+                continue
+            if self._listed_order_is_filled(data):
+                return True
+        return False
 
     def _order_within_entry_grace(self, order_id: str) -> bool:
         """True shortly after order placement while broker position may not be visible yet."""
@@ -3387,6 +6748,21 @@ class RithmicConnector(BaseBroker):
 
     @staticmethod
     def _position_qty_from_broker_data(data: Dict[str, Any]) -> int:
+        # Rithmic buy_qty/sell_qty = FILLED + WORKING order qty, so a leftover
+        # working BUY TP/SL makes a flat account look "+2". Use real position
+        # fields first: net_quantity, then fill_buy_qty - fill_sell_qty.
+        for key in ("net_quantity",):
+            val = data.get(key)
+            if val is not None and val != "":
+                try:
+                    return int(val)
+                except (TypeError, ValueError):
+                    pass
+        if data.get("fill_buy_qty") is not None or data.get("fill_sell_qty") is not None:
+            try:
+                return int(data.get("fill_buy_qty") or 0) - int(data.get("fill_sell_qty") or 0)
+            except (TypeError, ValueError):
+                pass
         buy = int(data.get("buy_qty", 0) or 0)
         sell = int(data.get("sell_qty", 0) or 0)
         if buy or sell:
@@ -3421,6 +6797,37 @@ class RithmicConnector(BaseBroker):
             if self._position_matches_symbol(data, symbol):
                 return self._position_qty_from_broker_data(data)
         return 0
+
+    async def _async_list_positions_net_or_none(self, symbol: str) -> Optional[int]:
+        """Signed net from PnL list_positions, or None if that plant is unavailable."""
+        if not symbol:
+            return None
+        positions = await self._async_list_positions()
+        if positions is None:
+            return None
+        return self._list_positions_net_qty(positions, symbol)
+
+    def _listed_leftover_log_rows(self, leftover: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        rows = []
+        for data in leftover:
+            refs = self._listed_cancel_refs(data)
+            rows.append({
+                "kind": self._listed_order_kind(data),
+                "status": refs["status"],
+                "user_tag": refs["user_tag"],
+                "basket_id": refs["basket_id"],
+                "exchange_order_id": refs["exchange_order_id"],
+                "price_type": self._listed_price_type(data),
+                "transaction_type": str(
+                    data.get("transaction_type") or data.get("transactionType") or ""
+                ),
+                "quantity": data.get("quantity") or data.get("qty") or data.get("stop_quantity")
+                or data.get("target_quantity"),
+                "price": data.get("price") or data.get("trigger_price") or data.get("stop_price")
+                or data.get("target_price"),
+                "symbol": data.get("symbol") or data.get("exchange_symbol"),
+            })
+        return rows
 
     async def _async_collect_bot_entry_ids(self, symbol: str) -> List[str]:
         """Bot entry user_tags from local cache plus unfilled entries in list_orders."""
@@ -3469,12 +6876,31 @@ class RithmicConnector(BaseBroker):
         entry = await self._async_get_order_snapshot(order_id)
         if entry and self._is_working_order_status(getattr(entry, "status", "")):
             return None
+        with self._order_lock:
+            locally_filled = bool((self._orders.get(order_id) or {}).get("fill_time"))
         if not entry or not self._is_filled_order_snapshot(entry):
+            # Lucid often cannot resolve the entry user_tag via get_order. If we
+            # saw the fill ourselves, that is NOT "never filled" — keep checking
+            # legs instead of declaring the trade closed (ghost-flat wipe bug).
+            if not locally_filled:
+                return False
+
+        listed_fill = await self._async_listed_protective_fill_for_entry(order_id, symbol)
+        if listed_fill:
+            self._remember_detected_exit_fill(order_id, listed_fill.get("leg"),
+                                              listed_fill.get("exit_price"),
+                                              listed_fill.get("user_tag") or "")
             return False
 
         sl_ids, tp_ids = self._bracket_leg_ids(order_id)
         for leg_id in sl_ids + tp_ids:
             if leg_id and await self._async_is_leg_filled(leg_id):
+                leg = "SL" if leg_id in sl_ids else "TP"
+                with self._order_lock:
+                    info = self._orders.get(order_id) or {}
+                    fb = float(info.get("stop_loss" if leg == "SL" else "take_profit") or 0)
+                px = await self._async_leg_fill_price(leg_id, fb)
+                self._remember_detected_exit_fill(order_id, leg, px, leg_id)
                 return False
 
         if self._order_within_entry_grace(order_id):
@@ -3490,6 +6916,16 @@ class RithmicConnector(BaseBroker):
         for leg_id in sl_ids + tp_ids:
             if leg_id and await self._async_is_order_working(leg_id):
                 return True
+
+        # User moved / cancel-replaced the SL/TP on Lucid: the bot's tags are
+        # gone but the position is still protected by the new working legs.
+        try:
+            rebound = (await self._async_rebind_symbol_legs(symbol)).get(str(order_id)) or {}
+        except Exception as e:
+            bot_logger.debug(f"leg rebind skipped for {order_id} {symbol}: {e}")
+            rebound = {}
+        if rebound.get("sl_working") or rebound.get("tp_working"):
+            return True
 
         with self._order_lock:
             info = self._orders.get(order_id, {})
@@ -3566,6 +7002,7 @@ class RithmicConnector(BaseBroker):
             if still_open is not False:
                 continue
             legs_cancelled += await self._async_cancel_stale_entry_legs(order_id, symbol)
+            self.remember_closed_entry(order_id, symbol)
             with self._order_lock:
                 removed = self._orders.pop(order_id, None)
             if removed:
@@ -3626,10 +7063,14 @@ class RithmicConnector(BaseBroker):
         try:
             return self._run_sync(
                 self._async_reconcile_symbol_exposure(symbol),
-                timeout=20,
+                timeout=8,
             ) or {}
         except Exception as e:
-            error_logger.error(f"reconcile_symbol_exposure failed for {symbol}: {e}")
+            error_logger.error(
+                f"reconcile_symbol_exposure failed for {symbol}: "
+                f"{self._format_connect_error(e)}"
+            )
+            # Do NOT report flat — a failed query must not wipe live local positions.
             return {
                 "broker_net": 0,
                 "list_positions_net": 0,
@@ -3637,9 +7078,10 @@ class RithmicConnector(BaseBroker):
                 "open_order_ids": [],
                 "working_entries": 0,
                 "stale_cleared": 0,
-                "exposure_source": "flat",
+                "exposure_source": "unknown",
                 "tag_inferred_entries": 0,
-                "error": str(e),
+                "error": self._format_connect_error(e),
+                "unknown": True,
             }
 
     async def _async_infer_open_from_filled_entries(
@@ -3695,7 +7137,8 @@ class RithmicConnector(BaseBroker):
             return True
 
         if not self._using_simulator_route:
-            return False
+            # Still try inference when PnL plant is empty (paper Lucid).
+            pass
 
         try:
             inferred = self._run_sync(
@@ -3704,10 +7147,16 @@ class RithmicConnector(BaseBroker):
             )
             if inferred is True:
                 return True
+            if inferred is None:
+                # Unknown on sim is common (empty list_positions). Do not claim flat —
+                # that falsely force-syncs open trades and freezes the hunt loop.
+                return None
         except Exception as e:
             error_logger.error(
-                f"Rithmic entry-fill position inference failed for {symbol}: {e}"
+                f"Rithmic entry-fill position inference failed for {symbol}: "
+                f"{e!r}"
             )
+            return None
         return False
 
     def get_symbol_list_positions_net(self, symbol: str) -> Optional[int]:
@@ -3742,36 +7191,54 @@ class RithmicConnector(BaseBroker):
         *,
         symbol: str,
         reason: str = "cancel",
+        basket_id: str = "",
     ) -> bool:
-        """Cancel a working bot entry order (not SL/TP leg)."""
-        if not order_id or not self._client:
+        """Cancel a working order on the order plant (not flatten)."""
+        oid = str(order_id or "").strip()
+        bid = str(basket_id or "").strip()
+        if not oid and not bid:
             return False
-        try:
-            await self._client.cancel_order(
-                order_id=order_id,
-                account_id=self._get_account_id(),
-            )
-            bot_logger.info(
-                f"Cancelled working bot order {order_id} {symbol} ({reason})"
-            )
-            return True
-        except Exception as e:
-            if self._is_order_not_found_error(e):
-                bot_logger.debug(
-                    f"Cancel bot order {order_id} — already gone ({reason}): {e}"
-                )
-                return True
-            error_logger.error(
-                f"Cancel working bot order {order_id} failed ({reason}): {e}"
-            )
+        if not self._client:
             return False
+        tag = oid if oid.startswith("bot_") else ""
+        if not bid and oid and not oid.startswith("bot_"):
+            bid = oid
+        return await self._async_cancel_order_on_plant(
+            symbol=symbol,
+            reason=reason,
+            basket_id=bid,
+            user_tag=tag,
+        )
 
     @staticmethod
     def _is_bot_entry_user_tag(tag: str) -> bool:
         tag = str(tag or "")
         if not tag.startswith("bot_"):
             return False
-        return not any(tag.endswith(suffix) for suffix in ("_sl", "_tp", "_tp_lit"))
+        if any(tag.endswith(suffix) for suffix in ("_sl", "_tp", "_tp_lit", "_tp2")):
+            return False
+        # "<entry>_r14" is the prefix of a replaced/repaired SL leg, not an entry.
+        return not _REPLACE_SEQ_RE.search(tag)
+
+    @staticmethod
+    def _entry_id_for_leg_tag(tag: str) -> str:
+        """Owning entry for a protective leg tag, else "".
+
+        bot_X_sl / bot_X_tp / bot_X_tp_lit -> bot_X
+        bot_X_r14_sl (SL replaced by trail/lock or re-placed by repair) -> bot_X
+        """
+        t = str(tag or "").strip()
+        for suf in ("_tp_lit", "_tp2", "_sl", "_tp"):
+            if t.endswith(suf):
+                return _REPLACE_SEQ_RE.sub("", t[: -len(suf)])
+        return ""
+
+    def _kept_leg_baskets(self, keep: set) -> set:
+        """Every basket id known to belong to a kept (live) entry, incl. _rN legs."""
+        out: set = set()
+        for eid in keep or ():
+            out |= self._known_bot_baskets_for_entry(str(eid))
+        return out
 
     async def _async_count_working_entry_orders(self, symbol: str) -> int:
         """Unfilled bot entry parent orders for symbol (excludes SL/TP legs)."""
@@ -3831,11 +7298,14 @@ class RithmicConnector(BaseBroker):
         if self._list_positions_net_qty(positions, symbol) != 0:
             return True
 
-        if not self._using_simulator_route:
-            return False
-
+        # Lucid ticker+order / empty PnL plant often returns [] even with a live fill.
+        # Always try entry-fill inference (not only when the route name says simulator).
         inferred = await self._async_infer_open_from_filled_entries(symbol)
-        return True if inferred is True else False
+        if inferred is True:
+            return True
+        if inferred is None:
+            return None
+        return False
 
     @staticmethod
     def _fill_price_from_order(order: Any, fallback: float = 0) -> float:
@@ -4040,6 +7510,30 @@ class RithmicConnector(BaseBroker):
                         f"{symbol}: {_response_to_dict_safe(last)}"
                     )
                     return False
+                # Persist basket_id so list_orders / cancel can find the leg even
+                # when get_order(user_tag) lags on Lucid.
+                basket_id = str(
+                    getattr(last, "basket_id", None)
+                    or getattr(last, "basketId", None)
+                    or ""
+                )
+                if basket_id:
+                    with self._order_lock:
+                        stored = self._orders.setdefault(order_id, {"ticket": order_id})
+                        stored["basket_id"] = basket_id
+                        parent = order_id.rsplit("_", 1)[0] if "_" in order_id else ""
+                        if parent.startswith("bot_"):
+                            parent_rec = self._orders.setdefault(parent, {"ticket": parent})
+                            key = (
+                                "protective_sl_basket_id"
+                                if leg == "SL"
+                                else "protective_tp_basket_id"
+                            )
+                            parent_rec[key] = basket_id
+                    bot_logger.info(
+                        f"Rithmic {leg} submit accepted {order_id} basket={basket_id} "
+                        f"{symbol} price={price:.2f} trigger={trigger_price:.2f}"
+                    )
         except RithmicErrorResponse as e:
             error_logger.error(
                 f"Rithmic rejected {leg} {order_id} {symbol} "
@@ -4052,19 +7546,105 @@ class RithmicConnector(BaseBroker):
             )
             return False
 
-        if await self._async_verify_submitted_leg(order_id, leg=leg):
+        if await self._async_verify_submitted_leg(order_id, leg=leg, wait_sec=2.0):
+            booked = await self._async_listed_leg_price_type(order_id)
+            if leg == "TP" and booked and self._price_type_is_stop(booked):
+                error_logger.error(
+                    f"Rithmic TP {order_id} booked as STOP ({booked}) — expected LIMIT; "
+                    f"cancelling bad leg"
+                )
+                await self._async_cancel_protective_leg(
+                    order_id,
+                    symbol=symbol,
+                    reason="tp_booked_as_stop",
+                    require_flat=False,
+                    cancel_path="tp_type_mismatch",
+                )
+                return False
+            if leg == "SL" and booked and self._price_type_is_limit_only(booked):
+                error_logger.error(
+                    f"Rithmic SL {order_id} booked as LIMIT ({booked}) — expected STOP; "
+                    f"cancelling bad leg"
+                )
+                await self._async_cancel_protective_leg(
+                    order_id,
+                    symbol=symbol,
+                    reason="sl_booked_as_limit",
+                    require_flat=False,
+                    cancel_path="sl_type_mismatch",
+                )
+                return False
             if leg == "SL":
+                px_note = (
+                    f"trigger={trigger_price:.2f} limit={price:.2f}"
+                    if price > 0 and trigger_price > 0
+                    else f"@ {trigger_price:.2f}"
+                )
                 bot_logger.info(
-                    f"SL STOP verified @ {trigger_price:.2f} — {order_id} {symbol} "
-                    f"({close_label} STOP closes {'long' if is_long else 'short'})"
+                    f"SL verified {px_note} — {order_id} {symbol} "
+                    f"({close_label} stop closes {'long' if is_long else 'short'})"
+                    + (f" price_type={booked}" if booked else "")
                 )
             else:
                 bot_logger.info(
                     f"TP LIMIT verified @ {price:.2f} — {order_id} {symbol} "
                     f"({close_label} LIMIT closes {'long' if is_long else 'short'})"
+                    + (f" price_type={booked}" if booked else "")
                 )
+            # Ensure basket_id is cached for later cancel (template 316 needs it)
+            try:
+                our_sym = symbol
+                # symbol arg here is often the broker contract (MNQZ6); resolve via parent
+                cached = await self._async_resolve_basket_for_tag(order_id)
+                if cached:
+                    bot_logger.info(
+                        f"Rithmic {leg} basket cached {order_id} basket={cached}"
+                    )
+            except Exception:
+                pass
             return True
         return False
+
+    @staticmethod
+    def _price_type_is_stop(raw: str) -> bool:
+        t = str(raw or "").strip().lower().replace("-", " ").replace("_", " ")
+        if t in {"3", "4", "stop", "stop market", "stopmarket", "stop limit", "stoplimit"}:
+            return True
+        return "stop" in t and "limit if touched" not in t
+
+    @staticmethod
+    def _price_type_is_limit_only(raw: str) -> bool:
+        t = str(raw or "").strip().lower().replace("-", " ").replace("_", " ")
+        if t in {"1", "limit"}:
+            return True
+        return t == "limit" or t.startswith("limit ") and "stop" not in t and "touch" not in t
+
+    async def _async_listed_leg_price_type(self, order_id: str) -> str:
+        """Return Lucid/Rithmic price_type string for a resting leg (by tag or basket)."""
+        if not order_id or not self._client:
+            return ""
+        basket_hint = ""
+        with self._order_lock:
+            basket_hint = str((self._orders.get(order_id) or {}).get("basket_id") or "")
+        try:
+            orders = await self._client.list_orders(
+                account_id=self._get_account_id(),
+            ) or []
+        except Exception:
+            return ""
+        for row in orders:
+            data = _response_to_dict_safe(row)
+            refs = self._listed_cancel_refs(data)
+            tag = str(refs.get("user_tag") or "")
+            basket = str(refs.get("basket_id") or "")
+            if tag == order_id or (basket_hint and basket == basket_hint):
+                return self._listed_price_type(data) or str(
+                    getattr(row, "price_type", "") or ""
+                )
+        order = await self._async_get_order_snapshot(order_id)
+        if order:
+            return str(getattr(order, "price_type", "") or "")
+        return ""
 
     async def _async_try_attach_native_target(
         self,
@@ -4100,7 +7680,99 @@ class RithmicConnector(BaseBroker):
         normalized = str(status or "").lower().strip()
         if not normalized:
             return False
+        # Lucid resting stops often report "trigger pending" / "triggerpending"
+        if "pending" in normalized or "trigger" in normalized:
+            if normalized not in _PROTECTIVE_TERMINAL_STATUSES:
+                return True
         return normalized not in _PROTECTIVE_TERMINAL_STATUSES
+
+    def cancel_stale_bot_brackets(
+        self,
+        symbol: str,
+        live_entry_ids: Optional[set] = None,
+    ) -> int:
+        """Cancel bot SL/TP on the book whose entry id is not in live_entry_ids.
+
+        Uses list_orders basket_id so Buy/Sell Stops actually clear on Lucid.
+        """
+        if not self._connected or not symbol:
+            return 0
+        live = {str(x) for x in (live_entry_ids or set()) if x}
+        try:
+            return int(
+                self._run_sync(
+                    self._async_cancel_stale_bot_brackets(symbol, live),
+                    timeout=45,
+                )
+                or 0
+            )
+        except Exception as e:
+            error_logger.error(f"cancel_stale_bot_brackets failed for {symbol}: {e}")
+            return 0
+
+    async def _async_cancel_stale_bot_brackets(
+        self,
+        symbol: str,
+        live_entry_ids: set,
+    ) -> int:
+        listed = await self._async_list_working_listed_orders(
+            symbol, empty_as_working=True,
+        )
+        cancelled = 0
+        seen: set = set()
+        for data in listed or []:
+            if not self._is_bot_owned_listed_order(data):
+                continue
+            refs = self._listed_cancel_refs(data)
+            tag = refs["user_tag"]
+            basket = refs["basket_id"]
+            entry = self._entry_id_for_leg_tag(tag)
+            if basket and live_entry_ids and basket in self._kept_leg_baskets(live_entry_ids):
+                continue
+            if (
+                self._price_type_is_stop(self._listed_price_type(data)) or tag.endswith("_sl")
+            ) and not self._stop_cancel_allowed(
+                await self._async_list_positions_net_or_none(symbol), entry, 0,
+            ):
+                continue  # never strip a stop while size is open
+            if not entry and tag.startswith("bot_"):
+                # bare entry still working — leave if live
+                if tag in live_entry_ids:
+                    continue
+                entry = tag
+            if entry and entry in live_entry_ids:
+                continue
+            if not entry and not basket:
+                continue
+            # Skip non-protective bare entries that are live fills (already complete)
+            if entry and entry in live_entry_ids:
+                continue
+            key = basket or tag
+            if key in seen:
+                continue
+            ok = await self._async_cancel_protective_leg(
+                tag or basket,
+                symbol=symbol,
+                reason="stale_not_in_live_book",
+                require_flat=False,
+                cancel_path="stale_bracket_sweep",
+                basket_id=basket,
+            )
+            if not ok and basket:
+                ok = await self._async_cancel_order_on_plant(
+                    symbol=symbol,
+                    reason="stale_bracket_sweep:stale_not_in_live_book",
+                    basket_id=basket,
+                    user_tag=tag,
+                )
+            if ok:
+                cancelled += 1
+                seen.add(key)
+                bot_logger.info(
+                    f"Stale bracket cancelled {symbol} tag={tag or '-'} "
+                    f"basket={basket or '-'} entry={entry or '-'}"
+                )
+        return cancelled
 
     async def _async_is_order_working(self, order_id: str) -> bool:
         """True when a user_tag order exists on Rithmic and is not terminal."""
@@ -4111,11 +7783,42 @@ class RithmicConnector(BaseBroker):
                 order_id=order_id,
                 account_id=self._get_account_id(),
             )
-            if not order:
-                return False
-            return self._is_working_order_status(getattr(order, "status", ""))
+            if order and self._is_working_order_status(getattr(order, "status", "")):
+                return True
+        except Exception:
+            pass
+        # Lucid often won't resolve protective legs via get_order(user_tag) — scan list.
+        basket_hint = ""
+        with self._order_lock:
+            basket_hint = str(
+                (self._orders.get(order_id) or {}).get("basket_id") or ""
+            )
+        try:
+            orders = await self._client.list_orders(
+                account_id=self._get_account_id(),
+            ) or []
         except Exception:
             return False
+        for row in orders:
+            data = _response_to_dict_safe(row)
+            refs = self._listed_cancel_refs(data)
+            tag = str(refs.get("user_tag") or "")
+            basket = str(refs.get("basket_id") or "")
+            if tag != order_id and not tag.endswith(order_id):
+                if not (basket_hint and basket == basket_hint):
+                    continue
+            if self._listed_order_is_filled(data):
+                continue
+            if self._is_working_order_status(
+                str(data.get("status") or data.get("order_status") or "")
+            ):
+                return True
+            st = str(data.get("status") or data.get("order_status") or "").lower()
+            if refs.get("basket_id") and st in (
+                "", "unknown", "open", "working", "partial", "submitted",
+            ):
+                return True
+        return False
 
     async def _async_native_bracket_legs(self, entry_order_id: str) -> tuple:
         """Return (sl_ok, tp_ok) from template-330 native bracket tables."""
@@ -4127,10 +7830,13 @@ class RithmicConnector(BaseBroker):
         )
         if not order:
             return False, False
-        stop_ticks, target_ticks = await self._client.get_stop_and_target(
+        stop_and_target = await self._client.get_stop_and_target(
             basket_id=order.basket_id,
             account_id=order.account_id,
         )
+        if not stop_and_target or len(stop_and_target) < 2:
+            return False, False
+        stop_ticks, target_ticks = stop_and_target[0], stop_and_target[1]
         return stop_ticks is not None, target_ticks is not None
 
     async def _async_query_broker_protection(
@@ -4269,31 +7975,110 @@ class RithmicConnector(BaseBroker):
         sl_ok = stop_loss <= 0
         tp_ok = take_profit <= 0
 
+        market = float(price_ref or 0)
+        if market <= 0:
+            quote = self.get_latest_price(symbol) or {}
+            market = float(
+                quote.get("last") or quote.get("bid") or quote.get("ask") or 0
+            )
+
         if stop_loss > 0:
             sl_mode = "down" if is_long else "up"
             sl_price = self._round_to_tick(stop_loss, tick_size, mode=sl_mode)
+            if market > 0:
+                buffer = tick_size * 4
+                if is_long and sl_price >= market:
+                    adjusted = self._round_to_tick(
+                        market - buffer, tick_size, mode="down"
+                    )
+                    bot_logger.warning(
+                        f"SL {sl_price:.2f} not below market {market:.2f} for long — "
+                        f"clamping to {adjusted:.2f}"
+                    )
+                    sl_price = adjusted
+                elif (not is_long) and sl_price <= market:
+                    adjusted = self._round_to_tick(
+                        market + buffer, tick_size, mode="up"
+                    )
+                    bot_logger.warning(
+                        f"SL {sl_price:.2f} not above market {market:.2f} for short — "
+                        f"clamping to {adjusted:.2f}"
+                    )
+                    sl_price = adjusted
             if abs(sl_price - stop_loss) >= tick_size * 0.01:
                 bot_logger.info(
                     f"SL rounded to tick: {stop_loss:.2f} → {sl_price:.2f} ({symbol})"
                 )
             sl_id = f"{prefix}_sl"
-            if not await self._async_is_order_working(sl_id) and not await self._async_is_leg_filled(sl_id):
-                if await self._async_submit_protective_leg(
-                    leg="SL",
-                    order_id=sl_id,
-                    symbol=rith_sym,
-                    exchange=exchange,
-                    qty=qty,
-                    close_side=close_side,
-                    close_label=close_label,
-                    is_long=is_long,
-                    account_id=account_id,
-                    order_type=OrderType.STOP_MARKET,
-                    trigger_price=sl_price,
-                    duration=OrderDuration.GTC,
+            sl_order_type = self._sl_order_type_for_route()
+            sl_trigger = sl_price
+            sl_limit = 0.0
+            if sl_order_type == OrderType.STOP_LIMIT:
+                sl_trigger, sl_limit = self._stop_limit_prices(
+                    sl_price, tick_size, is_long=is_long,
+                )
+            if await self._async_is_order_working(sl_id):
+                booked = await self._async_listed_leg_price_type(sl_id)
+                booked_u = str(booked or "").upper().replace("-", " ").replace("_", " ")
+                if (
+                    sl_order_type == OrderType.STOP_LIMIT
+                    and booked_u
+                    and "STOP" in booked_u
+                    and "LIMIT" not in booked_u
                 ):
+                    bot_logger.warning(
+                        f"Replacing Lucid STOP_MARKET SL {sl_id} ({booked}) "
+                        f"with STOP-LIMIT so it shows as a stop, not 'Buy Order'"
+                    )
+                    await self._async_cancel_protective_leg(
+                        sl_id,
+                        symbol=symbol,
+                        reason="upgrade_stop_limit",
+                        require_flat=False,
+                        cancel_path="lucid_sl_upgrade",
+                    )
+            if not await self._async_is_order_working(sl_id) and not await self._async_is_leg_filled(sl_id):
+                sl_kw: Dict[str, Any] = {
+                    "leg": "SL",
+                    "order_id": sl_id,
+                    "symbol": rith_sym,
+                    "exchange": exchange,
+                    "qty": qty,
+                    "close_side": close_side,
+                    "close_label": close_label,
+                    "is_long": is_long,
+                    "account_id": account_id,
+                    "order_type": sl_order_type,
+                    "duration": OrderDuration.DAY,
+                }
+                if sl_order_type == OrderType.STOP_LIMIT:
+                    sl_kw["trigger_price"] = sl_trigger
+                    sl_kw["price"] = sl_limit
+                else:
+                    sl_kw["trigger_price"] = sl_trigger
+                if await self._async_submit_protective_leg(**sl_kw):
                     out["protective_sl_order_id"] = sl_id
                     sl_ok = True
+                elif sl_order_type == OrderType.STOP_LIMIT:
+                    bot_logger.warning(
+                        f"SL STOP_LIMIT failed for {prefix} — retry STOP_MARKET @ {sl_price:.2f}"
+                    )
+                    if await self._async_submit_protective_leg(
+                        leg="SL",
+                        order_id=sl_id,
+                        symbol=rith_sym,
+                        exchange=exchange,
+                        qty=qty,
+                        close_side=close_side,
+                        close_label=close_label,
+                        is_long=is_long,
+                        account_id=account_id,
+                        order_type=OrderType.STOP_MARKET,
+                        trigger_price=sl_price,
+                        duration=OrderDuration.DAY,
+                    ):
+                        out["protective_sl_order_id"] = sl_id
+                        sl_ok = True
             elif await self._async_is_order_working(sl_id) or await self._async_is_leg_filled(sl_id):
                 out["protective_sl_order_id"] = sl_id
                 sl_ok = True
@@ -4301,6 +8086,26 @@ class RithmicConnector(BaseBroker):
         if take_profit > 0:
             tp_mode = "up" if is_long else "down"
             tp_price = self._round_to_tick(take_profit, tick_size, mode=tp_mode)
+            if market > 0:
+                buffer = tick_size * 2
+                if is_long and tp_price <= market:
+                    adjusted = self._round_to_tick(
+                        market + buffer, tick_size, mode="up"
+                    )
+                    bot_logger.warning(
+                        f"TP {tp_price:.2f} not above market {market:.2f} for long — "
+                        f"clamping to {adjusted:.2f}"
+                    )
+                    tp_price = adjusted
+                elif (not is_long) and tp_price >= market:
+                    adjusted = self._round_to_tick(
+                        market - buffer, tick_size, mode="down"
+                    )
+                    bot_logger.warning(
+                        f"TP {tp_price:.2f} not below market {market:.2f} for short — "
+                        f"clamping to {adjusted:.2f}"
+                    )
+                    tp_price = adjusted
             if abs(tp_price - take_profit) >= tick_size * 0.01:
                 bot_logger.info(
                     f"TP rounded to tick: {take_profit:.2f} → {tp_price:.2f} ({symbol})"
@@ -4322,30 +8127,54 @@ class RithmicConnector(BaseBroker):
                     account_id=account_id,
                     order_type=OrderType.LIMIT,
                     price=tp_price,
-                    duration=OrderDuration.GTC,
+                    duration=OrderDuration.DAY,
                 )
+                # Do NOT fall back to LIMIT_IF_TOUCHED — Lucid shows those as stops.
+                if not tp_ok:
+                    # One plain LIMIT retry with a fresh tag.
+                    tp_id = f"{prefix}_tp2"
+                    bot_logger.warning(
+                        f"TP LIMIT retry as {tp_id} @ {tp_price:.2f} ({symbol})"
+                    )
+                    tp_ok = await self._async_submit_protective_leg(
+                        leg="TP",
+                        order_id=tp_id,
+                        symbol=rith_sym,
+                        exchange=exchange,
+                        qty=qty,
+                        close_side=close_side,
+                        close_label=close_label,
+                        is_long=is_long,
+                        account_id=account_id,
+                        order_type=OrderType.LIMIT,
+                        price=tp_price,
+                        duration=OrderDuration.DAY,
+                    )
             if tp_ok:
                 out["protective_tp_order_id"] = tp_id
                 if await self._async_is_leg_filled(tp_id):
                     out["tp_filled_immediately"] = True
-                    pos_open = await self._async_broker_has_open_position(symbol)
-                    if pos_open is False:
-                        await self._async_cancel_protective_leg(
-                            f"{prefix}_sl",
-                            symbol=symbol,
-                            reason="tp_filled_immediately",
-                            cancel_path="immediate_tp_fill",
-                        )
-                    elif pos_open is True:
-                        bot_logger.info(
-                            f"Keeping SL/TP {prefix}_sl — position still open on broker "
-                            f"after immediate TP fill ({tp_id})"
-                        )
-                    else:
-                        bot_logger.warning(
-                            f"Keeping SL/TP {prefix}_sl — broker position unknown "
-                            f"after immediate TP fill ({tp_id})"
-                        )
+                    # TP already filled for this entry — always kill the sibling
+                    # STOP/STOP-LIMIT. list_positions lag must not keep it live.
+                    self._record_exit_fill(prefix, "TP", tp_price, tp_id)
+                    self.remember_closed_entry(prefix, symbol)
+                    await self._async_cancel_protective_leg(
+                        f"{prefix}_sl",
+                        symbol=symbol,
+                        reason="tp_filled_immediately",
+                        require_flat=False,
+                        cancel_path="immediate_tp_fill",
+                    )
+                    await self._async_cancel_remaining_bracket_legs(
+                        prefix,
+                        symbol,
+                        reason="tp_filled_immediately",
+                        force=True,
+                    )
+                    with self._order_lock:
+                        self._orders.pop(prefix, None)
+                        for suf in ("_sl", "_tp", "_tp_lit", "_tp2"):
+                            self._orders.pop(f"{prefix}{suf}", None)
             elif price_ref > 0 and await self._async_try_attach_native_target(
                 prefix, symbol, tp_price, price_ref,
             ):
@@ -4356,30 +8185,15 @@ class RithmicConnector(BaseBroker):
                     f"will retry on next protection verify"
                 )
 
+        # Keep resting SL even when TP fails — never strip the hard stop.
         if stop_loss > 0 and take_profit > 0 and sl_ok and not tp_ok and not out.get("native_target_attached"):
-            if not self._order_within_entry_grace(prefix):
-                sl_id = f"{prefix}_sl"
-                cancelled = await self._async_cancel_protective_leg(
-                    sl_id,
-                    symbol=symbol,
-                    reason="partial_bracket_tp_failed",
-                    require_flat=False,
-                    cancel_path="partial_bracket_cleanup",
-                )
-                if cancelled:
-                    out.pop("protective_sl_order_id", None)
-                    sl_ok = False
-                    bot_logger.warning(
-                        f"Cancelled orphan SL {sl_id} for {symbol} — TP submit failed "
-                        f"(partial bracket cleanup)"
-                    )
-            else:
-                bot_logger.info(
-                    f"Keeping SL for {prefix} — TP submit pending during entry grace ({symbol})"
-                )
+            bot_logger.warning(
+                f"Keeping SL for {prefix} despite TP failure ({symbol}) — "
+                f"hard stop stays; TP will retry"
+            )
         elif stop_loss > 0 and take_profit > 0 and tp_ok and not sl_ok:
             if not self._order_within_entry_grace(prefix):
-                tp_id = f"{prefix}_tp"
+                tp_id = out.get("protective_tp_order_id") or f"{prefix}_tp"
                 cancelled = await self._async_cancel_protective_leg(
                     tp_id,
                     symbol=symbol,
@@ -4424,13 +8238,34 @@ class RithmicConnector(BaseBroker):
                 f"continuing protective submit"
             )
             broker_pos = None
+        # Critical Lucid-sim path: empty list_positions must NOT cancel SL/TP when
+        # this entry is still filled (otherwise we strip brackets right after placing them).
         if broker_pos is False:
-            cancelled = await self._async_cancel_all_working_bot_orders_for_symbol(symbol)
-            if cancelled:
-                bot_logger.info(
-                    f"Rithmic {order_id} {symbol}: flat — cancelled {cancelled} "
-                    f"working bot_* order(s) before protective submit"
-                )
+            still = await self._async_is_entry_still_open(order_id, symbol)
+            if still is True:
+                broker_pos = True
+            elif still is None:
+                broker_pos = None
+            else:
+                entry = await self._async_get_order_snapshot(order_id)
+                if self._is_filled_order_snapshot(entry):
+                    listed_fill = await self._async_listed_protective_fill_for_entry(
+                        order_id, symbol
+                    )
+                    if not listed_fill:
+                        bot_logger.warning(
+                            f"Rithmic {order_id} {symbol}: list_positions flat but entry "
+                            f"still filled with no exit fill — keeping/submitting SL+TP "
+                            f"(do not cancel working bot legs)"
+                        )
+                        broker_pos = None
+        if broker_pos is False:
+            # Do NOT cancel legs here — Lucid empty list_positions is normal and
+            # cancelling strips freshly placed SL/TP. Exit path force-cancels.
+            bot_logger.info(
+                f"Rithmic {order_id} {symbol}: list_positions flat — "
+                f"skip protective ensure cancel (legs kept)"
+            )
             return {
                 "native_stop_attached": False,
                 "native_target_attached": False,
@@ -4476,7 +8311,69 @@ class RithmicConnector(BaseBroker):
         need_sl = stop_loss > 0 and not broker_sl
         need_tp = take_profit > 0 and not broker_tp
         extra: Dict[str, Any] = {}
+        allow_protective = str(
+            os.getenv(
+                "RITHMIC_ALLOW_PROTECTIVE_FALLBACK",
+                "true" if self._lucid_paper_route() else "false",
+            )
+        ).strip().lower() in {"1", "true", "yes", "on"}
+
+        # Prefer re-applying native stop/target ticks when they already exist.
         if need_sl or need_tp:
+            with self._order_lock:
+                stored = self._orders.get(order_id, {})
+                price_ref = float(
+                    stored.get("entry_price") or stored.get("price_ref") or 0
+                )
+            if price_ref > 0:
+                try:
+                    tick_size = get_instrument(symbol).tick_size
+                    sl_ticks, tp_ticks = self._bracket_ticks(
+                        price_ref, stop_loss, take_profit, tick_size,
+                    )
+                    mod_kwargs: Dict[str, Any] = {
+                        "order_id": order_id,
+                        "account_id": self._get_account_id(),
+                    }
+                    if need_sl and sl_ticks > 0 and not self._stop_on_profit_side(
+                        str(side).upper() in ("BUY", "LONG"), price_ref, float(stop_loss)
+                    ):
+                        mod_kwargs["stop_ticks"] = sl_ticks
+                    if need_tp and tp_ticks > 0:
+                        mod_kwargs["target_ticks"] = tp_ticks
+                    if "stop_ticks" in mod_kwargs or "target_ticks" in mod_kwargs:
+                        await self._client.modify_order(**mod_kwargs)
+                        bot_logger.info(
+                            f"Rithmic native SL/TP ensure modify for {order_id}: "
+                            f"stop_ticks={mod_kwargs.get('stop_ticks')} "
+                            f"target_ticks={mod_kwargs.get('target_ticks')}"
+                        )
+                        await asyncio.sleep(0.4)
+                        stop_ok, target_ok, _ = await self._async_verify_native_bracket(
+                            order_id
+                        )
+                        if stop_ok:
+                            broker_sl = True
+                            need_sl = False
+                        if target_ok:
+                            broker_tp = True
+                            need_tp = False
+                        if stop_ok or target_ok:
+                            extra["bracket_mode"] = "native_bracket"
+                        # Entry already carried ticks — trust them if Lucid lags.
+                        if not broker_sl and stored.get("stop_ticks"):
+                            broker_sl = True
+                            need_sl = False
+                        if not broker_tp and stored.get("target_ticks"):
+                            broker_tp = True
+                            need_tp = False
+                except Exception as mod_exc:
+                    bot_logger.warning(
+                        f"Rithmic native SL/TP ensure modify failed for {order_id}: "
+                        f"{mod_exc}"
+                    )
+
+        if (need_sl or need_tp) and allow_protective:
             with self._order_lock:
                 stored = self._orders.get(order_id, {})
                 price_ref = float(
@@ -4492,15 +8389,38 @@ class RithmicConnector(BaseBroker):
                 price_ref=price_ref,
             )
             extra.update(protective)
+        elif need_sl or need_tp:
+            bot_logger.info(
+                f"Rithmic {order_id}: skipping Buy Stop/Buy Limit legs "
+                f"(native bracket only on Lucid; set RITHMIC_ALLOW_PROTECTIVE_FALLBACK=true to override)"
+            )
+            # Trust ticks that went out with the entry.
+            with self._order_lock:
+                stored = self._orders.get(order_id, {})
+            if need_sl and (
+                stored.get("stop_ticks") or stored.get("native_stop_attached")
+            ):
+                broker_sl = True
+            if need_tp and (
+                stored.get("target_ticks") or stored.get("native_target_attached")
+            ):
+                broker_tp = True
 
-        broker_sl, broker_tp = await self._async_query_broker_protection(
+        broker_sl2, broker_tp2 = await self._async_query_broker_protection(
             order_id, stop_loss, take_profit,
         )
+        broker_sl = broker_sl or broker_sl2
+        broker_tp = broker_tp or broker_tp2
+        mode = str(extra.get("bracket_mode") or "")
+        if extra.get("protective_sl_order_id") or extra.get("protective_tp_order_id"):
+            mode = "protective_fallback"
+        elif mode != "native_bracket":
+            mode = "broker_verified" if (broker_sl and broker_tp) else "native_bracket_pending"
         return {
             "native_stop_attached": broker_sl,
             "native_target_attached": broker_tp,
-            "bracket_mode": "protective_fallback" if extra else "broker_verified",
-            **extra,
+            "bracket_mode": mode,
+            **{k: v for k, v in extra.items() if k != "bracket_mode"},
         }
 
     async def _async_place_order(
@@ -4563,35 +8483,71 @@ class RithmicConnector(BaseBroker):
         sl_ticks, tp_ticks = self._bracket_ticks(
             price_ref, stop_loss, take_profit, spec.tick_size,
         )
-        if stop_loss > 0 and sl_ticks > 0:
-            kwargs["stop_ticks"] = sl_ticks
-        if take_profit > 0 and tp_ticks > 0:
-            kwargs["target_ticks"] = tp_ticks
+        lucid_paper = self._lucid_paper_route()
+        allow_protective = str(
+            os.getenv(
+                "RITHMIC_ALLOW_PROTECTIVE_FALLBACK",
+                "true" if lucid_paper else "false",
+            )
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        # Lucid TEST sim never attaches template-330 Stop Loss / Take Profit.
+        # Chart-visible protection is STOP (SL) + LIMIT (TP) placed with the fill.
+        immediate_protective = allow_protective and (
+            lucid_paper
+            or str(os.getenv("RITHMIC_IMMEDIATE_PROTECTIVE", "false")).strip().lower()
+            in {"1", "true", "yes", "on"}
+        )
 
-        if stop_loss > 0 and "stop_ticks" not in kwargs:
-            raise RuntimeError(
-                f"Refusing entry-only order for {symbol}: cannot compute stop_ticks "
-                f"(entry={entry_price} sl={stop_loss} ref={price_ref}). "
-                f"SL/TP must go with the entry."
-            )
-        if take_profit > 0 and "target_ticks" not in kwargs:
-            raise RuntimeError(
-                f"Refusing entry-only order for {symbol}: cannot compute target_ticks "
-                f"(entry={entry_price} tp={take_profit} ref={price_ref}). "
-                f"SL/TP must go with the entry."
-            )
+        if not immediate_protective:
+            if stop_loss > 0 and sl_ticks > 0:
+                kwargs["stop_ticks"] = sl_ticks
+            if take_profit > 0 and tp_ticks > 0:
+                kwargs["target_ticks"] = tp_ticks
+            if stop_loss > 0 and "stop_ticks" not in kwargs:
+                raise RuntimeError(
+                    f"Refusing entry-only order for {symbol}: cannot compute stop_ticks "
+                    f"(entry={entry_price} sl={stop_loss} ref={price_ref}). "
+                    f"SL/TP must go with the entry."
+                )
+            if take_profit > 0 and "target_ticks" not in kwargs:
+                raise RuntimeError(
+                    f"Refusing entry-only order for {symbol}: cannot compute target_ticks "
+                    f"(entry={entry_price} tp={take_profit} ref={price_ref}). "
+                    f"SL/TP must go with the entry."
+                )
+            if lucid_paper:
+                kwargs["stop_market_on_reject"] = str(
+                    os.getenv("RITHMIC_BRACKET_STOP_MARKET_ON_REJECT", "true")
+                ).strip().lower() in {"1", "true", "yes", "on"}
 
         result = await self._client.submit_order(**kwargs)
-        bracket_mode = "native_bracket" if kwargs.get("stop_ticks") or kwargs.get("target_ticks") else "entry_only"
+        bracket_mode = (
+            "immediate_protective" if immediate_protective else "native_bracket"
+        )
 
+        signal_ref = price_ref
         filled_order = await self._async_wait_entry_filled(order_id)
         if filled_order:
             fill_price = self._fill_price_from_order(filled_order, price_ref)
-            if fill_price > 0 and abs(fill_price - price_ref) >= tick_size * 0.01:
+            if fill_price > 0 and abs(fill_price - signal_ref) >= tick_size * 0.01:
                 bot_logger.info(
                     f"Entry fill price for {order_id} {symbol}: "
-                    f"signal {price_ref:.2f} → fill {fill_price:.2f} (using fill for bracket ref)"
+                    f"signal {signal_ref:.2f} → fill {fill_price:.2f} (re-anchor SL/TP to fill)"
                 )
+                stop_loss, take_profit = self._reanchor_brackets_to_fill(
+                    signal_ref,
+                    fill_price,
+                    stop_loss,
+                    take_profit,
+                    is_long=is_long,
+                    tick_size=tick_size,
+                )
+                if stop_loss > 0:
+                    sl_mode = "down" if is_long else "up"
+                    stop_loss = self._round_to_tick(stop_loss, tick_size, mode=sl_mode)
+                if take_profit > 0:
+                    tp_mode = "up" if is_long else "down"
+                    take_profit = self._round_to_tick(take_profit, tick_size, mode=tp_mode)
                 price_ref = fill_price
                 sl_ticks, tp_ticks = self._bracket_ticks(
                     price_ref, stop_loss, take_profit, tick_size,
@@ -4600,6 +8556,8 @@ class RithmicConnector(BaseBroker):
                 stored = self._orders.get(order_id, {})
                 stored["entry_price"] = price_ref
                 stored["price_ref"] = price_ref
+                stored["stop_loss"] = stop_loss
+                stored["take_profit"] = take_profit
                 stored["fill_time"] = datetime.now(timezone.utc).isoformat()
                 if sl_ticks > 0:
                     stored["stop_ticks"] = sl_ticks
@@ -4607,49 +8565,139 @@ class RithmicConnector(BaseBroker):
                     stored["target_ticks"] = tp_ticks
                 self._orders[order_id] = stored
             await self._async_sync_positions_from_broker()
+            # Lucid sim rejects post-fill bracket modify ("No stop loss at creation").
+            if (
+                filled_order
+                and not immediate_protective
+                and not lucid_paper
+                and (sl_ticks > 0 or tp_ticks > 0)
+            ):
+                try:
+                    mod_kwargs: Dict[str, Any] = {
+                        "order_id": order_id,
+                        "account_id": self._get_account_id(),
+                    }
+                    if sl_ticks > 0:
+                        mod_kwargs["stop_ticks"] = sl_ticks
+                    if tp_ticks > 0:
+                        mod_kwargs["target_ticks"] = tp_ticks
+                    await self._client.modify_order(**mod_kwargs)
+                    bot_logger.info(
+                        f"Rithmic native SL/TP re-anchored for {order_id}: "
+                        f"stop_ticks={sl_ticks} target_ticks={tp_ticks}"
+                    )
+                except Exception as mod_exc:
+                    bot_logger.warning(
+                        f"Rithmic native bracket re-anchor skipped for {order_id}: {mod_exc}"
+                    )
+            elif filled_order and lucid_paper and abs(fill_price - signal_ref) >= tick_size * 0.01:
+                bot_logger.info(
+                    f"Lucid {order_id}: SL/TP ticks locked at entry signal "
+                    f"(no post-fill modify on sim) stop_ticks={sl_ticks} target_ticks={tp_ticks}"
+                )
         else:
             bot_logger.warning(
                 f"Rithmic entry {order_id} {symbol} not confirmed filled within wait window — "
                 f"will still attempt bracket/protective attach"
             )
 
-        stop_ok, target_ok, _ = await self._async_verify_native_bracket(order_id)
-        native_stop = stop_ok
-        native_target = target_ok
+        stop_ok, target_ok = False, False
         extra: Dict[str, Any] = {}
 
-        if (stop_loss > 0 and not stop_ok) or (take_profit > 0 and not target_ok):
-            bot_logger.warning(
-                f"Rithmic native bracket (template 330) not visible for {order_id} "
-                f"after retries (SL={'yes' if stop_ok else 'no'} TP={'yes' if target_ok else 'no'}) "
-                f"— submitting separate protective exit orders. "
-                f"{self._protective_chart_legend(side)}"
-            )
-            protective = await self._async_submit_protective_orders(
-                symbol=symbol,
-                entry_side=side,
-                qty=qty,
-                stop_loss=stop_loss if not stop_ok else 0,
-                take_profit=take_profit if not target_ok else 0,
-                prefix=order_id,
-                price_ref=price_ref,
-            )
+        if immediate_protective:
+            protective: Dict[str, Any] = {}
+            if stop_loss > 0 or take_profit > 0:
+                from async_rithmic import OrderType as _OT
+
+                sl_kind = (
+                    "STOP-LIMIT"
+                    if self._sl_order_type_for_route() == _OT.STOP_LIMIT
+                    else "STOP"
+                )
+                bot_logger.info(
+                    f"Rithmic {order_id}: submitting SL {sl_kind} + TP LIMIT with fill "
+                    f"@ SL={stop_loss:.2f} TP={take_profit:.2f}"
+                )
+                protective = await self._async_submit_protective_orders(
+                    symbol=symbol,
+                    entry_side=side,
+                    qty=qty,
+                    stop_loss=stop_loss,
+                    take_profit=take_profit,
+                    prefix=order_id,
+                    price_ref=price_ref,
+                )
             extra.update(protective)
-            bracket_mode = "protective_fallback"
+            bracket_mode = "immediate_protective"
+            stop_ok = (stop_loss <= 0) or bool(protective.get("protective_sl_order_id"))
+            target_ok = (take_profit <= 0) or bool(protective.get("protective_tp_order_id"))
+            if stop_loss > 0 and not stop_ok:
+                error_logger.error(
+                    f"Rithmic {order_id} {symbol}: Stop Loss NOT resting on Lucid"
+                )
+            if take_profit > 0 and not target_ok:
+                error_logger.error(
+                    f"Rithmic {order_id} {symbol}: Take Profit NOT resting on Lucid"
+                )
+            if stop_ok or target_ok:
+                bot_logger.info(self._protective_chart_legend(side))
+        else:
+            stop_ok, target_ok, _ = await self._async_verify_native_bracket(order_id)
+            list_sl, list_tp = await self._async_native_bracket_legs(order_id)
+            stop_ok = stop_ok or list_sl
+            target_ok = target_ok or list_tp
+            if stop_ok and target_ok:
+                bot_logger.info(
+                    f"Rithmic native Stop Loss / Take Profit bracket for {order_id} {symbol} "
+                    f"(stop_ticks={kwargs.get('stop_ticks') or sl_ticks} "
+                    f"target_ticks={kwargs.get('target_ticks') or tp_ticks}) — "
+                    f"check POSITION row on Lucid, not Buy Stop/Buy Limit working orders"
+                )
+                bracket_mode = "native_bracket"
+            elif allow_protective:
+                bot_logger.warning(
+                    f"Rithmic native bracket not visible for {order_id} "
+                    f"(SL={'yes' if stop_ok else 'no'} TP={'yes' if target_ok else 'no'}) "
+                    f"— placing STOP SL + LIMIT TP"
+                )
+                protective = await self._async_submit_protective_orders(
+                    symbol=symbol,
+                    entry_side=side,
+                    qty=qty,
+                    stop_loss=stop_loss if not stop_ok else 0,
+                    take_profit=take_profit if not target_ok else 0,
+                    prefix=order_id,
+                    price_ref=price_ref,
+                )
+                extra.update(protective)
+                bracket_mode = "protective_fallback"
+                stop_ok = stop_ok or bool(protective.get("protective_sl_order_id"))
+                target_ok = target_ok or bool(protective.get("protective_tp_order_id"))
+            else:
+                bot_logger.error(
+                    f"Rithmic {order_id}: NO SL/TP visible and protective fallback disabled"
+                )
+                bracket_mode = "unprotected"
 
         broker_sl, broker_tp = await self._async_query_broker_protection(
             order_id, stop_loss, take_profit,
         )
-        native_stop = broker_sl
-        native_target = broker_tp
+        if not broker_sl and extra.get("protective_sl_order_id"):
+            broker_sl = True
+        if not broker_tp and extra.get("protective_tp_order_id"):
+            broker_tp = True
+        native_stop = broker_sl or stop_ok
+        native_target = broker_tp or target_ok
 
         return {
             "result": result,
             "native_stop_attached": native_stop,
             "native_target_attached": native_target,
             "price_ref": price_ref,
-            "stop_ticks": kwargs.get("stop_ticks"),
-            "target_ticks": kwargs.get("target_ticks"),
+            "stop_loss": stop_loss,
+            "take_profit": take_profit,
+            "stop_ticks": kwargs.get("stop_ticks") or sl_ticks,
+            "target_ticks": kwargs.get("target_ticks") or tp_ticks,
             "bracket_mode": bracket_mode,
             **extra,
         }
@@ -4774,6 +8822,14 @@ class RithmicConnector(BaseBroker):
         return prioritized
 
     def _select_account_id(self, accounts: List[Any]) -> Optional[str]:
+        if self._account_id_override and not accounts:
+            # Lucid sometimes returns routes but an empty account list on
+            # ticker+order-only connects — still honor .env account for sim.
+            bot_logger.warning(
+                f"Rithmic accounts empty — using RITHMIC_ACCOUNT_ID="
+                f"{self._account_id_override!r}"
+            )
+            return self._account_id_override
         if not accounts:
             return None
         if self._account_id_override:
@@ -4781,10 +8837,31 @@ class RithmicConnector(BaseBroker):
                 acct_id = str(getattr(acct, "account_id", "") or "")
                 if acct_id == self._account_id_override:
                     return acct_id
-            bot_logger.error(
-                f"RITHMIC_ACCOUNT_ID={self._account_id_override!r} not found — "
-                f"available: {[getattr(a, 'account_id', '') for a in accounts]}"
+            bot_logger.warning(
+                f"RITHMIC_ACCOUNT_ID={self._account_id_override!r} not in "
+                f"broker list {[getattr(a, 'account_id', '') for a in accounts]} "
+                f"— using first matching demo/sim account instead"
             )
+            # Fall through to demo preference rather than force a stale TEST011 id.
+
+        def _label(acct: Any) -> str:
+            return (
+                f"{getattr(acct, 'account_id', '')} "
+                f"{getattr(acct, 'account_name', '')}"
+            ).lower()
+
+        # Paper / simulator: prefer accounts named demo/sim over stale TEST* ids.
+        if not self._live_mode or self._allow_simulator_route:
+            for needle in ("demo", "sim", "paper", "sandbox"):
+                for acct in accounts:
+                    if needle in _label(acct):
+                        aid = str(getattr(acct, "account_id", "") or "")
+                        if aid:
+                            bot_logger.info(
+                                f"Rithmic account auto-select ({needle}): {aid}"
+                            )
+                            return aid
+
         if len(accounts) == 1:
             return str(getattr(accounts[0], "account_id", "") or "") or None
 
@@ -4858,6 +8935,8 @@ class RithmicConnector(BaseBroker):
         """Return configured account ID (RITHMIC_ACCOUNT_ID or resolved default)."""
         if self._selected_account_id:
             return self._selected_account_id
+        if self._account_id_override:
+            return self._account_id_override
         if self._client and self._client.accounts:
             return self._client.accounts[0].account_id
         return None
@@ -4896,18 +8975,28 @@ class RithmicConnector(BaseBroker):
     def acknowledge_flat_position(self, order_id: str, symbol: str) -> None:
         """Drop local order tracking after bot force-syncs a broker-flat position."""
         oid = str(order_id)
+        self.remember_closed_entry(oid, symbol)
+
+        def _exc(exc: BaseException) -> str:
+            msg = str(exc).strip()
+            if msg:
+                return msg
+            return type(exc).__name__
+
         try:
             self._run_sync(
                 self._async_cancel_remaining_bracket_legs(
                     oid,
                     symbol,
                     reason="ack_flat",
+                    force=True,
                 ),
-                timeout=15,
+                timeout=8,
             )
         except Exception as e:
+            # Never block the hunt loop on cancel failures after an exit.
             error_logger.error(
-                f"Cancel bracket legs on ack_flat failed for {oid} {symbol}: {e}"
+                f"Cancel bracket legs on ack_flat failed for {oid} {symbol}: {_exc(e)}"
             )
         with self._order_lock:
             removed = self._orders.pop(oid, None)
@@ -4918,7 +9007,7 @@ class RithmicConnector(BaseBroker):
         try:
             cancelled = self._run_sync(
                 self._async_cancel_orphan_protective_if_flat(symbol),
-                timeout=15,
+                timeout=8,
             )
             if cancelled:
                 bot_logger.info(
@@ -4926,9 +9015,12 @@ class RithmicConnector(BaseBroker):
                 )
         except Exception as e:
             error_logger.error(
-                f"Orphan protective cleanup on ack_flat failed for {symbol}: {e}"
+                f"Orphan protective cleanup on ack_flat failed for {symbol}: {_exc(e)}"
             )
-        self._refresh_positions()
+        try:
+            self._refresh_positions()
+        except Exception:
+            pass
 
     def _bracket_leg_ids(self, order_id: str) -> Tuple[List[str], List[str]]:
         with self._order_lock:
@@ -4942,6 +9034,12 @@ class RithmicConnector(BaseBroker):
                 f"{order_id}_tp",
                 f"{order_id}_tp_lit",
             ]
+            closed_rec = self._closed_entry_registry().get(str(order_id)) or {}
+            for leg in closed_rec.get("legs") or ():
+                if leg.endswith("_sl") and leg not in sl_ids:
+                    sl_ids.append(leg)
+                elif leg not in tp_ids and leg not in sl_ids:
+                    tp_ids.append(leg)
         return (
             [leg_id for leg_id in sl_ids if leg_id],
             [leg_id for leg_id in tp_ids if leg_id],
@@ -5063,7 +9161,11 @@ class RithmicConnector(BaseBroker):
         if entry_open is None:
             return None
         if entry_open:
-            return None
+            listed_fill = await self._async_listed_protective_fill_for_entry(order_id, symbol)
+            if listed_fill:
+                entry_open = False
+            elif not force_sync:
+                return None
 
         with self._order_lock:
             cached = dict(self._confirmed_exit_fills.get(order_id, {}))
@@ -5074,18 +9176,20 @@ class RithmicConnector(BaseBroker):
         leg = ""
         sl_ids, tp_ids = self._bracket_leg_ids(order_id)
 
+        with self._order_lock:
+            _live = self._orders.get(order_id) or {}
+            stop_loss = float(_live.get("stop_loss") or stop_loss or 0)
+            take_profit = float(_live.get("take_profit") or take_profit or 0)
         for leg_id in sl_ids:
             if leg_id and await self._async_is_leg_filled(leg_id):
-                snap = await self._async_get_order_snapshot(leg_id)
-                exit_price = self._fill_price_from_order(snap, stop_loss)
+                exit_price = await self._async_leg_fill_price(leg_id, stop_loss)
                 leg = "SL"
                 break
 
         if not leg:
             for leg_id in tp_ids:
                 if leg_id and await self._async_is_leg_filled(leg_id):
-                    snap = await self._async_get_order_snapshot(leg_id)
-                    exit_price = self._fill_price_from_order(snap, take_profit)
+                    exit_price = await self._async_leg_fill_price(leg_id, take_profit)
                     leg = "TP"
                     break
 
@@ -5110,10 +9214,13 @@ class RithmicConnector(BaseBroker):
             }
             with self._order_lock:
                 self._confirmed_exit_fills[order_id] = result
+            # force=True: do not re-check still_open (working sibling STOP-LIMIT
+            # would otherwise look "still open" and skip cancel after TP/SL fill).
             await self._async_cancel_remaining_bracket_legs(
                 order_id,
                 symbol,
                 reason="bracket_exit_confirmed",
+                force=True,
             )
             return result
 
@@ -5121,6 +9228,51 @@ class RithmicConnector(BaseBroker):
             order_id, stop_loss, take_profit,
         )
         if diagnosis.get("legs_working"):
+            if (
+                _ALLOW_FLAT_ORPHAN_WIPE
+                and force_sync and flat_duration_sec >= _BROKER_FLAT_FORCE_SYNC_SEC
+            ):
+                listed_net = await self._async_list_positions_net_or_none(symbol)
+                if listed_net is not None and int(listed_net) == 0:
+                    await self._async_cancel_working_orders_after_exit(
+                        symbol,
+                        order_id,
+                        reason="bracket_exit_orphan_wipe",
+                        already_flat=True,
+                    )
+                    still_open = await self._async_is_entry_still_open(order_id, symbol)
+                    if still_open is False:
+                        exit_price = self._resolve_inferred_exit_price(
+                            symbol, stop_loss, take_profit, entry_price=entry_price,
+                        )
+                        result = {
+                            "confirmed": True,
+                            "inferred": True,
+                            "force_sync": True,
+                            "exit_price": exit_price,
+                            "leg": "UNKNOWN",
+                            "sync_reason": "ORPHAN_WIPE",
+                            "fill_from_broker": exit_price > 0 and self._get_cached_price(symbol) > 0,
+                            "detail": (
+                                f"orphan wipe after {flat_duration_sec:.0f}s flat "
+                                f"with working legs listed"
+                            ),
+                            "account_id": self._get_account_id(),
+                            "trade_route": self.get_trade_route("CME"),
+                        }
+                        bot_logger.warning(
+                            f"Bracket exit {order_id} {symbol}: orphan-wipe force-sync "
+                            f"@ {exit_price:.2f} after {flat_duration_sec:.0f}s flat"
+                        )
+                        with self._order_lock:
+                            self._confirmed_exit_fills[order_id] = result
+                        await self._async_cancel_remaining_bracket_legs(
+                            order_id,
+                            symbol,
+                            reason="bracket_exit_orphan_wipe",
+                            force=True,
+                        )
+                        return result
             route_note = (
                 "simulator list_positions often empty despite open fill + SL/TP"
                 if self._using_simulator_route
@@ -5160,20 +9312,52 @@ class RithmicConnector(BaseBroker):
             )
             return result
 
-        if force_sync and flat_duration_sec >= _BROKER_FLAT_FORCE_SYNC_SEC:
+        if force_sync:
             still_open = await self._async_is_entry_still_open(order_id, symbol)
-            if still_open is True:
-                route_note = (
-                    "simulator route — list_positions often empty despite open sim fills"
-                    if self._using_simulator_route
-                    else "entry filled with working SL/TP"
-                )
-                bot_logger.warning(
-                    f"Bracket exit {order_id} {symbol}: skipping force-sync — "
-                    f"{route_note} (flat {flat_duration_sec:.0f}s)"
-                )
-                return None
-            if still_open is None:
+            listed_net = await self._async_list_positions_net_or_none(symbol)
+            legs_working = False
+            sl_ids, tp_ids = self._bracket_leg_ids(order_id)
+            for leg_id in sl_ids + tp_ids:
+                if leg_id and await self._async_is_order_working(leg_id):
+                    legs_working = True
+                    break
+            # Manual flatten: list flat + no working SL/TP → clear local even if
+            # the filled entry tag still looks "open" on simulator.
+            manual_flat = (
+                listed_net is not None
+                and int(listed_net) == 0
+                and not legs_working
+            )
+            if still_open is True and not manual_flat:
+                if (
+                    _ALLOW_FLAT_ORPHAN_WIPE
+                    and listed_net is not None and int(listed_net) == 0
+                ):
+                    await self._async_cancel_working_orders_after_exit(
+                        symbol,
+                        order_id,
+                        reason="bracket_exit_force_sync_orphans",
+                        already_flat=True,
+                    )
+                    still_open = await self._async_is_entry_still_open(order_id, symbol)
+                    legs_working = False
+                    for leg_id in sl_ids + tp_ids:
+                        if leg_id and await self._async_is_order_working(leg_id):
+                            legs_working = True
+                            break
+                    manual_flat = not legs_working
+                if still_open is True and not manual_flat:
+                    route_note = (
+                        "simulator route — list_positions often empty despite open sim fills"
+                        if self._using_simulator_route
+                        else "entry filled with working SL/TP"
+                    )
+                    bot_logger.warning(
+                        f"Bracket exit {order_id} {symbol}: skipping force-sync — "
+                        f"{route_note} (flat {flat_duration_sec:.0f}s)"
+                    )
+                    return None
+            if still_open is None and not manual_flat:
                 bot_logger.info(
                     f"Bracket exit {order_id} {symbol}: force-sync pending — "
                     f"entry state unknown (flat {flat_duration_sec:.0f}s)"
@@ -5182,21 +9366,27 @@ class RithmicConnector(BaseBroker):
             exit_price = self._resolve_inferred_exit_price(
                 symbol, stop_loss, take_profit, entry_price=entry_price,
             )
+            sync_reason = "MANUAL_CLOSE" if manual_flat else "UNKNOWN"
             result = {
                 "confirmed": True,
                 "inferred": True,
                 "force_sync": True,
                 "exit_price": exit_price,
-                "leg": "UNKNOWN",
-                "sync_reason": "UNKNOWN",
+                "leg": "MANUAL" if manual_flat else "UNKNOWN",
+                "sync_reason": sync_reason,
                 "fill_from_broker": exit_price > 0 and self._get_cached_price(symbol) > 0,
-                "detail": f"force-sync after {flat_duration_sec:.0f}s broker-flat",
+                "detail": (
+                    f"manual/broker flat after {flat_duration_sec:.0f}s "
+                    f"(no working SL/TP, list_net={listed_net})"
+                    if manual_flat
+                    else f"force-sync after {flat_duration_sec:.0f}s broker-flat"
+                ),
                 "account_id": self._get_account_id(),
                 "trade_route": self.get_trade_route("CME"),
             }
             bot_logger.warning(
-                f"Bracket exit {order_id} {symbol}: force-sync UNKNOWN @ {exit_price:.2f} "
-                f"after {flat_duration_sec:.0f}s flat (no SL/TP fill confirmed)"
+                f"Bracket exit {order_id} {symbol}: force-sync {sync_reason} @ {exit_price:.2f} "
+                f"after {flat_duration_sec:.0f}s flat ({result.get('detail')})"
             )
             with self._order_lock:
                 self._confirmed_exit_fills[order_id] = result
@@ -5213,6 +9403,23 @@ class RithmicConnector(BaseBroker):
             f"(flat {flat_duration_sec:.0f}s, force_sync={force_sync})"
         )
         return None
+
+    def _remember_detected_exit_fill(
+        self, entry_id: str, leg: Any, price: Any, leg_order_id: str = "",
+    ) -> None:
+        """Record a detected SL/TP fill unless one is already confirmed (keeps real PnL)."""
+        try:
+            px = float(price or 0)
+        except (TypeError, ValueError):
+            px = 0.0
+        leg = str(leg or "").upper()
+        if px <= 0 or leg not in ("SL", "TP"):
+            return
+        with self._order_lock:
+            if (self._confirmed_exit_fills.get(entry_id) or {}).get("confirmed"):
+                return
+        self._record_exit_fill(entry_id, leg, px, leg_order_id)
+        bot_logger.info(f"Detected bracket {leg} fill for {entry_id} @ {px:.2f} (recorded for PnL)")
 
     def _record_exit_fill(
         self,
@@ -5277,6 +9484,128 @@ class RithmicConnector(BaseBroker):
         except Exception as e:
             error_logger.error(f"Rithmic refresh positions error: {e}")
 
+    async def _async_entry_has_working_legs(self, order_id: str, symbol: str) -> Optional[bool]:
+        """True if any SL/TP for this entry is working (tagged, cached basket, or adopted)."""
+        sl_ids, tp_ids = self._bracket_leg_ids(order_id)
+        for leg_id in sl_ids + tp_ids:
+            if leg_id and await self._async_is_order_working(leg_id):
+                return True
+        rebound = (await self._async_rebind_symbol_legs(symbol)).get(str(order_id))
+        if rebound is None:
+            return None
+        return bool(rebound.get("sl_working") or rebound.get("tp_working"))
+
+    def _legs_gone_since(self) -> Dict[str, float]:
+        reg = getattr(self, "_legs_gone_first_seen", None)
+        if reg is None:
+            reg = {}
+            self._legs_gone_first_seen = reg
+        return reg
+
+    def _legs_gone_passes(self) -> Dict[str, int]:
+        reg = getattr(self, "_legs_gone_pass_count", None)
+        if reg is None:
+            reg = {}
+            self._legs_gone_pass_count = reg
+        return reg
+
+    def _legs_gone_reset(self, oid: str) -> None:
+        self._legs_gone_since().pop(str(oid), None)
+        self._legs_gone_passes().pop(str(oid), None)
+
+    def _legs_gone_confirmed(self, oid: str) -> bool:
+        """Legs must stay gone for _LEGS_GONE_CONFIRM_SEC AND N consecutive passes."""
+        oid = str(oid)
+        passes = self._legs_gone_passes()
+        passes[oid] = int(passes.get(oid, 0)) + 1
+        if _LEGS_GONE_CONFIRM_SEC <= 0 and _LEGS_GONE_CONFIRM_PASSES <= 1:
+            return True
+        reg = self._legs_gone_since()
+        now = time.time()
+        first = reg.setdefault(oid, now)
+        return (
+            now - first >= _LEGS_GONE_CONFIRM_SEC
+            and passes[oid] >= max(1, _LEGS_GONE_CONFIRM_PASSES)
+        )
+
+    async def _async_find_exit_fill_for_entry(
+        self, order_id: str, symbol: str,
+    ) -> Optional[Dict[str, Any]]:
+        """Broker-side SL/TP fill for THIS entry (tag, cached basket or adopted leg)."""
+        with self._order_lock:
+            info = dict(self._orders.get(order_id) or {})
+        sl_px = float(info.get("stop_loss") or 0)
+        tp_px = float(info.get("take_profit") or 0)
+        try:
+            listed = await self._async_listed_protective_fill_for_entry(order_id, symbol)
+        except Exception:
+            listed = None
+        if listed and float(listed.get("exit_price") or 0) > 0:
+            return {
+                "leg": listed.get("leg") or "UNKNOWN",
+                "exit_price": float(listed["exit_price"]),
+                "leg_order_id": listed.get("user_tag") or listed.get("basket_id") or "",
+            }
+        sl_ids, tp_ids = self._bracket_leg_ids(order_id)
+        for leg_name, ids, fb in (("SL", sl_ids, sl_px), ("TP", tp_ids, tp_px)):
+            for leg_id in ids:
+                try:
+                    filled = leg_id and await self._async_is_leg_filled(leg_id)
+                except Exception:
+                    filled = False
+                if not filled:
+                    continue
+                px = await self._async_leg_fill_price(leg_id, fb)
+                if px > 0:
+                    return {"leg": leg_name, "exit_price": float(px), "leg_order_id": leg_id}
+        return None
+
+    def recover_exit_fill(self, order_id: str, symbol: str) -> Optional[Dict[str, Any]]:
+        """Public: real exit fill for an entry (cached confirm, else broker lookup)."""
+        with self._order_lock:
+            cached = dict((self._confirmed_exit_fills.get(order_id) or {}))
+        if cached.get("confirmed") and float(cached.get("exit_price") or 0) > 0 and str(
+            cached.get("leg") or ""
+        ).upper() in ("TP", "SL"):
+            return cached
+        if not self._connected or not self._client:
+            return None
+        try:
+            fill = self._run_sync(self._async_find_exit_fill_for_entry(order_id, symbol), timeout=20)
+        except Exception as e:
+            error_logger.error(f"recover_exit_fill failed for {order_id}: {e}")
+            return None
+        if not fill:
+            return None
+        self._record_exit_fill(order_id, fill["leg"], fill["exit_price"], fill.get("leg_order_id", ""))
+        with self._order_lock:
+            return dict(self._confirmed_exit_fills.get(order_id) or {})
+
+    def entry_protection_live(self, order_id: str, symbol: str) -> Optional[bool]:
+        """Public: True if any SL/TP of this entry is still working (None = unknown)."""
+        if not self._connected or not self._client or not symbol:
+            return None
+        try:
+            return self._run_sync(self._async_entry_has_working_legs(order_id, symbol), timeout=20)
+        except Exception as e:
+            error_logger.error(f"entry_protection_live failed for {order_id}: {e}")
+            return None
+
+    def _cleanup_try_record_exit_fill(self, oid: str, symbol: str) -> bool:
+        """Look up a broker SL/TP fill for oid; record it (real PnL). True if found."""
+        try:
+            fill = self._run_sync(self._async_find_exit_fill_for_entry(oid, symbol), timeout=20)
+        except Exception as e:
+            error_logger.error(f"Exit fill lookup failed for {oid}: {e}")
+            return False
+        if not fill:
+            return False
+        self._record_exit_fill(oid, fill["leg"], fill["exit_price"], fill.get("leg_order_id", ""))
+        bot_logger.info(
+            f"{oid} ({symbol}): broker exit fill found {fill['leg']} @ {fill['exit_price']:.2f}"
+        )
+        return True
+
     def _cleanup_closed_orders(self) -> None:
         """Remove local order tracking only when broker confirms symbol is flat."""
         with self._order_lock:
@@ -5316,35 +9645,126 @@ class RithmicConnector(BaseBroker):
                 )
                 continue
 
-            if broker_net != 0:
-                bot_logger.debug(
-                    f"Keeping SL/TP for {oid} — position still open on broker ({symbol})"
+            with self._order_lock:
+                exit_confirmed = bool(
+                    (self._confirmed_exit_fills.get(oid) or {}).get("confirmed")
                 )
-                continue
+            if broker_net != 0:
+                # Another concurrent entry may keep the symbol open. An entry
+                # whose own SL/TP fill is confirmed is closed regardless.
+                others = self._tracked_bot_entry_ids(symbol) - {str(oid)}
+                covered = abs(int(broker_net)) <= self._tracked_entry_qty(others)
+                if not covered:
+                    self._legs_gone_reset(str(oid))
+                    bot_logger.debug(
+                        f"Keeping SL/TP for {oid} — position still open on broker ({symbol})"
+                    )
+                    continue
+                if not exit_confirmed:
+                    # Early manual close of ONE of the concurrent trades: the
+                    # remaining size is fully owned by the other entries and
+                    # this entry has no working SL/TP left (after rebinding
+                    # any user-adjusted legs). Otherwise keep tracking.
+                    try:
+                        legs_live = self._run_sync(
+                            self._async_entry_has_working_legs(oid, symbol), timeout=20,
+                        )
+                    except Exception as e:
+                        error_logger.error(f"Leg check failed during cleanup for {oid}: {e}")
+                        legs_live = None
+                    if legs_live is not False:
+                        self._legs_gone_reset(str(oid))
+                        continue
+                    if not self._legs_gone_confirmed(str(oid)):
+                        continue
+                    exit_confirmed = self._cleanup_try_record_exit_fill(oid, symbol)
+                    bot_logger.warning(
+                        f"{oid} ({symbol}): broker net={broker_net} is covered by other "
+                        f"entries and its SL/TP are gone — treating as "
+                        f"{'closed by confirmed fill' if exit_confirmed else 'manually closed'}"
+                    )
+            elif not exit_confirmed:
+                # list_positions == 0 is NOT evidence of a close on Lucid (sim
+                # route reports 0 even right after a fill). Drop only on:
+                #   (a) a confirmed SL/TP fill for THIS entry, or
+                #   (b) its SL/TP gone for _LEGS_GONE_CONFIRM_SEC and N passes.
+                if self._cleanup_try_record_exit_fill(oid, symbol):
+                    exit_confirmed = True
+                else:
+                    try:
+                        still_open = self._run_sync(
+                            self._async_is_entry_still_open(oid, symbol),
+                            timeout=20,
+                        )
+                    except Exception as e:
+                        error_logger.error(
+                            f"Entry open check failed during cleanup for {oid} {symbol}: {e}"
+                        )
+                        still_open = None
+                    if still_open is True or still_open is None:
+                        self._legs_gone_reset(str(oid))
+                        bot_logger.debug(
+                            f"Keeping SL/TP for {oid} — entry still open or unknown ({symbol})"
+                        )
+                        continue
+                    if not self._legs_gone_confirmed(str(oid)):
+                        bot_logger.info(
+                            f"Keeping {oid} tracked — list_positions flat and SL/TP not "
+                            f"visible; confirming {_LEGS_GONE_CONFIRM_SEC:.0f}s / "
+                            f"{_LEGS_GONE_CONFIRM_PASSES} passes before release ({symbol})"
+                        )
+                        continue
+                    # Last chance: a fill may have printed while we waited.
+                    if self._cleanup_try_record_exit_fill(oid, symbol):
+                        exit_confirmed = True
 
+            if not exit_confirmed:
+                # Hard guard: never cancel legs / drop an entry whose protection is
+                # still working. Unknown also keeps (prefer tracked over wiped).
+                try:
+                    legs_live = self._run_sync(
+                        self._async_entry_has_working_legs(oid, symbol), timeout=20,
+                    )
+                except Exception as e:
+                    error_logger.error(f"Pre-release leg check failed for {oid}: {e}")
+                    legs_live = None
+                if legs_live is not False:
+                    self._legs_gone_reset(str(oid))
+                    bot_logger.warning(
+                        f"Keeping {oid} tracked — SL/TP still working or unknown "
+                        f"(legs_live={legs_live}); refusing ghost-flat release ({symbol})"
+                    )
+                    continue
+                bot_logger.warning(
+                    f"{oid} ({symbol}): SL/TP gone {_LEGS_GONE_CONFIRM_SEC:.0f}s+ and no exit "
+                    f"fill found — releasing as manual/unknown close"
+                )
+
+            # Snapshot baskets + cancel every remaining leg (incl. native bracket
+            # target/stop) BEFORE dropping tracking, or blank-tag Lucid rows are
+            # unreachable afterwards and stay on the chart.
+            self.remember_closed_entry(oid, symbol)
             try:
-                still_open = self._run_sync(
-                    self._async_is_entry_still_open(oid, symbol),
-                    timeout=10,
+                self._run_sync(
+                    self._async_cancel_remaining_bracket_legs(
+                        oid, symbol, info, reason="position_closed_cleanup", force=True,
+                    ),
+                    timeout=20,
                 )
             except Exception as e:
                 error_logger.error(
-                    f"Entry open check failed during cleanup for {oid} {symbol}: {e}"
+                    f"Cancel remaining legs failed for {oid} (path=cleanup_closed_orders): {e}"
                 )
-                still_open = None
-            if still_open is True or still_open is None:
-                bot_logger.debug(
-                    f"Keeping SL/TP for {oid} — entry still open or unknown ({symbol})"
-                )
-                continue
 
             with self._order_lock:
                 removed = self._orders.pop(oid, None)
+            self._legs_gone_reset(str(oid))
             if not removed:
                 continue
 
             bot_logger.info(
-                f"🔄 Order {oid} ({symbol}) removed — position confirmed flat on broker "
+                f"🔄 Order {oid} ({symbol}) removed — "
+                f"{'exit fill confirmed' if exit_confirmed else 'SL/TP gone, no fill (manual/unknown)'} "
                 f"(path=cleanup_closed_orders)"
             )
             if removed.get("protective_sl_order_id") or removed.get("protective_tp_order_id"):
@@ -5353,7 +9773,8 @@ class RithmicConnector(BaseBroker):
                         self._async_cancel_entry_protective_orders(
                             oid,
                             removed,
-                            reason="position_confirmed_flat_on_broker",
+                            reason=("entry_exit_confirmed" if exit_confirmed
+                                    else "entry_legs_gone_confirmed"),
                         ),
                         timeout=10,
                     )

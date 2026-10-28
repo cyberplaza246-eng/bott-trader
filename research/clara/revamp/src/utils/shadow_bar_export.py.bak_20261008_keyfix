@@ -1,0 +1,55 @@
+"""Append closed MNQ 5-minute bars for the NEAT shadow paper trader.
+
+SHADOW_BAR_EXPORT defaults to on (set 0/off to disable). Writes data/live_bars_MNQ_5m.csv.
+Never places orders. Caller must swallow exceptions.
+"""
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+import pandas as pd
+
+_last_written: dict[str, str] = {}
+
+
+def export_closed_bars(df, symbol: str = "MNQ") -> int:
+    if os.getenv("SHADOW_BAR_EXPORT", "1").strip().lower() in ("0", "false", "no", "off"):
+        return 0
+    if df is None or len(df) < 2:
+        return 0
+    if not str(symbol).upper().startswith("MNQ"):
+        return 0
+    root = Path(__file__).resolve().parents[2]
+    path = root / "data" / "live_bars_MNQ_5m.csv"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    closed = df.iloc[:-1]
+    time_col = "datetime" if "datetime" in closed.columns else ("time" if "time" in closed.columns else None)
+    if time_col is None:
+        return 0
+    last = _last_written.get(symbol)
+    if last is None and path.is_file() and path.stat().st_size > 0:
+        try:
+            last = str(pd.read_csv(path, usecols=["ts_et"]).iloc[-1]["ts_et"])
+            _last_written[symbol] = last
+        except Exception:
+            last = None
+    rows = []
+    for _, row in closed.iterrows():
+        ts = pd.Timestamp(row[time_col])
+        if ts.tzinfo is None:
+            ts = ts.tz_localize("UTC")
+        et = ts.tz_convert("America/New_York")
+        key = et.strftime("%Y-%m-%d %H:%M")
+        if last is not None and key <= last:
+            continue
+        rows.append(dict(ts_et=et.isoformat(), open=float(row["open"]), high=float(row["high"]),
+                         low=float(row["low"]), close=float(row["close"]),
+                         volume=float(row["volume"]) if "volume" in closed.columns and pd.notna(row.get("volume", None)) else 0.0))
+        last = key
+    if not rows:
+        return 0
+    out = pd.DataFrame(rows)
+    out.to_csv(path, mode="a", header=not path.is_file() or path.stat().st_size == 0, index=False)
+    _last_written[symbol] = last
+    return len(rows)

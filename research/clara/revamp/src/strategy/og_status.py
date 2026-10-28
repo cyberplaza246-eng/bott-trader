@@ -1,0 +1,232 @@
+﻿"""OG (Ensemble) bot plain-English status readout (OG_STATUS=1). READ-ONLY: never places,
+changes or blocks orders. Bias/sweep facts come from the bot's own log lines (captured by a
+logging handler), levels from the 5m bars, win rates from og_winrates.json (built by
+scripts/og_winrates_build.py from logs/trades.log)."""
+import json, logging, os, re
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+ET = ZoneInfo('America/New_York')
+_STATE = {}
+_RX = {
+    'regime': re.compile(r'regime=(\w+), bias=(\w+), ADX=([\d.]+)'),
+    'nosweep': re.compile(r'NO SWEEP: (.*)'),
+    'gap': re.compile(r'nearest_gap=([\d.]+)'),
+    'ema': re.compile(r"\[EMA\] Returning: \{'signal': '(\w+)', 'confidence': ([\d.]+)"),
+    'sweep': re.compile(r'(Bullish|Bearish) sweep: .*?swing_(?:low|high) ([\d.]+)'),
+    'soft': re.compile(r'sweep detected, soft MSS'),
+    'mss': re.compile(r' MSS: (.*)'),
+    'ctr': re.compile(r'counter-trend (BUY|SELL) rejected'),
+    'skip': re.compile(r'Sweep skip .*?: no bias'),
+    'conf_lo': re.compile(r'Confidence ([\d.]+)% < threshold ([\d.]+)%'),
+    'conf0': re.compile(r'Initial sweep=([\d.]+)%'),
+    'rsi_blk': re.compile(r'RSI (overbought|oversold) \(([\d.]+) [<>] ([\d.]+)\) \W{1,3} blocking sweep (BUY|SELL)'),
+}
+
+
+class _Tap(logging.Handler):
+    def emit(self, record):
+        try:
+            msg = record.getMessage()
+            now = datetime.now(timezone.utc)
+            for k, rx in _RX.items():
+                m = rx.search(msg)
+                if m:
+                    _STATE[k] = (m.groups(), now)
+        except Exception:
+            pass
+
+
+def install(logger_name='TradingBot'):
+    lg = logging.getLogger(logger_name)
+    if not any(isinstance(h, _Tap) for h in lg.handlers):
+        h = _Tap(); h.setLevel(logging.DEBUG); lg.addHandler(h)
+
+
+def _fresh(k, mins=10):
+    v = _STATE.get(k)
+    if not v:
+        return None
+    return v[0] if (datetime.now(timezone.utc) - v[1]).total_seconds() < mins * 60 else None
+
+
+def _swings(df, n=60, k=2):
+    hi, lo = [], []
+    d = df.tail(n)
+    H, L = d['high'].tolist(), d['low'].tolist()
+    for i in range(k, len(d) - k):
+        if H[i] == max(H[i-k:i+k+1]): hi.append(H[i])
+        if L[i] == min(L[i-k:i+k+1]): lo.append(L[i])
+    return hi, lo
+
+
+PV, TICK = 2.0, 0.25   # MNQ $/pt, tick
+
+
+class _Mute(logging.Filter):
+    """Drop records emitted by THIS thread while the readout computes SL/TP (keeps bot log clean)."""
+    def __init__(self):
+        super().__init__(); import threading; self.tid = threading.get_ident()
+    def filter(self, record):
+        return record.thread != self.tid
+
+
+def _quiet(fn, *a, **k):
+    lg = logging.getLogger('TradingBot'); f = _Mute(); lg.addFilter(f)
+    hs = [h for h in lg.handlers if not isinstance(h, _Tap)]
+    for h in hs: h.addFilter(f)
+    try:
+        return fn(*a, **k)
+    finally:
+        lg.removeFilter(f)
+        for h in hs: h.removeFilter(f)
+
+
+def _plan(bot, df, side, level):
+    """SL/TP from the bot's own ensemble.get_dynamic_sl_tp (same call as check_entry_signal).
+    Its 'p' units are ticks (0.25). sl_tp.py measures from the LAST CLOSE, so we take its
+    sl_distance / tp_distance (points) and apply them to the hypothetical sweep entry."""
+    d = 'BUY' if side == 'long' else 'SELL'
+    entry = level + TICK if side == 'long' else level - TICK
+    wick = level - TICK if side == 'long' else level + TICK
+    ens = getattr(bot, 'ensemble', None)
+    if ens is None or not hasattr(ens, 'get_dynamic_sl_tp'):
+        return entry, None, None, 'ensemble not loaded'
+    dfe = _quiet(bot.technical.calculate_indicators, df.copy())
+    r = _quiet(ens.get_dynamic_sl_tp, dfe, d, entry, symbol='MNQ', sweep_wick=wick, timeframe='5m')
+    sd, td = r.get('sl_distance'), r.get('tp_distance')
+    if sd is None or td is None:
+        return entry, None, None, f"method {r.get('method')} gave no distances"
+    sg = 1 if side == 'long' else -1
+    return entry, entry - sg * float(sd), entry + sg * float(td), r.get('method', '')
+
+
+def _fresh_bias(bot, df):
+    """Current bias from live 5m bars via the bot's own LiquiditySweepAnalyzer.detect_regime."""
+    sw = getattr(getattr(bot, 'ensemble', None), 'sweep', None)
+    if sw is None:
+        from src.ai.liquidity_sweep import LiquiditySweepAnalyzer
+        sw = LiquiditySweepAnalyzer()
+    return _quiet(sw.detect_regime, df.copy())
+
+
+def _side_lines(bot, df, price, side, level, label):
+    out = []
+    if level is None:
+        return [f"   {label}: ? (no recent 5m swing {'low below' if side=='long' else 'high above'} price)"]
+    dist = price - level if side == 'long' else level - price
+    if side == 'long':
+        out.append(f"   {label}: SWEEP LONG - needs to dip to {level - TICK:.2f} (-{dist + TICK:.1f} pts) then close back above {level:.2f}")
+    else:
+        out.append(f"   {label}: SWEEP SHORT - needs to pop to {level + TICK:.2f} (+{dist + TICK:.1f} pts) then close back below {level:.2f}")
+    try:
+        entry, sl, tp, how = _plan(bot, df, side, level)
+        if sl is None:
+            out.append(f"     ENTRY ~{entry:.2f} | SL ? | TP ? ({how})")
+            return out
+        risk = abs(entry - sl) * PV; rew = abs(tp - entry) * PV
+        rr = rew / risk if risk > 0 else 0
+        out.append(f"     ENTRY ~{entry:.2f} | SL {sl:.2f} | TP {tp:.2f}")
+        out.append(f"     LOSE ${risk:.0f} if stopped | WIN ${rew:.0f} at target | R:R 1:{rr:.1f}  (per 1 MNQ)")
+        cap = float(getattr(bot, 'max_risk_per_trade_usd', 0) or 0)
+        if cap and risk > cap:
+            out.append(f"     would be SKIPPED: risk ${risk:.0f} > ${cap:.0f} cap")
+    except Exception as e:
+        out.append(f"     SL/TP ? (could not compute: {str(e)[:60]})")
+    return out
+
+
+def lines(bot, symbol, df, price):
+    now_et = datetime.now(ET)
+    L = [f"--- OG {symbol} {now_et:%H:%M} ET | {price:.2f} ---"]
+    b = None
+    try:
+        ri = _fresh_bias(bot, df)
+        b = ri.get('bias'); adx = float(ri.get('adx') or 0)
+        strength = 'STRONG' if adx >= 30 else 'MODERATE' if adx >= 20 else 'WEAK'
+        if b in ('BUY', 'SELL'):
+            held = 'structure holding' if ri.get('regime', '').startswith('trend') else 'structure broken, lean only'
+            L.append(f"   BIAS: {b} - {strength} (ADX {adx:.0f}), 5m swings {'HH/HL' if b=='BUY' else 'LH/LL'}, {held}")
+        else:
+            L.append(f"   BIAS: NEUTRAL - no clear direction yet ({ri.get('details') or 'swings mixed'}; ADX {adx:.0f})")
+    except Exception as e:
+        L.append(f"   BIAS: ? (could not compute from bars: {str(e)[:50]})")
+    hi, lo = [], []
+    try:
+        hi, lo = _swings(df)
+    except Exception:
+        pass
+    lo_lvl = max([x for x in lo if x < price], default=None)
+    hi_lvl = min([x for x in hi if x > price], default=None)
+    if b == 'SELL':
+        L += _side_lines(bot, df, price, 'short', hi_lvl, 'SETUP')
+        L += _side_lines(bot, df, price, 'long', lo_lvl, 'OTHER SIDE (only if bias flips)')
+    else:
+        L += _side_lines(bot, df, price, 'long', lo_lvl, 'SETUP' if b == 'BUY' else 'LONG SIDE')
+        L += _side_lines(bot, df, price, 'short', hi_lvl, 'OTHER SIDE (only if bias flips)' if b == 'BUY' else 'SHORT SIDE')
+    # confidence
+    thr = None
+    try:
+        thr = float(bot.ensemble.learner.get_adjusted_threshold())
+    except Exception:
+        pass
+    em = _fresh('ema'); sw = _fresh('sweep', 6)
+    need = f"needs {thr*100:.0f}%+" if thr else "min ? (learner not loaded)"
+    if sw:
+        cs = f"sweep fired - trade confidence set by ensemble ({need}); size 1 MNQ, 2 at 72%, 3 at 78%, 4 at 85%"
+    elif em:
+        cs = f"no trade signal yet (0%); EMA model leans {em[0]} {float(em[1])*100:.0f}% - {need} AND a sweep"
+    else:
+        cs = f"no trade signal yet; {need} AND a sweep"
+    L.append(f"   CONFIDENCE: {cs}")
+    # waiting because
+    why = []
+    try:
+        from src.strategy.og_tokyo_block import tokyo_window_end
+        te = tokyo_window_end()
+        if te is not None: why.append(f"Tokyo-open block until {te:%H:%M} ET")
+    except Exception:
+        pass
+    try:
+        led = getattr(bot, '_session_ledger', None)
+        w = led.block_reason(datetime.now(timezone.utc)) if led is not None else None
+        if w: why.append(f"session limit hit ({w})")
+    except Exception:
+        pass
+    try:
+        nowu = datetime.now(timezone.utc)
+        u = getattr(bot, 'loss_cooldown_until', {}).get(symbol)
+        if u and nowu < u: why.append(f"loss cooldown {int((u-nowu).total_seconds()//60)+1} more min")
+        u = getattr(bot, '_consec_loss_pause_until', {}).get(symbol)
+        if u and nowu < u: why.append(f"losing-streak pause {int((u-nowu).total_seconds()//60)+1} more min")
+        if getattr(bot, 'cooldown', 0) > 0:
+            lt = (getattr(bot, 'trades', None) or [{}])[-1]
+            src = ''
+            if lt.get('pnl') is not None:
+                et = str(lt.get('exit_time', ''))
+                try: et = datetime.fromisoformat(et).astimezone(ET).strftime('%H:%M ET')
+                except Exception: pass
+                src = f" (last trade closed {'+' if lt['pnl']>=0 else '-'}${abs(lt['pnl']):.2f} at {et})"
+            why.append(f"short cooldown after a trade{src}, {bot.cooldown} more 5m bar(s)")
+        if bot._effective_open_count() >= bot.max_positions: why.append(f"already {bot.max_positions} trades open")
+    except Exception:
+        pass
+    ctr = _fresh('ctr', 6)
+    if ctr: why.append(f"last sweep was a counter-trend {ctr[0]} and got rejected")
+    if not why:
+        if b not in ('BUY', 'SELL'):
+            why.append("no clear bias, so it is not hunting either side")
+        elif not sw:
+            gp = _fresh('gap', 3)
+            g = f" (closest recent 1m wick was {float(gp[0]):.1f} pts away)" if gp else ""
+            why.append(f"price has not swept a swing {'low' if b=='BUY' else 'high'} yet{g}")
+        else:
+            cl, c0, rb = _fresh('conf_lo', 6), _fresh('conf0', 6), _fresh('rsi_blk', 6)
+            if rb:
+                why.append(f"sweep {rb[3]} was REJECTED: RSI {rb[0]} ({rb[1]} vs limit {rb[2]})" + (f", sweep confidence was {c0[0]}%" if c0 else ""))
+            elif cl:
+                why.append(f"sweep was REJECTED: confidence {cl[0]}% < {cl[1]}% needed" + (f" (started at {c0[0]}%, cut by adaptive/RL penalties)" if c0 else ""))
+            else:
+                why.append("sweep seen - ensemble has not confirmed the entry")
+    L.append("   WAITING BECAUSE: " + "; ".join(why) + ".")
+    return L

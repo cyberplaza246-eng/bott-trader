@@ -41,8 +41,139 @@ class SecretRedactFilter(logging.Filter):
         return True
 
 
+def install_rithmic_unknown_template_guard() -> None:
+    """Lucid/Rithmic may push template 358 (account update) before async_rithmic decodes it.
+
+    Older async_rithmic raises in the background process loop, spamming the console but
+    leaving the websocket up. Swallow unknown templates so recv/process loops continue.
+    """
+    if getattr(install_rithmic_unknown_template_guard, "_installed", False):
+        return
+    try:
+        import asyncio
+
+        from google.protobuf.json_format import MessageToDict
+
+        from async_rithmic.helpers import background_task_mixin as btm
+        from async_rithmic.plants import base as plant_base
+    except ImportError:
+        return
+
+    _orig_convert = plant_base.BasePlant._convert_bytes_to_response
+
+    def _convert_bytes_to_response_safe(self, buffer):
+        try:
+            return _orig_convert(self, buffer)
+        except Exception as exc:
+            msg = str(exc)
+            if "Unknown template ID:" not in msg:
+                raise
+            tid = msg.rsplit(":", 1)[-1].strip()
+            logging.getLogger("async_rithmic").debug(
+                "Ignoring unknown Rithmic template ID %s (upgrade async_rithmic to decode)",
+                tid,
+            )
+            return None
+
+    plant_base.BasePlant._convert_bytes_to_response = _convert_bytes_to_response_safe
+
+    _orig_process = btm.BackgroundTaskMixin._process_loop
+
+    async def _process_loop_safe(self):
+        while True:
+            buffer = await self._inbound_queue.get()
+            try:
+                response = self._convert_bytes_to_response(buffer)
+                if response is None:
+                    continue
+                self.logger.debug(f"Received message {MessageToDict(response)}")
+                await self._process_response(response)
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.exception("Error processing response", exc_info=e)
+
+    btm.BackgroundTaskMixin._process_loop = _process_loop_safe
+
+    _orig_immediate = plant_base.BasePlant._send_and_recv_immediate
+
+    async def _send_and_recv_immediate_safe(self, **kwargs):
+        responses = []
+        async with plant_base.try_acquire_lock(
+            self, context=f"send_and_recv_immediate_{kwargs.get('template_id')}"
+        ):
+            request = self._build_request(**kwargs)
+            self.logger.debug(f"Sending message {MessageToDict(request)}")
+            buffer = self._convert_request_to_bytes(request)
+            await self.ws.send(buffer)
+            while True:
+                buffer = await self.ws.recv()
+                response = self._convert_bytes_to_response(buffer)
+                if response is None:
+                    continue
+                self.logger.debug(f"Received message {MessageToDict(response)}")
+                if response.template_id != kwargs["template_id"] + 1:
+                    await self._process_response(response)
+                    continue
+                responses.append(response)
+                if not hasattr(response, "rp_code"):
+                    continue
+                break
+        if len(responses[-1].rp_code) and responses[-1].rp_code[0] != "0":
+            if responses[-1].rp_code[0] == "7":
+                self.logger.debug(
+                    f"Rithmic returned no data for the request={kwargs}"
+                )
+                return []
+            raise plant_base.RithmicErrorResponse(
+                f"Rithmic returned an error={MessageToDict(responses[-1])} "
+                f"for the request={kwargs}"
+            )
+        return responses
+
+    plant_base.BasePlant._send_and_recv_immediate = _send_and_recv_immediate_safe
+
+    if hasattr(plant_base.BasePlant, "_send_and_recv"):
+        _orig_send_recv = plant_base.BasePlant._send_and_recv
+
+        async def _send_and_recv_safe(self, **kwargs):
+            template_id = await self._send_request(**kwargs)
+            while True:
+                async with plant_base.DisconnectionHandler(self):
+                    async with plant_base.try_acquire_lock(
+                        self, context=f"send_and_recv_{template_id}"
+                    ):
+                        buffer = await self._recv()
+                    response = self._convert_bytes_to_response(buffer)
+                    if response is None:
+                        continue
+                    self.logger.debug(f"Received message {MessageToDict(response)}")
+                    if (
+                        not hasattr(response, "rp_code")
+                        or response.template_id != template_id + 1
+                    ):
+                        await self._process_response(response)
+                        continue
+                    break
+            if len(response.rp_code) and response.rp_code[0] != "0":
+                if response.rp_code[0] == "7":
+                    self.logger.debug(
+                        f"Rithmic returned no data for the request={kwargs}"
+                    )
+                    return response
+                raise plant_base.RithmicErrorResponse(
+                    f"Rithmic returned an error={MessageToDict(response)} "
+                    f"for the request={kwargs}"
+                )
+            return response
+
+        plant_base.BasePlant._send_and_recv = _send_and_recv_safe
+    install_rithmic_unknown_template_guard._installed = True
+
+
 def install_rithmic_log_redaction() -> None:
     """async_rithmic logs Client(password=...) on plant errors. Never print that."""
+    install_rithmic_unknown_template_guard()
     filt = SecretRedactFilter()
 
     def _attach(logger: logging.Logger) -> None:

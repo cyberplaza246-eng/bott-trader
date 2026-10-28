@@ -1,0 +1,84 @@
+"""EVAL PASSER (internal name flex3) — LucidFlex 50K eval plan — entry gate / sizing / lock params (pure python, no broker calls).
+Streams: "v2" (his +$400 -> +$50 lock), "addon" = ONL/E1 (no lock, 2 h time exit), "6pm" long (out 09:25 ET).
+All $ lock levels are PER CONTRACT (backtest ran per-contract pnl x size); live runner multiplies by size.
+Every setting can be overridden by env FLEX3_* (see flex3.env). SIM ONLY: UK50C73-TEST017."""
+import json, os
+from dataclasses import dataclass, asdict
+from datetime import datetime, time, timedelta
+from zoneinfo import ZoneInfo
+ET = ZoneInfo("America/New_York")
+def _f(n, d): return float(os.getenv(n, d))
+def _t(n, d): h, m = os.getenv(n, d).split(":"); return time(int(h), int(m))
+ACCOUNT_ALLOWED = os.getenv("FLEX3_ACCOUNT", "LFE050-PUK50C73-TEST017")
+SIZE_MNQ = int(os.getenv("FLEX3_SIZE", "1"))
+FLAT_TIME = _t("FLEX3_FLAT_ET", "16:44")
+REOPEN_TIME = _t("FLEX3_REOPEN_ET", "18:00")
+DAILY_LOSS_STOP = _f("FLEX3_DAILY_LOSS_STOP", "1500")
+DAY_PROFIT_CAP = _f("FLEX3_DAY_PROFIT_CAP", "1350")
+TARGET = _f("FLEX3_TARGET", "3000"); CONSISTENCY = _f("FLEX3_CONSISTENCY", "0.50")
+SIX_PM_DD_GATE = _f("FLEX3_6PM_DD_GATE", "500")
+V2_LOCK = dict(activate=_f("FLEX3_V2_LOCK_ACT", "400"), keep=_f("FLEX3_V2_LOCK_KEEP", "50"), trail_start=1e12, keep_pct=0.0)
+ADDON_LOCK = dict(activate=1e12, keep=0.0, trail_start=1e12, keep_pct=0.0)   # research (og50k_sim): ONL/E1 have NO lock; 2 h time exit
+COST_PER_CONTRACT = _f("FLEX3_COST_PER_CONTRACT", "4")   # $ round trip per MNQ, same as backtest ($12 at 3 MNQ)
+CAP_FLATTEN = os.getenv("FLEX3_CAP_FLATTEN", "1") == "1"   # flatten all when realized+open day P&L >= DAY_PROFIT_CAP
+SIX_PM_FAR_TP_PTS = _f("FLEX3_6PM_FAR_TP_PTS", "800")   # 800 = never hit in backtest (same as no TP), only a safety bracket; research 6 PM long has no TP; broker bracket gets a far one
+SIX_PM = dict(entry=time(18, 0), exit=time(9, 25), stop_atr15_mult=1.5, stop_min_pts=12.0, stop_max_pts=40.0)
+OG_MAIN_ON = False                       # EVAL PASSER trades only v2 / ONL+E1 / 6 PM
+PLANNER_KW = dict(exclude_src=tuple(s for s in os.getenv("FLEX3_EXCLUDE_SRC", "pb_ema").split(",") if s),
+                  og_trend=os.getenv("FLEX3_OG_TREND", "1") == "1")   # OG trend sleeve (EMA20/50 x EMA200, ADX>=25, RTH, 4xATR trail), only when flat   # pb_ema lost in tune (-$10.4/c, 246 tr) and 2026 OOS (-$6.9/c)
+def account_ok(acct): return acct == ACCOUNT_ALLOWED
+def classify_stream(signal):
+    """Explicit signal['flex3_stream'] wins; else ONL/E1 names -> addon, 6pm/sixpm -> 6pm, else v2."""
+    s = str(signal.get("flex3_stream") or "").lower()
+    if s in ("v2", "addon", "6pm", "ogtrend"): return s
+    tag = " ".join(str(signal.get(k, "")) for k in ("source", "strategy", "setup", "exit_sleeve", "name")).upper()
+    if "6PM" in tag or "SIXPM" in tag or "SIX_PM" in tag: return "6pm"
+    if "ONL" in tag or "E1" in tag.split() or "_E1" in tag or "E1_" in tag: return "addon"
+    return "v2"
+def lock_params(stream, size):
+    if stream == "6pm" and os.getenv("SIXPM_TRAIL", "1") == "1":   # 6pm uses the chandelier trail (runner), no $ lock
+        return dict(activate_usd=1e12, keep_usd=0.0, trail_start_usd=1e12, keep_pct=0.0)
+    p = V2_LOCK if stream in ("v2", "6pm") else ADDON_LOCK; n = max(1, int(size))   # ogtrend: no $ lock (own 4xATR trail)
+    return dict(activate_usd=p["activate"]*n, keep_usd=p["keep"]*n, trail_start_usd=p["trail_start"]*n, keep_pct=p["keep_pct"])
+def trading_day(now_et):
+    """Lucid day rolls at 18:00 ET."""
+    d = now_et + timedelta(days=1) if now_et.time() >= REOPEN_TIME else now_et
+    return d.date().isoformat()
+def in_flat_window(t): return FLAT_TIME <= t < REOPEN_TIME
+@dataclass
+class Flex3Guard:
+    eval_pnl: float = 0.0; eval_hwm: float = 0.0; day_pnl: float = 0.0; best_day: float = 0.0; day_key: str = ""
+    unknown_exits: int = 0
+    cap_hit_day: str = ""
+    def new_day(self, key):
+        if key != self.day_key:
+            if self.day_key: self.best_day = max(self.best_day, self.day_pnl)
+            self.day_key = key; self.day_pnl = 0.0
+    def on_close(self, pnl, day_key=None):
+        if day_key: self.new_day(day_key)
+        self.eval_pnl += pnl; self.day_pnl += pnl; self.eval_hwm = max(self.eval_hwm, self.eval_pnl)
+    def on_unknown_exit(self): self.unknown_exits += 1
+    def passed(self):
+        return self.eval_pnl >= TARGET and max(self.best_day, self.day_pnl) <= CONSISTENCY * self.eval_pnl
+    def allow_entry(self, stream, now_et_time, account, **_):
+        if account != ACCOUNT_ALLOWED: return False, f"account {account!r} not allowed (sim only {ACCOUNT_ALLOWED})"
+        if self.unknown_exits: return False, "unknown-pnl broker exit: reconcile flex3_state.json then reset unknown_exits"
+        if in_flat_window(now_et_time): return False, "flat window"
+        if self.passed(): return False, "eval passed - stop"
+        if self.day_pnl <= -DAILY_LOSS_STOP: return False, "daily loss stop"
+        if self.day_pnl >= DAY_PROFIT_CAP or (self.cap_hit_day and self.cap_hit_day == self.day_key): return False, "consistency day cap"
+        if stream == "6pm" and self.eval_hwm - self.eval_pnl >= SIX_PM_DD_GATE: return False, "6pm DD gate"
+        return True, "ok"
+    def on_entry(self, stream): pass
+    def cap_reached(self, open_pnl):
+        """True when realized + open day P&L >= cap -> runner flattens everything and blocks the rest of the day."""
+        hit = CAP_FLATTEN and self.day_pnl + float(open_pnl) >= DAY_PROFIT_CAP
+        if hit: self.cap_hit_day = self.day_key
+        return hit
+    def size(self, stream): return SIZE_MNQ
+    def save(self, path):
+        tmp = path + ".tmp"; open(tmp, "w").write(json.dumps(asdict(self), indent=1)); os.replace(tmp, path)
+    @classmethod
+    def load(cls, path):
+        try: return cls(**json.load(open(path)))
+        except FileNotFoundError: return cls()

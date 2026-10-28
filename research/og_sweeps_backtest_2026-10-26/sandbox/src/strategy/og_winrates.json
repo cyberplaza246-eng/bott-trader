@@ -1,0 +1,43 @@
+{
+ "source": "logs/trades.log",
+ "built": "2026-10-26T05:29:18",
+ "dupe_exit_lines_skipped": 156,
+ "note": "trades.log has no timestamps; whole history, costs included as logged",
+ "setups": {
+  "addon_long": {
+   "name": "Add-on long (ONL/6PM/E1)",
+   "n": 3,
+   "win_pct": 33.3,
+   "avg_usd": -32.5,
+   "total_usd": -97.5
+  },
+  "adopted_long": {
+   "name": "Adopted/manual long",
+   "n": 238,
+   "win_pct": 44.1,
+   "avg_usd": 53.03,
+   "total_usd": 12621.0
+  },
+  "reentry_long": {
+   "name": "Re-entry long",
+   "n": 24,
+   "win_pct": 62.5,
+   "avg_usd": 88.75,
+   "total_usd": 2130.0
+  },
+  "sweep_long": {
+   "name": "Sweep long (main setup)",
+   "n": 83,
+   "win_pct": 50.6,
+   "avg_usd": 10.38,
+   "total_usd": 861.5
+  },
+  "sweep_short": {
+   "name": "Sweep short (main setup)",
+   "n": 64,
+   "win_pct": 54.7,
+   "avg_usd": 51.7,
+   "total_usd": 3308.5
+  }
+ }
+}

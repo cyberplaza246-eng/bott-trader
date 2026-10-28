@@ -1,0 +1,177 @@
+"""Per-session loss limits + daily profit target for the REVAMP bot (user 2026-10-09).
+
+Sessions (ET, America/New_York, DST-aware):
+  day session        09:30-16:00 ET, Mon-Fri
+  overnight session  16:00 ET -> next weekday 09:30 ET (covers the 5-6 PM halt and the weekend)
+  trading day D      = overnight session leading into D's 09:30 open + D's day session
+
+P&L counting: each CLOSED trade's net P&L (after costs, as booked by process_exit) is added to the
+session in which the trade was OPENED (its entry time), and to that session's trading day.
+Open trades' unrealized P&L is not counted. The ledger is saved to data/session_pnl.json so a
+bot restart keeps today's numbers.
+
+Rules (only block NEW entries; open trades keep their SL/TP and are never force-closed):
+  DAY_SESSION_LOSS_LIMIT=500        day-session P&L <= -500 -> no new trades until the overnight session
+  OVERNIGHT_SESSION_LOSS_LIMIT=300  overnight P&L <= -300 -> no new trades until the 09:30 day session
+  DAILY_PROFIT_TARGET=2000          trading-day P&L >= +2000 -> no new trades until the next trading day
+  (0 disables a rule). SESSION_LIMITS=0 turns the whole module off (old calendar-day daily loss limit).
+"""
+from __future__ import annotations
+
+import json
+import os
+from datetime import date, datetime, time as dtime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
+
+try:
+    from zoneinfo import ZoneInfo
+    ET = ZoneInfo("America/New_York")
+except Exception:  # pragma: no cover
+    ET = None
+
+DAY_OPEN = dtime(9, 30)
+DAY_CLOSE = dtime(16, 0)
+DEFAULT_FILE = os.path.join("data", "session_pnl.json")
+
+
+def _f(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None or str(raw).strip() == "":
+        return float(default)
+    try:
+        v = float(raw)
+    except ValueError:
+        return float(default)
+    return v if v == v else float(default)
+
+
+def enabled(revamp_on: bool) -> bool:
+    raw = str(os.getenv("SESSION_LIMITS", "") or "").strip().lower()
+    if raw in ("0", "false", "no", "off"):
+        return False
+    if raw in ("1", "true", "yes", "on"):
+        return True
+    return bool(revamp_on)
+
+
+def limits() -> Tuple[float, float, float]:
+    """(day_loss, overnight_loss, daily_profit_target) in $, 0 = off."""
+    return (max(0.0, _f("DAY_SESSION_LOSS_LIMIT", 500.0)),
+            max(0.0, _f("OVERNIGHT_SESSION_LOSS_LIMIT", 300.0)),
+            max(0.0, _f("DAILY_PROFIT_TARGET", 2000.0)))
+
+
+def _to_et(ts: Any) -> datetime:
+    if isinstance(ts, str):
+        ts = datetime.fromisoformat(ts)
+    if ts is None:
+        ts = datetime.now(timezone.utc)
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+    return ts.astimezone(ET) if ET is not None else ts
+
+
+def _next_weekday(d: date) -> date:
+    while d.weekday() >= 5:
+        d += timedelta(days=1)
+    return d
+
+
+def session_of(ts: Any) -> Tuple[str, date]:
+    """('day' | 'overnight', trading_day) for a timestamp (aware or naive-UTC)."""
+    t = _to_et(ts)
+    d, hm = t.date(), t.time()
+    if d.weekday() < 5 and DAY_OPEN <= hm < DAY_CLOSE:
+        return "day", d
+    if d.weekday() >= 5:                       # Sat/Sun -> Monday's trading day
+        return "overnight", _next_weekday(d)
+    if hm >= DAY_CLOSE:                        # after 4 PM -> next weekday's trading day
+        return "overnight", _next_weekday(d + timedelta(days=1))
+    return "overnight", d                      # weekday before 09:30
+
+
+def _money(v: float) -> str:
+    s = "-" if v < -0.005 else ("+" if v > 0.005 else "")
+    return f"{s}${abs(v):,.0f}"
+
+
+class SessionLedger:
+    def __init__(self, path: Optional[str] = DEFAULT_FILE, keep_days: int = 7):
+        self.path = path
+        self.keep_days = keep_days
+        self.rows: List[Dict[str, Any]] = []
+        self._load()
+
+    # -- persistence -----------------------------------------------------------
+    def _load(self) -> None:
+        if not self.path or not os.path.exists(self.path):
+            return
+        try:
+            with open(self.path, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+            self.rows = [r for r in data.get("rows", []) if isinstance(r, dict)]
+        except Exception:
+            self.rows = []
+
+    def _save(self) -> None:
+        if not self.path or os.environ.get("PYTEST_CURRENT_TEST"):
+            return   # never let a test write the live ledger
+        try:
+            d = os.path.dirname(self.path)
+            if d:
+                os.makedirs(d, exist_ok=True)
+            tmp = self.path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as fh:
+                json.dump({"rows": self.rows}, fh, indent=1)
+            os.replace(tmp, self.path)
+        except Exception:
+            pass
+
+    # -- booking ---------------------------------------------------------------
+    def book(self, entry_time: Any, pnl: float, order_id: str = "", exit_time: Any = None) -> Tuple[str, date]:
+        kind, td = session_of(entry_time)
+        self.rows.append({"td": td.isoformat(), "kind": kind, "pnl": round(float(pnl), 2),
+                          "order_id": str(order_id),
+                          "exit_time": str(exit_time or datetime.now(timezone.utc))})
+        cutoff = (td - timedelta(days=self.keep_days)).isoformat()
+        self.rows = [r for r in self.rows if r.get("td", "") >= cutoff]
+        self._save()
+        return kind, td
+
+    def pnl(self, td: date, kind: Optional[str] = None) -> float:
+        k = td.isoformat()
+        return round(sum(float(r.get("pnl", 0) or 0) for r in self.rows
+                         if r.get("td") == k and (kind is None or r.get("kind") == kind)), 2)
+
+    # -- rules -----------------------------------------------------------------
+    def block_reason(self, now: Any = None) -> Optional[str]:
+        kind, td = session_of(now)
+        day_lim, on_lim, target = limits()
+        td_pnl = self.pnl(td)
+        if target > 0 and td_pnl >= target:
+            return f"daily profit target hit (trading day {_money(td_pnl)} >= {_money(target)})"
+        sp = self.pnl(td, kind)
+        if kind == "day" and day_lim > 0 and sp <= -day_lim:
+            return f"day-session loss limit hit ({_money(sp)}, limit -${day_lim:,.0f}); next trades overnight"
+        if kind == "overnight" and on_lim > 0 and sp <= -on_lim:
+            return f"overnight loss limit hit ({_money(sp)}, limit -${on_lim:,.0f}); next trades 9:30 AM ET"
+        return None
+
+    def status_line(self, now: Any = None) -> str:
+        kind, td = session_of(now)
+        day_lim, on_lim, target = limits()
+        sp, tdp = self.pnl(td, kind), self.pnl(td)
+        name = "Day" if kind == "day" else "Overnight"
+        lim = day_lim if kind == "day" else on_lim
+        stops = []
+        if lim > 0:
+            stops.append(f"-${lim:,.0f}")
+        if target > 0:
+            stops.append(f"+${target:,.0f}" + ("" if abs(tdp - sp) < 0.005 else " for the day"))
+        line = f"{name} P&L {_money(sp)}"
+        if abs(tdp - sp) >= 0.005:
+            line += f" (trading day {_money(tdp)})"
+        if stops:
+            line += ", stops at " + " or ".join(stops)
+        why = self.block_reason(now)
+        return f"STOPPED - {why}" if why else line

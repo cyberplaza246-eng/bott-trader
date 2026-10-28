@@ -1,0 +1,14 @@
+{
+ "bars_total": 666675,
+ "sweep_signals(buy/sell)": 7932,
+ "sweep_with_signal": 7932,
+ "pass_all_model_gates(should_trade)": 154,
+ "pass if conf gate off": 4310,
+ "pass if conf+rsi off": 4386,
+ "pass if conf+rsi+ema off": 5290,
+ "pass if conf+rsi+ema+agree off": 7932,
+ "final conf>=0.64 only": 162,
+ "sweep_conf>=0.64 only": 1160,
+ "rsi blocks (of conf>=.64)": 8,
+ "trades taken in sim": 118
+}

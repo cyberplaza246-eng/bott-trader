@@ -47,7 +47,7 @@ class EnsembleStrategy:
         self,
         adx_trend_min: float = ADX_TREND_MIN,
         adx_range_max: float = ADX_RANGE_MAX,
-        rth_only: bool = True,
+        rth_only: bool | None = None,
         breakout_in_range: bool = False,
         event_trigger: bool = True,
         revamp_exits: bool | None = None,
@@ -56,7 +56,8 @@ class EnsembleStrategy:
     ) -> None:
         self.adx_trend_min = adx_trend_min
         self.adx_range_max = adx_range_max
-        self.rth_only = rth_only
+        # None -> env (OVERNIGHT_TRADING / SESSION_MODE / RTH_ONLY); default RTH-only
+        self.rth_only = _rx.rth_only_from_env() if rth_only is None else bool(rth_only)
         self.breakout_in_range = breakout_in_range
         self.event_trigger = event_trigger
         self.revamp_exits = _rx.revamp_enabled() if revamp_exits is None else bool(revamp_exits)

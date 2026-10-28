@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YC3JQRYMJB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-YC3JQRYMJB');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clara Systems · Automated Futures Trading</title>
+<meta name='impact-site-verification' value='098f8a2e-bb60-4df4-8ebe-d49432548192'>
+<meta name="description" content="A free, fully automated MNQ futures strategy with every trade log published. Run the backtest yourself and test it live on sim, at no cost and no financial risk.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://clarasystems.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Clara Systems · Automated Futures Trading">
+<meta property="og:description" content="A free, fully automated MNQ futures strategy with every trade log published. Run the backtest yourself and test it live on sim, at no cost and no financial risk.">
+<meta property="og:url" content="https://clarasystems.io/">
+<meta property="og:site_name" content="Clara Systems">
+<meta property="og:image" content="https://clarasystems.io/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Clara Systems · Automated Futures Trading">
+<meta name="twitter:description" content="A free, fully automated MNQ futures strategy with every trade log published. Run the backtest yourself and test it live on sim, at no cost and no financial risk.">
+<meta name="robots" content="index, follow">
+
+<style type="text/css">@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js" integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Josefin Sans', sans-serif;
+  background: var(--bg);
+  color: #2C2B28;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+:root {
+  --black:   #2C2B28;
+  --mid:     #3a3835;
+  --soft:    #6b6a65;
+  --white:   #ffffff;
+  --bg:      #f7f6f3;
+  --bg-dark: #141412;
+  --bg-dk2:  #1c1c1a;
+  --border:  #D0D0CC;
+  --bdk:     rgba(255,255,255,0.12);
+  --green:   #1D9E75;
+  --cgr:     #1D9E75;
+  --red:     #D85A30;
+  --ow:      #E6E4DD;
+  --teal:    #1D9E75;
+  --amber:   #BA7517;
+}
+
+/* ═══════════════════════════════════════
+   SINGLE FIXED HEADER - one element, 3 states
+   State 1: dark bg, white logo, no CTA, no nav row
+   State 2 (.scrolled): white bg, black logo, no CTA, no nav row
+   State 3 (.locked): white bg, black logo, CTA appears, nav row expands
+═══════════════════════════════════════ */
+:root { --nav-h: 62px; --strip-h: 62px; --hero-gap: 2.5rem; --band-h: 34px; }
+/* --band-h is the height of the tab row. EVERY small text band in the hero card
+   (May 2019 caption, the tab note, the commission note, the fine print) is that
+   same height with its text vertically centred, so the air above and below each
+   one is equal and identical across all of them. Do not add vertical padding or
+   margins to those bands: the band height IS the spacing. */
+/* --hero-gap is the single gap used THREE times in the hero: above the headline,
+   after "Walk away.", and after "verifiable.". One variable so the three can
+   never drift apart. Short windows shrink it (see the max-height tiers below),
+   which keeps the three even while letting the CTAs and nav strip stay on screen. */
+
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  background: #2C2B28;
+  /* border-bottom always present so the header box clips the scrolling nav strip cleanly */
+  border-bottom: 1px solid transparent;
+  transition: background 400ms ease, border-color 400ms ease,
+              box-shadow 300ms ease;
+}
+.site-header.scrolled {
+  background: rgba(235,233,228,0.97);
+  border-color: var(--border);
+}
+.site-header.locked {
+  background: rgba(235,233,228,0.97);
+  border-color: var(--border);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+}
+
+/* Logo row */
+.header-logo-row {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  align-items: center; padding: 0 3rem;
+  height: var(--nav-h);
+  /* bottom border always visible so nav strip scrolls behind it cleanly */
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  transition: border-color 400ms ease;
+}
+.site-header.scrolled .header-logo-row,
+.site-header.locked   .header-logo-row { border-color: var(--border); }
+
+.header-logo {
+  grid-column: 2; text-align: center;
+  font-size: 28px; /* 25% bigger: 22 → 28 */
+  font-weight: 300; letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(240,239,233,0.82);
+  transition: color 400ms ease;
+}
+.site-header.scrolled .header-logo,
+.site-header.locked   .header-logo { color: var(--black); }
+
+.header-cta-slot {
+  grid-column: 3; display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 300ms ease;
+}
+.site-header.locked .header-cta-slot {
+  opacity: 1; pointer-events: auto;
+}
+.header-cta {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 12px; font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; padding: 10px 24px;
+  background: var(--black); color: #fff;
+  border: none; cursor: pointer; transition: background .15s;
+}
+.header-cta:hover { background: var(--green); }
+
+/* Nav links row - expands into view when locked */
+.header-nav-row {
+  overflow: hidden;
+  max-height: 0;
+  border-top: 1px solid transparent;
+  transition: max-height 300ms ease, border-color 300ms ease;
+}
+.site-header.locked .header-nav-row {
+  max-height: var(--strip-h);
+  border-color: var(--border);
+}
+.header-nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  gap: 2.5rem; padding: 0 3rem; height: var(--strip-h);
+}
+.header-nav-inner a {
+  font-size: 13px; font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--black);
+  text-decoration: none; transition: color .15s; white-space: nowrap;
+}
+.header-nav-inner a.active { color: var(--green); }
+
+
+/* HERO */
+.hero {
+  min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column;
+  background: var(--bg);
+}
+.hero-spacer { height: calc(var(--nav-h) + 41px); flex-shrink: 0; transition: height 300ms ease; }
+/* FINAL: when the header is locked it is two rows tall (logo + nav). The hero spacer
+   grows by the nav-row height so hero copy never sits underneath the fixed header. */
+@media (min-width: 769px) {
+  .site-header.locked ~ .hero .hero-spacer { height: calc(var(--nav-h) + var(--strip-h) + 41px); }
+}
+
+.hero-center {
+  flex: 1; display: flex; flex-direction: column;
+  /* flex-start, not center: with centering, any leftover vertical space was added
+     ABOVE the headline, so the top gap drifted (46px against 18px on short
+     windows) and the three hero gaps stopped matching. Anchored to the top, the
+     padding IS the gap, and the slack collects above the nav strip instead. */
+  align-items: center; justify-content: flex-start;
+  /* No bottom padding: the fine-print band's own height provides the air above
+     the nav strip, same as every other band. */
+  padding: var(--hero-gap) 3rem 0;
+  text-align: center;
+}
+
+/* The intro paragraph under the headline. Was an inline style; moved here so the
+   short-window tiers can reach it (inline styles beat media queries) and to keep
+   design law 8 - no inline padding or margin overrides. */
+.hero-intro {
+  font-size: 14px; line-height: 1.75; color: #6b6a65;
+  max-width: 580px; margin: var(--hero-gap) auto 0; text-align: center;
+}
+
+.hero-copy {
+  font-size: 18px; font-weight: 400; letter-spacing: .02em;
+  line-height: 1.75; color: var(--mid); max-width: 600px;
+}
+.hero-copy strong { color: var(--black); font-weight: 400; }
+
+/* The caption now sits between the intro copy and this rule, so the rule carries
+   no top margin of its own. The caption's own padding owns both gaps: a large
+   one above it (separating it from the intro copy) and a small one below it
+   (binding it to the rule and the dashboard it labels). */
+.hero-rule {
+  width: 100%; max-width: 824px; height: 1px;
+  background: var(--border); margin: 0;
+}
+
+.data-unit { width: 100%; max-width: 824px; }
+
+.data-caption-top {
+  font-size: 11px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--soft);
+  /* line-height 1.6 matches .model-tabs-note. Without it this line defaulted to
+     `normal` (~1.2), so when it wrapped to two lines on mobile the two lines sat
+     tight against each other while the tab note below breathed. Desktop is
+     unaffected: one line still sits inside the 34px band. */
+  text-align: center; line-height: 1.6;
+  margin-top: var(--hero-gap);
+  min-height: var(--band-h); padding: 3px 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Labels the model tabs: sits under the hero rule, directly above them.
+   Vertical padding is set so this box is the SAME HEIGHT as the tab row below
+   it (33.78px): a 19.2px line box plus 7.29px top and bottom. If the font size
+   or line-height changes, this padding has to be recalculated to match. */
+.model-tabs-note {
+  font-size: 12px; font-weight: 400; letter-spacing: .04em;
+  color: var(--soft); text-align: center; line-height: 1.6;
+  min-height: var(--band-h); padding: 3px 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.hero-stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border); border-bottom: none; background: #f0efe9;
+}
+.hs-box { padding: 1.1rem 1.4rem; border-right: 1px solid var(--border); }
+.hs-box:last-child { border-right: none; }
+.hs-label {
+  font-size: 10px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--soft); margin-bottom: .45rem;
+}
+.hs-val {
+  font-size: 1.55rem; font-weight: 400; letter-spacing: .03em;
+  line-height: 1; color: var(--black); font-variant-numeric: tabular-nums;
+}
+.hs-val.g { color: var(--green); }
+.hs-val.r { color: var(--red); }
+
+.hero-chart-wrap {
+  width: 100%; background: #f0efe9;
+  border: 1px solid var(--border);
+  padding: .85rem 1rem .6rem;
+}
+.data-caption-btm {
+  font-size: 12px; font-weight: 400; letter-spacing: .04em;
+  color: var(--soft); text-align: center; line-height: 1.6;
+  /* Not a 34px band: this note carries two lines, and the old 1.05rem of air
+     read better than a tight band. Symmetric top and bottom. */
+  padding: 1.05rem 0;
+}
+
+.hero-ctas {
+  width: 100%; max-width: 824px;
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; margin-top: 0;
+}
+.btn-s {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 13px; font-weight: 400; letter-spacing: .10em; text-transform: uppercase;
+  padding: 16px 20px; background: transparent; color: var(--black);
+  border: 1.5px solid var(--border); border-left: none;
+  cursor: pointer; transition: border-color .15s, background .15s;
+}
+.btn-s:hover { border-color: var(--green); color: var(--green); background: transparent; }
+.btn-p {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 13px; font-weight: 400; letter-spacing: .10em; text-transform: uppercase;
+  padding: 16px 20px; background: var(--black); color: #fff;
+  border: 1.5px solid var(--black); cursor: pointer; transition: background .15s;
+}
+.btn-p:hover { background: var(--green); border-color: var(--green); }
+
+.hero-fine {
+  width: 100%; max-width: 824px;
+  font-size: 13px; font-weight: 400; letter-spacing: .04em;
+  color: var(--soft); text-align: center; white-space: nowrap;
+  /* Same air as the commission note above, symmetric top and bottom. */
+  padding: 1.05rem 0;
+}
+
+/* ── MODEL TABS ── */
+.model-tabs {
+  width: 100%; max-width: 824px;
+  display: flex; gap: 0; margin-bottom: 0;
+  border: 1px solid var(--border); background: #f0efe9;
+  border-bottom: none;
+}
+.model-tab {
+  flex: 1; padding: .65rem .5rem;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 12px; font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--soft);
+  background: transparent; border: none; border-right: 1px solid var(--border);
+  cursor: pointer; transition: background .15s, color .15s;
+  text-align: center;
+}
+.model-tab:last-child { border-right: none; }
+.model-tab.active {
+  background: var(--black); color: #fff; font-weight: 400;
+}
+.model-tab:hover:not(.active) { background: var(--bg); color: var(--black); }
+
+/* ── ROTATING PROFIT CARD ── */
+.profit-rotator {
+  width: 100%; max-width: 824px;
+  background: #f0efe9; border: 1px solid var(--border);
+  border-bottom: none;
+  /* No bottom padding: the dots strip below carries its own .55rem, so the dots
+     end up with equal air above and below instead of 28px above and 8.8 below. */
+  padding: 1.2rem 1.5rem 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 1.5rem;
+}
+.profit-rotator-left { display: flex; flex-direction: column; gap: .3rem; min-width: 160px; padding-top: .5rem; }
+.profit-label-top {
+  font-size: 10px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--soft);
+}
+.profit-number {
+  font-size: 1.4rem; font-weight: 400; letter-spacing: .03em;
+  color: var(--cgr); font-variant-numeric: tabular-nums;
+  transition: opacity 300ms ease; line-height: 1.2;
+}
+.profit-number.fading { opacity: 0; }
+/* Three secondary stats */
+.profit-rotator-stats {
+  display: flex; gap: 0;
+  border-left: 1px solid var(--border);
+}
+.prs-box:last-child { border-right: none; }
+.prs-box {
+  flex: 1; padding: .5rem 1.25rem;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: .3rem;
+}
+.prs-label {
+  font-size: 10px; font-weight: 400; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--soft);
+}
+.prs-val {
+  font-size: 1.4rem; font-weight: 400; letter-spacing: .03em;
+  color: var(--soft); font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+.prs-val.red { color: var(--red); transition: opacity 300ms ease; }
+.prs-val.fading { opacity: 0; }
+
+/* Dots strip - centered, standalone between metrics and chart */
+.rotator-dots-strip {
+  width: 100%; max-width: 824px;
+  display: flex; justify-content: center; align-items: center;
+  padding: .55rem 0;
+  background: #f0efe9;
+  border: 1px solid var(--border);
+  border-top: none; border-bottom: none;
+  gap: 16px;
+}
+.profit-dots { display: flex; gap: 7px; align-items: center; }
+.profit-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--border); transition: background 300ms ease, transform 200ms ease;
+}
+.profit-dot.active { background: var(--cgr); transform: scale(1.3); }
+#rotatorPauseBtn {
+  font-size: 14px; color: var(--green);
+  background: none; border: none; cursor: pointer;
+  padding: 0; line-height: 1;
+  transition: color .15s ease;
+  display: flex; align-items: center;
+}
+#rotatorPauseBtn:hover { color: var(--black); }
+
+/* ── VIEW ALL LINK below rotator ── */
+.view-all-link {
+  width: 100%; max-width: 824px;
+  display: flex; justify-content: flex-end;
+  padding: .5rem 0 .25rem;
+}
+.view-all-link a {
+  font-size: 12px; font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--black);
+  text-decoration: none; border-bottom: 1px solid var(--black);
+  padding-bottom: 1px; transition: color .15s, border-color .15s;
+}
+.view-all-link a:hover { color: var(--green); border-color: var(--green); }
+
+/* In-page nav strip - scrolls naturally with page */
+.hero-nav-strip {
+  width: 100%; background: rgba(255,255,255,0.97);
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.hero-nav-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  gap: 2.5rem; padding: 0 3rem; height: var(--strip-h);
+}
+.hero-nav-inner a {
+  font-size: 13px; font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--black);
+  text-decoration: none; transition: color .15s;
+}
+.hero-nav-inner a:hover { color: var(--black); }
+/* FINAL: short desktop windows (visible taskbar) - compress hero vertical rhythm so the nav strip fits above the fold */
+
+@media (max-height: 1000px) and (min-width: 769px) {
+  .hero-spacer { height: calc(var(--nav-h) + 14px); }
+  .site-header.locked ~ .hero .hero-spacer { height: calc(var(--nav-h) + var(--strip-h) + 14px); }
+  :root { --hero-gap: 1.5rem; }
+  .hero-center { padding: var(--hero-gap) 3rem 0; }
+  .hero-copy { font-size: 17px; line-height: 1.6; }
+  .hero-chart-wrap > div { height: 140px !important; }
+  .hero-chart-wrap canvas { height: 140px !important; }
+  .hs-box { padding: .8rem 1.2rem; }
+}
+/* FINAL: very short desktop windows (small laptops) - second compression tier */
+@media (max-height: 900px) and (min-width: 769px) {
+  .hero-spacer { height: calc(var(--nav-h) + 2px); }
+  .site-header.locked ~ .hero .hero-spacer { height: calc(var(--nav-h) + var(--strip-h) + 2px); }
+  :root { --hero-gap: 1.15rem; }
+  .hero-copy { font-size: 15px; line-height: 1.5; }
+  .hs-box { padding: .6rem 1rem; }
+  .hs-val { font-size: 1.25rem; }
+  .hero-chart-wrap { padding: .5rem .75rem .4rem; }
+  .hero-chart-wrap > div { height: 120px !important; }
+  .hero-chart-wrap canvas { height: 120px !important; }
+  .rotator-dots-strip { padding: 2px 0 !important; }
+  .data-caption-btm { font-size: 11px; }
+  .btn-s, .btn-p { padding: 11px 16px; }
+}
+
+/* ═══════════════════════════════════════
+   SYSTEMS MAP
+═══════════════════════════════════════ */
+.systems-map {
+  display: grid; grid-template-columns: 1fr auto 1fr auto 1fr;
+  align-items: center; gap: 0;
+  margin-top: 2rem; border: 1px solid var(--border);
+  background: #f0efe9;
+}
+.sm-step {
+  padding: 1.5rem 1.25rem;
+  display: flex; flex-direction: column; gap: .4rem;
+}
+.sm-arrow {
+  color: var(--border); font-size: 1.2rem;
+  padding: 0 .25rem; user-select: none;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  align-self: stretch; padding: 0 .75rem;
+}
+.sm-tag {
+  font-size: 13px; font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--black);
+}
+.sm-sub {
+  font-size: 10px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--cgr);
+}
+.d-comma { display: none; }
+.sm-desc {
+  font-size: 12px; font-weight: 400; letter-spacing: .03em;
+  color: var(--soft); line-height: 1.55; margin-top: .2rem;
+}
+.sm-note {
+  font-size: 12px; font-weight: 400; letter-spacing: .04em;
+  color: var(--soft); margin-top: .85rem; text-align: center;
+}
+
+/* ═══════════════════════════════════════
+   SETTINGS GRID
+═══════════════════════════════════════ */
+.settings-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; margin: 1.5rem 0 0;
+  border: 1px solid var(--border);
+}
+.sg-block {
+  padding: 1.5rem 1.5rem;
+}
+.sg-locked { border-right: 1px solid var(--border); }
+.sg-head {
+  font-size: 13px; font-weight: 400; letter-spacing: .10em;
+  text-transform: uppercase; color: var(--black); margin-bottom: .2rem;
+}
+.sg-sub {
+  font-size: 11px; font-weight: 400; letter-spacing: .06em;
+  color: var(--soft); margin-bottom: .1rem;
+}
+.sg-locked .sg-head { color: var(--red); }
+.sg-user  .sg-head { color: var(--green); }
+.sg-note {
+  font-size: 12px; font-weight: 400; letter-spacing: .03em;
+  color: var(--soft); line-height: 1.6; margin-top: .85rem;
+  padding-top: .85rem; border-top: 1px solid var(--border);
+}
+
+/* Section break - dark band between How It Works and What We Trade */
+.section-break {
+  background: var(--bg-dark);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.section-break-inner {
+  max-width: 920px; margin: 0 auto;
+  padding: 1.1rem 3rem; text-align: center;
+}
+.section-break-inner span {
+  font-size: 11px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: #6b6a65;
+}
+
+/* ═══════════════════════════════════════
+   PAGE SECTIONS
+═══════════════════════════════════════ */
+.page-sec {
+  max-width: 920px; margin: 0 auto; padding: 4rem 3rem;
+}
+.mini-chart-wrap{margin:0 0 2.5rem;}
+.mc-lead{margin-bottom:.55rem;}
+.mini-chart{border:1px solid var(--border);border-radius:2px;background:#fff;padding:.6rem .6rem .1rem;}
+.mini-chart svg{display:block;width:100%;height:auto;}
+.sm-intro{margin-top:2.6rem;margin-bottom:1.4rem;}
+.sm-intro + .systems-map{margin-top:0;}
+.full-rule { border: none; border-top: 1px solid var(--border); }
+.bg-lt  { background: var(--bg); }
+.bg-alt { background: #eeecea; }
+.bg-dark { background: var(--bg-dark); }
+
+/* Section label */
+.sec-label {
+  display: block; font-size: 11px; font-weight: 400;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--soft);
+  margin-bottom: 2rem;
+}
+
+/* Body text - bigger, more prominent */
+.bt {
+  font-size: 17px; font-weight: 400; letter-spacing: .02em;
+  color: var(--mid); line-height: 1.85; margin-bottom: 1.4rem;
+}
+.bt strong { color: var(--black); font-weight: 400; }
+.bt em { font-style: normal; color: var(--black); font-weight: 400; }
+
+/* Indented list - no bullets, no dashes, clean indent only */
+.ilist { margin: 1rem 0 1.4rem; display: flex; flex-direction: column; gap: .85rem; }
+.hiw-steps { gap: .7rem; }
+.ilist p {
+  font-size: 16px; font-weight: 400; letter-spacing: .02em;
+  color: var(--mid); padding-left: 1.5rem; line-height: 1.6;
+}
+.dtxt .ilist p { color: #9b9a94; }
+.link-arr {
+  display: inline-block; margin-top: 1.5rem;
+  font-size: 13px; font-weight: 400; letter-spacing: .10em;
+  text-transform: uppercase; color: var(--black);
+  text-decoration: none; border-bottom: 1.5px solid var(--black);
+  padding-bottom: 2px; transition: color .15s, border-color .15s;
+}
+.link-arr:hover { color: var(--green); border-color: var(--green); }
+.link-arr.mid-sec { margin-bottom: 1.7rem; }
+
+/* Dark text overrides */
+.dtxt .sec-label { color: #6b6a65; }
+.dtxt .bt { color: #9b9a94; }
+.dtxt .bt strong, .dtxt .bt em { color: var(--ow); }
+.dtxt .link-arr { color: var(--ow); border-color: var(--ow); }
+
+/* ═══════════════════════════════════════
+   WHAT THE DATA SHOWS - dashboard style
+═══════════════════════════════════════ */
+.data-shows-wrap {
+  background: var(--bg); border: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+.data-shows-head {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--soft);
+}
+.data-shows-sub {
+  font-size: 12px; font-weight: 400; letter-spacing: .04em;
+  color: var(--soft); margin-top: .2rem; font-weight: 400;
+  text-transform: none; letter-spacing: .04em;
+}
+.ds-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .9rem 1.5rem; border-bottom: 1px solid var(--border);
+}
+.ds-row:last-child { border-bottom: none; }
+.ds-left { display: flex; align-items: center; gap: .85rem; }
+.ds-pill {
+  font-size: 9px; font-weight: 400; letter-spacing: .10em;
+  text-transform: uppercase; padding: 3px 8px;
+  border-radius: 2px;
+  display: inline-block; min-width: 88px; text-align: center;
+}
+.pill-actual { background: rgba(29,158,117,0.12); color: var(--teal); }
+.pill-balanced { background: rgba(186,117,23,0.12); color: var(--amber); }
+.pill-conservative { background: rgba(216,90,48,0.12); color: var(--red); }
+.ds-name {
+  font-size: 14px; font-weight: 400; letter-spacing: .02em; color: var(--mid);
+}
+.ds-val {
+  font-size: 15px; font-weight: 400; letter-spacing: .03em;
+  font-variant-numeric: tabular-nums;
+}
+.ds-val.teal { color: var(--teal); }
+.ds-val.amber { color: var(--amber); }
+.ds-val.red { color: var(--red); }
+
+.ds-total {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: var(--bg-dark); 
+}
+.ds-total-label {
+  font-size: 13px; font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(255,255,255,0.6);
+}
+.ds-total-val {
+  font-size: 1.3rem; font-weight: 400; color: var(--teal);
+  letter-spacing: .04em;
+}
+.ds-note {
+  padding: .85rem 1.5rem;
+  background: rgba(0,0,0,0.02);
+  border-top: 1px solid var(--border);
+}
+.ds-note p {
+  font-size: 12px; font-weight: 400; letter-spacing: .04em;
+  color: var(--soft); line-height: 1.7;
+}
+.ds-note strong { color: var(--black); font-weight: 400; }
+
+/* ═══════════════════════════════════════
+   PRICING
+═══════════════════════════════════════ */
+.pricing-wrap {
+  border: 1px solid rgba(255,255,255,0.12); overflow: hidden; margin: 2rem 0;
+}
+.price-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.5rem 2rem; background: var(--bg-dk2);
+  border-bottom: 1px solid rgba(255,255,255,0.08); gap: 2rem;
+}
+.price-row:last-child { border-bottom: none; }
+.p-plan {
+  font-size: 11px; font-weight: 400; letter-spacing: .12em;
+  text-transform: uppercase; color: #6b6a65; margin-bottom: .25rem;
+}
+.p-amt { font-size: 1.5rem; font-weight: 300; color: var(--ow); }
+.p-amt span { font-size: 14px; color: #6b6a65; }
+.p-note { font-size: 12px; font-weight: 400; color: #5DBE90; margin-top: .2rem; }
+.p-note.m { color: #6b6a65; }
+.btn-ow {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 13px; font-weight: 400; letter-spacing: .10em; text-transform: uppercase;
+  padding: 12px 28px; background: var(--ow); color: var(--bg-dark);
+  border: none; cursor: pointer; white-space: nowrap; transition: background .15s;
+}
+.btn-ow:hover { background: var(--green) !important; }
+.btn-gh {
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 13px; font-weight: 400; letter-spacing: .10em; text-transform: uppercase;
+  padding: 12px 28px; background: transparent; color: var(--ow);
+  border: 1.5px solid rgba(230,228,221,0.35); cursor: pointer; white-space: nowrap;
+  transition: border-color .15s;
+}
+.btn-gh:hover { border-color: var(--green) !important; color: var(--green) !important; }
+.price-fine {
+  font-size: 13px; font-weight: 400; letter-spacing: .04em;
+  color: #6b6a65; margin-top: 1rem;
+}
+
+/* SOCIAL ICONS */
+.f-social {
+  width: 100%; display: flex; justify-content: center;
+  align-items: center; gap: 20px; overflow: visible;
+}
+.f-social a {
+  color: var(--soft); display: inline-flex; align-items: center;
+  transition: color .15s ease, transform .2s ease;
+}
+.f-social a:hover { color: var(--green); transform: scale(1.2); }
+
+/* FOOTER */
+footer {
+  background: var(--bg); border-top: 1px solid var(--border);
+  padding: 2.5rem 3rem; display: flex; flex-direction: column;
+  align-items: center; text-align: center; gap: 1.25rem;
+}
+.f-logo {
+  font-size: 12px; font-weight: 400; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--soft);
+}
+.f-disc {
+  font-size: 12px; font-weight: 400; color: var(--soft);
+  text-align: center; line-height: 1.7;
+}
+.f-disc a { color: var(--black); text-decoration: none; }
+.f-disc a:hover { color: var(--green); }
+.f-disc a.footer-highlight { -webkit-text-fill-color: transparent; }
+.f-disc a.footer-highlight:hover { -webkit-text-fill-color: transparent; color: inherit; }
+
+/* status tag */
+@keyframes shimmer {
+  0%   { background-position: 150% center; }
+  100% { background-position: -150% center; }
+}
+.launch-tag {
+  position: relative; font-family: 'Josefin Sans', sans-serif;
+  font-size: 12px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase;
+  background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%);
+  background-size: 300% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; animation: shimmer 3s linear infinite; cursor: pointer; white-space: nowrap; text-decoration: none;
+}
+.launch-tag:hover .launch-tooltip { opacity: 1; pointer-events: auto; }
+.launch-tooltip { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--black); color: #f0efe9; padding: 10px 16px; border-radius: 4px; font-size: 11px; font-weight: 400; letter-spacing: .08em; text-transform: none; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 999; -webkit-text-fill-color: #f0efe9; background-clip: unset; -webkit-background-clip: unset; display: flex; align-items: center; gap: 10px; }
+.launch-tooltip::before { content: ''; position: absolute; top: -8px; left: 0; right: 0; height: 8px; background: transparent; }
+.launch-tooltip::after { content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 8px; height: 8px; background: var(--black); }
+.launch-tooltip a { color: #9b9a94; display: flex; align-items: center; transition: color .15s; text-decoration: none; }
+.launch-tooltip a:hover { color: #4ECBA0; }
+/* Logo click animation */
+@keyframes logoFlicker {
+  0%   { color: inherit; }
+  25%  { color: var(--green); }
+  100% { color: inherit; }
+}
+.header-logo.logo-clicked { animation: logoFlicker 400ms ease forwards; }
+
+/* Footer shimmer links */
+@keyframes shimmer {
+  0%   { background-position: 150% center; }
+  100% { background-position: -150% center; }
+}
+.footer-highlight {
+  background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%);
+  background-size: 300% auto; -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  animation: shimmer 3s linear infinite;
+  text-decoration: none; font-size: 12px; font-weight: 400; letter-spacing: .08em;
+}
+@media (max-width: 768px) { .f-disc { display: block; text-align: center; line-height: 2.05; } }
+
+/* ═══════════ MOBILE RESPONSIVE (≤768px) - does not affect desktop ═══════════ */
+@media (max-width: 768px) {
+  .header-logo-row { padding: 0 1rem; grid-template-columns: 1fr auto 1fr; }
+  .header-logo { font-size: 19px !important; font-weight: 300 !important; letter-spacing: .12em !important; white-space: nowrap; }
+  .header-cta { font-size: 8px !important; padding: 7px !important; line-height: 1.35 !important; text-align: center !important; }
+  .launch-tag { font-size: 9px !important; }
+  .header-nav-row {
+    gap: 1.1rem;
+    padding: 0 1rem;
+    overflow-x: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .header-nav-row::-webkit-scrollbar { display: none; }
+  .header-nav-row a { font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+.header-nav-row a.nt-nav.active { color: #F0592B; }
+  .page-sec { padding: 2.5rem 1.25rem !important; }
+  table { font-size: 13px !important; }
+  th, td { padding: .6rem .4rem !important; }
+  h1 { font-size: 26px !important; }
+  footer { padding: 2rem 1.25rem !important; }
+  .profit-rotator { grid-template-columns: 1fr; gap: .75rem; padding: 1rem 1rem 0; }
+  .profit-rotator-left { min-width: 100%; align-items: center; text-align: center; padding-bottom: .5rem; }
+  .profit-rotator-stats { width: 100%; border-left: none; border-top: 1px solid rgba(44,43,40,.16); flex-wrap: wrap; }
+  .prs-box { flex: 1 1 45%; min-width: 45%; border: none; align-items: center; text-align: center; padding: .7rem .5rem; border-bottom: 1px solid rgba(44,43,40,.16); }
+  .prs-box:first-child { border-right: 1px solid rgba(44,43,40,.16); }
+  .prs-box:last-child { flex-basis: 100%; }
+  .hero-nav-inner { justify-content: flex-start; overflow-x: auto; gap: 1.1rem; padding: 0 1rem; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .hero-nav-inner::-webkit-scrollbar { display: none; }
+  .hero-nav-inner a { white-space: nowrap; flex-shrink: 0; font-size: 12px; }
+  .header-nav-inner { justify-content: flex-start; overflow-x: auto; gap: 1.1rem; padding: 0 1rem; max-width: none; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .header-nav-inner::-webkit-scrollbar { display: none; }
+  .header-nav-inner a { white-space: nowrap; flex-shrink: 0; font-size: 12px; }
+  .launch-tag { display: none !important; }
+  .ilist p { margin-bottom: 1.1rem !important; }
+  .hero-spacer { height: calc(var(--nav-h) + 32px) !important; }
+  .mnq-s { display: inline !important; } .mnq-l { display: none !important; }
+  .hf-full { display: none !important; }
+  .mc-sim { display: none !important; }
+  .la-s { display: inline !important; } .la-l { display: none !important; }
+  .mb-br { display: inline !important; } .d-br { display: none !important; }
+  .m-hide { display: none !important; }
+  .mcn-gap { margin-top: .6rem !important; }
+  .m-sp { display: inline !important; }
+  .db-br { display: none !important; }
+  .sec-label { line-height: 2.4; }
+  .price-row { flex-direction: column; align-items: center; text-align: center; gap: 1.1rem; padding: 1.4rem 1.25rem; }
+  .price-row > div { display: contents; }
+  .p-line { order: 1; display: flex; align-items: baseline; justify-content: center; gap: .55rem; flex-wrap: wrap; }
+  .p-line .p-plan { margin-bottom: 0; }
+  .btn-ow { order: 2; }
+  .p-note { order: 3; margin-top: 0; }
+  .pn-dot { display: inline !important; } .pn-br { display: inline !important; }
+  .hero-stats { grid-template-columns: 1fr 1fr !important; }
+  .hs-box { padding: .9rem 1rem !important; border-bottom: 1px solid var(--border); }
+  .hs-box:nth-child(2n) { border-right: none !important; }
+  .hero-ctas { flex-direction: column !important; }
+  .hero-center { padding: var(--hero-gap) 1.25rem 0 !important; }
+  .systems-map { grid-template-columns: 1fr !important; }
+  .sm-step { border-right: none !important; border-bottom: 1px solid var(--border); padding: 1.1rem 1.25rem !important; }
+  .sm-step:last-of-type { border-bottom: none; }
+  .ds-dot { display: none; }
+  .ds-sub2 { display: block; margin-top: .15rem; }
+  .mc-gap { display: none; }
+  .mc-l2 { display: block; margin-top: .3rem; }
+  .sm-arrow { display: none !important; }
+  .sm-desc { display: block !important; font-size: 11.5px !important; line-height: 1.65 !important; margin-top: .35rem; }
+  .sm-desc .d-sep { display: none; }
+  .sm-desc .d-comma { display: inline; }
+}
+@media (max-width: 480px) {
+  .header-logo { font-size: 19px !important; }
+  .header-cta { font-size: 7px !important; padding: 7px !important; }
+  .header-nav-row a { font-size: 11px; }
+  .page-sec { padding: 2rem 1rem !important; }
+}
+
+/* ═══ MOBILE HAMBURGER (≤768px only, no desktop effect) ═══ */
+.ham-btn { display: none; }
+.mob-menu { display: none; }
+@media (max-width: 768px) {
+  .header-nav-row { display: none !important; }
+  .hero-nav-strip { display: none !important; }
+  .ham-btn {
+    display: inline-flex; flex-direction: column; justify-content: center; gap: 6px;
+    width: auto; justify-self: start;
+    height: 40px; padding: 10px 6px;
+    cursor: pointer;
+    background: none; border: none; border-radius: 0;
+    color: rgba(240,239,233,0.45);
+    transition: color .3s ease;
+  }
+  .site-header.scrolled .ham-btn, .site-header.locked .ham-btn { color: rgba(107,106,102,0.5); }
+  .ham-btn .hb1, .ham-btn .hb2 { display: block; height: 1.5px; background: currentColor; transition: transform .25s ease, width .25s ease; }
+  .ham-btn .hb1 { width: 20px; }
+  .ham-btn .hb2 { width: 13px; }
+  .ham-btn.open .hb1 { transform: translateY(3.75px) rotate(45deg); }
+  .ham-btn.open .hb2 { width: 20px; transform: translateY(-3.75px) rotate(-45deg); }
+  .header-logo-row { position: relative; z-index: 401; background: inherit; }
+  .mob-menu {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #f7f6f3; z-index: 400;
+    padding-top: 140px;
+    overflow-y: auto;
+    text-align: center;
+  }
+  .mob-menu.open { display: block; }
+  .mob-menu a {
+    display: block; padding: .95rem 1.5rem;
+    font-size: 17px; font-weight: 300; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--black); text-decoration: none;
+    border-bottom: none;
+  }
+  .mob-menu a.active { color: #1D9E75; }
+  .mob-menu a.nt-nav.active { color: #F0592B; }
+  .mm-rule { display: block; width: 120px; margin: 1.1rem auto; border-top: 1px solid #dedcd5; }
+  .mm-sec a { font-size: 13px; padding: .75rem 1.5rem; color: var(--soft); }
+  .header-cta { white-space: normal !important; line-height: 1.25 !important; max-width: 92px; }
+  .cta-br { display: block; height: 0; }
+}
+.mnq-s { display: none; }
+.mnq-l { display: inline; }
+.mb-br { display: none; }
+.d-br { display: inline; }
+.m-sp { display: none; }
+.pn-dot { display: inline; }
+.pn-br { display: inline; }
+.la-s { display: none; }
+.la-l { display: inline; }
+
+/* Mobile tab label - placed last so it wins the cascade (design law 7). */
+@media (max-width: 768px) {
+  .model-tabs-note { font-size: 11px; }
+}
+/* FOOTER, one block on every page. Shape and spacing from the home page. Added Oct 6, 2026. */
+footer { background: var(--bg); border-top: 1px solid var(--border); padding: 2.5rem 3rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.25rem; }
+.f-social { margin: 0; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; overflow: visible; }
+.f-social a { color: var(--soft); display: inline-flex; align-items: center; transition: color .15s ease, transform .2s ease; }
+.f-social a:hover { color: var(--green); transform: scale(1.2); }
+.f-logo { margin: 0; font-size: 12px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); }
+.f-disc { margin: 0; font-size: 12px; font-weight: 400; color: var(--soft); text-align: center; line-height: 1.7; }
+.f-disc a { color: var(--black); text-decoration: none; }
+.f-disc a:hover { color: var(--green); }
+.f-disc a.footer-highlight { -webkit-text-fill-color: transparent; }
+.f-disc a.footer-highlight:hover { -webkit-text-fill-color: transparent; color: inherit; }
+.footer-highlight { background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%); background-size: 300% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 3s linear infinite; text-decoration: none; font-size: 12px; font-weight: 400; letter-spacing: .08em; }
+.f-note { max-width: 480px; margin-left: auto; margin-right: auto; }
+.mb-br { display: none; }
+.f-links-m { display: none; }
+@media (max-width: 768px) { .f-disc { display: block; text-align: center; line-height: 2.05; } footer { padding: 2rem 1.25rem !important; } .mb-br { display: inline !important; } .f-links-d { display: none !important; } .f-links-m { display: block !important; } }
+
+@media (max-width:768px){ .f-risk{max-width:274px} }
+</style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xmci3fambi");
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","@id":"https://clarasystems.io/#org","name":"Clara Systems","url":"https://clarasystems.io/","logo":"https://clarasystems.io/apple-touch-icon.png","sameAs":["https://instagram.com/clarasystems_io","https://x.com/clarasystems_io","https://youtube.com/@clarasystems_io","https://www.facebook.com/clarasystems.io","https://t.me/clarasystems_io","https://discord.gg/GxHYxfKz8p"]},
+ {"@type":"WebSite","@id":"https://clarasystems.io/#site","url":"https://clarasystems.io/","name":"Clara Systems","publisher":{"@id":"https://clarasystems.io/#org"}},
+ {"@type":"SoftwareApplication","name":"Clara Core","applicationCategory":"FinanceApplication","operatingSystem":"Windows","softwareRequirements":"NinjaTrader 8","url":"https://clarasystems.io/downloads","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@id":"https://clarasystems.io/#org"},"description":"A free, fully automated Micro E-mini Nasdaq (MNQ) futures trading strategy for NinjaTrader, with a seven-year backtest published in full, wins and losses alike. Trading futures involves substantial risk of loss; backtested results are hypothetical."}
+]}
+</script>
+</head>
+<body>
+
+<!-- SINGLE FIXED HEADER: black → white → locked+CTA+nav -->
+<header class="site-header" id="siteHeader">
+  <div class="header-logo-row">
+    <button class="ham-btn" id="hamBtn" aria-label="Menu" aria-expanded="false"><span class="hb1"></span><span class="hb2"></span></button>
+    <div class="header-logo">CLARA SYSTEMS</div>
+    <div class="header-cta-slot">
+      <button class="header-cta" onclick="location.href='downloads.html'">Download<span class="cta-br"> </span>Free</button>
+    </div>
+  </div>
+  <div class="header-nav-row">
+    <div class="header-nav-inner">
+      <a href="index.html" class="active">HOME</a>
+      <a href="performance.html">PERFORMANCE</a>
+      <a href="strategy.html">STRATEGY</a>
+      <a href="structure.html">STRUCTURE</a>
+      <a href="pricing.html">WHY FREE</a>
+      <a href="philosophy.html">PHILOSOPHY</a>
+    <a href="ninjatrader.html" class="nt-nav">NINJATRADER</a>
+    </div>
+  </div>
+<nav class="mob-menu" id="mobMenu">
+      <a href="index.html" class="active">HOME</a>
+      <a href="performance.html">PERFORMANCE</a>
+      <a href="strategy.html">STRATEGY</a>
+      <a href="structure.html">STRUCTURE</a>
+      <a href="pricing.html">WHY FREE</a>
+      <a href="philosophy.html">PHILOSOPHY</a>
+    <a href="ninjatrader.html" class="nt-nav">NINJATRADER</a>
+    <span class="mm-rule"></span><div class="mm-sec"><a href="downloads.html">Downloads</a><a href="faq.html">FAQ</a><a href="verify.html">How To Verify A Strategy</a><a href="mindset.html">Trading &amp; The Mind</a><a href="socials.html">Connect</a></div></nav>
+</header>
+
+
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-spacer"></div>
+
+  <div class="hero-center">
+
+    <!-- Copy -->
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px;padding:0;border:0;white-space:nowrap">Clara Core: free automated MNQ futures trading strategy for NinjaTrader</h1>
+    <div class="hero-copy">
+      Fully automated futures trading.<br>
+      Enable the strategy. Walk away.
+    </div>
+
+    <div class="hero-intro">
+      Clara Core is free.<br>
+      A fully automated <span class="mnq-l">Micro Nasdaq futures (MNQ)</span><span class="mnq-s">Nasdaq futures</span> strategy.<br>
+      Seven years of backtested data, <br class="mb-br">including the parts most companies hide.<br>
+      Everything public. Everything verifiable.
+    </div>
+
+    <!-- Backtest caption - sits ABOVE the divider, centered with the hero copy -->
+    <div class="data-caption-top">
+      May 2019 – September 2026 Backtest · MNQ Futures · updated every quarter
+    </div>
+
+    <!-- Divider -->
+    <div class="hero-rule"></div>
+
+    <!-- DATA UNIT: tabs + rotating profit + chart seamless -->
+    <div class="data-unit">
+
+      <!-- What the tab values mean - directly above the tabs -->
+      <div class="model-tabs-note">
+        Each tab is a risk-per-trade model. Two trades per day maximum, and the strategy stops after the first daily win.
+      </div>
+
+      <!-- Model tabs -->
+      <div class="model-tabs" id="modelTabs">
+        <button class="model-tab" data-idx="0">$200</button>
+        <button class="model-tab active" data-idx="1">$300</button>
+        <button class="model-tab" data-idx="2">$400</button>
+        <button class="model-tab" data-idx="3">$600</button>
+        <button class="model-tab" data-idx="4">$800</button>
+      </div>
+
+      <!-- Auto-rotating net profit card -->
+      <div class="profit-rotator">
+        <div class="profit-rotator-left">
+          <div class="profit-label-top">Net Profit · Full Period</div>
+          <div class="profit-number" id="profitNumber">$50,730</div>
+        </div>
+        <div class="profit-rotator-stats">
+          <div class="prs-box">
+            <div class="prs-label">Max Drawdown</div>
+            <div class="prs-val red" id="profitDD">-$1,811</div>
+          </div>
+          <div class="prs-box">
+            <div class="prs-label">Total Trades</div>
+            <div class="prs-val">1,568</div>
+          </div>
+          <div class="prs-box">
+            <div class="prs-label">Win Rate</div>
+            <div class="prs-val">70.92%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation dots - centered, between metrics and chart -->
+      <div class="rotator-dots-strip">
+        <div class="profit-dots" id="profitDots">
+          <div class="profit-dot"></div>
+          <div class="profit-dot active"></div>
+          <div class="profit-dot"></div>
+          <div class="profit-dot"></div>
+          <div class="profit-dot"></div>
+        </div>
+        <button id="rotatorPauseBtn" aria-label="Pause rotation"><span style="letter-spacing:2px">❙❙</span></button>
+      </div>
+
+      <!-- Chart - joins below dots -->
+      <div class="hero-chart-wrap">
+        <div style="position:relative;height:184px">
+          <canvas id="heroChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Caption BELOW chart -->
+      <div class="data-caption-btm">
+        Results include a $1.90 round-turn <br class="mb-br">commission per contract, <br class="mb-br">NinjaTrader's free-account rate; <br class="mb-br">most traders pay less.<br>Stress-tested across 10,000 Monte Carlo simulations.
+      </div>
+
+    </div><!-- /data-unit -->
+
+    <!-- CTAs - full width, side by side -->
+    <div class="hero-ctas">
+      <button class="btn-p" onclick="location.href='performance.html'">View Full Performance</button>
+      <button class="btn-s" onclick="location.href='downloads.html'">Download Free</button>
+    </div>
+    <div class="hero-fine">
+      No credit card required &nbsp;·&nbsp; No subscription<span class="hf-full"> &nbsp;·&nbsp; All data shown in full</span>
+    </div>
+
+  </div><!-- /hero-center -->
+
+  <!-- LAYER 2: Nav strip - in-page, scrolls naturally with page -->
+  <div class="hero-nav-strip" id="heroNavStrip">
+    <div class="hero-nav-inner">
+      <a href="index.html" class="active">HOME</a>
+      <a href="performance.html">PERFORMANCE</a>
+      <a href="strategy.html">STRATEGY</a>
+      <a href="structure.html">STRUCTURE</a>
+      <a href="pricing.html">WHY FREE</a>
+      <a href="philosophy.html">PHILOSOPHY</a>
+    <a href="ninjatrader.html" class="nt-nav">NINJATRADER</a>
+    </div>
+  </div>
+</section>
+
+<hr class="full-rule">
+
+<!-- WHAT THIS IS -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">What This Is, And Why It's Free</span>
+    <p class="bt">Clara Systems builds automated trading strategies that run on NinjaTrader. Behind every strategy we release, we publish the full trade log, complete statistics, and a deep dive into risk management and how to use the strategy responsibly. Our focus is on transparency. We are invested in the outcome, and in the person on the other side putting real money and real risk on the line.</p>
+    <p class="bt">Clara Systems exists because we spent years being the customer. We paid for the indicators, the signal services, the turnkey systems and strategies that overpromised and underdelivered. Nobody showed the backtest, nobody explained the real risk of loss before the sale, and the accounts paid for it in full.</p>
+    <p class="bt">So we decided to build a strategy for ourselves, engineered to manage drawdown and hold up in a market that is constantly changing. A strategy we could test, understand, and trust with our own money, with nothing hidden.</p>
+    <p class="bt">Clara Core is that strategy. It is our first public release, and you can run it for free.</p>
+    <p class="bt">Clara Core is a fully automated strategy for the Micro E-mini Nasdaq-100 futures (MNQ), delivered as a locked NinjaTrader strategy file. You download it and run it yourself, on a personal PC, a laptop, or a VPS. You enable it, and it trades. Setup, risk sizing, and operation are all documented on this site.</p>
+    <p class="bt">Clara Core's backtest: seven years, 1,568 trades, and a win rate above 70%, through a pandemic and through markets going both ways.</p>
+    <p class="bt">So the point of Clara Core is to find out whether it holds, in public, with nothing changed along the way. Every trade is published as it happens, winning or losing. That is a decision about this strategy, not a rule for everything we build.</p>
+    <p class="bt"><strong>A backtest tells you what happened. <br class="mb-br">The live record shows what happens next.</strong></p>
+    <p class="bt">Clara FastPass is the other thing we have made, and it is also free. FastPass is a high-risk evaluation-account tool that places opposing positions across two accounts. It has no market edge and it is high risk: one account passes and the other fails, and in choppy conditions both can fail. It is for evaluation accounts only. The instructions and the honest math are on the downloads page.</p>
+    <p class="bt">We have nothing to sell you right now. No product, no upsell, no hidden tier, no credit card required.</p>
+    <p class="bt">That raises a fair question: what is the business, then. Clara Core is free permanently and will not turn into a paid tier. We may sell other strategies later, and if we do they will be published to this same standard, with every trade and every weakness visible before anyone is asked for money.</p>
+    <p class="bt">This is not a protest. It is what should have existed in the first place: a standard of transparency that didn't exist in the services we used, so we built it ourselves.</p>
+    <p class="bt">We do not run a support desk, and we do not answer messages. What we do is listen. Every post on our channels is open to comments, and we read them. A company only gets better by listening to the people who use what it makes, and what we want for them is what we want for ourselves: strategies we would run on our own accounts, that hold up over years and survive the bad stretches without taking the account with them.</p>
+    <div style="font-size:11px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin:3rem 0 1.25rem;">The Part That Doesn't Sell</div>
+    <p class="bt">Most companies in this space are not in the business of making you profitable. They are in the business of selling you something. The playbook is familiar: lead with inflated earning potential, then borrow credibility through industry buzzwords like "institutional-grade strategies," "AI-driven automation," and "hedge-fund-quality algorithms." The word algorithm is misused in this space to imply a system that thinks, adapts, and predicts the market. In reality, most of these products, ours included, are fixed rules that execute trades automatically: no discretion, no emotion, just execution. We call ours what it is: an automated trading strategy.</p>
+    <p class="bt">The real limitations and the risk rarely come up on the sales call, and rarely make the page. And when the strategy fails, companies blame the market. The market was always going to be unpredictable; that is the exact reality you paid them to navigate.</p>
+    <p class="bt">A high win rate is the first thing most new traders look for. Winning most of the time feels like proof the strategy works, making it the primary metric companies use to close a sale. But on its own, a win rate tells you nothing about profitability. Profitability is determined by the size of the wins against the size of the losses, and that is the number most companies selling a strategy leave out: the risk-to-reward behind the win rate.</p>
+    <p class="bt">That is why strategies with a negative risk-to-reward carried by a high win rate are the most commonly sold products in this industry. Companies show winning streaks and cherry-picked periods, hide the risk, and close the sale for thousands of dollars. Then the market shifts, the losses land, sometimes all at once, and the buyer learns the reality of the strategy, with real money on the line. Sometimes the account absorbs the loss. Sometimes it blows up and goes to zero. A strategy like this depends on its win rate holding. Markets change, and if the win rate slips, the losses are larger than the wins and the edge evaporates fast. That is the fragility, and it is the part that goes unsaid because it doesn't sell.</p>
+    <p class="bt">Clara Core belongs to that exact category of high-win-rate, negative risk-to-reward strategies, and we state that upfront. Across every trade in the published record, it kept a historical win rate above 70%. But fragile does not mean broken. The edge is real in every trade of the published record, and that record is what you can check.</p>
+    <p class="bt">The strategy's internal logic produces that edge deliberately through risk filters, session filters, and the way open trades are managed. Once a trade moves far enough, the stop is pulled into profit, locking in gains and turning would-be losses into small wins when the market snaps back. This helps raise the win rate and control drawdown. The trade-off is real: some winning trades get cut short, which is part of why the average win is smaller than the average loss. It is deliberate, and it is part of what produces the results over time.</p>
+    <p class="bt">Regardless of how strong a seven-year backtest looks, it only shows what happened in the past; it cannot promise the win rate holds tomorrow. That is why we would never sell a strategy with that risk profile. So we did the opposite: Clara Core is free, and everything about it is public. Every trade, every statistic, and every weakness is published before you run a single trade.</p>
+    <p class="bt">That paragraph was a warning until this year. Now it is a number. The settings that produce these results were fixed using data through the end of 2025. The 2026 results therefore show how the strategy performed on market data that was not used to set them. The first two quarters made money. The third lost $971 and set the deepest drawdown in the whole record, -$1,811, deeper than anything in the years it was built from. Q3 ended with the drawdown still open.</p>
+<p class="bt">We changed nothing in response, and we published it on the same page as the good quarters while the drawdown was still open. How a strategy behaves when it is not working is something you should be able to see, not discover after the fact.</p>
+<p class="bt">We are not telling you to avoid Clara Core. We run it ourselves, though take that as disclosure and not evidence. People can believe sincerely in a strategy and still lose money on it. What we are telling you is to decide with this in front of you instead of behind you, and that a seven-year backtest describes what already happened and nothing else. The risk profile on this page belongs to Clara Core. It is not a house standard.</p>
+<p class="bt">Whatever we release next will arrive with its own data published the same way, and it should be judged on that data and not on Clara Core.</p>
+<p class="bt">Selling this was the obvious move. We did not make it. The quarter-by-quarter record is on the performance page, and it will keep being updated whichever way it goes.</p>
+<p class="bt"><strong>Don't take our word for it. <br class="mb-br">Verify it, free.</strong></p>
+    <p class="bt">Download our trade logs, or better yet, run the backtest yourself in NinjaTrader for free. We walk you through how to do it in our setup guide. Export your own report directly from NinjaTrader and compare it to our published numbers. Then run the strategy on a simulation account and watch it trade in real time, with no financial risk.</p>
+    <div style="font-size:11px;font-weight:400;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin:3rem 0 1.25rem;">How To Start</div>
+    <p class="bt">The practical path to getting started is simple. Start on a simulation account and let the strategy run for a few weeks. Read the results against the published numbers until you understand what it does and how it trades. If you feel Clara Core is a strategy you like, understand, and want to run real money on, the lower-cost starting point is a prop firm account. Prop firms measure drawdown in one of three ways. Intraday trailing moves the limit up the moment an open trade makes a new high, and it is usually the cheapest account. End of day counts only the closing balance, the way a normal account behaves, and it is the one most firms offer. Static never moves the limit at all: it behaves like a cash account, and few firms offer it. The structure page walks through the same day under all three rules.</p>
+    <p class="bt">The lowest-risk way to start is also the simplest: one prop firm evaluation at a time, end of day trailing drawdown, bought at a discount. If it earns payouts, scale from those payouts, one account at a time. And a personal cash account, if you ever open one for this, should hold only money the strategy itself has generated, at $5,000 or more, understood from the first day as money that can be lost.</p>
+    <p class="bt">If you are running another strategy, evaluating a different company, or thinking about running Clara Core, take the metrics you will find here on Clara Systems and hold them as the baseline: the full trade log, the worst historical window, drawdown measured honestly, the weakness stated plainly. If a company cannot provide these metrics or hides them behind a paywall, the marketing is doing the work the strategy and data cannot. Evaluate strategies on complete data, and you stop judging them on marketing and start judging them on statistics and probabilities.</p>
+    <p class="bt">We hold ourselves to that same test, down to publishing the reasons not to run Clara Core. The honest answer is that Clara Core, as it is today, might not be the right strategy for your risk tolerance. That is not a sales tactic; it is the baseline transparency you can expect from us across everything we build.</p>
+    <p class="bt">No demo. No sales call. No gated pricing. Everything you need to make an informed decision is available here and now. No pressure. No deadline.</p>
+    <p class="bt">If you never spend anything with us, but the content or data here helps you look deeper at the next strategy you buy, build, or run, that is what motivated us to build Clara Systems.</p>
+    <p class="bt">That is enough for us.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WHAT YOU GET -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Full Transparency<span class="m-hide"> · </span> <br class="mb-br">Before Any Decision</span>
+    <p class="bt">Everything is published before you decide anything. Every number on this site is open, with nothing to sign up for. Review it at your own pace.</p>
+    <div class="ilist">
+      <p>Raw backtest trade log, May 2019 – September 2026: every year, every month, every trade metric</p>
+      <p>Win distribution: average win, largest win, average P&amp;L per trade</p>
+      <p>Loss distribution: average loss, largest loss</p>
+      <p>Drawdown profile: worst day, losing streaks, and recovery time</p>
+      <p>Maximum drawdown: worst peak-to-low on open equity</p>
+      <p>Trade patterns: winning and losing sequences</p>
+      <p>Trade behavior: frequency and detailed execution statistics</p>
+      <p>Monte Carlo: 10,000 simulations of trade-order variability</p>
+      <p>Cross-platform check: the same logic run in TradingView, compared against NinjaTrader trade by trade</p>
+<p>Start-date study: all 83 monthly entries since 2019 replayed, plus the nine worst possible days to start</p>
+<p>Risk at account size: what each drawdown looks like as a share of the account balance</p>
+<p>Prop firm accounts: the three drawdown rules, intraday, end of day, and static, and which one we use and suggest</p>
+      <p>5 risk models, $200 to $800 risk per trade, full data for each, side by side in Compare All</p>
+      <p>Monthly patterns across all seven years</p>
+      <p>A risk framework for sizing each model to your account and drawdown limits</p>
+      <p>Telegram &amp; Discord send trade confirmations on every entry and exit, plus a notice on the days the strategy does not trade, and why</p>
+    </div>
+    <p class="bt">We provide this level of depth so you can evaluate on statistical data, not marketing promises. The good, the bad, and the parts that usually stay hidden. This is not an exception for Clara Core. Transparency is the standard for everything we release.</p>
+    <a href="performance.html" class="link-arr">View Full Performance Data →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">From Zero To Running</span>
+    <p class="bt">5 steps to your first automated session.</p>
+    <div class="ilist">
+      <p>1. Create a free NinjaTrader account, then sign in once to confirm the account is active. <a href="https://ninjatraderus.pxf.io/ZV4AZz" target="_blank" rel="noopener sponsored" style="color:var(--black);text-decoration:underline;white-space:nowrap">Start here</a> <span style="font-size:11px;color:var(--soft)">(referral link)</span></p>
+      <p>2. From your NinjaTrader account, download NinjaTrader Desktop, install it on your Windows computer or a Windows VPS (we use <a href="https://my.hyonix.com/aff.php?aff=5514" target="_blank" rel="noopener sponsored" style="color:inherit;text-decoration:underline">Hyonix</a>, referral link), and sign in. On a Mac? NinjaTrader Desktop runs on Windows: a VPS is the direct route, and the <a href="faq.html#faq-mac" style="color:inherit;text-decoration:underline">FAQ</a> covers the free tools</p>
+      <p>3. Download Clara Core free on the <a href="downloads.html" style="color:var(--black);text-decoration:underline">Downloads page</a>. Fill in the short form and the link is emailed to you</p>
+      <p>4. Import it in NinjaTrader: Tools, Import, NinjaScript Add-On. 2 minutes</p>
+      <p>5. Read the <a href="downloads.html#setup-guide" style="color:var(--black);text-decoration:underline">Setup Guide</a>. It covers install and settings, the daily routine, what to do if your connection drops, prop-firm notes, and how to verify our numbers yourself</p>
+    </div>
+    <p class="bt" style="margin-top:1.5rem;margin-bottom:0;">That is the whole setup. <br class="mb-br">The strategy does the rest.</p>
+    <p style="font-size:11px;color:var(--soft);margin:1.8rem 0 0;">NinjaTrader&reg; is a registered trademark of NinjaTrader Group, LLC. No NinjaTrader company endorses, recommends, or approves Clara Systems; full notice in the <a href="legal.html#risk" style="color:var(--soft);text-decoration:underline">disclaimer</a>.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WHAT WE TRADE -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">What We Trade</span>
+    <p class="bt">Clara Core trades one instrument: <br class="mb-br"><strong>MNQ</strong><span class="m-sp"> </span><br class="db-br">Micro E-mini Nasdaq Futures<span class="m-hide"> · </span> <br class="mb-br">2-minute chart<br>New York Session · 9:30am – 3:30pm Eastern Time (ET) · Monday through Friday<br>Entries begin only after the open settles</p>
+    <p class="bt">MNQ tracks the Nasdaq-100, one of the most liquid and most actively traded markets in the world. High participation. Deep liquidity. Supported across all major prop firms and platforms.</p>
+    <p class="bt">The strategy logic is tuned to how the Nasdaq trades around the open, not generalized across markets.</p>
+    <p class="bt">Clara Core uses several entry and exit filters built on the same principles, each tuned to different market conditions and volatility, maintaining a high win rate and controlled drawdown across a large sample of trades. The markets are dynamic; the strategy accounts for that.</p>
+    <p class="bt">We could ship a dozen strategies, the way most companies do. We chose to refine one. Clara Core finished every backtested year positive across seven years of testing, through a bear market, rate shocks, elections, war headlines, and the pandemic itself. Everything it did along the way is published. Whatever we build next may trade a different market. It will be built the same way, and shown the same way. Quality over quantity.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- HOW IT WORKS -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">How It Works</span>
+    <p class="bt">It runs on every account type: simulation, prop-firm evaluation, prop-firm funded, personal cash, and Roth IRA retirement accounts. And there is no account limit: connect as many accounts as you like.</p>
+    <p class="bt">A prop firm (proprietary trading firm) funds trading accounts for a split of the profits. You pay a small fee for an evaluation, a test of whether you can trade within the firm's rules, and if you pass, you trade their capital instead of risking your own. Understand the business model before you use one: the business runs on evaluation and reset fees, because most traders fail, and only a fraction ever collect a payout. The firm makes money when traders fail. We use them anyway, with open eyes: the rules that break most traders are the ones a disciplined system is built for, and the math of the cheap capital is laid out further down this page.</p>
+    <p class="bt">Two checks before you buy a prop account. First, automation: firms differ on it, some allow it, some do not, and the rules change, so confirm your firm's current policy. Second, the drawdown rule: prop firms calculate drawdown three different ways, intraday trailing, end of day, or static with no trailing at all. Same day, same trade, three different distances to failure: $500, $2,000, and $2,500 of room left. Intraday accounts are usually the cheaper ones. The structure page walks through the same day under all three rules.</p>
+    <p class="bt mc-lead"><strong>The same trading day, <br class="mb-br"> under each of the three rules</strong></p>
+    <div class="mini-chart-wrap"><div class="mini-chart keep"><svg viewBox="0 -14 760 250" xmlns="http://www.w3.org/2000/svg" font-family="'Josefin Sans',sans-serif">
+  <g id="mini-intraday">
+    <text x="125" y="-2" fill="#D85A30" font-size="11" text-anchor="middle" letter-spacing="1">INTRADAY</text>
+    <path d="M20,100 L40,94 L61,83 L79,74 L98,65 L118,48 L138,30 L163,48 L187,65 L212,75 L230,83" fill="none" stroke="#2C2B28" stroke-width="2"/>
+    <path d="M20,170 L40,164 L61,153 L79,144 L98,135 L118,118 L138,100 L230,100" fill="none" stroke="#D85A30" stroke-width="2"/>
+    <circle cx="61" cy="83" r="2.5" fill="#2C2B28"/><circle cx="98" cy="65" r="2.5" fill="#2C2B28"/><circle cx="138" cy="30" r="3" fill="#2C2B28"/><circle cx="230" cy="83" r="3" fill="#2C2B28"/>
+    <text x="56" y="77" fill="#55534e" font-size="9" text-anchor="end">+$500</text>
+    <text x="94" y="58" fill="#55534e" font-size="9" text-anchor="end">+$1,000</text>
+    <text x="138" y="22" fill="#2C2B28" font-size="9.5" text-anchor="middle">+$2,000</text>
+    <text x="233" y="98" fill="#55534e" font-size="9" text-anchor="end">close +$500</text>
+    <text x="22" y="190" fill="#D85A30" font-size="9.5">floor $48,000</text>
+    <text x="226" y="119" fill="#D85A30" font-size="9.5" text-anchor="end">floor $50,000</text>
+    <text x="125" y="215" fill="#D85A30" font-size="11" text-anchor="middle">floor $48,000 &#8594; $50,000 &middot; $500 left</text>
+  </g>
+  <g id="mini-eod" transform="translate(253,0)">
+    <text x="125" y="-2" fill="#2F6FAE" font-size="11" text-anchor="middle" letter-spacing="1">END OF DAY</text>
+    <path d="M20,100 L40,94 L61,83 L79,74 L98,65 L118,48 L138,30 L163,48 L187,65 L212,75 L230,83" fill="none" stroke="#2C2B28" stroke-width="2"/>
+    <path d="M20,170 L222,170 L222,153 L230,153" fill="none" stroke="#D85A30" stroke-width="2"/>
+    <circle cx="61" cy="83" r="2.5" fill="#2C2B28"/><circle cx="98" cy="65" r="2.5" fill="#2C2B28"/><circle cx="138" cy="30" r="3" fill="#2C2B28"/><circle cx="230" cy="83" r="3" fill="#2C2B28"/>
+    <text x="56" y="77" fill="#55534e" font-size="9" text-anchor="end">+$500</text>
+    <text x="94" y="58" fill="#55534e" font-size="9" text-anchor="end">+$1,000</text>
+    <text x="138" y="22" fill="#2C2B28" font-size="9.5" text-anchor="middle">+$2,000</text>
+    <text x="233" y="98" fill="#55534e" font-size="9" text-anchor="end">close +$500</text>
+    <text x="22" y="190" fill="#D85A30" font-size="9.5">floor $48,000</text>
+    <text x="230" y="147" fill="#D85A30" font-size="9.5" text-anchor="end">floor $48,500</text>
+    <text x="125" y="215" fill="#2F6FAE" font-size="11" text-anchor="middle">floor $48,000 &#8594; $48,500 &middot; $2,000 kept</text>
+  </g>
+  <g id="mini-notrailing" transform="translate(506,0)">
+    <text x="125" y="-2" fill="#1D9E75" font-size="11" text-anchor="middle" letter-spacing="1">NO TRAILING</text>
+    <path d="M20,100 L40,94 L61,83 L79,74 L98,65 L118,48 L138,30 L163,48 L187,65 L212,75 L230,83" fill="none" stroke="#2C2B28" stroke-width="2"/>
+    <path d="M20,170 L230,170" fill="none" stroke="#D85A30" stroke-width="2"/>
+    <circle cx="61" cy="83" r="2.5" fill="#2C2B28"/><circle cx="98" cy="65" r="2.5" fill="#2C2B28"/><circle cx="138" cy="30" r="3" fill="#2C2B28"/><circle cx="230" cy="83" r="3" fill="#2C2B28"/>
+    <text x="56" y="77" fill="#55534e" font-size="9" text-anchor="end">+$500</text>
+    <text x="94" y="58" fill="#55534e" font-size="9" text-anchor="end">+$1,000</text>
+    <text x="138" y="22" fill="#2C2B28" font-size="9.5" text-anchor="middle">+$2,000</text>
+    <text x="233" y="98" fill="#55534e" font-size="9" text-anchor="end">close +$500</text>
+    <text x="22" y="190" fill="#D85A30" font-size="9.5">line $48,000</text>
+    <text x="230" y="163" fill="#D85A30" font-size="9.5" text-anchor="end">unchanged</text>
+    <text x="125" y="215" fill="#1D9E75" font-size="11" text-anchor="middle">line unchanged &middot; grew to $2,500</text>
+  </g>
+  <line x1="245" y1="4" x2="245" y2="220" stroke="#eeecea" stroke-width="1"/>
+  <line x1="498" y1="4" x2="498" y2="220" stroke="#eeecea" stroke-width="1"/>
+</svg></div></div>
+    <p class="bt" style="display:none"></p>
+    <p class="bt"><strong>What to do, in order:</strong></p>
+    <div class="ilist hiw-steps">
+      <p>Read this site first: the data, the risks, the settings</p>
+      <p>Download the NinjaTrader strategy file</p>
+      <p>Install it and set up your accounts, following the setup guide</p>
+      <p>Start on a simulation or evaluation account</p>
+      <p>Enable the strategy before 9:30am ET. It handles the rest</p>
+    </div>
+    <p class="bt"><strong>Do not risk capital before you understand the type of strategy you are running.</strong></p>
+    <p class="bt">The system enters, manages, and exits every trade automatically.<br>No decisions during market hours. <br class="mb-br">No manual input required.</p>
+    <p class="bt"><strong>It trades selectively, not every day.</strong> It takes no trades in the first twenty minutes after the 9:30am open, avoiding the open's most erratic minutes. If the opening swings are too wide, it skips the day. Protective risk filters can also refuse an individual trade the same way. One of those filters is public: the strategy will not take a trade that risks more than $400 per contract, on any model. The limit is locked in the code; it is not an adjustable setting, and it is the maximum planned risk at entry, not a maximum possible loss. Some days it takes nothing. That is by design: we would rather miss a day than take a trade whose risk we cannot justify. A strategy that forces a trade every day can make money too. This one is not built that way.</p>
+    <p class="bt">After initial setup, daily operation takes less than five minutes. That is the point of automation: time away from the charts. A trade can win fast, lose fast, or run all day and finish either way. The truth is you do not know what is going to happen, and watching it live invites anxiety and interference. Clara Core is built to run on its own, and we run ours unattended. One honest note: NinjaTrader advises against running any automated strategy fully unattended. An internet drop, a platform outage, a broker connection issue: some of it is unavoidable, but most of it is preventable. Use a wired connection rather than wifi, or better, a VPS so the strategy never depends on your home internet or your computer staying awake. Connect first and let the platform settle before enabling. And set the platform options covered in the setup guide, which keep your stop resting at the broker even if NinjaTrader stops. Understand the risks and decide your own comfort level.</p>
+    <p class="bt">Everything, from setup and execution to risk models and account structure, is documented on this website. The Setup Guide covers every step in writing. Clara Core is friendly to someone just starting out, but there is a learning curve. Do not skip it. We walk through every step here.</p>
+    <p class="bt">The download asks for your name and an email. The link is emailed to you within a minute. You hear from us when the new Clara Core is released each November, and when a new strategy, indicator or tool comes out. Nothing else. No weekly emails. No promotions. No spam. The download comes with a direct link to the full setup guide.</p>
+    <p class="bt"><strong>We release an updated Clara Core every year.</strong>  Versions are named for their year, so the current one is Clara Core 26. It takes its last trade on December 31, and from December 1 a notice appears on your chart reminding you to update. Clara Core 27 releases free in late November.</p>
+    <a href="downloads.html#setup-guide" class="link-arr">Full Setup Guide →</a>
+
+    <!-- SYSTEMS MAP -->
+    <p class="bt sm-intro"><strong>The three main pages:</strong></p>
+    <div class="systems-map">
+      <div class="sm-step">
+        <div class="sm-tag">Performance</div>
+        <div class="sm-sub">Data</div>
+        <div class="sm-desc">May&nbsp;2019&nbsp;–&nbsp;September&nbsp;2026<span class="d-sep"> · </span><span class="d-comma">, </span>5 risk models<span class="d-sep"> · </span><span class="d-comma">, </span>Monte Carlo<span class="d-sep"> · </span><span class="d-comma">, </span>drawdown profiles</div>
+      </div>
+      <div class="sm-arrow">→</div>
+      <div class="sm-step">
+        <div class="sm-tag">Strategy</div>
+        <div class="sm-sub">Logic</div>
+        <div class="sm-desc">How the system enters and exits<span class="d-sep"> · </span><span class="d-comma">, </span>what is locked<span class="d-sep"> · </span><span class="d-comma">, </span>what you control</div>
+      </div>
+      <div class="sm-arrow">→</div>
+      <div class="sm-step">
+        <div class="sm-tag">Structure</div>
+        <div class="sm-sub">Execution</div>
+        <div class="sm-desc">Prop firm setup<span class="d-sep"> · </span><span class="d-comma">, </span>account types<span class="d-sep"> · </span><span class="d-comma">, </span>risk scaling<span class="d-sep"> · </span><span class="d-comma">, </span>live operation</div>
+      </div>
+    </div>
+    <p class="sm-note">Start with Performance. Read the data first. <br class="mb-br">Everything else follows from there.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- RISK COMES FIRST -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">Risk Comes First</span>
+    <p class="bt">Most traders approach the market asking:<br><em>how much can I make?</em></p>
+    <p class="bt">Experienced traders ask a different question:<br><em>what does my edge allow, and how much can I risk with the capital I have?</em></p>
+    <p class="bt">Your return potential is not determined by ambition. It is determined by the edge you are running, available capital, and the discipline to execute consistently within defined risk. An edge, in a trading strategy, means a distinct advantage that gives you a higher probability of winning or profiting over the long run.</p>
+    <p class="bt">You don't need to know what will happen on any individual trade. You need to execute consistently, and let the edge express itself over time through a large sample of trades.</p>
+    <p class="bt"><strong>That is how this system is built.</strong></p>
+    <p class="bt">Trading is not for everyone, and that is not a slogan. Anyone can handle winning. Losing is the skill. Every strategy, this one included, loses regularly, and taking those losses without flinching is part of trading.</p>
+    <p class="bt">The issue is not the loss. Nobody likes losing money. The question is what you do after one. Clara Core answers that with fixed rules: win the first trade and it stops for the day. Lose the first trade and it can take one more. Two trades per day, maximum. Across seven years, that second trade won 79.8% of the time. The structure keeps you grounded at the precise moment the mind wants to revenge trade. It is also why we say turn it on and leave it alone. The daily result is noise, win or lose. Judge the system over months and years. That is where the edge shows.</p>
+    <p class="bt">The first book on our reading list shaped this thinking more than any other. It is about the part no system can automate, and it applies whether or not you ever run Clara Core.</p>
+    <a href="downloads.html#books" class="link-arr">The Human Edge →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WHAT THE DATA SHOWS -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Historical Drawdown &amp; Monte Carlo<span class="mc-sim"> Simulation</span></span>
+    <p class="bt">A backtest shows what happened in the past. Monte Carlo takes the same trades and shuffles them 10,000 different ways, simulating how results shift when the order of wins and losses varies.</p>
+    <p class="bt">It helps answer: if the order of my trades were different, or if I hit a concentrated streak of losses, would I still be profitable, and would the account survive it?</p>
+    <p class="bt">The actual drawdown is one run of history. The median sits above it, and planning around the higher number leaves a buffer for a future that will not replay the past exactly: the order of trades can differ, and so can their size.</p>
+    <p class="bt"><strong>Actual backtest &nbsp;→&nbsp; what happened.<span class="mc-gap"> &nbsp;&nbsp; </span><span class="mc-l2">Monte Carlo &nbsp;→&nbsp; what can happen.</span></strong></p>
+
+    <div class="data-shows-wrap">
+      <div class="data-shows-head">
+        Figures based on $300 risk per trade
+      </div>
+      <div class="ds-row">
+        <div class="ds-left">
+          <span class="ds-pill pill-actual">Actual</span>
+          <span class="ds-name">What happened</span>
+        </div>
+        <span class="ds-val teal">-$1,811</span>
+      </div>
+      <div class="ds-row">
+        <div class="ds-left">
+          <span class="ds-pill pill-balanced">Median</span>
+          <span class="ds-name">50th percentile</span>
+        </div>
+        <span class="ds-val amber">-$2,597</span>
+      </div>
+      <div class="ds-row">
+        <div class="ds-left">
+          <span class="ds-pill pill-conservative">Downside case</span>
+          <span class="ds-name">5th percentile</span>
+        </div>
+        <span class="ds-val red">-$3,860</span>
+      </div>
+      <div class="ds-total">
+        <div style="display:flex;flex-direction:column;justify-content:center;gap:.3rem">
+          <span style="font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,0.45)">May 2019 &ndash; September 2026</span>
+          <span class="ds-total-label">Net Profit</span>
+        </div>
+        <span class="ds-total-val">$50,730</span>
+      </div>
+      <div class="ds-note">
+        <p>Results include a $1.90 round-turn commission per contract, NinjaTrader's free-account rate; <br class="mb-br">most traders pay less.</p>
+        <p>Median is the 50th percentile: <br class="mb-br">half of the 10,000 runs drew down less, half drew down more. <br class="mb-br">Downside case is the 5th percentile: <br class="mb-br">5% of runs drew down deeper. <br class="mb-br">It is a planning figure, not the worst that can happen; <br class="mb-br">the true worst case is unknowable.</p>
+        <p class="mcn-gap">Monte Carlo is a tool for risk awareness, <br class="mb-br">not prediction.</p>
+      </div>
+    </div>
+
+    <a href="performance.html#mcSimCard" class="link-arr"><span class="la-l">Full Performance &amp; Monte Carlo Report</span><span class="la-s">Monte Carlo Report</span> →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- HOW WE TEST -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">How We Test, And How You Can Check</span>
+    <p class="bt">The statistics on this site come from NinjaTrader, the same free platform you run the strategy on. It exports the complete trade log as a CSV, which is what every statistic here is built from, and we publish those files. It also loads history back to the contract's launch in May 2019, so the window we publish is the window you can reproduce yourself, free, in a few short steps, typically under five minutes.</p>
+    <p class="bt">That is the whole idea. The number we report and the number you get come from the same place, on a platform you already have. We run the same logic in TradingView as an independent cross-check, and show both on the performance page.</p>
+    <p class="bt">The published window starts on MNQ's first trading day, May 6, 2019, so the pandemic crash and the contract's thin early years sit inside the record rather than outside it. Those are the weakest years in the sample: the first two returned a fraction of what the mature years did. We could have started the record in 2021 and the numbers would look better. A backtest that only shows its best stretch is not a backtest. It is an ad. The same goes for what happens next. We post what the strategy does every month, good or bad, on this site and in the channels. If it has a bad month or a bad quarter you hear it from us at the same time as everything else. And we do not rebuild a strategy because it had a bad week: changing it after every rough patch is how a backtest gets fitted to the past, and leaving it alone is how you find out whether it was ever real.</p>
+    
+    <a href="performance.html#verification" class="link-arr">See both platforms side by side →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WINS LOSSES -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Wins, Losses, And What Carries Them</span>
+    <p class="bt">On the $300 risk model, across every trade in the record: the average winning trade is smaller than the average losing trade, and the strategy is profitable anyway because it wins far more often than it loses. Past results do not promise future ones. The performance page has a compare view with the full figures for every risk model side by side, so you can judge the right fit for your account size.</p>
+    <p class="bt">Losses run larger than wins, so the win rate does the carrying. Two built-in mechanics make that possible. The first: once a trade moves far enough, the stop is pulled into profit, not just to breakeven, locking in part of the gain. How much depends on conditions, and the strategy handles it. The second: when the market trends instead of chops, the trailing exit lets a winner run, sometimes all day. The runners are where the largest wins come from.</p>
+    <p class="bt">Over seven years, that combination produced a low drawdown relative to profit, and that shape is what a prop-firm account needs. Prop accounts run on a trailing drawdown: a moving loss limit that follows your equity up, usually $2,000 to $2,500 on a $50,000 account. Some firms move that limit on your open equity, tick by tick; others only on your end-of-day balance. The difference matters, and the structure page covers it.</p>
+    <p class="bt">This is the part most companies leave out, because it does not sell. Losses are larger than wins, so the edge depends on the win rate holding, and nobody can promise the order of future wins and losses. A rough sequence early in an account's life can hit the trailing limit even while the strategy behaves normally. That is why accounts are structured around the Monte Carlo median rather than the single historical sequence, why risk is only added behind a buffer sized to the simulated downside, and why we say scale slowly when adding prop-firm accounts.</p>
+    <p class="bt">The account type changes what a drawdown costs you. A prop evaluation runs about $20 to $100, plus an activation fee to go funded, so the total at risk is usually $85 to $200 for an account with a $2,000 to $2,500 trailing limit. A funded account that has banked profit also puts that balance on the line. Put the same $2,000 to $2,500 in a cash account and a drawdown costs the full amount. One is a $200 loss. The other is a $2,000 loss. Know that difference before you choose where to run it.</p>
+    <p class="bt">That difference is why we lean toward prop-firm accounts. Their rules make payouts challenging, but a defined system, real risk management, and patience are exactly what those rules reward. That is where the edge shines: a $2,000 trailing account costs about $200 of your own capital. Cheap capital, if you treat it professionally.</p>
+
+    <p class="bt">Account size matters too: the same dollar figure is a different problem on a $2,000 account than on a $50,000 one. We show each drawdown as a percentage across a range of account sizes, on the performance page.</p>
+
+    <p class="bt">Scaling follows account P&amp;L, not the calendar. Start with one or two accounts. If an account is down 50% or more of its trailing limit, add a fresh one: the first takes time to recover while the new one moves. If it is flat, do nothing. Once an account clears its trailing threshold, build the buffer, take a payout, and let the payout fund the next account, so you scale from profits. Whether you take a modest payout early or build the full buffer first is a risk choice; the performance page lays out both paths. Where you enter the equity curve is random. A winning streak, a drawdown, or a sideways grind are all normal strategy behavior. You just do not know which one you will start in. That is exactly why scaling runs on results, not on a schedule. Scaling this way takes patience and a plan. It protects your capital and, just as important, your discipline. It is built from real experience with the strategy, the market, and prop firms. Use it as a framework, and adjust it to your own risk tolerance.</p>
+    <p class="bt">It would be easy to tell you to open ten accounts. We will not. Some traders have the capital and temperament to scale fast. Most should earn each step. We show the actual results, the risks attached to them, and the future risks no strategy can account for. The decision is yours, made with the full picture in front of you.</p>
+    <a href="structure.html" class="link-arr">Risk, scaling, and account structure &rarr;</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+
+<!-- HOW THE SYSTEM IS BUILT -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">How The System Is Built</span>
+    <p class="bt">Clara Core is a fully rule-based strategy built on price action.<br>All entries and exits execute automatically based on predefined rules.</p>
+    <p class="bt">Time-based candlestick charts only.<br>All actions occur on bar close. No intrabar updates, no repainting. Backtest and live execution use the same strategy logic. Actual live fills and results may differ materially due to market and execution conditions.</p>
+    <p class="bt">Each trade includes predefined protection mechanisms:</p>
+    <div class="ilist">
+      <p>Profit lock-in logic</p>
+      <p>Trailing behavior</p>
+      <p>Time-based exits</p>
+      <p>Structure-based exits</p>
+    </div>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- STRATEGY SETTINGS -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Strategy Settings</span>
+    <p class="bt">Clara Core has dozens of internal inputs, toggles, and parameters that define its logic. The strategy logic itself is locked. What you control is limited to risk sizing and a few operational settings, listed below.</p>
+    <p class="bt">This is intentional. The main decision you make is how much to risk per trade. Everything else runs automatically based on seven years of backtested data. This removes decision fatigue, prevents interference, and keeps execution consistent.</p>
+    <p class="bt">Risk per trade decides position size: higher models take the same trades with more contracts. Worth understanding: position size never goes below one contract, so on the $200 and $300 models a wide trade can cost more than the risk per trade value you are using. Internal risk filters cap the planned stop at $400 per contract; an actual loss can exceed it. That is why the largest loss on both models was the same $381. The smaller models still carry the lowest drawdowns of any model. What changed in the third quarter of 2026 is that the $200 and the $300 ended up identical: stops were wide enough that both were down to one contract, so they traded the same and lost the same. Larger models track their setting more closely.</p>
+    <p class="bt">Which model fits depends on the account you run it on. A fresh prop account with a standard $2,000 to $2,500 trailing limit ran the $300 default well in the backtest. A cash account under $5,000 runs the same default. An account that is already deep in drawdown when you start recovers better on the $200 model, where the losses are smaller. Some traders running several accounts deliberately put one on a higher model and keep the rest conservative: higher reward, higher risk. Choose based on the backtest and the Monte Carlo range, understanding the risk of losing the account. The risk framework on the performance page sizes every model to an account, and the structure page covers mixed-risk setups in detail.</p>
+    <p class="bt">Every backtest on this site runs the default configuration, across all five models. Experienced users are welcome to test other risk values in backtest, free in NinjaTrader. You will find risk values that backtest slightly better than the published models, and neighbors that backtest slightly worse. That is rounding and sequence luck, not a better strategy; chasing it is curve-fitting.</p>
+    <p class="bt"><strong>User Controlled</strong></p>
+    <div class="ilist">
+      <p>Risk per trade: the dollar amount risked on each trade</p>
+      <p>Time zone offset: for users running NinjaTrader outside of Eastern Time (ET)</p>
+    </div>
+    <p class="bt"><strong>Locked, not visible or adjustable:</strong></p>
+    <div class="ilist">
+      <p>Entry logic, exits, and all internal strategy parameters</p>
+      <p>Risk limit: no trade is planned to risk more than $400 per contract</p>
+      <p>Maximum two trades per day</p>
+      <p>Stops after the first daily win</p>
+    </div>
+    <p class="bt">These are locked after seven years of testing. This removes the temptation to interfere, second-guess, or over-optimize based on short-term results.</p>
+    <p class="bt"><strong>Skip Day Filters:</strong></p>
+    <div class="ilist">
+      <p>FOMC decision days</p>
+      <p>Futures rollover week</p>
+      <p>Market half-days and the day after</p>
+    </div>
+    <p class="bt">Skip Day Filters are built into the strategy and the data supports every one of them.</p>
+    <p class="bt">All other economic events (CPI, payroll, PMI, and other high-impact news days) are traded normally.</p>
+    <p class="bt">A caution for prop accounts: some firms restrict trading around certain high-impact news events, and those rules change. Know your firm's current policy; a strategy that trades normally through news can conflict with an account that is not allowed to.</p>
+    <p class="bt">The strategy applies its calendar filters automatically; you remain responsible for the rules of your account and your prop firm. When a skip day filter is active, a label appears on the chart at 7:00am ET showing which session is being skipped, so you always know exactly where you stand without checking a calendar. The same notices post daily to our Discord and Telegram channels. The filters reduce event risk. They do not remove risk.</p>
+    <p class="bt">The goal is not to trade more. <br class="mb-br">It is to trade better.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- SELF-GUIDED BY DESIGN -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">Self-Guided By Design</span>
+    <p class="bt">Clara Systems does not run a community chat room. This is intentional.</p>
+    <p class="bt">Community environments introduce noise:</p>
+    <div class="ilist">
+      <p>FOMO, emotional reactions to losses, account comparisons</p>
+      <p>Inaccurate analysis shared without understanding the strategy logic</p>
+      <p>Alternative settings presented without backtesting</p>
+      <p>Manual trades mixed into automated execution</p>
+    </div>
+    <p class="bt">None of that belongs in a systematic process.</p>
+    <p class="bt"><strong>Everything you need is provided directly:</strong></p>
+    <div class="ilist">
+      <p>Full performance data: every metric, every model, every year</p>
+      <p>Written documentation for every stage of setup and execution</p>
+      <p>The Setup Guide covers every step in writing</p>
+      <p>Straight answers to common questions on the FAQ page</p>
+    </div>
+    <p class="bt">You read the documentation. You follow the process. You turn it on, and you leave it alone.</p>
+    <p class="bt"><strong>That is the structure. <br class="mb-br">That is how it is meant to be run.</strong></p>
+    <a href="faq.html" class="link-arr">Read the FAQ →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- FOLLOW ALONG -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Follow Along</span>
+    <p class="bt">Trade confirmations are posted to Telegram and Discord, so you can verify the strategy's activity. These are not trade signals. On days the system does not trade, an automatic notice explains why: a calendar skip, the daily conditions, or simply no signal. Every day gets an answer. No setup, just join a channel. Telegram is the easiest to follow on a phone. Results and notes go out on our social channels.</p>
+    <a href="socials.html" class="link-arr">Follow for updates →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WHY FREE -->
+<div class="bg-dark dtxt">
+  <div class="page-sec">
+    <span class="sec-label">CLARA CORE · FREE</span>
+    <div class="pricing-wrap">
+      <div class="price-row">
+        <div>
+          <div class="p-line"><div class="p-plan">Clara Core</div>
+          <div class="p-amt">$0 <span>/ free</span></div></div>
+          <div class="p-note">No subscription<span class="pn-dot"> · </span><span class="pn-br">No trial</span><span class="pn-dot"> · </span><span class="pn-br">No card</span></div>
+        </div>
+        <button class="btn-ow" onclick="location.href='downloads.html'">Download Free</button>
+      </div>
+    </div>
+    <p class="bt" style="margin-top:1.5rem">No paid version, no upsell, nothing held back.</p>
+    <div class="ilist">
+      <p>Fully automated NinjaTrader strategy</p>
+      <p>Locked strategy file that runs on your own PC, laptop, or VPS</p>
+      <p>Multiple account connections supported</p>
+      <p>All data, distributions, and Monte Carlo shown in full</p>
+      <p>Strategy updates, once a year, free</p>
+    </div>
+    
+    <p class="price-fine">By downloading, you accept the <a href="legal.html#risk" style="color:inherit;text-decoration:underline">Risk Disclosure</a>. Trading futures involves substantial risk of loss.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- THE INFORMATION HERE IS THE EDGE -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">The Information Here Is The Edge</span>
+    <p class="bt">This website is long. That is intentional.</p>
+    <p class="bt">Every section, from the drawdown profiles and monthly breakdowns to the Monte Carlo, the risk models, and the scaling guidance, exists so you can execute every trade without hesitation. Not because you are certain of the outcome. Because you understand the probabilities behind it.</p>
+    <p class="bt">The data does not eliminate uncertainty. Nothing does. What it does is replace emotion with context. When a loss hits, you already know what the historical loss distribution looks like. When a drawdown starts, you already know how long recoveries have taken. That knowledge is what keeps the system running when it needs to run.</p>
+    <p class="bt">This is not just relevant to Clara Core. These principles apply to any strategy. We did the work to bring it here: documented, verified, and free to anyone, before you run a single trade.</p>
+    <p class="bt">Some things are not disclosed. Internal logic, filter mechanics, and execution parameters stay closed. What we do not share is code. What we do share is everything that matters for you to make an informed decision and execute with confidence.</p>
+    <p class="bt">The website is the substance.<br>Read it once. It will change how you think about every trade.</p>
+    <p class="bt">And when you are done with the numbers, read Trading &amp; The Mind. It is the conversation we wish someone had with us before the first trade: losses, expectations, discipline, and what the market does to a person. The strategy is the easy part.</p>
+    <a href="mindset.html" class="link-arr">Trading &amp; The Mind →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<div class="bg-lt">
+  <div class="page-sec">
+    <p class="bt">This was built on real experience, <br class="mb-br">not theory.</p>
+    <p class="bt"><strong>If it's right for you, the data will tell you.<br>If it's not, the data will tell you that too.</strong></p>
+    <div style="display:flex;gap:2.5rem;margin-top:1.5rem;flex-wrap:wrap">
+      <a href="philosophy.html" class="link-arr" style="margin-top:0">Read our philosophy →</a>
+    </div>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- SUPPORT THE WORK -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Support The Work</span>
+    <p class="bt">Contributing here buys nothing. It unlocks nothing, it changes nothing about what you receive, and it is never expected. It goes to the work itself: the research, the testing, and keeping what we find published in the open. If it has been useful to you, you are welcome to contribute. Any amount helps, and we appreciate it.</p>
+    <a href="https://ko-fi.com/clarasystems_io" id="kofiLink" target="_blank" rel="noopener" style="display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);text-decoration:none;border-bottom:1px solid rgba(29,158,117,0.4);padding-bottom:2px;">Support the work →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<footer>
+  <div class="f-logo">Clara Systems &middot; US-based</div>
+  <div class="f-social">
+    <a href="https://instagram.com/clarasystems_io" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.31-1.46.72-2.13 1.38C1.35 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.66 1.34 1.07 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.13-1.38.66-.67 1.07-1.34 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.13C21.32 1.35 20.65.94 19.86.63 19.1.33 18.22.13 16.95.07 15.67.01 15.26 0 12 0m0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8m7.85-10.41a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0"/></svg>
+    </a>
+    <a href="https://x.com/clarasystems_io" target="_blank" rel="noopener" aria-label="X">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.2 2h3.4l-7.4 8.5L23 22h-6.8l-5.3-7-6.1 7H1.4l7.9-9L1 2h7l4.8 6.4L18.2 2zm-1.2 18h1.9L7.1 4H5.1L17 20z"/>
+      </svg>
+    </a>
+    <a href="https://discord.gg/GxHYxfKz8p" target="_blank" rel="noopener" aria-label="Discord">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3c-.2.4-.5.9-.6 1.3a18.3 18.3 0 0 0-5.5 0C9.1 3.9 8.8 3.4 8.6 3a19.7 19.7 0 0 0-4.9 1.4C1.3 8.2.6 11.9 1 15.5a19.9 19.9 0 0 0 6.1 3.1c.5-.7.9-1.4 1.3-2.2-.7-.3-1.4-.6-2-1 .2-.1.3-.2.5-.3a14.2 14.2 0 0 0 12.2 0l.5.3c-.6.4-1.3.7-2 1 .4.8.8 1.5 1.3 2.2a19.8 19.8 0 0 0 6.1-3.1c.5-4.2-.7-7.9-3-11.1zM8.5 13.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4c1.2 0 2.1 1.1 2.1 2.4s-.9 2.4-2.1 2.4zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4c1.2 0 2.1 1.1 2.1 2.4s-.9 2.4-2.1 2.4z"/>
+      </svg>
+    </a>
+    <a href="https://t.me/clarasystems_io" target="_blank" rel="noopener" aria-label="Telegram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(12,12) scale(1.25) translate(-12,-12)"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></g></svg>
+    </a>
+    <a href="https://youtube.com/@clarasystems_io" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.8 15.5V8.5l6.3 3.5-6.3 3.5z"/>
+      </svg>
+    </a>
+    <a href="https://www.facebook.com/clarasystems.io" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12z"/></svg></a>
+    <a href="https://reddit.com/user/ClaraSystems" target="_blank" rel="noopener" aria-label="Reddit"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.74c.69 0 1.25.56 1.25 1.25a1.25 1.25 0 0 1-2.5.06l-2.6-.55-.8 3.75c1.83.07 3.48.63 4.68 1.49.3-.31.73-.5 1.2-.5.97 0 1.76.79 1.76 1.76 0 .72-.43 1.33-1.01 1.61a3.11 3.11 0 0 1 .04.52c0 2.7-3.13 4.87-7 4.87-3.88 0-7-2.17-7-4.87 0-.18 0-.36.04-.53A1.75 1.75 0 0 1 4.03 12c0-.97.79-1.76 1.76-1.76.47 0 .9.19 1.2.5 1.21-.86 2.9-1.42 4.77-1.46l.83-3.95a.36.36 0 0 1 .14-.22.36.36 0 0 1 .26-.06l2.78.59a1.25 1.25 0 0 1 1.24-.9zM9.25 12a1.25 1.25 0 0 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm5.5 0a1.25 1.25 0 0 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm-5.47 3.99a.33.33 0 0 0-.23.57c.84.84 2.49.91 2.96.91.48 0 2.13-.07 2.97-.91a.33.33 0 0 0 0-.47.33.33 0 0 0-.46 0c-.53.53-1.67.72-2.5.72-.83 0-1.97-.19-2.5-.72a.33.33 0 0 0-.24-.1z"/></svg></a>
+    </div>
+  <div class="f-disc f-links-d" style="margin-top:1.1rem">
+    <a class="footer-highlight" href="philosophy.html#faceless">Who We Are</a> &nbsp;·&nbsp; <a class="footer-highlight" href="verify.html">How To Verify A Strategy</a> &nbsp;·&nbsp; <a class="footer-highlight" href="mindset.html" style="white-space:nowrap">Trading &amp; The Mind</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="downloads.html">Downloads &amp; Resources</a> &nbsp;·&nbsp; <a class="footer-highlight" href="downloads.html#referrals">Referrals &amp; Discounts</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="faq.html">FAQ</a> &nbsp;·&nbsp; <a class="footer-highlight" href="socials.html">Connect</a>
+  </div>
+  <div class="f-disc f-links-m" style="margin-top:1.1rem">
+    <a class="footer-highlight" href="philosophy.html#faceless">Who We Are</a> &nbsp;·&nbsp; <a class="footer-highlight" href="verify.html">How To Verify A Strategy</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="downloads.html">Downloads &amp; Resources</a> &nbsp;·&nbsp; <a class="footer-highlight" href="downloads.html#referrals">Referrals &amp; Discounts</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="mindset.html" style="white-space:nowrap">Trading &amp; The Mind</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="faq.html">FAQ</a> &nbsp;·&nbsp; <a class="footer-highlight" href="socials.html">Connect</a>
+  </div>
+  <div style="width:52px;height:1px;background:#D0D0CC;margin:1.6rem auto 1.3rem;"></div>
+  <div class="f-disc f-note">
+    Clara Systems may earn a commission <br class="mb-br">if you use our referral links, <br class="d-br">
+    at no extra cost to you. <br class="mb-br">It's a free way to help us and we appreciate it.<br>
+    Our referral partners are listed in the <a href="legal.html">legal page</a>.
+  </div>
+  <div class="f-disc f-note f-risk" style="margin-top:14px">
+    Trading futures involves substantial <br class="mb-br">risk of loss and is not suitable for everyone.<br>
+      Past performance, whether simulated or actual, is not indicative of future results.<br>
+      <br>
+      Clara Systems provides <br class="mb-br">software and educational information.<br>
+      We do not provide financial advice, manage customer funds, <br class="d-br">or trade on anyone's behalf.<br>
+      <a href="legal.html">Legal &amp; Disclosures</a>
+  </div>
+<div class="f-disc" style="margin-top:14px">&copy; 2026 Clara Systems. All rights reserved.</div>
+</footer>
+
+<script>
+/* ─── All 6 model monthly data (flat, 89 months May 2019 – Sep 2026) ─── */
+const allModels = [
+  { label: '$200', sub: '$200 risk per trade', profit: '$39,685', dd: '-$1,811',
+    monthly: [426,271,-49,-24,-199,135,0,-27,-16,201,610,-595,629,1173,59,-305,513,96,-43,408,873,-325,289,680,533,413,1269,245,363,625,258,106,425,-57,434,370,890,625,793,219,823,1114,724,80,65,332,566,451,323,403,98,302,248,1295,866,391,1137,129,326,652,340,-20,1851,1880,889,-455,763,47,936,1569,1395,648,745,206,351,-133,1049,1255,471,362,980,735,685,81,575,835,589,-1266,-294
+] },
+  { label: '$300', sub: '$300 risk per trade', profit: '$50,730', dd: '-$1,811',
+    monthly: [579,489,-74,15,-355,203,0,-36,69,299,466,-869,883,1397,422,-623,668,36,-171,796,1369,-519,77,1123,470,802,2588,662,441,771,309,106,912,-27,589,645,890,625,793,368,687,1115,724,0,208,406,750,847,361,811,415,480,261,1908,917,696,1795,-59,28,1211,382,108,1999,2604,993,-453,684,-4,1203,1503,1422,648,771,176,514,-129,1748,1839,471,449,980,735,685,214,575,835,589,-1266,-294
+] },
+  { label: '$400', sub: '$400 risk per trade', profit: '$68,532', dd: '-$2,477',
+    monthly: [733,707,-99,208,-512,271,0,1,290,535,602,-969,1194,2102,728,-1258,632,144,-70,839,2223,-307,225,1483,770,1064,3488,787,765,1488,827,-36,1775,-335,657,518,758,689,1639,499,1381,1355,921,-298,815,785,1194,1163,1030,1039,408,446,459,1622,1122,796,2095,46,3,944,1026,356,2798,3347,1324,-880,1079,-69,1286,2490,2114,473,862,86,492,277,2383,2634,500,456,1227,735,696,780,311,659,589,-1625,-255
+] },
+  { label: '$600', sub: '$600 risk per trade', profit: '$109,745', dd: '-$3,776',
+    monthly: [1466,1114,-132,337,-711,459,0,-72,182,982,1411,-1659,2124,3362,863,-1983,1151,119,-343,1099,4000,-687,45,2490,1165,1720,5562,1515,1181,2326,1117,-144,2782,-330,984,1118,1967,1470,2193,379,2029,2226,1081,-192,850,1128,1559,1971,1188,1827,666,523,634,3505,1770,1379,3336,117,122,2001,1140,374,4143,6193,2061,-1506,1444,-53,2273,3543,3337,646,1514,-36,1084,70,3606,3750,1064,961,1563,1095,1987,1059,519,1541,167,-2188,52
+] },
+  { label: '$800', sub: '$800 risk per trade', profit: '$152,533', dd: '-$5,374',
+    monthly: [1751,1435,-204,527,-1023,594,0,-98,581,967,1683,-2124,2856,4829,1215,-2904,1709,73,-610,1460,4958,-792,199,3271,2098,2276,7589,1831,1569,3057,1992,276,3439,-990,1594,1860,2624,1690,2986,654,2907,3606,1558,-217,1821,1636,2404,2605,1702,2252,845,780,975,4862,2443,1694,4295,58,408,2674,1901,463,5907,8241,2716,-2139,2480,-80,2805,4922,3935,1418,2423,201,1701,651,4771,5171,1150,1912,2827,1957,1417,1190,1248,2004,569,-3736,302
+] },
+];
+
+/* ─── Build cumulative from monthly ─── */
+function buildCum(arr) {
+  let c = 0;
+  return arr.map(v => { c += v; return c; });
+}
+
+/* ─── Labels - year only at Jan ─── */
+const mos = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const yrs = [2019,2020,2021,2022,2023,2024,2025,2026];
+const labels = [];
+for (const y of yrs) for (let i = 0; i < 12; i++) {
+  if (y === 2019 && i < 4) continue;   // MNQ launched May 6, 2019
+  if (y === 2026 && i > 8) continue;   // data ends September 30, 2026
+  labels.push(`${mos[i]} ${y}`);
+}
+// 89 labels: May 2019 through Sep 2026 - matches the data exactly
+
+/* ─── Current state ─── */
+let activeModel = 1;      // start on $300 - recommended baseline
+let rotatorIdx  = 1;      // auto-rotate starts at $300
+
+/* ─── Build chart ─── */
+const ctx = document.getElementById('heroChart').getContext('2d');
+const gradFill = ctx.createLinearGradient(0, 0, 0, 165);
+gradFill.addColorStop(0, 'rgba(29,158,117,0.25)');
+gradFill.addColorStop(1, 'rgba(29,158,117,0.03)');
+
+const heroChart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [{
+      data: buildCum(allModels[1].monthly),
+      borderColor: '#1D9E75',
+      backgroundColor: gradFill,
+      fill: true,
+      tension: 0.35,
+      pointRadius: 0,
+      pointHoverRadius: 5,
+      pointHoverBackgroundColor: '#1D9E75',
+      pointHoverBorderColor: '#fff',
+      pointHoverBorderWidth: 2,
+      borderWidth: 2
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        position: 'nearest',
+        yAlign: 'bottom',
+        xAlign: 'center',
+        caretPadding: 14,
+        backgroundColor: 'rgba(235,233,228,0.97)',
+        borderColor: '#D0D0CC',
+        borderWidth: 1,
+        titleColor: '#2C2B28',
+        bodyColor: '#3a3835',
+        titleFont: { family: 'Josefin Sans', size: 12, weight: '400' },
+        bodyFont:  { family: 'Josefin Sans', size: 12 },
+        padding:   { top: 8, bottom: 8, left: 12, right: 12 },
+        callbacks: {
+          title: items => {
+            const raw = labels[items[0].dataIndex];
+            const [mon, yr] = raw.split(' ');
+            return `${mon} '${yr.slice(2)}`;
+          },
+          label: ctx => {
+            const v = ctx.parsed.y;
+            return ' Cumulative   $' + v.toLocaleString('en-US', {maximumFractionDigits:0});
+          },
+          afterLabel: ctx => {
+            const val = allModels[activeModel].monthly[ctx.dataIndex];
+            const sign = val >= 0 ? '+' : '';
+            return ` Month P&L   ${sign}$${Math.abs(val).toLocaleString('en-US', {maximumFractionDigits:0})}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(136,135,128,0.15)' },
+        ticks: {
+          color: '#9b9a94', font: { size: 11, family: 'Josefin Sans' },
+          maxRotation: 0, autoSkip: false,
+          callback: (val, idx) => idx % 12 === 0 ? yrs[idx / 12] : ''
+        }
+      },
+      y: {
+        grid: { color: 'rgba(136,135,128,0.15)' },
+        ticks: {
+          color: '#9b9a94', font: { size: 11, family: 'Josefin Sans' },
+          callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v)
+        }
+      }
+    }
+  }
+});
+
+/* ─── Switch chart to a model index ─── */
+function switchChart(idx) {
+  activeModel = idx;
+  heroChart.data.datasets[0].data = buildCum(allModels[idx].monthly);
+  heroChart.update('none');
+  /* Sync tabs */
+  document.querySelectorAll('.model-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === idx);
+  });
+}
+
+/* ─── Tab click handlers ─── */
+document.querySelectorAll('.model-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const idx = +tab.dataset.idx;
+    switchChart(idx);
+    /* Also sync rotator to this model */
+    setRotator(idx);
+    /* Stop auto-rotation when user manually selects a tab */
+    stopRotation();
+  });
+});
+
+/* ─── Rotator: crossfade to a model ─── */
+const profitNumber = document.getElementById('profitNumber');
+const profitDD     = document.getElementById('profitDD');
+const dots         = document.querySelectorAll('.profit-dot');
+const pauseBtn     = document.getElementById('rotatorPauseBtn');
+
+function setRotator(idx) {
+  rotatorIdx = idx;
+  /* Drive the chart with the card - one unit */
+  activeModel = idx;
+  heroChart.data.datasets[0].data = buildCum(allModels[idx].monthly);
+  heroChart.update('none');
+  /* Fade out */
+  profitNumber.classList.add('fading');
+  profitDD.classList.add('fading');
+  setTimeout(() => {
+    profitNumber.textContent = allModels[idx].profit;
+    profitDD.textContent     = allModels[idx].dd;
+    profitNumber.classList.remove('fading');
+    profitDD.classList.remove('fading');
+  }, 300);
+  /* Update dots */
+  dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  /* Sync model tabs - highlight the active model */
+  document.querySelectorAll('.model-tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+/* ─── Pause / Play logic ─── */
+let isRotating = true;
+let rotationInterval;
+
+function stopRotation() {
+  clearInterval(rotationInterval);
+  isRotating = false;
+  pauseBtn.textContent = '▶';
+}
+
+function startRotation() {
+  rotationInterval = setInterval(() => {
+    const next = (rotatorIdx + 1) % allModels.length;
+    setRotator(next);
+  }, 3000);
+  isRotating = true;
+  pauseBtn.innerHTML = '<span style="letter-spacing:2px">❙❙</span>';
+}
+
+pauseBtn.addEventListener('click', () => {
+  if (isRotating) { stopRotation(); } else { startRotation(); }
+});
+
+/* ─── Start auto-rotation ─── */
+startRotation();
+
+/* ─── Header state machine ─── */
+const hdr          = document.getElementById('siteHeader');
+const heroNavStrip = document.getElementById('heroNavStrip');
+const NAV_H        = 62;
+
+
+/* FINAL: return visits to index within the same browser session start with the settled
+   header (nav locked at top) instead of the hero reveal. Desktop only; mobile keeps the
+   hamburger flow. First visit in a session is unchanged. */
+let navPinned = false;
+try {
+  const deskW = window.matchMedia('(min-width: 769px)').matches;
+  navPinned = deskW && sessionStorage.getItem('clara_nav_pin') === '1';
+  sessionStorage.setItem('clara_nav_pin', '1');
+} catch(e) {}
+if (navPinned && heroNavStrip) { heroNavStrip.style.display = 'none'; }
+
+/* FINAL: the lock is one-way. Once the header locks on the way down, it stays locked for
+   the rest of the visit, including scrolling back to the top. The dark-to-light reveal is
+   the first impression only; a new browser session resets it. */
+let lockedOnce = navPinned;
+function updateHeader() {
+  const y         = window.scrollY;
+  const stripTop = heroNavStrip.offsetParent ? heroNavStrip.offsetTop : ((document.querySelector('.hero')||{}).offsetHeight || 600);
+const lockPoint = stripTop - NAV_H;
+  if (y >= lockPoint) lockedOnce = true;
+  /* FINAL: once locked, the hero's own nav strip is redundant (the locked header carries
+     the nav). Hide it without removing its height so the page never jumps. Desktop only. */
+  if (lockedOnce && heroNavStrip && window.matchMedia('(min-width: 769px)').matches) {
+    heroNavStrip.style.visibility = 'hidden';
+  }
+  hdr.classList.toggle('scrolled', lockedOnce || y > 2);
+  hdr.classList.toggle('locked',   lockedOnce);
+}
+
+window.addEventListener('scroll', updateHeader, { passive: true });
+updateHeader();
+</script>
+<script>
+/* Logo click flicker */
+document.querySelectorAll('.header-logo').forEach(function(el) {
+  el.addEventListener('click', function() {
+    el.classList.remove('logo-clicked');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('logo-clicked');
+    el.addEventListener('animationend', function() {
+      el.classList.remove('logo-clicked');
+    }, { once: true });
+  });
+});
+</script>
+<!-- logo-click-handler -->
+
+<script>
+(function(){var b=document.getElementById('hamBtn'),m=document.getElementById('mobMenu');
+if(b&&m){b.addEventListener('click',function(){b.classList.toggle('open');m.classList.toggle('open');b.setAttribute('aria-expanded',m.classList.contains('open'));});}})();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a515af199bba52f1',t:'MTc5MzE0NTg3NQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

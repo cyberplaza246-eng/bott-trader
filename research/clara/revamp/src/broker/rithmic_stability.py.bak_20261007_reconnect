@@ -1,0 +1,254 @@
+"""Keep Lucid history replays from fighting each other.
+
+Rithmic allows one historical replay per symbol and period. The live loop and
+the ensemble were both requesting MNQ 5m, and async_rithmic resent template
+202 after a ForcedLogout reconnect. That produced "already in progress", then
+permission denied on the new history socket.
+
+This module is installed once, before RithmicClient is constructed.
+"""
+from __future__ import annotations
+
+import os
+import threading
+import time
+from datetime import datetime, timedelta, timezone
+from typing import Any, Callable, Dict, Optional
+
+import pandas as pd
+
+# RequestTimeBarReplay / RequestTickBarReplay. Resending these on a fresh
+# socket keeps the previous replay "in progress" and draws a permission deny.
+REPLAY_TEMPLATES = frozenset({202, 206})
+
+_INSTALLED = False
+_ORIG_SEND = None
+_ORIG_GET_BARS = None
+_ORIG_GET_DELAY = None
+
+
+def is_in_progress_error(exc: Any) -> bool:
+    """True when Rithmic rejected a second replay for the same bar key."""
+    return "already in progress" in str(exc).lower()
+
+
+def should_retry_send_after_reconnect(template_id: Any) -> bool:
+    """Historical replays must not be resent onto a reconnected socket."""
+    try:
+        return int(template_id) not in REPLAY_TEMPLATES
+    except (TypeError, ValueError):
+        return True
+
+
+class ThreadSingleFlight:
+    """One in-flight call per key. Later callers wait and share the result.
+
+    State is process-wide, so ``ThreadSingleFlight().do(key, fn)`` dedupes
+    even when each caller constructs its own instance (live loop + ensemble).
+    """
+
+    _lock = threading.Lock()
+    _slots: Dict[str, dict] = {}
+
+    def do(self, key: str, fn: Callable[[], Any]) -> Any:
+        with self._lock:
+            slot = self._slots.get(key)
+            if slot is None:
+                slot = {
+                    "event": threading.Event(),
+                    "value": None,
+                    "error": None,
+                    "waiters": 0,
+                }
+                self._slots[key] = slot
+                leader = True
+            else:
+                slot["waiters"] += 1
+                leader = False
+
+        if not leader:
+            slot["event"].wait()
+            error = slot["error"]
+            value = slot["value"]
+            with self._lock:
+                slot["waiters"] -= 1
+                if slot["waiters"] <= 0 and self._slots.get(key) is slot:
+                    self._slots.pop(key, None)
+            if error is not None:
+                raise error
+            return value
+
+        try:
+            value = fn()
+            slot["value"] = value
+            return value
+        except BaseException as exc:
+            slot["error"] = exc
+            raise
+        finally:
+            slot["event"].set()
+            with self._lock:
+                if slot["waiters"] <= 0 and self._slots.get(key) is slot:
+                    self._slots.pop(key, None)
+
+
+def history_requests_paused(client: Any) -> bool:
+    """True while the history plant is down or cooling off after a bad replay."""
+    plant = _history_plant(client)
+    if plant is None:
+        return True
+    try:
+        connected = bool(plant.is_connected)
+    except Exception:
+        connected = False
+    if not connected:
+        return True
+    event = getattr(plant, "_reconnect_event", None)
+    if event is not None and not event.is_set():
+        return True
+    return time.time() < float(getattr(plant, "_replay_pause_until", 0) or 0)
+
+
+def mark_history_replay_paused(plant: Any, seconds: Optional[float] = None) -> None:
+    if plant is None:
+        return
+    if seconds is None:
+        seconds = float(os.getenv("RITHMIC_HISTORY_PAUSE_SEC", "30"))
+    plant._replay_pause_until = time.time() + max(0.0, seconds)
+
+
+def filter_warm_history(
+    df: Optional[pd.DataFrame],
+    max_age_hours: float = 6.0,
+    now: Optional[datetime] = None,
+) -> Optional[pd.DataFrame]:
+    """Drop warm-start bars older than ``max_age_hours``. None if nothing is fresh."""
+    if df is None or len(df) == 0 or "datetime" not in df.columns:
+        return None
+    out = df.copy()
+    out["datetime"] = pd.to_datetime(out["datetime"], utc=True, errors="coerce")
+    out = out.dropna(subset=["datetime"])
+    if out.empty:
+        return None
+    if now is None:
+        now = datetime.now(timezone.utc)
+    elif now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+    else:
+        now = now.astimezone(timezone.utc)
+    cutoff = now - timedelta(hours=max_age_hours)
+    out = out.loc[out["datetime"] >= cutoff]
+    if out.empty:
+        return None
+    return out.reset_index(drop=True)
+
+
+def _history_plant(client: Any):
+    if client is None:
+        return None
+    plants = getattr(client, "plants", None)
+    if not plants:
+        return None
+    try:
+        if hasattr(plants, "get"):
+            return plants.get("history")
+        return plants["history"]
+    except Exception:
+        return None
+
+
+def _replay_key(symbol, exchange, bar_type, bar_type_periods) -> tuple:
+    try:
+        bar_id = int(bar_type)
+    except (TypeError, ValueError):
+        bar_id = str(bar_type)
+    return (str(symbol), str(exchange), bar_id, int(bar_type_periods))
+
+
+def install_async_rithmic_patches() -> None:
+    """Patch async_rithmic once. Safe to call on every connect."""
+    global _INSTALLED, _ORIG_SEND, _ORIG_GET_BARS, _ORIG_GET_DELAY
+    if _INSTALLED:
+        return
+
+    from async_rithmic.objects import ReconnectionSettings
+    from async_rithmic.plants.base import BasePlant
+    from async_rithmic.plants.history import HistoryPlant
+
+    _ORIG_SEND = BasePlant._send
+    _ORIG_GET_BARS = HistoryPlant.get_historical_time_bars
+    _ORIG_GET_DELAY = ReconnectionSettings.get_delay
+
+    async def _send_no_replay_retry(self, message, template_id=None):
+        if should_retry_send_after_reconnect(template_id):
+            return await _ORIG_SEND(self, message, template_id=template_id)
+        from async_rithmic.helpers.concurrency import try_acquire_lock
+
+        # One shot. A closed socket must not reconnect and resend template 202.
+        async with try_acquire_lock(self, context=f"send_{template_id}"):
+            await self.ws.send(message)
+
+    async def _get_bars_single_flight(
+        self,
+        symbol,
+        exchange,
+        start_time,
+        end_time,
+        bar_type,
+        bar_type_periods,
+        wait=True,
+    ):
+        if history_requests_paused(getattr(self, "client", None)) and not _plant_socket_open(self):
+            raise RuntimeError("history plant down — pausing historical replay")
+        if time.time() < float(getattr(self, "_replay_pause_until", 0) or 0):
+            raise RuntimeError("history plant cooling down — pausing historical replay")
+        event = getattr(self, "_reconnect_event", None)
+        if event is not None and not event.is_set():
+            raise RuntimeError("history plant reconnecting — pausing historical replay")
+
+        key = _replay_key(symbol, exchange, bar_type, bar_type_periods)
+        inflight = self.__dict__.setdefault("_replay_inflight", set())
+        if key in inflight:
+            raise RuntimeError(
+                "Cannot start another historical time bar request with the same "
+                "symbol, exchange, bar type, and period while one is already in progress."
+            )
+        inflight.add(key)
+        try:
+            return await _ORIG_GET_BARS(
+                self,
+                symbol,
+                exchange,
+                start_time,
+                end_time,
+                bar_type,
+                bar_type_periods,
+                wait,
+            )
+        except Exception as exc:
+            if is_in_progress_error(exc) or "permission denied" in str(exc).lower():
+                mark_history_replay_paused(self)
+                self.logger.warning(
+                    "Not retrying historical replay after %s",
+                    "already in progress" if is_in_progress_error(exc) else "permission denied",
+                )
+            raise
+        finally:
+            inflight.discard(key)
+
+    def _get_delay_with_floor(self, attempt: int) -> float:
+        delay = _ORIG_GET_DELAY(self, attempt)
+        floor = float(os.getenv("RITHMIC_RECONNECT_MIN_DELAY", "45"))
+        return max(float(delay), floor)
+
+    BasePlant._send = _send_no_replay_retry
+    HistoryPlant.get_historical_time_bars = _get_bars_single_flight
+    ReconnectionSettings.get_delay = _get_delay_with_floor
+    _INSTALLED = True
+
+
+def _plant_socket_open(plant: Any) -> bool:
+    try:
+        return bool(plant.is_connected)
+    except Exception:
+        return False

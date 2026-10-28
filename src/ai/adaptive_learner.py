@@ -228,6 +228,11 @@ class AdaptiveLearner:
         pair = self._normalize_pair(trade_result.get('pair', 'UNKNOWN'))
         signal = trade_result.get('signal', 'UNKNOWN')
         model_signals = trade_result.get('model_signals', {})
+        if not isinstance(model_signals, dict):
+            model_signals = {}
+        # Only {model: {'signal': ...}} entries are model votes; plain values such as
+        # revamp_sleeve='breakout' are metadata and crashed .get() below.
+        model_signals = {k: v for k, v in model_signals.items() if isinstance(v, dict)}
         regime = trade_result.get('regime', self.current_regime)
         exit_type = trade_result.get('exit_type', 'UNKNOWN')  # SL_HIT, TP_HIT, TIME_EXIT, MANUAL
 
@@ -293,6 +298,8 @@ class AdaptiveLearner:
             if model_name not in self.model_accuracy:
                 self.model_accuracy[model_name] = {'correct': 0, 'total': 0}
 
+            if not isinstance(model_signal, dict):
+                continue  # e.g. revamp_sleeve='breakout' (metadata, not a model vote)
             model_dir = model_signal.get('signal')
             model_agreed = model_dir == signal
             model_opposed = model_dir in ('BUY', 'SELL') and model_dir != signal

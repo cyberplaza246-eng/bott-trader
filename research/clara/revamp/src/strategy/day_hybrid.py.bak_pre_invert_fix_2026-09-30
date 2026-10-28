@@ -1,0 +1,591 @@
+"""
+Day hybrid RTH bot — stacked books (separate long + short).
+
+Long: 15/5/1 bullish, 1m pullback, w4_no_noon windows, 1R, 1 slot.
+Short: 15/5/1 bearish, quiet 1m, continuous RTH scan, 2 slots, max 12/day.
+"""
+from __future__ import annotations
+
+import os
+from dataclasses import dataclass, field
+from datetime import date, datetime
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+import numpy as np
+import pandas as pd
+import pytz
+
+from src.strategy.mnq_15m_ema_eod import (
+    ENTRY_MINUTE,
+    EMA_FAST,
+    EMA_SLOW,
+    FLAT_MINUTE,
+    ONE_MIN_MAX_BODY,
+    SEP_MIN,
+    _as_utc_frame,
+    atr1_on_1m,
+    ema_series,
+    quiet_1m_ok,
+    sep15_on_1m,
+    sl_pts_from_atr,
+    trend_15m_on_1m,
+    window_index,
+    window_label,
+)
+
+from src.utils.trading_session import is_globex_session_et
+
+ET = pytz.timezone("US/Eastern")
+SESSION_NAME = "day_hybrid"
+GLOBEX_COOLDOWN_MIN = int(os.getenv("DAY_HYBRID_GLOBEX_COOLDOWN", "3"))
+
+# w4_no_noon: windows 0,1,2,4 (skip noon slot 3)
+W4_NO_NOON = frozenset({0, 1, 2, 4})
+
+LONG_MAX_DAY = 99
+LONG_MAX_LOTS = 2
+SHORT_MAX_DAY = 12
+SHORT_MAX_LOTS = 2
+SHORT_COOLDOWN_MIN = 0
+SL_ATR_MULT = 1.5
+SL_MIN = 6.0
+SL_MAX = 25.0
+TP_R = 1.0
+RSI_PERIOD = int(os.getenv("DAY_HYBRID_RSI_PERIOD", "14"))
+RSI_MIN_SHORT = float(os.getenv("DAY_HYBRID_RSI_MIN_SHORT", "40"))
+RSI_MAX_LONG = float(os.getenv("DAY_HYBRID_RSI_MAX_LONG", "65"))
+RSI_OVERSOLD = float(os.getenv("DAY_HYBRID_RSI_OVERSOLD", "35"))
+RSI_OVERBOUGHT = float(os.getenv("DAY_HYBRID_RSI_OVERBOUGHT", "65"))
+
+
+def day_hybrid_from_env() -> bool:
+    return str(os.getenv("PAPER_DAY_HYBRID", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    ) or str(os.getenv("DAY_HYBRID", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def day_hybrid_invert_enabled() -> bool:
+    """Flip every day-hybrid signal long<->short (same SL/TP distance)."""
+    return str(os.getenv("DAY_HYBRID_INVERT", "")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def invert_day_hybrid_signal(sig):
+    """Mirror direction + SL/TP around entry when DAY_HYBRID_INVERT is on."""
+    if not sig or not day_hybrid_invert_enabled():
+        return sig
+    out = dict(sig)
+    entry = float(out["entry"])
+    pts = float(out.get("sl_pts") or abs(entry - float(out["sl"])))
+    orig = out.get("direction")
+    if orig == "long":
+        out["direction"] = "short"
+        out["leg"] = "short"
+        out["sl"] = entry + pts
+        out["tp"] = entry - pts * TP_R
+    else:
+        out["direction"] = "long"
+        out["leg"] = "long"
+        out["sl"] = entry - pts
+        out["tp"] = entry + pts * TP_R
+    out["inverted"] = True
+    out["orig_direction"] = orig
+    return out
+
+
+def globex_scan_enabled() -> bool:
+    return str(os.getenv("DAY_HYBRID_GLOBEX", "true")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def rsi_gate_enabled() -> bool:
+    """Same scalp hybrid idea: block selling dips / buying tops via 1m RSI."""
+    return str(os.getenv("DAY_HYBRID_RSI_GATE", "true")).strip().lower() in (
+        "1", "true", "yes", "on",
+    )
+
+
+def rsi_series(close: pd.Series, period: int = RSI_PERIOD) -> pd.Series:
+    delta = close.diff()
+    gain = delta.clip(lower=0).rolling(period).mean()
+    loss = (-delta.clip(upper=0)).rolling(period).mean()
+    rs = gain / (loss + 1e-10)
+    return 100.0 - (100.0 / (1.0 + rs))
+
+
+def rsi_entry_ok(direction: int, rsi: float, rsi_prev: float) -> Tuple[bool, str]:
+    """
+    Long: RSI not overbought (≤ max) unless rising out of oversold.
+    Short: RSI not oversold (≥ min) unless falling out of overbought.
+    """
+    if not rsi_gate_enabled():
+        return True, ""
+    if rsi != rsi:  # NaN
+        return True, ""
+    prev_ok = rsi_prev == rsi_prev
+    if direction > 0:
+        rising_from_os = prev_ok and rsi_prev <= RSI_OVERSOLD and rsi > rsi_prev
+        if rsi <= RSI_MAX_LONG or rising_from_os:
+            return True, f"RSI {rsi:.0f}"
+        return False, f"RSI {rsi:.0f}>{RSI_MAX_LONG:.0f} overbought"
+    if direction < 0:
+        falling_from_ob = prev_ok and rsi_prev >= RSI_OVERBOUGHT and rsi < rsi_prev
+        if rsi >= RSI_MIN_SHORT or falling_from_ob:
+            return True, f"RSI {rsi:.0f}"
+        return False, f"RSI {rsi:.0f}<{RSI_MIN_SHORT:.0f} oversold"
+    return False, "RSI flat"
+
+
+def is_rth_scan_et(now: Optional[datetime] = None) -> bool:
+    """Mon–Fri 9:35–15:50 ET (windowed long + RTH short)."""
+    now = now or datetime.now(pytz.UTC)
+    et = now.astimezone(ET)
+    if et.weekday() >= 5:
+        return False
+    m = et.hour * 60 + et.minute
+    return ENTRY_MINUTE <= m < FLAT_MINUTE
+
+
+def is_rth_et(now: Optional[datetime] = None) -> bool:
+    """Alias — scan active during RTH."""
+    return is_rth_scan_et(now)
+
+
+def is_scan_active_et(now: Optional[datetime] = None) -> bool:
+    """RTH windows Mon–Fri, plus Globex (Sun 6 PM – Fri 5 PM) when enabled."""
+    now = now or datetime.now(pytz.UTC)
+    if is_rth_scan_et(now):
+        return True
+    if globex_scan_enabled() and is_globex_session_et(now):
+        return True
+    return False
+
+
+def should_flatten_rth(now: Optional[datetime] = None) -> bool:
+    """15:50 RTH flatten Mon–Fri — not during evening/overnight Globex.
+
+    After 15:50 the RTH book is force-flat until Globex reopens at 18:00 ET
+    (Mon–Thu). Once Globex evening is open, hold overnight — do not EOD-kill
+    Globex entries. Friday stays flat after 15:50 (week ends ~17:00).
+    """
+    now = now or datetime.now(pytz.UTC)
+    et = now.astimezone(ET)
+    if et.weekday() >= 5:
+        return False
+    m = et.hour * 60 + et.minute
+    if m < FLAT_MINUTE:
+        return False
+    # Evening Globex (Mon–Thu from 18:00): keep positions; RTH EOD already done.
+    if globex_scan_enabled() and et.weekday() <= 3 and m >= 18 * 60:
+        return False
+    return True
+
+
+def _et_date(ts) -> date:
+    t = pd.Timestamp(ts)
+    if t.tzinfo is None:
+        t = t.tz_localize("UTC")
+    return t.tz_convert(ET).date()
+
+
+def _et_minutes(ts) -> int:
+    t = pd.Timestamp(ts)
+    if t.tzinfo is None:
+        t = t.tz_localize("UTC")
+    et = t.tz_convert(ET)
+    return int(et.hour * 60 + et.minute)
+
+
+def trend_5m_on_1m(df_1m: pd.DataFrame) -> pd.Series:
+    tmp = _as_utc_frame(df_1m)
+    b5 = tmp.resample("5min").agg(
+        {"open": "first", "high": "max", "low": "min", "close": "last"}
+    ).dropna()
+    fast = ema_series(b5["close"], EMA_FAST)
+    slow = ema_series(b5["close"], EMA_SLOW)
+    trend = pd.Series(0, index=b5.index, dtype=int)
+    trend.loc[fast > slow] = 1
+    trend.loc[fast < slow] = -1
+    return trend.shift(1).fillna(0).astype(int).reindex(tmp.index, method="ffill").fillna(0).astype(int)
+
+
+def trend_1m_completed(df_1m: pd.DataFrame) -> np.ndarray:
+    tmp = _as_utc_frame(df_1m)
+    fast = ema_series(tmp["close"], EMA_FAST)
+    slow = ema_series(tmp["close"], EMA_SLOW)
+    trend = pd.Series(0, index=tmp.index, dtype=int)
+    trend.loc[fast > slow] = 1
+    trend.loc[fast < slow] = -1
+    return trend.shift(1).fillna(0).astype(int).to_numpy(dtype=int)
+
+
+def prepare_arrays(df_1m: pd.DataFrame) -> Dict[str, Any]:
+    dt = pd.DatetimeIndex(pd.to_datetime(df_1m["datetime"], utc=True))
+    work = df_1m.copy()
+    work["datetime"] = dt
+    et = dt.tz_convert(ET)
+    close = work["close"].astype(float)
+    rsi = rsi_series(close, RSI_PERIOD)
+    return {
+        "dt": dt,
+        "t15": trend_15m_on_1m(work).to_numpy(dtype=int),
+        "t5": trend_5m_on_1m(work).to_numpy(dtype=int),
+        "t1": trend_1m_completed(work),
+        "sep": sep15_on_1m(work).to_numpy(dtype=float),
+        "atr1": atr1_on_1m(work).to_numpy(dtype=float),
+        "rsi": rsi.to_numpy(dtype=float),
+        "op": work["open"].to_numpy(dtype=float),
+        "hi": work["high"].to_numpy(dtype=float),
+        "lo": work["low"].to_numpy(dtype=float),
+        "cl": close.to_numpy(dtype=float),
+        "mins": (et.hour * 60 + et.minute).to_numpy(),
+        "dow": et.weekday.to_numpy(),
+        "dates": np.array(et.date),
+    }
+
+
+def stack_side_15_5_1(i: int, a: Dict[str, Any]) -> int:
+    s15 = int(a["t15"][i])
+    if s15 == 0:
+        return 0
+    if s15 == int(a["t5"][i]) and s15 == int(a["t1"][i]):
+        return s15
+    return 0
+
+
+def entry_pullback(side: int, i: int, a: Dict[str, Any]) -> bool:
+    if not quiet_1m_ok(side, a["op"][i], a["cl"][i], max_body=ONE_MIN_MAX_BODY):
+        return False
+    if i < 2:
+        return False
+    prev = float(a["cl"][i - 1]) - float(a["cl"][i - 2])
+    if side > 0:
+        return prev <= 0
+    return prev >= 0
+
+
+def stop_pts(a: Dict[str, Any], i: int) -> float:
+    atr1 = float(a["atr1"][i])
+    if atr1 != atr1 or atr1 <= 0:
+        return float("nan")
+    return sl_pts_from_atr(atr1, mult=SL_ATR_MULT, sl_min=SL_MIN, sl_max=SL_MAX)
+
+
+@dataclass
+class LongBookState:
+    day: Optional[date] = None
+    fired: Set[int] = field(default_factory=set)
+    trades_today: int = 0
+    last_entry_min: Optional[int] = None
+
+    def reset(self, day: date) -> None:
+        if self.day != day:
+            self.day = day
+            self.fired = set()
+            self.trades_today = 0
+            self.last_entry_min = None
+
+
+@dataclass
+class ShortBookState:
+    day: Optional[date] = None
+    trades_today: int = 0
+    last_entry_min: Optional[int] = None
+
+    def reset(self, day: date) -> None:
+        if self.day != day:
+            self.day = day
+            self.trades_today = 0
+            self.last_entry_min = None
+
+
+def check_long_entry(
+    df_1m: pd.DataFrame,
+    state: LongBookState,
+    *,
+    open_count: int,
+    now: Optional[datetime] = None,
+) -> Tuple[Optional[Dict[str, Any]], LongBookState]:
+    if open_count >= LONG_MAX_LOTS:
+        return None, state
+    if df_1m is None or len(df_1m) < 80:
+        return None, state
+    a = prepare_arrays(df_1m)
+    i = len(a["cl"]) - 1
+    ts = now or pd.Timestamp(a["dt"][i]).to_pydatetime()
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=pytz.UTC)
+    day = _et_date(ts)
+    state.reset(day)
+    m = _et_minutes(ts)
+    rth = is_rth_scan_et(ts)
+    globex = globex_scan_enabled() and is_globex_session_et(ts) and not rth
+    if not rth and not globex:
+        return None, state
+    if state.trades_today >= LONG_MAX_DAY:
+        return None, state
+
+    if rth:
+        if m < ENTRY_MINUTE or m >= FLAT_MINUTE:
+            return None, state
+        win = window_index(m)
+        if win is None or win not in W4_NO_NOON:
+            return None, state
+        # One "window shot" plus optional add-on lot while under LONG_MAX_LOTS.
+        if win in state.fired and open_count >= LONG_MAX_LOTS:
+            return None, state
+        if win in state.fired and open_count <= 0:
+            return None, state
+        window_name = window_label(win)
+    else:
+        if GLOBEX_COOLDOWN_MIN > 0 and state.last_entry_min is not None:
+            if m - state.last_entry_min < GLOBEX_COOLDOWN_MIN:
+                return None, state
+        win = None
+        window_name = "globex_loop"
+
+    side = stack_side_15_5_1(i, a)
+    if side != 1:
+        return None, state
+    if not entry_pullback(1, i, a):
+        return None, state
+    rsi = float(a["rsi"][i])
+    rsi_prev = float(a["rsi"][i - 1]) if i > 0 else float("nan")
+    ok_rsi, _ = rsi_entry_ok(1, rsi, rsi_prev)
+    if not ok_rsi:
+        return None, state
+    use = stop_pts(a, i)
+    if use != use or use <= 0:
+        return None, state
+    entry = float(a["cl"][i])
+    sl = entry - use
+    tp = entry + use * TP_R
+    state.trades_today += 1
+    state.last_entry_min = m
+    if win is not None:
+        state.fired.add(int(win))
+    return {
+        "leg": "long",
+        "direction": "long",
+        "entry": entry,
+        "sl": sl,
+        "tp": tp,
+        "sl_pts": round(use, 2),
+        "rsi": round(rsi, 1) if rsi == rsi else None,
+        "window": win,
+        "window_name": window_name,
+        "session": SESSION_NAME,
+    }, state
+
+
+def check_short_entry(
+    df_1m: pd.DataFrame,
+    state: ShortBookState,
+    *,
+    open_count: int,
+    now: Optional[datetime] = None,
+) -> Tuple[Optional[Dict[str, Any]], ShortBookState]:
+    if open_count >= SHORT_MAX_LOTS:
+        return None, state
+    if df_1m is None or len(df_1m) < 80:
+        return None, state
+    a = prepare_arrays(df_1m)
+    i = len(a["cl"]) - 1
+    ts = now or pd.Timestamp(a["dt"][i]).to_pydatetime()
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=pytz.UTC)
+    day = _et_date(ts)
+    state.reset(day)
+    m = _et_minutes(ts)
+    rth = is_rth_scan_et(ts)
+    globex = globex_scan_enabled() and is_globex_session_et(ts) and not rth
+    if not rth and not globex:
+        return None, state
+    if rth and (m < ENTRY_MINUTE or m >= FLAT_MINUTE):
+        return None, state
+    if state.trades_today >= SHORT_MAX_DAY:
+        return None, state
+    cooldown = SHORT_COOLDOWN_MIN if rth else GLOBEX_COOLDOWN_MIN
+    if cooldown > 0 and state.last_entry_min is not None:
+        if m - state.last_entry_min < cooldown:
+            return None, state
+    side = stack_side_15_5_1(i, a)
+    if side != -1:
+        return None, state
+    if not quiet_1m_ok(-1, a["op"][i], a["cl"][i], max_body=ONE_MIN_MAX_BODY):
+        return None, state
+    rsi = float(a["rsi"][i])
+    rsi_prev = float(a["rsi"][i - 1]) if i > 0 else float("nan")
+    ok_rsi, _ = rsi_entry_ok(-1, rsi, rsi_prev)
+    if not ok_rsi:
+        return None, state
+    use = stop_pts(a, i)
+    if use != use or use <= 0:
+        return None, state
+    entry = float(a["cl"][i])
+    sl = entry + use
+    tp = entry - use * TP_R
+    state.trades_today += 1
+    state.last_entry_min = m
+    return {
+        "leg": "short",
+        "direction": "short",
+        "entry": entry,
+        "sl": sl,
+        "tp": tp,
+        "sl_pts": round(use, 2),
+        "rsi": round(rsi, 1) if rsi == rsi else None,
+        "window_name": "globex_loop" if globex else "rth_loop",
+        "session": SESSION_NAME,
+    }, state
+
+
+def on_long_closed(state: LongBookState, window: Optional[int]) -> LongBookState:
+    if window is not None:
+        state.fired.discard(int(window))
+    return state
+
+
+def check_bar_exit(
+    pos: Dict[str, Any],
+    bar_high: float,
+    bar_low: float,
+    bar_close: float,
+    *,
+    flat_eod: bool,
+) -> Optional[Tuple[str, float]]:
+    direction = pos.get("direction", "long")
+    sl = float(pos["sl"])
+    tp = float(pos["tp"])
+    if flat_eod:
+        return "EOD", float(bar_close)
+    if direction == "long":
+        if bar_low <= sl:
+            return "SL", sl
+        if bar_high >= tp:
+            return "TP", tp
+    else:
+        if bar_high >= sl:
+            return "SL", sl
+        if bar_low <= tp:
+            return "TP", tp
+    return None
+
+
+def scan_mode_label(now: Optional[datetime] = None) -> str:
+    now = now or datetime.now(pytz.UTC)
+    if is_rth_scan_et(now):
+        return "RTH"
+    if globex_scan_enabled() and is_globex_session_et(now):
+        return "Globex"
+    return "closed"
+
+
+def explain_day_hybrid_skip(
+    df_1m: Optional[pd.DataFrame],
+    long_state: LongBookState,
+    short_state: ShortBookState,
+    *,
+    long_open: int,
+    short_open: int,
+    now: Optional[datetime] = None,
+) -> str:
+    """Human-readable why neither book entered (does not mutate state)."""
+    now = now or datetime.now(pytz.UTC)
+    if df_1m is None or len(df_1m) < 80:
+        n = 0 if df_1m is None else len(df_1m)
+        return f"need >=80 1m bars (have {n})"
+    a = prepare_arrays(df_1m)
+    i = len(a["cl"]) - 1
+    ts = now
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=pytz.UTC)
+    m = _et_minutes(ts)
+    rth = is_rth_scan_et(ts)
+    globex = globex_scan_enabled() and is_globex_session_et(ts) and not rth
+    if not rth and not globex:
+        return "outside RTH/Globex scan"
+    side = stack_side_15_5_1(i, a)
+    s15, s5, s1 = int(a["t15"][i]), int(a["t5"][i]), int(a["t1"][i])
+    stack = f"stack 15/5/1={s15}/{s5}/{s1}"
+    rsi = float(a["rsi"][i])
+    rsi_prev = float(a["rsi"][i - 1]) if i > 0 else float("nan")
+    rsi_txt = f"RSI {rsi:.0f}" if rsi == rsi else "RSI -"
+
+    long_why = ""
+    if long_open >= LONG_MAX_LOTS:
+        long_why = "long slot full"
+    elif rth:
+        win = window_index(m)
+        if win is None or win not in W4_NO_NOON:
+            long_why = f"long window skip (m={m})"
+        elif win in long_state.fired and long_open <= 0:
+            long_why = f"long w{win} already fired"
+        elif win in long_state.fired and long_open >= LONG_MAX_LOTS:
+            long_why = "long slot full"
+        elif side != 1:
+            long_why = f"long needs bull stack ({stack})"
+        elif not entry_pullback(1, i, a):
+            long_why = "long waiting pullback"
+        else:
+            ok_rsi, why = rsi_entry_ok(1, rsi, rsi_prev)
+            long_why = "long ok" if ok_rsi else f"long blocked {why}"
+    else:
+        if (
+            GLOBEX_COOLDOWN_MIN > 0
+            and long_state.last_entry_min is not None
+            and m - long_state.last_entry_min < GLOBEX_COOLDOWN_MIN
+        ):
+            long_why = "long globex cooldown"
+        elif side != 1:
+            long_why = f"long needs bull stack ({stack})"
+        elif not entry_pullback(1, i, a):
+            long_why = "long waiting pullback"
+        else:
+            ok_rsi, why = rsi_entry_ok(1, rsi, rsi_prev)
+            long_why = "long ok" if ok_rsi else f"long blocked {why}"
+
+    short_why = ""
+    if short_open >= SHORT_MAX_LOTS:
+        short_why = "short slots full"
+    elif short_state.trades_today >= SHORT_MAX_DAY:
+        short_why = "short day cap"
+    elif side != -1:
+        short_why = f"short needs bear stack ({stack})"
+    elif not quiet_1m_ok(-1, a["op"][i], a["cl"][i], max_body=ONE_MIN_MAX_BODY):
+        short_why = "short waiting quiet 1m"
+    else:
+        ok_rsi, why = rsi_entry_ok(-1, rsi, rsi_prev)
+        short_why = "short ok" if ok_rsi else f"short blocked {why}"
+
+    last = pd.Timestamp(a["dt"][i]).tz_convert(ET).strftime("%H:%M ET")
+    gate = (
+        f"{rsi_txt} gate short>={RSI_MIN_SHORT:.0f}/long<={RSI_MAX_LONG:.0f}"
+        if rsi_gate_enabled()
+        else "RSI gate off"
+    )
+    return f"bars->{last} | {gate} | {long_why} | {short_why}"
+
+
+def recipe_banner_lines() -> List[str]:
+    rsi_line = (
+        f"RSI gate ON (1m): short>={RSI_MIN_SHORT:.0f} long<={RSI_MAX_LONG:.0f} "
+        f"(DAY_HYBRID_RSI_GATE=true)"
+        if rsi_gate_enabled()
+        else "RSI gate OFF"
+    )
+    return [
+        "DAY HYBRID (separate from overnight bot)",
+        "Stacked books - long selective + short aggressive",
+        "RTH Mon-Fri: LONG pullback w4 windows | SHORT quiet continuous | flatten 15:50",
+        "Globex (Sun 6 PM+): LONG pullback + SHORT quiet continuous scan (DAY_HYBRID_GLOBEX=true)",
+        rsi_line,
+        "Stop: 1m ATR x1.5 clip 6-25 | TP 1R",
+        ("INVERT ON — every signal flips long<->short (DAY_HYBRID_INVERT=true)"
+         if day_hybrid_invert_enabled() else "INVERT off"),
+        "Do not run with start_mnq_overnight_paper.bat at the same time (one Lucid login)",
+    ]

@@ -217,4 +217,7 @@ BIAS_15M_BUFFER_PTS = float(os.getenv('15M_BIAS_BUFFER_PTS', '0'))
 LSTM_MODEL_PATH = 'models/lstm_model.h5'
 SCALER_PATH = 'models/scaler.pkl'
 
-print(f"✅ Strategy Config Loaded - Mode: {TRADING_MODE}, Scalping 1M+5M, Pairs: {PAIRS}")
+if not os.getenv("DAY_HYBRID", "").strip().lower() in ("1", "true", "yes", "on") and not os.getenv(
+    "PAPER_DAY_HYBRID", "",
+).strip().lower() in ("1", "true", "yes", "on"):
+    print(f"✅ Strategy Config Loaded - Mode: {TRADING_MODE}, Scalping 1M+5M, Pairs: {PAIRS}")

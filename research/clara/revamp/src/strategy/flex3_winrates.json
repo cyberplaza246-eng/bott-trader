@@ -1,0 +1,170 @@
+{
+ "meta": {
+  "period": "2024-10-01..2026-10-07",
+  "unit": "USD per 1 MNQ, costs ($4 RT) included, every signal (ungated)",
+  "source": "box backtest live_streams_per_contract.csv + og_trend/stream_ogtrend_live.csv"
+ },
+ "stats": {
+  "6pm_long|1": {
+   "n": 514,
+   "win": 0.263,
+   "avg_win": 284.8,
+   "avg_loss": -81.8,
+   "exp": 14.5
+  },
+  "E1|1": {
+   "n": 225,
+   "win": 0.436,
+   "avg_win": 95.6,
+   "avg_loss": -55.3,
+   "exp": 10.4
+  },
+  "ONL|1": {
+   "n": 202,
+   "win": 0.386,
+   "avg_win": 175.7,
+   "avg_loss": -91.3,
+   "exp": 11.8
+  },
+  "bo_retest|-1": {
+   "n": 246,
+   "win": 0.407,
+   "avg_win": 204.1,
+   "avg_loss": -126.7,
+   "exp": 7.8
+  },
+  "bo_retest|1": {
+   "n": 226,
+   "win": 0.429,
+   "avg_win": 134.1,
+   "avg_loss": -81.2,
+   "exp": 11.2
+  },
+  "og_trend|-1": {
+   "n": 82,
+   "win": 0.366,
+   "avg_win": 244.0,
+   "avg_loss": -119.7,
+   "exp": 13.3
+  },
+  "og_trend|1": {
+   "n": 58,
+   "win": 0.293,
+   "avg_win": 216.8,
+   "avg_loss": -131.4,
+   "exp": -29.3
+  },
+  "pb_onh|1": {
+   "n": 11,
+   "win": 0.545,
+   "avg_win": 150.5,
+   "avg_loss": -96.6,
+   "exp": 38.1
+  },
+  "pb_onl|-1": {
+   "n": 4,
+   "win": 0.5,
+   "avg_win": 237.9,
+   "avg_loss": -91.4,
+   "exp": 73.2
+  },
+  "pb_orh|1": {
+   "n": 1,
+   "win": 1.0,
+   "avg_win": 205.5,
+   "avg_loss": null,
+   "exp": 205.5
+  },
+  "pb_orl|-1": {
+   "n": 4,
+   "win": 0.5,
+   "avg_win": 251.4,
+   "avg_loss": -130.1,
+   "exp": 60.6
+  },
+  "pb_orl|1": {
+   "n": 1,
+   "win": 0.0,
+   "avg_win": null,
+   "avg_loss": -139.3,
+   "exp": -139.3
+  },
+  "pb_pdc|-1": {
+   "n": 5,
+   "win": 0.4,
+   "avg_win": 87.1,
+   "avg_loss": -70.4,
+   "exp": -7.4
+  },
+  "pb_pdc|1": {
+   "n": 5,
+   "win": 0.2,
+   "avg_win": 81.7,
+   "avg_loss": -39.8,
+   "exp": -15.5
+  },
+  "pb_pdh|1": {
+   "n": 12,
+   "win": 0.5,
+   "avg_win": 75.5,
+   "avg_loss": -57.2,
+   "exp": 9.1
+  },
+  "pb_pdl|-1": {
+   "n": 8,
+   "win": 0.5,
+   "avg_win": 196.3,
+   "avg_loss": -89.4,
+   "exp": 53.4
+  },
+  "pb_pwh|-1": {
+   "n": 1,
+   "win": 0.0,
+   "avg_win": null,
+   "avg_loss": -79.2,
+   "exp": -79.2
+  },
+  "pb_pwh|1": {
+   "n": 4,
+   "win": 0.25,
+   "avg_win": 74.5,
+   "avg_loss": -76.5,
+   "exp": -38.7
+  },
+  "pb_pwl|-1": {
+   "n": 1,
+   "win": 1.0,
+   "avg_win": 128.6,
+   "avg_loss": null,
+   "exp": 128.6
+  },
+  "pb_vwap|-1": {
+   "n": 72,
+   "win": 0.319,
+   "avg_win": 139.8,
+   "avg_loss": -88.4,
+   "exp": -15.5
+  },
+  "pb_vwap|1": {
+   "n": 85,
+   "win": 0.447,
+   "avg_win": 104.6,
+   "avg_loss": -55.2,
+   "exp": 16.2
+  },
+  "pb_zone|-1": {
+   "n": 12,
+   "win": 0.167,
+   "avg_win": 269.6,
+   "avg_loss": -88.0,
+   "exp": -28.4
+  },
+  "pb_zone|1": {
+   "n": 4,
+   "win": 0.5,
+   "avg_win": 58.1,
+   "avg_loss": -78.8,
+   "exp": -10.3
+  }
+ }
+}

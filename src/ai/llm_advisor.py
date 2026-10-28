@@ -19,7 +19,12 @@ import requests
 
 from src.ai.mnq_context import build_mnq_context, compute_setup_score
 from src.ai.economic_calendar import EconomicCalendar
-from src.ai.action_log import OVERNIGHT_FLATTEN_ET, OVERNIGHT_TP_TEXT, is_overnight_rec, stop_pts_of
+from src.ai.action_log import (
+    overnight_tp_text,
+    is_overnight_rec,
+    stop_pts_of,
+    take_profit_text,
+)
 from src.strategy.mnq_15m_ema_eod import (
     ET,
     FLATTEN_ET,
@@ -73,7 +78,8 @@ OVERNIGHT_ASK_SYSTEM = (
     "Python already computed the only legal numbers in context.market.levels from the LIVE ticker. "
     "Copy those numbers. Do not invent prices. Do not use a stale MNQ_1m.csv or Databento file print.\n"
     "First sentence MUST be exactly levels.first_line (open paper position, live last, stop, "
-    "1R TP, Flatten 09:25 ET).\n"
+    "R-multiple TP from OVERNIGHT_TP_R. No 09:25 flatten — this paper runner keeps the position "
+    "through RTH until SL/TP or Ctrl+C).\n"
     "Do not lead with RTH WAIT, next window 09:35, flatten 15:50, or a file price from a prior date.\n"
     "Label the answer 'second opinion — recipe is still the boss.'"
 )
@@ -426,7 +432,7 @@ def _last_closed_why(recent_trades: Optional[List[Dict[str, Any]]]) -> Optional[
 def _position_from_status(status: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     status = status or {}
     overnight = is_overnight_rec(status)
-    flatten = OVERNIGHT_FLATTEN_ET if overnight else FLATTEN_ET
+    flatten = "" if overnight else FLATTEN_ET
     opens = status.get("open_positions") or []
     if not isinstance(opens, list):
         opens = []
@@ -438,7 +444,7 @@ def _position_from_status(status: Optional[Dict[str, Any]]) -> Dict[str, Any]:
             "entry": None,
             "stop": None,
             "flatten_et": flatten,
-            "take_profit": OVERNIGHT_TP_TEXT if overnight else f"Flatten {flatten} ET",
+            "take_profit": overnight_tp_text() if overnight else "1R TP",
         }
     p = live[0]
     return {
@@ -448,7 +454,11 @@ def _position_from_status(status: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "entry": p.get("entry") or p.get("entry_price"),
         "stop": p.get("sl") or p.get("stop"),
         "flatten_et": p.get("flatten_et") or flatten,
-        "take_profit": OVERNIGHT_TP_TEXT if overnight else f"Flatten {flatten} ET",
+        "take_profit": take_profit_text({
+            **p,
+            "session": "overnight_research" if overnight else "ema15_eod",
+            "tp": p.get("tp") or p.get("target") or p.get("take_profit"),
+        }) or (overnight_tp_text() if overnight else "1R TP"),
         "open_count": len(live),
     }
 
@@ -459,6 +469,7 @@ def overlay_overnight_levels(
     *,
     price: Any = None,
     source: str = "rithmic",
+    wait_reason: str = "",
 ) -> Dict[str, Any]:
     """Replace RTH WAIT with the live overnight paper position / ticker."""
     levels = dict(rth or {})
@@ -474,8 +485,12 @@ def overlay_overnight_levels(
     levels["source"] = src
     levels["last_price"] = None if px is None else round(px, 2)
     levels["overnight"] = True
-    levels["flatten_et"] = OVERNIGHT_FLATTEN_ET
-    levels["take_profit"] = OVERNIGHT_TP_TEXT
+    levels["flatten_et"] = ""
+    levels["take_profit"] = take_profit_text({
+        **pos,
+        "session": "overnight_research",
+        "tp": pos.get("tp") or pos.get("target") or pos.get("take_profit"),
+    }) or overnight_tp_text()
     last_bit = f"{px:.2f}" if px is not None else "unavailable"
     if pos:
         side = str(pos.get("direction") or pos.get("side") or "LONG").upper()
@@ -498,15 +513,21 @@ def overlay_overnight_levels(
         entry_bit = f"{entry:.2f}" if entry is not None else "—"
         levels["first_line"] = (
             f"PAPER {side} — last MNQ {last_bit} ({src}). "
-            f"Entry {entry_bit}, stop {stop_bit}{pts_bit}. {OVERNIGHT_TP_TEXT}."
+            f"Entry {entry_bit}, stop {stop_bit}{pts_bit}. {levels['take_profit']}."
         )
     else:
         levels["callout"] = "PAPER"
         levels["waiting"] = True
-        levels["first_line"] = (
-            f"PAPER OVERNIGHT — flat. Last MNQ {last_bit} ({src}). "
-            f"{OVERNIGHT_TP_TEXT}. Locked RTH recipe starts 09:35."
-        )
+        wait = str(wait_reason or status.get("wait_reason") or "").strip()
+        if wait:
+            levels["first_line"] = (
+                f"PAPER OVERNIGHT — flat. Last MNQ {last_bit} ({src}). {wait}"
+            )
+        else:
+            levels["first_line"] = (
+                f"PAPER OVERNIGHT — flat. Last MNQ {last_bit} ({src}). "
+                f"{overnight_tp_text()}. Runs through RTH until SL/TP or Ctrl+C."
+            )
     return levels
 
 
@@ -1252,7 +1273,7 @@ Context:
             ctx = raw_ctx[:14000]
             nums = json.dumps(levels, default=str)
             exit_bit = (
-                "Then EXIT using those numbers only. 1R TP, then flatten 09:25 ET. "
+                f"Then EXIT using those numbers only. {overnight_tp_text()} (SL/TP or Ctrl+C). "
                 "Do not lead with RTH WAIT or 09:35."
                 if overnight
                 else "Then ENTRY/EXIT using those numbers only. Flatten 15:50 ET. Do not trail."
@@ -1269,7 +1290,7 @@ Context:
             ctx = raw_ctx[:4000]
             rules = (
                 "Overnight paper is open. Lead with the live ticker and the open paper SL / "
-                "1R TP, flatten 09:25 ET. Do not cite a stale MNQ_1m.csv print."
+                f"{overnight_tp_text()}. Do not flatten at 09:25. Do not cite a stale MNQ_1m.csv print."
                 if overnight
                 else
                 "Rules: enter only when daily+15m+60m agree (15m EMA8/21, 60m EMA8/21, "

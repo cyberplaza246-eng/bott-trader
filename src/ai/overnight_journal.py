@@ -53,6 +53,30 @@ def load_jsonl(path: str) -> List[Dict[str, Any]]:
     return rows
 
 
+def load_open_overnight_positions(path: str = JOURNAL_PATH) -> List[Dict[str, Any]]:
+    """Every overnight entry row that has no matching close (oldest first)."""
+    open_by_id: Dict[str, Dict[str, Any]] = {}
+    closed: set = set()
+    for row in load_jsonl(path):
+        if not is_overnight_research_row(row):
+            continue
+        tid = str(row.get("trade_id") or "")
+        ev = str(row.get("event") or "")
+        if ev == "close" and tid:
+            closed.add(tid)
+        elif ev == "entry" and tid:
+            open_by_id[tid] = row
+    opens = [row for tid, row in open_by_id.items() if tid not in closed]
+    opens.sort(key=lambda r: str(r.get("timestamp") or r.get("entry_time") or ""))
+    return opens
+
+
+def load_last_open_overnight(path: str = JOURNAL_PATH) -> Optional[Dict[str, Any]]:
+    """Newest overnight entry that has no matching close."""
+    opens = load_open_overnight_positions(path)
+    return opens[-1] if opens else None
+
+
 def load_overnight_closes(path: str = JOURNAL_PATH) -> List[Dict[str, Any]]:
     return [
         r for r in load_jsonl(path)
@@ -212,8 +236,10 @@ class OvernightPaperJournal:
             "zone_name": signal.get("zone_name"),
             "zone_price": signal.get("zone_price"),
             "why": signal.get("why"),
-            "flatten_et": signal.get("flatten_et") or "09:25",
+            "flatten_et": signal.get("flatten_et") or "",
             "paper": True,
+            "entry_confidence_pct": signal.get("entry_confidence_pct"),
+            "entry_confidence": signal.get("entry_confidence"),
         })
 
     def log_close(self, record: Dict[str, Any], *, gemini_note: str = "") -> Dict[str, Any]:

@@ -12,6 +12,27 @@ from __future__ import annotations
 import pandas as pd
 
 SESSION_TZ = "America/New_York"
+
+
+def format_ts_et(ts, fmt: str = "%Y-%m-%d %H:%M:%S ET") -> str:
+    """Format a timestamp in America/New_York and label it ET.
+
+    Naive values are treated as UTC (same convention as live Rithmic/Yahoo candles).
+    """
+    if ts is None:
+        return "n/a"
+    try:
+        t = pd.Timestamp(ts)
+        if pd.isna(t):
+            return "n/a"
+        if t.tzinfo is None:
+            t = t.tz_localize("UTC")
+        t = t.tz_convert(SESSION_TZ)
+        return t.strftime(fmt)
+    except Exception:
+        return str(ts)
+
+
 RTH_START_MINUTES = 9 * 60 + 30  # 09:30
 RTH_END_MINUTES = 16 * 60  # 16:00 exclusive
 

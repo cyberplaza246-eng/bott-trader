@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YC3JQRYMJB"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-YC3JQRYMJB');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strategy: Clara Systems</title>
+<meta name="description" content="How Clara Core works: a fully automated MNQ futures strategy with a built-in risk limit, structured exits, and bar-close execution. What is locked, what you control, and why.">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://clarasystems.io/strategy">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Strategy · Clara Systems">
+<meta property="og:description" content="How Clara Core works: a fully automated MNQ futures strategy with a built-in risk limit, structured exits, and bar-close execution. What is locked, what you control, and why.">
+<meta property="og:url" content="https://clarasystems.io/strategy">
+<meta property="og:site_name" content="Clara Systems">
+<meta property="og:image" content="https://clarasystems.io/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Strategy · Clara Systems">
+<meta name="twitter:description" content="How Clara Core works: a fully automated MNQ futures strategy with a built-in risk limit, structured exits, and bar-close execution. What is locked, what you control, and why.">
+<meta name="robots" content="index, follow">
+
+<style type="text/css">@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:300;src:url(/cf-fonts/v/josefin-sans/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin/wght/normal.woff2);unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/vietnamese/wght/normal.woff2);unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB;font-display:swap;}@font-face {font-family:'Josefin Sans';font-style:normal;font-weight:400;src:url(/cf-fonts/v/josefin-sans/5.2.8/latin-ext/wght/normal.woff2);unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;font-display:swap;}</style>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Josefin Sans', sans-serif; background: var(--bg); color: #2C2B28; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+:root {
+  --black: #2C2B28; --mid: #3a3835; --soft: #6b6a65;
+  --bg: #f7f6f3; --bg-dark: #141412; --bg-dk2: #1c1c1a;
+  --border: #D0D0CC; --green: #1D9E75; --red: #D85A30;
+  --ow: #E6E4DD; --amber: #BA7517; --nav-h: 62px;
+}
+.site-header { position: sticky; top: 0; z-index: 500; background: rgba(235,233,228,0.97); border-bottom: 1px solid var(--border); box-shadow: 0 2px 20px rgba(0,0,0,0.06); }
+.header-logo-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 0 3rem; height: var(--nav-h); border-bottom: 1px solid var(--border); }
+.header-logo { grid-column: 2; text-align: center; font-size: 22px; font-weight: 300; letter-spacing: .22em; text-transform: uppercase; color: var(--black); text-decoration: none; }
+.header-cta-slot { grid-column: 3; display: flex; justify-content: flex-end; align-items: center; gap: 1.5rem; }
+.header-cta { font-family: 'Josefin Sans', sans-serif; font-size: 12px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; padding: 10px 24px; background: #2C2B28; color: #fff; border: none; cursor: pointer; transition: background .15s; }
+.header-cta:hover { background: var(--green); }
+.header-nav-row { height: var(--nav-h); display: flex; align-items: center; justify-content: center; gap: 2.5rem; padding: 0 3rem; }
+.header-nav-row a { font-size: 13px; font-weight: 400; letter-spacing: .08em; text-transform: uppercase; color: var(--black); text-decoration: none; transition: color .15s; white-space: nowrap; }
+.header-nav-row a.nt-nav.active { color: #F0592B; }
+.header-nav-row a.active { color: var(--green); }
+.page-sec { max-width: 920px; margin: 0 auto; padding: 4rem 3rem; }
+
+.bg-lt { background: var(--bg); }
+.bg-alt { background: #eeecea; }
+.bg-dark { background: var(--bg-dark); }
+.full-rule { border: none; border-top: 1px solid var(--border); }
+.sec-label { display: block; font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); margin-bottom: 2rem; }
+@media (max-width: 768px) { .sec-label { line-height: 2.4; } }
+.bt { font-size: 17px; font-weight: 400; letter-spacing: .02em; color: var(--mid); line-height: 1.85; margin-bottom: 1.4rem; }
+.bt strong { color: var(--black); font-weight: 400; }
+.bt em { font-style: normal; color: var(--black); font-weight: 400; }
+.ilist { margin: 1rem 0 1.4rem; display: flex; flex-direction: column; gap: .85rem; }
+.ilist p { font-size: 16px; font-weight: 400; letter-spacing: .02em; color: var(--mid); padding-left: 1.5rem; line-height: 1.6; }
+.link-arr { display: inline-block; margin-top: 1.5rem; font-size: 13px; font-weight: 400; letter-spacing: .10em; text-transform: uppercase; color: var(--black); text-decoration: none; border-bottom: 1.5px solid var(--black); padding-bottom: 2px; transition: color .15s, border-color .15s; }
+.link-arr:hover { color: var(--green); border-color: var(--green); }
+.ex-box { border: 1px solid var(--border); background: #f0efe9; padding: 1.5rem; margin: 1.25rem 0; }
+.ex-row { display: flex; justify-content: space-between; align-items: center; padding: .35rem 0; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 400; color: var(--mid); }
+.ex-row:last-child { border-bottom: none; }
+.ex-row span:last-child { color: var(--black); }
+.ex-head { font-size: 10px; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--soft); margin-bottom: .75rem; }
+.f-social { margin: 0; width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; overflow: visible; }
+.f-social a { color: var(--soft); display: inline-flex; align-items: center; transition: color .15s ease, transform .2s ease; }
+.f-social a:hover { color: var(--green); transform: scale(1.2); }
+footer { background: var(--bg); border-top: 1px solid var(--border); padding: 2.5rem 3rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.25rem; }
+.f-logo { font-size: 12px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); }
+.f-disc { font-size: 12px; font-weight: 400; color: var(--soft); text-align: center; line-height: 1.7; }
+.f-disc a { color: var(--black); text-decoration: none; }
+.f-disc a:hover { color: var(--green); }
+.f-disc a.footer-highlight { -webkit-text-fill-color: transparent; }
+.f-disc a.footer-highlight:hover { -webkit-text-fill-color: transparent; color: inherit; }
+
+/* Logo click animation */
+@keyframes logoFlicker {
+  0%   { color: inherit; }
+  25%  { color: var(--green); }
+  100% { color: inherit; }
+}
+.header-logo.logo-clicked { animation: logoFlicker 400ms ease forwards; }
+/* status tag */
+@keyframes shimmer {
+  0%   { background-position: 150% center; }
+  100% { background-position: -150% center; }
+}
+.launch-tag {
+  position: relative;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 12px; font-weight: 400; letter-spacing: .14em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%);
+  background-size: 300% auto; -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  animation: shimmer 3s linear infinite; cursor: pointer;
+  white-space: nowrap; text-decoration: none;
+}
+.launch-tag:hover .launch-tooltip { opacity: 1; pointer-events: auto; }
+.launch-tooltip {
+  position: absolute; top: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); background: var(--black); color: #f0efe9;
+  padding: 10px 16px; border-radius: 4px; font-size: 11px; font-weight: 400;
+  letter-spacing: .08em; text-transform: none; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: opacity .2s ease; z-index: 999;
+  -webkit-text-fill-color: #f0efe9; background-clip: unset;
+  -webkit-background-clip: unset; display: flex; align-items: center; gap: 10px;
+}
+.launch-tooltip::before { content: ''; position: absolute; top: -8px; left: 0; right: 0; height: 8px; background: transparent; }
+.launch-tooltip::after { content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 8px; height: 8px; background: var(--black); }
+.launch-tooltip a { color: #9b9a94; display: flex; align-items: center; transition: color .15s; text-decoration: none; }
+.launch-tooltip a:hover { color: #4ECBA0; }
+/* Logo animation */
+
+/* Footer shimmer links */
+.footer-highlight {
+  background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%);
+  background-size: 300% auto; -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+  animation: shimmer 3s linear infinite;
+  text-decoration: none; font-size: 12px; font-weight: 400; letter-spacing: .08em;
+}
+@media (max-width: 768px) {
+  .m-flip.bg-lt { background: #eeecea; }
+  .m-flip.bg-alt { background: var(--bg); } .f-disc { display: block; text-align: center; line-height: 2.05; } }
+
+/* ═══════════ MOBILE RESPONSIVE (≤768px) - does not affect desktop ═══════════ */
+@media (max-width: 768px) {
+  .header-logo-row { padding: 0 1rem; grid-template-columns: 1fr auto 1fr; }
+  .header-logo { font-size: 19px !important; font-weight: 300 !important; letter-spacing: .12em !important; white-space: nowrap; }
+  .header-cta { font-size: 8px !important; padding: 7px !important; line-height: 1.35 !important; text-align: center !important; }
+  .launch-tag { display: none !important; }
+  .ilist p { margin-bottom: 1.1rem !important; }
+  .ex-row { font-size: 13px !important; gap: 14px; align-items: flex-start !important; }
+  .ex-row span:first-child { flex: 1; }
+  .ex-row span:last-child { white-space: nowrap; text-align: right; }
+  .header-nav-row {
+    gap: 1.1rem;
+    padding: 0 1rem;
+    overflow-x: auto;
+    justify-content: flex-start;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .header-nav-row::-webkit-scrollbar { display: none; }
+  .header-nav-row a { font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+  .page-sec { padding: 2.5rem 1.25rem !important; }
+  table { font-size: 13px !important; }
+  th, td { padding: .6rem .4rem !important; }
+  h1 { font-size: 26px !important; }
+  footer { padding: 2rem 1.25rem !important; }
+}
+@media (max-width: 480px) {
+  .header-logo { font-size: 19px !important; }
+  .header-cta { font-size: 7px !important; padding: 7px !important; }
+  .header-nav-row a { font-size: 11px; }
+  .page-sec { padding: 2rem 1rem !important; }
+}
+
+/* ═══ MOBILE HAMBURGER (≤768px only, no desktop effect) ═══ */
+.ham-btn { display: none; }
+.mob-menu { display: none; }
+@media (max-width: 768px) {
+  .header-nav-row { display: none !important; }
+  .ham-btn {
+    display: inline-flex; flex-direction: column; justify-content: center; gap: 6px;
+    height: 40px; padding: 10px 6px;
+    cursor: pointer;
+    background: none; border: none; border-radius: 0;
+    color: rgba(107,106,102,0.5);
+  }
+  .ham-btn .hb1, .ham-btn .hb2 { display: block; height: 1.5px; background: currentColor; transition: transform .25s ease, width .25s ease; }
+  .ham-btn .hb1 { width: 20px; }
+  .ham-btn .hb2 { width: 13px; }
+  .ham-btn.open .hb1 { transform: translateY(3.75px) rotate(45deg); }
+  .ham-btn.open .hb2 { width: 20px; transform: translateY(-3.75px) rotate(-45deg); }
+  .header-logo-row { position: relative; z-index: 401; background: inherit; }
+  .mob-menu {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: #f7f6f3; z-index: 400;
+    padding-top: 140px;
+    overflow-y: auto;
+    text-align: center;
+  }
+  .mob-menu a {
+    display: block; padding: .95rem 1.5rem;
+    font-size: 17px; font-weight: 300; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--black, #2C2B28); text-decoration: none;
+    border-bottom: none;
+  }
+  .mob-menu a.active { color: #1D9E75; }
+  .mob-menu a.nt-nav.active { color: #F0592B; }
+  .mob-menu.open { display: block; }
+  .mm-rule { width: 120px; margin: 1.1rem auto; border-top: 1px solid #dedcd5; }
+  .mm-sec a { font-size: 13px; padding: .75rem 1.5rem; color: var(--soft, #6b6a66); }
+  .header-cta { white-space: normal !important; line-height: 1.25 !important; max-width: 92px; }
+  .cta-br { display: block; height: 0; }
+}
+.pg-title-band, .pg-title-band + hr { display: none; }
+@media (max-width: 768px) { .pg-title-band, .pg-title-band + hr { display: block; } }
+
+#trade-management, #execution-model, #trade-exits { scroll-margin-top: 152px; }
+@media (max-width: 768px) { #trade-management, #execution-model, #trade-exits { scroll-margin-top: 86px; } }
+/* FOOTER, one block on every page. Shape and spacing from the home page. Added Oct 6, 2026. */
+footer { background: var(--bg); border-top: 1px solid var(--border); padding: 2.5rem 3rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1.25rem; }
+.f-social { width: 100%; display: flex; justify-content: center; align-items: center; gap: 20px; overflow: visible; }
+.f-social a { color: var(--soft); display: inline-flex; align-items: center; transition: color .15s ease, transform .2s ease; }
+.f-social a:hover { color: var(--green); transform: scale(1.2); }
+.f-logo { margin: 0; font-size: 12px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; color: var(--soft); }
+.f-disc { margin: 0; font-size: 12px; font-weight: 400; color: var(--soft); text-align: center; line-height: 1.7; }
+.f-disc a { color: var(--black); text-decoration: none; }
+.f-disc a:hover { color: var(--green); }
+.f-disc a.footer-highlight { -webkit-text-fill-color: transparent; }
+.f-disc a.footer-highlight:hover { -webkit-text-fill-color: transparent; color: inherit; }
+.footer-highlight { background: linear-gradient(90deg, #1D9E75 0%, #2db88a 30%, #5DDCB2 50%, #2db88a 70%, #1D9E75 100%); background-size: 300% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 3s linear infinite; text-decoration: none; font-size: 12px; font-weight: 400; letter-spacing: .08em; }
+.f-note { max-width: 480px; margin-left: auto; margin-right: auto; }
+.mb-br { display: none; }
+.d-br { display: inline; }
+.f-links-m { display: none; }
+@media (max-width: 768px) { .f-disc { display: block; text-align: center; line-height: 2.05; } footer { padding: 2rem 1.25rem !important; } .mb-br { display: inline !important; } .d-br { display: none !important; } .f-links-d { display: none !important; } .f-links-m { display: block !important; } }
+</style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "xmci3fambi");
+</script>
+<style>.mb-br{display:none}@media (max-width:768px){.mb-br{display:inline}}</style>
+<style>@media (max-width:768px){.link-arr{border-bottom:none;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:4px;}.link-arr:hover{text-decoration-color:var(--green);}}
+@media (max-width:768px){ .f-risk{max-width:274px} }
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://clarasystems.io/#org","name":"Clara Systems","url":"https://clarasystems.io/","logo":"https://clarasystems.io/apple-touch-icon.png","sameAs":["https://instagram.com/clarasystems_io","https://x.com/clarasystems_io","https://youtube.com/@clarasystems_io","https://www.facebook.com/clarasystems.io","https://t.me/clarasystems_io","https://discord.gg/GxHYxfKz8p"]},{"@type":"WebSite","@id":"https://clarasystems.io/#site","url":"https://clarasystems.io/","name":"Clara Systems","publisher":{"@id":"https://clarasystems.io/#org"}}]}</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-logo-row">
+    <div><button class="ham-btn" id="hamBtn" aria-label="Menu" aria-expanded="false"><span class="hb1"></span><span class="hb2"></span></button></div>
+    <a href="index.html" class="header-logo">CLARA SYSTEMS</a>
+    <div class="header-cta-slot">
+      <button class="header-cta" onclick="location.href='downloads.html'">Download<span class="cta-br"> </span>Free</button>
+    </div>
+  </div>
+  <nav class="header-nav-row">
+    <a href="index.html">HOME</a>
+    <a href="performance.html">PERFORMANCE</a>
+    <a href="strategy.html" class="active">STRATEGY</a>
+    <a href="structure.html">STRUCTURE</a>
+    <a href="pricing.html">WHY FREE</a>
+    <a href="philosophy.html">PHILOSOPHY</a>
+    <a href="ninjatrader.html" class="nt-nav">NINJATRADER</a>
+  </nav>
+<nav class="mob-menu" id="mobMenu">
+    <a href="index.html">HOME</a>
+    <a href="performance.html">PERFORMANCE</a>
+    <a href="strategy.html" class="active">STRATEGY</a>
+    <a href="structure.html">STRUCTURE</a>
+    <a href="pricing.html">WHY FREE</a>
+    <a href="philosophy.html">PHILOSOPHY</a>
+    <a href="ninjatrader.html" class="nt-nav">NINJATRADER</a>
+  <span class="mm-rule" style="display:block"></span><div class="mm-sec"><a href="downloads.html">Downloads</a><a href="faq.html">FAQ</a><a href="verify.html">How To Verify A Strategy</a><a href="mindset.html">Trading &amp; The Mind</a><a href="socials.html">Connect</a></div></nav>
+</header>
+  <div class="bg-lt pg-title-band">
+    <div class="page-sec">
+      <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px;padding:0;border:0;white-space:nowrap">Clara Core strategy: how the automated MNQ futures strategy trades, manages risk, and exits</h1><span class="sec-label">Strategy</span>
+    </div>
+  </div>
+  <hr class="full-rule">
+
+
+<!-- CORE OVERVIEW -->
+<div class="bg-lt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">Core Overview</span>
+    <p class="bt">Clara Core is a fully rule-based intraday strategy designed to trade the Nasdaq-100 using Micro E-mini Nasdaq-100 Futures (MNQ). It trades on a 2-minute chart, chosen to reduce the noise and false signals of the 1-minute, while entering moves earlier than the 5-minute would allow.</p>
+    <p class="bt"><strong>Price Action First</strong><br>The strategy is built entirely on price action. All entries and exits are executed automatically based on predefined rules.</p>
+    <p class="bt">You can manually close trades or disable the strategy at any time.</p>
+    <p class="bt">This page explains exactly how the strategy behaves so you can understand how the strategy operates and its limitations.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- HOW CLARA CORE WAS BUILT -->
+<div class="bg-alt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">How Clara Core Was Built</span>
+    <p class="bt">Clara Core was built to be the kind of strategy most of this industry sells, a high win rate carried by a negative risk-to-reward, with one difference: every weakness would be published. We prioritised low drawdown first, then win rate and profit factor. A low drawdown does not mean a tight stop; it means the strategy stays out of the conditions where it loses most.</p>
+    <p class="bt">Every filter had to earn its place the same way. It was tested against the full seven-year backtest, and the question was never only whether the numbers improved but how many trades it touched. A filter that improves drawdown by acting on a handful of trades out of 1,500 is noise, and it was not used; a filter has to change the result across a meaningful share of the sample. Improving one number usually costs another: a higher win rate tends to shrink the payoff, a lower drawdown tends to cost profit. When that trade-off came up, we chose the lower drawdown every time.</p>
+    <p class="bt">There are no random skip days. Every day the strategy sits out has a reason: FOMC days, where volatility spikes and liquidity is taken on both sides; market half-days and the session after, where participation is thin and moves reverse instead of trending; and rollover week, when the contract changes hands. Each showed a lower drawdown and a better win rate across a meaningful sample. The specifics of every filter are proprietary; the results of all of them are in every number on this site.</p>
+    <p class="bt">One thing this method cannot do: the filters were chosen against the same seven years the backtest reports, so the published result is not a test on unseen data. That is why the Monte Carlo exists, why we plan around its 5th percentile with a buffer, and why we say plainly that neither a backtest nor a Monte Carlo tells you what the strategy will do next.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- WHAT WE TRADE -->
+<div class="bg-lt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">What We Trade</span>
+    <p class="bt">Clara Core trades MNQ exclusively.</p>
+    <p class="bt">This allows for consistency, specialization, and controlled execution within one of the most actively traded markets in the world.</p>
+    <p class="bt"><strong>Why MNQ:</strong></p>
+    <div class="ilist">
+      <p>Tracks the Nasdaq-100 index, driven by global technology and growth sectors</p>
+      <p>High liquidity and strong participation</p>
+      <p>Supported across prop firms and platforms</p>
+      <p>Accessible capital requirements</p>
+    </div>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- EXECUTION MODEL -->
+<div class="bg-alt m-flip">
+  <div class="page-sec">
+    <span id="execution-model" style="display:block;"></span><span class="sec-label">Execution Model</span>
+    <p class="bt">Clara Core uses an OnBarClose execution model.</p>
+    <p class="bt">All actions (entries, stop adjustments, profit protection, and trailing) occur only after a candle fully closes.</p>
+    <p class="bt">Nothing updates intrabar or on-tick data.</p>
+    <p class="bt"><strong>Why this matters:</strong></p>
+    <div class="ilist">
+      <p>No repainting</p>
+      <p>No intrabar noise or false movement</p>
+      <p>Stable and consistent execution</p>
+      <p>Backtest and live execution use the same strategy logic; actual fills may differ</p>
+    </div>
+<p class="bt">When a trade enters, a stop loss is applied immediately, and it is the one exception to bar close: the stop rests at the broker, so if price touches it, the position exits.</p>
+    <p class="bt">There is no fixed take profit, exits are managed dynamically based on price behavior and bar closes. Stop adjustments only update on bar close.</p>
+    <p class="bt">We have run Clara Core on live and simulated accounts to confirm it enters and exits exactly as designed, and every action happens on bar close with nothing updating intrabar. Actual live fills and results may differ from the backtest due to market and execution conditions.</p>
+    <a href="performance.html#verification" class="link-arr">NinjaTrader vs TradingView →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- ENTRY-BASED TAKE PROFIT -->
+
+<!-- TRADE MANAGEMENT SYSTEM -->
+<div class="bg-lt m-flip">
+  <div class="page-sec">
+    <span id="trade-management" style="display:block;"></span><span class="sec-label">Trade Management</span>
+        <p class="bt">Position size is calculated based on the distance between entry and stop loss. The strategy adjusts contract size to stay within a defined risk per trade.</p>
+
+    <div class="ex-box">
+      <div class="ex-head">Example using $400 risk per trade</div>
+      <div class="ex-row"><span>stop costs <br class="mb-br">$400 per contract</span><span>1 contract</span></div>
+      <div class="ex-row"><span>stop costs <br class="mb-br">$200 per contract</span><span>2 contracts</span></div>
+      <div class="ex-row"><span>stop costs more than <br class="mb-br">$400 per contract</span><span>trade skipped</span></div>
+    </div>
+
+    <p class="bt">The strategy takes a trade when conditions are met and the risk is within the limit. Because at least one contract must be executed, a trade can use slightly more than your selected risk per trade when the stop distance is wide, but never beyond the $400-per-contract limit. That limit is the maximum planned risk at entry, not a maximum possible loss: an actual loss can exceed it when a fill or a gap lands past the stop.</p>
+    <p class="bt">This behavior is expected and is reflected in the performance data.</p>
+    <p class="bt">On the $200 and $300 models, the one-contract minimum means a single loss can exceed the set risk. They still produce the lowest overall drawdowns of any model. Through June 2026 the $200 model's worst drawdown ran about 23% below the $300 model's. Since the third quarter of 2026 the two have been level, because stops widened enough to put both down to a single contract. The performance page&#8217;s How To Read The Data explains the floor and the ceiling in full.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- PROFIT PROTECTION -->
+<div class="bg-alt m-flip">
+  <div class="page-sec">
+    <span id="trade-exits" style="display:block"></span><span class="sec-label">Profit Protection &amp; Trade Exits</span>
+<p class="bt">Clara Core does not operate on a fixed risk-to-reward ratio. It uses several different exit mechanisms, and not all trades behave the same; this is by design, allowing the strategy to adapt to different market conditions. Depending on which exit activates, a trade may:</p>
+<div class="ilist">
+<p>Close quickly with a small gain</p>
+<p>Run for an extended move when conditions allow</p>
+<p>Have the stop move to a secured profit level after reaching a threshold, then exit if the market reverses before the full target is reached</p>
+</div>
+<p class="bt">That secured level is not break-even. Once price moves a defined percentage toward the target relative to the stop, the stop adjusts into profit, locking in part of the move. How much depends on which of the 5 exit models is active. Not all exits use this mechanism, and every adjustment happens on bar close.</p>
+<p class="bt">Because of this, some trades close early and protect capital, some run and capture extended moves, and some give back unrealized profit before exiting. That variation is expected and intentional, and it is why performance should not be evaluated on any single trade outcome or a fixed risk-to-reward ratio. The relevant metrics are win rate, profit factor, and drawdown; that is what the strategy is built around.</p>
+<p class="bt">Any trade still open is closed automatically on the first bar close after 3:30pm ET. No positions are ever carried overnight. This is built into the strategy and has shown improved results over time. It also ensures compliance with prop firm rules that require all positions to be closed before market close.</p>
+<p class="bt">Full profit factor and win rate breakdown by year and risk model is available on the <a href="performance.html" style="color:var(--black);text-decoration:underline">performance dashboard</a>.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- TRADE PROTECTION SYSTEM -->
+<div class="bg-lt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">What Is Locked, And What You Control</span>
+    <p class="bt">All logic is predefined within the strategy. Entry logic, exits, filters, and internal behavior are not visible or user-adjustable.</p>
+    <p class="bt">You control two inputs: <strong>risk per trade</strong> and a time zone offset. Everything else runs automatically. One built-in limit is public: no trade is planned to risk more than $400 per contract. It is locked in the code; it is not an adjustable setting. No other part of the logic is adjustable, by design.</p>
+    <p class="bt">The published record runs this exact configuration. That includes the skip-day filters in the next section. The one choice you make is risk per trade. If you run a value other than the published models, treat it as your own experiment: backtest it first, free in NinjaTrader, and compare it against the defaults. The defaults are the strategy we publish.</p>
+    <p class="bt">Strategy parameters are fixed, tested against seven years of data. This removes the temptation to interfere, second-guess, or over-optimize based on short-term results.</p>
+    <p class="bt">This structure is a key reason the strategy maintains:</p>
+    <div class="ilist">
+      <p>Controlled drawdown</p>
+      <p>Stable performance over time</p>
+      <p>A historical win rate above 70%</p>
+    </div>
+    <p class="bt">That win rate is the entire edge: the average loss is larger than the average win, so Clara Core profits only because it wins far more often than it loses. The <a href="performance.html" style="color:var(--black);text-decoration:underline">performance page</a> shows the full picture.</p>
+  </div>
+</div>
+
+
+<hr class="full-rule">
+
+
+<!-- EXECUTION FILTERS -->
+<div class="bg-alt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">Skip Day Filters</span>
+    <p class="bt">Clara Core is designed to operate without the need for constant monitoring or manual decision-making. Predefined execution filters automatically avoid specific market conditions that have historically shown lower consistency and higher risk.</p>
+    <p class="bt"><strong>Built-in filters, reflected in all backtest results:</strong></p>
+    <div class="ilist">
+      <p>FOMC decision days</p>
+      <p>Futures rollover week (one week each in March, June, September, and December)</p>
+      <p>Market half-days</p>
+      <p>The session after a half-day, covered by the same notice</p>
+    </div>
+    <p class="bt">These filters are built into the strategy as a capital protection measure.</p>
+    <p class="bt"><strong>Why these filters exist</strong><br>Historical testing shows these periods tend to produce less stable conditions, including increased drawdown and inconsistent behavior. Rather than maximizing trade frequency, the strategy prioritizes stability and capital preservation. The strategy applies these calendar filters automatically; you remain responsible for understanding the rules of your account and your prop firm.</p>
+    <p class="bt"><strong>Day after half-day</strong><br>The strategy also avoids trading the day following a market half-day. The specific weekday varies from year to year with the holiday calendar. While the impact on total trades is small, testing shows this period can slightly increase drawdown. For this reason, it is treated as a protective filter.</p>
+    <p class="bt"><strong>Built In</strong><br>These filters are part of the strategy itself. There is nothing to configure and no calendar to monitor; the chart label tells you when one is active.</p>
+    <p class="bt">The goal is not to trade more. It is to trade better.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- EXECUTION SCOPE -->
+<div class="bg-lt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">Execution Scope</span>
+    <p class="bt">The strategy trades Monday through Friday. All other economic events (CPI, payroll, PMI, earnings, and other high-impact news days) are traded normally. Only structurally abnormal sessions are excluded.</p>
+    <p class="bt">You do not need to track the news, watch earnings releases, or manage exposure around the Nasdaq's largest components. The strategy handles entries and exits based on price behavior, not on what is happening in the news.</p>
+    <p class="bt">Experienced traders often feel the pull to intervene, closing a trade early because the move looks extended, skipping a day because the market feels uncertain. But no indicator, reading, or intuition is consistently right enough to override a tested system. The reason to use automation is to remove that burden. That is what we do with ours.</p>
+          </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- CONNECTION DROPS -->
+<div class="bg-alt m-flip">
+  <div class="page-sec">
+    <span class="sec-label">What Happens When <br class="mb-br">The Connection Drops</span>
+    <p class="bt">There is a risk here that rarely gets discussed: if the platform disconnects or restarts while a trade is open, a strategy can lose track of the position, and depending on your platform settings the protective order can be cancelled along with it, leaving the position running unprotected. A naked position.</p>
+    <p class="bt">Two things prevent it, and the Setup Guide covers both. Your protective order rests at the broker, so a stop never depends on your machine staying up, and one NinjaTrader setting keeps that order alive if the strategy stops. After a short drop, the platform reconnects and the strategy continues on its own. After a restart the strategy is no longer running, and after a longer outage it may be disabled. Your stop stays exactly where it is, resting at the broker, for as long as the trade is open, and you can confirm it from your broker's phone app with NinjaTrader fully closed. The Setup Guide walks through what to do when you are back at the machine, along with how to set an extra layer of protection: a maximum daily loss limit on the broker side, on a prop firm or cash account.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- TIME ZONE OFFSET -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Time Zone Offset</span>
+    <p class="bt">The strategy operates based on U.S. market hours (9:30am ET, Eastern Time). A time zone offset setting is available for users running NinjaTrader outside of ET.</p>
+<p class="bt">Most people never touch this. It only matters if NinjaTrader itself is set to a time zone other than Eastern, usually because another strategy on the same platform needs it there. Example: your platform runs on European time for a different strategy; leave it there, set Clara Core&#8217;s offset to the difference, and it still trades the New York session. If NinjaTrader is on Eastern Time, leave the offset at zero.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- LIMITATIONS & REALITY -->
+<div class="bg-lt">
+  <div class="page-sec">
+    <span class="sec-label">Limitations &amp; Reality</span>
+<p class="bt">No strategy performs well in all conditions.</p>
+    <p class="bt">Clara Core may struggle during:</p>
+    <div class="ilist">
+      <p>Choppy, range-bound markets</p>
+      <p>Low participation or low volume</p>
+      <p>Repeated false breakout conditions</p>
+    </div>
+    <p class="bt">The execution filters reduce exposure to some of these conditions, but no filter can fully anticipate every market environment. Losses and drawdowns are part of trading regardless of the strategy. Managing risk correctly is what keeps emotions in check when difficult conditions arrive.</p>
+    <p class="bt">Your selected risk per trade plays a major role in how these periods affect your account.</p>
+    <p class="bt">Detailed statistics, drawdown profiles, and risk models are provided so you can choose an approach that fits your account size and risk tolerance.</p>
+        <p class="bt">For a detailed view of how to structure risk across account types, see the full Performance page.</p>
+    <a href="performance.html#risk-at-size" class="link-arr">Risk At Account Size →</a>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<!-- TRANSPARENCY -->
+<div class="bg-alt">
+  <div class="page-sec">
+    <span class="sec-label">Transparency</span>
+        
+    <p class="bt">This page replaces onboarding and support: everything the strategy does is laid out here, in plain language. All results are based on historical backtesting. The objective is structured risk management, not risk elimination.</p>
+  </div>
+</div>
+
+<hr class="full-rule">
+
+<footer>
+  <div class="f-logo">Clara Systems &middot; US-based</div>
+  <div class="f-social">
+    <a href="https://instagram.com/clarasystems_io" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.79.31-1.46.72-2.13 1.38C1.35 2.68.94 3.35.63 4.14.33 4.9.13 5.78.07 7.05.01 8.33 0 8.74 0 12s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.46 1.38 2.13.67.66 1.34 1.07 2.13 1.38.76.3 1.64.5 2.91.56C8.33 23.99 8.74 24 12 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56.79-.31 1.46-.72 2.13-1.38.66-.67 1.07-1.34 1.38-2.13.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91-.31-.79-.72-1.46-1.38-2.13C21.32 1.35 20.65.94 19.86.63 19.1.33 18.22.13 16.95.07 15.67.01 15.26 0 12 0m0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8m7.85-10.41a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0"/></svg>
+    </a>
+    <a href="https://x.com/clarasystems_io" target="_blank" rel="noopener" aria-label="X">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.2 2h3.4l-7.4 8.5L23 22h-6.8l-5.3-7-6.1 7H1.4l7.9-9L1 2h7l4.8 6.4L18.2 2zm-1.2 18h1.9L7.1 4H5.1L17 20z"/>
+      </svg>
+    </a>
+    <a href="https://discord.gg/GxHYxfKz8p" target="_blank" rel="noopener" aria-label="Discord">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3c-.2.4-.5.9-.6 1.3a18.3 18.3 0 0 0-5.5 0C9.1 3.9 8.8 3.4 8.6 3a19.7 19.7 0 0 0-4.9 1.4C1.3 8.2.6 11.9 1 15.5a19.9 19.9 0 0 0 6.1 3.1c.5-.7.9-1.4 1.3-2.2-.7-.3-1.4-.6-2-1 .2-.1.3-.2.5-.3a14.2 14.2 0 0 0 12.2 0l.5.3c-.6.4-1.3.7-2 1 .4.8.8 1.5 1.3 2.2a19.8 19.8 0 0 0 6.1-3.1c.5-4.2-.7-7.9-3-11.1zM8.5 13.3c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4c1.2 0 2.1 1.1 2.1 2.4s-.9 2.4-2.1 2.4zm7 0c-1.2 0-2.1-1.1-2.1-2.4s.9-2.4 2.1-2.4c1.2 0 2.1 1.1 2.1 2.4s-.9 2.4-2.1 2.4z"/>
+      </svg>
+    </a>
+    <a href="https://t.me/clarasystems_io" target="_blank" rel="noopener" aria-label="Telegram">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><g transform="translate(12,12) scale(1.25) translate(-12,-12)"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/></g></svg>
+    </a>
+    <a href="https://youtube.com/@clarasystems_io" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.8 15.5V8.5l6.3 3.5-6.3 3.5z"/>
+      </svg>
+    </a>
+    <a href="https://www.facebook.com/clarasystems.io" target="_blank" rel="noopener" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.88 11.85v-8.38H7.08V12h3.04V9.36c0-3 1.79-4.67 4.53-4.67 1.31 0 2.68.24 2.68.24v2.95h-1.51c-1.49 0-1.95.92-1.95 1.87V12h3.32l-.53 3.47h-2.79v8.38A12 12 0 0 0 24 12z"/></svg></a>
+    <a href="https://reddit.com/user/ClaraSystems" target="_blank" rel="noopener" aria-label="Reddit"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.74c.69 0 1.25.56 1.25 1.25a1.25 1.25 0 0 1-2.5.06l-2.6-.55-.8 3.75c1.83.07 3.48.63 4.68 1.49.3-.31.73-.5 1.2-.5.97 0 1.76.79 1.76 1.76 0 .72-.43 1.33-1.01 1.61a3.11 3.11 0 0 1 .04.52c0 2.7-3.13 4.87-7 4.87-3.88 0-7-2.17-7-4.87 0-.18 0-.36.04-.53A1.75 1.75 0 0 1 4.03 12c0-.97.79-1.76 1.76-1.76.47 0 .9.19 1.2.5 1.21-.86 2.9-1.42 4.77-1.46l.83-3.95a.36.36 0 0 1 .14-.22.36.36 0 0 1 .26-.06l2.78.59a1.25 1.25 0 0 1 1.24-.9zM9.25 12a1.25 1.25 0 0 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm5.5 0a1.25 1.25 0 0 0 0 2.5 1.25 1.25 0 0 0 0-2.5zm-5.47 3.99a.33.33 0 0 0-.23.57c.84.84 2.49.91 2.96.91.48 0 2.13-.07 2.97-.91a.33.33 0 0 0 0-.47.33.33 0 0 0-.46 0c-.53.53-1.67.72-2.5.72-.83 0-1.97-.19-2.5-.72a.33.33 0 0 0-.24-.1z"/></svg></a>
+    </div>
+  <div class="f-disc f-links-d" style="margin-top:1.1rem">
+    <a class="footer-highlight" href="philosophy.html#faceless">Who We Are</a> &nbsp;·&nbsp; <a class="footer-highlight" href="verify.html">How To Verify A Strategy</a> &nbsp;·&nbsp; <a class="footer-highlight" href="mindset.html" style="white-space:nowrap">Trading &amp; The Mind</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="downloads.html">Downloads &amp; Resources</a> &nbsp;·&nbsp; <a class="footer-highlight" href="downloads.html#referrals">Referrals &amp; Discounts</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="faq.html">FAQ</a> &nbsp;·&nbsp; <a class="footer-highlight" href="socials.html">Connect</a>
+  </div>
+  <div class="f-disc f-links-m" style="margin-top:1.1rem">
+    <a class="footer-highlight" href="philosophy.html#faceless">Who We Are</a> &nbsp;·&nbsp; <a class="footer-highlight" href="verify.html">How To Verify A Strategy</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="downloads.html">Downloads &amp; Resources</a> &nbsp;·&nbsp; <a class="footer-highlight" href="downloads.html#referrals">Referrals &amp; Discounts</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="mindset.html" style="white-space:nowrap">Trading &amp; The Mind</a>
+    <span style="display:block;height:0.5rem;"></span><a class="footer-highlight" href="faq.html">FAQ</a> &nbsp;·&nbsp; <a class="footer-highlight" href="socials.html">Connect</a>
+  </div>
+  <div style="width:52px;height:1px;background:#D0D0CC;margin:1.6rem auto 1.3rem;"></div>
+  <div class="f-disc f-note">
+    Clara Systems may earn a commission <br class="mb-br">if you use our referral links, <br class="d-br">
+    at no extra cost to you. <br class="mb-br">It's a free way to help us and we appreciate it.<br>
+    Our referral partners are listed in the <a href="legal.html">legal page</a>.
+  </div>
+  <div class="f-disc f-note f-risk" style="margin-top:14px">
+    Trading futures involves substantial <br class="mb-br">risk of loss and is not suitable for everyone.<br>
+      Past performance, whether simulated or actual, is not indicative of future results.<br>
+      <br>
+      Clara Systems provides <br class="mb-br">software and educational information.<br>
+      We do not provide financial advice, manage customer funds, <br class="d-br">or trade on anyone's behalf.<br>
+      <a href="legal.html">Legal &amp; Disclosures</a>
+  </div>
+<div class="f-disc" style="margin-top:14px">&copy; 2026 Clara Systems. All rights reserved.</div>
+</footer>
+
+<script>
+/* Logo click flicker */
+document.querySelectorAll('.header-logo').forEach(function(el) {
+  el.addEventListener('click', function() {
+    el.classList.remove('logo-clicked');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('logo-clicked');
+    el.addEventListener('animationend', function() {
+      el.classList.remove('logo-clicked');
+    }, { once: true });
+  });
+});
+</script>
+<!-- logo-click-handler -->
+
+<script>
+(function(){var b=document.getElementById('hamBtn'),m=document.getElementById('mobMenu');
+if(b&&m){b.addEventListener('click',function(){b.classList.toggle('open');m.classList.toggle('open');b.setAttribute('aria-expanded',m.classList.contains('open'));});}})();
+</script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a515af3cdea24a3e',t:'MTc5MzE0NTg4MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

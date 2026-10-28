@@ -8,6 +8,8 @@ import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
+from src.utils.trade_console import trade_emoji
+
 try:
     import pytz
     ET = pytz.timezone("US/Eastern")
@@ -83,8 +85,21 @@ def fmt_usd(value: Any) -> str:
     return f"{sign}${abs(n):,.2f}"
 
 
-OVERNIGHT_FLATTEN_ET = "09:25"
-OVERNIGHT_TP_TEXT = "1R TP, flatten 09:25 ET"
+OVERNIGHT_FLATTEN_ET = ""
+
+
+def overnight_tp_text() -> str:
+    """Label for overnight TP (reads OVERNIGHT_TP_R)."""
+    try:
+        from src.strategy.overnight_research import overnight_tp_text as _otp
+
+        return _otp()
+    except Exception:
+        return "0.65R TP"
+
+
+# Backward-compatible default; prefer overnight_tp_text() so env is respected.
+OVERNIGHT_TP_TEXT = "0.65R TP"
 
 
 def _num(value: Any) -> Optional[float]:
@@ -128,18 +143,15 @@ def format_stop_line(rec: Optional[Dict[str, Any]]) -> str:
 
 def take_profit_text(rec: Optional[Dict[str, Any]]) -> str:
     rec = rec or {}
+    tp_px = fmt_px(rec.get("tp") or rec.get("target") or rec.get("take_profit") or rec.get("tp_cap"))
+    otp = overnight_tp_text()
+    r_tag = otp.replace(" TP", "")
     if is_overnight_rec(rec):
-        flatten = str(rec.get("flatten_et") or OVERNIGHT_FLATTEN_ET)
-        if flatten.endswith(" ET"):
-            flatten = flatten.replace(" ET", "")
-        return f"1R TP, flatten {flatten} ET"
-    flatten = rec.get("flatten_et")
-    cap_px = fmt_px(rec.get("tp_cap") or rec.get("tp") or rec.get("take_profit"))
-    if flatten:
-        line = f"Flatten {flatten} ET (no scalp TP)"
-        if cap_px:
-            line += f" · TP cap {cap_px}"
-        return line
+        if tp_px:
+            return f"{tp_px} ({r_tag})"
+        return otp
+    if tp_px:
+        return f"{tp_px} (1R)"
     return ""
 
 
@@ -164,18 +176,17 @@ def format_tp_line(rec: Optional[Dict[str, Any]]) -> str:
 
 
 def format_live_entry_brackets(rec: Optional[Dict[str, Any]]) -> str:
-    """Day (ema15_eod) entry line: SL placed @ … / TP cap @ …"""
+    """Day (ema15_eod) entry line: SL placed @ … / TP placed @ …"""
     rec = rec or {}
     if is_overnight_rec(rec):
         return ""
     sl = fmt_px(_stop_px(rec))
-    cap = rec.get("tp_cap") or rec.get("tp") or rec.get("take_profit")
-    tp = fmt_px(cap)
+    tp = fmt_px(rec.get("tp") or rec.get("take_profit") or rec.get("tp_cap"))
     parts = []
     if sl:
         parts.append(f"SL placed @ {sl}")
     if tp:
-        parts.append(f"TP cap @ {tp}")
+        parts.append(f"TP placed @ {tp} (1R)")
     return " / ".join(parts)
 
 
@@ -292,16 +303,30 @@ def _default_emoji_title(kind: str, rec: Dict[str, Any]) -> Tuple[str, str]:
         pnl_n = None
 
     if kind in ("entry", "paper_trade"):
+        from src.utils.trade_console import trade_emoji
         title = f"PAPER {side}" if paper else side
         if rec.get("cue") == "test_fill" or "test_fill" in str(rec.get("reason") or "").lower():
             title = f"PAPER {side}"
-        return "🟢", title or "TRADE PLACED"
+        dir_emoji = trade_emoji(_side(rec)) if _side(rec) else "📈"
+        return dir_emoji, title or "TRADE PLACED"
     if kind in ("profit",) or (kind in ("exit", "close", "flatten") and pnl_n is not None and pnl_n >= 0):
-        return "💰", "PROFITABLE TRADE" if kind in ("exit", "close", "flatten", "profit") else "PROFIT"
+        from src.utils.trade_console import exit_emoji
+        reason = str(rec.get("reason") or rec.get("exit_reason") or "")
+        em = exit_emoji(reason)
+        if em == "🔚":
+            em = "✅"
+        return em, "PROFITABLE TRADE" if kind in ("exit", "close", "flatten", "profit") else "PROFIT"
     if kind in ("loss",) or (kind in ("exit", "close", "flatten") and pnl_n is not None and pnl_n < 0):
-        return "🔴", "LOSING TRADE"
+        from src.utils.trade_console import exit_emoji
+        reason = str(rec.get("reason") or rec.get("exit_reason") or "")
+        em = exit_emoji(reason)
+        if em == "🔚":
+            em = "❌"
+        return em, "LOSING TRADE"
     if kind in ("exit", "close", "flatten"):
-        return "💰", "TRADE CLOSED"
+        from src.utils.trade_console import exit_emoji
+        reason = str(rec.get("reason") or rec.get("exit_reason") or "")
+        return exit_emoji(reason), "TRADE CLOSED"
     if kind in ("skip", "rejected"):
         return "❌", "TRADE SKIPPED"
     if kind in ("idle", "no_trade"):
@@ -317,6 +342,25 @@ def _default_emoji_title(kind: str, rec: Dict[str, Any]) -> Tuple[str, str]:
     if kind in ("data", "market"):
         return "📊", "MARKET"
     return "🟡", str(kind or "UPDATE").upper().replace("_", " ")
+
+
+def _confidence_line(rec: Dict[str, Any]) -> str:
+    conf = rec.get("entry_confidence")
+    pct = rec.get("entry_confidence_pct")
+    if isinstance(conf, dict) and conf.get("pct") is not None:
+        try:
+            from src.strategy.overnight_research import format_entry_confidence_line
+            line = format_entry_confidence_line(conf)
+            return line.replace("Confidence:", "Win confidence:", 1)
+        except Exception:
+            pass
+    if pct is None:
+        return ""
+    try:
+        n = int(pct)
+    except (TypeError, ValueError):
+        return ""
+    return f"Win confidence: {n}%"
 
 
 def _entry_lines(rec: Dict[str, Any]) -> List[str]:
@@ -346,6 +390,9 @@ def _entry_lines(rec: Dict[str, Any]) -> List[str]:
             tp_line = format_tp_line(rec)
             if tp_line:
                 lines.append(tp_line)
+    conf_line = _confidence_line(rec)
+    if conf_line:
+        lines.append(conf_line)
     if _is_paper(rec) or rec.get("cue") == "test_fill":
         dest = str(rec.get("dest") or "")
         if "lucid" in dest.lower() and "ticket" in dest.lower():
@@ -470,14 +517,21 @@ def open_position_card(status: Optional[Dict[str, Any]]) -> Optional[Dict[str, A
         f"{side} / {symbol} · {qty}",
         f"Entry {entry}" if entry else "",
         *level_lines,
-        "Status Open",
     ]
-    if paper or cue == "test_fill":
-        lines.append("Test: Paper only — not sent to Rithmic")
+    conf_line = _confidence_line({**pos, **card_rec})
+    if conf_line:
+        lines.append(conf_line)
+    lines.append("Status Open")
+    ticket = str(pos.get("lucid_ticket") or pos.get("trade_id") or "")
+    note = str(status.get("last_note") or "")
+    if ticket.startswith("bot_") or "Lucid" in note:
+        lines.append("On Lucid (TEST011 sim)")
+    elif paper or cue == "test_fill":
+        lines.append("Paper fill")
     return {
         "kind": "paper_trade",
         "layer": "human",
-        "emoji": "🟢",
+        "emoji": trade_emoji(str(pos.get("direction") or pos.get("side") or "")),
         "title": f"PAPER TRADE — {side}",
         "clock": format_clock(status.get("updated_at")),
         "lines": [x for x in lines if x],
@@ -490,6 +544,8 @@ def open_position_card(status: Optional[Dict[str, Any]]) -> Optional[Dict[str, A
         "live": True,
         "session": card_rec.get("session"),
         "flatten_et": card_rec.get("flatten_et"),
+        "entry_confidence_pct": pos.get("entry_confidence_pct"),
+        "entry_confidence": pos.get("entry_confidence"),
         "ts": status.get("updated_at"),
     }
 

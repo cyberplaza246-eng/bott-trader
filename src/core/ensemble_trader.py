@@ -70,6 +70,71 @@ except ImportError as e:
     bot_logger.warning(f"DynamicSLTP not available: {e}")
 
 
+
+def trend_15m(df):
+    """15m direction from a 5m (or any intraday) frame: 'up', 'down' or 'neutral'."""
+    try:
+        d = df
+        if d is None or len(d) < 30:
+            return 'neutral'
+        if isinstance(d.index, pd.DatetimeIndex):
+            idx = d.index
+        elif 'time' in d.columns:
+            idx = pd.to_datetime(d['time'])
+        elif 'timestamp' in d.columns:
+            idx = pd.to_datetime(d['timestamp'])
+        else:
+            idx = None
+        if idx is not None:
+            c = pd.Series(d['close'].values, index=idx).resample('15min').last().dropna()
+            h = pd.Series(d['high'].values, index=idx).resample('15min').max().dropna()
+            l = pd.Series(d['low'].values, index=idx).resample('15min').min().dropna()
+        else:
+            g = (pd.Series(range(len(d))) // 3).values
+            c = d['close'].groupby(g).last(); h = d['high'].groupby(g).max(); l = d['low'].groupby(g).min()
+        if len(c) < 12:
+            return 'neutral'
+        e9 = c.ewm(span=9, adjust=False).mean().iloc[-1]
+        e21 = c.ewm(span=21, adjust=False).mean().iloc[-1]
+        px = c.iloc[-1]
+        hh = h.iloc[-4:].max() > h.iloc[-8:-4].max() and l.iloc[-4:].min() > l.iloc[-8:-4].min()
+        ll = h.iloc[-4:].max() < h.iloc[-8:-4].max() and l.iloc[-4:].min() < l.iloc[-8:-4].min()
+        if e9 > e21 and px > e21 and not ll:
+            return 'up'
+        if e9 < e21 and px < e21 and not hh:
+            return 'down'
+        return 'neutral'
+    except Exception:
+        return 'neutral'
+
+
+def regime_modifier_v2(learner, sweep_regime, signal, price, ema200, df_for_15m):
+    """One source of truth: sweep detector regime (same as detect_regime log).
+    Returns (modifier, label, tf15)."""
+    sr = str(sweep_regime or '')
+    use15 = os.environ.get('OG_REGIME_15M', '1') != '0'
+    tf15 = trend_15m(df_for_15m) if use15 else 'off'
+    if sr in ('trend_up', 'trend_down'):
+        tdir = 'BUY' if sr == 'trend_up' else 'SELL'
+        ema_ok = True
+        if ema200 is not None and not pd.isna(ema200):
+            ema_ok = (price > ema200) if signal == 'BUY' else (price < ema200)
+        if signal != tdir or not ema_ok:
+            return 0.80, 'trending-counter', tf15
+        if use15:
+            want = 'up' if signal == 'BUY' else 'down'
+            if tf15 == 'neutral':
+                return 0.95, 'trending-with,15m-neutral', tf15
+            if tf15 != want:
+                return 0.80, 'trending-with,15m-against', tf15
+        return 1.0, 'trending-with', tf15
+    lr = 'ranging'
+    try:
+        lr = learner.REGIME_RANGING
+    except Exception:
+        pass
+    return learner.get_regime_confidence_modifier(lr), 'ranging', tf15
+
 class EnsembleTrader:
     """Sweep-gated entry system with confirmation boosters, intelligent ML, and adaptive learning."""
 
@@ -244,9 +309,14 @@ class EnsembleTrader:
         regime = self.learner.detect_regime(df_enriched)
 
         # ── Step 2: Fetch 5M data + spread (shared across models) ────
+        # The live loop already passes a 5m frame. A second get_candles(pair, 5)
+        # starts another MNQ replay, which Rithmic rejects as already in progress.
         df_5m = None
         broker_spread = None
-        if self.broker:
+        if self._looks_like_five_minute_data(df_enriched):
+            df_5m = df_enriched.tail(250).copy()
+            bot_logger.info(f"📊 {pair} reusing caller 5M frame: {len(df_5m)} rows")
+        elif self.broker:
             try:
                 df_5m = self.broker.get_candles(pair, 5, num_candles=250)
                 if df_5m is not None:
@@ -255,19 +325,13 @@ class EnsembleTrader:
                     bot_logger.warning(f"⚠️ {pair} 5M fetch returned None")
             except Exception as e:
                 bot_logger.warning(f"⚠️ {pair} 5M fetch EXCEPTION: {type(e).__name__}: {e}")
+        if self.broker:
             get_spread = getattr(self.broker, 'get_spread', None)
             if callable(get_spread):
                 try:
                     broker_spread = get_spread(pair)
                 except Exception as e:
                     bot_logger.warning(f"⚠️ {pair} spread fetch failed: {e}")
-
-        # If broker 5M is missing, reuse the caller frame only when cadence looks 5M.
-        if (df_5m is None or len(df_5m) < 30) and self._looks_like_five_minute_data(df_enriched):
-            df_5m = df_enriched.tail(250).copy()
-            bot_logger.info(
-                f"📊 {pair} using caller 5M frame fallback: {len(df_5m)} rows"
-            )
 
         has_valid_5m_bias = df_5m is not None and len(df_5m) >= 30
 
@@ -529,12 +593,33 @@ class EnsembleTrader:
 
             # ── Regime confidence modifier from learner ──────────────
             old_confidence = final_confidence
-            regime_modifier = self.learner.get_regime_confidence_modifier(regime)
-            final_confidence *= regime_modifier
-            if regime_modifier != 1.0:
-                bot_logger.info(
-                    f"🎭 Regime modifier ({regime}): x{regime_modifier:.3f} ({old_confidence:.1%} → {final_confidence:.1%})"
-                )
+            if os.environ.get('OG_REGIME_FIX', '1') != '0':
+                _sr = None
+                try:
+                    _sr = (sweep_signal or {}).get('regime')
+                except Exception:
+                    _sr = None
+                _ema = df_enriched['ema_200'].iloc[-1] if 'ema_200' in df_enriched.columns else None
+                _px = df_enriched['close'].iloc[-1]
+                try:
+                    _d5 = df_5m
+                except NameError:
+                    _d5 = None
+                regime_modifier, _rlabel, _tf15 = regime_modifier_v2(
+                    self.learner, _sr, final_signal, _px, _ema,
+                    _d5 if _d5 is not None else df_enriched)
+                if regime_modifier != 1.0 or _rlabel.startswith('trend'):
+                    bot_logger.info(
+                        f"\U0001F3AD Regime modifier ({_rlabel}, 15m={_tf15}): x{regime_modifier:.3f} ({old_confidence:.1%} -> {old_confidence*regime_modifier:.1%})"
+                    )
+                final_confidence *= regime_modifier
+            else:
+                regime_modifier = self.learner.get_regime_confidence_modifier(regime)
+                final_confidence *= regime_modifier
+                if regime_modifier != 1.0:
+                    bot_logger.info(
+                        f"🎭 Regime modifier ({regime}): x{regime_modifier:.3f} ({old_confidence:.1%} → {final_confidence:.1%})"
+                    )
 
             # Count how many context models agree (for logging & compatibility)
             context_signals = {
