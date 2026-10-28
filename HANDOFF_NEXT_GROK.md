@@ -26,3 +26,9 @@ Paste this to the next Grok: "Read HANDOFF_NEXT_GROK.md in C:\Users\shawa\Projec
 - Work in progress on Grok's box: /workspace/clara/revamp/next/ (scripts + results). Rule: pick variants on train (<=2025)/walk-forward, test 2026 once, report net after costs, DD, $2k breach count, account size needed.
 - Nothing changed on the PC or live bots.
 - Also: CRM Residential phone screen (Asst. Property Manager, $28-30/hr) - prep delivered; booking at c.nxtapply.com/schedule/crm-residential-phone-interview.
+
+## Results Oct 28 (research/clara/revamp/next/)
+- Chosen trim: cut overnight breakouts 2-8 AM: +$25.0k, DD $4.4k, $2k-breach days 146->65, 20/23 months green.
+- Double: trim + 3 MNQ on daytime breakout (1 MNQ rest): +$53.2k (train 36.8k, 2026 16.4k), PF 1.33, DD $7.4k, ~$11k account.
+- More trades/day: max +~$2k; signals, not caps, are the limit. Untested: looser breakout entry thresholds / new breakout windows (needs signal code changes).
+- Plan: paper 2-8 AM cut at 1 MNQ -> 2 MNQ day breakout -> 3 MNQ. Not deployed; needs Shawayne's OK.
