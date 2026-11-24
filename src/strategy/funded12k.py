@@ -16,7 +16,7 @@ import numpy as np, pandas as pd
 ET = ZoneInfo("America/New_York")
 def _f(n, d): return float(os.getenv(n, d))
 def _t(n, d): h, m = os.getenv(n, d).split(":"); return time(int(h), int(m))
-ACCOUNT_ALLOWLIST = [a.strip() for a in os.getenv("FUNDED_ACCOUNT_ALLOWLIST", "LFF050-9XP156CR-PRO005").split(",") if a.strip()]
+ACCOUNT_ALLOWLIST = [a.strip() for a in os.getenv("FUNDED_ACCOUNT_ALLOWLIST", "").split(",") if a.strip()]
 ACCOUNT_ALLOWED = ACCOUNT_ALLOWLIST[0] if ACCOUNT_ALLOWLIST else ""        # paper-mode stand-in only
 SIZE_MNQ = int(os.getenv("FUNDED_SIZE", "1"))
 DAILY_LOSS_STOP = _f("FUNDED_DAILY_LOSS_STOP", "500")
