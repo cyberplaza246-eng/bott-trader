@@ -1,0 +1,379 @@
+{
+  "csv": "data\\MNQ_1m.csv",
+  "range": [
+    "2025-12-29 00:00:00+00:00",
+    "2026-08-21 13:14:00+00:00"
+  ],
+  "results": [
+    {
+      "name": "OFFICIAL (daily+15m+60m, 15m ATR\u00d72, TP500, 6 windows)",
+      "overall": {
+        "trades": 145,
+        "win_rate": 14.5,
+        "profit_factor": 0.54,
+        "expectancy": -20.58,
+        "total_pnl": -2983.8,
+        "max_drawdown": 2983.8,
+        "avg_winner": 164.59,
+        "avg_loser": -51.94,
+        "max_consec_losses": 24
+      },
+      "is": {
+        "trades": 97,
+        "win_rate": 17.5,
+        "profit_factor": 0.68,
+        "expectancy": -13.55,
+        "total_pnl": -1314.78,
+        "max_drawdown": 1758.86,
+        "avg_winner": 163.79,
+        "avg_loser": -51.24,
+        "max_consec_losses": 12
+      },
+      "oos": {
+        "trades": 48,
+        "win_rate": 8.3,
+        "profit_factor": 0.29,
+        "expectancy": -34.77,
+        "total_pnl": -1669.02,
+        "max_drawdown": 1669.02,
+        "avg_winner": 168.01,
+        "avg_loser": -53.21,
+        "max_consec_losses": 21
+      },
+      "by_month": {
+        "2025-12": {
+          "trades": 1,
+          "win_rate": 0.0,
+          "profit_factor": 0.0,
+          "expectancy": -51.24,
+          "total_pnl": -51.24,
+          "max_drawdown": 51.24,
+          "avg_winner": 0.0,
+          "avg_loser": -51.24,
+          "max_consec_losses": 1
+        },
+        "2026-01": {
+          "trades": 15,
+          "win_rate": 13.3,
+          "profit_factor": 0.21,
+          "expectancy": -34.97,
+          "total_pnl": -524.6,
+          "max_drawdown": 563.64,
+          "avg_winner": 70.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 11
+        },
+        "2026-02": {
+          "trades": 17,
+          "win_rate": 11.8,
+          "profit_factor": 0.2,
+          "expectancy": -36.12,
+          "total_pnl": -614.08,
+          "max_drawdown": 614.08,
+          "avg_winner": 77.26,
+          "avg_loser": -51.24,
+          "max_consec_losses": 8
+        },
+        "2026-04": {
+          "trades": 3,
+          "win_rate": 0.0,
+          "profit_factor": 0.0,
+          "expectancy": -51.24,
+          "total_pnl": -153.72,
+          "max_drawdown": 153.72,
+          "avg_winner": 0.0,
+          "avg_loser": -51.24,
+          "max_consec_losses": 3
+        },
+        "2026-05": {
+          "trades": 61,
+          "win_rate": 21.3,
+          "profit_factor": 1.01,
+          "expectancy": 0.47,
+          "total_pnl": 28.86,
+          "max_drawdown": 892.36,
+          "avg_winner": 191.41,
+          "avg_loser": -51.24,
+          "max_consec_losses": 10
+        },
+        "2026-06": {
+          "trades": 31,
+          "win_rate": 9.7,
+          "profit_factor": 0.43,
+          "expectancy": -27.77,
+          "total_pnl": -860.94,
+          "max_drawdown": 1433.96,
+          "avg_winner": 220.09,
+          "avg_loser": -54.33,
+          "max_consec_losses": 21
+        },
+        "2026-07": {
+          "trades": 17,
+          "win_rate": 5.9,
+          "profit_factor": 0.01,
+          "expectancy": -47.53,
+          "total_pnl": -808.08,
+          "max_drawdown": 808.08,
+          "avg_winner": 11.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 8
+        }
+      },
+      "pass": false
+    },
+    {
+      "name": "L6 MORNING-ONLY (9:35/10:15/11:00, 1m ATR\u00d71.5, 1R TP)",
+      "overall": {
+        "trades": 408,
+        "win_rate": 49.3,
+        "profit_factor": 0.95,
+        "expectancy": -1.24,
+        "total_pnl": -504.87,
+        "max_drawdown": 1425.59,
+        "avg_winner": 46.68,
+        "avg_loser": -47.77,
+        "max_consec_losses": 9
+      },
+      "is": {
+        "trades": 227,
+        "win_rate": 48.0,
+        "profit_factor": 0.92,
+        "expectancy": -1.95,
+        "total_pnl": -441.68,
+        "max_drawdown": 1425.59,
+        "avg_winner": 45.98,
+        "avg_loser": -46.22,
+        "max_consec_losses": 9
+      },
+      "oos": {
+        "trades": 181,
+        "win_rate": 50.8,
+        "profit_factor": 0.99,
+        "expectancy": -0.35,
+        "total_pnl": -63.19,
+        "max_drawdown": 493.56,
+        "avg_winner": 47.51,
+        "avg_loser": -49.82,
+        "max_consec_losses": 7
+      },
+      "by_month": {
+        "2025-12": {
+          "trades": 15,
+          "win_rate": 13.3,
+          "profit_factor": 0.14,
+          "expectancy": -28.22,
+          "total_pnl": -423.37,
+          "max_drawdown": 472.13,
+          "avg_winner": 35.71,
+          "avg_loser": -38.06,
+          "max_consec_losses": 7
+        },
+        "2026-01": {
+          "trades": 52,
+          "win_rate": 42.3,
+          "profit_factor": 0.74,
+          "expectancy": -6.65,
+          "total_pnl": -345.8,
+          "max_drawdown": 501.07,
+          "avg_winner": 45.61,
+          "avg_loser": -44.97,
+          "max_consec_losses": 5
+        },
+        "2026-02": {
+          "trades": 39,
+          "win_rate": 43.6,
+          "profit_factor": 0.73,
+          "expectancy": -7.62,
+          "total_pnl": -297.0,
+          "max_drawdown": 368.6,
+          "avg_winner": 48.44,
+          "avg_loser": -50.93,
+          "max_consec_losses": 5
+        },
+        "2026-04": {
+          "trades": 12,
+          "win_rate": 33.3,
+          "profit_factor": 0.49,
+          "expectancy": -15.92,
+          "total_pnl": -191.01,
+          "max_drawdown": 278.1,
+          "avg_winner": 46.77,
+          "avg_loser": -47.26,
+          "max_consec_losses": 4
+        },
+        "2026-05": {
+          "trades": 109,
+          "win_rate": 58.7,
+          "profit_factor": 1.39,
+          "expectancy": 7.48,
+          "total_pnl": 815.5,
+          "max_drawdown": 363.45,
+          "avg_winner": 45.73,
+          "avg_loser": -46.92,
+          "max_consec_losses": 4
+        },
+        "2026-06": {
+          "trades": 96,
+          "win_rate": 51.0,
+          "profit_factor": 0.97,
+          "expectancy": -0.64,
+          "total_pnl": -61.4,
+          "max_drawdown": 488.92,
+          "avg_winner": 46.8,
+          "avg_loser": -50.09,
+          "max_consec_losses": 7
+        },
+        "2026-07": {
+          "trades": 69,
+          "win_rate": 53.6,
+          "profit_factor": 1.14,
+          "expectancy": 3.18,
+          "total_pnl": 219.44,
+          "max_drawdown": 371.08,
+          "avg_winner": 48.3,
+          "avg_loser": -48.99,
+          "max_consec_losses": 5
+        },
+        "2026-08": {
+          "trades": 16,
+          "win_rate": 37.5,
+          "profit_factor": 0.57,
+          "expectancy": -13.83,
+          "total_pnl": -221.23,
+          "max_drawdown": 221.23,
+          "avg_winner": 48.51,
+          "avg_loser": -51.23,
+          "max_consec_losses": 3
+        }
+      },
+      "pass": false
+    },
+    {
+      "name": "L6 FULL (reference, all 6 windows)",
+      "overall": {
+        "trades": 805,
+        "win_rate": 47.3,
+        "profit_factor": 0.86,
+        "expectancy": -3.1,
+        "total_pnl": -2493.93,
+        "max_drawdown": 3011.22,
+        "avg_winner": 40.67,
+        "avg_loser": -42.42,
+        "max_consec_losses": 8
+      },
+      "is": {
+        "trades": 433,
+        "win_rate": 44.8,
+        "profit_factor": 0.77,
+        "expectancy": -5.04,
+        "total_pnl": -2182.69,
+        "max_drawdown": 2793.01,
+        "avg_winner": 38.64,
+        "avg_loser": -40.5,
+        "max_consec_losses": 8
+      },
+      "oos": {
+        "trades": 372,
+        "win_rate": 50.3,
+        "profit_factor": 0.96,
+        "expectancy": -0.84,
+        "total_pnl": -311.24,
+        "max_drawdown": 922.45,
+        "avg_winner": 42.77,
+        "avg_loser": -44.92,
+        "max_consec_losses": 6
+      },
+      "by_month": {
+        "2025-12": {
+          "trades": 15,
+          "win_rate": 13.3,
+          "profit_factor": 0.14,
+          "expectancy": -28.22,
+          "total_pnl": -423.37,
+          "max_drawdown": 472.13,
+          "avg_winner": 35.71,
+          "avg_loser": -38.06,
+          "max_consec_losses": 7
+        },
+        "2026-01": {
+          "trades": 109,
+          "win_rate": 43.1,
+          "profit_factor": 0.72,
+          "expectancy": -5.89,
+          "total_pnl": -641.64,
+          "max_drawdown": 785.8,
+          "avg_winner": 34.94,
+          "avg_loser": -36.84,
+          "max_consec_losses": 5
+        },
+        "2026-02": {
+          "trades": 65,
+          "win_rate": 44.6,
+          "profit_factor": 0.71,
+          "expectancy": -7.13,
+          "total_pnl": -463.56,
+          "max_drawdown": 463.56,
+          "avg_winner": 39.55,
+          "avg_loser": -44.74,
+          "max_consec_losses": 7
+        },
+        "2026-04": {
+          "trades": 23,
+          "win_rate": 47.8,
+          "profit_factor": 0.75,
+          "expectancy": -5.44,
+          "total_pnl": -125.04,
+          "max_drawdown": 177.88,
+          "avg_winner": 33.94,
+          "avg_loser": -41.53,
+          "max_consec_losses": 4
+        },
+        "2026-05": {
+          "trades": 221,
+          "win_rate": 47.5,
+          "profit_factor": 0.89,
+          "expectancy": -2.39,
+          "total_pnl": -529.08,
+          "max_drawdown": 1334.44,
+          "avg_winner": 40.59,
+          "avg_loser": -41.3,
+          "max_consec_losses": 8
+        },
+        "2026-06": {
+          "trades": 190,
+          "win_rate": 49.5,
+          "profit_factor": 0.91,
+          "expectancy": -2.08,
+          "total_pnl": -395.62,
+          "max_drawdown": 818.93,
+          "avg_winner": 42.48,
+          "avg_loser": -45.72,
+          "max_consec_losses": 6
+        },
+        "2026-07": {
+          "trades": 149,
+          "win_rate": 52.3,
+          "profit_factor": 1.08,
+          "expectancy": 1.79,
+          "total_pnl": 266.54,
+          "max_drawdown": 699.71,
+          "avg_winner": 43.69,
+          "avg_loser": -44.25,
+          "max_consec_losses": 5
+        },
+        "2026-08": {
+          "trades": 33,
+          "win_rate": 45.5,
+          "profit_factor": 0.77,
+          "expectancy": -5.52,
+          "total_pnl": -182.17,
+          "max_drawdown": 233.84,
+          "avg_winner": 39.78,
+          "avg_loser": -43.27,
+          "max_consec_losses": 3
+        }
+      },
+      "pass": false
+    }
+  ]
+}

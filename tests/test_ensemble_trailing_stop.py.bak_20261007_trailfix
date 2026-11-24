@@ -1,0 +1,309 @@
+"""STOP-LIMIT / protective SL must keep ATR trailing enabled (Lucid sim path)."""
+from __future__ import annotations
+
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+from unittest.mock import MagicMock
+
+import numpy as np
+import pandas as pd
+import pytest
+
+# Stub optional / heavy deps so importing start_live_rithmic stays lightweight.
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+_STUBS = {
+    "src.broker.rithmic_stability": MagicMock(filter_warm_history=lambda df, **k: df),
+    "src.core.ensemble_trader": MagicMock(),
+    "src.ai.technical_analyzer": MagicMock(TechnicalAnalyzer=MagicMock),
+    "src.research_ensemble": MagicMock(),
+    "src.research_ensemble.revamp_exits": MagicMock(
+        revamp_enabled=lambda: False, revamp_trail_mult=lambda: 4.0
+    ),
+    "src.research_ensemble.live_signals": MagicMock(classify_last_sleeve=MagicMock()),
+    "src.research_ensemble.live_display": MagicMock(
+        revamp_verbose_level=MagicMock(return_value=0)
+    ),
+    "config.strategy_config": MagicMock(SCALPING_PAIRS={}),
+}
+for name, mod in _STUBS.items():
+    sys.modules.setdefault(name, mod)
+
+# Package-style stubs used by "from src.research_ensemble import ..."
+_re = sys.modules["src.research_ensemble"]
+_re.revamp_exits = sys.modules["src.research_ensemble.revamp_exits"]
+_re.live_display = sys.modules["src.research_ensemble.live_display"]
+_re.live_signals = sys.modules["src.research_ensemble.live_signals"]
+
+import start_live_rithmic as slr  # noqa: E402
+
+
+def _trader():
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    t.broker = MagicMock()
+    t.contracts = 1
+    return t
+
+
+def _short_pos(*, trailing=True, order_id="bot_bf2e4111c8"):
+    return slr.Position(
+        order_id=order_id,
+        symbol="MNQ",
+        direction="short",
+        entry_price=25000.0,
+        size=1,
+        sl=25040.0,
+        tp=24900.0,
+        entry_time=datetime.now(timezone.utc),
+        trailing_enabled=trailing,
+    )
+
+
+def test_broker_can_update_stop_true_for_protective_stop_limit():
+    info = {
+        "supports_stop_modify": False,
+        "native_stop_attached": True,
+        "protective_sl_order_id": "bot_bf2e4111c8_sl",
+        "bracket_mode": "protective_fallback",
+    }
+    assert slr.LiveRithmicTrader._broker_can_update_stop(info) is True
+    assert slr.LiveRithmicTrader._broker_can_update_stop(
+        {"can_update_stop": True, "supports_stop_modify": False}
+    ) is True
+    assert slr.LiveRithmicTrader._broker_can_update_stop(
+        {"supports_stop_modify": False, "native_stop_attached": False}
+    ) is False
+
+
+def test_place_order_keeps_trailing_when_stop_limit_protective(monkeypatch):
+    t = _trader()
+    t.broker.place_order.return_value = {
+        "ticket": "bot_bf2e4111c8",
+        "entry_price": 25000.0,
+        "supports_stop_modify": False,  # Lucid protective path
+        "native_stop_attached": True,
+        "protective_sl_order_id": "bot_bf2e4111c8_sl",
+        "bracket_mode": "protective_fallback",
+        "can_update_stop": True,
+    }
+    monkeypatch.setattr(t, "_write_board_status", lambda **kwargs: None)
+
+    signal = {
+        "symbol": "MNQ",
+        "direction": "short",
+        "entry": 25000.0,
+        "sl": 25040.0,
+        "tp": 24900.0,
+        "trailing_enabled": True,
+        "ensemble_signal": "SELL",
+        "regime": "trend_down",
+    }
+    assert t.place_order(signal) is True
+    pos = t.positions["bot_bf2e4111c8"]
+    assert pos.trailing_enabled is True
+
+
+def test_place_order_disables_trailing_only_when_no_broker_stop(monkeypatch):
+    t = _trader()
+    t.broker.place_order.return_value = {
+        "ticket": "bot_nosl",
+        "entry_price": 25000.0,
+        "supports_stop_modify": False,
+        "native_stop_attached": False,
+        "bracket_mode": "entry_only",
+    }
+    monkeypatch.setattr(t, "_write_board_status", lambda **kwargs: None)
+    signal = {
+        "symbol": "MNQ",
+        "direction": "short",
+        "entry": 25000.0,
+        "sl": 25040.0,
+        "tp": 24900.0,
+        "trailing_enabled": True,
+    }
+    assert t.place_order(signal) is True
+    assert t.positions["bot_nosl"].trailing_enabled is False
+
+
+def test_apply_stop_update_does_not_disable_trail_after_protective_replace():
+    t = _trader()
+    pos = _short_pos()
+    t.positions[pos.order_id] = pos
+    t.broker.update_stop_loss.return_value = True
+    t.broker.get_order_info.return_value = {
+        "supports_stop_modify": False,
+        "protective_sl_order_id": f"{pos.order_id}_sl",
+        "native_stop_attached": True,
+    }
+    assert t._apply_stop_update(pos, 25020.0) is True
+    assert pos.sl == 25020.0
+    assert pos.trailing_enabled is True
+
+
+def test_update_trailing_stops_uses_update_stop_loss_for_protective():
+    t = _trader()
+    pos = _short_pos()
+    t.positions[pos.order_id] = pos
+    t.broker.update_stop_loss.return_value = True
+    t.broker.get_order_info.return_value = {
+        "supports_stop_modify": False,
+        "protective_sl_order_id": f"{pos.order_id}_sl",
+    }
+
+    # Favorable move for short: low well below entry; ATR trail should tighten SL down.
+    df = pd.DataFrame(
+        [
+            {
+                "high": 24990.0,
+                "low": 24920.0,
+                "close": 24940.0,
+                "atr": 20.0,
+            }
+        ]
+    )
+    t.update_trailing_stops("MNQ", df)
+    assert t.broker.update_stop_loss.called
+    assert not t.broker.modify_position.called
+    assert pos.trailing_enabled is True
+    assert pos.sl < 25040.0
+
+
+def test_adopt_enables_trail_when_protective_stop_present():
+    t = _trader()
+    t.broker.get_order_info.return_value = {
+        "supports_stop_modify": False,
+        "native_stop_attached": True,
+        "protective_sl_order_id": "bot_old_sl",
+        "bracket_mode": "protective_fallback",
+    }
+    n = t._adopt_untracked_broker_positions({
+        "bot_old": {
+            "symbol": "MNQ",
+            "type": "SELL",
+            "open_price": 25000.0,
+            "size": 1,
+            "sl": 25040.0,
+            "tp": 24900.0,
+        }
+    })
+    assert n == 1
+    assert t.positions["bot_old"].trailing_enabled is True
+
+
+def _long_pos(*, trailing=True, order_id="bot_long1", tp=25100.0, sl=24960.0):
+    return slr.Position(
+        order_id=order_id,
+        symbol="MNQ",
+        direction="long",
+        entry_price=25000.0,
+        size=1,
+        sl=sl,
+        tp=tp,
+        entry_time=datetime.now(timezone.utc),
+        trailing_enabled=trailing,
+    )
+
+
+def test_profit_lock_defaults_100_to_20():
+    assert slr.PROFIT_LOCK_TRIGGER_1_USD == 100.0
+    assert slr.PROFIT_LOCK_LEVEL_1_USD == 20.0
+    assert slr.PROFIT_LOCK_TRIGGER_2_USD == 150.0
+    assert slr.PROFIT_LOCK_LEVEL_2_USD == 50.0
+
+
+@pytest.mark.skip(reason='dollar ProfitLock replaced by R-locks (see test_sl_safety.py)')
+def test_profit_lock_100_moves_sl_to_plus_20():
+    t = _trader()
+    t.paper_orders = True
+    pos = _long_pos(sl=24960.0, tp=25100.0)
+    t.positions[pos.order_id] = pos
+    # +$100 uPnL on MNQ ($2/pt, 1 ct) = +50 pts → price 25050
+    df = pd.DataFrame([{"high": 25050.0, "low": 25010.0, "close": 25050.0, "atr": 15.0}])
+    t.update_dollar_profit_locks("MNQ", df)
+    # Lock +$20 = +10 pts → SL 25010
+    assert pos.profit_lock_level == 1
+    assert pos.sl == pytest.approx(25010.0)
+    assert pos.sl > 24960.0
+
+
+def test_past_tp_cancels_tp_enables_trail_and_floors_sl():
+    t = _trader()
+    t.paper_orders = True
+    pos = _long_pos(sl=24960.0, tp=25100.0)
+    t.positions[pos.order_id] = pos
+    # High beyond TP; low stays above floored SL so we only assert no TAKE_PROFIT.
+    df = pd.DataFrame([{"high": 25140.0, "low": 25105.0, "close": 25120.0, "atr": 20.0}])
+    t.update_past_tp_to_trail("MNQ", df)
+    assert pos.tp_cleared is True
+    assert pos.tp == 0.0
+    assert pos.original_tp == pytest.approx(25100.0)
+    assert pos.trailing_enabled is True
+    # SL floored at original TP
+    assert pos.sl == pytest.approx(25100.0)
+    # Local exit check must NOT emit TAKE_PROFIT once TP cleared
+    exits = t.check_position_exit("MNQ", df)
+    assert not any(et == "TAKE_PROFIT" for _, et in exits)
+    assert exits == []
+
+
+def test_past_tp_calls_broker_cancel_take_profit_live():
+    t = _trader()
+    t.paper_mode = False
+    t.paper_orders = False
+    pos = _long_pos(sl=24960.0, tp=25100.0)
+    t.positions[pos.order_id] = pos
+    t.broker.cancel_take_profit.return_value = True
+    t.broker.update_stop_loss.return_value = True
+    df = pd.DataFrame([{"high": 25125.0, "low": 25090.0, "close": 25120.0, "atr": 20.0}])
+    t.update_past_tp_to_trail("MNQ", df)
+    assert t.broker.cancel_take_profit.called
+    kwargs = t.broker.cancel_take_profit.call_args.kwargs
+    assert kwargs["ticket"] == pos.order_id
+    assert kwargs["symbol"] == "MNQ"
+    assert pos.tp_cleared is True
+    assert pos.trailing_enabled is True
+
+
+def test_past_tp_keeps_tp_if_cancel_fails():
+    t = _trader()
+    t.paper_mode = False
+    t.paper_orders = False
+    pos = _long_pos(sl=24960.0, tp=25100.0)
+    t.positions[pos.order_id] = pos
+    t.broker.cancel_take_profit.return_value = False
+    df = pd.DataFrame([{"high": 25125.0, "low": 25090.0, "close": 25120.0, "atr": 20.0}])
+    t.update_past_tp_to_trail("MNQ", df)
+    assert pos.tp_cleared is False
+    assert pos.tp == pytest.approx(25100.0)
+
+
+def test_trail_after_past_tp_never_loosens_through_original_tp():
+    t = _trader()
+    t.paper_orders = True
+    pos = _long_pos(sl=25100.0, tp=0.0)
+    pos.tp_cleared = True
+    pos.original_tp = 25100.0
+    pos.trailing_enabled = True
+    t.positions[pos.order_id] = pos
+    # Wide ATR would want SL far below original TP — floor must hold.
+    df = pd.DataFrame([{"high": 25140.0, "low": 25105.0, "close": 25130.0, "atr": 80.0}])
+    t.update_trailing_stops("MNQ", df)
+    assert pos.sl >= 25100.0 - 1e-9
+
+
+def test_short_past_tp_floors_sl_at_original_tp():
+    t = _trader()
+    t.paper_orders = True
+    pos = _short_pos(trailing=True)
+    # short entry 25000, tp 24900, sl 25040
+    t.positions[pos.order_id] = pos
+    df = pd.DataFrame([{"high": 24920.0, "low": 24880.0, "close": 24890.0, "atr": 15.0}])
+    t.update_past_tp_to_trail("MNQ", df)
+    assert pos.tp_cleared is True
+    assert pos.original_tp == pytest.approx(24900.0)
+    assert pos.trailing_enabled is True
+    assert pos.sl == pytest.approx(24900.0)
+    assert pos.sl <= 24900.0

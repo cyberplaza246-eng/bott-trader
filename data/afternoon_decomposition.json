@@ -1,0 +1,291 @@
+{
+  "test": "afternoon_decomposition",
+  "spec": "dynamic_15_5_1_rth pattern A full day",
+  "afternoon_trades": 342,
+  "aggregate": {
+    "trades": 342,
+    "win_rate": 42.1,
+    "profit_factor": 0.83,
+    "net_pnl": -1268.63,
+    "mean_r": -0.07
+  },
+  "sections": {
+    "by_direction": {
+      "long": {
+        "trades": 239,
+        "win_rate": 47.7,
+        "profit_factor": 0.86,
+        "net_pnl": -545.41,
+        "mean_r": -0.05
+      },
+      "short": {
+        "trades": 103,
+        "win_rate": 29.1,
+        "profit_factor": 0.79,
+        "net_pnl": -723.22,
+        "mean_r": -0.13
+      }
+    },
+    "by_hour": {
+      "12:xx": {
+        "trades": 99,
+        "win_rate": 42.4,
+        "profit_factor": 0.86,
+        "net_pnl": -295.11,
+        "mean_r": -0.06
+      },
+      "13:xx": {
+        "trades": 91,
+        "win_rate": 44.0,
+        "profit_factor": 0.8,
+        "net_pnl": -391.15,
+        "mean_r": -0.05
+      },
+      "14:xx": {
+        "trades": 82,
+        "win_rate": 37.8,
+        "profit_factor": 0.79,
+        "net_pnl": -352.94,
+        "mean_r": -0.13
+      },
+      "15:xx": {
+        "trades": 70,
+        "win_rate": 44.3,
+        "profit_factor": 0.85,
+        "net_pnl": -229.43,
+        "mean_r": -0.05
+      }
+    },
+    "by_hour_block": {
+      "12:00-13:00": {
+        "trades": 99,
+        "win_rate": 42.4,
+        "profit_factor": 0.86,
+        "net_pnl": -295.11,
+        "mean_r": -0.06
+      },
+      "13:00-14:00": {
+        "trades": 91,
+        "win_rate": 44.0,
+        "profit_factor": 0.8,
+        "net_pnl": -391.15,
+        "mean_r": -0.05
+      },
+      "14:00-15:00": {
+        "trades": 82,
+        "win_rate": 37.8,
+        "profit_factor": 0.79,
+        "net_pnl": -352.94,
+        "mean_r": -0.13
+      },
+      "15:00+": {
+        "trades": 70,
+        "win_rate": 44.3,
+        "profit_factor": 0.85,
+        "net_pnl": -229.43,
+        "mean_r": -0.05
+      }
+    },
+    "by_structure": {
+      "HH_HL": {
+        "trades": 239,
+        "win_rate": 47.7,
+        "profit_factor": 0.86,
+        "net_pnl": -545.41,
+        "mean_r": -0.05
+      },
+      "LH_LL": {
+        "trades": 103,
+        "win_rate": 29.1,
+        "profit_factor": 0.79,
+        "net_pnl": -723.22,
+        "mean_r": -0.13
+      }
+    },
+    "by_vwap": {
+      "aligned": {
+        "trades": 342,
+        "win_rate": 42.1,
+        "profit_factor": 0.83,
+        "net_pnl": -1268.63,
+        "mean_r": -0.07
+      }
+    },
+    "by_ema": {
+      "aligned": {
+        "trades": 342,
+        "win_rate": 42.1,
+        "profit_factor": 0.83,
+        "net_pnl": -1268.63,
+        "mean_r": -0.07
+      }
+    },
+    "by_trigger": {
+      "A": {
+        "trades": 148,
+        "win_rate": 37.8,
+        "profit_factor": 0.78,
+        "net_pnl": -757.24,
+        "mean_r": -0.14
+      },
+      "B": {
+        "trades": 194,
+        "win_rate": 45.4,
+        "profit_factor": 0.87,
+        "net_pnl": -511.39,
+        "mean_r": -0.02
+      }
+    },
+    "by_sep": {
+      "sep_high": {
+        "trades": 342,
+        "win_rate": 42.1,
+        "profit_factor": 0.83,
+        "net_pnl": -1268.63,
+        "mean_r": -0.07
+      }
+    },
+    "by_atr": {
+      "atr_12_18": {
+        "trades": 71,
+        "win_rate": 43.7,
+        "profit_factor": 0.92,
+        "net_pnl": -137.27,
+        "mean_r": -0.04
+      },
+      "atr_8_12": {
+        "trades": 127,
+        "win_rate": 42.5,
+        "profit_factor": 0.73,
+        "net_pnl": -596.35,
+        "mean_r": -0.11
+      },
+      "atr_ge_18": {
+        "trades": 78,
+        "win_rate": 33.3,
+        "profit_factor": 0.81,
+        "net_pnl": -502.72,
+        "mean_r": -0.1
+      },
+      "atr_lt_8": {
+        "trades": 66,
+        "win_rate": 50.0,
+        "profit_factor": 0.95,
+        "net_pnl": -32.29,
+        "mean_r": 0.0
+      }
+    },
+    "by_direction_x_hour_block": {
+      "long|12:00-13:00": {
+        "trades": 68,
+        "win_rate": 48.5,
+        "profit_factor": 0.94,
+        "net_pnl": -67.3,
+        "mean_r": -0.03
+      },
+      "long|13:00-14:00": {
+        "trades": 66,
+        "win_rate": 51.5,
+        "profit_factor": 0.95,
+        "net_pnl": -53.98,
+        "mean_r": 0.03
+      },
+      "long|14:00-15:00": {
+        "trades": 60,
+        "win_rate": 36.7,
+        "profit_factor": 0.46,
+        "net_pnl": -648.47,
+        "mean_r": -0.27
+      },
+      "long|15:00+": {
+        "trades": 45,
+        "win_rate": 55.6,
+        "profit_factor": 1.41,
+        "net_pnl": 224.34,
+        "mean_r": 0.1
+      },
+      "short|12:00-13:00": {
+        "trades": 31,
+        "win_rate": 29.0,
+        "profit_factor": 0.79,
+        "net_pnl": -227.81,
+        "mean_r": -0.13
+      },
+      "short|13:00-14:00": {
+        "trades": 25,
+        "win_rate": 24.0,
+        "profit_factor": 0.62,
+        "net_pnl": -337.17,
+        "mean_r": -0.28
+      },
+      "short|14:00-15:00": {
+        "trades": 22,
+        "win_rate": 40.9,
+        "profit_factor": 1.59,
+        "net_pnl": 295.53,
+        "mean_r": 0.23
+      },
+      "short|15:00+": {
+        "trades": 25,
+        "win_rate": 24.0,
+        "profit_factor": 0.53,
+        "net_pnl": -453.77,
+        "mean_r": -0.32
+      }
+    },
+    "by_direction_x_vwap": {
+      "long|aligned": {
+        "trades": 239,
+        "win_rate": 47.7,
+        "profit_factor": 0.86,
+        "net_pnl": -545.41,
+        "mean_r": -0.05
+      },
+      "short|aligned": {
+        "trades": 103,
+        "win_rate": 29.1,
+        "profit_factor": 0.79,
+        "net_pnl": -723.22,
+        "mean_r": -0.13
+      }
+    },
+    "by_structure_x_direction": {
+      "HH_HL|long": {
+        "trades": 239,
+        "win_rate": 47.7,
+        "profit_factor": 0.86,
+        "net_pnl": -545.41,
+        "mean_r": -0.05
+      },
+      "LH_LL|short": {
+        "trades": 103,
+        "win_rate": 29.1,
+        "profit_factor": 0.79,
+        "net_pnl": -723.22,
+        "mean_r": -0.13
+      }
+    }
+  },
+  "r_multiples": {
+    "mean": -0.07,
+    "median": -1.0,
+    "buckets": {
+      "lt_0": 198,
+      "0_0.5": 1,
+      "0.5_1": 1,
+      "1_2": 112,
+      "ge_2": 30
+    }
+  },
+  "sim_stats": {
+    "signals_stack": 9937,
+    "signals_pattern": 1392,
+    "filtered_sep": 1561,
+    "entries": 611
+  },
+  "hypotheses": [
+    "Afternoon shorts 13:00\u201314:00 are a primary bleed (n=25, PF=0.62, $-337.17).",
+    "13:00\u201314:00 hour block is the worst overall (n=91, PF=0.8, $-391.15)."
+  ],
+  "primary_failure": "Afternoon shorts 13:00\u201314:00 are a primary bleed (n=25, PF=0.62, $-337.17)."
+}

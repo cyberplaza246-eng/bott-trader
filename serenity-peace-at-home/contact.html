@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact Serenity Peace at Home — phone, email, address, and contact form for assistance, donations, and partnerships.">
+  <title>Contact | Serenity Peace at Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@400;700&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="Serenity Peace at Home — Home">
+        <span class="logo-name">Serenity Peace at Home</span>
+        <span class="logo-tagline">Healing. Hope. Home.</span>
+      </a>
+      <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="main-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Main navigation">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="resources.html">Resources</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+        <div class="nav-cta">
+          <a href="index.html#get-help" class="btn btn--gold">Get Help</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="page-hero">
+      <div class="container">
+        <h1>Contact Us</h1>
+        <p>We're here to listen, support, and connect. Reach out — you are not alone.</p>
+      </div>
+    </section>
+
+    <section class="section section--ivory">
+      <div class="container">
+        <div class="contact-grid">
+          <div>
+            <div class="contact-info-card">
+              <h2 style="margin-bottom: 1.5rem;">Get In Touch</h2>
+
+              <div class="contact-item">
+                <div class="contact-item-icon" aria-hidden="true">📞</div>
+                <div>
+                  <h3>Phone</h3>
+                  <p>(555) 123-4567</p>
+                  <p class="placeholder-note">Placeholder — replace with real phone number</p>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-item-icon" aria-hidden="true">✉️</div>
+                <div>
+                  <h3>Email</h3>
+                  <p><a href="mailto:info@serenitypeaceathome.org">info@serenitypeaceathome.org</a></p>
+                  <p class="placeholder-note">Placeholder — replace with real email address</p>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-item-icon" aria-hidden="true">📍</div>
+                <div>
+                  <h3>Address</h3>
+                  <p>123 Hope Lane<br>Community City, ST 12345</p>
+                  <p class="placeholder-note">Placeholder — replace with real address</p>
+                </div>
+              </div>
+
+              <div class="contact-item">
+                <div class="contact-item-icon" aria-hidden="true">🕐</div>
+                <div>
+                  <h3>Office Hours</h3>
+                  <p>Monday – Friday: 8:00 AM – 6:00 PM<br>Saturday: 9:00 AM – 2:00 PM<br>Sunday: Closed</p>
+                  <p class="placeholder-note">Placeholder — update with actual hours</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="map-placeholder" role="img" aria-label="Map placeholder — replace with Google Maps embed of facility location">
+              <span class="map-placeholder-icon" aria-hidden="true">🗺️</span>
+              <h3>Find Us on the Map</h3>
+              <p>Google Maps embed placeholder</p>
+              <p class="placeholder-note" style="margin-top: 0.75rem;">Replace this section with a Google Maps iframe embed once the real address is confirmed.</p>
+            </div>
+          </div>
+
+          <div>
+            <div class="contact-info-card">
+              <h2 style="margin-bottom: 0.5rem;">Send Us a Message</h2>
+              <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem;">Fill out the form below and we'll respond within 1–2 business days.</p>
+
+              <div class="form-success" role="status">Thank you for reaching out! We've received your message and will get back to you soon.</div>
+
+              <form data-validate novalidate aria-label="Contact form">
+                <div class="form-group">
+                  <label for="contact-name">Full Name <span class="required" aria-hidden="true">*</span></label>
+                  <input type="text" id="contact-name" name="name" data-required autocomplete="name" placeholder="Your full name">
+                  <span class="error-message" role="alert"></span>
+                </div>
+                <div class="form-group">
+                  <label for="contact-email">Email Address <span class="required" aria-hidden="true">*</span></label>
+                  <input type="email" id="contact-email" name="email" data-required autocomplete="email" placeholder="you@example.com">
+                  <span class="error-message" role="alert"></span>
+                </div>
+                <div class="form-group">
+                  <label for="contact-phone">Phone Number</label>
+                  <input type="tel" id="contact-phone" name="phone" autocomplete="tel" placeholder="(555) 123-4567">
+                </div>
+                <div class="form-group">
+                  <label for="contact-subject">Subject <span class="required" aria-hidden="true">*</span></label>
+                  <select id="contact-subject" name="subject" data-required>
+                    <option value="">Select a topic...</option>
+                    <option value="housing">Apply for Housing</option>
+                    <option value="referral">Refer Someone</option>
+                    <option value="donate">Donate / Sponsor</option>
+                    <option value="volunteer">Volunteer</option>
+                    <option value="partner">Partnership Inquiry</option>
+                    <option value="employment">Employment Opportunities</option>
+                    <option value="general">General Inquiry</option>
+                  </select>
+                  <span class="error-message" role="alert"></span>
+                </div>
+                <div class="form-group">
+                  <label for="contact-message">Message <span class="required" aria-hidden="true">*</span></label>
+                  <textarea id="contact-message" name="message" rows="5" data-required placeholder="How can we help you?"></textarea>
+                  <span class="error-message" role="alert"></span>
+                </div>
+                <button type="submit" class="btn btn--gold" style="width: 100%;">Send Message</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--beige text-center" aria-label="Emergency information">
+      <div class="container">
+        <h2>Need Immediate Help?</h2>
+        <p style="max-width: 650px; margin: 0 auto 1rem; color: var(--text-muted);">If you are in immediate danger, please call <strong>911</strong>. For domestic violence support, call the National Domestic Violence Hotline at <strong>1-800-799-7233</strong>.</p>
+        <a href="index.html#get-help" class="btn btn--gold">Request Housing Assistance</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <p class="logo-name">Serenity Peace at Home</p>
+          <div class="footer-taglines">
+            <p class="footer-tagline">From Struggles to Strength</p>
+            <p class="footer-tagline">Healing. Hope. Home.</p>
+          </div>
+          <p>Empowering women and children to heal, grow, and thrive — together.</p>
+          <div class="social-links" aria-label="Social media links">
+            <a href="#" class="social-link" aria-label="Facebook (placeholder)">f</a>
+            <a href="#" class="social-link" aria-label="Instagram (placeholder)">in</a>
+            <a href="#" class="social-link" aria-label="Twitter (placeholder)">X</a>
+          </div>
+        </div>
+        <div>
+          <h3 class="footer-heading">Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="resources.html">Resources</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-contact">
+          <h3 class="footer-heading">Contact</h3>
+          <p>📞 (555) 123-4567</p>
+          <p>✉️ info@serenitypeaceathome.org</p>
+          <p>📍 123 Hope Lane, Community City, ST 12345</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Serenity Peace at Home. All rights reserved. | A 501(c)(3) nonprofit organization.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

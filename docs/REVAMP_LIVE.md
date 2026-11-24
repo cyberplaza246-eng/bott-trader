@@ -52,3 +52,19 @@ Code
 
 Do NOT run start_mnq_live.bat and start_mnq_live_revamp.bat at the same time
 (one Lucid / Rithmic login). Close Lucid desktop first.
+
+Overnight / Globex entries (2026-10-06)
+--------------------------------------
+  start_mnq_live_revamp.bat sets:
+    OVERNIGHT_TRADING=true
+    SESSION_MODE=extended
+    SCALP_SESSIONS=off
+    REVAMP_RTH_ONLY=0
+
+  That turns off the research ensemble RTH-only gate (was 09:30-16:00 ET only)
+  so the 5m ADX router may enter across CME Globex:
+    Sun 6:00 PM – Fri 5:00 PM ET (daily halt ~5:00–6:00 PM ET Mon–Thu).
+
+  Thin UTC bad-hour blacklist (0/4/21) is also cleared while revamp overnight is on.
+  No separate daily EOD flatten on this path (ema15_eod 15:50 flatten is the day bot).
+  To restore RTH-only: set REVAMP_RTH_ONLY=1 (or OVERNIGHT_TRADING=false + SESSION_MODE=rth).

@@ -1,0 +1,15 @@
+[
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_becd675cf4",
+    "direction": "short",
+    "entry": 30031.25,
+    "exit": 30039.75,
+    "sl": 30039.25,
+    "tp": 30016.25,
+    "pnl": -17.0,
+    "reason": "BROKER_BRACKET",
+    "entry_time": "2026-06-14T23:50:02.141415+00:00",
+    "exit_time": "2026-06-14T23:52:39.718274+00:00"
+  }
+]

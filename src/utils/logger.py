@@ -4,7 +4,7 @@ Centralized logging for the trading bot
 import logging
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pythonjsonlogger import jsonlogger
 
 from src.utils.redact import redact_secrets
@@ -213,6 +213,15 @@ class _ConsoleNewsPolicyFilter(logging.Filter):
         return not any(s in msg for s in self._SKIP_INFO_SUBSTRINGS)
 
 
+class _TimestampedJsonFormatter(jsonlogger.JsonFormatter):
+    """JSON lines with a real UTC timestamp and level (keys kept as 'timestamp'/'level')."""
+
+    def add_fields(self, log_record, record, message_dict):
+        super().add_fields(log_record, record, message_dict)
+        log_record["timestamp"] = datetime.fromtimestamp(record.created, tz=timezone.utc).isoformat(timespec="milliseconds")
+        log_record["level"] = record.levelname
+
+
 def setup_logger(name, log_file=None, level=logging.INFO):
     """
     Set up a logger with both console and file handlers
@@ -239,7 +248,7 @@ def setup_logger(name, log_file=None, level=logging.INFO):
         os.makedirs(os.path.dirname(log_file), exist_ok=True)
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(level)
-        file_format = jsonlogger.JsonFormatter('%(timestamp)s %(level)s %(name)s %(message)s')
+        file_format = _TimestampedJsonFormatter('%(timestamp)s %(level)s %(name)s %(message)s')
         file_handler.setFormatter(file_format)
         file_handler.addFilter(SecretRedactFilter())
         logger.addHandler(file_handler)
@@ -307,3 +316,13 @@ class TradeLogger:
     @staticmethod
     def log_bot_status(status, message):
         bot_logger.info(f"BOT_STATUS | {status} | {message}")
+
+
+# --- Trade alerts (sound + email) - additive, fail-safe; see src/utils/trade_alerts.py ---
+# Listens to the existing "order placed"/ENTRY/EXIT log lines. TRADE_ALERT_SOUND=0 /
+# TRADE_ALERT_EMAIL=0 turn each off. Any failure here is swallowed.
+try:
+    from src.utils.trade_alerts import install as _install_trade_alerts
+    _install_trade_alerts(bot_logger, trades_logger)
+except Exception:
+    pass

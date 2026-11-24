@@ -1,0 +1,2 @@
+C:\Users\shawa\Projects\bott-trader\scripts\test_published_nq_strategies.py:48: RuntimeWarning: Mean of empty slice
+  a,b=A[k],B[k]; sig=np.nanmean(mv[k-14:k],axis=0); pc=D.c.iloc[k-1]

@@ -1,0 +1,284 @@
+"""2026-10-08: re-entry after a profitable lock/trail stop exit (REVAMP live, flag-gated)."""
+from __future__ import annotations
+
+import importlib
+import pathlib
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock
+
+import numpy as np
+import pandas as pd
+import pytest
+
+import start_live_rithmic as slr
+from src.core import reentry as rx
+
+UTC = timezone.utc
+ROOT = pathlib.Path(slr.__file__).resolve().parent
+
+
+# ── pure rule ─────────────────────────────────────────────────────────────
+
+def _pos(**kw):
+    base = dict(order_id="bot_parent", symbol="MNQ", direction="long", entry_price=31000.0, size=1,
+                sl=31050.0, tp=31400.0, entry_time=datetime(2026, 10, 8, 15, 0, tzinfo=UTC),
+                exit_sleeve="breakout", peak_pts=100.0, confidence=0.75)
+    base.update(kw)
+    return slr.Position(**base)
+
+
+def test_should_arm_only_profitable_stop_exits():
+    p = _pos()
+    assert rx.should_arm(p, "STOP_LOSS", 97.0, 31050.0, enabled=True, max_reentries=1)[0]
+    assert not rx.should_arm(p, "TAKE_PROFIT", 797.0, 31400.0, enabled=True, max_reentries=1)[0]
+    assert not rx.should_arm(p, "STOP_LOSS", -103.0, 30950.0, enabled=True, max_reentries=1)[0]
+    assert not rx.should_arm(p, "BROKER_SYNC_UNKNOWN", 0.0, 0.0, enabled=True, max_reentries=1)[0]
+    assert not rx.should_arm(p, "STOP_LOSS", 97.0, 31050.0, enabled=False, max_reentries=1)[0]
+
+
+def test_should_arm_skips_adopted_and_reentries_past_max():
+    assert not rx.should_arm(_pos(order_id="bot_adopt_db0dcf1fa6"), "STOP_LOSS", 50, 31050, True, 1)[0]
+    assert not rx.should_arm(_pos(regime="broker_adopt"), "STOP_LOSS", 50, 31050, True, 1)[0]
+    assert not rx.should_arm(_pos(reentry_gen=1), "STOP_LOSS", 50, 31050, True, 1)[0]
+    assert rx.should_arm(_pos(reentry_gen=1), "STOP_LOSS", 50, 31050, True, 2)[0]
+
+
+def test_arm_trigger_expiry_and_status_text():
+    now = datetime(2026, 10, 8, 17, 0, tzinfo=UTC)
+    a = rx.make_arm(_pos(), 31100.0, 0.25, now, 0.75, window_bars=12)
+    assert a.trigger == 31100.25 and a.side == "BUY" and a.gen == 1
+    assert a.expires_at == now + timedelta(minutes=60)
+    assert a.status_text(now + timedelta(minutes=5)) == "Re-entry armed: BUY above 31100.25 for 55 min"
+    s = rx.make_arm(_pos(direction="short", entry_price=31000.0), 30900.0, 0.25, now, 0.7, window_bars=12)
+    assert s.trigger == 30899.75
+    assert s.status_text(now) == "Re-entry armed: SELL below 30899.75 for 60 min"
+    assert rx.triggered(a, 31100.25) and not rx.triggered(a, 31100.0)
+    assert rx.triggered(s, 30899.5) and not rx.triggered(s, 30900.0) and not rx.triggered(s, 0)
+
+
+def test_entry_window_0930_1555_et_dst_aware():
+    assert rx.in_entry_window_et(datetime(2026, 10, 8, 13, 30, tzinfo=UTC))      # 09:30 EDT
+    assert not rx.in_entry_window_et(datetime(2026, 10, 8, 13, 29, tzinfo=UTC))
+    assert rx.in_entry_window_et(datetime(2026, 10, 8, 19, 55, 30, tzinfo=UTC))  # 15:55 EDT
+    assert not rx.in_entry_window_et(datetime(2026, 10, 8, 19, 56, tzinfo=UTC))
+    assert rx.in_entry_window_et(datetime(2026, 12, 8, 14, 30, tzinfo=UTC))      # 09:30 EST
+    assert not rx.in_entry_window_et(datetime(2026, 12, 8, 13, 30, tzinfo=UTC))
+    assert not rx.in_entry_window_et(datetime(2026, 10, 10, 15, 0, tzinfo=UTC))  # Saturday
+
+
+def _bars(n=30, start=datetime(2026, 10, 8, 15, 0, tzinfo=UTC), base=31000.0, rng=10.0):
+    ts = [start + timedelta(minutes=5 * i) for i in range(n)]
+    close = np.full(n, base)
+    return pd.DataFrame({"datetime": ts, "open": close, "high": close + rng, "low": close - rng,
+                         "close": close, "volume": 100.0})
+
+
+def test_compute_levels_swing_vs_atr_and_cap():
+    df = _bars(6, base=31000.0, rng=10.0)            # 6-bar low 30990
+    # swing: 31100 - (30990 - 0.25) = 110.25 > 1.5*20=30 -> swing wins
+    assert rx.compute_levels("long", 31100.0, df, 20.0, 0.25, 2.0, 500) == (30989.75, 31320.5, 110.25)
+    # ATR wins when wider: 1.5*100 = 150
+    sl, tp, d = rx.compute_levels("long", 31000.0, df, 100.0, 0.25, 2.0, 500)
+    assert d == 150.0 and sl == 30850.0 and tp == 31300.0
+    # short: swing high 31010.25
+    sl, tp, d = rx.compute_levels("short", 30900.0, df, 20.0, 0.25, 2.0, 500)
+    assert (sl, tp, d) == (31010.25, 30679.5, 110.25)
+    # cap: $500 on MNQ = 250 pts
+    sl, tp, d = rx.compute_levels("long", 31600.0, df, 20.0, 0.25, 2.0, 500)
+    assert d == 250.0 and sl == 31350.0 and tp == 32100.0
+    # NQ $20/pt -> 25 pts
+    assert rx.compute_levels("long", 31100.0, df, 20.0, 0.25, 20.0, 500)[2] == 25.0
+    # cap off
+    assert rx.compute_levels("long", 31600.0, df, 20.0, 0.25, 2.0, 0)[2] == 610.25
+    assert rx.compute_levels("long", 31000.0, None, float("nan"), 0.25, 2.0, 500) is None
+
+
+def test_completed_bars_drops_forming_bar():
+    df = _bars(4)  # bars 15:00..15:15
+    now = datetime(2026, 10, 8, 15, 17, tzinfo=UTC)  # 15:15 bar still forming
+    assert len(rx.completed_bars(df, now)) == 3
+
+
+def test_parent_peak_uses_bars_after_entry():
+    df = _bars(6, base=31000.0, rng=10.0)
+    df.loc[3, "high"] = 31150.0                       # 15:15 bar, after entry at 15:00
+    p = _pos(peak_pts=100.0)                          # tracked peak 31100
+    assert rx.parent_peak_price(p, df) == 31150.0
+    assert rx.parent_peak_price(p, None) == 31100.0
+
+
+def test_default_off_without_env(monkeypatch):
+    monkeypatch.delenv("REENTRY_ENABLED", raising=False)
+    try:
+        importlib.reload(rx)
+        assert rx.REENTRY_ENABLED is False and rx.REENTRY_WINDOW_BARS == 12 and rx.REENTRY_MAX == 1
+    finally:
+        importlib.reload(rx)
+
+
+# ── live trader wiring (no broker connection; MagicMock broker) ─────────────
+
+@pytest.fixture
+def trader(monkeypatch):
+    monkeypatch.setattr(slr._reentry, "REENTRY_ENABLED", True)
+    monkeypatch.setattr(slr._reentry, "REENTRY_MAX", 1)
+    monkeypatch.setattr(slr._reentry, "REENTRY_WINDOW_BARS", 12)
+    monkeypatch.setattr(slr._reentry, "in_entry_window_et", lambda now: True)
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    t.broker = MagicMock()
+    t.broker.place_order.return_value = {"ticket": "bot_re1", "entry_price": 31101.0}
+    t._broker_can_update_stop = lambda r: True
+    t._write_board_status = lambda **k: None
+    t._contracts_for_entry = lambda sig: (1, float(sig.get("confidence", 0)), "test")
+    t._effective_open_count = lambda: len(t.positions)
+    t._is_trading_session_allowed = lambda s: True
+    t._cancel_orders_for_closed_position = lambda *a, **k: 0
+    t.get_candles = lambda symbol=None, count=100: None
+    t.max_risk_per_trade_usd = 500.0
+    return t
+
+
+def _open_parent(t, **kw):
+    p = _pos(**kw)
+    t.positions[p.order_id] = p
+    return p
+
+
+def test_profitable_stop_exit_arms(trader, capsys):
+    _open_parent(trader, peak_pts=100.0)              # peak 31100
+    trader.process_exit("bot_parent", "STOP_LOSS", 31050.0)
+    arm = trader._reentry_arms["bot_parent"]
+    assert arm.trigger == 31100.25 and arm.direction == "long" and arm.confidence == 0.75
+    out = capsys.readouterr().out
+    assert "Re-entry armed: BUY above 31100.25 for 60 min" in out
+    assert trader.reentry_status_lines("MNQ")[0].startswith("Re-entry armed: BUY above 31100.25 for ")
+
+
+@pytest.mark.parametrize("exit_type,px,kw", [
+    ("TAKE_PROFIT", 31400.0, {}),
+    ("STOP_LOSS", 30950.0, {}),                         # loss
+    ("STOP_LOSS", 31050.0, {"order_id": "bot_adopt_6e0495323f"}),
+    ("STOP_LOSS", 31050.0, {"reentry_gen": 1}),         # already a re-entry (max 1)
+])
+def test_no_arm_cases(trader, exit_type, px, kw):
+    p = _open_parent(trader, **kw)
+    trader.process_exit(p.order_id, exit_type, px)
+    assert not trader._reentry_arms
+
+
+def test_disabled_never_arms(trader, monkeypatch):
+    monkeypatch.setattr(slr._reentry, "REENTRY_ENABLED", False)
+    _open_parent(trader)
+    trader.process_exit("bot_parent", "STOP_LOSS", 31050.0)
+    assert not trader._reentry_arms
+    assert trader.reentry_status_lines("MNQ") == []
+
+
+def _arm(trader, monkeypatch, **kw):
+    _open_parent(trader, **kw)
+    trader.process_exit("bot_parent", "STOP_LOSS", 31050.0 if kw.get("direction", "long") == "long" else 30950.0)
+    trader.cooldown = 1                                 # post-exit cooldown is active
+    now = datetime.now(UTC)
+    trader.get_candles = lambda symbol=None, count=100: _bars(30, start=now - timedelta(minutes=5 * 31),
+                                                               base=31060.0, rng=8.0)
+
+
+def test_no_fire_below_trigger(trader, monkeypatch):
+    _arm(trader, monkeypatch)
+    trader.broker.get_latest_price.return_value = {"last": 31100.0}
+    assert trader.check_reentry_triggers() == 0
+    trader.broker.place_order.assert_not_called()
+    assert "bot_parent" in trader._reentry_arms
+
+
+def test_fires_market_reentry_on_break_bypassing_cooldown(trader, monkeypatch):
+    _arm(trader, monkeypatch)
+    trader.broker.get_latest_price.return_value = {"last": 31100.25}
+    assert trader.check_reentry_triggers() == 1
+    kw = trader.broker.place_order.call_args.kwargs
+    # swing low of last 6 completed bars = 31052 -> dist 31100.25 - 31051.75 = 48.5 (> 1.5 ATR=24)
+    assert kw["order_type"] == "buy" and kw["size"] == 1
+    assert kw["stop_loss"] == 31051.75 and kw["take_profit"] == 31197.25
+    pos = trader.positions["bot_re1"]
+    assert pos.reentry_gen == 1 and pos.reentry_parent == "bot_parent" and pos.confidence == 0.75
+    assert pos.exit_sleeve == "breakout"
+    assert not trader._reentry_arms                    # consumed
+    # its own profitable stop exit does not arm a 2nd re-entry (REENTRY_MAX=1)
+    trader.positions["bot_re1"].peak_pts = 60.0
+    trader.process_exit("bot_re1", "STOP_LOSS", 31130.0)
+    assert not trader._reentry_arms
+
+
+def test_short_reentry(trader, monkeypatch):
+    _arm(trader, monkeypatch, direction="short", entry_price=31100.0, sl=31050.0, tp=30700.0, peak_pts=100.0)
+    arm = trader._reentry_arms["bot_parent"]
+    assert arm.trigger == 30999.75
+    trader.broker.get_latest_price.return_value = {"last": 30999.5}
+    assert trader.check_reentry_triggers() == 1
+    kw = trader.broker.place_order.call_args.kwargs
+    assert kw["order_type"] == "sell" and kw["stop_loss"] > 30999.5 and kw["take_profit"] < 30999.5
+
+
+@pytest.mark.parametrize("setup,needle", [
+    ("daily", "daily loss cap"),
+    ("maxconc", "max concurrent"),
+    ("conf", "extra trade needs conf"),
+    ("pause", "consecutive-loss pause"),
+])
+def test_gates_block_and_consume(trader, monkeypatch, capsys, setup, needle):
+    _arm(trader, monkeypatch, confidence=0.66)
+    if setup == "daily":
+        trader.daily_pnl = -trader.daily_loss_limit
+    elif setup == "maxconc":
+        for i in range(trader.max_positions):
+            trader.positions[f"o{i}"] = _pos(order_id=f"o{i}", confidence=0.9)
+    elif setup == "conf":
+        trader.positions["o1"] = _pos(order_id="o1", confidence=0.9)   # 1 open, parent conf 0.66 < 0.72
+    elif setup == "pause":
+        trader._consec_loss_pause_until["MNQ"] = datetime.now(UTC) + timedelta(minutes=30)
+    trader.broker.get_latest_price.return_value = {"last": 31101.0}
+    assert trader.check_reentry_triggers() == 0
+    trader.broker.place_order.assert_not_called()
+    assert not trader._reentry_arms
+    assert needle in capsys.readouterr().out
+
+
+def test_expired_arm_dropped(trader, monkeypatch):
+    _arm(trader, monkeypatch)
+    trader._reentry_arms["bot_parent"].expires_at = datetime.now(UTC) - timedelta(seconds=1)
+    trader.broker.get_latest_price.return_value = {"last": 31200.0}
+    assert trader.check_reentry_triggers() == 0
+    assert not trader._reentry_arms
+    trader.broker.place_order.assert_not_called()
+
+
+def test_outside_window_drops_arm(trader, monkeypatch):
+    _arm(trader, monkeypatch)
+    monkeypatch.setattr(slr._reentry, "in_entry_window_et", lambda now: False)
+    trader.broker.get_latest_price.return_value = {"last": 31200.0}
+    assert trader.check_reentry_triggers() == 0
+    assert not trader._reentry_arms
+
+
+def test_risk_cap_respected(trader, monkeypatch):
+    _arm(trader, monkeypatch)
+    now = datetime.now(UTC)
+    # very wide recent range -> stop capped at $500 (250 pts on MNQ)
+    trader.get_candles = lambda symbol=None, count=100: _bars(30, start=now - timedelta(minutes=5 * 31),
+                                                               base=30700.0, rng=10.0)
+    trader.broker.get_latest_price.return_value = {"last": 31100.25}
+    assert trader.check_reentry_triggers() == 1
+    kw = trader.broker.place_order.call_args.kwargs
+    assert kw["entry_price"] - kw["stop_loss"] == 250.0
+
+
+# ── bats ───────────────────────────────────────────────────────────────────
+
+def test_revamp_bat_enables_reentry_others_do_not():
+    mnq = (ROOT / "start_mnq_live_revamp.bat").read_text(encoding="latin-1")
+    for kv in ("REENTRY_ENABLED=1", "REENTRY_WINDOW_BARS=12", "REENTRY_MAX=1"):
+        assert f'set "{kv}"' in mnq, kv
+    for other in ROOT.glob("*.bat"):
+        if other.name.lower() == "start_mnq_live_revamp.bat":
+            continue
+        assert 'REENTRY_ENABLED=1' not in other.read_text(encoding="latin-1", errors="replace"), other.name

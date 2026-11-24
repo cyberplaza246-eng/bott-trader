@@ -1,0 +1,2067 @@
+{
+ "variants_tried": 72,
+ "splits": {
+  "dev_end": "2025-12-01",
+  "val_end": "2026-04-01"
+ },
+ "selection": "dev PF>=1.15 & >=100 trades, val PF>=1.1 & >=30 trades; top3 by val PF see final once",
+ "finalists": [],
+ "all": [
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 10,
+    "slmode": "range",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 306,
+    "trades_per_day": 0.99,
+    "win_pct": 62.1,
+    "pf": 0.531,
+    "net": -32782,
+    "max_dd": 35243,
+    "green_months_pct": 26.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 51.8,
+    "pf": 0.344,
+    "net": -16388,
+    "max_dd": 17756,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 10,
+    "slmode": "range",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 50.0,
+    "pf": 0.324,
+    "net": -22864,
+    "max_dd": 23255,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 51.3,
+    "pf": 0.338,
+    "net": -14927,
+    "max_dd": 16100,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 10,
+    "slmode": "12",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 306,
+    "trades_per_day": 0.99,
+    "win_pct": 22.9,
+    "pf": 0.232,
+    "net": -45197,
+    "max_dd": 45588,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 11.8,
+    "pf": 0.104,
+    "net": -16758,
+    "max_dd": 16508,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 10,
+    "slmode": "12",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 14.3,
+    "pf": 0.131,
+    "net": -20824,
+    "max_dd": 21215,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 13.2,
+    "pf": 0.119,
+    "net": -14512,
+    "max_dd": 14262,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 20,
+    "slmode": "range",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 306,
+    "trades_per_day": 0.99,
+    "win_pct": 52.3,
+    "pf": 0.72,
+    "net": -24642,
+    "max_dd": 28594,
+    "green_months_pct": 33.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 41.2,
+    "pf": 0.454,
+    "net": -16632,
+    "max_dd": 19401,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 20,
+    "slmode": "range",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 42.0,
+    "pf": 0.473,
+    "net": -20709,
+    "max_dd": 21104,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 42.1,
+    "pf": 0.472,
+    "net": -14162,
+    "max_dd": 16535,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 20,
+    "slmode": "12",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 306,
+    "trades_per_day": 0.99,
+    "win_pct": 18.3,
+    "pf": 0.355,
+    "net": -40227,
+    "max_dd": 40811,
+    "green_months_pct": 6.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 7.1,
+    "pf": 0.12,
+    "net": -17338,
+    "max_dd": 17088,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 20,
+    "slmode": "12",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 13.4,
+    "pf": 0.245,
+    "net": -18269,
+    "max_dd": 18707,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 7.9,
+    "pf": 0.136,
+    "net": -15092,
+    "max_dd": 14842,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 40,
+    "slmode": "range",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 306,
+    "trades_per_day": 0.99,
+    "win_pct": 40.2,
+    "pf": 0.882,
+    "net": -13067,
+    "max_dd": 21168,
+    "green_months_pct": 40.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 31.8,
+    "pf": 0.608,
+    "net": -13872,
+    "max_dd": 19813,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 40,
+    "slmode": "range",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 32.1,
+    "pf": 0.623,
+    "net": -17364,
+    "max_dd": 18883,
+    "green_months_pct": 22.2,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 31.6,
+    "pf": 0.602,
+    "net": -12602,
+    "max_dd": 17747,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 40,
+    "slmode": "12",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 306,
+    "trades_per_day": 0.99,
+    "win_pct": 13.7,
+    "pf": 0.501,
+    "net": -32897,
+    "max_dd": 36846,
+    "green_months_pct": 6.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 4.7,
+    "pf": 0.157,
+    "net": -17028,
+    "max_dd": 16825,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 15,
+    "tp": 40,
+    "slmode": "12",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 8.9,
+    "pf": 0.313,
+    "net": -17494,
+    "max_dd": 18087,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 5.3,
+    "pf": 0.177,
+    "net": -14782,
+    "max_dd": 14580,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 10,
+    "slmode": "range",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 304,
+    "trades_per_day": 0.98,
+    "win_pct": 64.1,
+    "pf": 0.581,
+    "net": -27538,
+    "max_dd": 30194,
+    "green_months_pct": 20.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 57.6,
+    "pf": 0.437,
+    "net": -12362,
+    "max_dd": 12340,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 10,
+    "slmode": "range",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 55.4,
+    "pf": 0.402,
+    "net": -18034,
+    "max_dd": 17620,
+    "green_months_pct": 22.2,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 56.6,
+    "pf": 0.418,
+    "net": -11707,
+    "max_dd": 11684,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 10,
+    "slmode": "12",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 304,
+    "trades_per_day": 0.98,
+    "win_pct": 20.4,
+    "pf": 0.201,
+    "net": -48258,
+    "max_dd": 48346,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 14.1,
+    "pf": 0.129,
+    "net": -15868,
+    "max_dd": 15618,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 10,
+    "slmode": "12",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 11.6,
+    "pf": 0.103,
+    "net": -22159,
+    "max_dd": 22105,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 13.2,
+    "pf": 0.119,
+    "net": -14512,
+    "max_dd": 14262,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 20,
+    "slmode": "range",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 304,
+    "trades_per_day": 0.98,
+    "win_pct": 52.3,
+    "pf": 0.717,
+    "net": -24773,
+    "max_dd": 28212,
+    "green_months_pct": 33.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 41.2,
+    "pf": 0.454,
+    "net": -16632,
+    "max_dd": 16814,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 20,
+    "slmode": "range",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 42.9,
+    "pf": 0.491,
+    "net": -19704,
+    "max_dd": 19094,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 40.8,
+    "pf": 0.447,
+    "net": -15167,
+    "max_dd": 15348,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 20,
+    "slmode": "12",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 304,
+    "trades_per_day": 0.98,
+    "win_pct": 15.5,
+    "pf": 0.29,
+    "net": -45533,
+    "max_dd": 46390,
+    "green_months_pct": 6.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 7.1,
+    "pf": 0.12,
+    "net": -17338,
+    "max_dd": 17088,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 20,
+    "slmode": "12",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 8.9,
+    "pf": 0.155,
+    "net": -21494,
+    "max_dd": 21244,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 6.6,
+    "pf": 0.112,
+    "net": -15737,
+    "max_dd": 15488,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 40,
+    "slmode": "range",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 304,
+    "trades_per_day": 0.98,
+    "win_pct": 38.8,
+    "pf": 0.829,
+    "net": -19178,
+    "max_dd": 25438,
+    "green_months_pct": 26.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 29.4,
+    "pf": 0.544,
+    "net": -16682,
+    "max_dd": 16868,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 40,
+    "slmode": "range",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 31.2,
+    "pf": 0.597,
+    "net": -18769,
+    "max_dd": 18160,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 30.3,
+    "pf": 0.566,
+    "net": -14007,
+    "max_dd": 14193,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 40,
+    "slmode": "12",
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 304,
+    "trades_per_day": 0.98,
+    "win_pct": 13.2,
+    "pf": 0.483,
+    "net": -34048,
+    "max_dd": 37714,
+    "green_months_pct": 6.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 4.7,
+    "pf": 0.157,
+    "net": -17028,
+    "max_dd": 16778,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "ORB",
+   "params": {
+    "rmin": 30,
+    "tp": 40,
+    "slmode": "12",
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 112,
+    "trades_per_day": 0.44,
+    "win_pct": 7.1,
+    "pf": 0.245,
+    "net": -19584,
+    "max_dd": 19382,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 76,
+    "trades_per_day": 0.88,
+    "win_pct": 3.9,
+    "pf": 0.131,
+    "net": -15827,
+    "max_dd": 15578,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 10,
+    "sl_cap": 15,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 188,
+    "trades_per_day": 0.62,
+    "win_pct": 47.9,
+    "pf": 0.64,
+    "net": -9876,
+    "max_dd": 10708,
+    "green_months_pct": 20.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 64,
+    "trades_per_day": 0.74,
+    "win_pct": 50.0,
+    "pf": 0.694,
+    "net": -2763,
+    "max_dd": 3626,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 10,
+    "sl_cap": 15,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 65,
+    "trades_per_day": 0.26,
+    "win_pct": 38.5,
+    "pf": 0.431,
+    "net": -6458,
+    "max_dd": 7366,
+    "green_months_pct": 37.5,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 51.7,
+    "pf": 0.727,
+    "net": -2206,
+    "max_dd": 2874,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 10,
+    "sl_cap": 25,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 188,
+    "trades_per_day": 0.62,
+    "win_pct": 58.5,
+    "pf": 0.694,
+    "net": -9491,
+    "max_dd": 9764,
+    "green_months_pct": 26.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 64,
+    "trades_per_day": 0.74,
+    "win_pct": 57.8,
+    "pf": 0.636,
+    "net": -4138,
+    "max_dd": 5448,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 10,
+    "sl_cap": 25,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 65,
+    "trades_per_day": 0.26,
+    "win_pct": 52.3,
+    "pf": 0.529,
+    "net": -5928,
+    "max_dd": 6912,
+    "green_months_pct": 37.5,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 60.3,
+    "pf": 0.67,
+    "net": -3371,
+    "max_dd": 4953,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 20,
+    "sl_cap": 15,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 188,
+    "trades_per_day": 0.62,
+    "win_pct": 37.2,
+    "pf": 0.843,
+    "net": -5141,
+    "max_dd": 9083,
+    "green_months_pct": 40.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 64,
+    "trades_per_day": 0.74,
+    "win_pct": 42.2,
+    "pf": 1.011,
+    "net": 112,
+    "max_dd": 3256,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": 18.25
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 20,
+    "sl_cap": 15,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 65,
+    "trades_per_day": 0.26,
+    "win_pct": 26.2,
+    "pf": 0.497,
+    "net": -6792,
+    "max_dd": 8038,
+    "green_months_pct": 37.5,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 43.1,
+    "pf": 1.028,
+    "net": 269,
+    "max_dd": 2704,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": 7.6
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 20,
+    "sl_cap": 25,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 188,
+    "trades_per_day": 0.62,
+    "win_pct": 46.8,
+    "pf": 0.87,
+    "net": -5221,
+    "max_dd": 8870,
+    "green_months_pct": 53.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 64,
+    "trades_per_day": 0.74,
+    "win_pct": 48.4,
+    "pf": 0.861,
+    "net": -1983,
+    "max_dd": 4315,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 20,
+    "sl_cap": 25,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 65,
+    "trades_per_day": 0.26,
+    "win_pct": 40.0,
+    "pf": 0.652,
+    "net": -5482,
+    "max_dd": 7508,
+    "green_months_pct": 37.5,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 50.0,
+    "pf": 0.877,
+    "net": -1616,
+    "max_dd": 3552,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 40,
+    "sl_cap": 15,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 188,
+    "trades_per_day": 0.62,
+    "win_pct": 25.0,
+    "pf": 0.95,
+    "net": -1966,
+    "max_dd": 9352,
+    "green_months_pct": 66.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 64,
+    "trades_per_day": 0.74,
+    "win_pct": 29.7,
+    "pf": 1.169,
+    "net": 2182,
+    "max_dd": 3382,
+    "green_months_pct": 75.0,
+    "best_month_share_of_net": 1.76
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 40,
+    "sl_cap": 15,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 65,
+    "trades_per_day": 0.26,
+    "win_pct": 20.0,
+    "pf": 0.705,
+    "net": -4322,
+    "max_dd": 9568,
+    "green_months_pct": 37.5,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 29.3,
+    "pf": 1.128,
+    "net": 1539,
+    "max_dd": 3692,
+    "green_months_pct": 75.0,
+    "best_month_share_of_net": 2.49
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 40,
+    "sl_cap": 25,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 188,
+    "trades_per_day": 0.62,
+    "win_pct": 34.6,
+    "pf": 1.051,
+    "net": 2489,
+    "max_dd": 10182,
+    "green_months_pct": 80.0,
+    "best_month_share_of_net": 1.03
+   },
+   "val": {
+    "trades": 64,
+    "trades_per_day": 0.74,
+    "win_pct": 35.9,
+    "pf": 1.018,
+    "net": 317,
+    "max_dd": 6096,
+    "green_months_pct": 75.0,
+    "best_month_share_of_net": 7.77
+   }
+  },
+  {
+   "family": "SWEEP",
+   "params": {
+    "tp": 40,
+    "sl_cap": 25,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 65,
+    "trades_per_day": 0.26,
+    "win_pct": 27.7,
+    "pf": 0.74,
+    "net": -5032,
+    "max_dd": 10778,
+    "green_months_pct": 37.5,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 36.2,
+    "pf": 0.993,
+    "net": -116,
+    "max_dd": 6606,
+    "green_months_pct": 75.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 10,
+    "sl": 10,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 547,
+    "trades_per_day": 1.77,
+    "win_pct": 20.3,
+    "pf": 0.238,
+    "net": -69642,
+    "max_dd": 70032,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 148,
+    "trades_per_day": 1.72,
+    "win_pct": 15.5,
+    "pf": 0.172,
+    "net": -21691,
+    "max_dd": 21677,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 10,
+    "sl": 10,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 214,
+    "trades_per_day": 0.84,
+    "win_pct": 13.6,
+    "pf": 0.146,
+    "net": -33088,
+    "max_dd": 33074,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 133,
+    "trades_per_day": 1.55,
+    "win_pct": 13.5,
+    "pf": 0.146,
+    "net": -20574,
+    "max_dd": 20560,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 10,
+    "sl": 20,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 539,
+    "trades_per_day": 1.74,
+    "win_pct": 40.8,
+    "pf": 0.329,
+    "net": -87620,
+    "max_dd": 88598,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 145,
+    "trades_per_day": 1.69,
+    "win_pct": 34.5,
+    "pf": 0.251,
+    "net": -29128,
+    "max_dd": 28914,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 10,
+    "sl": 20,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 214,
+    "trades_per_day": 0.84,
+    "win_pct": 36.9,
+    "pf": 0.279,
+    "net": -39838,
+    "max_dd": 40620,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 130,
+    "trades_per_day": 1.51,
+    "win_pct": 33.8,
+    "pf": 0.244,
+    "net": -26615,
+    "max_dd": 26401,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 20,
+    "sl": 10,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 547,
+    "trades_per_day": 1.77,
+    "win_pct": 15.4,
+    "pf": 0.343,
+    "net": -63776,
+    "max_dd": 64754,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 148,
+    "trades_per_day": 1.72,
+    "win_pct": 14.2,
+    "pf": 0.312,
+    "net": -18301,
+    "max_dd": 18487,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 20,
+    "sl": 10,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 214,
+    "trades_per_day": 0.84,
+    "win_pct": 10.7,
+    "pf": 0.227,
+    "net": -30918,
+    "max_dd": 31104,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 133,
+    "trades_per_day": 1.55,
+    "win_pct": 12.0,
+    "pf": 0.258,
+    "net": -18184,
+    "max_dd": 18370,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 20,
+    "sl": 20,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 537,
+    "trades_per_day": 1.74,
+    "win_pct": 32.0,
+    "pf": 0.456,
+    "net": -80938,
+    "max_dd": 82124,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 145,
+    "trades_per_day": 1.69,
+    "win_pct": 29.0,
+    "pf": 0.394,
+    "net": -25568,
+    "max_dd": 25554,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "VWAP2",
+   "params": {
+    "tp": 20,
+    "sl": 20,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 213,
+    "trades_per_day": 0.83,
+    "win_pct": 29.1,
+    "pf": 0.398,
+    "net": -37057,
+    "max_dd": 37848,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 130,
+    "trades_per_day": 1.51,
+    "win_pct": 27.7,
+    "pf": 0.37,
+    "net": -24255,
+    "max_dd": 24241,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 10,
+    "sl": 8,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 240,
+    "trades_per_day": 0.78,
+    "win_pct": 31.2,
+    "pf": 0.524,
+    "net": -13305,
+    "max_dd": 13552,
+    "green_months_pct": 6.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 69,
+    "trades_per_day": 0.8,
+    "win_pct": 27.5,
+    "pf": 0.438,
+    "net": -4760,
+    "max_dd": 5178,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 10,
+    "sl": 8,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 94,
+    "trades_per_day": 0.37,
+    "win_pct": 27.7,
+    "pf": 0.441,
+    "net": -6443,
+    "max_dd": 6469,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 62,
+    "trades_per_day": 0.72,
+    "win_pct": 25.8,
+    "pf": 0.401,
+    "net": -4669,
+    "max_dd": 5086,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 10,
+    "sl": 15,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 240,
+    "trades_per_day": 0.78,
+    "win_pct": 47.5,
+    "pf": 0.572,
+    "net": -16710,
+    "max_dd": 16792,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 69,
+    "trades_per_day": 0.8,
+    "win_pct": 42.0,
+    "pf": 0.458,
+    "net": -6710,
+    "max_dd": 7884,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 10,
+    "sl": 15,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 94,
+    "trades_per_day": 0.37,
+    "win_pct": 43.6,
+    "pf": 0.489,
+    "net": -8388,
+    "max_dd": 8779,
+    "green_months_pct": 22.2,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 62,
+    "trades_per_day": 0.72,
+    "win_pct": 40.3,
+    "pf": 0.427,
+    "net": -6564,
+    "max_dd": 7737,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 20,
+    "sl": 8,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 240,
+    "trades_per_day": 0.78,
+    "win_pct": 25.0,
+    "pf": 0.778,
+    "net": -6780,
+    "max_dd": 7062,
+    "green_months_pct": 26.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 69,
+    "trades_per_day": 0.8,
+    "win_pct": 21.7,
+    "pf": 0.648,
+    "net": -3220,
+    "max_dd": 4238,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 20,
+    "sl": 8,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 94,
+    "trades_per_day": 0.37,
+    "win_pct": 21.3,
+    "pf": 0.631,
+    "net": -4633,
+    "max_dd": 4859,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 62,
+    "trades_per_day": 0.72,
+    "win_pct": 19.4,
+    "pf": 0.56,
+    "net": -3729,
+    "max_dd": 4746,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 20,
+    "sl": 15,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 240,
+    "trades_per_day": 0.78,
+    "win_pct": 36.7,
+    "pf": 0.74,
+    "net": -12240,
+    "max_dd": 12102,
+    "green_months_pct": 13.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 69,
+    "trades_per_day": 0.8,
+    "win_pct": 34.8,
+    "pf": 0.682,
+    "net": -4436,
+    "max_dd": 6413,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 20,
+    "tp": 20,
+    "sl": 15,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 94,
+    "trades_per_day": 0.37,
+    "win_pct": 33.0,
+    "pf": 0.629,
+    "net": -7238,
+    "max_dd": 7324,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 62,
+    "trades_per_day": 0.72,
+    "win_pct": 33.9,
+    "pf": 0.655,
+    "net": -4384,
+    "max_dd": 6362,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 10,
+    "sl": 8,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 189,
+    "trades_per_day": 0.62,
+    "win_pct": 31.2,
+    "pf": 0.523,
+    "net": -10500,
+    "max_dd": 10918,
+    "green_months_pct": 13.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 65,
+    "trades_per_day": 0.76,
+    "win_pct": 29.2,
+    "pf": 0.476,
+    "net": -4082,
+    "max_dd": 4500,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 10,
+    "sl": 8,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 81,
+    "trades_per_day": 0.33,
+    "win_pct": 29.6,
+    "pf": 0.486,
+    "net": -4970,
+    "max_dd": 5165,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 27.6,
+    "pf": 0.439,
+    "net": -3991,
+    "max_dd": 4408,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 10,
+    "sl": 15,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 189,
+    "trades_per_day": 0.62,
+    "win_pct": 46.0,
+    "pf": 0.539,
+    "net": -14560,
+    "max_dd": 14838,
+    "green_months_pct": 6.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 65,
+    "trades_per_day": 0.76,
+    "win_pct": 44.6,
+    "pf": 0.509,
+    "net": -5472,
+    "max_dd": 6646,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 10,
+    "sl": 15,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 81,
+    "trades_per_day": 0.33,
+    "win_pct": 43.2,
+    "pf": 0.481,
+    "net": -7394,
+    "max_dd": 7590,
+    "green_months_pct": 11.1,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 43.1,
+    "pf": 0.479,
+    "net": -5326,
+    "max_dd": 6499,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 20,
+    "sl": 8,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 189,
+    "trades_per_day": 0.62,
+    "win_pct": 24.9,
+    "pf": 0.772,
+    "net": -5480,
+    "max_dd": 5932,
+    "green_months_pct": 26.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 65,
+    "trades_per_day": 0.76,
+    "win_pct": 23.1,
+    "pf": 0.7,
+    "net": -2542,
+    "max_dd": 3560,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 20,
+    "sl": 8,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 81,
+    "trades_per_day": 0.33,
+    "win_pct": 24.7,
+    "pf": 0.765,
+    "net": -2430,
+    "max_dd": 2825,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 20.7,
+    "pf": 0.609,
+    "net": -3051,
+    "max_dd": 4068,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 20,
+    "sl": 15,
+    "atrf": 0
+   },
+   "dev": {
+    "trades": 189,
+    "trades_per_day": 0.62,
+    "win_pct": 34.9,
+    "pf": 0.686,
+    "net": -11966,
+    "max_dd": 12138,
+    "green_months_pct": 13.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 65,
+    "trades_per_day": 0.76,
+    "win_pct": 36.9,
+    "pf": 0.748,
+    "net": -3198,
+    "max_dd": 5175,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "FIRSTPB",
+   "params": {
+    "thr": 40,
+    "tp": 20,
+    "sl": 15,
+    "atrf": 1
+   },
+   "dev": {
+    "trades": 81,
+    "trades_per_day": 0.33,
+    "win_pct": 35.8,
+    "pf": 0.713,
+    "net": -4624,
+    "max_dd": 5020,
+    "green_months_pct": 33.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 58,
+    "trades_per_day": 0.67,
+    "win_pct": 36.2,
+    "pf": 0.725,
+    "net": -3146,
+    "max_dd": 5124,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 10,
+    "sl": 20,
+    "hold": 3
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 57.2,
+    "pf": 0.639,
+    "net": -18325,
+    "max_dd": 22990,
+    "green_months_pct": 13.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 54.1,
+    "pf": 0.563,
+    "net": -6978,
+    "max_dd": 7862,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 10,
+    "sl": 20,
+    "hold": 15
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 57.2,
+    "pf": 0.639,
+    "net": -18325,
+    "max_dd": 22990,
+    "green_months_pct": 13.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 54.1,
+    "pf": 0.563,
+    "net": -6978,
+    "max_dd": 7862,
+    "green_months_pct": 0.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 10,
+    "sl": 40,
+    "hold": 3
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 73.1,
+    "pf": 0.693,
+    "net": -18275,
+    "max_dd": 23747,
+    "green_months_pct": 20.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 68.2,
+    "pf": 0.548,
+    "net": -9348,
+    "max_dd": 10829,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 10,
+    "sl": 40,
+    "hold": 15
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 74.5,
+    "pf": 0.705,
+    "net": -17675,
+    "max_dd": 24298,
+    "green_months_pct": 26.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 68.2,
+    "pf": 0.519,
+    "net": -10518,
+    "max_dd": 11999,
+    "green_months_pct": 50.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 20,
+    "sl": 20,
+    "hold": 3
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 47.2,
+    "pf": 0.849,
+    "net": -9405,
+    "max_dd": 20870,
+    "green_months_pct": 40.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 37.6,
+    "pf": 0.592,
+    "net": -8732,
+    "max_dd": 9510,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 20,
+    "sl": 20,
+    "hold": 15
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 47.9,
+    "pf": 0.889,
+    "net": -6860,
+    "max_dd": 19932,
+    "green_months_pct": 40.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 37.6,
+    "pf": 0.583,
+    "net": -9048,
+    "max_dd": 9824,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 20,
+    "sl": 40,
+    "hold": 3
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 64.5,
+    "pf": 0.931,
+    "net": -5230,
+    "max_dd": 20365,
+    "green_months_pct": 53.3,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 54.1,
+    "pf": 0.633,
+    "net": -10562,
+    "max_dd": 12619,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 20,
+    "sl": 40,
+    "hold": 15
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 65.9,
+    "pf": 0.943,
+    "net": -4600,
+    "max_dd": 21806,
+    "green_months_pct": 46.7,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 55.3,
+    "pf": 0.597,
+    "net": -12408,
+    "max_dd": 14348,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 40,
+    "sl": 20,
+    "hold": 3
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 36.9,
+    "pf": 0.969,
+    "net": -2250,
+    "max_dd": 19763,
+    "green_months_pct": 40.0,
+    "best_month_share_of_net": null
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 25.9,
+    "pf": 0.662,
+    "net": -8608,
+    "max_dd": 8994,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 40,
+    "sl": 20,
+    "hold": 15
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 35.5,
+    "pf": 1.07,
+    "net": 5360,
+    "max_dd": 19683,
+    "green_months_pct": 46.7,
+    "best_month_share_of_net": 1.47
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 24.7,
+    "pf": 0.637,
+    "net": -9502,
+    "max_dd": 9888,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 40,
+    "sl": 40,
+    "hold": 3
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 52.8,
+    "pf": 1.041,
+    "net": 3865,
+    "max_dd": 18712,
+    "green_months_pct": 60.0,
+    "best_month_share_of_net": 2.11
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 41.2,
+    "pf": 0.715,
+    "net": -10508,
+    "max_dd": 11585,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  },
+  {
+   "family": "SIXPM",
+   "params": {
+    "tp": 40,
+    "sl": 40,
+    "hold": 15
+   },
+   "dev": {
+    "trades": 290,
+    "trades_per_day": 0.94,
+    "win_pct": 53.8,
+    "pf": 1.143,
+    "net": 15475,
+    "max_dd": 16918,
+    "green_months_pct": 60.0,
+    "best_month_share_of_net": 0.61
+   },
+   "val": {
+    "trades": 85,
+    "trades_per_day": 0.99,
+    "win_pct": 41.2,
+    "pf": 0.672,
+    "net": -13268,
+    "max_dd": 14049,
+    "green_months_pct": 25.0,
+    "best_month_share_of_net": null
+   }
+  }
+ ]
+}

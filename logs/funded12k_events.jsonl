@@ -1,0 +1,9 @@
+{"t": "2026-10-26T22:00:22.686780+00:00", "event": "entry", "order_id": "bot_ae3cf39489", "symbol": "MNQ", "direction": "long", "size": 1, "entry": 29482.75, "sl": 29442.75, "tp": 29882.75, "stream": "6pm", "source": "6pm_long", "td": "2026-10-27"}
+{"t": "2026-10-26T23:01:34.744020+00:00", "event": "sl_move", "order_id": "bot_adopt_65406045c4", "old_sl": 29566.25, "sl": 29471.0, "tp": 0.0}
+{"t": "2026-10-26T23:06:35.298840+00:00", "event": "sl_move", "order_id": "bot_adopt_65406045c4", "old_sl": 29471.0, "sl": 29449.0, "tp": 0.0}
+{"t": "2026-10-26T23:11:10.133907+00:00", "event": "sl_move", "order_id": "bot_adopt_65406045c4", "old_sl": 29449.0, "sl": 29445.0, "tp": 0.0}
+{"t": "2026-10-26T23:16:25.632636+00:00", "event": "sl_move", "order_id": "bot_adopt_65406045c4", "old_sl": 29445.0, "sl": 29443.75, "tp": 0.0}
+{"t": "2026-10-26T23:35:19.429995+00:00", "event": "exit", "order_id": "bot_adopt_494449100d", "symbol": "MNQ", "direction": "short", "size": 2, "entry": 29496.5, "exit": 29516.0, "reason": "STOP_LOSS", "pnl": -86.0, "stream": ""}
+{"t": "2026-10-26T23:46:16.619225+00:00", "event": "exit", "order_id": "bot_adopt_dd285129e6", "symbol": "MNQ", "direction": "short", "size": 2, "entry": 29514.0, "exit": 29546.5, "reason": "STOP_LOSS", "pnl": -138.0, "stream": ""}
+{"t": "2026-10-27T00:18:20.195930+00:00", "event": "exit", "order_id": "bot_adopt_fe18c019a9", "symbol": "MNQ", "direction": "short", "size": 1, "entry": 29564.25, "exit": 29584.25, "reason": "STOP_LOSS", "pnl": -44.0, "stream": ""}
+{"t": "2026-10-27T00:36:53.168278+00:00", "event": "exit", "order_id": "bot_adopt_8b58bf210b", "symbol": "MNQ", "direction": "long", "size": 3, "entry": 29582.08333333, "exit": 29555.25, "reason": "STOP_LOSS", "pnl": -172.9999999799984, "stream": ""}

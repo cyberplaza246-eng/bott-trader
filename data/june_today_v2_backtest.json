@@ -1,0 +1,105 @@
+{
+  "spec": "pullback_hybrid_v2",
+  "period": "2026-06-01 through 2026-09-21 03:58:00+00:00",
+  "data_bars": 664264,
+  "long_recipe": {
+    "stack": "15_5_1",
+    "loop": "window_loop",
+    "entry": "1m_pullback",
+    "win": "w4_no_noon",
+    "stop": "atr1_1.5_6_25",
+    "tp": "1R",
+    "side": "long",
+    "sep": false,
+    "cooldown": 0,
+    "max_day": null,
+    "max_lots": 1,
+    "morning": false,
+    "vwap": "none",
+    "sep_short_min": null
+  },
+  "short_recipe": {
+    "stack": "15_5_1",
+    "loop": "window_loop",
+    "win": "w6_all",
+    "stop": "atr1_1.5_6_25",
+    "side": "short",
+    "max_day": null,
+    "max_lots": 1,
+    "sep_min": 0.45,
+    "entry": "1m_pullback",
+    "tp": "1R",
+    "vwap": "none",
+    "structure": "lh_ll",
+    "sep_mode": "none"
+  },
+  "combined": {
+    "trades": 185,
+    "win_rate": 56.2,
+    "profit_factor": 1.21,
+    "net_pnl": 735.74,
+    "expectancy": 3.98,
+    "max_drawdown": 560.41
+  },
+  "long": {
+    "trades": 104,
+    "win_rate": 56.7,
+    "profit_factor": 1.22,
+    "net_pnl": 418.22,
+    "expectancy": 4.02,
+    "max_drawdown": 297.99
+  },
+  "short": {
+    "trades": 81,
+    "win_rate": 55.6,
+    "profit_factor": 1.2,
+    "net_pnl": 317.52,
+    "expectancy": 3.92,
+    "max_drawdown": 385.21
+  },
+  "activity": {
+    "max_day": 7,
+    "avg_active": 2.68,
+    "days_5plus": 6,
+    "active_days": 69
+  },
+  "monthly": {
+    "2026-06": {
+      "trades": 42,
+      "profit_factor": 1.9,
+      "net_pnl": 579.21
+    },
+    "2026-07": {
+      "trades": 58,
+      "profit_factor": 1.53,
+      "net_pnl": 549.4
+    },
+    "2026-08": {
+      "trades": 56,
+      "profit_factor": 0.76,
+      "net_pnl": -284.24
+    },
+    "2026-09": {
+      "trades": 29,
+      "profit_factor": 0.83,
+      "net_pnl": -108.62
+    }
+  },
+  "session": {
+    "morning": {
+      "trades": 90,
+      "profit_factor": 1.18,
+      "net_pnl": 340.76
+    },
+    "midday": {
+      "trades": 77,
+      "profit_factor": 1.24,
+      "net_pnl": 308.47
+    },
+    "afternoon": {
+      "trades": 18,
+      "profit_factor": 1.3,
+      "net_pnl": 86.52
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "long": {
+    "stack": "15_5_1",
+    "loop": "window_loop",
+    "entry": "quiet",
+    "win": "w2_open",
+    "stop": "atr1_1.5_6_25",
+    "tp": "1R",
+    "side": "long",
+    "sep": false,
+    "cooldown": 0,
+    "max_day": 4,
+    "max_lots": 1,
+    "morning": false,
+    "vwap": "none",
+    "sep_short_min": null
+  },
+  "short": {
+    "stack": "15_5",
+    "loop": "window_loop",
+    "entry": "quiet",
+    "win": "w3_pm",
+    "stop": "atr1_1.5_6_25",
+    "tp": "2R",
+    "side": "short",
+    "sep": false,
+    "cooldown": 0,
+    "max_day": 4,
+    "max_lots": 1,
+    "morning": false,
+    "vwap": "with_side",
+    "sep_short_min": null
+  },
+  "pass": false
+}

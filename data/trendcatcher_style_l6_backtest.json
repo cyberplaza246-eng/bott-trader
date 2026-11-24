@@ -1,0 +1,176 @@
+{
+  "recipe": "L6_responsive_15_5_1m_atr",
+  "maps_from": "TrendCatcher-style: trend + confirm + timed entry + SL/TP bracket",
+  "variant": "B",
+  "stop": {
+    "id": "1m_atr1.5_6_25",
+    "label": "1m ATR\u00d71.5 clip 6-25",
+    "kind": "atr",
+    "tf": "1m",
+    "mult": 1.5,
+    "min": 6.0,
+    "max": 25.0
+  },
+  "csv": "data\\MNQ_1m.csv",
+  "bars": 116128,
+  "range": [
+    "2025-12-29 00:00:00+00:00",
+    "2026-08-21 13:14:00+00:00"
+  ],
+  "report": {
+    "variant": "B",
+    "stack": "15m+5m (no daily) -> quiet 1m entry",
+    "stop_id": "1m_atr1.5_6_25",
+    "stop_label": "1m ATR\u00d71.5 clip 6-25",
+    "avg_stop_pts": 20.8,
+    "overall": {
+      "trades": 805,
+      "win_rate": 47.3,
+      "profit_factor": 0.86,
+      "expectancy": -3.1,
+      "total_pnl": -2493.93,
+      "max_drawdown": 3011.22,
+      "avg_winner": 40.67,
+      "avg_loser": -42.42,
+      "max_consec_losses": 8
+    },
+    "is": {
+      "trades": 433,
+      "win_rate": 44.8,
+      "profit_factor": 0.77,
+      "expectancy": -5.04,
+      "total_pnl": -2182.69,
+      "max_drawdown": 2793.01,
+      "avg_winner": 38.64,
+      "avg_loser": -40.5,
+      "max_consec_losses": 8
+    },
+    "oos": {
+      "trades": 372,
+      "win_rate": 50.3,
+      "profit_factor": 0.96,
+      "expectancy": -0.84,
+      "total_pnl": -311.24,
+      "max_drawdown": 922.45,
+      "avg_winner": 42.77,
+      "avg_loser": -44.92,
+      "max_consec_losses": 6
+    },
+    "by_side": {
+      "long": {
+        "trades": 498,
+        "win_rate": 46.6,
+        "profit_factor": 0.83,
+        "expectancy": -3.57,
+        "total_pnl": -1780.07,
+        "max_drawdown": 2031.95,
+        "avg_winner": 37.6,
+        "avg_loser": -39.48,
+        "max_consec_losses": 8
+      },
+      "short": {
+        "trades": 307,
+        "win_rate": 48.5,
+        "profit_factor": 0.9,
+        "expectancy": -2.33,
+        "total_pnl": -713.86,
+        "max_drawdown": 1228.4,
+        "avg_winner": 45.45,
+        "avg_loser": -47.38,
+        "max_consec_losses": 10
+      }
+    },
+    "by_session": {
+      "morning": {
+        "trades": 408,
+        "win_rate": 49.3,
+        "profit_factor": 0.95,
+        "expectancy": -1.24,
+        "total_pnl": -504.87,
+        "max_drawdown": 1425.59,
+        "avg_winner": 46.68,
+        "avg_loser": -47.77,
+        "max_consec_losses": 9
+      },
+      "afternoon": {
+        "trades": 397,
+        "win_rate": 45.3,
+        "profit_factor": 0.75,
+        "expectancy": -5.01,
+        "total_pnl": -1989.07,
+        "max_drawdown": 2215.75,
+        "avg_winner": 33.95,
+        "avg_loser": -37.33,
+        "max_consec_losses": 7
+      }
+    },
+    "by_window": {
+      "09:35": {
+        "trades": 121,
+        "win_rate": 47.1,
+        "profit_factor": 0.87,
+        "expectancy": -3.54,
+        "total_pnl": -428.09,
+        "max_drawdown": 566.93,
+        "avg_winner": 48.46,
+        "avg_loser": -49.85,
+        "max_consec_losses": 8
+      },
+      "10:15": {
+        "trades": 125,
+        "win_rate": 50.4,
+        "profit_factor": 0.97,
+        "expectancy": -0.75,
+        "total_pnl": -93.36,
+        "max_drawdown": 361.72,
+        "avg_winner": 47.26,
+        "avg_loser": -49.53,
+        "max_consec_losses": 6
+      },
+      "11:00": {
+        "trades": 162,
+        "win_rate": 50.0,
+        "profit_factor": 1.0,
+        "expectancy": 0.1,
+        "total_pnl": 16.58,
+        "max_drawdown": 967.39,
+        "avg_winner": 44.98,
+        "avg_loser": -44.78,
+        "max_consec_losses": 6
+      },
+      "12:00": {
+        "trades": 128,
+        "win_rate": 43.8,
+        "profit_factor": 0.72,
+        "expectancy": -6.38,
+        "total_pnl": -817.01,
+        "max_drawdown": 956.11,
+        "avg_winner": 36.91,
+        "avg_loser": -40.05,
+        "max_consec_losses": 10
+      },
+      "13:30": {
+        "trades": 131,
+        "win_rate": 45.8,
+        "profit_factor": 0.74,
+        "expectancy": -5.5,
+        "total_pnl": -720.78,
+        "max_drawdown": 932.83,
+        "avg_winner": 33.59,
+        "avg_loser": -38.54,
+        "max_consec_losses": 7
+      },
+      "14:30": {
+        "trades": 138,
+        "win_rate": 46.4,
+        "profit_factor": 0.82,
+        "expectancy": -3.27,
+        "total_pnl": -451.28,
+        "max_drawdown": 654.23,
+        "avg_winner": 31.69,
+        "avg_loser": -33.51,
+        "max_consec_losses": 11
+      }
+    }
+  }
+}

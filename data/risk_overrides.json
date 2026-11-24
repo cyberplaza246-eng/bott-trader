@@ -10,15 +10,15 @@
   "sl_min_atr_mult": 1.0,
   "sl_max_atr_mult": 2.0,
   "sl_multiplier_by_pair": {
-    "MNQ": 1.3,
+    "MNQ": 1.5,
     "NQ": 1.2,
-    "MES": 1.1
+    "MES": 2.0
   },
   "tp_multiplier_by_pair": {
     "MNQ": 1.3,
     "NQ": 1.3
   },
-  "entry_confidence_threshold": 0.68,
+  "entry_confidence_threshold": 0.64,
   "price_drift_tolerance_atr": 2.5,
   "skip_friday": false,
   "strategy": "mtf_scalping",
@@ -42,7 +42,7 @@
     "max_sl_adjustment": 0.15,
     "max_tp_adjustment": 0.15
   },
-  "updated_at_utc": "2026-06-15T05:54:14.017552",
+  "updated_at_utc": "2026-11-09T02:40:48.430707",
   "source": "scripts/validate_mtf_configs.py \u00e2\u20ac\u201d wider_tp winner",
   "source_window_utc": {
     "start_date": "2025-12-29",
@@ -53,7 +53,7 @@
     "win_rate": 39.2
   },
   "auto_learning_adjustments": [
-    "SL_MES=1.10 (SL hit rate 64%)",
-    "SL_MNQ=1.30 (SL hit rate 73%)"
+    "SL_MES=2.00 (SL hit rate 64%)",
+    "SL_MNQ=1.50 (SL hit rate 70%)"
   ]
 }

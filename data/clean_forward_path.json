@@ -1,0 +1,85 @@
+{
+  "recipe": {
+    "stack": "A_d15_60",
+    "win": "w2_open",
+    "stop": "fix25",
+    "tp": "eod500",
+    "side": "long",
+    "quiet": false,
+    "sep": true
+  },
+  "rules": {
+    "stack": "daily EMA20 + completed 15m EMA8/21 + completed 60m EMA8/21 ALL long",
+    "windows": [
+      "09:35",
+      "11:00"
+    ],
+    "side": "long_only",
+    "stop_pts": 25,
+    "tp": "cap_500_or_eod_1550",
+    "quiet_1m": false,
+    "sep_lots": "max 2 if sep>=0.45"
+  },
+  "is": {
+    "trades": 509,
+    "win_rate": 19.1,
+    "profit_factor": 1.2,
+    "expectancy": 8.08,
+    "total_pnl": 4112.84,
+    "max_drawdown": 3193.08,
+    "avg_winner": 259.36,
+    "avg_loser": -51.08,
+    "max_consec_losses": 22
+  },
+  "val": {
+    "trades": 30,
+    "win_rate": 23.3,
+    "profit_factor": 2.39,
+    "expectancy": 54.48,
+    "total_pnl": 1634.3,
+    "max_drawdown": 256.2,
+    "avg_winner": 401.83,
+    "avg_loser": -51.24,
+    "max_consec_losses": 5
+  },
+  "aug": {
+    "trades": 32,
+    "win_rate": 12.5,
+    "profit_factor": 1.49,
+    "expectancy": 22.13,
+    "total_pnl": 708.32,
+    "max_drawdown": 1017.04,
+    "avg_winner": 535.76,
+    "avg_loser": -51.24,
+    "max_consec_losses": 18
+  },
+  "sep": {
+    "trades": 3,
+    "win_rate": 33.3,
+    "profit_factor": 0.74,
+    "expectancy": -8.74,
+    "total_pnl": -26.22,
+    "max_drawdown": 51.24,
+    "avg_winner": 76.26,
+    "avg_loser": -51.24,
+    "max_consec_losses": 1
+  },
+  "oos": {
+    "trades": 65,
+    "win_rate": 18.5,
+    "profit_factor": 1.85,
+    "expectancy": 35.64,
+    "total_pnl": 2316.4,
+    "max_drawdown": 1017.04,
+    "avg_winner": 419.34,
+    "avg_loser": -51.24,
+    "max_consec_losses": 18
+  },
+  "clean_forward": true,
+  "legacy_pass": true,
+  "how_to_run": {
+    "paper_bat": "start_mnq_pass_forward.bat",
+    "verify": "python scripts/verify_clean_forward.py",
+    "note": "Do not run with micro_scalp or overnight on the same Lucid login. Stop micro-scalp first."
+  }
+}

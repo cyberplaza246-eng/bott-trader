@@ -1,0 +1,14 @@
+WKC q0 H60 {'n': 86, 'net': 3474, 'pf': np.float64(1.89), 'dd': 602, 'train': 2065, 'y26': 1409, 'folds_pos': '5/6', 'boot_p': 0.97, 'slip4': 3216, 'delay1': -1230, 'top3': 2360}
+WKC q0 H120 {'n': 86, 'net': 5160, 'pf': np.float64(2.0), 'dd': 716, 'train': 2560, 'y26': 2600, 'folds_pos': '5/6', 'boot_p': 0.99, 'slip4': 4902, 'delay1': 455, 'top3': 2452}
+WKC q0 H180 {'n': 85, 'net': 5338, 'pf': np.float64(2.07), 'dd': 574, 'train': 3645, 'y26': 1693, 'folds_pos': '5/6', 'boot_p': 0.99, 'slip4': 5083, 'delay1': 1644, 'top3': 2212}
+WKC q0.5 H60 {'n': 50, 'net': 3602, 'pf': np.float64(2.75), 'dd': 726, 'train': 1390, 'y26': 2212, 'folds_pos': '4/6', 'boot_p': 0.99, 'slip4': 3452, 'delay1': -1514, 'top3': 2360}
+WKC q0.5 H120 {'n': 50, 'net': 4827, 'pf': np.float64(2.9), 'dd': 626, 'train': 1542, 'y26': 3284, 'folds_pos': '5/6', 'boot_p': 1.0, 'slip4': 4677, 'delay1': -290, 'top3': 2452}
+WKC q0.5 H180 {'n': 49, 'net': 4436, 'pf': np.float64(2.8), 'dd': 462, 'train': 2588, 'y26': 1848, 'folds_pos': '6/6', 'boot_p': 1.0, 'slip4': 4290, 'delay1': 330, 'top3': 2154}
+WKC q0.75 H60 {'n': 31, 'net': 2362, 'pf': np.float64(2.26), 'dd': 666, 'train': 660, 'y26': 1701, 'folds_pos': '3/6', 'boot_p': 0.93, 'slip4': 2268, 'delay1': -1650, 'top3': 2334}
+WKC q0.75 H120 {'n': 31, 'net': 2570, 'pf': np.float64(2.09), 'dd': 708, 'train': 482, 'y26': 2088, 'folds_pos': '4/6', 'boot_p': 0.94, 'slip4': 2477, 'delay1': -1442, 'top3': 2412}
+WKC q0.75 H180 {'n': 30, 'net': 2638, 'pf': np.float64(2.26), 'dd': 536, 'train': 1103, 'y26': 1534, 'folds_pos': '6/6', 'boot_p': 0.96, 'slip4': 2548, 'delay1': -364, 'top3': 1954}
+{"label": "base+gap q75H90+weekend continuation q0H120", "n": 2693, "net": 42067, "pf": 1.28, "dd": 4404, "train": 23335, "y26": 18732, "wf": 31264, "folds": "5/6", "green": "20/24", "sleeve_tpm": 9.7, "corr": -0.005}
+{"label": "base+gap q75H90+weekend cont (dup check)", "n": 2693, "net": 42067, "pf": 1.28, "dd": 4404, "train": 23335, "y26": 18732, "wf": 31264, "folds": "5/6", "green": "20/24", "sleeve_tpm": 9.7, "corr": -0.005}
+{"label": "base+gap abs40 H180+weekend cont", "n": 2896, "net": 45654, "pf": 1.25, "dd": 4379, "train": 27033, "y26": 18621, "wf": 34294, "folds": "5/6", "green": "19/24", "sleeve_tpm": 18.7, "corr": -0.093}
+{"label": "base+gap q75H90+weekend cont+1530 fade", "n": 2792, "net": 44651, "pf": 1.29, "dd": 4272, "train": 24221, "y26": 20430, "wf": 32670, "folds": "5/6", "green": "20/24", "sleeve_tpm": 14.1, "corr": 0.014}
+DONE3

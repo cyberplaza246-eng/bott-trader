@@ -1,0 +1,65 @@
+{
+  "label": "frequency_upgrade_v1",
+  "period": "2026-06-01 through 2026-08-21",
+  "target": "avg >= 6 trades/weekday",
+  "recommended": {
+    "name": "stacked_hybrid_rth_short",
+    "description": "Selective long (v4 pullback windows) + aggressive short (continuous RTH quiet, 2 slots). Separate books.",
+    "avg_trades_per_weekday": 7.45,
+    "days_ge6_of_60_weekdays": 31,
+    "combined_pf": 1.03,
+    "combined_net_jun_aug": 302.3,
+    "long_leg": {
+      "loop": "window_loop",
+      "entry": "1m_pullback",
+      "winset": "w4_no_noon",
+      "stack": "15_5_1",
+      "stop": "atr1_1.5_6_25",
+      "tp": "1R",
+      "max_lots": 1,
+      "max_day": 99,
+      "trades": 75,
+      "pf": 1.42,
+      "net": 531.5
+    },
+    "short_leg": {
+      "loop": "rth_loop",
+      "entry": "quiet",
+      "winset": null,
+      "stack": "15_5_1",
+      "stop": "atr1_1.5_6_25",
+      "tp": "1R",
+      "max_lots": 2,
+      "max_day": 12,
+      "structure": null,
+      "cooldown_min": 0,
+      "trades": 372,
+      "pf": 0.97,
+      "net": -229.1
+    }
+  },
+  "alternative_max_frequency_profitable": {
+    "name": "hybrid_plus_scalp",
+    "description": "Above hybrid + 5m scalp momentum leg (C1m no-chase, sl8 tp12 hold90s)",
+    "avg_trades_per_weekday": 19.93,
+    "days_ge6": 69,
+    "combined_pf": 1.01,
+    "combined_net_jun_aug": 109.0,
+    "note": "Volume from scalp; edge very thin — PF barely above 1"
+  },
+  "alternative_quality_over_volume": {
+    "name": "pullback_hybrid_v2",
+    "description": "Original one-position combined spec — best net, lowest frequency",
+    "avg_trades_per_weekday": 2.4,
+    "combined_pf": 1.33,
+    "combined_net_jun_aug": 872.0
+  },
+  "paths_tested": {
+    "continuous_rth_pullback_both": "8-10/wd but long RTH pullback bleeds; short side OK",
+    "faster_turnover_0.5R_0.75R": "More WR but net still negative on full RTH pullback",
+    "scalp_second_leg": "Adds ~6-13 trades/wd; dilutes PF when stacked on quiet short",
+    "stacked_selective_long_aggressive_short": "Winner for 6+/day profitable stack-only"
+  },
+  "script": "scripts/backtest_frequency_upgrade.py",
+  "results_file": "data/frequency_upgrade_search.json"
+}

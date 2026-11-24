@@ -1,0 +1,73 @@
+{
+  "spec": "micro_scalp_20",
+  "data": "data\\MNQ_1s_databento.csv",
+  "bars": 1182772,
+  "params": {
+    "min_hold_sec": 10.0,
+    "tp_usd": 20.0,
+    "sl_pts": 20.0,
+    "comm": 1.24,
+    "rth_only": true,
+    "max_hold_sec": 180.0,
+    "cooldown_sec": 15.0
+  },
+  "all": {
+    "trades": 14831,
+    "win_rate": 60.2,
+    "profit_factor": 1.03,
+    "net_pnl": 7130.56,
+    "expectancy": 0.48,
+    "max_drawdown": 3738.6,
+    "avg_hold_sec": 382.7,
+    "median_hold_sec": 38.0,
+    "tp": 8354,
+    "sl": 4481,
+    "max_hold": 1995,
+    "holds_under_10s": 304
+  },
+  "jun_jul": {
+    "trades": 12886,
+    "win_rate": 60.7,
+    "profit_factor": 1.05,
+    "net_pnl": 9385.86,
+    "expectancy": 0.73,
+    "max_drawdown": 2307.44,
+    "avg_hold_sec": 377.5,
+    "median_hold_sec": 35.0,
+    "tp": 7448,
+    "sl": 4051,
+    "max_hold": 1387,
+    "holds_under_10s": 289
+  },
+  "aug": {
+    "trades": 1945,
+    "win_rate": 56.5,
+    "profit_factor": 0.91,
+    "net_pnl": -2255.3,
+    "expectancy": -1.16,
+    "max_drawdown": 2593.06,
+    "avg_hold_sec": 416.9,
+    "median_hold_sec": 86.0,
+    "tp": 906,
+    "sl": 430,
+    "max_hold": 608,
+    "holds_under_10s": 15
+  },
+  "jun_through_data_end": {
+    "trades": 14831,
+    "win_rate": 60.2,
+    "profit_factor": 1.03,
+    "net_pnl": 7130.56,
+    "expectancy": 0.48,
+    "max_drawdown": 3738.6,
+    "avg_hold_sec": 382.7,
+    "median_hold_sec": 38.0,
+    "tp": 8354,
+    "sl": 4481,
+    "max_hold": 1995,
+    "holds_under_10s": 304
+  },
+  "note": "1s close proxy for quote stream; Sep 2026 not in this 1s file (ends ~2026-08-16).",
+  "tp_hold_min": 10.0,
+  "tp_hold_ok": true
+}

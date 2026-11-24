@@ -1,0 +1,21 @@
+============================================
+  BottTrader - MNQ S16 MID PAPER (Lucid TEST)
+  HybridS15_IB  ORB20+IB45  target_r=0.75
+  long-only | RTH entries | flatten ~15:55 ET
+  lock_fp=e8ad933573b8bbf3  size=1
+  PAPER / TEST only — not funded live
+  Close Lucid desktop / one login only
+============================================
+Desk: http://127.0.0.1:5055
+Leave this window open. Ctrl+C to stop.
+
+MNQ 1m refresh failed: Databento 402 unpaid invoice
+MNQ 1m Databento unpaid (402) — skipping refresh 6h; using CSV seed + Rithmic history. Pay invoice at databento.com/portal/billing
+2026-09-24 13:38:56 - TradingBot - INFO - Rithmic Lucid plants: ticker + order + pnl + history (1m bars for day hybrid / paper seed)
+2026-09-24 13:38:59 - TradingBot - INFO - Rithmic accounts (1): ['LFE050-IBWS3708-TEST012 (LT-Z8WS597N)']
+2026-09-24 13:38:59 - TradingBot - INFO - Rithmic trade routes (5): ['CDE: simulator default=True status=UP', 'NYMEX: simulator default=True status=UP', 'CBOT: simulator default=True status=UP', 'COMEX: simulator default=True status=UP', 'CME: simulator default=True status=UP']
+2026-09-24 13:38:59 - TradingBot - INFO - Rithmic execution: account_id=LFE050-IBWS3708-TEST012 trade_route(CME)=simulator live_mode=False
+2026-09-24 13:38:59 - TradingBot - INFO - Rithmic connector initialized — system=LucidTrading, gateway=wss://rprotocol.rithmic.com:443
+ Lucid sim connected (TEST + history 1m). Close R|Trader if logged in elsewhere.
+ Rithmic 1m merged (+600 bars) → 664864 total, last 2026-09-24 09:38 ET
+ CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))

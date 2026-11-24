@@ -4577,6 +4577,8 @@ class RithmicConnector(BaseBroker):
         new_sl: float,
         take_profit: Optional[float] = None,
         _from_modify: bool = False,
+        entry_price: Optional[float] = None,  # caller's own entry (bot Position); fallback only
+        current_sl: Optional[float] = None,   # caller's own current stop; fallback only
     ) -> bool:
         """Tighten stop-loss on broker (native bracket modify or protective place-then-cancel)."""
         if not self._connected or new_sl <= 0:
@@ -4593,6 +4595,14 @@ class RithmicConnector(BaseBroker):
             is_long = str(side).upper() in ("BUY", "LONG")
             entry_px = float(order.get("entry_price") or 0)
             cur_sl = float(order.get("stop_loss") or 0)
+            # RITHMIC_SL_ENTRY_FALLBACK (default OFF): fill in a missing record value
+            # from the caller's own Position. Existing guards below still all run.
+            _fb = os.getenv("RITHMIC_SL_ENTRY_FALLBACK", "0").strip().lower() in ("1", "true", "yes", "on")
+            if _fb:
+                if entry_px <= 0:
+                    entry_px = float(order.get("price_ref") or 0) or float(entry_price or 0)
+                if cur_sl <= 0:
+                    cur_sl = float(current_sl or 0)
 
         # Ratchet only: never loosen the broker stop once it has been tightened.
         if self._stop_is_looser(is_long, float(new_sl), cur_sl):
@@ -4617,6 +4627,8 @@ class RithmicConnector(BaseBroker):
                     side=side,
                     qty=int(size),
                     new_sl=new_sl,
+                    entry_hint=entry_px if _fb else 0.0,
+                    cur_sl_hint=cur_sl if _fb else 0.0,
                 ),
                 timeout=15,
             )
@@ -4863,6 +4875,8 @@ class RithmicConnector(BaseBroker):
         side: str,
         qty: int,
         new_sl: float,
+        entry_hint: float = 0.0,
+        cur_sl_hint: float = 0.0,
     ) -> bool:
         """Tighten SL safely: validate vs LIVE price, place new stop FIRST, then cancel old.
 
@@ -4879,6 +4893,16 @@ class RithmicConnector(BaseBroker):
             _o = self._orders.get(order_id, {}) or {}
             entry_px = float(_o.get("entry_price") or 0)
             cur_sl = float(_o.get("stop_loss") or 0)
+        # Hints are only non-zero when RITHMIC_SL_ENTRY_FALLBACK is on (see update_stop_loss).
+        if entry_px <= 0 and entry_hint > 0:
+            entry_px = float(_o.get("price_ref") or 0) or float(entry_hint)
+            self._log_sl_skip_once(
+                f"{order_id}:entry_fallback",
+                f"SL move {order_id} {symbol}: connector record has no entry price - "
+                f"using fallback entry {entry_px:.2f} (RITHMIC_SL_ENTRY_FALLBACK)",
+            )
+        if cur_sl <= 0 and cur_sl_hint > 0:
+            cur_sl = float(cur_sl_hint)
         buf_ticks = int(os.getenv("SL_MOVE_MIN_BUFFER_TICKS", "4"))
         reason = ""
         if market <= 0:

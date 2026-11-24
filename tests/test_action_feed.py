@@ -27,7 +27,7 @@ def test_humanize_overnight_paper_short():
         "reason": "test_fill — paper only, not sent to Lucid",
         "cue": "test_fill",
     })
-    assert rec["emoji"] == "🟢"
+    assert rec["emoji"] == "📉"
     assert rec["clock"] == "12:17 AM"
     assert "PAPER SHORT" in rec["title"]
     assert rec["layer"] == "human"
@@ -35,8 +35,29 @@ def test_humanize_overnight_paper_short():
     assert "29,899.25" in joined
     assert "29,959.25" in joined
     assert "60 pts" in joined
-    assert "1R TP, flatten 09:25 ET" in joined
+    assert "0.65R TP" in joined
     assert "Paper only" in joined
+
+
+def test_humanize_overnight_entry_shows_win_confidence():
+    rec = humanize_action({
+        "kind": "entry",
+        "symbol": "MNQ",
+        "direction": "short",
+        "entry": 29533.5,
+        "stop": 29573.5,
+        "qty": 2,
+        "session": "overnight_research",
+        "paper": True,
+        "entry_confidence_pct": 87,
+        "entry_confidence": {
+            "pct": 87,
+            "summary": "1m close confirmed, HTF aligned, qty-2 stack",
+        },
+    })
+    joined = " ".join(rec["lines"])
+    assert "Win confidence: 87%" in joined
+    assert "HTF aligned" in joined
 
 
 def test_humanize_day_entry_shows_sl_tp_placed():
@@ -53,7 +74,7 @@ def test_humanize_day_entry_shows_sl_tp_placed():
     })
     joined = " ".join(rec["lines"])
     assert "SL placed @ 24,960.00" in joined
-    assert "TP cap @ 25,500.00" in joined
+    assert "TP placed @ 25,500.00 (1R)" in joined
 
 
 def test_humanize_upgrades_old_lines_with_flatten_tp():
@@ -69,7 +90,7 @@ def test_humanize_upgrades_old_lines_with_flatten_tp():
     })
     joined = " ".join(rec["lines"])
     assert "Stop 29,849.75 (60 pts)" in joined
-    assert "1R TP, flatten 09:25 ET" in joined
+    assert "0.65R TP" in joined
 
 
 def test_humanize_profit_and_loss():
@@ -83,7 +104,7 @@ def test_humanize_profit_and_loss():
         "pnl": 142.50,
         "paper": True,
     })
-    assert win["emoji"] == "💰"
+    assert win["emoji"] == "✅"
     assert "PROFITABLE" in win["title"]
     assert any("+$142.50" in x for x in win["lines"])
     lose = humanize_action({
@@ -95,7 +116,7 @@ def test_humanize_profit_and_loss():
         "pnl": -120.0,
         "paper": True,
     })
-    assert lose["emoji"] == "🔴"
+    assert lose["emoji"] == "❌"
     assert "LOSING" in lose["title"]
 
 
@@ -148,15 +169,58 @@ def test_open_card_from_status():
         }],
     })
     assert card is not None
-    assert card["emoji"] == "🟢"
+    assert card["emoji"] == "📉"
     assert "PAPER TRADE" in card["title"]
     joined = " ".join(card["lines"])
     assert "SHORT / MNQ · 1" in joined
     assert "Entry 29,899.25" in joined
     assert "29,959.25" in joined
     assert "60 pts" in joined
-    assert "1R TP, flatten 09:25 ET" in joined
-    assert "not sent to Rithmic" in joined
+    assert "0.65R TP" in joined
+    assert "Paper fill" in joined
+
+
+def test_open_card_lucid_ticket_not_local_only():
+    card = open_position_card({
+        "paper_mode": True,
+        "overnight_research": True,
+        "last_note": "PAPER TEST FILL · MNQ SHORT @ 29522.75 · Lucid bot_a3b339bed8",
+        "open_positions": [{
+            "symbol": "MNQ",
+            "direction": "SHORT",
+            "entry": 29522.75,
+            "sl": 29582.75,
+            "size": 1,
+            "cue": "test_fill",
+            "lucid_ticket": "bot_a3b339bed8",
+        }],
+    })
+    joined = " ".join(card["lines"])
+    assert "On Lucid (TEST011 sim)" in joined
+    assert "not sent to Rithmic" not in joined
+
+
+def test_open_card_shows_confidence():
+    card = open_position_card({
+        "paper_mode": True,
+        "overnight_research": True,
+        "updated_at": "2026-08-18T04:22:00+00:00",
+        "open_positions": [{
+            "symbol": "MNQ",
+            "direction": "LONG",
+            "entry": 24710.0,
+            "sl": 24670.0,
+            "size": 2,
+            "entry_confidence_pct": 88,
+            "entry_confidence": {
+                "pct": 88,
+                "summary": "1m close confirmed, HTF aligned, qty-2 stack",
+            },
+        }],
+    })
+    joined = " ".join(card["lines"])
+    assert "Win confidence: 88%" in joined
+    assert card.get("entry_confidence_pct") == 88
 
 
 def test_today_activity_splits_and_injects_monitor():

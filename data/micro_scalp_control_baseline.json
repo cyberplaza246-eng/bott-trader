@@ -1,0 +1,43 @@
+{
+  "oos_exp": -3.02,
+  "oos_pf": 0.71,
+  "oos_wr": 47.5,
+  "mfe_median": 14.8,
+  "mae_median": 16.0,
+  "source": "data/micro_scalp_exit_repair.json baseline OOS + path medians",
+  "locked": true,
+  "beat_this_oos": true,
+  "all_path_is": {
+    "n": 9135,
+    "mfe": 14.5,
+    "mae": 15.5,
+    "edge": -1.0,
+    "p10_b_m10": 45.5,
+    "exp": -2.8,
+    "pf": 0.689,
+    "wr": 44.5,
+    "net": -25579.83
+  },
+  "all_path_val": {
+    "n": 538,
+    "mfe": 24.25,
+    "mae": 22.38,
+    "edge": 1.88,
+    "p10_b_m10": 52.0,
+    "exp": -3.11,
+    "pf": 0.728,
+    "wr": 48.3,
+    "net": -1672.23
+  },
+  "all_path_oos_aug_plus": {
+    "n": 597,
+    "mfe": 15.75,
+    "mae": 17.5,
+    "edge": -1.75,
+    "p10_b_m10": 47.4,
+    "exp": -2.57,
+    "pf": 0.725,
+    "wr": 46.6,
+    "net": -1536.42
+  }
+}

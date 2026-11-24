@@ -12,6 +12,7 @@ from src.dashboard.mtf_actions import (
     entry_windows_display,
     gemini_desk_status,
     last_ask_ok_from_history,
+    open_unrealized,
     todays_live_trade_count,
 )
 
@@ -170,7 +171,7 @@ def test_signal_overnight_leads_with_paper_long_not_rth_wait():
     assert "09:35" not in sig["headline"]
     assert sig["stop"] == 29849.75
     assert sig["stop_pts"] == 60.0
-    assert sig["take_profit"] == "1R TP, flatten 09:25 ET"
+    assert sig["take_profit"] == "0.65R TP"
     assert sig["gemini_callout"] is None
     assert "Day recipe" in sig["rth_recipe_note"]
 
@@ -223,7 +224,7 @@ def test_status_card_overnight_stop_and_target():
     )
     rows = dict(card["rows"])
     assert rows["Stop"] == "Stop 29,849.75 (60 pts)"
-    assert rows["Target"] == "1R TP, flatten 09:25 ET"
+    assert rows["Target"] == "0.65R TP"
 
 
 def test_status_card_has_quote_age_not_desk_only_banner():
@@ -280,6 +281,33 @@ def test_status_card_download_failed():
     age = dict(card["rows"])["Quote age"]
     assert "download failed" in age
     assert "not current" in age
+
+
+def test_open_unrealized_short_is_up_when_price_drops():
+    pnl = open_unrealized({
+        "last_price": 29517.50,
+        "open_positions": [{
+            "direction": "SHORT",
+            "entry": 29522.75,
+            "size": 1,
+        }],
+    })
+    assert pnl["open"] is True
+    assert pnl["pts"] == 5.25
+    assert pnl["usd"] == 10.50
+    assert pnl["side"] == "SHORT"
+
+
+def test_open_unrealized_flat_when_no_position():
+    assert open_unrealized({"last_price": 29517.50, "open_positions": []})["open"] is False
+
+
+def test_open_unrealized_open_without_quote():
+    pnl = open_unrealized({
+        "open_positions": [{"direction": "SHORT", "entry": 29522.75, "size": 1}],
+    })
+    assert pnl["open"] is True
+    assert pnl["usd"] is None
 
 
 def test_signal_hides_file_print_when_refresh_fails():

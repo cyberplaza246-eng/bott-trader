@@ -1,0 +1,113 @@
+{
+  "symbol": "MNQ",
+  "status": "PASS_STRONG",
+  "sprint_locked": 16,
+  "variant": "mid",
+  "locked_at": "2026-09-21T13:51:49.239205-04:00",
+  "role": "optional_mid_freq_paper",
+  "note": "Mid-freq paper candidate (tprd\u22480.41). Does NOT replace S15 production. Below 0.6 HF floor \u2014 filename _mid not _hf. No live.",
+  "production_s15": {
+    "path": "/workspace/massive-futures-data/local_hunt/MNQ_PASS_s15.json",
+    "fp": "b3467e96fe069cbf",
+    "frozen": true,
+    "role": "production_slow"
+  },
+  "mes_untouched": {
+    "path": "/workspace/massive-futures-data/local_hunt/MES_PASS_s9.json",
+    "fp": "c702c311c5988651",
+    "frozen": true
+  },
+  "source_harden": "sprint16_hf_hybib_harden.json",
+  "data": {
+    "path": "/workspace/massive-futures-data/MNQ_1m.csv",
+    "timeframe": "1m",
+    "source": "Massive resolution=1min"
+  },
+  "strategy": {
+    "class": "HybridS15_IB",
+    "module": "local_hunt/run_sprint16_hf_d.py",
+    "name": "hybib_or20_ib45_r0.75_ow120_iw180_cd0",
+    "params": {
+      "or_minutes": 20,
+      "orb_window": 120,
+      "target_r": 0.75,
+      "ib_minutes": 45,
+      "ib_window": 180
+    }
+  },
+  "engine": {
+    "fill_model": "next_open",
+    "apply_exit_slippage": true,
+    "gap_aware_stops": true,
+    "trail_update": "next_bar",
+    "cooldown_bars": 0,
+    "allow_same_bar_reentry": false,
+    "daily_loss_halt_pct": 2.0,
+    "flatten_at_rth_close": true,
+    "max_contracts": 10,
+    "rth_entries_only": true,
+    "slippage_ticks": 1
+  },
+  "frequency": {
+    "trades_per_rth_day": 0.4094,
+    "fs_trades": 210,
+    "fs_pnl": 8166.79,
+    "hf_floor": 0.6,
+    "below_hf_floor": true
+  },
+  "gates": {
+    "wf_t": 2.151,
+    "wf_n": 123,
+    "wf_pnl": 4222.44,
+    "wf_win_rate": 0.6667,
+    "wf_expectancy": 34.33,
+    "wf_significant": true,
+    "ho_t": 0.0947,
+    "ho_n": 21,
+    "ho_pnl": 115.99,
+    "neighbor_pass_rate": 0.5,
+    "neighbor_passes": 6,
+    "neighbor_total": 12,
+    "bootstrap": {
+      "n": 210,
+      "t_obs": 1.7029,
+      "p_pos_mean": 0.6286,
+      "ci_t_lo": 0.0915,
+      "ci_t_hi": 3.0525,
+      "frac_t_ge_2": 0.364,
+      "mean_pnl": 38.89,
+      "total_pnl": 8166.79
+    },
+    "loyo": [
+      {
+        "year": 2024,
+        "n": 45,
+        "pnl": 3975.5750000000016,
+        "t_stat": 0.9729
+      },
+      {
+        "year": 2025,
+        "n": 109,
+        "pnl": 4825.504999999999,
+        "t_stat": 2.5421
+      },
+      {
+        "year": 2026,
+        "n": 30,
+        "pnl": 262.03499999999985,
+        "t_stat": 0.2016
+      }
+    ],
+    "tier": "PASS_STRONG",
+    "reasons": [
+      "ALL gates clear nbr\u226540% (prefer)"
+    ],
+    "fs": {
+      "trades": 210,
+      "pnl": 8166.79,
+      "win_rate": 0.6286,
+      "expectancy": 38.89,
+      "trades_per_rth_day": 0.4094
+    }
+  }
+}

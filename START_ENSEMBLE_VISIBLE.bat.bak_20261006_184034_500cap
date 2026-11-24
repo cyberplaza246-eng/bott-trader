@@ -1,0 +1,13 @@
+@echo off
+cd /d C:\Users\shawa\Projects\bott-trader
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
+set TRADING_MODE=live
+set FALLBACK_ENTRIES_ENABLED=true
+set TRAIL_ATR_MULT=0.35
+set TRAIL_ACTIVATION_R=0.25
+set NEAT_BAR_EXPORT=1
+set NEAT_BAR_EXPORT_PATH=C:\Users\shawa\neat-mnq-evolution\artifacts\live_bars\MNQ_1m_live.csv
+title bott-trader MNQ LIVE (Lucid sim)
+.\venv\Scripts\python.exe .\start_live_rithmic.py --symbols MNQ --yes
+pause

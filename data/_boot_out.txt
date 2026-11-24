@@ -1,0 +1,1419 @@
+  Contract sizing: MNQ: $2/pt ($0.50/tick), qty=1, max $250/trade (~125.0 pt SL), daily $300
+
+>>> DAY HYBRID RTH + LUCID SIM (stacked long pullback + short RTH quiet — not overnight bot) <<<
+
+DAY HYBRID (separate from overnight bot)
+Stacked books - long selective + short aggressive
+RTH Mon-Fri: LONG pullback w4 windows | SHORT quiet continuous | flatten 15:50
+Globex (Sun 6 PM+): LONG pullback + SHORT quiet continuous scan (DAY_HYBRID_GLOBEX=true)
+RSI gate ON (1m): short>=40 long<=65 (DAY_HYBRID_RSI_GATE=true)
+Stop: 1m ATR x1.5 clip 6-25 | TP 1R
+Do not run with start_mnq_overnight_paper.bat at the same time (one Lucid login)
+Desk: http://127.0.0.1:5055
+Leave this window open. Ctrl+C to stop.
+
+MNQ 1m Databento unpaid (402) — skipping refresh 6h; using CSV seed + Rithmic history. Pay invoice at databento.com/portal/billing
+2026-09-23 19:37:22 - TradingBot - INFO - Rithmic Lucid plants: ticker + order + pnl + history (1m bars for day hybrid / paper seed)
+2026-09-23 19:37:25 - TradingBot - INFO - Rithmic accounts (1): ['LFE050-IBWS3708-TEST012 (LT-Z8WS597N)']
+2026-09-23 19:37:25 - TradingBot - INFO - Rithmic trade routes (5): ['CDE: simulator default=True status=UP', 'NYMEX: simulator default=True status=UP', 'CBOT: simulator default=True status=UP', 'COMEX: simulator default=True status=UP', 'CME: simulator default=True status=UP']
+2026-09-23 19:37:25 - TradingBot - INFO - Rithmic execution: account_id=LFE050-IBWS3708-TEST012 trade_route(CME)=simulator live_mode=False
+2026-09-23 19:37:25 - TradingBot - INFO - Rithmic connector initialized — system=LucidTrading, gateway=wss://rprotocol.rithmic.com:443
+🔗 Lucid sim connected (TEST + history 1m). Close R|Trader if logged in elsewhere.
+📊 Rithmic 1m merged (+600 bars) → 664864 total, last 2026-09-23 15:37 ET
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+💓 19:38 ET MNQ 30770.25 | flat | Globex | bars->19:37 ET | RSI 44 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+💓 19:41 ET MNQ 30774.00 | flat | Globex | bars->19:40 ET | RSI 56 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+💓 19:43 ET MNQ 30762.25 | flat | Globex | bars->19:43 ET | RSI 41 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+💓 19:46 ET MNQ 30758.50 | flat | Globex | bars->19:45 ET | RSI 40 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+💓 19:49 ET MNQ 30760.00 | flat | Globex | bars->19:48 ET | RSI 42 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+2026-09-23 19:49:55,494 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:49:55,695 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:49:55,696 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:49:55,697 - rithmic.plant.ticker - INFO - Waiting 11.5s before reconnect attempt #1
+2026-09-23 19:49:56,656 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:49:56,895 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:49:56,898 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:49:56,899 - rithmic.plant.history - INFO - Waiting 11.9s before reconnect attempt #1
+2026-09-23 19:49:58,119 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:50:07,142 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:50:07,733 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:50:08,787 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:50:09,031 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:50:09,061 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:50:09,062 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 19:50:09,063 - rithmic.plant.history - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 19:50:14 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:50:19 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:50:19,641 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:50:19,918 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:50:22,265 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:50:22,351 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:50:22,466 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:50:22,471 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:50:22,472 - rithmic.plant.ticker - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 19:50:22,550 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:50:22,551 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:50:22,552 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 19:50:24 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:50:24,067 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:50:33,808 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:50:34,092 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:50:34,100 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:50:34,101 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 19:50:34,102 - rithmic.plant.history - INFO - Waiting 12.3s before reconnect attempt #1
+2026-09-23 19:50:34,852 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:50:35,259 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:50:39 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:50:45 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:50:46,446 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:50:46,666 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:50:48 - TradingBot - INFO - 1M fallback for MNQ: aggregated 600 bars from 1200×30s bars (MINUTE_BAR history unavailable)
+2026-09-23 19:50:51,551 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:50:51,581 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:50:51,582 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:50:51,583 - rithmic.plant.ticker - INFO - Waiting 12.2s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 19:50:59,476 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:50:59,508 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:50:59,509 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:50:59,510 - rithmic.plant.history - INFO - Waiting 10.9s before reconnect attempt #1
+2026-09-23 19:51:04,316 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:51:07,469 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:51:10,432 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:51:11,581 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:51:20,651 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:51:20,681 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:51:20,682 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:51:20,682 - rithmic.plant.ticker - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 19:51:25,535 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:51:25,686 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:51:25,686 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:51:25,687 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 19:51:33,504 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:51:37,205 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:51:38,339 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:51:40,735 - rithmic.plant.history - INFO - Reconnection successful.
+💓 19:51 ET MNQ 30751.75 | flat | Globex | bars->19:50 ET | RSI 33 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+2026-09-23 19:51:52,477 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:51:52,679 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:51:52,680 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:51:52,681 - rithmic.plant.ticker - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 19:51:54,754 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:51:54,954 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:51:54,984 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:51:54,985 - rithmic.plant.history - INFO - Waiting 11.8s before reconnect attempt #1
+2026-09-23 19:52:03,828 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:52:04,337 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:52:06,739 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:52:06,972 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:52:21,408 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:52:21,409 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:52:21,420 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:52:21,421 - rithmic.plant.ticker - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 19:52:23,712 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:52:23,743 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:52:23,744 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:52:23,744 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 19:52:32,168 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:52:37,107 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:52:37,196 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:52:38,241 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:52:49,914 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:52:49,961 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:52:49,962 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:52:49,963 - rithmic.plant.ticker - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 19:52:51,182 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:52:51,183 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:52:51,184 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:52:51,184 - rithmic.plant.history - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 19:53:01,888 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:53:03,513 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:53:04,901 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:53:07,268 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:53:17,556 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:53:17,757 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:53:17,786 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:53:17,787 - rithmic.plant.history - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 19:53:20,688 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:53:20,890 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:53:20,920 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:53:20,920 - rithmic.plant.ticker - INFO - Waiting 12.3s before reconnect attempt #1
+2026-09-23 19:53:30,186 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:53:30,451 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:53:33,255 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:53:33,681 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:53:45,073 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:53:45,272 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:53:45,301 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:53:45,302 - rithmic.plant.history - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 19:53:47,496 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:53:50,168 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:53:50,369 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:53:50,399 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:53:50,399 - rithmic.plant.ticker - INFO - Waiting 11.5s before reconnect attempt #1
+2026-09-23 19:53:56,952 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:53:57,245 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:53:57,274 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:53:57,275 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 19:53:57,277 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 19:54:01,897 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:54:02 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:54:02,313 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:54:07 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:54:08,100 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:54:08,898 - rithmic.plant.history - ERROR - Error processing response
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\src\utils\logger.py", line 90, in _process_loop_safe
+    await self._process_response(response)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\history.py", line 383, in _process_response
+    if await super()._process_response(response):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 550, in _process_response
+    raise RithmicErrorResponse(f"Rithmic returned an error={MessageToDict(response)} for the request={request}")
+async_rithmic.exceptions.RithmicErrorResponse: Rithmic returned an error={'userMsg': ['41a92720-2ef1-4bc5-8eac-bf13aa826267'], 'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'user_msg': '41a92720-2ef1-4bc5-8eac-bf13aa826267', 'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': '[REDACTED]', 'system_name': 'LucidTrading', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 3}
+2026-09-23 19:54:08,911 - rithmic.plant.history - ERROR - Login failed after reconnect: 'NoneType' object has no attribute 'heartbeat_interval'. Will retry.
+2026-09-23 19:54:08,912 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:54:08,912 - rithmic.plant.history - INFO - Waiting 10.5s before reconnect attempt #1
+2026-09-23 19:54:12 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:54:12,330 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:54:14,833 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:54:15,034 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:54:15,064 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:54:15,065 - rithmic.plant.ticker - INFO - Waiting 10.7s before reconnect attempt #1
+2026-09-23 19:54:19,444 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:54:19,814 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:54:19,844 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:54:19,846 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 19:54:19,848 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 19:54:24 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:54:25,798 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:54:26,234 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:54:31,072 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:54:31,322 - rithmic.plant.history - ERROR - Error processing response
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\src\utils\logger.py", line 90, in _process_loop_safe
+    await self._process_response(response)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\history.py", line 383, in _process_response
+    if await super()._process_response(response):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 550, in _process_response
+    raise RithmicErrorResponse(f"Rithmic returned an error={MessageToDict(response)} for the request={request}")
+async_rithmic.exceptions.RithmicErrorResponse: Rithmic returned an error={'userMsg': ['3700b9d9-8095-4afd-af2f-630a1d282b8d'], 'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'user_msg': '3700b9d9-8095-4afd-af2f-630a1d282b8d', 'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': '[REDACTED]', 'system_name': 'LucidTrading', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 3}
+2026-09-23 19:54:31,353 - rithmic.plant.history - ERROR - Login failed after reconnect: 'NoneType' object has no attribute 'heartbeat_interval'. Will retry.
+2026-09-23 19:54:31,354 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:54:31,356 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 19:54:31 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:54:33,917 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:54:38,138 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:54:38,338 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:54:38,368 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:54:38,369 - rithmic.plant.ticker - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 19:54:43,441 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:54:43,693 - rithmic.plant.history - ERROR - Error processing response
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\src\utils\logger.py", line 90, in _process_loop_safe
+    await self._process_response(response)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\history.py", line 383, in _process_response
+    if await super()._process_response(response):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 550, in _process_response
+    raise RithmicErrorResponse(f"Rithmic returned an error={MessageToDict(response)} for the request={request}")
+async_rithmic.exceptions.RithmicErrorResponse: Rithmic returned an error={'userMsg': ['bd821512-60c0-4e4d-96e9-eeaf64214194'], 'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'user_msg': 'bd821512-60c0-4e4d-96e9-eeaf64214194', 'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': '[REDACTED]', 'system_name': 'LucidTrading', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 3}
+2026-09-23 19:54:43,725 - rithmic.plant.history - ERROR - Login failed after reconnect: 'NoneType' object has no attribute 'heartbeat_interval'. Will retry.
+2026-09-23 19:54:43,726 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:54:43,728 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 19:54:43 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Unable to reconnect WebSocket
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 19:54:49,940 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:54:50,348 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:54:55,395 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:54:56,654 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:55:08,544 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:55:08,574 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:55:08,575 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:55:08,576 - rithmic.plant.ticker - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 19:55:12,487 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:55:13,814 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:55:13,844 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:55:13,845 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 19:55:20,182 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:55:24,232 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:55:25,501 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:55:25,948 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:55:42,031 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:55:42,032 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:55:42,157 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:55:42,182 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:55:42,183 - rithmic.plant.history - INFO - Waiting 10.9s before reconnect attempt #1
+2026-09-23 19:55:42,184 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:55:42,184 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:55:42,185 - rithmic.plant.ticker - INFO - Waiting 12.1s before reconnect attempt #1
+💓 19:55 ET MNQ 30765.00 | flat | Globex | bars->19:54 ET | RSI 44 gate short>=40/long<=65 | long waiting pullback | short needs bear stack (stack 15/5/1=1/1/1)
+2026-09-23 19:55:53,038 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:55:53,337 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:55:54,320 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:55:54,768 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:56:04,768 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:56:04,966 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:56:04,997 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:56:04,998 - rithmic.plant.history - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 19:56:07,485 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:56:07,686 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:56:07,716 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:56:07,718 - rithmic.plant.ticker - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 19:56:15,510 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:56:16,423 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:56:16,748 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:56:16,777 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:56:16,779 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 19:56:16,781 - rithmic.plant.history - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 19:56:19,365 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:56:19,793 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:56:21 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:56:26 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:56:27,430 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:56:27,698 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:56:29,471 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:56:29,669 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:56:29,699 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:56:29,702 - rithmic.plant.history - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 19:56:31 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:56:31 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 19:56:32,287 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:56:32,487 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:56:32,517 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:56:32,518 - rithmic.plant.ticker - INFO - Waiting 10.7s before reconnect attempt #1
+2026-09-23 19:56:33 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 19:56:35 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 19:56:40,359 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:56:41,467 - rithmic.plant.history - ERROR - Error processing response
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\src\utils\logger.py", line 90, in _process_loop_safe
+    await self._process_response(response)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\history.py", line 383, in _process_response
+    if await super()._process_response(response):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 550, in _process_response
+    raise RithmicErrorResponse(f"Rithmic returned an error={MessageToDict(response)} for the request={request}")
+async_rithmic.exceptions.RithmicErrorResponse: Rithmic returned an error={'userMsg': ['ae1101cf-0c94-4474-b29a-053564cfbff6'], 'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'user_msg': 'ae1101cf-0c94-4474-b29a-053564cfbff6', 'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': '[REDACTED]', 'system_name': 'LucidTrading', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 3}
+2026-09-23 19:56:41,498 - rithmic.plant.history - ERROR - Login failed after reconnect: 'NoneType' object has no attribute 'heartbeat_interval'. Will retry.
+2026-09-23 19:56:41,499 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:56:41,500 - rithmic.plant.history - INFO - Waiting 11.4s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 19:56:44,379 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:56:47,486 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:56:53,193 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:56:54,313 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:57:05,551 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:57:05,582 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:57:05,583 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:57:05,583 - rithmic.plant.ticker - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 19:57:06,762 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:57:06,791 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:57:06,792 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:57:06,793 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 19:57:19,351 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:57:19,403 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:57:23,019 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:57:24,402 - rithmic.plant.ticker - WARNING - Reconnect attempt #1 timed out
+2026-09-23 19:57:24,855 - rithmic.plant.ticker - INFO - Waiting 22.4s before reconnect attempt #2
+2026-09-23 19:57:38,405 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:57:38,605 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:57:38,635 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:57:38,636 - rithmic.plant.history - INFO - Waiting 10.7s before reconnect attempt #1
+2026-09-23 19:57:49,046 - rithmic.plant.ticker - INFO - Reconnection attempt #2
+2026-09-23 19:57:49,329 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:57:49,525 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:57:49,567 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:58:01,675 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:58:01,875 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:58:01,904 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:58:01,906 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:58:01,906 - rithmic.plant.ticker - INFO - Waiting 11.0s before reconnect attempt #1
+2026-09-23 19:58:02,082 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:58:02,083 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:58:02,084 - rithmic.plant.history - INFO - Waiting 10.5s before reconnect attempt #1
+2026-09-23 19:58:03,524 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:58:12,603 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:58:12,857 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:58:12,887 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:58:12,887 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 19:58:12,888 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:58:12,889 - rithmic.plant.history - INFO - Waiting 11.8s before reconnect attempt #1
+2026-09-23 19:58:13,279 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:58:17 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:58:22 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:58:24,659 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:58:24,882 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:58:26,437 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:58:26,637 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:58:26,638 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:58:26,639 - rithmic.plant.history - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 19:58:27 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 19:58:27 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 19:58:29,216 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:58:29,416 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:58:29,418 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:58:29,418 - rithmic.plant.ticker - INFO - Waiting 10.9s before reconnect attempt #1
+2026-09-23 19:58:29 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 19:58:31 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 19:58:38,257 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:58:38,500 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:58:40,525 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:58:43,806 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:58:54,860 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:58:54,890 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:58:54,891 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:58:54,892 - rithmic.plant.history - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 19:59:00,805 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:59:00,846 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:59:00,847 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:59:00,847 - rithmic.plant.ticker - INFO - Waiting 11.5s before reconnect attempt #1
+2026-09-23 19:59:07,470 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:59:08,580 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:59:13,301 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:59:16,357 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:59:21,955 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:59:21,985 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:59:21,986 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:59:21,986 - rithmic.plant.history - INFO - Waiting 11.1s before reconnect attempt #1
+💓 19:59 ET MNQ 30757.75 | flat | Globex | bars->19:58 ET | RSI 39 gate short>=40/long<=65 | long waiting pullback | short needs bear stack (stack 15/5/1=1/1/1)
+2026-09-23 19:59:29,659 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:59:29,859 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:59:29,889 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:59:29,891 - rithmic.plant.ticker - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 19:59:33,054 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:59:33,301 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:59:42,284 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 19:59:42,732 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 19:59:45,656 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:59:45,855 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:59:45,886 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:59:45,887 - rithmic.plant.history - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 19:59:55,358 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 19:59:55,560 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 19:59:55,591 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:59:55,592 - rithmic.plant.ticker - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 19:59:57,975 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 19:59:58,037 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 19:59:58,194 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 19:59:58,225 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 19:59:58,226 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 19:59:58,228 - rithmic.plant.history - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:00:03 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:00:07,734 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:00:08,171 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:00:08 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:00:09,586 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:00:09,790 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:00:13 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:00:13 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:00:14 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:00:17 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:00:22,662 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:00:22,692 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:00:22,693 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:00:22,693 - rithmic.plant.ticker - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 20:00:23,840 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:00:24,050 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:00:24,080 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:00:24,081 - rithmic.plant.history - INFO - Waiting 12.4s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:00:35,810 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:00:37,919 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:00:39,137 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:00:41,290 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:00:42 - TradingBot - WARNING - Rithmic ORDER SUBMIT: bot_e5488c43a1 buy 1 MNQ | $2/pt tick=0.25 risk~$20 reward~$20 | account=LFE050-IBWS3708-TEST012 trade_route=simulator
+2026-09-23 20:00:43 - TradingBot - INFO - Entry fill price for bot_e5488c43a1 MNQ: signal 30757.75 → fill 30756.50 (re-anchor SL/TP to fill)
+2026-09-23 20:00:43 - TradingBot - INFO - Lucid bot_e5488c43a1: SL/TP ticks locked at entry signal (no post-fill modify on sim) stop_ticks=41 target_ticks=41
+2026-09-23 20:00:43 - TradingBot - INFO - Rithmic bot_e5488c43a1: submitting SL STOP-LIMIT + TP LIMIT with fill @ SL=30746.25 TP=30766.75
+2026-09-23 20:00:45 - TradingBot - INFO - SL verified trigger=30746.25 limit=30745.75 — bot_e5488c43a1_sl MNQZ6 (SELL stop closes long) price_type=STOP_LIMIT
+2026-09-23 20:00:45 - TradingBot - INFO - Rithmic SL basket cached bot_e5488c43a1_sl basket=231500595
+2026-09-23 20:00:48 - TradingBot - INFO - TP LIMIT verified @ 30766.75 — bot_e5488c43a1_tp MNQZ6 (SELL LIMIT closes long) price_type=LIMIT
+2026-09-23 20:00:48 - TradingBot - INFO - Rithmic TP basket cached bot_e5488c43a1_tp basket=231500618
+2026-09-23 20:00:48 - TradingBot - INFO - Lucid (LONG): SELL STOP-LIMIT = Stop Loss, SELL LIMIT = Take Profit.
+2026-09-23 20:00:48 - TradingBot - INFO - Lucid (LONG): SELL STOP-LIMIT = Stop Loss, SELL LIMIT = Take Profit.
+2026-09-23 20:00:48 - TradingBot - INFO - Rithmic order placed: bot_e5488c43a1 buy 1 MNQ | brackets=immediate_protective SL=yes TP=yes
+📈 ENTRY LONG LONG @ 30756.50 | SL 30746.25 ✓ | TP 30766.75 ✓ | RSI 51 | #bot_e5488c43a1
+2026-09-23 20:00:56,401 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:00:56,432 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:00:56,434 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:00:56,434 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:00:56,434 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:00:56,435 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:00:56,436 - rithmic.plant.history - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:00:56,436 - rithmic.plant.ticker - INFO - Waiting 11.8s before reconnect attempt #1
+2026-09-23 20:01:09,032 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:01:09,091 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:01:10,362 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:01:12,730 - rithmic.plant.ticker - INFO - Reconnection successful.
+💓 20:01 ET MNQ 30752.00 | open 1: 📈 L 30756 SL30746 TP30767
+2026-09-23 20:01:24,209 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:01:24,407 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:01:24,408 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:01:24,409 - rithmic.plant.history - INFO - Waiting 10.7s before reconnect attempt #1
+2026-09-23 20:01:25,572 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:01:25,773 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:01:25,802 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:01:25,803 - rithmic.plant.ticker - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:01:35,092 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:01:35,381 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:01:37,261 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:01:37,733 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:01:47,151 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:01:47,349 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:01:47,379 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:01:47,383 - rithmic.plant.history - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 20:01:50,644 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:01:50,844 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:01:50,874 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:01:50,875 - rithmic.plant.ticker - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:01:54,924 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:01:57,968 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:01:58,207 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:01:58,236 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:01:58,237 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:01:58,239 - rithmic.plant.history - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:02:02,920 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:02:03 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:02:03,433 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:02:08 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:02:10,202 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:02:10,420 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:02:13 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:02:13 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:02:14 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:02:17 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:02:19,284 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:02:19,314 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:02:19,315 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:02:19,316 - rithmic.plant.ticker - INFO - Waiting 12.4s before reconnect attempt #1
+🔚 EXIT LONG BROKER @ 30756.50 (long from 30756.50)
+🧹 CHART CLEARED (exit_broker): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:02:25,088 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+🧹 CHART CLEARED (post_exit_flat): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:02:25,287 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:02:25,288 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:02:25,288 - rithmic.plant.history - INFO - Waiting 12.0s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:02:32,143 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:02:37,201 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:02:37,320 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:02:40,688 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:02:54,638 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:02:54,674 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:02:54,676 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:02:54,677 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:02:54,677 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:02:54,678 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:02:54,678 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 20:02:54,679 - rithmic.plant.ticker - INFO - Waiting 12.2s before reconnect attempt #1
+2026-09-23 20:03:07,329 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:03:07,383 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:03:10,321 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:03:11,306 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:03:22,766 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:03:22,966 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:03:22,997 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:03:22,998 - rithmic.plant.ticker - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:03:23,267 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:03:23,465 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:03:23,495 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:03:23,497 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:03:34,747 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:03:34,970 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:03:35,000 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:03:35,383 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:03:49,463 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:03:51,376 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:03:51,408 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:03:51,409 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:03:51,410 - rithmic.plant.history - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 20:03:52,371 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:03:52,372 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:03:52,373 - rithmic.plant.ticker - INFO - Waiting 10.8s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:04:02,683 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:04:04,898 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:04:05,053 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:04:08,399 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:04:27,097 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:04:27,127 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:04:27,127 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:04:27,128 - rithmic.plant.ticker - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:04:39,401 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:04:42,501 - rithmic.plant.ticker - INFO - Reconnection successful.
+💓 20:04 ET MNQ 30750.50 | flat | Globex | bars->20:03 ET | RSI 48 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+2026-09-23 20:04:45,844 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:04:46,042 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:04:46,071 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:04:46,072 - rithmic.plant.history - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:04:55,866 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:04:56,066 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:04:56,096 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:04:56,097 - rithmic.plant.ticker - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:04:57,337 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:04:57,560 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:05:07,274 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:05:07,711 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:05:09,829 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:05:10,028 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:05:10,058 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:05:10,058 - rithmic.plant.history - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 20:05:14,413 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:05:19,081 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:05:19,282 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:05:19,312 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:05:19,313 - rithmic.plant.ticker - INFO - Waiting 11.7s before reconnect attempt #1
+2026-09-23 20:05:20,666 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:05:20,906 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:05:20,935 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:05:20,936 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:05:20,937 - rithmic.plant.history - INFO - Waiting 12.5s before reconnect attempt #1
+2026-09-23 20:05:25 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:05:31,030 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:05:31 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:05:31,455 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:05:33,415 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:05:33,635 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:05:34,657 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:05:34,855 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:05:34,857 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:05:34,859 - rithmic.plant.history - INFO - Waiting 11.7s before reconnect attempt #1
+2026-09-23 20:05:36 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:05:36 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:05:37 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:05:40 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:05:46,530 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:05:46,583 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:05:46,731 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:05:46,761 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:05:46,762 - rithmic.plant.ticker - INFO - Waiting 11.5s before reconnect attempt #1
+2026-09-23 20:05:46,807 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:05:59,355 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:06:00,820 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:06:03,110 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:06:03,140 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:06:03,141 - rithmic.plant.history - INFO - Waiting 10.9s before reconnect attempt #1
+2026-09-23 20:06:03,225 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:06:14,225 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:06:15,548 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:06:24,897 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:06:24,902 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:06:24,902 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:06:24,903 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:06:24,903 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:06:24,904 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:06:24,904 - rithmic.plant.ticker - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:06:24,905 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 20:06:36,269 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:06:36,298 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:06:38,623 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:06:40,098 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:06:53,260 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:06:53,458 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:06:53,488 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:06:53,489 - rithmic.plant.history - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:06:56,219 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:06:56,419 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:06:56,435 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:06:56,435 - rithmic.plant.ticker - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 20:07:04,934 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:07:05,195 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:07:08,847 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:07:09,285 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:07:18,420 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:07:19,703 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:07:19,714 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:07:19,715 - rithmic.plant.history - INFO - Waiting 10.7s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:07:23,292 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:07:23,294 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:07:23,294 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:07:23,295 - rithmic.plant.ticker - INFO - Waiting 11.5s before reconnect attempt #1
+2026-09-23 20:07:30,700 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:07:33,359 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:07:35,115 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:07:36,567 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:07:45,736 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:07:45,737 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:07:45,738 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:07:45,739 - rithmic.plant.history - INFO - Waiting 12.2s before reconnect attempt #1
+2026-09-23 20:07:48,785 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:07:49,138 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:07:50,587 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:07:50,633 - rithmic.plant.ticker - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:07:58,831 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:08:01,235 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:08:02,761 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:08:08,162 - rithmic.plant.ticker - INFO - Reconnection successful.
+💓 20:08 ET MNQ 30746.50 | flat | Globex | bars->20:07 ET | RSI 27 gate short>=40/long<=65 | long needs bull stack (stack 15/5/1=1/-1/-1) | short needs bear stack (stack 15/5/1=1/-1/-1)
+2026-09-23 20:08:14,162 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:08:14,361 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:08:14,391 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:08:14,392 - rithmic.plant.history - INFO - Waiting 10.9s before reconnect attempt #1
+2026-09-23 20:08:24,959 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:08:25,161 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:08:25,190 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:08:25,191 - rithmic.plant.ticker - INFO - Waiting 12.2s before reconnect attempt #1
+2026-09-23 20:08:25,237 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:08:25,433 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:08:37,440 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:08:37,862 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:08:39,899 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:08:40,072 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:08:40,073 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:08:40,074 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 20:08:41,561 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:08:51,203 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:08:51,404 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:08:51,406 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:08:51,407 - rithmic.plant.ticker - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:08:52,160 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:08:52,379 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:08:52,381 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:08:52,382 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:08:52,384 - rithmic.plant.history - INFO - Waiting 11.5s before reconnect attempt #1
+2026-09-23 20:08:57 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:09:02 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:09:02,607 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:09:03,082 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:09:03,898 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:09:04,130 - rithmic.plant.history - ERROR - Error processing response
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\src\utils\logger.py", line 90, in _process_loop_safe
+    await self._process_response(response)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\history.py", line 383, in _process_response
+    if await super()._process_response(response):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 550, in _process_response
+    raise RithmicErrorResponse(f"Rithmic returned an error={MessageToDict(response)} for the request={request}")
+async_rithmic.exceptions.RithmicErrorResponse: Rithmic returned an error={'userMsg': ['21e6c850-76ad-4b9e-9ab2-315dc7513f5c'], 'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'user_msg': '21e6c850-76ad-4b9e-9ab2-315dc7513f5c', 'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': '[REDACTED]', 'system_name': 'LucidTrading', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 3}
+2026-09-23 20:09:04,137 - rithmic.plant.history - ERROR - Login failed after reconnect: 'NoneType' object has no attribute 'heartbeat_interval'. Will retry.
+2026-09-23 20:09:04,138 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:09:04,139 - rithmic.plant.history - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 20:09:07 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:09:07 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:09:08 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:09:11 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:09:16,333 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:09:16,365 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:09:16,366 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:09:16,367 - rithmic.plant.ticker - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:09:17,335 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:09:17,558 - rithmic.plant.history - INFO - Reconnection successful.
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:09:27,789 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:09:30,305 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:09:32,162 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:09:32,164 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:09:32,164 - rithmic.plant.history - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 20:09:32,274 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:09:44,948 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:09:44,989 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:09:44,990 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:09:44,991 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:09:44,991 - rithmic.plant.ticker - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 20:09:46,111 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:09:58,037 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:10:02,107 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:10:03,334 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:10:03,365 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:10:03,365 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:10:03,366 - rithmic.plant.history - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:10:15,320 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:10:15,593 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:10:18,214 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:10:18,416 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:10:18,417 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:10:18,417 - rithmic.plant.ticker - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 20:10:29,007 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:10:29,434 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:10:30,221 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:10:30,420 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:10:30,449 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:10:30,450 - rithmic.plant.history - INFO - Waiting 11.9s before reconnect attempt #1
+2026-09-23 20:10:39,577 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:10:42,328 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:10:42,554 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:10:42,585 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:10:42,585 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:10:42,586 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:10:43,143 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:10:43,345 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:10:43,375 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:10:43,377 - rithmic.plant.ticker - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:10:47 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:10:52 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:10:53,810 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:10:54,114 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:10:54,796 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:10:55,259 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:10:57 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:10:57 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:10:59 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:11:01 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:11:06,333 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:11:06,364 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:11:06,365 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:11:06,366 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 20:11:07,559 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:11:07,759 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:11:07,789 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:11:07,790 - rithmic.plant.ticker - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 20:11:17,154 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:11:19,036 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:11:19,153 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:11:22,128 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:11:35,382 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:11:35,411 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:11:35,412 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:11:35,412 - rithmic.plant.history - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:11:38,943 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:11:38,944 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:11:38,945 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:11:38,945 - rithmic.plant.ticker - INFO - Waiting 12.2s before reconnect attempt #1
+2026-09-23 20:11:47,594 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:11:50,491 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:11:52,622 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:11:56,102 - rithmic.plant.ticker - INFO - Reconnection successful.
+💓 20:11 ET MNQ 30726.00 | flat | Globex | bars->20:11 ET | RSI 26 gate short>=40/long<=65 | long waiting pullback | short needs bear stack (stack 15/5/1=1/1/1)
+2026-09-23 20:12:05,327 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:12:05,525 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:12:05,554 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:12:05,555 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 20:12:11,533 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:12:11,733 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:12:11,764 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:12:11,765 - rithmic.plant.ticker - INFO - Waiting 12.3s before reconnect attempt #1
+2026-09-23 20:12:16,406 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:12:16,655 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:12:24,133 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:12:24,696 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:12:29,406 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:12:29,438 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:12:29,439 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:12:29,439 - rithmic.plant.history - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 20:12:29,454 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:12:37,590 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:12:37,792 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:12:37,822 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:12:37,823 - rithmic.plant.ticker - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:12:40,049 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:12:40,291 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:12:40,319 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:12:40,321 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:12:40,323 - rithmic.plant.history - INFO - Waiting 10.7s before reconnect attempt #1
+2026-09-23 20:12:45 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:12:49,207 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:12:49,755 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:12:50 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:12:50,987 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:12:51,237 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:12:55 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:12:55 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:12:56 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:12:59 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:13:02,349 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:13:02,378 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:13:02,379 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:13:02,380 - rithmic.plant.ticker - INFO - Waiting 11.9s before reconnect attempt #1
+2026-09-23 20:13:04,190 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:13:05,166 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:13:05,196 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:13:05,197 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:13:14,739 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:13:16,623 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:13:17,649 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:13:19,457 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:13:31,103 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:13:31,143 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:13:31,146 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:13:31,147 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:13:31,148 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:13:31,149 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:13:31,150 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 20:13:31,150 - rithmic.plant.ticker - INFO - Waiting 10.5s before reconnect attempt #1
+2026-09-23 20:13:43,046 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:13:43,095 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:13:44,262 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:13:46,129 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:13:46,159 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:13:46,160 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:13:46,161 - rithmic.plant.history - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 20:13:47,185 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:13:57,280 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:13:57,550 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:14:03,880 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:14:04,080 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:14:04,085 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:14:04,085 - rithmic.plant.ticker - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:14:10,892 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:14:11,090 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:14:11,120 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:14:11,120 - rithmic.plant.history - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 20:14:15,352 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:14:15,802 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:14:22,865 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:14:23,505 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:14:23,750 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:14:23,780 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:14:23,780 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:14:23,781 - rithmic.plant.history - INFO - Waiting 11.8s before reconnect attempt #1
+2026-09-23 20:14:26,930 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:14:27,131 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:14:27,161 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:14:27,162 - rithmic.plant.ticker - INFO - Waiting 12.5s before reconnect attempt #1
+2026-09-23 20:14:28 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:14:33 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:14:35,620 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:14:35,859 - rithmic.plant.history - ERROR - Error processing response
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\src\utils\logger.py", line 90, in _process_loop_safe
+    await self._process_response(response)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\history.py", line 383, in _process_response
+    if await super()._process_response(response):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 550, in _process_response
+    raise RithmicErrorResponse(f"Rithmic returned an error={MessageToDict(response)} for the request={request}")
+async_rithmic.exceptions.RithmicErrorResponse: Rithmic returned an error={'userMsg': ['7211126d-1104-456f-abc4-c4468ff2954b'], 'rpCode': ['13', 'permission denied'], 'templateId': 11} for the request={'user_msg': '7211126d-1104-456f-abc4-c4468ff2954b', 'template_id': 10, 'template_version': '3.9', 'user': 'LT-Z8WS597N', 'password': '[REDACTED]', 'system_name': 'LucidTrading', 'app_name': 'AiScalpBot', 'app_version': '1.0', 'infra_type': 3}
+2026-09-23 20:14:35,862 - rithmic.plant.history - ERROR - Login failed after reconnect: 'NoneType' object has no attribute 'heartbeat_interval'. Will retry.
+2026-09-23 20:14:35,864 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:14:35,865 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 20:14:38 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:14:38 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:14:39,657 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:14:40,116 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:14:40 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:14:42 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:14:48,602 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:14:48,879 - rithmic.plant.history - INFO - Reconnection successful.
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:14:54,535 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:14:54,567 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:14:54,568 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:14:54,569 - rithmic.plant.ticker - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:15:00,100 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:15:01,136 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:15:01,164 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:15:01,165 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 20:15:06,065 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:15:09,045 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:15:14,946 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:15:16,370 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:15:23,372 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:15:23,403 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:15:23,404 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:15:23,404 - rithmic.plant.ticker - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:15:34,490 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:15:34,491 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:15:34,492 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:15:34,492 - rithmic.plant.history - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:15:35,738 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:15:39,372 - rithmic.plant.ticker - INFO - Reconnection successful.
+💓 20:15 ET MNQ 30737.25 | flat | Globex | bars->20:14 ET | RSI 28 gate short>=40/long<=65 | long waiting pullback | short needs bear stack (stack 15/5/1=1/1/1)
+2026-09-23 20:15:45,743 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:15:45,976 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:15:55,279 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:15:55,480 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:15:55,509 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:15:55,510 - rithmic.plant.ticker - INFO - Waiting 11.0s before reconnect attempt #1
+2026-09-23 20:15:59,454 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:15:59,653 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:15:59,654 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:15:59,655 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-09-23 20:16:06,546 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:16:07,259 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:16:11,472 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:16:11,704 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:16:11,983 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:16:12,013 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:16:12,014 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:16:12,016 - rithmic.plant.history - INFO - Waiting 11.6s before reconnect attempt #1
+2026-09-23 20:16:17 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:16:19,657 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:16:19,860 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:16:19,889 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:16:19,891 - rithmic.plant.ticker - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 20:16:22 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:16:23,676 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:16:23,935 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:16:27 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:16:27 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:16:28 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:16:31,004 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:16:31 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:16:36,633 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:16:36,671 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:16:36,672 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:16:36,673 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:16:36,674 - rithmic.plant.history - INFO - Waiting 11.1s before reconnect attempt #1
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:16:47,797 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:16:49,736 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:16:49,847 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:16:50,830 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:16:50,831 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:16:50,832 - rithmic.plant.ticker - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 20:17:02,259 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:17:05,543 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:17:05,573 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:17:05,574 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:17:05,575 - rithmic.plant.history - INFO - Waiting 11.7s before reconnect attempt #1
+2026-09-23 20:17:07,953 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:17:18,265 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:17:19,540 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:17:25,184 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:17:25,227 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:17:25,227 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:17:25,228 - rithmic.plant.ticker - INFO - Waiting 10.6s before reconnect attempt #1
+2026-09-23 20:17:35,136 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:17:35,336 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:17:35,366 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:17:35,367 - rithmic.plant.history - INFO - Waiting 10.9s before reconnect attempt #1
+2026-09-23 20:17:35,809 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:17:36,274 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:17:46,307 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:17:46,582 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:17:49,640 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:17:49,840 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:17:49,871 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:17:49,873 - rithmic.plant.ticker - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:17:59,109 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:17:59,307 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:17:59,337 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:17:59,339 - rithmic.plant.history - INFO - Waiting 10.8s before reconnect attempt #1
+2026-09-23 20:18:01,742 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:18:01,789 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:18:02,167 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:18:10,118 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:18:10,384 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:18:10,413 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:18:10,414 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:18:10,417 - rithmic.plant.history - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 20:18:14,659 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:18:14,860 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:18:14,889 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:18:14,890 - rithmic.plant.ticker - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:18:15 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:18:20 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:18:21,518 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:18:21,755 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:18:25 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:18:25 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:18:26,228 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:18:26,682 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:18:27 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:18:29 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:18:38,518 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:18:38,521 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:18:38,521 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:18:38,522 - rithmic.plant.history - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:18:44,561 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:18:44,562 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:18:44,563 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:18:44,564 - rithmic.plant.ticker - INFO - Waiting 12.4s before reconnect attempt #1
+2026-09-23 20:18:50,319 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:18:51,508 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:18:57,215 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:19:00,750 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:19:05,256 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:19:05,286 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:19:05,286 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:19:05,287 - rithmic.plant.history - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 20:19:18,082 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:19:18,124 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:19:18,125 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:19:18,126 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:19:18,126 - rithmic.plant.ticker - INFO - Waiting 11.7s before reconnect attempt #1
+2026-09-23 20:19:19,319 - rithmic.plant.history - INFO - Reconnection successful.
+💓 20:19 ET MNQ 30741.50 | flat | Globex | bars->20:18 ET | RSI 37 gate short>=40/long<=65 | long waiting pullback | short needs bear stack (stack 15/5/1=1/1/1)
+2026-09-23 20:19:29,641 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:19:29,835 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:19:29,865 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:19:29,867 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:19:29,869 - rithmic.plant.history - INFO - Waiting 11.0s before reconnect attempt #1
+2026-09-23 20:19:30,289 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:19:40,920 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:19:41,717 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:19:42,773 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:19:42,973 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:19:43,002 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:19:43,004 - rithmic.plant.ticker - INFO - Waiting 10.9s before reconnect attempt #1
+2026-09-23 20:19:53,396 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:19:53,596 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:19:53,625 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:19:53,625 - rithmic.plant.history - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 20:19:53,880 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:19:54,294 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:19:57,585 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:20:04,731 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:20:04,920 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:20:04,949 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:20:04,950 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:20:04,951 - rithmic.plant.history - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:20:09,865 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:20:09 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:20:10,066 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:20:10,067 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:20:10,067 - rithmic.plant.ticker - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:20:14 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:20:16,384 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:20:16,638 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:20:19,395 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:20:19,594 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:20:19,598 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:20:19,600 - rithmic.plant.history - INFO - Waiting 12.0s before reconnect attempt #1
+2026-09-23 20:20:20 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:20:20 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:20:21,265 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:20:21 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:20:21,721 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:20:24 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:20:31,864 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:20:32,100 - rithmic.plant.history - INFO - Reconnection successful.
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:20:38,615 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:20:38,618 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:20:38,619 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:20:38,619 - rithmic.plant.ticker - INFO - Waiting 11.5s before reconnect attempt #1
+2026-09-23 20:20:48,684 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:20:48,705 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:20:48,705 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:20:48,706 - rithmic.plant.history - INFO - Waiting 11.0s before reconnect attempt #1
+2026-09-23 20:20:50,213 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:20:55,610 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:20:59,873 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:21:01,854 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:21:07,797 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:21:07,828 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:21:07,829 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:21:07,829 - rithmic.plant.ticker - INFO - Waiting 12.3s before reconnect attempt #1
+2026-09-23 20:21:14,424 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:21:14,454 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:21:14,456 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:21:14,456 - rithmic.plant.history - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:21:20,116 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:21:20,777 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:21:25,817 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:21:26,069 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:21:36,760 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:21:36,960 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:21:36,986 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:21:36,987 - rithmic.plant.ticker - INFO - Waiting 10.5s before reconnect attempt #1
+2026-09-23 20:21:40,592 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:21:40,793 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:21:40,823 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:21:40,823 - rithmic.plant.history - INFO - Waiting 10.7s before reconnect attempt #1
+2026-09-23 20:21:47,509 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:21:48,037 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:21:52,232 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:21:52,294 - rithmic.plant.history - ERROR - WebSocket connection closed unexpectedly while sending a message (template_id=202)
+Traceback (most recent call last):
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\async_rithmic\plants\base.py", line 290, in _send
+    await self.ws.send(message)
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 465, in send
+    async with self.send_context():
+               ^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\shawa\Projects\bott-trader\venv\Lib\site-packages\websockets\asyncio\connection.py", line 934, in send_context
+    raise self.protocol.close_exc from original_exc
+websockets.exceptions.ConnectionClosedError: received 1011 (internal error) permission denied; then sent 1011 (internal error) permission denied
+2026-09-23 20:21:52,496 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:21:52,526 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:21:52,527 - rithmic.plant.history - INFO - Retrying send after successful reconnect
+2026-09-23 20:21:52,527 - rithmic.plant.history - INFO - Waiting 10.7s before reconnect attempt #1
+2026-09-23 20:21:57 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:22:02 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:22:03,226 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:22:03,463 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:22:03,746 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:22:03,947 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:22:03,948 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:22:03,948 - rithmic.plant.ticker - INFO - Waiting 11.4s before reconnect attempt #1
+2026-09-23 20:22:06,566 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:22:06,766 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:22:06,795 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:22:06,795 - rithmic.plant.history - INFO - Waiting 11.1s before reconnect attempt #1
+2026-09-23 20:22:07 - TradingBot - WARNING - Rithmic candles error for MNQ: Historical data request stalled: no data or completion message received for 5.0s
+2026-09-23 20:22:07 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:22:09 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:22:11 - TradingBot - WARNING - Rithmic SECOND_BAR fetch failed for MNQ (30s): Cannot start another historical time bar request with the same symbol, exchange, bar type, and period while one is already in progress.
+2026-09-23 20:22:15,378 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:22:18,251 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:22:18,484 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:22:18,515 - rithmic.plant.history - INFO - Reconnection successful.
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:22:30,546 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:22:31,513 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:22:31,543 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:22:31,548 - rithmic.plant.history - INFO - Waiting 12.3s before reconnect attempt #1
+2026-09-23 20:22:31,562 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:22:31,916 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:22:33,264 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:22:33,312 - rithmic.plant.ticker - INFO - Waiting 11.9s before reconnect attempt #1
+2026-09-23 20:22:34 - TradingBot - WARNING - Rithmic ORDER SUBMIT: bot_c0ed74b9bb buy 1 MNQ | $2/pt tick=0.25 risk~$27 reward~$27 | account=LFE050-IBWS3708-TEST012 trade_route=simulator
+2026-09-23 20:22:34 - TradingBot - INFO - Entry fill price for bot_c0ed74b9bb MNQ: signal 30735.50 → fill 30737.25 (re-anchor SL/TP to fill)
+2026-09-23 20:22:34 - TradingBot - INFO - Lucid bot_c0ed74b9bb: SL/TP ticks locked at entry signal (no post-fill modify on sim) stop_ticks=54 target_ticks=54
+2026-09-23 20:22:34 - TradingBot - INFO - Rithmic bot_c0ed74b9bb: submitting SL STOP-LIMIT + TP LIMIT with fill @ SL=30723.75 TP=30750.75
+2026-09-23 20:22:37 - TradingBot - INFO - SL verified trigger=30723.75 limit=30723.25 — bot_c0ed74b9bb_sl MNQZ6 (SELL stop closes long) price_type=STOP_LIMIT
+2026-09-23 20:22:37 - TradingBot - INFO - Rithmic SL basket cached bot_c0ed74b9bb_sl basket=231525909
+2026-09-23 20:22:39 - TradingBot - INFO - TP LIMIT verified @ 30750.75 — bot_c0ed74b9bb_tp MNQZ6 (SELL LIMIT closes long) price_type=LIMIT
+2026-09-23 20:22:39 - TradingBot - INFO - Rithmic TP basket cached bot_c0ed74b9bb_tp basket=231526000
+2026-09-23 20:22:39 - TradingBot - INFO - Lucid (LONG): SELL STOP-LIMIT = Stop Loss, SELL LIMIT = Take Profit.
+2026-09-23 20:22:39 - TradingBot - INFO - Lucid (LONG): SELL STOP-LIMIT = Stop Loss, SELL LIMIT = Take Profit.
+2026-09-23 20:22:40 - TradingBot - INFO - Rithmic order placed: bot_c0ed74b9bb buy 1 MNQ | brackets=immediate_protective SL=yes TP=yes
+📈 ENTRY LONG LONG @ 30737.25 | SL 30723.75 ✓ | TP 30750.75 ✓ | RSI 44 | #bot_c0ed74b9bb
+2026-09-23 20:22:43,970 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:22:45,835 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:22:46,935 - rithmic.plant.history - INFO - Reconnection successful.
+2026-09-23 20:22:49,796 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:22:58,297 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:22:58,299 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:22:58,299 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:22:58,300 - rithmic.plant.history - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:23:11,350 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:23:14,716 - rithmic.plant.history - INFO - Reconnection successful.
+💓 20:23 ET MNQ 30729.25 | open 1: 📈 L 30737 SL30724 TP30751
+2026-09-23 20:23:32,470 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:23:32,671 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:23:32,673 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:23:32,674 - rithmic.plant.ticker - INFO - Waiting 11.3s before reconnect attempt #1
+2026-09-23 20:23:33,630 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:23:33,828 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:23:33,830 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:23:33,831 - rithmic.plant.history - INFO - Waiting 12.2s before reconnect attempt #1
+2026-09-23 20:23:44,005 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-09-23 20:23:44,426 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-09-23 20:23:46,003 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:23:46,222 - rithmic.plant.history - INFO - Reconnection successful.
+🔚 EXIT LONG BROKER @ 30737.25 (long from 30737.25)
+🧹 CHART CLEARED (exit_broker): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+🧹 CHART CLEARED (post_exit_flat): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-09-23 20:24:02,785 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-09-23 20:24:02,831 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-09-23 20:24:02,832 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-09-23 20:24:02,834 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-09-23 20:24:14,231 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-09-23 20:24:18,451 - rithmic.plant.history - INFO - Reconnection successful.

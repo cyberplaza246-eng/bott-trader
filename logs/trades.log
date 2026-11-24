@@ -95,3 +95,980 @@
 {"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$51.56"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MES @ 6684.54 PnL=$50.31"}
 {"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MES @ 6689.25 SL=6693.87 TP=6680.02"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31145.00 SL=31075.00 TP=31229.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31177.75 SL=31111.63 TP=31257.09"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31184.75 SL=31114.00 TP=31269.65"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31209.50 SL=31134.50 TP=31299.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31226.25 SL=31151.25 TP=31316.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31246.25 SL=31173.73 TP=31333.28"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31253.00 SL=31178.00 TP=31343.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31055.25 SL=31121.27 TP=30945.81"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31025.00 SL=31090.51 TP=30941.28"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31035.00 SL=31094.44 TP=30942.78"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31233.00 SL=31158.00 TP=31323.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31227.50 SL=31175.98 TP=31289.32"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31268.50 SL=31207.95 TP=31341.16"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31265.00 SL=31208.26 TP=31333.09"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31248.50 SL=31208.34 TP=31296.69"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31276.00 SL=31228.52 TP=31332.97"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31294.25 SL=31264.89 TP=31329.49"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31293.25 SL=31264.84 TP=31327.34"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31311.25 SL=31265.68 TP=31365.93"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31354.25 SL=31299.51 TP=31419.94"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31369.00 SL=31333.15 TP=31412.02"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31351.75 SL=31326.80 TP=31381.69"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31332.00 SL=31311.66 TP=31369.83"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31335.00 SL=31315.09 TP=31370.28"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31391.50 SL=31367.20 TP=31420.66"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31387.75 SL=31362.76 TP=31417.74"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31370.00 PnL=$-52.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31381.00 PnL=$-53.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31344.75 SL=31317.43 TP=31377.53"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31338.00 SL=31310.87 TP=31370.56"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31309.00 PnL=$-57.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31577.75 SL=31455.50 TP=31822.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31516.25 SL=31541.49 TP=31485.96"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31514.75 SL=31539.98 TP=31484.47"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31506.50 SL=31535.84 TP=31471.29"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31470.00 PnL=$68.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31493.00 SL=31516.50 TP=31464.80"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31493.50 SL=31515.14 TP=31467.53"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31516.25 SL=31534.60 TP=31494.23"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31512.25 SL=31530.55 TP=31490.30"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31490.75 PnL=$41.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31493.50 PnL=$42.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31494.00 SL=31514.08 TP=31469.91"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31492.00 SL=31512.36 TP=31467.56"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31500.50 PnL=$-16.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31494.25 SL=31515.52 TP=31468.73 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31494.00 PnL=$-6.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31493.00 SL=31512.50 TP=31469.60 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31494.75 PnL=$-24.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31447.75 SL=31437.50 TP=31521.00 contracts=1 confidence=0.800 reason=gated day_not_green pnl=0.00,streak=0<2 want=3"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31431.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31444.75 SL=31469.27 TP=31415.33 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31458.25 SL=31483.18 TP=31428.33 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31461.75 PnL=$-29.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31405.50 SL=31482.00 TP=31252.50 contracts=1 confidence=0.800 reason=gated day_not_green pnl=0.00,streak=0<2 want=3"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31253.25 PnL=$303.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31180.50 SL=31281.50 TP=30978.50 contracts=2 confidence=0.765 reason=scale conf=0.765"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31324.75 SL=31399.75 TP=31199.75 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31324.25 SL=31285.71 TP=31370.50 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31332.25 PnL=$5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31330.25 SL=31293.93 TP=31373.84 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31365.00 PnL=$35.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31364.75 SL=31327.75 TP=31409.16 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31449.00 SL=31380.00 TP=31587.00 contracts=2 confidence=0.761 reason=scale conf=0.761"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31381.50 PnL=$-273.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31437.75 SL=31409.32 TP=31471.87 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31416.25 PnL=$-59.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31410.00 SL=31384.61 TP=31452.29 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31386.75 PnL=$-53.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31378.25 SL=31424.45 TP=31322.81 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31325.75 PnL=$108.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31343.50 SL=31399.12 TP=31276.76 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31281.00 PnL=$131.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31273.50 SL=31326.08 TP=31210.40 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31218.00 PnL=$124.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31221.75 SL=31296.75 TP=31131.75 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31295.00 PnL=$-152.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31247.50 SL=31286.16 TP=31201.11 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31197.25 PnL=$90.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31128.50 SL=31192.77 TP=31051.38 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31202.50 PnL=$-132.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31193.75 SL=31231.02 TP=31141.98 contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31235.00 PnL=$-77.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31069.50 SL=31303.00 TP=30602.50 contracts=1 confidence=0.638 reason=base conf=0.638<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 contracts=1 confidence=0.707 reason=base conf=0.707<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30923.75 PnL=$-93.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30965.50 SL=31072.50 TP=30751.50 conf 70% contracts=1 confidence=0.704 reason=base conf=0.704<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31083.50 PnL=$-217.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31083.50 PnL=$-217.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31083.50 PnL=$-217.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31080.25 SL=31021.97 TP=31150.19 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31089.50 SL=31057.06 TP=31128.43 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31130.25 PnL=$75.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31123.25 SL=31098.81 TP=31152.57 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31132.25 SL=31108.40 TP=31160.88 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31159.75 PnL=$56.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31159.75 PnL=$55.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31160.25 SL=31113.63 TP=31216.19 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31208.00 PnL=$109.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31192.25 SL=31139.64 TP=31255.39 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31212.25 SL=31173.18 TP=31259.13 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31211.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31221.50 SL=31198.44 TP=31260.17 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31196.75 PnL=$-52.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31190.00 PnL=$-64.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31211.25 SL=31182.78 TP=31258.64 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31230.75 SL=31200.99 TP=31266.46 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31200.75 PnL=$-76.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31159.00 SL=31129.75 TP=31248.75 conf 66% contracts=1 confidence=0.660 reason=base conf=0.660<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31159.00 PnL=$-68.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31038.50 PnL=$163.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31080.50 PnL=$-27.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31082.25 PnL=$144.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31081.00 PnL=$228.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31116.50 PnL=$-131.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31098.50 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31134.75 PnL=$252.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31112.00 PnL=$151.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31108.00 PnL=$69.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31113.00 PnL=$19.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31103.75 PnL=$-117.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31174.75 SL=31153.25 TP=31217.50 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31227.00 PnL=$83.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31227.00 PnL=$193.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31247.00 PnL=$-72.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31272.00 PnL=$103.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31188.25 PnL=$-206.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31252.50 SL=31230.04 TP=31279.45 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31258.75 SL=31234.01 TP=31288.44 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31226.00 PnL=$-52.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31219.25 PnL=$-58.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31211.33 PnL=$127.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31183.00 SL=31239.94 TP=31114.68 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31169.50 SL=31219.02 TP=31110.07 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31155.00 SL=31191.79 TP=31110.85 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31108.75 PnL=$134.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31106.25 PnL=$116.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 31103.50 PnL=$86.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31071.75 SL=31129.84 TP=31002.04 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31047.50 SL=31085.37 TP=31002.05 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31034.75 SL=31085.43 TP=30973.94 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31081.50 PnL=$-80.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31035.50 SL=31082.78 TP=30978.76 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 31031.75 SL=31082.78 TP=30970.51 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 31086.75 PnL=$-110.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 30952.00 SL=30941.50 TP=31112.50 conf 66% contracts=1 confidence=0.660 reason=base conf=0.660<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30988.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30988.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31031.00 SL=30991.00 TP=31111.25 conf 45% contracts=1 confidence=0.450 reason=addon_onl_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30960.50 PnL=$-83.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30880.50 SL=31087.75 TP=30466.00 conf 75% contracts=1 confidence=0.755 reason=base conf=0.755<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29619.75 SL=29694.75 TP=29529.75 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29610.00 SL=29676.28 TP=29530.47 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29626.25 PnL=$17.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29626.00 SL=29676.82 TP=29565.02 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29652.50 SL=29701.71 TP=29593.44 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29704.25 PnL=$-105.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29717.50 PnL=$-102.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29742.00 PnL=$-106.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29762.50 PnL=$26.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29660.75 SL=29695.80 TP=29587.86 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29646.50 SL=29681.08 TP=29585.72 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29967.75 SL=29921.50 TP=30060.25 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29910.25 PnL=$-97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29858.50 SL=29933.50 TP=29768.50 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29844.75 SL=29919.75 TP=29754.75 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29844.75 SL=29919.75 TP=29754.75 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29823.50 SL=29873.57 TP=29763.42 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29828.75 SL=29873.61 TP=29774.91 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29810.25 SL=29854.85 TP=29756.73 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29810.25 SL=29854.85 TP=29756.73 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29777.50 SL=29817.92 TP=29728.99 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29771.75 SL=29812.63 TP=29722.69 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29835.00 PnL=$-92.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29839.25 PnL=$-126.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29839.00 PnL=$-137.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29802.75 SL=29847.07 TP=29749.57 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 29749.25 PnL=$104.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29753.25 SL=29809.74 TP=29685.47 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29734.25 SL=29809.25 TP=29644.25 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29719.00 SL=29769.98 TP=29657.83 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29687.75 SL=29729.61 TP=29637.52 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29663.50 SL=29706.82 TP=29611.52 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29671.50 SL=29713.34 TP=29621.30 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29613.50 SL=29647.47 TP=29572.74 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29597.50 SL=29632.20 TP=29555.86 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29569.50 SL=29624.51 TP=29503.49 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29497.75 SL=29539.99 TP=29447.06 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29474.50 SL=29528.50 TP=29409.70 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29454.00 SL=29511.12 TP=29385.45 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 29429.50 PnL=$99.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29423.75 SL=29496.06 TP=29336.98 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29458.50 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29492.75 PnL=$-148.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29522.00 PnL=$-117.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29473.50 SL=29509.53 TP=29424.84 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29461.75 SL=29500.06 TP=29415.78 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29455.00 SL=29493.04 TP=29409.35 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29529.00 SL=29492.03 TP=29573.37 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29539.75 SL=29502.58 TP=29584.35 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29535.25 SL=29497.94 TP=29580.02 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29359.25 SL=29304.00 TP=29584.50 conf 66% contracts=1 confidence=0.660 reason=base conf=0.660<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29259.50 PnL=$-113.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29355.75 SL=29430.75 TP=29265.75 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 74% contracts=1 confidence=0.740 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 18500.25 SL=18520.00 TP=18460.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 25000.00 SL=25040.00 TP=24900.00 conf n/a contracts=1 confidence=0.000 reason=base conf=0.000<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 110.00 PnL=$17.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 114.00 PnL=$25.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 95.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=4 confidence=0.800 reason=test risk_cap->2"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31045.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30945.00 SL=31303.00 TP=30229.00 conf 80% contracts=1 confidence=0.800 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long NQ @ 20010.00 PnL=$190.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 20050.00 PnL=$197.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 98.75 PnL=$-5.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 101.00 PnL=$-0.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 31400.00 PnL=$797.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 30950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=31051.75 TP=31197.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=31051.75 TP=31197.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31130.00 PnL=$55.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 30950.00 PnL=$297.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 30999.50 SL=31068.25 TP=30862.00 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY short MNQ parent=bot_parent trigger=30999.75 SL=31068.25 TP=30862.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 31050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 31100.25 SL=30850.25 TP=31600.25 conf 75% re-entry contracts=1 confidence=0.750 reason=test"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "REENTRY long MNQ parent=bot_parent trigger=31100.25 SL=30850.25 TP=31600.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 29049.25 SL=29108.88 TP=28977.69 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29185.25 SL=29115.36 TP=29269.11 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29185.25 SL=29115.36 TP=29269.11 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29131.00 PnL=$-227.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29288.00 SL=29213.00 TP=29378.00 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29272.25 SL=29197.25 TP=29362.25 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29273.75 SL=29198.75 TP=29363.75 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29282.50 PnL=$88.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29290.00 SL=29217.34 TP=29377.19 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29214.25 PnL=$-148.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29248.50 SL=29182.35 TP=29327.88 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29244.50 SL=29178.01 TP=29324.29 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29253.50 SL=29188.76 TP=29331.19 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29258.00 SL=29195.07 TP=29333.51 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29184.50 SL=29109.50 TP=29288.39 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29190.75 SL=29115.75 TP=29289.32 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29115.00 PnL=$-154.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29113.75 PnL=$-144.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29262.25 PnL=$-84.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29253.25 SL=29217.00 TP=29325.50 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29269.00 SL=29232.75 TP=29341.50 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29269.00 SL=29232.75 TP=29341.50 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29326.50 SL=29251.50 TP=29416.50 conf 65% contracts=1 confidence=0.650 reason=base conf=0.650<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29205.88 PnL=$16.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29188.25 PnL=$-99.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29091.00 PnL=$-56.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29073.50 PnL=$-33.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29110.25 PnL=$-123.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29147.50 PnL=$105.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29083.25 PnL=$-111.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29098.75 PnL=$-235.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT short MNQ @ 29068.75 PnL=$251.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29099.62 PnL=$142.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29133.50 PnL=$-40.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29133.50 PnL=$-40.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 29147.25 PnL=$12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 29147.25 PnL=$12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 29147.25 PnL=$12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 29207.00 PnL=$13.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29482.75 SL=29442.75 TP=29882.75 conf 100% contracts=1 confidence=1.000 reason=flex3 6pm fixed"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29516.00 PnL=$-86.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29546.50 PnL=$-138.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29584.25 PnL=$-44.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29555.25 PnL=$-173.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29828.75 SL=29803.50 TP=29879.25 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29851.25 PnL=$-50.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 29867.00 PnL=$33.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29886.00 PnL=$-35.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29854.25 PnL=$-78.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29889.25 PnL=$-77.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29912.00 PnL=$-24.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29965.50 SL=29901.00 TP=30159.00 conf 63% contracts=1 confidence=0.628 reason=base conf=0.628<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29985.00 PnL=$25.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29787.50 SL=29777.50 TP=29979.25 conf 66% contracts=1 confidence=0.660 reason=base conf=0.660<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29663.50 PnL=$-140.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 29766.00 PnL=$-557.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29582.25 SL=29522.00 TP=29778.25 conf 66% contracts=1 confidence=0.660 reason=base conf=0.660<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29521.75 PnL=$-132.25"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29520.00 PnL=$-123.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29436.50 SL=29396.25 TP=29741.25 conf 66% contracts=1 confidence=0.660 reason=base conf=0.660<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 29522.00 SL=29424.75 TP=29716.50 conf 64% contracts=1 confidence=0.641 reason=base conf=0.641<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29146.75 PnL=$-582.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 29154.75 PnL=$-737.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28997.50 SL=29134.00 TP=28724.50 conf 70% contracts=1 confidence=0.695 reason=base conf=0.695<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28883.50 PnL=$15.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28915.92 PnL=$28.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28949.50 PnL=$-23.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28996.25 PnL=$185.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28835.75 SL=28939.75 TP=28627.75 conf 76% contracts=1 confidence=0.765 reason=base conf=0.765<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28783.25 SL=28889.00 TP=28571.75 conf 82% contracts=1 confidence=0.818 reason=base conf=0.818<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28803.75 PnL=$72.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28692.75 SL=28842.25 TP=28393.75 conf 71% contracts=1 confidence=0.705 reason=base conf=0.705<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28847.00 PnL=$-145.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28846.75 PnL=$-310.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28528.25 SL=28773.00 TP=28038.75 conf 71% contracts=1 confidence=0.706 reason=base conf=0.706<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28250.50 PnL=$259.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28199.25 PnL=$-90.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28129.25 SL=28251.25 TP=27885.25 conf 66% contracts=1 confidence=0.658 reason=base conf=0.658<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28092.75 SL=28198.25 TP=27881.75 conf 67% contracts=1 confidence=0.666 reason=base conf=0.666<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28091.91 PnL=$523.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28128.00 PnL=$-12.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY short MNQ @ 28055.50 SL=28148.50 TP=27869.50 conf 64% contracts=1 confidence=0.643 reason=base conf=0.643<9.99"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28150.10 PnL=$-176.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 28165.75 PnL=$-63.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 28236.00 SL=28161.00 TP=28326.00 conf 66% contracts=1 confidence=0.662 reason=base conf=0.662<0.72"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 28317.50 PnL=$177.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28339.61 PnL=$48.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28327.50 PnL=$-34.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "ENTRY long MNQ @ 28443.75 SL=28398.75 TP=28534.00 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28415.00 PnL=$-87.00"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28353.17 PnL=$103.50"}
+{"timestamp": null, "level": null, "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 28581.00 PnL=$-151.50"}
+{"timestamp": "2026-11-07T22:24:49.202+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 25050.00 PnL=$97.50"}
+{"timestamp": "2026-11-07T22:24:49.203+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS long MNQ @ 24950.00 PnL=$-102.50"}
+{"timestamp": "2026-11-08T23:06:37.195+00:00", "level": "INFO", "name": "Trades", "message": "ENTRY short MNQ @ 27052.50 SL=27211.25 TP=26576.25 conf 68% contracts=1 confidence=0.683 reason=base conf=0.683<0.72"}
+{"timestamp": "2026-11-09T00:06:42.089+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 27013.75 PnL=$204.00"}
+{"timestamp": "2026-11-09T00:52:48.555+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 27068.75 PnL=$-680.50"}
+{"timestamp": "2026-11-09T01:29:49.041+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 26951.34 PnL=$353.00"}
+{"timestamp": "2026-11-09T02:22:58.447+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 27254.25 PnL=$-101.50"}
+{"timestamp": "2026-11-09T02:33:12.895+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 27320.00 PnL=$-321.50"}
+{"timestamp": "2026-11-09T02:40:48.424+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 27266.95 PnL=$207.50"}
+{"timestamp": "2026-11-09T02:51:36.396+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 27273.69 PnL=$-66.00"}
+{"timestamp": "2026-11-09T02:56:21.676+00:00", "level": "INFO", "name": "Trades", "message": "EXIT STOP_LOSS short MNQ @ 27253.42 PnL=$495.50"}
+{"timestamp": "2026-11-09T19:41:44.459+00:00", "level": "INFO", "name": "Trades", "message": "ENTRY long MNQ @ 28070.50 SL=27891.75 TP=28606.75 conf 71% contracts=1 confidence=0.711 reason=base conf=0.711<0.72"}
+{"timestamp": "2026-11-10T23:16:49.740+00:00", "level": "INFO", "name": "Trades", "message": "ENTRY long MNQ @ 27924.75 SL=27878.75 TP=28016.75 conf 51% contracts=1 confidence=0.510 reason=addon_e1_fixed1"}
+{"timestamp": "2026-11-11T01:01:05.916+00:00", "level": "INFO", "name": "Trades", "message": "EXIT TAKE_PROFIT long MNQ @ 28040.75 PnL=$229.50"}

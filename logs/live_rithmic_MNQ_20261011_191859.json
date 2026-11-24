@@ -1,0 +1,43 @@
+{
+  "symbols": [
+    "MNQ"
+  ],
+  "paper_mode": false,
+  "strategy": "enhanced_breakout",
+  "params": {
+    "lookback": 10,
+    "atr_mult": 1.5,
+    "tp_mult": 2.0,
+    "ema_len": 50
+  },
+  "stats": {
+    "trades": 2,
+    "wins": 1,
+    "losses": 1,
+    "win_rate": 50.0,
+    "total_pnl": 31.0,
+    "profit_factor": 1.4275862068965517
+  },
+  "trades": [
+    {
+      "symbol": "MNQ",
+      "direction": "short",
+      "entry_time": "2026-10-11 23:25:55.800471+00:00",
+      "exit_time": "2026-10-11 23:27:00.119978+00:00",
+      "entry_price": 31238.25,
+      "exit_price": 31247.0,
+      "exit_type": "STOP_LOSS",
+      "pnl": -72.5
+    },
+    {
+      "symbol": "MNQ",
+      "direction": "long",
+      "entry_time": "2026-10-11 23:28:36.568856+00:00",
+      "exit_time": "2026-10-11 23:43:18.549479+00:00",
+      "entry_price": 31258.75,
+      "exit_price": 31272.0,
+      "exit_type": "STOP_LOSS",
+      "pnl": 103.5
+    }
+  ]
+}

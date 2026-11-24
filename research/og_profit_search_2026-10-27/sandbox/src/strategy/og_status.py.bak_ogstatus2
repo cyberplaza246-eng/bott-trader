@@ -1,0 +1,155 @@
+﻿"""OG (Ensemble) bot plain-English status readout (OG_STATUS=1). READ-ONLY: never places,
+changes or blocks orders. Bias/sweep facts come from the bot's own log lines (captured by a
+logging handler), levels from the 5m bars, win rates from og_winrates.json (built by
+scripts/og_winrates_build.py from logs/trades.log)."""
+import json, logging, os, re
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
+
+ET = ZoneInfo('America/New_York')
+_WR_PATH = os.path.join(os.path.dirname(__file__), 'og_winrates.json')
+_STATE = {}
+_RX = {
+    'regime': re.compile(r'regime=(\w+), bias=(\w+), ADX=([\d.]+)'),
+    'nosweep': re.compile(r'NO SWEEP: (.*)'),
+    'gap': re.compile(r'nearest_gap=([\d.]+)'),
+    'ema': re.compile(r"\[EMA\] Returning: \{'signal': '(\w+)', 'confidence': ([\d.]+)"),
+    'sweep': re.compile(r'(Bullish|Bearish) sweep: .*?swing_(?:low|high) ([\d.]+)'),
+    'soft': re.compile(r'sweep detected, soft MSS'),
+    'mss': re.compile(r' MSS: (.*)'),
+    'ctr': re.compile(r'counter-trend (BUY|SELL) rejected'),
+    'skip': re.compile(r'Sweep skip .*?: no bias'),
+}
+
+
+class _Tap(logging.Handler):
+    def emit(self, record):
+        try:
+            msg = record.getMessage()
+            now = datetime.now(timezone.utc)
+            for k, rx in _RX.items():
+                m = rx.search(msg)
+                if m:
+                    _STATE[k] = (m.groups(), now)
+        except Exception:
+            pass
+
+
+def install(logger_name='TradingBot'):
+    lg = logging.getLogger(logger_name)
+    if not any(isinstance(h, _Tap) for h in lg.handlers):
+        h = _Tap(); h.setLevel(logging.DEBUG); lg.addHandler(h)
+
+
+def _fresh(k, mins=10):
+    v = _STATE.get(k)
+    if not v:
+        return None
+    return v[0] if (datetime.now(timezone.utc) - v[1]).total_seconds() < mins * 60 else None
+
+
+def _swings(df, n=60, k=2):
+    hi, lo = [], []
+    d = df.tail(n)
+    H, L = d['high'].tolist(), d['low'].tolist()
+    for i in range(k, len(d) - k):
+        if H[i] == max(H[i-k:i+k+1]): hi.append(H[i])
+        if L[i] == min(L[i-k:i+k+1]): lo.append(L[i])
+    return hi, lo
+
+
+def _wr_lines():
+    try:
+        wr = json.load(open(_WR_PATH, encoding='utf-8'))['setups']
+    except Exception:
+        return ['   Win rates: og_winrates.json missing (run scripts\\og_winrates_build.py)']
+    out = ['   HISTORY (your real OG trades, logs\\trades.log):']
+    for key in ('sweep_long', 'sweep_short', 'reentry_long', 'reentry_short', 'addon_long'):
+        s = wr.get(key)
+        if not s:
+            continue
+        if s['n'] < 10:
+            out.append(f"     {s['name']:<26} not enough data ({s['n']} trades)")
+        else:
+            out.append(f"     {s['name']:<26} wins {s['win_pct']:.0f}% | avg ${s['avg_usd']:+.0f} | {s['n']} trades")
+    return out
+
+
+def lines(bot, symbol, df, price):
+    now_et = datetime.now(ET)
+    L = [f"--- OG STATUS {symbol} {now_et:%H:%M} ET | price {price:.2f} ---"]
+    rg = _fresh('regime')
+    if rg:
+        regime, bias, adx = rg[0], rg[1], float(rg[2])
+        strength = 'strong' if adx >= 30 else 'moderate' if adx >= 20 else 'weak/choppy'
+        word = {'BUY': 'BULLISH (looking for longs only)', 'SELL': 'BEARISH (looking for shorts only)'}.get(bias, 'NO BIAS (sitting out)')
+        L.append(f"   BIAS: {word} | trend strength {strength} (ADX {adx:.0f}) | 5m regime: {regime}")
+    elif _fresh('skip'):
+        L.append("   BIAS: NONE - regime filter says no clear direction, no setups hunted")
+    else:
+        L.append("   BIAS: not read yet this cycle (ensemble did not run - see blockers)")
+        bias = None
+    em = _fresh('ema')
+    if em:
+        L.append(f"   EMA model: {em[0]} at {float(em[1])*100:.0f}% confidence")
+    # setup waiting for
+    hi, lo = ([], [])
+    try:
+        hi, lo = _swings(df)
+    except Exception:
+        pass
+    b = rg[1] if rg else None
+    if b == 'BUY':
+        below = [x for x in lo if x < price]
+        lvl = max(below) if below else None
+        s = f"   WAITING FOR: SWEEP LONG - price dips under a 1m swing low, then closes back above"
+        L.append(s)
+        if lvl: L.append(f"     nearest 5m swing low {lvl:.2f} ({price - lvl:.1f} pts below price)")
+    elif b == 'SELL':
+        above = [x for x in hi if x > price]
+        lvl = min(above) if above else None
+        L.append("   WAITING FOR: SWEEP SHORT - price pokes above a 1m swing high, then closes back below")
+        if lvl: L.append(f"     nearest 5m swing high {lvl:.2f} ({lvl - price:.1f} pts above price)")
+    gp = _fresh('gap', 3)
+    if gp:
+        L.append(f"     closest any recent 1m candle got to a sweep level: {float(gp[0]):.1f} pts")
+    sw = _fresh('sweep', 6)
+    if sw:
+        side = 'long' if sw[0] == 'Bullish' else 'short'
+        if _fresh('soft', 6):
+            L.append(f"   STRUCTURE BREAK: sweep {side} at {float(sw[1]):.2f} seen, NO displacement break - entered/eligible at reduced confidence")
+        elif _fresh('mss', 6):
+            L.append(f"   STRUCTURE BREAK: confirmed after sweep {side} at {float(sw[1]):.2f}")
+        else:
+            L.append(f"   STRUCTURE BREAK: pending after sweep {side} at {float(sw[1]):.2f}")
+    elif b in ('BUY', 'SELL'):
+        L.append("   STRUCTURE BREAK: not yet - needs a sweep first")
+    # blockers
+    bl = []
+    try:
+        from src.strategy.og_tokyo_block import tokyo_window_end
+        te = tokyo_window_end()
+        if te is not None: bl.append(f"Tokyo-open block until {te:%H:%M} ET")
+    except Exception:
+        pass
+    try:
+        led = getattr(bot, '_session_ledger', None)
+        why = led.block_reason(datetime.now(timezone.utc)) if led is not None else None
+        if why: bl.append(f"session limit: {why}")
+    except Exception:
+        pass
+    try:
+        nowu = datetime.now(timezone.utc)
+        u = getattr(bot, 'loss_cooldown_until', {}).get(symbol)
+        if u and nowu < u: bl.append(f"loss cooldown {int((u-nowu).total_seconds()//60)+1} min")
+        u = getattr(bot, '_consec_loss_pause_until', {}).get(symbol)
+        if u and nowu < u: bl.append(f"losing-streak pause {int((u-nowu).total_seconds()//60)+1} min")
+        if getattr(bot, 'cooldown', 0) > 0: bl.append(f"bar cooldown ({bot.cooldown} bars)")
+        if bot._effective_open_count() >= bot.max_positions: bl.append(f"max positions ({bot.max_positions}) open")
+    except Exception:
+        pass
+    if _fresh('ctr', 6): bl.append(f"last sweep rejected as counter-trend ({_fresh('ctr', 6)[0]})")
+    if b in ('BUY', 'SELL') and not sw: bl.append("no sweep yet (normal - most minutes have none)")
+    L.append("   BLOCKERS: " + ("; ".join(bl) if bl else "none - will trade the moment the setup prints"))
+    L.extend(_wr_lines())
+    return L

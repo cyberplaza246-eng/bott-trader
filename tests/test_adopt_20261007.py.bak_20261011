@@ -1,0 +1,136 @@
+﻿"""2026-10-07 adopt fix: cleanup never strips a stop from open size; untracked
+broker size is adopted (tracked + stop attached, existing TP kept)."""
+from __future__ import annotations
+
+import asyncio
+import time
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from tests.test_orphan_working_orders import _conn, _row, _cancelled_targets
+import start_live_rithmic as slr
+
+
+def _clear(conn, keep):
+    conn._is_bot_owned_listed_order = lambda data: True
+    return asyncio.run(conn._async_clear_chart_stops("MNQ", keep_entry_ids=set(keep), rounds=1))
+
+
+# ---- (b) stop protection in cleanup ----
+
+def test_unknown_stop_kept_while_net_open_and_live_trade_has_no_stop():
+    rows = [_row("bot_live_tp", "1", "LIMIT", "SELL"), _row("bot_old_sl", "2", "STOP", "SELL")]
+    conn = _conn(net=1, orders=rows)
+    conn._orders = {"bot_live": {"symbol": "MNQ", "size": 1}}
+    _clear(conn, {"bot_live"})
+    assert "bot_old_sl" not in _cancelled_targets(conn)
+
+
+def test_surplus_stop_cancelled_when_live_trade_stop_covers_net():
+    rows = [_row("bot_live_r3_sl", "1", "STOP", "SELL"), _row("bot_old_sl", "2", "STOP", "SELL")]
+    conn = _conn(net=1, orders=rows)
+    conn._orders = {"bot_live": {"symbol": "MNQ", "size": 1}}
+    _clear(conn, {"bot_live"})
+    got = _cancelled_targets(conn)
+    assert "bot_old_sl" in got and "bot_live_r3_sl" not in got
+
+
+def test_stop_of_known_closed_entry_cancelled_even_if_net_open():
+    rows = [_row("bot_old_sl", "2", "STOP", "SELL")]
+    conn = _conn(net=1, orders=rows)
+    conn._closed_entry_registry()["bot_old"] = {"symbol": "MNQ", "baskets": set(), "legs": set(),
+                                                "closed_at": time.time(), "clean_passes": 0}
+    _clear(conn, {"bot_live"})
+    assert "bot_old_sl" in _cancelled_targets(conn)
+
+
+def test_stop_cancelled_when_flat_and_unknown_net_keeps_it():
+    conn = _conn(net=0, orders=[_row("bot_old_sl", "2", "STOP", "SELL")])
+    _clear(conn, {"bot_live"})
+    assert "bot_old_sl" in _cancelled_targets(conn)
+    conn2 = _conn(net=None, orders=[_row("bot_old_sl", "2", "STOP", "SELL")])
+    _clear(conn2, {"bot_live"})
+    assert _cancelled_targets(conn2) == []
+
+
+# ---- (c) adopt untracked broker size ----
+
+def _adopt_conn(rows, net=1, avg=31366.75):
+    conn = _conn(net=net, orders=rows)
+    conn._async_list_positions = AsyncMock(return_value=[
+        {"symbol": "MNQ", "net_quantity": net, "avg_open_fill_price": avg},
+    ])
+    conn._live_market_price = MagicMock(return_value=31384.0)
+    conn._async_repair_missing_stop = AsyncMock(return_value=True)
+    return conn
+
+
+def test_adopt_rebuilds_trade_keeps_tp_and_places_planned_stop():
+    tp = _row("bot_b1a03f89ca_tp", "245122845", "LIMIT", "SELL")
+    tp["price"] = 31411.5
+    conn = _adopt_conn([tp])
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0, planned_sl=31327.75))
+    assert res["ticket"] == "bot_b1a03f89ca"
+    assert res["tp"] == pytest.approx(31411.5) and res["sl_placed"] is True
+    args = conn._async_repair_missing_stop.await_args.args
+    assert args[:4] == ("bot_b1a03f89ca", "MNQ", "BUY", 1)
+    assert args[4] == pytest.approx(31327.75)
+    rec = conn._orders["bot_b1a03f89ca"]
+    assert rec["take_profit"] == pytest.approx(31411.5) and rec["entry_price"] == pytest.approx(31366.75)
+    assert "bot_b1a03f89ca" in conn._tracked_bot_entry_ids("MNQ")
+    assert _cancelled_targets(conn) == []  # nothing cancelled while adopting
+
+
+def test_adopt_uses_existing_stop_and_does_not_double_it():
+    sl = _row("", "777", "STOP_LIMIT", "SELL")
+    sl["trigger_price"] = 31340.0
+    conn = _adopt_conn([sl])
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0))
+    assert res["sl_existing"] is True and res["sl"] == pytest.approx(31340.0)
+    conn._async_repair_missing_stop.assert_not_awaited()
+    assert res["ticket"].startswith("bot_adopt_")
+
+
+def test_adopt_default_atr_stop_and_noop_when_tracked_or_flat():
+    conn = _adopt_conn([])
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0))
+    assert conn._async_repair_missing_stop.await_args.args[4] == pytest.approx(31336.75)
+    assert res["type"] == "BUY"
+    flat = _adopt_conn([], net=0)
+    assert asyncio.run(flat._async_adopt_untracked_position("MNQ", 30.0)) is None
+    tracked = _adopt_conn([])
+    tracked._orders = {"bot_live": {"symbol": "MNQ", "size": 1}}
+    assert asyncio.run(tracked._async_adopt_untracked_position("MNQ", 30.0)) is None
+
+
+def test_bot_adopts_only_after_confirm_window(monkeypatch):
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    t.broker = MagicMock()
+    t.broker._positions = {"MNQ": {"size": 1, "avg_price": 31366.75}}
+    t.broker.adopt_untracked_position.return_value = {
+        "ticket": "bot_x", "type": "BUY", "size": 1, "open_price": 31366.75,
+        "sl": 31327.75, "tp": 31411.5, "sl_placed": True,
+    }
+    monkeypatch.setattr(t, "_live_broker", lambda: True)
+    monkeypatch.setattr(t, "_broker_net_qty", lambda sym: 1)
+    monkeypatch.setattr(t, "_planned_sl_from_trades_log", lambda *a: 31327.75)
+    assert t._adopt_untracked_exposure() == 0  # first sighting only
+    t.broker.adopt_untracked_position.assert_not_called()
+    t._untracked_seen_at["MNQ"] -= slr.ADOPT_CONFIRM_SEC + 1
+    assert t._adopt_untracked_exposure() == 1
+    kw = t.broker.adopt_untracked_position.call_args.kwargs
+    assert kw["planned_sl"] == pytest.approx(31327.75)
+
+
+def test_planned_sl_from_trades_log(tmp_path, monkeypatch):
+    (tmp_path / "logs").mkdir()
+    (tmp_path / "logs" / "trades.log").write_text(
+        '{"message": "ENTRY long MNQ @ 25000.00 SL=24950.00 TP=25100 contracts=1"}\n'
+        '{"message": "ENTRY long MNQ @ 31364.75 SL=31327.75 TP=31409.16 contracts=1"}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    assert t._planned_sl_from_trades_log("MNQ", "long", 31366.75) == pytest.approx(31327.75)
+    assert t._planned_sl_from_trades_log("MNQ", "short", 31366.75) == 0.0

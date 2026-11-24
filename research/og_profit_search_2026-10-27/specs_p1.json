@@ -1,0 +1,109 @@
+{
+"baseline": {
+"_save": true
+},
+"drop_trend_day": {
+"drop": [
+"trend_day"
+]
+},
+"drop_trend_ovn": {
+"drop": [
+"trend_ovn"
+]
+},
+"drop_bo_day": {
+"drop": [
+"bo_day"
+]
+},
+"drop_bo_ovn_0009": {
+"drop": [
+"bo_ovn_0009"
+]
+},
+"drop_bo_ovn_other": {
+"drop": [
+"bo_ovn_other"
+]
+},
+"drop_mr_day": {
+"drop": [
+"mr_day"
+]
+},
+"drop_mr_ovn": {
+"drop": [
+"mr_ovn"
+]
+},
+"drop_onl": {
+"drop": [
+"onl"
+]
+},
+"drop_e1": {
+"drop": [
+"e1"
+]
+},
+"no_revamp_exits": {
+"revamp": false
+},
+"lock_off": {
+"lock": "off"
+},
+"lock_tight": {
+"lock": "tight"
+},
+"lock_tight2": {
+"lock": "tight2"
+},
+"lock_wide": {
+"lock": "wide"
+},
+"maxopen1": {
+"max_open": 1
+},
+"maxopen2": {
+"max_open": 2
+},
+"tp_trend1.0": {
+"trend_r": 1.0
+},
+"tp_trend2.0": {
+"trend_r": 2.0
+},
+"tp_bo1.5": {
+"bo_r": 1.5
+},
+"tp_bo2.5": {
+"bo_r": 2.5
+},
+"tp_bo3.0": {
+"bo_r": 3.0
+},
+"day_only_main": {
+"drop": [
+"trend_ovn",
+"bo_ovn_0009",
+"bo_ovn_other",
+"mr_ovn"
+]
+},
+"day_only_all": {
+"drop": [
+"trend_ovn",
+"bo_ovn_0009",
+"bo_ovn_other",
+"mr_ovn",
+"e1"
+]
+},
+"slip2_baseline": {
+"slip": 0.5
+},
+"comm224_check": {
+"comm": 2.24
+}
+}

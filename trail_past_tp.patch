@@ -1,0 +1,327 @@
+# trail_past_tp.patch
+# Apply on Paragan bott-trader tree (start_live_rithmic.py + tests).
+# Connector: run apply_cancel_take_profit.py (Paragan connector diverged; surgical insert).
+# Does NOT restart the live bot.
+#
+--- a/start_live_rithmic.py
++++ b/start_live_rithmic.py
+@@ -73,12 +73,12 @@
+     'min_step_ticks': int(os.getenv('TRAIL_MIN_STEP_TICKS', '1')),
+ }
+ 
+-# Dollar profit locks (MNQ $2/pt: +$100 uPnL = 50 pts → SL locks +$15 = 7.5 pts)
++# Dollar profit locks (MNQ $2/pt: +$100 uPnL = 50 pts → SL locks +$20 = 10 pts)
+ PROFIT_LOCK_ENABLED = os.getenv('PROFIT_LOCK_ENABLED', 'true').strip().lower() in (
+     '1', 'true', 'yes', 'on',
+ )
+ PROFIT_LOCK_TRIGGER_1_USD = float(os.getenv('PROFIT_LOCK_TRIGGER_1_USD', '100'))
+-PROFIT_LOCK_LEVEL_1_USD = float(os.getenv('PROFIT_LOCK_LEVEL_1_USD', '15'))
++PROFIT_LOCK_LEVEL_1_USD = float(os.getenv('PROFIT_LOCK_LEVEL_1_USD', '20'))
+ PROFIT_LOCK_TRIGGER_2_USD = float(os.getenv('PROFIT_LOCK_TRIGGER_2_USD', '150'))
+ PROFIT_LOCK_LEVEL_2_USD = float(os.getenv('PROFIT_LOCK_LEVEL_2_USD', '50'))
+ 
+@@ -163,7 +163,9 @@
+     tp: float
+     entry_time: datetime
+     trailing_enabled: bool = True
+-    profit_lock_level: int = 0  # 0=none, 1=+$15 after +$100, 2=+$50 after +$150
++    profit_lock_level: int = 0  # 0=none, 1=+$20 after +$100, 2=+$50 after +$150
++    tp_cleared: bool = False  # True after price past TP: broker TP cancelled, trail-only
++    original_tp: float = 0.0  # TP price at clear-time; trail SL floored here
+     ensemble_signal: str = 'UNKNOWN'
+     model_signals: Optional[Dict] = None
+     regime: str = 'unknown'
+@@ -328,8 +330,103 @@
+             return True
+         return False
+ 
++    def _cancel_position_take_profit(self, pos: 'Position', *, reason: str = 'past_tp_trail') -> bool:
++        """Cancel broker TP only; never touch SL. Paper/local always succeeds."""
++        if self.paper_mode or self.paper_orders or not self.broker:
++            return True
++        if hasattr(self.broker, 'cancel_take_profit'):
++            try:
++                return bool(
++                    self.broker.cancel_take_profit(
++                        ticket=pos.order_id,
++                        symbol=pos.symbol,
++                        reason=reason,
++                    )
++                )
++            except Exception as e:
++                bot_logger.error(
++                    f"cancel_take_profit failed {pos.symbol} {pos.order_id}: {e}"
++                )
++                return False
++        # Fallback: cancel known protective TP tag via entry bracket helper is unsafe
++        # (cancels SL too). Refuse rather than drop the stop.
++        bot_logger.warning(
++            f"Broker lacks cancel_take_profit; cannot clear TP for {pos.order_id}"
++        )
++        return False
++
++    def update_past_tp_to_trail(self, symbol: str, df: pd.DataFrame):
++        """If price trades beyond TP, cancel TP and trail; floor SL at original TP.
++
++        Winners may run past the original target. Local check_position_exit will not
++        emit TAKE_PROFIT once tp is cleared. Trail must never loosen SL back through
++        the old TP profit level (long: SL >= original_tp; short: SL <= original_tp).
++        """
++        if not self.positions or df is None or len(df) == 0:
++            return
++        row = df.iloc[-1]
++        bar_high = float(row['high'])
++        bar_low = float(row['low'])
++        close = float(row.get('close', 0) or 0)
++
++        for order_id, pos in list(self.positions.items()):
++            if pos.symbol != symbol:
++                continue
++            if getattr(pos, 'tp_cleared', False):
++                continue
++            tp = float(pos.tp or 0)
++            if tp <= 0:
++                continue
++
++            if pos.direction == 'long':
++                fav = max(bar_high, close) if close > 0 else bar_high
++                past = fav >= tp
++            else:
++                fav = min(bar_low, close) if close > 0 else bar_low
++                past = fav <= tp
++            if not past:
++                continue
++
++            if not self._cancel_position_take_profit(pos, reason='past_tp_trail'):
++                bot_logger.error(
++                    f"Past-TP: broker TP cancel failed for {symbol} {order_id}; "
++                    f"keeping TP working to avoid unprotected state"
++                )
++                print(f"   ⚠️ {symbol} past TP but cancel failed — TP left working")
++                continue
++
++            old_tp = tp
++            pos.original_tp = old_tp
++            pos.tp = 0.0
++            pos.tp_cleared = True
++            pos.trailing_enabled = True
++
++            # Lock at least the original TP profit immediately when tighter than current SL.
++            if self._is_tighter_sl(pos, old_tp, pos.sl):
++                old_sl = pos.sl
++                if self._apply_stop_update(pos, old_tp):
++                    print(
++                        f"   🎯 {symbol} past TP {old_tp:.2f}: TP cancelled, "
++                        f"SL floored {old_sl:.2f} → {pos.sl:.2f}, trailing ON"
++                    )
++                else:
++                    print(
++                        f"   🎯 {symbol} past TP {old_tp:.2f}: TP cancelled, "
++                        f"trailing ON (SL floor {old_tp:.2f} pending)"
++                    )
++            else:
++                print(
++                    f"   🎯 {symbol} past TP {old_tp:.2f}: TP cancelled, "
++                    f"trailing ON (SL already ≥ TP floor)"
++                )
++            bot_logger.info(
++                f"Past-TP trail {symbol} {order_id}: cancelled TP @ {old_tp:.2f}, "
++                f"trailing_enabled=True, SL floor={old_tp:.2f}"
++            )
++
+     def update_dollar_profit_locks(self, symbol: str, df: pd.DataFrame):
+-        """+$100 uPnL → lock +$15; +$150 → ratchet to +$50 lock (env-configurable)."""
++
++        """+$100 uPnL → lock +$20; +$150 → ratchet to +$50 lock (env-configurable)."""
+         if not PROFIT_LOCK_ENABLED or not self.positions or df is None or len(df) == 0:
+             return
+         row = df.iloc[-1]
+@@ -399,8 +496,11 @@
+ 
+             tp_dist = abs(pos.tp - pos.entry_price) if pos.tp and pos.tp > 0 else 0.0
+             risk_dist = max(tick, abs(pos.entry_price - pos.sl))
++            # Past-TP trail: already beyond target — keep trailing without fixed TP.
+             # REVAMP trend sleeve: no fixed TP — activate trail on small R move (research-like).
+-            if tp_dist <= 0:
++            if getattr(pos, 'tp_cleared', False):
++                activation_move = 0.0
++            elif tp_dist <= 0:
+                 if not REVAMP_EXITS_ON:
+                     continue
+                 activation_move = risk_dist * max(0.05, activation_r)
+@@ -435,6 +535,21 @@
+                     candidate_sl = self._round_to_tick(bar_high + tick, tick)
+                 if candidate_sl >= pos.sl or (pos.sl - candidate_sl) < min_move:
+                     continue
++
++            # After past-TP: never pull SL back through the original TP profit level.
++            orig_tp = float(getattr(pos, 'original_tp', 0) or 0)
++            if getattr(pos, 'tp_cleared', False) and orig_tp > 0:
++                if pos.direction == 'long':
++                    candidate_sl = max(candidate_sl, orig_tp)
++                else:
++                    candidate_sl = min(candidate_sl, orig_tp)
++                # Re-check ratchet / min step after flooring.
++                if pos.direction == 'long':
++                    if candidate_sl <= pos.sl or (candidate_sl - pos.sl) < min_move:
++                        continue
++                else:
++                    if candidate_sl >= pos.sl or (pos.sl - candidate_sl) < min_move:
++                        continue
+ 
+             old_sl = pos.sl
+             if self.paper_mode or self.paper_orders:
+@@ -1102,12 +1217,20 @@
+             if d == 'long':
+                 if row['low'] <= pos.sl:
+                     exits.append((order_id, 'STOP_LOSS'))
+-                elif pos.tp and pos.tp > 0 and row['high'] >= pos.tp:
++                elif (
++                    not getattr(pos, 'tp_cleared', False)
++                    and pos.tp and pos.tp > 0
++                    and row['high'] >= pos.tp
++                ):
+                     exits.append((order_id, 'TAKE_PROFIT'))
+             else:
+                 if row['high'] >= pos.sl:
+                     exits.append((order_id, 'STOP_LOSS'))
+-                elif pos.tp and pos.tp > 0 and row['low'] <= pos.tp:
++                elif (
++                    not getattr(pos, 'tp_cleared', False)
++                    and pos.tp and pos.tp > 0
++                    and row['low'] <= pos.tp
++                ):
+                     exits.append((order_id, 'TAKE_PROFIT'))
+         
+         return exits
+@@ -1775,6 +1898,8 @@
+                     any_new_bar = True
+ 
+                     if self.positions:
++                        # Past TP → cancel TP + trail (before local TAKE_PROFIT check).
++                        self.update_past_tp_to_trail(symbol, df)
+                         exits = self.check_position_exit(symbol, df)
+                         for order_id, exit_type in exits:
+                             pos = self.positions.get(order_id)
+
+--- a/tests/test_ensemble_trailing_stop.py
++++ b/tests/test_ensemble_trailing_stop.py
+@@ -191,3 +191,118 @@
+     })
+     assert n == 1
+     assert t.positions["bot_old"].trailing_enabled is True
++
++
++def _long_pos(*, trailing=True, order_id="bot_long1", tp=25100.0, sl=24960.0):
++    return slr.Position(
++        order_id=order_id,
++        symbol="MNQ",
++        direction="long",
++        entry_price=25000.0,
++        size=1,
++        sl=sl,
++        tp=tp,
++        entry_time=datetime.now(timezone.utc),
++        trailing_enabled=trailing,
++    )
++
++
++def test_profit_lock_defaults_100_to_20():
++    assert slr.PROFIT_LOCK_TRIGGER_1_USD == 100.0
++    assert slr.PROFIT_LOCK_LEVEL_1_USD == 20.0
++    assert slr.PROFIT_LOCK_TRIGGER_2_USD == 150.0
++    assert slr.PROFIT_LOCK_LEVEL_2_USD == 50.0
++
++
++def test_profit_lock_100_moves_sl_to_plus_20():
++    t = _trader()
++    t.paper_orders = True
++    pos = _long_pos(sl=24960.0, tp=25100.0)
++    t.positions[pos.order_id] = pos
++    # +$100 uPnL on MNQ ($2/pt, 1 ct) = +50 pts → price 25050
++    df = pd.DataFrame([{"high": 25050.0, "low": 25010.0, "close": 25050.0, "atr": 15.0}])
++    t.update_dollar_profit_locks("MNQ", df)
++    # Lock +$20 = +10 pts → SL 25010
++    assert pos.profit_lock_level == 1
++    assert pos.sl == pytest.approx(25010.0)
++    assert pos.sl > 24960.0
++
++
++def test_past_tp_cancels_tp_enables_trail_and_floors_sl():
++    t = _trader()
++    t.paper_orders = True
++    pos = _long_pos(sl=24960.0, tp=25100.0)
++    t.positions[pos.order_id] = pos
++    # High beyond TP; low stays above floored SL so we only assert no TAKE_PROFIT.
++    df = pd.DataFrame([{"high": 25140.0, "low": 25105.0, "close": 25120.0, "atr": 20.0}])
++    t.update_past_tp_to_trail("MNQ", df)
++    assert pos.tp_cleared is True
++    assert pos.tp == 0.0
++    assert pos.original_tp == pytest.approx(25100.0)
++    assert pos.trailing_enabled is True
++    # SL floored at original TP
++    assert pos.sl == pytest.approx(25100.0)
++    # Local exit check must NOT emit TAKE_PROFIT once TP cleared
++    exits = t.check_position_exit("MNQ", df)
++    assert not any(et == "TAKE_PROFIT" for _, et in exits)
++    assert exits == []
++
++
++def test_past_tp_calls_broker_cancel_take_profit_live():
++    t = _trader()
++    t.paper_mode = False
++    t.paper_orders = False
++    pos = _long_pos(sl=24960.0, tp=25100.0)
++    t.positions[pos.order_id] = pos
++    t.broker.cancel_take_profit.return_value = True
++    t.broker.update_stop_loss.return_value = True
++    df = pd.DataFrame([{"high": 25125.0, "low": 25090.0, "close": 25120.0, "atr": 20.0}])
++    t.update_past_tp_to_trail("MNQ", df)
++    assert t.broker.cancel_take_profit.called
++    kwargs = t.broker.cancel_take_profit.call_args.kwargs
++    assert kwargs["ticket"] == pos.order_id
++    assert kwargs["symbol"] == "MNQ"
++    assert pos.tp_cleared is True
++    assert pos.trailing_enabled is True
++
++
++def test_past_tp_keeps_tp_if_cancel_fails():
++    t = _trader()
++    t.paper_mode = False
++    t.paper_orders = False
++    pos = _long_pos(sl=24960.0, tp=25100.0)
++    t.positions[pos.order_id] = pos
++    t.broker.cancel_take_profit.return_value = False
++    df = pd.DataFrame([{"high": 25125.0, "low": 25090.0, "close": 25120.0, "atr": 20.0}])
++    t.update_past_tp_to_trail("MNQ", df)
++    assert pos.tp_cleared is False
++    assert pos.tp == pytest.approx(25100.0)
++
++
++def test_trail_after_past_tp_never_loosens_through_original_tp():
++    t = _trader()
++    t.paper_orders = True
++    pos = _long_pos(sl=25100.0, tp=0.0)
++    pos.tp_cleared = True
++    pos.original_tp = 25100.0
++    pos.trailing_enabled = True
++    t.positions[pos.order_id] = pos
++    # Wide ATR would want SL far below original TP — floor must hold.
++    df = pd.DataFrame([{"high": 25140.0, "low": 25105.0, "close": 25130.0, "atr": 80.0}])
++    t.update_trailing_stops("MNQ", df)
++    assert pos.sl >= 25100.0 - 1e-9
++
++
++def test_short_past_tp_floors_sl_at_original_tp():
++    t = _trader()
++    t.paper_orders = True
++    pos = _short_pos(trailing=True)
++    # short entry 25000, tp 24900, sl 25040
++    t.positions[pos.order_id] = pos
++    df = pd.DataFrame([{"high": 24920.0, "low": 24880.0, "close": 24890.0, "atr": 15.0}])
++    t.update_past_tp_to_trail("MNQ", df)
++    assert pos.tp_cleared is True
++    assert pos.original_tp == pytest.approx(24900.0)
++    assert pos.trailing_enabled is True
++    assert pos.sl == pytest.approx(24900.0)
++    assert pos.sl <= 24900.0

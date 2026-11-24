@@ -1,0 +1,1386 @@
+[
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 3,
+  "sessions": "all",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 909,
+   "net": 32259.5,
+   "pf": 1.11,
+   "wr": 37.8,
+   "avg": 35.49,
+   "dd": 14021.5
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 19587.6,
+   "P2 May25-Oct25": 17104.5,
+   "P3 Nov25-Mar26": -4383.3,
+   "P4 Apr26-Sep26": -49.4
+  },
+  "periods_positive": 2,
+  "worst_day": -3378.1,
+  "losing_days_pct": 56.7,
+  "net_per_dd": 2.3,
+  "by_tag": {
+   "addon_e1": {
+    "n": 168,
+    "net": 10520.0,
+    "pf": 1.23,
+    "wr": 43.5,
+    "avg": 62.62,
+    "dd": 7220.0
+   },
+   "addon_onl": {
+    "n": 58,
+    "net": 2110.0,
+    "pf": 1.1,
+    "wr": 37.9,
+    "avg": 36.38,
+    "dd": 7250.0
+   },
+   "ens_breakout": {
+    "n": 311,
+    "net": 5775.0,
+    "pf": 1.05,
+    "wr": 39.9,
+    "avg": 18.57,
+    "dd": 14915.0
+   },
+   "ens_mean_reversion": {
+    "n": 285,
+    "net": 6866.8,
+    "pf": 1.09,
+    "wr": 28.8,
+    "avg": 24.09,
+    "dd": 12114.1
+   },
+   "ens_trend": {
+    "n": 87,
+    "net": 6987.7,
+    "pf": 1.28,
+    "wr": 49.4,
+    "avg": 80.32,
+    "dd": 4891.7
+   }
+  }
+ },
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 1,
+  "sessions": "all",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 806,
+   "net": 22780.5,
+   "pf": 1.09,
+   "wr": 37.1,
+   "avg": 28.26,
+   "dd": 11412.2
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 14288.9,
+   "P2 May25-Oct25": 6241.4,
+   "P3 Nov25-Mar26": 99.5,
+   "P4 Apr26-Sep26": 2150.6
+  },
+  "periods_positive": 4,
+  "worst_day": -2663.3,
+  "losing_days_pct": 55.8,
+  "net_per_dd": 2.0,
+  "by_tag": {
+   "addon_e1": {
+    "n": 168,
+    "net": 10520.0,
+    "pf": 1.23,
+    "wr": 43.5,
+    "avg": 62.62,
+    "dd": 7220.0
+   },
+   "addon_onl": {
+    "n": 60,
+    "net": 3600.0,
+    "pf": 1.17,
+    "wr": 40.0,
+    "avg": 60.0,
+    "dd": 7250.0
+   },
+   "ens_breakout": {
+    "n": 215,
+    "net": -2975.0,
+    "pf": 0.96,
+    "wr": 38.6,
+    "avg": -13.84,
+    "dd": 11085.0
+   },
+   "ens_mean_reversion": {
+    "n": 288,
+    "net": 5945.4,
+    "pf": 1.08,
+    "wr": 28.5,
+    "avg": 20.64,
+    "dd": 12114.1
+   },
+   "ens_trend": {
+    "n": 75,
+    "net": 5690.1,
+    "pf": 1.25,
+    "wr": 49.3,
+    "avg": 75.87,
+    "dd": 3666.5
+   }
+  }
+ },
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 3,
+  "sessions": "all",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 848,
+   "net": 29352.9,
+   "pf": 1.11,
+   "wr": 37.9,
+   "avg": 34.61,
+   "dd": 15244.2
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 17700.0,
+   "P2 May25-Oct25": 15338.3,
+   "P3 Nov25-Mar26": -3919.3,
+   "P4 Apr26-Sep26": 233.9
+  },
+  "periods_positive": 3,
+  "worst_day": -3378.1,
+  "losing_days_pct": 59.1,
+  "net_per_dd": 1.93,
+  "by_tag": {
+   "addon_e1": {
+    "n": 165,
+    "net": 11015.0,
+    "pf": 1.25,
+    "wr": 43.6,
+    "avg": 66.76,
+    "dd": 6685.0
+   },
+   "addon_onl": {
+    "n": 57,
+    "net": 2665.0,
+    "pf": 1.12,
+    "wr": 38.6,
+    "avg": 46.75,
+    "dd": 7250.0
+   },
+   "ens_breakout": {
+    "n": 288,
+    "net": 6735.0,
+    "pf": 1.06,
+    "wr": 39.9,
+    "avg": 23.39,
+    "dd": 13250.0
+   },
+   "ens_mean_reversion": {
+    "n": 262,
+    "net": 1534.6,
+    "pf": 1.02,
+    "wr": 27.9,
+    "avg": 5.86,
+    "dd": 10960.2
+   },
+   "ens_trend": {
+    "n": 76,
+    "net": 7403.3,
+    "pf": 1.35,
+    "wr": 51.3,
+    "avg": 97.41,
+    "dd": 3678.6
+   }
+  }
+ },
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 1,
+  "sessions": "day_only",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 161,
+   "net": 12233.9,
+   "pf": 1.24,
+   "wr": 36.6,
+   "avg": 75.99,
+   "dd": 6472.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 6231.3,
+   "P2 May25-Oct25": 7335.0,
+   "P3 Nov25-Mar26": -1542.3,
+   "P4 Apr26-Sep26": 209.9
+  },
+  "periods_positive": 3,
+  "worst_day": -2250.0,
+  "losing_days_pct": 60.8,
+  "net_per_dd": 1.89,
+  "by_tag": {
+   "addon_onl": {
+    "n": 64,
+    "net": 4845.0,
+    "pf": 1.22,
+    "wr": 40.6,
+    "avg": 75.7,
+    "dd": 6410.0
+   },
+   "ens_breakout": {
+    "n": 10,
+    "net": 2980.0,
+    "pf": 1.8,
+    "wr": 50.0,
+    "avg": 298.0,
+    "dd": 1555.0
+   },
+   "ens_mean_reversion": {
+    "n": 80,
+    "net": 8677.0,
+    "pf": 1.43,
+    "wr": 33.8,
+    "avg": 108.46,
+    "dd": 4346.4
+   },
+   "ens_trend": {
+    "n": 7,
+    "net": -4268.2,
+    "pf": 0.04,
+    "wr": 14.3,
+    "avg": -609.74,
+    "dd": 3770.1
+   }
+  }
+ },
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 3,
+  "sessions": "day_only",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 161,
+   "net": 12233.9,
+   "pf": 1.24,
+   "wr": 36.6,
+   "avg": 75.99,
+   "dd": 6472.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 6231.3,
+   "P2 May25-Oct25": 7335.0,
+   "P3 Nov25-Mar26": -1542.3,
+   "P4 Apr26-Sep26": 209.9
+  },
+  "periods_positive": 3,
+  "worst_day": -2250.0,
+  "losing_days_pct": 60.8,
+  "net_per_dd": 1.89,
+  "by_tag": {
+   "addon_onl": {
+    "n": 64,
+    "net": 4845.0,
+    "pf": 1.22,
+    "wr": 40.6,
+    "avg": 75.7,
+    "dd": 6410.0
+   },
+   "ens_breakout": {
+    "n": 10,
+    "net": 2980.0,
+    "pf": 1.8,
+    "wr": 50.0,
+    "avg": 298.0,
+    "dd": 1555.0
+   },
+   "ens_mean_reversion": {
+    "n": 80,
+    "net": 8677.0,
+    "pf": 1.43,
+    "wr": 33.8,
+    "avg": 108.46,
+    "dd": 4346.4
+   },
+   "ens_trend": {
+    "n": 7,
+    "net": -4268.2,
+    "pf": 0.04,
+    "wr": 14.3,
+    "avg": -609.74,
+    "dd": 3770.1
+   }
+  }
+ },
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 1,
+  "sessions": "all",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 762,
+   "net": 19846.3,
+   "pf": 1.08,
+   "wr": 37.0,
+   "avg": 26.04,
+   "dd": 11143.3
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 13948.4,
+   "P2 May25-Oct25": 4940.3,
+   "P3 Nov25-Mar26": -1476.3,
+   "P4 Apr26-Sep26": 2433.9
+  },
+  "periods_positive": 3,
+  "worst_day": -2663.3,
+  "losing_days_pct": 57.7,
+  "net_per_dd": 1.78,
+  "by_tag": {
+   "addon_e1": {
+    "n": 165,
+    "net": 11015.0,
+    "pf": 1.25,
+    "wr": 43.6,
+    "avg": 66.76,
+    "dd": 6685.0
+   },
+   "addon_onl": {
+    "n": 60,
+    "net": 3600.0,
+    "pf": 1.17,
+    "wr": 40.0,
+    "avg": 60.0,
+    "dd": 7250.0
+   },
+   "ens_breakout": {
+    "n": 203,
+    "net": -1960.0,
+    "pf": 0.98,
+    "wr": 38.4,
+    "avg": -9.66,
+    "dd": 9550.0
+   },
+   "ens_mean_reversion": {
+    "n": 265,
+    "net": 613.1,
+    "pf": 1.01,
+    "wr": 27.5,
+    "avg": 2.31,
+    "dd": 10960.2
+   },
+   "ens_trend": {
+    "n": 69,
+    "net": 6578.2,
+    "pf": 1.33,
+    "wr": 50.7,
+    "avg": 95.34,
+    "dd": 2818.1
+   }
+  }
+ },
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 1,
+  "sessions": "day_only",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 160,
+   "net": 10617.8,
+   "pf": 1.21,
+   "wr": 36.2,
+   "avg": 66.36,
+   "dd": 6472.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 6231.3,
+   "P2 May25-Oct25": 5718.9,
+   "P3 Nov25-Mar26": -1542.3,
+   "P4 Apr26-Sep26": 209.9
+  },
+  "periods_positive": 3,
+  "worst_day": -2250.0,
+  "losing_days_pct": 61.5,
+  "net_per_dd": 1.64,
+  "by_tag": {
+   "addon_onl": {
+    "n": 64,
+    "net": 4845.0,
+    "pf": 1.22,
+    "wr": 40.6,
+    "avg": 75.7,
+    "dd": 6410.0
+   },
+   "ens_breakout": {
+    "n": 10,
+    "net": 2980.0,
+    "pf": 1.8,
+    "wr": 50.0,
+    "avg": 298.0,
+    "dd": 1555.0
+   },
+   "ens_mean_reversion": {
+    "n": 79,
+    "net": 7061.0,
+    "pf": 1.35,
+    "wr": 32.9,
+    "avg": 89.38,
+    "dd": 4346.4
+   },
+   "ens_trend": {
+    "n": 7,
+    "net": -4268.2,
+    "pf": 0.04,
+    "wr": 14.3,
+    "avg": -609.74,
+    "dd": 3770.1
+   }
+  }
+ },
+ {
+  "max_risk_usd": 800.0,
+  "max_open": 3,
+  "sessions": "day_only",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 160,
+   "net": 10617.8,
+   "pf": 1.21,
+   "wr": 36.2,
+   "avg": 66.36,
+   "dd": 6472.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 6231.3,
+   "P2 May25-Oct25": 5718.9,
+   "P3 Nov25-Mar26": -1542.3,
+   "P4 Apr26-Sep26": 209.9
+  },
+  "periods_positive": 3,
+  "worst_day": -2250.0,
+  "losing_days_pct": 61.5,
+  "net_per_dd": 1.64,
+  "by_tag": {
+   "addon_onl": {
+    "n": 64,
+    "net": 4845.0,
+    "pf": 1.22,
+    "wr": 40.6,
+    "avg": 75.7,
+    "dd": 6410.0
+   },
+   "ens_breakout": {
+    "n": 10,
+    "net": 2980.0,
+    "pf": 1.8,
+    "wr": 50.0,
+    "avg": 298.0,
+    "dd": 1555.0
+   },
+   "ens_mean_reversion": {
+    "n": 79,
+    "net": 7061.0,
+    "pf": 1.35,
+    "wr": 32.9,
+    "avg": 89.38,
+    "dd": 4346.4
+   },
+   "ens_trend": {
+    "n": 7,
+    "net": -4268.2,
+    "pf": 0.04,
+    "wr": 14.3,
+    "avg": -609.74,
+    "dd": 3770.1
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 1,
+  "sessions": "day_only",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 73,
+   "net": 5429.5,
+   "pf": 1.38,
+   "wr": 31.5,
+   "avg": 74.38,
+   "dd": 3556.6
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.4,
+   "P2 May25-Oct25": -2326.6,
+   "P3 Nov25-Mar26": 289.1,
+   "P4 Apr26-Sep26": 1706.6
+  },
+  "periods_positive": 3,
+  "worst_day": -658.4,
+  "losing_days_pct": 66.2,
+  "net_per_dd": 1.53,
+  "by_tag": {
+   "addon_onl": {
+    "n": 20,
+    "net": 1030.0,
+    "pf": 1.21,
+    "wr": 40.0,
+    "avg": 51.5,
+    "dd": 2750.0
+   },
+   "ens_mean_reversion": {
+    "n": 53,
+    "net": 4399.5,
+    "pf": 1.48,
+    "wr": 28.3,
+    "avg": 83.01,
+    "dd": 2292.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 1,
+  "sessions": "day_only",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 73,
+   "net": 5429.5,
+   "pf": 1.38,
+   "wr": 31.5,
+   "avg": 74.38,
+   "dd": 3556.6
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.4,
+   "P2 May25-Oct25": -2326.6,
+   "P3 Nov25-Mar26": 289.1,
+   "P4 Apr26-Sep26": 1706.6
+  },
+  "periods_positive": 3,
+  "worst_day": -658.4,
+  "losing_days_pct": 66.2,
+  "net_per_dd": 1.53,
+  "by_tag": {
+   "addon_onl": {
+    "n": 20,
+    "net": 1030.0,
+    "pf": 1.21,
+    "wr": 40.0,
+    "avg": 51.5,
+    "dd": 2750.0
+   },
+   "ens_mean_reversion": {
+    "n": 53,
+    "net": 4399.5,
+    "pf": 1.48,
+    "wr": 28.3,
+    "avg": 83.01,
+    "dd": 2292.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 3,
+  "sessions": "day_only",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 73,
+   "net": 5429.5,
+   "pf": 1.38,
+   "wr": 31.5,
+   "avg": 74.38,
+   "dd": 3556.6
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.4,
+   "P2 May25-Oct25": -2326.6,
+   "P3 Nov25-Mar26": 289.1,
+   "P4 Apr26-Sep26": 1706.6
+  },
+  "periods_positive": 3,
+  "worst_day": -658.4,
+  "losing_days_pct": 66.2,
+  "net_per_dd": 1.53,
+  "by_tag": {
+   "addon_onl": {
+    "n": 20,
+    "net": 1030.0,
+    "pf": 1.21,
+    "wr": 40.0,
+    "avg": 51.5,
+    "dd": 2750.0
+   },
+   "ens_mean_reversion": {
+    "n": 53,
+    "net": 4399.5,
+    "pf": 1.48,
+    "wr": 28.3,
+    "avg": 83.01,
+    "dd": 2292.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 3,
+  "sessions": "day_only",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 73,
+   "net": 5429.5,
+   "pf": 1.38,
+   "wr": 31.5,
+   "avg": 74.38,
+   "dd": 3556.6
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.4,
+   "P2 May25-Oct25": -2326.6,
+   "P3 Nov25-Mar26": 289.1,
+   "P4 Apr26-Sep26": 1706.6
+  },
+  "periods_positive": 3,
+  "worst_day": -658.4,
+  "losing_days_pct": 66.2,
+  "net_per_dd": 1.53,
+  "by_tag": {
+   "addon_onl": {
+    "n": 20,
+    "net": 1030.0,
+    "pf": 1.21,
+    "wr": 40.0,
+    "avg": 51.5,
+    "dd": 2750.0
+   },
+   "ens_mean_reversion": {
+    "n": 53,
+    "net": 4399.5,
+    "pf": 1.48,
+    "wr": 28.3,
+    "avg": 83.01,
+    "dd": 2292.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 3,
+  "sessions": "all",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 464,
+   "net": 9805.5,
+   "pf": 1.1,
+   "wr": 33.2,
+   "avg": 21.13,
+   "dd": 8506.6
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 6590.6,
+   "P2 May25-Oct25": 2152.2,
+   "P3 Nov25-Mar26": -1544.0,
+   "P4 Apr26-Sep26": 2606.7
+  },
+  "periods_positive": 3,
+  "worst_day": -1317.7,
+  "losing_days_pct": 61.5,
+  "net_per_dd": 1.15,
+  "by_tag": {
+   "addon_e1": {
+    "n": 107,
+    "net": 3265.0,
+    "pf": 1.15,
+    "wr": 43.0,
+    "avg": 30.51,
+    "dd": 3600.0
+   },
+   "addon_onl": {
+    "n": 21,
+    "net": 540.0,
+    "pf": 1.1,
+    "wr": 38.1,
+    "avg": 25.71,
+    "dd": 3240.0
+   },
+   "ens_breakout": {
+    "n": 59,
+    "net": -2690.0,
+    "pf": 0.85,
+    "wr": 32.2,
+    "avg": -45.59,
+    "dd": 5550.0
+   },
+   "ens_mean_reversion": {
+    "n": 228,
+    "net": 2518.3,
+    "pf": 1.06,
+    "wr": 23.7,
+    "avg": 11.05,
+    "dd": 9268.3
+   },
+   "ens_trend": {
+    "n": 49,
+    "net": 6172.2,
+    "pf": 1.67,
+    "wr": 55.1,
+    "avg": 125.96,
+    "dd": 1200.0
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 1,
+  "sessions": "all",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 451,
+   "net": 7411.6,
+   "pf": 1.08,
+   "wr": 32.6,
+   "avg": 16.43,
+   "dd": 8792.4
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 7092.7,
+   "P2 May25-Oct25": -1210.1,
+   "P3 Nov25-Mar26": -1077.7,
+   "P4 Apr26-Sep26": 2606.7
+  },
+  "periods_positive": 2,
+  "worst_day": -1317.7,
+  "losing_days_pct": 61.3,
+  "net_per_dd": 0.84,
+  "by_tag": {
+   "addon_e1": {
+    "n": 107,
+    "net": 3265.0,
+    "pf": 1.15,
+    "wr": 43.0,
+    "avg": 30.51,
+    "dd": 3600.0
+   },
+   "addon_onl": {
+    "n": 21,
+    "net": 540.0,
+    "pf": 1.1,
+    "wr": 38.1,
+    "avg": 25.71,
+    "dd": 3240.0
+   },
+   "ens_breakout": {
+    "n": 49,
+    "net": -4440.0,
+    "pf": 0.72,
+    "wr": 28.6,
+    "avg": -90.61,
+    "dd": 5670.0
+   },
+   "ens_mean_reversion": {
+    "n": 227,
+    "net": 2585.1,
+    "pf": 1.06,
+    "wr": 23.8,
+    "avg": 11.39,
+    "dd": 9268.3
+   },
+   "ens_trend": {
+    "n": 47,
+    "net": 5461.5,
+    "pf": 1.59,
+    "wr": 53.2,
+    "avg": 116.2,
+    "dd": 1289.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 1,
+  "sessions": "day_only",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 36,
+   "net": 1670.2,
+   "pf": 1.33,
+   "wr": 22.2,
+   "avg": 46.4,
+   "dd": 2147.4
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 2367.3,
+   "P2 May25-Oct25": -917.4,
+   "P3 Nov25-Mar26": -797.6,
+   "P4 Apr26-Sep26": 1017.9
+  },
+  "periods_positive": 2,
+  "worst_day": -295.0,
+  "losing_days_pct": 77.1,
+  "net_per_dd": 0.78,
+  "by_tag": {
+   "addon_onl": {
+    "n": 3,
+    "net": -110.0,
+    "pf": 0.81,
+    "wr": 33.3,
+    "avg": -36.67,
+    "dd": 575.0
+   },
+   "ens_mean_reversion": {
+    "n": 33,
+    "net": 1780.2,
+    "pf": 1.4,
+    "wr": 21.2,
+    "avg": 53.95,
+    "dd": 1852.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 1,
+  "sessions": "day_only",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 36,
+   "net": 1670.2,
+   "pf": 1.33,
+   "wr": 22.2,
+   "avg": 46.4,
+   "dd": 2147.4
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 2367.3,
+   "P2 May25-Oct25": -917.4,
+   "P3 Nov25-Mar26": -797.6,
+   "P4 Apr26-Sep26": 1017.9
+  },
+  "periods_positive": 2,
+  "worst_day": -295.0,
+  "losing_days_pct": 77.1,
+  "net_per_dd": 0.78,
+  "by_tag": {
+   "addon_onl": {
+    "n": 3,
+    "net": -110.0,
+    "pf": 0.81,
+    "wr": 33.3,
+    "avg": -36.67,
+    "dd": 575.0
+   },
+   "ens_mean_reversion": {
+    "n": 33,
+    "net": 1780.2,
+    "pf": 1.4,
+    "wr": 21.2,
+    "avg": 53.95,
+    "dd": 1852.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 3,
+  "sessions": "day_only",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 36,
+   "net": 1670.2,
+   "pf": 1.33,
+   "wr": 22.2,
+   "avg": 46.4,
+   "dd": 2147.4
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 2367.3,
+   "P2 May25-Oct25": -917.4,
+   "P3 Nov25-Mar26": -797.6,
+   "P4 Apr26-Sep26": 1017.9
+  },
+  "periods_positive": 2,
+  "worst_day": -295.0,
+  "losing_days_pct": 77.1,
+  "net_per_dd": 0.78,
+  "by_tag": {
+   "addon_onl": {
+    "n": 3,
+    "net": -110.0,
+    "pf": 0.81,
+    "wr": 33.3,
+    "avg": -36.67,
+    "dd": 575.0
+   },
+   "ens_mean_reversion": {
+    "n": 33,
+    "net": 1780.2,
+    "pf": 1.4,
+    "wr": 21.2,
+    "avg": 53.95,
+    "dd": 1852.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 3,
+  "sessions": "day_only",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 36,
+   "net": 1670.2,
+   "pf": 1.33,
+   "wr": 22.2,
+   "avg": 46.4,
+   "dd": 2147.4
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 2367.3,
+   "P2 May25-Oct25": -917.4,
+   "P3 Nov25-Mar26": -797.6,
+   "P4 Apr26-Sep26": 1017.9
+  },
+  "periods_positive": 2,
+  "worst_day": -295.0,
+  "losing_days_pct": 77.1,
+  "net_per_dd": 0.78,
+  "by_tag": {
+   "addon_onl": {
+    "n": 3,
+    "net": -110.0,
+    "pf": 0.81,
+    "wr": 33.3,
+    "avg": -36.67,
+    "dd": 575.0
+   },
+   "ens_mean_reversion": {
+    "n": 33,
+    "net": 1780.2,
+    "pf": 1.4,
+    "wr": 21.2,
+    "avg": 53.95,
+    "dd": 1852.4
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 3,
+  "sessions": "all",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 478,
+   "net": 6753.8,
+   "pf": 1.06,
+   "wr": 32.6,
+   "avg": 14.13,
+   "dd": 9573.0
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5375.5,
+   "P2 May25-Oct25": 1396.9,
+   "P3 Nov25-Mar26": -2625.4,
+   "P4 Apr26-Sep26": 2606.7
+  },
+  "periods_positive": 3,
+  "worst_day": -1556.5,
+  "losing_days_pct": 61.5,
+  "net_per_dd": 0.71,
+  "by_tag": {
+   "addon_e1": {
+    "n": 107,
+    "net": 3265.0,
+    "pf": 1.15,
+    "wr": 43.0,
+    "avg": 30.51,
+    "dd": 3600.0
+   },
+   "addon_onl": {
+    "n": 20,
+    "net": 870.0,
+    "pf": 1.17,
+    "wr": 40.0,
+    "avg": 43.5,
+    "dd": 3240.0
+   },
+   "ens_breakout": {
+    "n": 64,
+    "net": -3955.0,
+    "pf": 0.8,
+    "wr": 31.2,
+    "avg": -61.8,
+    "dd": 6325.0
+   },
+   "ens_mean_reversion": {
+    "n": 234,
+    "net": 1943.0,
+    "pf": 1.04,
+    "wr": 23.5,
+    "avg": 8.3,
+    "dd": 9268.3
+   },
+   "ens_trend": {
+    "n": 53,
+    "net": 4630.8,
+    "pf": 1.43,
+    "wr": 50.9,
+    "avg": 87.37,
+    "dd": 1479.0
+   }
+  }
+ },
+ {
+  "max_risk_usd": 500.0,
+  "max_open": 1,
+  "sessions": "all",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 462,
+   "net": 5779.8,
+   "pf": 1.06,
+   "wr": 32.3,
+   "avg": 12.51,
+   "dd": 10000.9
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5877.7,
+   "P2 May25-Oct25": -910.1,
+   "P3 Nov25-Mar26": -1794.3,
+   "P4 Apr26-Sep26": 2606.7
+  },
+  "periods_positive": 2,
+  "worst_day": -1556.5,
+  "losing_days_pct": 61.1,
+  "net_per_dd": 0.58,
+  "by_tag": {
+   "addon_e1": {
+    "n": 107,
+    "net": 3265.0,
+    "pf": 1.15,
+    "wr": 43.0,
+    "avg": 30.51,
+    "dd": 3600.0
+   },
+   "addon_onl": {
+    "n": 21,
+    "net": 540.0,
+    "pf": 1.1,
+    "wr": 38.1,
+    "avg": 25.71,
+    "dd": 3240.0
+   },
+   "ens_breakout": {
+    "n": 52,
+    "net": -4670.0,
+    "pf": 0.73,
+    "wr": 28.8,
+    "avg": -89.81,
+    "dd": 5900.0
+   },
+   "ens_mean_reversion": {
+    "n": 233,
+    "net": 2009.8,
+    "pf": 1.04,
+    "wr": 23.6,
+    "avg": 8.63,
+    "dd": 9268.3
+   },
+   "ens_trend": {
+    "n": 49,
+    "net": 4635.0,
+    "pf": 1.46,
+    "wr": 51.0,
+    "avg": 94.59,
+    "dd": 1777.9
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 1,
+  "sessions": "all",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 206,
+   "net": -1952.0,
+   "pf": 0.94,
+   "wr": 23.3,
+   "avg": -9.48,
+   "dd": 9770.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.7,
+   "P2 May25-Oct25": -3766.2,
+   "P3 Nov25-Mar26": -4030.9,
+   "P4 Apr26-Sep26": 84.4
+  },
+  "periods_positive": 2,
+  "worst_day": -1001.5,
+  "losing_days_pct": 72.3,
+  "net_per_dd": -0.2,
+  "by_tag": {
+   "addon_e1": {
+    "n": 43,
+    "net": 205.0,
+    "pf": 1.03,
+    "wr": 41.9,
+    "avg": 4.77,
+    "dd": 3390.0
+   },
+   "addon_onl": {
+    "n": 2,
+    "net": -575.0,
+    "pf": 0.0,
+    "wr": 0.0,
+    "avg": -287.5,
+    "dd": 280.0
+   },
+   "ens_breakout": {
+    "n": 4,
+    "net": 445.0,
+    "pf": 1.72,
+    "wr": 50.0,
+    "avg": 111.25,
+    "dd": 615.0
+   },
+   "ens_mean_reversion": {
+    "n": 147,
+    "net": -2285.4,
+    "pf": 0.9,
+    "wr": 15.6,
+    "avg": -15.55,
+    "dd": 8161.2
+   },
+   "ens_trend": {
+    "n": 10,
+    "net": 258.4,
+    "pf": 1.18,
+    "wr": 50.0,
+    "avg": 25.84,
+    "dd": 887.6
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 1,
+  "sessions": "all",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 206,
+   "net": -1952.0,
+   "pf": 0.94,
+   "wr": 23.3,
+   "avg": -9.48,
+   "dd": 9770.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.7,
+   "P2 May25-Oct25": -3766.2,
+   "P3 Nov25-Mar26": -4030.9,
+   "P4 Apr26-Sep26": 84.4
+  },
+  "periods_positive": 2,
+  "worst_day": -1001.5,
+  "losing_days_pct": 72.3,
+  "net_per_dd": -0.2,
+  "by_tag": {
+   "addon_e1": {
+    "n": 43,
+    "net": 205.0,
+    "pf": 1.03,
+    "wr": 41.9,
+    "avg": 4.77,
+    "dd": 3390.0
+   },
+   "addon_onl": {
+    "n": 2,
+    "net": -575.0,
+    "pf": 0.0,
+    "wr": 0.0,
+    "avg": -287.5,
+    "dd": 280.0
+   },
+   "ens_breakout": {
+    "n": 4,
+    "net": 445.0,
+    "pf": 1.72,
+    "wr": 50.0,
+    "avg": 111.25,
+    "dd": 615.0
+   },
+   "ens_mean_reversion": {
+    "n": 147,
+    "net": -2285.4,
+    "pf": 0.9,
+    "wr": 15.6,
+    "avg": -15.55,
+    "dd": 8161.2
+   },
+   "ens_trend": {
+    "n": 10,
+    "net": 258.4,
+    "pf": 1.18,
+    "wr": 50.0,
+    "avg": 25.84,
+    "dd": 887.6
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 3,
+  "sessions": "all",
+  "day_loss": 1000.0,
+  "ovn_loss": 600.0,
+  "total": {
+   "n": 206,
+   "net": -1952.0,
+   "pf": 0.94,
+   "wr": 23.3,
+   "avg": -9.48,
+   "dd": 9770.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.7,
+   "P2 May25-Oct25": -3766.2,
+   "P3 Nov25-Mar26": -4030.9,
+   "P4 Apr26-Sep26": 84.4
+  },
+  "periods_positive": 2,
+  "worst_day": -1001.5,
+  "losing_days_pct": 72.3,
+  "net_per_dd": -0.2,
+  "by_tag": {
+   "addon_e1": {
+    "n": 43,
+    "net": 205.0,
+    "pf": 1.03,
+    "wr": 41.9,
+    "avg": 4.77,
+    "dd": 3390.0
+   },
+   "addon_onl": {
+    "n": 2,
+    "net": -575.0,
+    "pf": 0.0,
+    "wr": 0.0,
+    "avg": -287.5,
+    "dd": 280.0
+   },
+   "ens_breakout": {
+    "n": 4,
+    "net": 445.0,
+    "pf": 1.72,
+    "wr": 50.0,
+    "avg": 111.25,
+    "dd": 615.0
+   },
+   "ens_mean_reversion": {
+    "n": 147,
+    "net": -2285.4,
+    "pf": 0.9,
+    "wr": 15.6,
+    "avg": -15.55,
+    "dd": 8161.2
+   },
+   "ens_trend": {
+    "n": 10,
+    "net": 258.4,
+    "pf": 1.18,
+    "wr": 50.0,
+    "avg": 25.84,
+    "dd": 887.6
+   }
+  }
+ },
+ {
+  "max_risk_usd": 300.0,
+  "max_open": 3,
+  "sessions": "all",
+  "day_loss": 2000.0,
+  "ovn_loss": 1200.0,
+  "total": {
+   "n": 206,
+   "net": -1952.0,
+   "pf": 0.94,
+   "wr": 23.3,
+   "avg": -9.48,
+   "dd": 9770.8
+  },
+  "periods": {
+   "P1 Nov24-Apr25": 5760.7,
+   "P2 May25-Oct25": -3766.2,
+   "P3 Nov25-Mar26": -4030.9,
+   "P4 Apr26-Sep26": 84.4
+  },
+  "periods_positive": 2,
+  "worst_day": -1001.5,
+  "losing_days_pct": 72.3,
+  "net_per_dd": -0.2,
+  "by_tag": {
+   "addon_e1": {
+    "n": 43,
+    "net": 205.0,
+    "pf": 1.03,
+    "wr": 41.9,
+    "avg": 4.77,
+    "dd": 3390.0
+   },
+   "addon_onl": {
+    "n": 2,
+    "net": -575.0,
+    "pf": 0.0,
+    "wr": 0.0,
+    "avg": -287.5,
+    "dd": 280.0
+   },
+   "ens_breakout": {
+    "n": 4,
+    "net": 445.0,
+    "pf": 1.72,
+    "wr": 50.0,
+    "avg": 111.25,
+    "dd": 615.0
+   },
+   "ens_mean_reversion": {
+    "n": 147,
+    "net": -2285.4,
+    "pf": 0.9,
+    "wr": 15.6,
+    "avg": -15.55,
+    "dd": 8161.2
+   },
+   "ens_trend": {
+    "n": 10,
+    "net": 258.4,
+    "pf": 1.18,
+    "wr": 50.0,
+    "avg": 25.84,
+    "dd": 887.6
+   }
+  }
+ }
+]

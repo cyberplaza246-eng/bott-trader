@@ -254,7 +254,7 @@ def simulate_exit(
     return ts, float(cl[-1]), "END", (ts - entry_ts).total_seconds()
 
 
-def run_variant(
+def simulate_variant_trades(
     variant: VariantConfig,
     df_1m: pd.DataFrame,
     df_5m: pd.DataFrame,
@@ -263,7 +263,7 @@ def run_variant(
     sl_pts: float,
     tp_pts: float,
     max_hold_sec: int,
-) -> Dict[str, Any]:
+) -> List[ScalpTrade]:
     trigger = df_1m if not variant.use_30s_trigger else df_30s
     trigger = attach_context(trigger, df_1m, ["ema_20", "atr", "avg_range", "range"], "_1m")
     trigger = attach_context(trigger, df_5m, ["close", "vwap", "ema_20", "adx"], "_5m")
@@ -402,6 +402,22 @@ def run_variant(
 
         i += 1
 
+    return trades
+
+
+def run_variant(
+    variant: VariantConfig,
+    df_1m: pd.DataFrame,
+    df_5m: pd.DataFrame,
+    df_30s: pd.DataFrame,
+    symbol: str,
+    sl_pts: float,
+    tp_pts: float,
+    max_hold_sec: int,
+) -> Dict[str, Any]:
+    trades = simulate_variant_trades(
+        variant, df_1m, df_5m, df_30s, symbol, sl_pts, tp_pts, max_hold_sec
+    )
     return summarize(trades, variant.name, symbol)
 
 

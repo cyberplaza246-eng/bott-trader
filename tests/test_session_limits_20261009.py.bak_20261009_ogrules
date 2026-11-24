@@ -1,0 +1,151 @@
+"""2026-10-09: day-session -$500 / overnight -$300 loss limits + +$2,000 daily profit target (REVAMP).
+
+Closed-trade P&L counts toward the session the trade was OPENED in; limits only block new entries.
+"""
+from __future__ import annotations
+
+from datetime import date, datetime, timezone
+from unittest.mock import MagicMock
+
+import pytest
+
+import start_live_rithmic as slr
+from src.core import session_limits as sl
+
+UTC = timezone.utc
+
+
+def _t(s):  # UTC ISO
+    return datetime.fromisoformat(s).replace(tzinfo=UTC)
+
+
+@pytest.fixture(autouse=True)
+def _env(monkeypatch):
+    for k in ("DAY_SESSION_LOSS_LIMIT", "OVERNIGHT_SESSION_LOSS_LIMIT", "DAILY_PROFIT_TARGET", "SESSION_LIMITS"):
+        monkeypatch.delenv(k, raising=False)
+
+
+def test_sessions_and_trading_day():
+    assert sl.session_of(_t("2026-10-08T13:30:00")) == ("day", date(2026, 10, 8))        # 9:30 ET
+    assert sl.session_of(_t("2026-10-08T19:59:00")) == ("day", date(2026, 10, 8))        # 3:59 PM ET
+    assert sl.session_of(_t("2026-10-08T20:00:00")) == ("overnight", date(2026, 10, 9))  # 4 PM ET
+    assert sl.session_of(_t("2026-10-09T00:06:20")) == ("overnight", date(2026, 10, 9))  # 8:06 PM ET
+    assert sl.session_of(_t("2026-10-09T13:29:00")) == ("overnight", date(2026, 10, 9))  # 9:29 AM ET
+    assert sl.session_of(_t("2026-10-09T21:00:00")) == ("overnight", date(2026, 10, 12))  # Fri 5 PM -> Mon
+    assert sl.session_of(_t("2026-10-11T23:00:00")) == ("overnight", date(2026, 10, 12))  # Sun 7 PM
+    assert sl.session_of(_t("2026-12-15T14:30:00")) == ("day", date(2026, 12, 15))        # EST: 9:30
+
+
+def test_defaults():
+    assert sl.limits() == (500.0, 300.0, 2000.0)
+    assert sl.enabled(True) and not sl.enabled(False)
+
+
+def test_overnight_limit_counts_by_entry_session():
+    L = sl.SessionLedger(None)
+    L.book(_t("2026-10-09T00:06:20"), -217.0)                 # Oct 8 8:06 PM ET short
+    now_on = _t("2026-10-09T04:00:00")
+    assert L.block_reason(now_on) is None
+    assert L.status_line(now_on) == "Overnight P&L -$217, stops at -$300 or +$2,000"
+    L.book(_t("2026-10-09T02:30:00"), -100.0)
+    assert "overnight loss limit hit (-$317" in L.block_reason(now_on)
+    # 9:30 AM: day session starts fresh (overnight loss counts only toward the trading day)
+    now_day = _t("2026-10-09T14:00:00")
+    assert L.block_reason(now_day) is None
+    assert L.status_line(now_day) == "Day P&L $0 (trading day -$317), stops at -$500 or +$2,000 for the day"
+
+
+def test_day_limit_and_overnight_reopens():
+    L = sl.SessionLedger(None)
+    L.book(_t("2026-10-08T14:00:00"), -300.0)
+    L.book(_t("2026-10-08T15:00:00"), -120.0)
+    assert L.status_line(_t("2026-10-08T16:00:00")) == "Day P&L -$420, stops at -$500 or +$2,000"
+    L.book(_t("2026-10-08T17:00:00"), -100.0)
+    assert "day-session loss limit hit (-$520" in L.block_reason(_t("2026-10-08T18:00:00"))
+    assert L.block_reason(_t("2026-10-08T20:30:00")) is None     # 4:30 PM ET overnight session
+
+
+def test_profit_target_includes_overnight():
+    L = sl.SessionLedger(None)
+    L.book(_t("2026-10-09T01:00:00"), 800.0)                     # overnight into Oct 9
+    L.book(_t("2026-10-09T14:00:00"), 1250.0)                    # day session Oct 9
+    assert "daily profit target hit (trading day +$2,050" in L.block_reason(_t("2026-10-09T15:00:00"))
+    assert L.block_reason(_t("2026-10-09T21:00:00")) is None     # next trading day (Mon)
+
+
+def test_env_overrides_and_off(monkeypatch):
+    monkeypatch.setenv("DAY_SESSION_LOSS_LIMIT", "0")
+    monkeypatch.setenv("DAILY_PROFIT_TARGET", "1000")
+    L = sl.SessionLedger(None)
+    L.book(_t("2026-10-08T14:00:00"), -900.0)
+    assert L.block_reason(_t("2026-10-08T15:00:00")) is None
+    L.book(_t("2026-10-08T14:30:00"), 1950.0)
+    assert "profit target" in L.block_reason(_t("2026-10-08T15:00:00"))
+    monkeypatch.setenv("SESSION_LIMITS", "0")
+    assert not sl.enabled(True)
+
+
+def test_ledger_persists(tmp_path, monkeypatch):
+    p = tmp_path / "session_pnl.json"
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)   # allow the save for this check
+    L = sl.SessionLedger(str(p))
+    L.book(_t("2026-10-09T00:06:20"), -217.0, "bot_16b412a862")
+    L2 = sl.SessionLedger(str(p))
+    assert L2.pnl(date(2026, 10, 9), "overnight") == -217.0
+
+
+# -- live trader wiring -------------------------------------------------------------
+
+@pytest.fixture
+def trader(monkeypatch, tmp_path):
+    monkeypatch.setattr(slr._reentry, "REENTRY_ENABLED", False)
+    monkeypatch.setattr(slr, "trades_logger", MagicMock())
+    monkeypatch.setattr(slr, "bot_logger", MagicMock())
+    monkeypatch.setattr(slr, "REVAMP_EXITS_ON", True)
+    monkeypatch.setenv("SESSION_PNL_FILE", str(tmp_path / "s.json"))
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    t.broker = MagicMock()
+    t._write_board_status = lambda **k: None
+    t._cancel_orders_for_closed_position = lambda *a, **k: 0
+    t.daily_pnl = 0.0
+    return t
+
+
+class _Clock(datetime):
+    NOW = _t("2026-10-09T04:00:00")
+
+    @classmethod
+    def now(cls, tz=None):
+        return cls.NOW if tz else cls.NOW.replace(tzinfo=None)
+
+
+def test_trader_books_exit_and_blocks_new_entries_only(trader, monkeypatch):
+    assert trader._session_ledger is not None
+    monkeypatch.setattr(slr, "datetime", _Clock)
+    for i, px in enumerate((31083.5, 31033.5)):
+        oid = f"bot_on{i}"
+        trader.positions[oid] = slr.Position(order_id=oid, symbol="MNQ", direction="short", entry_price=30976.25,
+                                             size=1, sl=31083.25, tp=30762.25,
+                                             entry_time=_t("2026-10-09T00:06:20"), exit_sleeve="breakout")
+        trader.process_exit(oid, "STOP_LOSS", px)
+    assert trader._session_ledger.pnl(date(2026, 10, 9), "overnight") < -300
+    why = trader._session_limit_block()
+    assert why and "overnight loss limit" in why
+    # old calendar-day limit no longer stops the whole loop in session mode
+    trader.daily_pnl = -900.0
+    trader.current_date = _Clock.NOW.replace(tzinfo=None).date()
+    assert trader.check_daily_limits() is True
+    assert trader.check_entry_signal("MNQ", None) is None
+    assert "STOPPED - overnight loss limit" in trader._session_status_line()
+    gs = trader._revamp_gate_state("MNQ", 0)
+    assert gs["daily_loss_limit"] == float("inf") and "overnight loss limit" in gs["session_block"]
+
+
+def test_non_revamp_keeps_old_daily_limit(monkeypatch, tmp_path):
+    monkeypatch.setattr(slr, "REVAMP_EXITS_ON", False)
+    monkeypatch.setattr(slr, "bot_logger", MagicMock())
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    assert t._session_ledger is None and t._session_limit_block() is None
+    t.current_date = datetime.now().date()
+    t.daily_pnl = -t.daily_loss_limit
+    assert t.check_daily_limits() is False

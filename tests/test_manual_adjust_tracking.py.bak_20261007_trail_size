@@ -1,0 +1,389 @@
+"""User adjusts / cancel-replaces a bot SL or TP on Lucid → bot keeps tracking.
+
+No live orders: Rithmic is mocked. Covers:
+  * same-basket modify (Lucid blanks user_tag, price changes) → price follows
+  * cancel/replace → bot adopts the new working leg (never the other trade's)
+  * fill of an adjusted / adopted leg is detected → exit recorded, sibling cancelled
+  * entry not dropped while only adopted legs protect it (list_positions=0 on sim)
+  * early manual close of ONE of two trades frees that slot only
+  * start_live_rithmic follows the new prices and frees the slot on close
+"""
+from __future__ import annotations
+
+import asyncio
+import threading
+import time
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock
+
+import start_live_rithmic as slr
+import src.broker.rithmic_connector as rc
+from src.broker.rithmic_connector import RithmicConnector
+
+
+def _conn(rows: Optional[List[Dict[str, Any]]] = None, net: Optional[int] = 0) -> RithmicConnector:
+    conn = object.__new__(RithmicConnector)
+    conn._client = AsyncMock()
+    conn._client.plants = {"ticker": object(), "order": object(), "pnl": object()}
+    conn._client.list_orders = AsyncMock(return_value=[])
+    conn._plant_skip_logged = set()
+    conn._get_account_id = MagicMock(return_value="TEST-ACCT")
+    conn.get_trade_route = MagicMock(return_value="simulator")
+    conn._reverse_resolve = lambda sym: sym
+    conn._order_lock = threading.Lock()
+    conn._state_lock = threading.Lock()
+    conn._orders = {}
+    conn._positions = {}
+    conn._confirmed_exit_fills = {}
+    conn._connected = True
+    conn._run_sync = lambda coro, timeout=None: asyncio.run(coro)
+    conn._async_cancel_protective_leg = AsyncMock(return_value=True)
+    conn._async_cancel_order_on_plant = AsyncMock(return_value=True)
+    conn._async_is_order_working = AsyncMock(return_value=False)
+    conn._order_within_entry_grace = MagicMock(return_value=False)
+    conn._async_list_positions_net_or_none = AsyncMock(return_value=net)
+    conn._async_list_working_listed_orders = AsyncMock(side_effect=lambda *a, **k: list(rows or []))
+    conn._listed_order_matches_symbol = MagicMock(return_value=True)
+    return conn
+
+
+def _row(tag, basket, ptype="LIMIT", side="SELL", price=None, trigger=None, status="open", qty=1):
+    d = {"symbol": "MNQ", "user_tag": tag, "basket_id": basket, "status": status,
+         "price_type": ptype, "transaction_type": side, "quantity": qty}
+    if price is not None:
+        d["price"] = price
+    if trigger is not None:
+        d["trigger_price"] = trigger
+    return d
+
+
+def _two_longs(conn):
+    conn._orders = {
+        "bot_a": {"symbol": "MNQ", "type": "buy", "size": 1, "entry_price": 100.0,
+                  "stop_loss": 95.0, "take_profit": 110.0,
+                  "protective_sl_basket_id": "11", "protective_tp_basket_id": "12"},
+        "bot_a_sl": {"ticket": "bot_a_sl", "basket_id": "11"},
+        "bot_a_tp": {"ticket": "bot_a_tp", "basket_id": "12"},
+        "bot_b": {"symbol": "MNQ", "type": "buy", "size": 1, "entry_price": 101.0,
+                  "stop_loss": 96.0, "take_profit": 111.0,
+                  "protective_sl_basket_id": "21", "protective_tp_basket_id": "22"},
+        "bot_b_sl": {"ticket": "bot_b_sl", "basket_id": "21"},
+        "bot_b_tp": {"ticket": "bot_b_tp", "basket_id": "22"},
+    }
+
+
+# ── connector: rebind ──────────────────────────────────────────────
+
+def test_same_basket_modify_with_blank_tag_follows_new_price():
+    rows = [
+        _row("bot_a_sl", "11", "STOP_LIMIT", trigger=95.0, price=94.75),
+        _row("", "12", "LIMIT", price=114.0),          # user dragged TP 110 → 114
+        _row("bot_b_sl", "21", "STOP_LIMIT", trigger=96.0),
+        _row("bot_b_tp", "22", "LIMIT", price=111.0),
+    ]
+    conn = _conn(rows)
+    _two_longs(conn)
+    out = asyncio.run(conn._async_rebind_symbol_legs("MNQ"))
+    assert out["bot_a"]["tp_working"] and out["bot_a"]["tp"] == 114.0
+    assert out["bot_a"]["sl"] == 95.0
+    assert conn._orders["bot_a"]["take_profit"] == 114.0
+    assert conn._orders["bot_b"]["take_profit"] == 111.0
+    assert out["bot_a"]["rebound"] == []
+
+
+def test_cancel_replace_tp_is_adopted_without_stealing_other_trade_legs():
+    rows = [
+        _row("bot_a_sl", "11", "STOP_LIMIT", trigger=95.0),
+        # bot_a TP (12) cancelled by user; new blank-tag sell limit 900 placed
+        _row("", "900", "LIMIT", price=115.0),
+        _row("bot_b_sl", "21", "STOP_LIMIT", trigger=96.0),
+        _row("bot_b_tp", "22", "LIMIT", price=111.0),
+    ]
+    conn = _conn(rows)
+    _two_longs(conn)
+    out = asyncio.run(conn._async_rebind_symbol_legs("MNQ"))
+    assert out["bot_a"]["rebound"] == ["tp"] and out["bot_a"]["tp"] == 115.0
+    assert conn._orders["bot_a"]["protective_tp_basket_id"] == "900"
+    assert conn._orders["bot_a_tp"]["basket_id"] == "900"
+    assert conn._orders["bot_b"]["protective_tp_basket_id"] == "22"
+    assert "900" in conn._known_bot_baskets_for_entry("bot_a")  # cleanup will reach it
+    assert conn._leg_tag_for_basket("900") == "bot_a_tp"       # fills resolve to bot_a
+
+
+def test_both_trades_replaced_assigns_by_closest_price():
+    rows = [
+        _row("", "901", "LIMIT", price=111.5),
+        _row("", "902", "LIMIT", price=110.25),
+        _row("bot_a_sl", "11", "STOP", trigger=95.0),
+        _row("bot_b_sl", "21", "STOP", trigger=96.0),
+    ]
+    conn = _conn(rows)
+    _two_longs(conn)
+    asyncio.run(conn._async_rebind_symbol_legs("MNQ"))
+    assert conn._orders["bot_a"]["protective_tp_basket_id"] == "902"  # was 110
+    assert conn._orders["bot_b"]["protective_tp_basket_id"] == "901"  # was 111
+
+
+def test_never_adopts_manual_tagged_wrong_side_oversize_or_closed_entry_rows():
+    rows = [
+        _row("manual_x", "31", "LIMIT", price=112.0),          # tagged manual
+        _row("", "32", "LIMIT", side="BUY", price=90.0),        # opening side
+        _row("", "33", "LIMIT", price=112.0, qty=3),            # bigger than entry
+        _row("", "34", "LIMIT", price=112.0),                   # leftover of closed entry
+    ]
+    conn = _conn(rows)
+    _two_longs(conn)
+    conn._closed_entry_registry()["bot_old"] = {
+        "baskets": {"34"}, "legs": set(), "symbol": "MNQ", "closed_at": time.time(), "clean_passes": 0,
+    }
+    out = asyncio.run(conn._async_rebind_symbol_legs("MNQ"))
+    assert not out["bot_a"]["tp_working"] and not out["bot_b"]["tp_working"]
+    assert conn._orders["bot_a"]["protective_tp_basket_id"] == "12"
+
+
+def test_replaced_sl_is_adopted_as_stop():
+    rows = [_row("", "950", "STOP_MARKET", trigger=99.0), _row("bot_a_tp", "12", price=110.0)]
+    conn = _conn(rows)
+    _two_longs(conn)
+    conn._orders = {k: v for k, v in conn._orders.items() if k.startswith("bot_a")}
+    out = asyncio.run(conn._async_rebind_symbol_legs("MNQ"))
+    assert out["bot_a"]["rebound"] == ["sl"] and out["bot_a"]["sl"] == 99.0
+    assert conn._orders["bot_a"]["stop_loss"] == 99.0
+
+
+# ── connector: exit detection after adjust ──────────────────────────
+
+def test_fill_of_adjusted_blank_tag_tp_is_detected_and_sibling_cancelled():
+    from async_rithmic.enums import ExchangeOrderNotificationType
+    conn = _conn([], net=1)
+    _two_longs(conn)
+    conn._orders["bot_a"]["protective_tp_basket_id"] = "900"
+    conn._orders["bot_a_tp"]["basket_id"] = "900"
+    conn._async_get_order_snapshot = AsyncMock(return_value=None)   # tag lookup misses
+    conn._client.list_orders = AsyncMock(return_value=[
+        _row("", "900", "LIMIT", price=115.0, status="complete"),
+    ])
+    conn._async_cancel_remaining_bracket_legs = AsyncMock(return_value=1)
+    asyncio.run(conn._on_exchange_order_notification({
+        "user_tag": "", "basket_id": "900", "fill_price": 115.0,
+        "notify_type": ExchangeOrderNotificationType.FILL,
+    }))
+    fill = conn._confirmed_exit_fills["bot_a"]
+    assert fill["confirmed"] and fill["leg"] == "TP" and fill["exit_price"] == 115.0
+    targets = [c.args[0] for c in conn._async_cancel_protective_leg.await_args_list]
+    assert "bot_a_sl" in targets and "bot_b_sl" not in targets
+
+
+def test_leg_filled_and_listed_fill_match_by_basket():
+    conn = _conn([])
+    _two_longs(conn)
+    conn._orders["bot_a_tp"]["basket_id"] = "900"
+    conn._orders["bot_a"]["protective_tp_basket_id"] = "900"
+    conn._async_get_order_snapshot = AsyncMock(return_value=None)
+    conn._client.list_orders = AsyncMock(return_value=[
+        _row("", "900", "LIMIT", price=115.0, status="complete"),
+    ])
+    assert asyncio.run(conn._async_is_leg_filled("bot_a_tp")) is True
+    lf = asyncio.run(conn._async_listed_protective_fill_for_entry("bot_a", "MNQ"))
+    assert lf and lf["leg"] == "TP" and lf["exit_price"] == 115.0
+    assert asyncio.run(conn._async_leg_fill_price("bot_a_tp", 110.0)) == 115.0
+
+
+def test_entry_still_open_when_only_adopted_leg_protects_it():
+    rows = [_row("", "900", "LIMIT", price=115.0), _row("", "950", "STOP", trigger=94.0)]
+    conn = _conn(rows)
+    _two_longs(conn)
+    conn._orders = {k: v for k, v in conn._orders.items() if k.startswith("bot_a")}
+    conn._async_get_order_snapshot = AsyncMock(return_value=MagicMock(status="filled", report_type="fill"))
+    conn._async_listed_protective_fill_for_entry = AsyncMock(return_value=None)
+    conn._async_is_leg_filled = AsyncMock(return_value=False)
+    conn._async_list_positions = AsyncMock(return_value=[])   # sim route: always flat
+    conn._list_positions_net_qty = MagicMock(return_value=0)
+    assert asyncio.run(conn._async_is_entry_still_open("bot_a", "MNQ")) is True
+    assert conn._orders["bot_a"]["protective_tp_basket_id"] == "900"
+
+
+def _cleanup_conn(rows, net):
+    conn = _conn(rows, net=net)
+    conn._async_list_positions = AsyncMock(return_value=[{"symbol": "MNQ"}])
+    conn._list_positions_net_qty = MagicMock(return_value=net)
+    conn._async_cancel_remaining_bracket_legs = AsyncMock(return_value=0)
+    conn._async_cancel_entry_protective_orders = AsyncMock(return_value=None)
+    return conn
+
+
+def test_cleanup_waits_for_replaced_legs_before_dropping(monkeypatch):
+    monkeypatch.setattr(rc, "_LEGS_GONE_CONFIRM_SEC", 12.0)
+    monkeypatch.setattr(rc, "_LEGS_GONE_CONFIRM_PASSES", 2)
+    conn = _cleanup_conn([], net=0)
+    _two_longs(conn)
+    conn._orders = {k: v for k, v in conn._orders.items() if k.startswith("bot_a")}
+    conn._async_is_entry_still_open = AsyncMock(return_value=False)  # legs mid cancel/replace
+    conn._cleanup_closed_orders()
+    assert "bot_a" in conn._orders, "must not drop the trade the instant its legs vanish"
+    conn._legs_gone_since()["bot_a"] -= 13
+    conn._cleanup_closed_orders()
+    assert "bot_a" not in conn._orders
+
+
+def test_manual_early_close_of_one_of_two_frees_only_that_entry(monkeypatch):
+    monkeypatch.setattr(rc, "_LEGS_GONE_CONFIRM_SEC", 0.0)
+    monkeypatch.setattr(rc, "_LEGS_GONE_CONFIRM_PASSES", 1)
+    rows = [_row("bot_b_sl", "21", "STOP", trigger=96.0), _row("bot_b_tp", "22", price=111.0)]
+    conn = _cleanup_conn(rows, net=1)       # user flattened bot_a (and its legs) on Lucid
+    _two_longs(conn)
+    conn._cleanup_closed_orders()
+    assert "bot_a" not in conn._orders and "bot_b" in conn._orders
+
+
+def test_net_covered_but_entry_legs_still_working_keeps_tracking(monkeypatch):
+    monkeypatch.setattr(rc, "_LEGS_GONE_CONFIRM_SEC", 0.0)
+    rows = [_row("", "900", "LIMIT", price=115.0),            # bot_a adjusted TP (adopted)
+            _row("bot_b_sl", "21", "STOP", trigger=96.0), _row("bot_b_tp", "22", price=111.0)]
+    conn = _cleanup_conn(rows, net=1)
+    _two_longs(conn)
+    conn._cleanup_closed_orders()
+    assert "bot_a" in conn._orders and "bot_b" in conn._orders
+
+
+def test_entry_scoped_bulk_cancel_spares_other_trades_adjusted_legs():
+    conn = _conn([])
+    _two_longs(conn)
+    conn._orders["bot_b"]["protective_tp_basket_id"] = "922"   # bot_b TP adopted (blank tag)
+    conn._orders["bot_b_tp"]["basket_id"] = "922"
+    conn._client.list_orders = AsyncMock(return_value=[
+        _row("bot_a_sl", "11", "STOP"), _row("", "922", "LIMIT"), _row("bot_b_sl", "21", "STOP"),
+    ])
+    conn._async_cancel_native_bracket_rows = AsyncMock(return_value=0)
+    asyncio.run(conn._async_cancel_all_working_bot_orders_for_symbol(
+        "MNQ", force=True, entry_order_id="bot_a",
+    ))
+    hit = {c.kwargs.get("basket_id") for c in conn._async_cancel_protective_leg.await_args_list}
+    hit |= {c.kwargs.get("basket_id") for c in conn._async_cancel_order_on_plant.await_args_list}
+    assert "11" in hit
+    assert not hit & {"922", "21"}
+
+
+# ── start_live_rithmic ──────────────────────────────────────────────
+
+class AdjustBroker:
+    connected = True
+
+    def __init__(self):
+        self._orders: Dict[str, Dict[str, Any]] = {}
+        self._positions: Dict[str, Dict[str, Any]] = {}
+        self._order_lock = threading.RLock()
+        self._state_lock = threading.RLock()
+        self._confirmed_exit_fills: Dict[str, Dict[str, Any]] = {}
+        self.brackets: Dict[str, Dict[str, Any]] = {}
+        self.released: List[tuple] = []
+        self.sweeps: List[tuple] = []
+
+    def get_open_positions(self, symbol=None):
+        return []
+
+    def entry_protection_grace_active(self, order_id):
+        return False
+
+    def get_order_info(self, ticket):
+        return self._orders.get(str(ticket))
+
+    def sync_tracked_brackets(self, symbol):
+        return {k: dict(v) for k, v in self.brackets.items()}
+
+    def release_closed_entry(self, order_id, symbol, reason=""):
+        self.released.append((order_id, symbol, reason))
+        self._orders.pop(order_id, None)
+        return 1
+
+    def sweep_orphan_working_orders(self, symbol, live_entry_ids=None, reason=""):
+        self.sweeps.append((symbol, set(live_entry_ids or ()), reason))
+        return {"cancelled": 0}
+
+    def confirm_bracket_exit_fill(self, *a, **k):
+        return None
+
+
+def _pos(oid, age=120.0):
+    return slr.Position(order_id=oid, symbol="MNQ", direction="long", entry_price=100.0, size=1,
+                        sl=95.0, tp=110.0,
+                        entry_time=datetime.now(timezone.utc) - timedelta(seconds=age))
+
+
+def _trader():
+    t = slr.LiveRithmicTrader(symbol="MNQ", symbols=["MNQ"], paper_mode=False, skip_confirm=True)
+    t.broker = AdjustBroker()
+    t.paper_orders = False
+    t._feed_learner_on_exit = MagicMock()
+    t._write_board_status = MagicMock()
+    return t
+
+
+def test_adjust_tp_on_one_of_two_then_close_frees_slot():
+    t = _trader()
+    for oid in ("bot_a", "bot_b"):
+        t.positions[oid] = _pos(oid)
+        t.broker._orders[oid] = {"symbol": "MNQ", "size": 1}
+    # 1) user moves bot_a TP 110 → 114 on Lucid
+    t.broker.brackets = {
+        "bot_a": {"sl": 95.0, "tp": 114.0, "sl_working": True, "tp_working": True, "rebound": []},
+        "bot_b": {"sl": 95.0, "tp": 110.0, "sl_working": True, "tp_working": True, "rebound": []},
+    }
+    t.sync_broker_position()
+    assert set(t.positions) == {"bot_a", "bot_b"}, "adjusted trade must stay tracked"
+    assert t.positions["bot_a"].tp == 114.0 and t.positions["bot_b"].tp == 110.0
+    assert t._effective_open_count() == 2
+    # 2) adjusted TP fills on the broker
+    t.broker._confirmed_exit_fills["bot_a"] = {"confirmed": True, "leg": "TP", "exit_price": 114.0}
+    t.broker.brackets.pop("bot_a")
+    t.sync_broker_position()
+    assert "bot_a" not in t.positions and "bot_b" in t.positions
+    assert t.trades[-1]["exit_type"] == "TAKE_PROFIT" and t.trades[-1]["exit_price"] == 114.0
+    assert ("bot_a", "MNQ", "exit_take_profit") in t.broker.released
+    assert t.broker.sweeps[-1][1] == {"bot_b"}, "other trade keeps its SL/TP"
+    assert len(t.positions) < t.max_positions, "slot must be free to place again"
+
+
+def test_confirmed_fill_closes_even_inside_ghost_grace():
+    t = _trader()
+    t.positions["bot_a"] = _pos("bot_a", age=5)
+    t.broker._orders["bot_a"] = {"symbol": "MNQ", "size": 1}
+    t.broker._confirmed_exit_fills["bot_a"] = {"confirmed": True, "leg": "SL", "exit_price": 95.0}
+    t.sync_broker_position()
+    assert "bot_a" not in t.positions
+    assert t.trades[-1]["exit_type"] == "STOP_LOSS"
+
+
+def test_manual_close_of_one_trade_frees_slot_while_other_keeps_symbol_open():
+    t = _trader()
+    t.positions["bot_a"] = _pos("bot_a")
+    t.positions["bot_b"] = _pos("bot_b")
+    t.broker._orders["bot_b"] = {"symbol": "MNQ", "size": 1}   # connector dropped bot_a
+    t.broker._positions["MNQ"] = {"size": 1}                   # broker net 1 = bot_b
+    t.sync_broker_position()
+    assert "bot_a" not in t.positions and "bot_b" in t.positions
+    assert ("bot_a", "MNQ", "broker_sync_flat") in t.broker.released
+
+
+def test_untracked_extra_size_is_not_released():
+    t = _trader()
+    t.positions["bot_a"] = _pos("bot_a")
+    t.positions["bot_b"] = _pos("bot_b")
+    t.broker._orders["bot_b"] = {"symbol": "MNQ", "size": 1}
+    t.broker._positions["MNQ"] = {"size": 2}   # both still open on broker
+    t.sync_broker_position()
+    assert set(t.positions) == {"bot_a", "bot_b"}
+
+
+def test_unworking_leg_prices_are_not_overwritten():
+    t = _trader()
+    t.positions["bot_a"] = _pos("bot_a")
+    t.broker._orders["bot_a"] = {"symbol": "MNQ", "size": 1}
+    t.broker.brackets = {"bot_a": {"sl": 0.0, "tp": 0.0, "sl_working": False, "tp_working": False}}
+    t.sync_broker_position()
+    assert t.positions["bot_a"].sl == 95.0 and t.positions["bot_a"].tp == 110.0
+
+
+def test_max_concurrent_still_two():
+    assert slr.ENV_MAX_CONCURRENT_TRADES <= 2

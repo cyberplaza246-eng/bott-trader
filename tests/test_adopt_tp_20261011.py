@@ -1,0 +1,155 @@
+"""2026-10-11: an adopted (manual / untracked) trade gets a TP LIMIT, not only a stop.
+
+All broker calls are mocked - nothing connects to Rithmic.
+"""
+from __future__ import annotations
+
+import asyncio
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from tests.test_orphan_working_orders import _conn, _row, _cancelled_targets
+import start_live_rithmic as slr
+
+
+@pytest.fixture(autouse=True)
+def _adopt_tp_on(monkeypatch):
+    # 2026-10-11b: ADOPT_PLACE_TP now defaults to 0; these tests cover the ON behaviour.
+    monkeypatch.setenv("ADOPT_PLACE_TP", "1")
+
+
+def _adopt_conn(rows, net=1, avg=31191.5, market=31200.0, sl_ok=True, tp_id="TPID"):
+    conn = _conn(net=net, orders=rows)
+    conn._async_list_positions = AsyncMock(return_value=[
+        {"symbol": "MNQ", "net_quantity": net, "avg_open_fill_price": avg},
+    ])
+    conn._live_market_price = MagicMock(return_value=market)
+    conn._async_repair_missing_stop = AsyncMock(return_value=sl_ok)
+
+    async def _submit(**kw):
+        return {"protective_tp_order_id": f"{kw['prefix']}_tp"} if tp_id else {}
+
+    conn._async_submit_protective_orders = AsyncMock(side_effect=_submit)
+    return conn
+
+
+def _tp_call(conn):
+    assert conn._async_submit_protective_orders.await_count == 1
+    return conn._async_submit_protective_orders.await_args.kwargs
+
+
+def test_new_stop_and_tp_placed_at_default_r():
+    conn = _adopt_conn([])
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 38.25, tp_r=1.5))
+    # SL 31191.50 - 38.25 = 31153.25 ; TP = 31191.50 + 1.5*38.25 = 31248.875 -> 31249.00
+    assert res["sl"] == pytest.approx(31153.25)
+    kw = _tp_call(conn)
+    assert kw["stop_loss"] == 0  # TP only, the stop is never re-submitted
+    assert kw["take_profit"] == pytest.approx(31249.0)
+    assert kw["prefix"] == res["ticket"] and kw["entry_side"] == "BUY" and kw["qty"] == 1
+    assert res["tp_placed"] is True and res["tp"] == pytest.approx(31249.0)
+    rec = conn._orders[res["ticket"]]
+    assert rec["take_profit"] == pytest.approx(31249.0)
+    assert rec["protective_tp_order_id"] == f"{res['ticket']}_tp"
+    # exit cleanup finds the TP leg (SL fill -> cancel TP) and the SL (TP fill -> cancel SL)
+    sl_ids, tp_ids = conn._bracket_leg_ids(res["ticket"])
+    assert f"{res['ticket']}_tp" in tp_ids
+    assert _cancelled_targets(conn) == []
+
+
+def test_existing_manual_tp_kept_not_duplicated():
+    tp = _row("", "555", "LIMIT", "SELL")
+    tp["price"] = 31260.0
+    conn = _adopt_conn([tp])
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0, tp_r=1.5))
+    conn._async_submit_protective_orders.assert_not_awaited()
+    assert res["tp_existing"] is True and res["tp"] == pytest.approx(31260.0)
+
+
+def test_existing_manual_sl_gets_tp_from_its_distance_short():
+    sl = _row("", "777", "STOP_LIMIT", "BUY")
+    sl["trigger_price"] = 31220.0
+    conn = _adopt_conn([sl], net=-1, avg=31200.0, market=31195.0)
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0, tp_r=2.0))
+    conn._async_repair_missing_stop.assert_not_awaited()
+    kw = _tp_call(conn)
+    # short: risk 20 -> TP 31200 - 2*20 = 31160
+    assert kw["entry_side"] == "SELL" and kw["take_profit"] == pytest.approx(31160.0)
+    assert res["sl_existing"] is True and res["tp_placed"] is True
+
+
+def test_planned_tp_used_when_valid():
+    conn = _adopt_conn([])
+    asyncio.run(conn._async_adopt_untracked_position(
+        "MNQ", 30.0, planned_sl=31160.0, planned_tp=31240.0, tp_r=1.5))
+    assert _tp_call(conn)["take_profit"] == pytest.approx(31240.0)
+
+
+def test_no_tp_without_working_stop():
+    conn = _adopt_conn([], sl_ok=False)
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0, tp_r=1.5))
+    conn._async_submit_protective_orders.assert_not_awaited()
+    assert res["tp_placed"] is False
+
+
+def test_tp_reject_reported_and_sl_kept():
+    conn = _adopt_conn([], tp_id=None)
+    res = asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0, tp_r=1.5))
+    assert res["tp_placed"] is False and res["sl_placed"] is True
+    assert _cancelled_targets(conn) == []
+
+
+def test_adopt_place_tp_off_switch(monkeypatch):
+    monkeypatch.setenv("ADOPT_PLACE_TP", "0")
+    conn = _adopt_conn([])
+    asyncio.run(conn._async_adopt_untracked_position("MNQ", 30.0, tp_r=1.5))
+    conn._async_submit_protective_orders.assert_not_awaited()
+
+
+def test_new_stop_capped_by_max_risk():
+    # x4 contracts, $500 cap, MNQ $2/pt -> max 62.5 pts; a 100 pt default stop is tightened
+    conn = _adopt_conn([], net=4)
+    res = asyncio.run(conn._async_adopt_untracked_position(
+        "MNQ", 100.0, tp_r=1.5, max_risk_usd=500.0))
+    stop = conn._async_repair_missing_stop.await_args.args[4]
+    assert 31191.5 - stop <= 62.5 + 1e-9 and stop == pytest.approx(31129.0)
+    assert (31191.5 - stop) * 2.0 * 4 <= 500.0
+    assert res["size"] == 4 and _tp_call(conn)["qty"] == 4
+
+
+def test_bot_passes_tp_r_cap_and_planned_tp(monkeypatch):
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    t.broker = MagicMock()
+    t.broker._positions = {"MNQ": {"size": 1, "avg_price": 31191.5}}
+    t.broker.adopt_untracked_position.return_value = {
+        "ticket": "bot_x", "type": "BUY", "size": 1, "open_price": 31191.5,
+        "sl": 31153.25, "tp": 31249.0, "sl_placed": True, "tp_placed": True,
+    }
+    monkeypatch.setattr(t, "_live_broker", lambda: True)
+    monkeypatch.setattr(t, "_broker_net_qty", lambda sym: 1)
+    monkeypatch.setattr(t, "_planned_sl_from_trades_log", lambda *a: 0.0)
+    monkeypatch.setattr(t, "_planned_tp_from_trades_log", lambda *a: 0.0)
+    monkeypatch.delenv("ADOPT_TP_R", raising=False)
+    t.max_risk_per_trade_usd = 500.0
+    assert t._adopt_untracked_exposure() == 0
+    t._untracked_seen_at["MNQ"] -= slr.ADOPT_CONFIRM_SEC + 1
+    assert t._adopt_untracked_exposure() == 1
+    kw = t.broker.adopt_untracked_position.call_args.kwargs
+    assert kw["tp_r"] > 0 and kw["max_risk_usd"] == pytest.approx(500.0)
+    assert kw["planned_tp"] == 0.0
+    monkeypatch.setenv("ADOPT_TP_R", "2")
+    assert slr.LiveRithmicTrader._adopt_tp_r() == pytest.approx(2.0)
+
+
+def test_planned_tp_only_for_same_entry(tmp_path, monkeypatch):
+    (tmp_path / "logs").mkdir()
+    (tmp_path / "logs" / "trades.log").write_text(
+        '{"message": "ENTRY long MNQ @ 31174.75 SL=31153.25 TP=31217.50 contracts=1"}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    t = slr.LiveRithmicTrader(symbol="MNQ", paper_mode=False, skip_confirm=True)
+    # manual add 17 pts away from the bot's entry -> not the same trade, no planned TP
+    assert t._planned_tp_from_trades_log("MNQ", "long", 31191.5) == 0.0
+    assert t._planned_tp_from_trades_log("MNQ", "long", 31175.0) == pytest.approx(31217.5)

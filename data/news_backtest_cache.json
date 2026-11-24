@@ -1,0 +1,2672 @@
+{
+  "NQ:2026050105": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050106": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound near term.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Missing headlines reduces conviction; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050107": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050108": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk simmering"
+    ],
+    "risk_note": "Lack of catalysts increases intraday noise; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050110": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaiting CPI and Fed cues.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "tech earnings lull",
+      "mixed risk appetite"
+    ],
+    "risk_note": "Low liquidity window; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050111": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound near term.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050112": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050322": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; tech sentiment mixed with Fed uncertainty.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk-off flows"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050323": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech sentiment",
+      "risk appetite"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050400": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050401": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050402": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050403": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech mixed",
+      "Geopolitical risk steady"
+    ],
+    "risk_note": "Low conviction; rely on technicals for entry/exit.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050405": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050410": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Missing headlines; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050500": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical uncertainty"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050501": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050502": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050503": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound near term.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to low liquidity moves; wait for confirmation.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050504": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050505": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "mega-cap support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050506": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051205": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk off"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051206": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051207": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Scalp only with tight stops; avoid directional bets until catalyst emerges.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051208": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051209": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical uncertainty"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051300": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051301": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings mixed",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051302": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051303": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051304": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound near term.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051305": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051306": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051307": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases TA reliance; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051308": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No clear macro catalyst; Fed pause and mixed tech sentiment keep NQ range-bound.",
+    "key_themes": [
+      "Fed hold",
+      "tech mixed",
+      "risk neutral"
+    ],
+    "risk_note": "Low liquidity session; wait for US cash open for direction.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051309": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Missing headlines reduce conviction; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051400": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051401": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051402": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051403": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and tech earnings uncertainty.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051404": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051405": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ direction unclear.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051406": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ direction unclear.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051407": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; mixed macro signals with Fed uncertainty and tech earnings caution.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech mixed",
+      "risk-off undercurrent"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid directional bets.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051409": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and tech earnings uncertainty.",
+    "key_themes": [
+      "Fed policy",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051410": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ direction unclear.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech mixed",
+      "Geopolitical risk steady"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; wait for clear signal.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051508": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of headlines increases unpredictability; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051509": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaiting CPI and Fed guidance.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "tech earnings lull",
+      "mixed risk sentiment"
+    ],
+    "risk_note": "Low liquidity session; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051515": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "rate uncertainty"
+    ],
+    "risk_note": "Low conviction; avoid directional bets until clear signal.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051516": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; tech earnings season quiet, Fed in wait-and-see mode.",
+    "key_themes": [
+      "Fed pause",
+      "tech earnings lull",
+      "low volatility"
+    ],
+    "risk_note": "Absence of headlines increases sensitivity to surprise data or geopolitical flashpoints.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051722": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ direction unclear.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mega-cap tech mixed",
+      "risk-off undercurrent"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051723": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051800": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ direction unclear.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mixed tech sentiment",
+      "risk-off undercurrent"
+    ],
+    "risk_note": "Avoid directional bets; wait for catalyst.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051801": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; tech earnings season quiet, Fed on hold, yields stable.",
+    "key_themes": [
+      "Fed pause",
+      "tech earnings lull",
+      "low volatility"
+    ],
+    "risk_note": "Without headlines, bias is neutral; watch for late-day positioning shifts.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051807": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "rate uncertainty"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051810": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "yield stability"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051811": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ direction unclear.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051812": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaiting CPI and Fed cues later this week.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "rates uncertainty"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051814": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech valuations",
+      "geopolitical risk"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051819": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro headlines; Fed pause narrative and tech earnings uncertainty create mixed signals.",
+    "key_themes": [
+      "Fed policy",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051822": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; tech sentiment mixed, Fed uncertainty persists.",
+    "key_themes": [
+      "Fed policy",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051900": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of catalyst increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051901": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk on hold"
+    ],
+    "risk_note": "Lack of catalysts increases whipsaw risk; wait for clear breakout or headline.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051906": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical uncertainty"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051907": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro uncertainty keeps NQ range-bound.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051908": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051910": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of headlines increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051911": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of catalysts increases intraday noise; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051915": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep bias flat.",
+    "key_themes": [
+      "Fed watch",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; wait for catalyst.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051916": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052616": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052618": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mega-cap tech support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; wait for clear breakout.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052619": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "risk-off sentiment"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052620": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless short-term.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052622": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed decision next week.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "range-bound NQ"
+    ],
+    "risk_note": "Low liquidity session; avoid chasing moves.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052623": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with Fed pause hopes vs sticky inflation and tech uncertainty.",
+    "key_themes": [
+      "Fed policy",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052700": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical tensions"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052701": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; tech earnings season quiet, Fed in wait-and-see mode.",
+    "key_themes": [
+      "Fed hold",
+      "tech sideways",
+      "low vol"
+    ],
+    "risk_note": "Missing headlines increase uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052703": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech mixed",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Absence of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052704": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaiting CPI and Fed decision next week.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "rates uncertainty"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052705": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed decision next week.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "rates uncertainty"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052706": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with Fed pause hopes vs sticky inflation and tech uncertainty.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052707": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "risk sentiment neutral"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052708": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings sentiment",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; avoid chasing.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052809": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "yield stability"
+    ],
+    "risk_note": "Low liquidity session; avoid chasing moves.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052810": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; tech earnings season quiet, Fed on hold, geopolitical risks elevated but stable.",
+    "key_themes": [
+      "Fed pause",
+      "tech earnings lull",
+      "geopolitical risk"
+    ],
+    "risk_note": "Low liquidity session; avoid chasing moves without confirmation.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052811": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech mixed",
+      "Geopolitical risk steady"
+    ],
+    "risk_note": "Absence of catalysts increases reliance on technicals; avoid chasing intraday moves.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052812": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052813": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052814": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052815": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mega-cap tech mixed",
+      "risk-off undercurrent"
+    ],
+    "risk_note": "Absence of catalysts increases sensitivity to any surprise headlines.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052900": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No clear macro catalyst; Fed pause narrative and mixed tech sentiment keep NQ range-bound.",
+    "key_themes": [
+      "Fed hold",
+      "tech mixed",
+      "low vol"
+    ],
+    "risk_note": "Absence of headlines increases sensitivity to surprise data or news.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052901": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "tech earnings season",
+      "yield watch"
+    ],
+    "risk_note": "Low liquidity window; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052902": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "rate uncertainty"
+    ],
+    "risk_note": "Low liquidity window; avoid chasing moves without confirmation.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052903": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "tech earnings season",
+      "yield volatility"
+    ],
+    "risk_note": "Low liquidity window; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052904": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No clear macro catalyst; mixed signals from Fed pause expectations and tech resilience.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of headlines increases uncertainty; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052905": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaiting CPI and Fed cues.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "rate expectations"
+    ],
+    "risk_note": "Low conviction; avoid directional bets without headlines.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052907": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Scalp only with tight stops; wait for catalyst.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026052908": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "yield stability"
+    ],
+    "risk_note": "Low liquidity window; avoid overleveraging.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026053122": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "tech earnings season",
+      "yield watch"
+    ],
+    "risk_note": "Low liquidity session; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060100": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market likely range-bound awaiting CPI and Fed guidance.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Tech earnings season quiet",
+      "Geopolitical risk steady"
+    ],
+    "risk_note": "Low liquidity session; avoid chasing moves without confirmation.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060101": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "tech earnings lull",
+      "mixed risk sentiment"
+    ],
+    "risk_note": "Low conviction; avoid directional bets until clear signal.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060104": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts increases sensitivity to any surprise headlines; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060105": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060106": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; mixed macro signals with Fed uncertainty and tech earnings caution.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech mixed",
+      "risk-off undercurrent"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060112": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No clear macro catalyst; Fed pause and mixed tech sentiment keep NQ range-bound.",
+    "key_themes": [
+      "Fed hold",
+      "tech mixed",
+      "low vol"
+    ],
+    "risk_note": "Missing headlines; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060113": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No clear macro catalyst; Fed pause narrative and mixed tech sentiment keep NQ range-bound.",
+    "key_themes": [
+      "Fed hold",
+      "tech mixed",
+      "low vol"
+    ],
+    "risk_note": "Missing headlines; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060114": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "yield stability"
+    ],
+    "risk_note": "Low liquidity window; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060115": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaiting CPI and Fed decision next week.",
+    "key_themes": [
+      "Fed hold expectations",
+      "tech earnings lull",
+      "low volatility"
+    ],
+    "risk_note": "Absence of headlines increases sensitivity to surprise data or headlines.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060119": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Risk-on/off tug-of-war"
+    ],
+    "risk_note": "Absence of news increases sensitivity to any unexpected headline; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060203": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk premium"
+    ],
+    "risk_note": "Lack of news increases sensitivity to any unexpected headline; use tight stops.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060204": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060205": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech mixed",
+      "Geopolitical risk premium"
+    ],
+    "risk_note": "Absence of catalysts increases sensitivity to any surprise headlines; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060206": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound near term.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Missing headlines reduces conviction; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060208": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060210": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060211": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Missing news increases event risk; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060212": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ range-bound near term.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Low conviction; wait for catalyst or use tight stops.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060213": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mega-cap tech support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid high conviction.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060214": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs AI optimism.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060215": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060216": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; Fed pause narrative and mixed tech sentiment keep NQ range-bound.",
+    "key_themes": [
+      "Fed on hold",
+      "tech earnings uncertainty",
+      "low volatility"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action; wait for clear breakout or headline.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060300": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060301": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060302": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Low liquidity or news gap could trigger sharp moves.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060303": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060304": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro crosscurrents keep NQ range-bound near term.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mega-cap tech mixed",
+      "risk-off on geopolitical jitters"
+    ],
+    "risk_note": "Missing headlines increase unpredictability; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060305": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Absence of catalysts increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060306": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026060307": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; mixed macro signals with Fed uncertainty and tech earnings season pending.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050113": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050114": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050115": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050423": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050507": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050508": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050509": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Wait for catalyst; avoid directional bets.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050510": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050512": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of real-time data increases uncertainty; rely on technicals for entry.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050514": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050515": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market likely range-bound awaiting CPI and Fed guidance.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "yield dynamics"
+    ],
+    "risk_note": "Low liquidity session; avoid chasing moves without confirmation.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050516": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season pending.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid large directional bets.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050517": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaiting CPI and Fed decision next week.",
+    "key_themes": [
+      "Fed hold expectations",
+      "tech earnings lull",
+      "low volatility"
+    ],
+    "risk_note": "Absence of headlines increases sensitivity to surprise data or news.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050519": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050520": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid oversized positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026050522": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro headlines; wait for US CPI or Fed guidance for directional catalyst.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "tech earnings lull",
+      "geopolitical calm"
+    ],
+    "risk_note": "Low conviction; avoid size until clear signal.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051211": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and tech earnings uncertainty.",
+    "key_themes": [
+      "Fed policy",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051212": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051213": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and tech earnings uncertainty.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051214": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and tech earnings uncertainty.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051215": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed policy wait",
+      "tech earnings lull",
+      "geopolitical risk"
+    ],
+    "risk_note": "Scalp only with tight stops; avoid overnight exposure.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051216": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro backdrop mixed with sticky inflation and tech resilience.",
+    "key_themes": [
+      "Fed hold",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts increases intraday noise; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051218": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps NQ directionless near-term.",
+    "key_themes": [
+      "Fed rate path",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Wait for catalyst; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051219": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed decision next week.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "yield stability"
+    ],
+    "risk_note": "Low liquidity session; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051220": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid oversized positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051222": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051223": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051310": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and tech resilience.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases uncertainty; rely on technicals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051311": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No clear macro catalyst; Fed pause narrative and mixed tech sentiment keep NQ range-bound.",
+    "key_themes": [
+      "Fed hold",
+      "tech mixed",
+      "low vol"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051312": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Absence of news increases sensitivity to any surprise; use tight stops.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051313": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro uncertainty caps directional conviction.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to choppy price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051314": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech resilience",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of catalysts may lead to range-bound price action; wait for clear signals.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051315": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid overpositioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051317": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro crosscurrents between sticky inflation and resilient tech earnings keep NQ directionless.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "mixed risk appetite"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid oversized positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051318": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "mega-cap support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051319": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "risk-off sentiment"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid large directional bets.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051320": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech support",
+      "geopolitical calm"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051322": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of real-time news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051323": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro uncertainty keeps bias flat.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051411": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed cautious",
+      "tech earnings support",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; stay nimble.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051412": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season pending.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk sentiment"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large positions.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051413": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "risk-off geopolitics"
+    ],
+    "risk_note": "Lack of headlines increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051414": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with Fed uncertainty and tech earnings season looming.",
+    "key_themes": [
+      "Fed policy uncertainty",
+      "mega-cap tech earnings",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid large directional bets.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051415": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; tech sentiment mixed, Fed uncertainty caps conviction.",
+    "key_themes": [
+      "Fed rate path",
+      "mega-cap tech",
+      "risk appetite"
+    ],
+    "risk_note": "Low liquidity session; avoid overleveraging.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051418": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No fresh macro catalysts; market awaits CPI and Fed decision next week.",
+    "key_themes": [
+      "Fed watch",
+      "tech earnings lull",
+      "range-bound NQ"
+    ],
+    "risk_note": "Low liquidity session; avoid chasing moves.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051419": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation and resilient tech earnings.",
+    "key_themes": [
+      "Fed rate uncertainty",
+      "mega-cap tech resilience",
+      "geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  },
+  "NQ:2026051420": {
+    "bias": "neutral",
+    "confidence": 0.5,
+    "reason": "No live headlines; macro backdrop mixed with sticky inflation vs resilient tech earnings.",
+    "key_themes": [
+      "Fed rate path uncertainty",
+      "Mega-cap tech support",
+      "Geopolitical risk"
+    ],
+    "risk_note": "Lack of news increases reliance on technicals; avoid aggressive positioning.",
+    "headline_count": 0,
+    "source": "llm_only",
+    "allowed": true,
+    "size_adjust_pct": 0
+  }
+}

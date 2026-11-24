@@ -1,0 +1,255 @@
+"""Shadow paper trader for the W5 NEAT brain. Never connects to a broker and never places orders.
+
+Tails data/live_bars_MNQ_5m.csv (written by the revamp after its next restart) and appends
+simulated trades to kid_trades.csv. Same rules as the holdout sim: 1 MNQ, $3 round trip,
+$500 daily loss cap, stop 1.5 ATR (min 8 pts), target 3 ATR, decision every 3rd bar.
+"""
+from __future__ import annotations
+
+import math
+import os
+import sys
+import time
+from pathlib import Path
+
+import pandas as pd
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import kid_engine as K
+
+REPO = HERE.parent
+LIVE = Path(os.environ.get("SHADOW_BARS", str(REPO / "data" / "live_bars_MNQ_5m.csv")))
+TRADES = HERE / "kid_trades.csv"
+WARMUP = HERE / "warmup_MNQ_5m.csv"
+FAITHFUL_BARS = 2760  # atr-ratio window; features cross the data gap until this many live bars exist
+BARS_PER_DAY = 276  # about 23 hours of 5-minute bars
+COLS = ["entry_time", "side", "entry", "sl", "tp", "exit_time", "exit", "reason", "pnl", "faithful"]
+MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+PV = 2.0  # MNQ dollars per point
+
+
+def _et_ts(ts) -> pd.Timestamp:
+    t = pd.Timestamp(ts)
+    if t.tzinfo is None:
+        t = t.tz_localize("UTC")
+    return t.tz_convert("America/New_York")
+
+
+def et_stamp(ts) -> str:
+    return _et_ts(ts).strftime("%Y-%m-%d %H:%M")
+
+
+def pretty(ts) -> str:
+    t = _et_ts(ts)
+    hour = t.hour % 12 or 12
+    ampm = "AM" if t.hour < 12 else "PM"
+    return f"{MONTHS[t.month - 1]} {t.day}, {hour}:{t.minute:02d} {ampm}"
+
+
+def short_date(ts) -> str:
+    t = _et_ts(ts)
+    return f"{MONTHS[t.month - 1]} {t.day}"
+
+
+def px(x) -> str:
+    v = round(float(x) * 4) / 4.0
+    iv = round(v)
+    if abs(v - iv) < 1e-9:
+        return str(int(iv))
+    text = f"{v:.2f}"
+    if text.endswith("0"):
+        text = text[:-1]
+    return text
+
+
+def updown(amount) -> str:
+    n = int(round(float(amount)))
+    if n > 0:
+        return f"up ${n}"
+    if n < 0:
+        return f"down ${-n}"
+    return "flat"
+
+
+def made_lost(amount) -> str:
+    n = int(round(float(amount)))
+    if n < 0:
+        return f"LOST ${-n}"
+    return f"MADE ${n}"
+
+
+def _has_tp(tp) -> bool:
+    if tp is None or tp == "":
+        return False
+    try:
+        return float(tp) != 0.0
+    except (TypeError, ValueError):
+        return False
+
+
+def entry_line(when, side, entry, sl, tp) -> str:
+    extra = f", TP {px(tp)}" if _has_tp(tp) else ""
+    return f"{pretty(when)}: {side} 1 MNQ at {px(entry)}. SL {px(sl)}{extra}."
+
+
+def exit_line(t) -> str:
+    price = px(t["exit"])
+    reason = t["reason"]
+    if reason == "stop":
+        how = f"SL hit at {price}"
+    elif reason == "target":
+        how = f"TP hit at {price}"
+    else:
+        how = f"end of session at {price}"
+    return f"{pretty(t['exit_time'])}: {t['side']} closed, {how}. {made_lost(t['pnl'])}."
+
+
+def status_line(when, price, op) -> str:
+    if not op:
+        return f"{pretty(when)}: Price {px(price)}. No trade open."
+    sign = 1.0 if op["side"] == "LONG" else -1.0
+    mark = (float(price) - float(op["entry"])) * sign * PV
+    bits = f"SL {px(op['sl'])}"
+    if _has_tp(op.get("tp")):
+        bits += f", TP {px(op['tp'])}"
+    return f"{pretty(when)}: In a {op['side']} from {px(op['entry'])} ({bits}), now {updown(mark)}."
+
+
+def summary_line(trades) -> str:
+    if not trades:
+        return "No pretend trades yet."
+    first = min(trades, key=lambda t: pd.Timestamp(t["entry_time"]))
+    n = len(trades)
+    word = "trade" if n == 1 else "trades"
+    net = sum(float(t["pnl"]) for t in trades)
+    return f"Since {short_date(first['entry_time'])}: {n} pretend {word}, {updown(net)}."
+
+
+def daily_line(trades, asof) -> str:
+    today = et_stamp(asof)[:10]
+    day = [t for t in trades if et_stamp(t["exit_time"])[:10] == today]
+    n = len(day)
+    word = "trade" if n == 1 else "trades"
+    day_net = sum(float(t["pnl"]) for t in day)
+    total = sum(float(t["pnl"]) for t in trades)
+    return f"Today: {n} {word}, {updown(day_net)}. Total since start: {updown(total)}."
+
+
+def rough_line(n_live, now) -> str:
+    left = FAITHFUL_BARS - int(n_live)
+    if left <= 0:
+        return "Enough recent prices are in. Results are no longer rough."
+    days = max(1, math.ceil(left / BARS_PER_DAY))
+    when = _et_ts(now).normalize()
+    added = 0
+    while added < days:
+        when += pd.Timedelta(days=1)
+        if when.weekday() < 5:
+            added += 1
+    unit = "trading day" if days == 1 else "trading days"
+    return f"Results are rough until about {short_date(when)}, about {days} {unit} from now."
+
+
+def trade_key(t) -> str:
+    return f"{et_stamp(t['entry_time'])}|{t['side']}|{et_stamp(t['exit_time'])}"
+
+
+def open_id(side, when) -> str:
+    return f"{et_stamp(when)}|{side}"
+
+
+def load_bars() -> tuple[pd.DataFrame, int, pd.Timestamp]:
+    w = pd.read_csv(WARMUP)
+    w["datetime"] = pd.to_datetime(w["datetime"], utc=True)
+    warm_end = w["datetime"].max()
+    parts = [w]
+    if LIVE.is_file() and LIVE.stat().st_size > 0:
+        lv = pd.read_csv(LIVE)
+        if len(lv):
+            ts = pd.to_datetime(lv["ts_et"], utc=True)
+            lv = pd.DataFrame(dict(datetime=ts, open=lv.open, high=lv.high, low=lv.low,
+                                   close=lv.close, volume=lv.volume, no_trade=False))
+            parts.append(lv)
+    df = pd.concat(parts, ignore_index=True)
+    df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
+    df = df.sort_values("datetime").drop_duplicates("datetime", keep="last").reset_index(drop=True)
+    n_live = int((df["datetime"] > warm_end).sum())
+    return df, n_live, warm_end
+
+
+def main():
+    print("Kid practice mode. Pretend trades only, no real orders.")
+    seen: set[str] = set()
+    if TRADES.exists():
+        old = pd.read_csv(TRADES)
+        # entry/side/exit in ET minutes, same text the log stores, so a restart does not double-log
+        for _, r in old.iterrows():
+            seen.add(f"{r.entry_time}|{r.side}|{r.exit_time}")
+    announced: set[str] = set()
+    first = True
+    last_state = None
+    last_status = 0.0
+    while True:
+        try:
+            bars, n_live, warm_end = load_bars()
+            cols, norm = K.load_norm()
+            p = __import__("json").loads((HERE / "w5_params.json").read_text(encoding="utf-8"))
+            frame, F, _ = K.build_features(bars, cols, norm)
+            trades = K.simulate(frame, F, K.load_net(), p, cost_mult=1.0, start=1600, liquidate_end=False) if len(frame) > 1600 else []
+            faithful = n_live >= FAITHFUL_BARS
+            new = []
+            for t in trades:
+                key = trade_key(t)
+                if key in seen:
+                    continue
+                seen.add(key)
+                new.append(t)
+            if new:
+                out = pd.DataFrame(new)
+                out["faithful"] = "yes" if faithful else "bridge"
+                out = out[COLS]
+                for c in ("entry_time", "exit_time"):
+                    out[c] = pd.to_datetime(out[c], utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d %H:%M")
+                out.to_csv(TRADES, mode="a", header=not TRADES.exists(), index=False)
+            op = getattr(K.simulate, "last_open", None)
+            state = None if not len(frame) else (("flat",) if not op else (op["side"], et_stamp(op["since"])))
+            spoke = False
+            if first:
+                print(rough_line(n_live, pd.Timestamp.now(tz="America/New_York")))
+                print(summary_line(trades))
+                if op:
+                    announced.add(open_id(op["side"], op["since"]))
+                first = False
+                show_status = bool(len(frame))
+            else:
+                show_status = False
+                for t in new:
+                    eid = open_id(t["side"], t["entry_time"])
+                    if eid not in announced:
+                        print(entry_line(t["entry_time"], t["side"], t["entry"], t["sl"], t["tp"]))
+                        announced.add(eid)
+                    print(exit_line(t))
+                    spoke = True
+                if op and open_id(op["side"], op["since"]) not in announced:
+                    print(entry_line(op["since"], op["side"], op["entry"], op["sl"], op.get("tp")))
+                    announced.add(open_id(op["side"], op["since"]))
+                    spoke = True
+                if len(frame) and (state != last_state or time.time() - last_status >= 1800) and not spoke:
+                    show_status = True
+            if show_status and len(frame):
+                last = frame.iloc[-1]
+                print(status_line(last.datetime, last.close, op))
+                spoke = True
+                last_status = time.time()
+            if len(frame):
+                last_state = state
+                if spoke:
+                    print(daily_line(trades, frame.iloc[-1].datetime))
+        except Exception as e:
+            print(f"Could not update. No real orders. {e}")
+        time.sleep(15)
+
+
+if __name__ == "__main__":
+    main()

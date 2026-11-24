@@ -1,0 +1,3 @@
+POLICY stop300 d0: gap trades 134 skipped(opp/cap) 49 taken 85 gap pnl 6786 | baseline trades blocked by open gap pos 49 lost baseline pnl -469 | NET effect 7255
+POLICY stop300 d1: gap trades 134 skipped(opp/cap) 42 taken 92 gap pnl 6126 | baseline trades blocked by open gap pos 47 lost baseline pnl -1017 | NET effect 7143
+POLICY stop300 d3: gap trades 134 skipped(opp/cap) 41 taken 93 gap pnl 4458 | baseline trades blocked by open gap pos 50 lost baseline pnl 454 | NET effect 4005

@@ -266,10 +266,15 @@ def run_hybrid_variant(
 
     params: HybridParams,
     rth_windows: Optional[List[SessionWindow]] = None,
+    trigger_bar_seconds: int = 30,
+    return_trades: bool = False,
 
 ) -> Dict[str, Any]:
 
-    trigger = attach_context(df_30s, df_1m, ["ema_20", "atr", "rsi", "rsi_prev"], "_1m")
+    trigger_src = df_30s if trigger_bar_seconds < 60 else df_1m
+    if "body" not in trigger_src.columns or "avg_body" not in trigger_src.columns:
+        trigger_src = add_30s_body_stats(trigger_src)
+    trigger = attach_context(trigger_src, df_1m, ["ema_20", "atr", "rsi", "rsi_prev"], "_1m")
 
     trigger = attach_context(trigger, df_5m, ["close", "vwap", "ema_20", "adx", "volume"], "_5m")
 
@@ -411,7 +416,7 @@ def run_hybrid_variant(
 
             setup_window_sec=params.setup_window_sec,
 
-            trigger_bar_seconds=30,
+            trigger_bar_seconds=trigger_bar_seconds,
 
             sl_pts=sl_pts,
 
@@ -507,7 +512,11 @@ def run_hybrid_variant(
 
 
 
-    return scalp_bt.summarize(trades, variant.name, symbol)
+    stats = scalp_bt.summarize(trades, variant.name, symbol)
+    if return_trades:
+        stats = dict(stats)
+        stats["trades_raw"] = trades
+    return stats
 
 
 
@@ -571,7 +580,12 @@ def main() -> None:
 
     parser.add_argument("--csv-5m", default=None)
 
-    parser.add_argument("--csv-30s", default=None)
+    parser.add_argument("--csv-30s", default=None, help="Real 30s CSV (required unless --synthetic-30s)")
+    parser.add_argument(
+        "--synthetic-30s",
+        action="store_true",
+        help="Allow inventing 30s bars from 1m (not realistic; default off)",
+    )
 
     parser.add_argument("--sl", type=float, default=8.0)
 
@@ -606,10 +620,21 @@ def main() -> None:
         if args.max_hold == 60:
             args.max_hold = 30
 
+    if not args.csv_30s and not args.synthetic_30s:
+        default_30s = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "data", "MNQ_30s_databento.csv",
+        )
+        august_30s = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), "data", "MNQ_30s_august_databento.csv",
+        )
+        if os.path.isfile(default_30s):
+            args.csv_30s = default_30s
+        elif os.path.isfile(august_30s):
+            args.csv_30s = august_30s
+
     df_1m_raw, df_5m_raw, df_30s_raw, data_note = scalp_bt.load_data(
-
         args.csv_1m, args.csv_5m, args.csv_30s,
-
+        allow_synthetic_30s=args.synthetic_30s,
     )
 
     df_1m = scalp_bt.add_1m_indicators(df_1m_raw)

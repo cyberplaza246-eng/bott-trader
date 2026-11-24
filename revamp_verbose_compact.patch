@@ -1,0 +1,491 @@
+diff --git a/src/research_ensemble/live_display.py b/src/research_ensemble/live_display.py
+index e1f58d7..dbb49c5 100644
+--- a/src/research_ensemble/live_display.py
++++ b/src/research_ensemble/live_display.py
+@@ -9,7 +9,10 @@ Numbers come from the same indicator functions the strategy uses
+ (src/research_ensemble/indicators.py) and from the same EnsembleStrategy /
+ sleeve strategies, so the readout matches what the router sees.
+ 
+-Toggle: env REVAMP_VERBOSE (default ON). Set REVAMP_VERBOSE=0 to silence.
++Toggle: env REVAMP_VERBOSE
++  unset / 1  -> compact plain-English readout, 'now X | needs Y' per active sleeve (default)
++  2          -> detailed 6-line block (indicator values per sleeve)
++  0          -> off
+ """
+ from __future__ import annotations
+ 
+@@ -28,12 +31,25 @@ SLEEVE_LABEL = {"trend": "trend", "breakout": "breakout", "mean_reversion": "mea
+ INDENT = "   "
+ 
+ 
+-def revamp_verbose_enabled() -> bool:
+-    """REVAMP_VERBOSE env toggle; default ON."""
++def revamp_verbose_level() -> int:
++    """REVAMP_VERBOSE: unset/1 -> 1 (compact, default), 2 -> detailed, 0 -> off."""
+     raw = os.getenv("REVAMP_VERBOSE")
+     if raw is None or str(raw).strip() == "":
+-        return True
+-    return str(raw).strip().lower() in ("1", "true", "yes", "on")
++        return 1
++    v = str(raw).strip().lower()
++    if v in ("0", "false", "no", "off"):
++        return 0
++    if v in ("2", "full", "detail", "detailed", "verbose"):
++        return 2
++    try:
++        return 2 if int(v) >= 2 else (1 if int(v) == 1 else 0)
++    except ValueError:
++        return 1
++
++
++def revamp_verbose_enabled() -> bool:
++    """REVAMP_VERBOSE env toggle; default ON (compact)."""
++    return revamp_verbose_level() > 0
+ 
+ 
+ def _f(v: Any) -> float:
+@@ -68,6 +84,8 @@ def compute_revamp_snapshot(df: pd.DataFrame, strategy: Optional[EnsembleStrateg
+     rsi_s = rsi(close, mr_.rsi_period)
+     don_hi = high.rolling(bo_.donchian_period).max().shift(1)  # prior channel, as strategy
+     don_lo = low.rolling(bo_.donchian_period).min().shift(1)
++    next_hi = high.rolling(bo_.donchian_period).max()  # level the NEXT bar must close beyond
++    next_lo = low.rolling(bo_.donchian_period).min()
+     avg_vol = vol.rolling(bo_.volume_lookback).mean()
+ 
+     # Sleeve raw entries on the last bar (before ADX routing / RTH gate)
+@@ -132,6 +150,7 @@ def compute_revamp_snapshot(df: pd.DataFrame, strategy: Optional[EnsembleStrateg
+         "don_hi": _f(don_hi.iloc[i]), "don_lo": _f(don_lo.iloc[i]),
+         "prev_beyond_hi": bool(prev_c > _f(don_hi.iloc[i - 1])),
+         "prev_beyond_lo": bool(prev_c < _f(don_lo.iloc[i - 1])),
++        "next_hi": _f(next_hi.iloc[i]), "next_lo": _f(next_lo.iloc[i]),
+         "don_n": bo_.donchian_period,
+         "vol_ratio": vol_ratio, "vol_mult": float(bo_.volume_mult),
+         "bb_up": _f(up.iloc[i]), "bb_mid": _f(mid.iloc[i]), "bb_lo": _f(lo.iloc[i]),
+@@ -339,7 +358,220 @@ def format_revamp_block(snapshot: Dict[str, Any], gates: Optional[Dict[str, Any]
+     return [INDENT + ln for ln in lines]
+ 
+ 
++# ------------------------------------------------------- compact (default)
++
++COMPACT_MAX = 87  # chars after the 3-space indent -> whole line <= 90
++
++
++def _w(x: float) -> int:
++    """Whole number, half rounds up (prices / points in the compact readout)."""
++    return int(np.floor(float(x) + 0.5))
++
++
++def _pts(d: float) -> str:
++    return f"{_w(abs(d))} pts"
++
++
++def _mode_word(s: Dict[str, Any]) -> str:
++    if s["trending"]:
++        return "Trending"
++    if s["ranging"]:
++        return "Choppy"
++    return "In between"
++
++
++def _bias_word(s: Dict[str, Any]) -> str:
++    above = s["close"] > s["ema_trend"]
++    fast_up = s["ema_fast"] > s["ema_slow"]
++    if above and fast_up:
++        return "BUY"
++    if (not above) and (not fast_up):
++        return "SELL"
++    return "NEUTRAL"
++
++
++def _sleeve_word(sleeve: str) -> str:
++    return SLEEVE_LABEL.get(sleeve or "", sleeve or "?")
++
++
++def _plain_gate(gates: Optional[Dict[str, Any]], s: Dict[str, Any]):
++    """(line-1 result, 'because ...' text) for the first blocking gate, else (None, None)."""
++    g = gates or {}
++    dll, pnl = _f(g.get("daily_loss_limit")), _f(g.get("daily_pnl"))
++    if np.isfinite(dll) and np.isfinite(pnl) and pnl <= -dll:
++        return "Stopped: daily loss limit", "the daily loss limit was hit"
++    mt = g.get("max_trades")
++    if mt is not None and int(g.get("daily_trades") or 0) >= int(mt):
++        return "Stopped: max trades for today", "the max trades for today was reached"
++    if not s["in_rth"]:
++        return (f"Closed: outside trading hours ({s['time_et']})",
++                f"it is outside trading hours ({s['time_et']})")
++    if g.get("session_block"):
++        return f"Closed: {g['session_block']}", f"of the {g['session_block']}"
++    open_n, max_n = g.get("open_count"), g.get("max_positions")
++    if open_n is not None and max_n is not None and int(open_n) >= int(max_n):
++        n = int(open_n)
++        return (f"Blocked: {n} trade{'s' if n != 1 else ''} already open",
++                f"{n} trade{'s are' if n != 1 else ' is'} already open")
++    cd = int(g.get("cooldown") or 0)
++    if cd > 0:
++        return (f"Paused: cooldown {cd} bar{'s' if cd != 1 else ''}",
++                f"of the cooldown ({cd} bar{'s' if cd != 1 else ''} left)")
++    lc = int(g.get("loss_cooldown_min") or 0)
++    if lc > 0:
++        return f"Paused: after a loss ({lc} min)", f"of the after-loss pause ({lc} min left)"
++    cp = int(g.get("consec_pause_min") or 0)
++    if cp > 0:
++        n = int(g.get("consec_losses") or 0)
++        return f"Paused: {n} losses in a row ({cp} min)", f"of {n} losses in a row ({cp} min pause left)"
++    return None, None
++
++
++def _fit(options: List[str]) -> str:
++    for o in options:
++        if len(o) <= COMPACT_MAX:
++            return o
++    return options[-1]
++
++
++def _bias_first(s: Dict[str, Any], buy_part: str, buy_dist: float, sell_part: str, sell_dist: float) -> List[str]:
++    bias = _bias_word(s)
++    if bias == "SELL" or (bias == "NEUTRAL" and sell_dist < buy_dist):
++        return [sell_part, buy_part]
++    return [buy_part, sell_part]
++
++
++def _price_breakout_line(s: Dict[str, Any]) -> str:
++    """Price: now X | needs above H to BUY (d) | below L to SELL (d) -- breakout sleeve."""
++    c, hi, lo = s["close"], s["next_hi"], s["next_lo"]
++    beyond_hi = bool(np.isfinite(s["don_hi"]) and c > s["don_hi"])  # broke out on this bar
++    beyond_lo = bool(np.isfinite(s["don_lo"]) and c < s["don_lo"])
++
++    def side_txt(buy: bool, short: bool) -> str:
++        if buy and beyond_hi:
++            lvl = _w(s["don_hi"])
++            return f"already above {lvl}" if short else f"already above {lvl} (BUY needs a pullback)"
++        if (not buy) and beyond_lo:
++            lvl = _w(s["don_lo"])
++            return f"already below {lvl}" if short else f"already below {lvl} (SELL needs a bounce)"
++        return f"above {_w(hi)} to BUY ({_pts(hi - c)})" if buy else f"below {_w(lo)} to SELL ({_pts(c - lo)})"
++
++    opts = []
++    for short in (False, True):
++        a1, a2 = _bias_first(s, side_txt(True, short), abs(hi - c), side_txt(False, short), abs(c - lo))
++        opts.append(f"Price: {_w(c)} | needs {a1} | {a2}" if not a1.startswith("already")
++                    else f"Price: {_w(c)} | {a1} | needs {a2}" if not a2.startswith("already")
++                    else f"Price: {_w(c)} | {a1} | {a2}")
++    opts.append(opts[-1].split(" | ")[0] + " | " + opts[-1].split(" | ")[1])
++    return _fit(opts)
++
++
++def _price_mr_line(s: Dict[str, Any]) -> str:
++    """Price vs Bollinger bands -- mean-reversion sleeve (choppy)."""
++    c, up, lo = s["close"], s["bb_up"], s["bb_lo"]
++    buy = (f"at/below {_w(lo)} for a BUY dip (now there)" if c <= lo
++           else f"dip to {_w(lo)} to BUY ({_pts(c - lo)})")
++    sell = (f"at/above {_w(up)} for a SELL pop (now there)" if c >= up
++            else f"pop to {_w(up)} to SELL ({_pts(up - c)})")
++    parts = _bias_first(s, buy, abs(c - lo), sell, abs(up - c))
++    return _fit([f"Price: {_w(c)} | needs {parts[0]} | {parts[1]}",
++                 f"Price: {_w(c)} | needs {parts[0]}"])
++
++
++def _volume_line(s: Dict[str, Any]) -> str:
++    vr, vm = s["vol_ratio"], s["vol_mult"]
++    if not np.isfinite(vr):
++        return f"Volume: n/a | needs {vm:.1f}x"
++    now = f"{vr:.1f}x"
++    if now == f"{vm:.1f}x":
++        now = f"{vr:.2f}x"  # avoid '1.5x | needs 1.5x' when it is 1.47x
++    return f"Volume: {now} | needs {vm:.1f}x" + (" (OK)" if _vol_ok(s) else "")
++
++
++def _ema_line(s: Dict[str, Any]) -> str:
++    f, sl, fn, sn, tn = s["ema_fast"], s["ema_slow"], s["fast_n"], s["slow_n"], s["trend_n"]
++    gap = _pts(f - sl)
++    if s["ema_cross_up"] or s["ema_cross_down"]:
++        up = s["ema_cross_up"]
++        state = f"EMA cross: {fn} crossed {'above' if up else 'below'} {sn} this bar"
++        if s["trend_entry"] != 0:
++            return f"{state} | {'BUY' if up else 'SELL'} setup"
++        return f"{state} | filtered: price {'below' if up else 'above'} {tn} EMA"
++    fast_up = f > sl
++    side = "SELL" if fast_up else "BUY"
++    filt_ok = (side == "SELL" and s["close"] < s["ema_trend"]) or (side == "BUY" and s["close"] > s["ema_trend"])
++    state = f"EMA cross: {fn} {'above' if fast_up else 'below'} {sn} by {gap} (no new cross)"
++    need = f"needs a fresh cross {'down' if fast_up else 'up'} to {side}"
++    if filt_ok:
++        return _fit([f"{state} | {need}", f"EMA cross: {fn} {'above' if fast_up else 'below'} {sn} | {need}"])
++    extra = f" + price {'under' if side == 'SELL' else 'over'} {tn} EMA"
++    short_need = f"needs cross {'down' if fast_up else 'up'}{extra} to {side}"
++    rel = 'above' if fast_up else 'below'
++    return _fit([f"{state} | {need}{extra}",
++                 f"EMA cross: {fn} {rel} {sn} ({gap}) | {short_need}",
++                 f"EMA cross: {fn} {rel} {sn} | {short_need}"])
++
++
++def _rsi_line(s: Dict[str, Any]) -> str:
++    r = s["rsi"]
++    if not np.isfinite(r):
++        return "RSI: n/a"
++    lbl = "oversold" if r < s["rsi_os"] else ("overbought" if r > s["rsi_ob"] else "neutral")
++    shown = f"{r:.0f}"
++    if shown in (f"{s['rsi_os']:.0f}", f"{s['rsi_ob']:.0f}"):
++        shown = f"{r:.1f}"  # avoid '30 (oversold)' when the raw value is 29.6
++    off = "" if s["ranging"] else f" [off now: {_mode_word(s).lower()}]"
++    need = f"needs under {s['rsi_os']:.0f} to BUY dip, over {s['rsi_ob']:.0f} to SELL pop"
++    short_need = f"needs under {s['rsi_os']:.0f} to BUY, over {s['rsi_ob']:.0f} to SELL"
++    return _fit([f"RSI: {shown} ({lbl}) | {need}{off}", f"RSI: {shown} ({lbl}) | {short_need}{off}",
++                 f"RSI: {shown} | {need}{off}", f"RSI: {shown} ({lbl}){off}"])
++
++
++def format_revamp_compact(snapshot: Dict[str, Any], gates: Optional[Dict[str, Any]] = None,
++                          signal: Optional[Dict[str, Any]] = None, checked: bool = True) -> List[str]:
++    """Default readout: decision line, optional entry/skip line, then 'now X | needs Y'
++    lines for the ACTIVE sleeves only (RSI always shown). Each line <= ~90 chars."""
++    s = snapshot
++    bias, mode = _bias_word(s), _mode_word(s)
++    extra: Optional[str] = None
++    if signal:
++        side = str(signal.get("ensemble_signal") or "").upper() or (
++            "BUY" if signal.get("direction") == "long" else "SELL")
++        result = f"{side} ({_sleeve_word(str(signal.get('exit_sleeve') or ''))})"
++        tp = _f(signal.get("tp"))
++        tp_txt = f"{tp:.2f}" if np.isfinite(tp) and tp > 0 else "trailing stop (no fixed target)"
++        extra = f"Entry {_f(signal.get('entry')):.2f} | Stop {_f(signal.get('sl')):.2f} | Target {tp_txt}"
++    else:
++        gate_res, because = _plain_gate(gates, s)
++        setup = s["final_entry"] if s["in_rth"] else s["routed_entry"]
++        sleeve = s["routed_sleeve"]
++        if setup != 0 and gate_res:
++            result = gate_res
++            extra = f"{_side(setup)} {_sleeve_word(sleeve)} skipped because {because}"
++        elif setup != 0:
++            result = f"Skipped: {_side(setup)} {_sleeve_word(sleeve)}"
++            extra = f"{_side(setup)} {_sleeve_word(sleeve)} found but rejected by live checks (see log)"
++        else:
++            result = gate_res or "No trade"
++    lines = [f"Bias: {bias} | {mode} | {result}"]
++    if extra:
++        lines.append(extra)
++    if s["ranging"]:  # mean-reversion sleeve active
++        lines.append(_price_mr_line(s))
++    if s["breakout_allowed"]:  # breakout sleeve active (default: ADX >= 20)
++        lines.append(_price_breakout_line(s))
++        lines.append(_volume_line(s))
++    if s["trending"]:  # trend sleeve active
++        lines.append(_ema_line(s))
++    lines.append(_rsi_line(s))
++    return [INDENT + ln for ln in lines]
++
++
+ def render_revamp_block(df: pd.DataFrame, gates: Optional[Dict[str, Any]] = None,
+                         signal: Optional[Dict[str, Any]] = None, checked: bool = True,
+-                        strategy: Optional[EnsembleStrategy] = None) -> List[str]:
+-    return format_revamp_block(compute_revamp_snapshot(df, strategy), gates, signal, checked)
++                        strategy: Optional[EnsembleStrategy] = None, level: int = 2) -> List[str]:
++    """level 1 = compact readout (3-6 short lines), level 2 = detailed 6-line block."""
++    snap = compute_revamp_snapshot(df, strategy)
++    if level == 1:
++        return format_revamp_compact(snap, gates, signal, checked)
++    return format_revamp_block(snap, gates, signal, checked)
+diff --git a/start_live_rithmic.py b/start_live_rithmic.py
+index 6ff061f..fccc2b8 100644
+--- a/start_live_rithmic.py
++++ b/start_live_rithmic.py
+@@ -99,8 +99,10 @@ REVAMP_EXITS_ON = _revamp_exits.revamp_enabled()
+ if REVAMP_EXITS_ON:
+     TRAIL_SETTINGS['atr_mult'] = float(_revamp_exits.revamp_trail_mult())
+ REVAMP_CANDLE_COUNT = int(os.getenv('REVAMP_CANDLE_COUNT', '320'))
+-# DISPLAY-ONLY: per-bar bias + decision reasoning in revamp mode (REVAMP_VERBOSE=0 to hide).
+-REVAMP_VERBOSE = bool(_revamp_display is not None and _revamp_display.revamp_verbose_enabled())
++# DISPLAY-ONLY: per-bar bias + decision readout in revamp mode.
++# REVAMP_VERBOSE unset/1 = compact (now X | needs Y), 2 = detailed 6 lines, 0 = off.
++REVAMP_VERBOSE_LEVEL = _revamp_display.revamp_verbose_level() if _revamp_display is not None else 0
++REVAMP_VERBOSE = REVAMP_VERBOSE_LEVEL > 0
+ 
+ def _env_int(name: str, default: int) -> int:
+     raw = os.getenv(name)
+@@ -858,7 +860,9 @@ class LiveRithmicTrader:
+         """Print bias / regime / sleeves / decision. Errors never reach trading."""
+         try:
+             gates = self._revamp_gate_state(symbol, open_count)
+-            for line in _revamp_display.render_revamp_block(df, gates=gates, signal=signal, checked=checked):
++            for line in _revamp_display.render_revamp_block(
++                df, gates=gates, signal=signal, checked=checked, level=REVAMP_VERBOSE_LEVEL,
++            ):
+                 print(line)
+         except Exception as e:
+             if not getattr(self, '_revamp_display_err_shown', False):
+@@ -1669,7 +1673,8 @@ class LiveRithmicTrader:
+             print(f"Strategy:   Research 5m ADX ensemble (trend/MR/breakout)")
+             print(f"REVAMP:     {_revamp_exits.describe()}")
+             print(f"Trail ATR:  {TRAIL_SETTINGS['atr_mult']} (live default without revamp bat: 0.6)")
+-            print(f"Readout:    {'ON - bias + decision every 5m bar (REVAMP_VERBOSE=0 to hide)' if REVAMP_VERBOSE else 'OFF (set REVAMP_VERBOSE=1)'}")
++            _rv_mode = {1: 'compact (REVAMP_VERBOSE=2 detailed, 0 off)', 2: 'detailed (REVAMP_VERBOSE=1 compact, 0 off)'}
++            print(f"Readout:    {('ON ' + _rv_mode.get(REVAMP_VERBOSE_LEVEL, '')) if REVAMP_VERBOSE else 'OFF (set REVAMP_VERBOSE=1)'}")
+         else:
+             print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
+             print(f"Features:   Dynamic SL/TP, Trailing Stops, 8 Confirmation Models")
+diff --git a/tests/test_revamp_live_display.py b/tests/test_revamp_live_display.py
+index 96c98d6..5382491 100644
+--- a/tests/test_revamp_live_display.py
++++ b/tests/test_revamp_live_display.py
+@@ -16,6 +16,7 @@ def _snap(**over):
+         "adx": 22.4, "adx_trend_min": 25.0, "adx_range_max": 20.0,
+         "trending": False, "ranging": False, "breakout_allowed": True,
+         "don_hi": 31560.5, "don_lo": 31480.0, "prev_beyond_hi": False, "prev_beyond_lo": False,
++        "next_hi": 31560.5, "next_lo": 31480.0,
+         "don_n": 20, "vol_ratio": 1.12, "vol_mult": 1.5,
+         "bb_up": 31570.0, "bb_mid": 31525.0, "bb_lo": 31480.0, "rsi": 58.3,
+         "rsi_os": 30.0, "rsi_ob": 70.0,
+@@ -89,14 +90,134 @@ def test_setup_blocked_by_gate_and_signal_decision():
+     assert d2 == "   Decision: SELL (trend) @ 31570.00 | SL 31650.00 | TP ATR trail"
+ 
+ 
+-def test_verbose_toggle(monkeypatch):
++def test_verbose_levels(monkeypatch):
+     monkeypatch.delenv("REVAMP_VERBOSE", raising=False)
+-    assert ld.revamp_verbose_enabled() is True
+-    for v in ("0", "false", "off", "no"):
++    assert ld.revamp_verbose_level() == 1 and ld.revamp_verbose_enabled() is True  # default = compact
++    for v, lvl in (("0", 0), ("false", 0), ("off", 0), ("1", 1), ("on", 1), ("true", 1),
++                   ("2", 2), ("detailed", 2), ("3", 2)):
+         monkeypatch.setenv("REVAMP_VERBOSE", v)
+-        assert ld.revamp_verbose_enabled() is False
+-    monkeypatch.setenv("REVAMP_VERBOSE", "1")
+-    assert ld.revamp_verbose_enabled() is True
++        assert ld.revamp_verbose_level() == lvl, v
++        assert ld.revamp_verbose_enabled() is (lvl > 0)
++
++
++# ----------------------------------------------------------------- compact
++
++def _c(snap=None, gates=None, signal=None):
++    lines = ld.format_revamp_compact(snap or _snap(), gates if gates is not None else _gates(), signal)
++    assert 3 <= len(lines) <= 6
++    for ln in lines:
++        assert ln.startswith("   ") and len(ln) <= 90, ln
++        ln.encode("ascii")
++    assert "ADX" not in lines[0] and "EMA" not in lines[0]  # line 1 is plain words
++    return [ln.strip() for ln in lines]
++
++
++TREND_BUY = dict(adx=30.0, trending=True, close=31584.0, ema_fast=31570.0, ema_slow=31550.0,
++                 next_hi=31616.5, don_hi=31616.5, next_lo=31480.0, don_lo=31480.0, vol_ratio=0.6)
++
++
++def test_compact_trending_no_trade():
++    assert _c(_snap(**TREND_BUY)) == [
++        "Bias: BUY | Trending | No trade",
++        "Price: 31584 | needs above 31617 to BUY (33 pts) | below 31480 to SELL (104 pts)",
++        "Volume: 0.6x | needs 1.5x",
++        # a SELL cross would also need price under the 200 EMA (price is above it now)
++        "EMA cross: 20 above 50 (20 pts) | needs cross down + price under 200 EMA to SELL",
++        "RSI: 58 (neutral) | needs under 30 to BUY dip, over 70 to SELL pop [off now: trending]",
++    ]
++
++
++def test_compact_bias_side_first_and_volume_ok():
++    s = _snap(**dict(TREND_BUY, close=31500.0, ema_trend=31600.0, ema_fast=31520.0, ema_slow=31540.0,
++                     vol_ratio=2.04))
++    assert _c(s)[:4] == [
++        "Bias: SELL | Trending | No trade",
++        "Price: 31500 | needs below 31480 to SELL (20 pts) | above 31617 to BUY (117 pts)",
++        "Volume: 2.0x | needs 1.5x (OK)",
++        "EMA cross: 20 below 50 (20 pts) | needs cross up + price over 200 EMA to BUY",
++    ]
++    assert _c(_snap(**dict(TREND_BUY, vol_ratio=1.47)))[2] == "Volume: 1.47x | needs 1.5x"
++
++
++def test_compact_fresh_cross_line_when_filter_passes():
++    s = _snap(**dict(TREND_BUY, close=31200.0, ema_trend=31300.0, ema_fast=31204.0, ema_slow=31200.0,
++                     next_hi=31260.0, don_hi=31260.0, next_lo=31150.0, don_lo=31150.0))
++    l = _c(s)
++    assert l[0].startswith("Bias: NEUTRAL | Trending")
++    assert l[3] == "EMA cross: 20 above 50 by 4 pts (no new cross) | needs a fresh cross down to SELL"
++
++
++def test_compact_already_broken_out():
++    s = _snap(**dict(TREND_BUY, close=31630.0, don_hi=31616.5, next_hi=31640.0))
++    # broke out on this bar -> a new BUY break can't fire next bar (needs a pullback first)
++    assert _c(s)[1] == "Price: 31630 | already above 31617 | needs below 31480 to SELL (150 pts)"
++    s2 = _snap(**dict(TREND_BUY, close=31600.0, don_hi=31616.5, next_hi=31616.5, don_lo=31605.0, next_lo=31590.0))
++    assert _c(s2)[1] == "Price: 31600 | needs above 31617 to BUY (17 pts) | already below 31605"
++
++
++def test_compact_in_between_shows_breakout_only():
++    l = _c(_snap())
++    assert l[0] == "Bias: BUY | In between | No trade"
++    assert l[1].startswith("Price: 31549 | needs above 31561 to BUY (12 pts) | below 31480 to SELL")
++    assert l[2] == "Volume: 1.1x | needs 1.5x"
++    assert not any(x.startswith("EMA cross") for x in l)
++    assert l[-1].endswith("[off now: in between]") and l[-1].startswith("RSI: 58")
++
++
++def test_compact_choppy_shows_mean_reversion_only():
++    s = _snap(adx=15.0, ranging=True, breakout_allowed=False, bb_lo=31480.0, bb_up=31634.0)
++    l = _c(s)
++    assert l == ["Bias: BUY | Choppy | No trade",
++                 "Price: 31549 | needs dip to 31480 to BUY (69 pts) | pop to 31634 to SELL (86 pts)",
++                 "RSI: 58 (neutral) | needs under 30 to BUY dip, over 70 to SELL pop"]
++
++
++def test_compact_fired_trade():
++    sig = {"ensemble_signal": "BUY", "direction": "long", "entry": 31584.5, "sl": 31480.0, "tp": 31790.0,
++           "exit_sleeve": "breakout"}
++    l = _c(_snap(**TREND_BUY), signal=sig)
++    assert l[0] == "Bias: BUY | Trending | BUY (breakout)"
++    assert l[1] == "Entry 31584.50 | Stop 31480.00 | Target 31790.00"
++    sig2 = dict(sig, ensemble_signal="SELL", direction="short", tp=0.0, exit_sleeve="trend")
++    l = _c(_snap(**TREND_BUY), signal=sig2)
++    assert l[0].endswith("| SELL (trend)") and l[1].endswith("Target trailing stop (no fixed target)")
++
++
++@pytest.mark.parametrize("gates,result", [
++    ({"open_count": 2}, "Blocked: 2 trades already open"),
++    ({"cooldown": 3}, "Paused: cooldown 3 bars"),
++    ({"daily_pnl": -1600.0}, "Stopped: daily loss limit"),
++])
++def test_compact_gates(gates, result):
++    l = _c(_snap(**TREND_BUY), _gates(**gates))
++    assert l[0] == "Bias: BUY | Trending | " + result
++    assert l[1].startswith("Price: ")  # conditions still shown
++
++
++def test_compact_blocked_setup_and_closed():
++    s = _snap(**dict(TREND_BUY, close=31380.0, ema_fast=31390.0, ema_slow=31420.0, ema_trend=31500.0,
++                     bo_entry=-1, routed_entry=-1, routed_sleeve="breakout", final_entry=-1))
++    l = _c(s, _gates(open_count=2))
++    assert l[0] == "Bias: SELL | Trending | Blocked: 2 trades already open"
++    assert l[1] == "SELL breakout skipped because 2 trades are already open"
++    l = _c(_snap(in_rth=False, time_et="18:05 ET"))
++    assert l[0] == "Bias: BUY | In between | Closed: outside trading hours (18:05 ET)"
++
++
++@pytest.mark.parametrize("rsi,txt", [(25.0, "RSI: 25 (oversold)"), (29.6, "RSI: 29.6 (oversold)"),
++                                     (30.0, "RSI: 30.0 (neutral)"), (57.4, "RSI: 57 (neutral)"),
++                                     (70.0, "RSI: 70.0 (neutral)"), (78.2, "RSI: 78 (overbought)")])
++def test_compact_rsi_line(rsi, txt):
++    line = _c(_snap(rsi=rsi, adx=15.0, ranging=True, breakout_allowed=False))[-1]
++    assert line.startswith(txt + " | needs under 30 to BUY dip, over 70 to SELL pop")
++    off = _c(_snap(rsi=rsi, **TREND_BUY))[-1]  # MR sleeve inactive -> tagged, label kept
++    assert off.startswith(txt + " | needs under 30 to BUY") and off.endswith("[off now: trending]")
++
++
++def test_render_levels():
++    df = _synthetic_5m(n=300)
++    assert 3 <= len(ld.render_revamp_block(df, gates=_gates(), level=1)) <= 6
++    assert len(ld.render_revamp_block(df, gates=_gates(), level=2)) == 6
+ 
+ 
+ def _synthetic_5m(n=420, seed=7):
+@@ -126,11 +247,12 @@ def test_display_has_no_effect_on_strategy(monkeypatch):
+         off = classify_last_sleeve(w)
+         snap = ld.compute_revamp_snapshot(w)
+         lines = ld.format_revamp_block(snap, _gates())
++        compact = ld.format_revamp_compact(snap, _gates())
+         on = classify_last_sleeve(w)
+         pd.testing.assert_frame_equal(w, before)
+         assert off == on
+         assert (snap["final_entry"] != 0) == bool(on)
+-        assert len(lines) == 6
++        assert len(lines) == 6 and 3 <= len(compact) <= 6
+         if on:
+             hits += 1
+             assert lines[-1].startswith("   Decision: NO TRADE: " + on["ensemble_signal"] + " setup")

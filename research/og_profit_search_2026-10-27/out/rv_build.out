@@ -1,0 +1,7 @@
+cleaned 1m: dropped 2,742 off-contract / spike bars
+built 661522 138513 3993 {'addon_onl': 203, 'addon_e1': 1163} 5
+sim sec 26 {'n': 2520, 'net': 27695.5, 'pf': 1.21, 'wr': 60.6, 'avg': 10.99, 'dd': 4465.1}
+P1 Nov24-Apr25 n= 646 net=$   8529.1 PF= 1.25 WR= 60.7% avg=$  13.20 DD=$ 4465.1
+P2 May25-Oct25 n= 668 net=$   6999.8 PF= 1.22 WR= 56.6% avg=$  10.48 DD=$ 2201.7
+P3 Nov25-Mar26 n= 573 net=$   4151.0 PF= 1.13 WR= 59.2% avg=$   7.24 DD=$ 4428.3
+P4 Apr26-Sep26 n= 633 net=$   8015.6 PF= 1.22 WR= 66.2% avg=$  12.66 DD=$ 3369.2

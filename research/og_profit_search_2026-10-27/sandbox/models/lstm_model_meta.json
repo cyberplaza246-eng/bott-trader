@@ -1,0 +1,16 @@
+{
+  "num_features": 6,
+  "lookback": 60,
+  "final_train_loss": 0.00018279629875905812,
+  "final_val_loss": 0.00021538679720833898,
+  "epochs_trained": 18,
+  "feature_names": [
+    "close_norm",
+    "rsi",
+    "macd",
+    "bb_pos",
+    "atr_norm",
+    "vol_ratio"
+  ],
+  "training_time_sec": 1005.5
+}

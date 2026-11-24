@@ -1,0 +1,114 @@
+"""Shadow paper trader for the W5 NEAT brain. Never connects to a broker and never places orders.
+
+Tails data/live_bars_MNQ_5m.csv (written by the revamp after its next restart) and appends
+simulated trades to kid_trades.csv. Same rules as the holdout sim: 1 MNQ, $3 round trip,
+$500 daily loss cap, stop 1.5 ATR (min 8 pts), target 3 ATR, decision every 3rd bar.
+"""
+from __future__ import annotations
+
+import os
+import sys
+import time
+from pathlib import Path
+
+import pandas as pd
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import kid_engine as K
+
+REPO = HERE.parent
+LIVE = Path(os.environ.get("SHADOW_BARS", str(REPO / "data" / "live_bars_MNQ_5m.csv")))
+TRADES = HERE / "kid_trades.csv"
+WARMUP = HERE / "warmup_MNQ_5m.csv"
+FAITHFUL_BARS = 2760  # atr-ratio window; features cross the data gap until this many live bars exist
+COLS = ["entry_time", "side", "entry", "sl", "tp", "exit_time", "exit", "reason", "pnl", "faithful"]
+
+
+def _et(ts) -> str:
+    t = pd.Timestamp(ts)
+    if t.tzinfo is None:
+        t = t.tz_localize("UTC")
+    return t.tz_convert("America/New_York").strftime("%Y-%m-%d %H:%M ET")
+
+
+def load_bars() -> tuple[pd.DataFrame, int, pd.Timestamp]:
+    w = pd.read_csv(WARMUP)
+    w["datetime"] = pd.to_datetime(w["datetime"], utc=True)
+    warm_end = w["datetime"].max()
+    parts = [w]
+    if LIVE.is_file() and LIVE.stat().st_size > 0:
+        lv = pd.read_csv(LIVE)
+        if len(lv):
+            ts = pd.to_datetime(lv["ts_et"], utc=True)
+            lv = pd.DataFrame(dict(datetime=ts, open=lv.open, high=lv.high, low=lv.low,
+                                   close=lv.close, volume=lv.volume, no_trade=False))
+            parts.append(lv)
+    df = pd.concat(parts, ignore_index=True)
+    df["datetime"] = pd.to_datetime(df["datetime"], utc=True)
+    df = df.sort_values("datetime").drop_duplicates("datetime", keep="last").reset_index(drop=True)
+    n_live = int((df["datetime"] > warm_end).sum())
+    return df, n_live, warm_end
+
+
+def main():
+    print("NEAT kid shadow. Paper only. No broker, no orders.")
+    print(f"Warmup through 2026-09-30 14:50 ET. Live bars: {LIVE}")
+    print("Gap: no bars from 2026-09-30 14:55 ET until the revamp is restarted with the bar export.")
+    print(f"Trades are marked bridge until {FAITHFUL_BARS} live bars (~10 days). Log: {TRADES}")
+    seen: set[str] = set()
+    if TRADES.exists():
+        old = pd.read_csv(TRADES)
+        # keys rebuilt loosely so a restart does not double-log; entry/side/exit in ET minutes
+        for _, r in old.iterrows():
+            seen.add(f"logged|{r.entry_time}|{r.side}|{r.exit_time}")
+    last_line = None
+    while True:
+        try:
+            # rebuild seen from closed trades already simulated this process via entry iso;
+            # first call prints historical closed trades once.
+            bars, n_live, warm_end = load_bars()
+            cols, norm = K.load_norm()
+            p = __import__("json").loads((HERE / "w5_params.json").read_text(encoding="utf-8"))
+            frame, F, _ = K.build_features(bars, cols, norm)
+            trades = K.simulate(frame, F, K.load_net(), p, cost_mult=1.0, start=1600, liquidate_end=False) if len(frame) > 1600 else []
+            faithful = n_live >= FAITHFUL_BARS
+            new = []
+            for t in trades:
+                key = f"{pd.Timestamp(t['entry_time']).isoformat()}|{t['side']}|{pd.Timestamp(t['exit_time']).isoformat()}"
+                if key in seen:
+                    continue
+                seen.add(key)
+                new.append(t)
+                print(f"SIM {_et(t['entry_time'])} {t['side']} 1 MNQ @ {t['entry']:.2f}  "
+                      f"exit {_et(t['exit_time'])} {t['reason']} @ {t['exit']:.2f}  ${t['pnl']:+.2f}"
+                      + ("" if faithful else "  (bridge)"))
+            if new:
+                out = pd.DataFrame(new)
+                out["faithful"] = "yes" if faithful else "bridge"
+                out = out[COLS]
+                for c in ("entry_time", "exit_time"):
+                    out[c] = pd.to_datetime(out[c], utc=True).dt.tz_convert("America/New_York").dt.strftime("%Y-%m-%d %H:%M")
+                out.to_csv(TRADES, mode="a", header=not TRADES.exists(), index=False)
+            if len(frame):
+                last = frame.iloc[-1]
+                op = getattr(K.simulate, "last_open", None)
+                held = f"open {op['side']} @ {op['entry']:.2f} SL {op['sl']:.2f}" if op else "flat"
+                tag = "" if faithful else f"  bridge {n_live}/{FAITHFUL_BARS}"
+                line = f"{_et(last.datetime)}  MNQ {last.close:.2f}  {held}{tag}"
+                if line != last_line:
+                    print(line)
+                    last_line = line
+                    if TRADES.exists():
+                        log = pd.read_csv(TRADES)
+                        if len(log):
+                            today = _et(last.datetime)[:10]
+                            day = log[log.exit_time.str.slice(0, 10) == today]
+                            print(f"Today {len(day)} trades ${day.pnl.sum():+.2f}   running ${log.pnl.sum():+.2f}")
+        except Exception as e:
+            print(f"shadow error (still no orders): {e}")
+        time.sleep(15)
+
+
+if __name__ == "__main__":
+    main()

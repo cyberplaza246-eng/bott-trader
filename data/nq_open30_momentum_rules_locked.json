@@ -1,0 +1,6 @@
+﻿{"name":"open30_momentum","locked_at":"2026-10-19T22:21-04:00","source":"scripts/search_nq_small_target.py B_OPEN30 thr=20",
+ "rules":{"data":"data/MNQ_1m.csv 1-minute bars, America/New_York","signal":"mv = close of 10:00 bar - open of 09:30 bar","threshold_pts":20,
+ "direction":"long if mv>0 else short; skip day if |mv|<20","entry":"market at open of 10:01 bar","exit":"close of 15:59 bar, no stop, no target",
+ "day_filter":"day must have 09:30,10:00,15:00,15:59 bars","max_trades_per_day":1},
+ "costs":{"slippage":"1 tick (0.25) on entry and on exit","NQ":"$20/pt, $4.50 RT","MNQ":"$2/pt, $1.24 RT"},
+ "final_period":"2026-04-01 to 2026-09-20","pass_rule":"final PF>=1.2 and best month < 50% of net"}

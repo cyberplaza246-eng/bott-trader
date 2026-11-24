@@ -1,0 +1,10 @@
+{"t": "2026-09-14T22:00:00+00:00", "event": "entry", "order_id": "replay_1", "symbol": "MNQ", "direction": "long", "size": 1, "entry": 29495.75, "sl": 29455.75, "tp": 0.0, "stream": "6pm", "source": "6pm"}
+{"t": "2026-09-14T22:18:00+00:00", "event": "exit", "order_id": "replay_1", "symbol": "MNQ", "direction": "long", "size": 1, "entry": 29495.75, "exit": 29455.75, "reason": "STOP_LOSS", "pnl": -84.0, "stream": "6pm"}
+{"t": "2026-09-15T05:10:00+00:00", "event": "entry", "order_id": "replay_2", "symbol": "MNQ", "direction": "short", "size": 1, "entry": 29334.25, "sl": 29366.5, "tp": 29271.25, "stream": "v2", "source": "bo_retest"}
+{"t": "2026-09-15T05:42:00+00:00", "event": "exit", "order_id": "replay_2", "symbol": "MNQ", "direction": "short", "size": 1, "entry": 29334.25, "exit": 29366.52, "reason": "STOP_LOSS", "pnl": -68.53, "stream": "v2"}
+{"t": "2026-09-15T07:15:00+00:00", "event": "entry", "order_id": "replay_3", "symbol": "MNQ", "direction": "short", "size": 1, "entry": 29326.25, "sl": 29381.0, "tp": 29217.25, "stream": "v2", "source": "bo_retest"}
+{"t": "2026-09-15T07:26:00+00:00", "event": "exit", "order_id": "replay_3", "symbol": "MNQ", "direction": "short", "size": 1, "entry": 29326.25, "exit": 29381.05, "reason": "STOP_LOSS", "pnl": -113.6, "stream": "v2"}
+{"t": "2026-09-15T07:40:00+00:00", "event": "entry", "order_id": "replay_4", "symbol": "MNQ", "direction": "short", "size": 1, "entry": 29337.0, "sl": 29370.25, "tp": 29270.75, "stream": "v2", "source": "pb_pwl"}
+{"t": "2026-09-15T08:08:00+00:00", "event": "exit", "order_id": "replay_4", "symbol": "MNQ", "direction": "short", "size": 1, "entry": 29337.0, "exit": 29270.69, "reason": "TAKE_PROFIT", "pnl": 128.63, "stream": "v2"}
+{"t": "2026-09-15T14:55:00+00:00", "event": "entry", "order_id": "replay_5", "symbol": "MNQ", "direction": "long", "size": 1, "entry": 29239.0, "sl": 29198.25, "tp": 29322.0, "stream": "addon", "source": "ONL"}
+{"t": "2026-09-15T16:55:00+00:00", "event": "exit", "order_id": "replay_5", "symbol": "MNQ", "direction": "long", "size": 1, "entry": 29239.0, "exit": 29298.25, "reason": "TIME_EXIT", "pnl": 114.5, "stream": "addon"}

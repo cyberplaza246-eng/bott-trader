@@ -1,0 +1,8 @@
+{
+ "sl": 1.5,
+ "tp": 3.0,
+ "trail": 0.0,
+ "min_sl": 8.0,
+ "every": 3,
+ "drop": "tod,vlog,vtod,r1,r3"
+}

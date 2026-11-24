@@ -1,0 +1,2 @@
+C:\Users\shawa\Projects\bott-trader\research\og_profit_search_2026-10-27\strategy_research_2026-10-28\sr_gap.py:58: UserWarning: Converting to PeriodArray/Index representation will drop timezone information.
+  df['q']=df.entry_time.dt.tz_convert(ET).dt.to_period('Q').astype(str)

@@ -1,0 +1,44 @@
+{
+  "model_name": "TEST_gb_high_05",
+  "model_type": "gb",
+  "timestamp": "20260315_180252",
+  "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/TEST_gb_high_05/model_20260315_180252.pkl",
+  "scaler_path": null,
+  "config": {
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "num_leaves": 32,
+    "num_boost_round": 200,
+    "min_data_in_leaf": 20,
+    "lambda_l1": 0.1,
+    "lambda_l2": 0.1,
+    "is_scale": false,
+    "objective": "binary"
+  },
+  "metrics": {
+    "error": "LightGBM not available"
+  },
+  "feature_names": [
+    "close_SMA_5",
+    "close_SMA_10",
+    "close_SMA_20",
+    "close_SMA_50",
+    "close_EMA_5",
+    "close_EMA_10",
+    "close_EMA_20",
+    "close_EMA_50",
+    "close_RSI_5",
+    "close_RSI_10",
+    "close_RSI_20",
+    "close_RSI_50",
+    "close_skew_10",
+    "close_kurtosis_10",
+    "close_slope_10",
+    "close_skew_20",
+    "close_kurtosis_20",
+    "close_slope_20",
+    "close_skew_50",
+    "close_kurtosis_50",
+    "close_slope_50"
+  ]
+}

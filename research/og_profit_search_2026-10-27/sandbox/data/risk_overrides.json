@@ -1,0 +1,58 @@
+{
+  "tp_base_ratio": 2.5,
+  "tp_expanding": 2.5,
+  "tp_contracting": 2.0,
+  "tp_asian_session": 2.0,
+  "tp_london_open": 2.5,
+  "tp_ny_overlap": 2.5,
+  "tp_quiet_hours": 2.0,
+  "sl_atr_mult": 1.2,
+  "sl_min_atr_mult": 1.0,
+  "sl_max_atr_mult": 2.0,
+  "sl_multiplier_by_pair": {
+    "MNQ": 1.3,
+    "NQ": 1.2,
+    "MES": 1.8
+  },
+  "tp_multiplier_by_pair": {
+    "MNQ": 1.3,
+    "NQ": 1.3
+  },
+  "entry_confidence_threshold": 0.64,
+  "price_drift_tolerance_atr": 2.5,
+  "skip_friday": false,
+  "strategy": "mtf_scalping",
+  "bad_hours_utc": {
+    "MNQ": [
+      0,
+      4,
+      21
+    ]
+  },
+  "trailing_stop": {
+    "MNQ": {
+      "enabled": false
+    }
+  },
+  "auto_learning": {
+    "enabled": true,
+    "sl_hit_rate_threshold": 0.6,
+    "tp_hit_rate_threshold": 0.7,
+    "adjustment_interval_trades": 30,
+    "max_sl_adjustment": 0.15,
+    "max_tp_adjustment": 0.15
+  },
+  "updated_at_utc": "2026-10-23T04:42:34.504712",
+  "source": "scripts/validate_mtf_configs.py \u00e2\u20ac\u201d wider_tp winner",
+  "source_window_utc": {
+    "start_date": "2025-12-29",
+    "end_date": "2026-03-11",
+    "trade_count": 329,
+    "profit_factor": 1.21,
+    "total_pnl": 834.38,
+    "win_rate": 39.2
+  },
+  "auto_learning_adjustments": [
+    "SL_MES=1.80 (SL hit rate 64%)"
+  ]
+}

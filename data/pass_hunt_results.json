@@ -1,0 +1,186 @@
+{
+  "elapsed_sec": 60.7,
+  "tested": 65,
+  "pass_count": 1,
+  "weak_count": 2,
+  "passed": [
+    {
+      "name": "A_d15_60|w2_open|fix25|eod500|long|q0|sep1",
+      "stack": "A_d15_60",
+      "win": "w2_open",
+      "stop": "fix25",
+      "tp": "eod500",
+      "side": "long",
+      "quiet": false,
+      "sep": true,
+      "overall": {
+        "trades": 114,
+        "win_rate": 15.8,
+        "profit_factor": 1.12,
+        "expectancy": 5.15,
+        "total_pnl": 587.14,
+        "max_drawdown": 1053.52,
+        "avg_winner": 305.9,
+        "avg_loser": -51.24,
+        "max_consec_losses": 18
+      },
+      "is": {
+        "trades": 72,
+        "win_rate": 16.7,
+        "profit_factor": 1.09,
+        "expectancy": 3.83,
+        "total_pnl": 275.72,
+        "max_drawdown": 1053.52,
+        "avg_winner": 279.18,
+        "avg_loser": -51.24,
+        "max_consec_losses": 18
+      },
+      "oos": {
+        "trades": 42,
+        "win_rate": 14.3,
+        "profit_factor": 1.17,
+        "expectancy": 7.41,
+        "total_pnl": 311.42,
+        "max_drawdown": 716.76,
+        "avg_winner": 359.34,
+        "avg_loser": -51.24,
+        "max_consec_losses": 13
+      },
+      "grade": "PASS"
+    }
+  ],
+  "weak_top": [
+    {
+      "name": "A_d15_60|w2_open|fix30|eod500|long|q0|sep1",
+      "stack": "A_d15_60",
+      "win": "w2_open",
+      "stop": "fix30",
+      "tp": "eod500",
+      "side": "long",
+      "quiet": false,
+      "sep": true,
+      "overall": {
+        "trades": 102,
+        "win_rate": 19.6,
+        "profit_factor": 1.14,
+        "expectancy": 7.27,
+        "total_pnl": 742.02,
+        "max_drawdown": 995.52,
+        "avg_winner": 294.19,
+        "avg_loser": -62.7,
+        "max_consec_losses": 13
+      },
+      "is": {
+        "trades": 64,
+        "win_rate": 21.9,
+        "profit_factor": 1.22,
+        "expectancy": 10.4,
+        "total_pnl": 665.64,
+        "max_drawdown": 879.54,
+        "avg_winner": 266.26,
+        "avg_loser": -61.24,
+        "max_consec_losses": 12
+      },
+      "oos": {
+        "trades": 38,
+        "win_rate": 15.8,
+        "profit_factor": 1.04,
+        "expectancy": 2.01,
+        "total_pnl": 76.38,
+        "max_drawdown": 995.52,
+        "avg_winner": 359.34,
+        "avg_loser": -64.99,
+        "max_consec_losses": 13
+      },
+      "grade": "WEAK"
+    },
+    {
+      "name": "A_d15_60|w2_open|fix30|eod500|long|q0|sep0",
+      "stack": "A_d15_60",
+      "win": "w2_open",
+      "stop": "fix30",
+      "tp": "eod500",
+      "side": "long",
+      "quiet": false,
+      "sep": false,
+      "overall": {
+        "trades": 102,
+        "win_rate": 19.6,
+        "profit_factor": 1.14,
+        "expectancy": 7.27,
+        "total_pnl": 742.02,
+        "max_drawdown": 995.52,
+        "avg_winner": 294.19,
+        "avg_loser": -62.7,
+        "max_consec_losses": 13
+      },
+      "is": {
+        "trades": 64,
+        "win_rate": 21.9,
+        "profit_factor": 1.22,
+        "expectancy": 10.4,
+        "total_pnl": 665.64,
+        "max_drawdown": 879.54,
+        "avg_winner": 266.26,
+        "avg_loser": -61.24,
+        "max_consec_losses": 12
+      },
+      "oos": {
+        "trades": 38,
+        "win_rate": 15.8,
+        "profit_factor": 1.04,
+        "expectancy": 2.01,
+        "total_pnl": 76.38,
+        "max_drawdown": 995.52,
+        "avg_winner": 359.34,
+        "avg_loser": -64.99,
+        "max_consec_losses": 13
+      },
+      "grade": "WEAK"
+    }
+  ],
+  "best_fail": {
+    "name": "A_d15_60|w2_open|atr15_2_20_60|eod500|long|q1|sep1",
+    "stack": "A_d15_60",
+    "win": "w2_open",
+    "stop": "atr15_2_20_60",
+    "tp": "eod500",
+    "side": "long",
+    "quiet": true,
+    "sep": true,
+    "overall": {
+      "trades": 46,
+      "win_rate": 39.1,
+      "profit_factor": 1.38,
+      "expectancy": 29.06,
+      "total_pnl": 1336.53,
+      "max_drawdown": 647.16,
+      "avg_winner": 272.18,
+      "avg_loser": -127.24,
+      "max_consec_losses": 4
+    },
+    "is": {
+      "trades": 32,
+      "win_rate": 40.6,
+      "profit_factor": 1.44,
+      "expectancy": 31.92,
+      "total_pnl": 1021.39,
+      "max_drawdown": 647.16,
+      "avg_winner": 255.14,
+      "avg_loser": -120.82,
+      "max_consec_losses": 4
+    },
+    "oos": {
+      "trades": 14,
+      "win_rate": 35.7,
+      "profit_factor": 1.25,
+      "expectancy": 22.51,
+      "total_pnl": 315.14,
+      "max_drawdown": 609.42,
+      "avg_winner": 316.46,
+      "avg_loser": -140.8,
+      "max_consec_losses": 3
+    },
+    "grade": "FAIL"
+  }
+}

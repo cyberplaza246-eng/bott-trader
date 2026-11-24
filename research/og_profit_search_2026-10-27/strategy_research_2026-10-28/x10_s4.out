@@ -1,0 +1,15 @@
+14 to run
+{'name': 'e1_off__slip4', 'n': 2338, 'net': 22418.4, 'sec': 48}
+{'name': 'align_htf2880__slip4', 'n': 2142, 'net': 26584.8, 'sec': 47}
+{'name': 'off_overnight_short__slip4', 'n': 2132, 'net': 24190.7, 'sec': 49}
+{'name': 'off_18_0930_trend_short__slip4', 'n': 2425, 'net': 25207.7, 'sec': 52}
+{'name': 'base__slip4', 'n': 2456, 'net': 22954.1, 'sec': 53}
+{'name': 'off_evening_short__slip4', 'n': 2441, 'net': 24915.1, 'sec': 53}
+{'name': 'combo_E1htf__slip4', 'n': 2009, 'net': 24446.7, 'sec': 38}
+{'name': 'align_htf576__slip4', 'n': 2238, 'net': 25745.3, 'sec': 43}
+{'name': 'off_h03__slip4', 'n': 2369, 'net': 24889.1, 'sec': 45}
+{'name': 'combo_A__slip4', 'n': 2307, 'net': 23965.6, 'sec': 41}
+{'name': 'off_h05__slip4', 'n': 2446, 'net': 24421.4, 'sec': 46}
+{'name': 'trim_bo_3_6__slip4', 'n': 2289, 'net': 23851.5, 'sec': 43}
+{'name': 'off_18_0930_all__slip4', 'n': 914, 'net': 11632.7, 'sec': 20}
+{'name': 'off_night_all__slip4', 'n': 1832, 'net': 13585.2, 'sec': 25}

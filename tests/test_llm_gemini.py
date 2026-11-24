@@ -268,12 +268,12 @@ def test_overnight_packet_uses_live_ticker_not_file():
     assert "PAPER LONG" in line
     assert "29920.25" in line
     assert "29849.75" in line
-    assert "1R TP, flatten 09:25 ET" in line
+    assert "0.65R TP" in line
     assert "30215" not in line
     assert "09:35" not in line
     ov = overlay_overnight_levels(stale["levels"], status, price=29920.25, source="rithmic")
     assert ov["stop"] == 29849.75
-    assert ov["take_profit"] == "1R TP, flatten 09:25 ET"
+    assert ov["take_profit"] == "0.65R TP"
 
 
 def test_refresh_failed_hides_stale_file_price():

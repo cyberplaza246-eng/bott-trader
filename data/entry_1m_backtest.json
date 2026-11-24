@@ -1,0 +1,274 @@
+{
+  "generated_at": "2026-08-18T23:28:05.029593+00:00",
+  "csv": "C:\\Users\\shawa\\Projects\\bott-trader\\data\\MNQ_1m.csv",
+  "data_note": "real 1m merged: MNQ_1m.csv, MNQ_1m_real_window.csv, MNQ_1m_august_databento.csv, MNQ_1m_august.csv",
+  "live_note": "Research only until a method beats current 1m close on test AND train.",
+  "day": [
+    {
+      "id": "now",
+      "label": "First 1m close (current)",
+      "is_n": 83,
+      "is_pf": 1.22,
+      "is_pnl": 921.3,
+      "is_wr": 56.6,
+      "oos_n": 57,
+      "oos_pf": 0.95,
+      "oos_pnl": -174.7,
+      "oos_wr": 50.9,
+      "exits": {
+        "SL": 61,
+        "TP": 71,
+        "FLAT": 8
+      },
+      "fills": 140,
+      "signals": 140
+    },
+    {
+      "id": "next_with",
+      "label": "Next 1m must close with the trade",
+      "is_n": 47,
+      "is_pf": 1.46,
+      "is_pnl": 1010.9,
+      "is_wr": 59.6,
+      "oos_n": 32,
+      "oos_pf": 0.94,
+      "oos_pnl": -110.7,
+      "oos_wr": 50.0,
+      "exits": {
+        "SL": 33,
+        "TP": 43,
+        "FLAT": 3
+      },
+      "fills": 79,
+      "signals": 140
+    },
+    {
+      "id": "pullback_go",
+      "label": "1m pullback, then next with-trend close",
+      "is_n": 82,
+      "is_pf": 1.11,
+      "is_pnl": 479.8,
+      "is_wr": 53.7,
+      "oos_n": 57,
+      "oos_pf": 0.82,
+      "oos_pnl": -680.2,
+      "oos_wr": 47.4,
+      "exits": {
+        "SL": 65,
+        "TP": 68,
+        "FLAT": 6
+      },
+      "fills": 139,
+      "signals": 140
+    },
+    {
+      "id": "ema20_reclaim",
+      "label": "1m touches EMA20 and closes back with trend",
+      "is_n": 67,
+      "is_pf": 1.42,
+      "is_pnl": 1318.5,
+      "is_wr": 59.7,
+      "oos_n": 48,
+      "oos_pf": 0.86,
+      "oos_pnl": -428.5,
+      "oos_wr": 47.9,
+      "exits": {
+        "SL": 49,
+        "TP": 60,
+        "FLAT": 6
+      },
+      "fills": 115,
+      "signals": 140
+    },
+    {
+      "id": "no_chase",
+      "label": "Skip stretched 1m; wait for a small with-trend bar",
+      "is_n": 74,
+      "is_pf": 1.42,
+      "is_pnl": 1467.9,
+      "is_wr": 59.5,
+      "oos_n": 48,
+      "oos_pf": 1.16,
+      "oos_pnl": 424.0,
+      "oos_wr": 56.2,
+      "exits": {
+        "SL": 48,
+        "TP": 68,
+        "FLAT": 6
+      },
+      "fills": 122,
+      "signals": 140
+    },
+    {
+      "id": "retest",
+      "label": "Come back to the signal price / break level, then hold",
+      "is_n": 72,
+      "is_pf": 1.37,
+      "is_pnl": 1263.6,
+      "is_wr": 58.3,
+      "oos_n": 52,
+      "oos_pf": 0.83,
+      "oos_pnl": -568.0,
+      "oos_wr": 46.2,
+      "exits": {
+        "SL": 54,
+        "TP": 64,
+        "FLAT": 6
+      },
+      "fills": 124,
+      "signals": 140
+    },
+    {
+      "id": "live_quiet",
+      "label": "LIVE day path: quiet 1m body <=4",
+      "is_n": 76,
+      "is_pf": 1.33,
+      "is_pnl": 1216.4,
+      "is_wr": 57.9,
+      "oos_n": 49,
+      "oos_pf": 1.11,
+      "oos_pnl": 302.7,
+      "oos_wr": 55.1,
+      "exits": {
+        "SL": 51,
+        "TP": 68,
+        "FLAT": 6
+      },
+      "fills": 125,
+      "signals": 140
+    }
+  ],
+  "overnight": [
+    {
+      "id": "now",
+      "label": "First 1m close (current)",
+      "is_n": 41,
+      "is_pf": 2.13,
+      "is_pnl": 1042.3,
+      "is_wr": 68.3,
+      "oos_n": 52,
+      "oos_pf": 1.54,
+      "oos_pnl": 881.6,
+      "oos_wr": 61.5,
+      "exits": {
+        "SL": 33,
+        "TP": 59,
+        "FLAT": 1
+      },
+      "fills": 93,
+      "signals": 93
+    },
+    {
+      "id": "next_with",
+      "label": "Next 1m must close with the trade",
+      "is_n": 21,
+      "is_pf": 1.25,
+      "is_pnl": 171.8,
+      "is_wr": 57.1,
+      "oos_n": 25,
+      "oos_pf": 2.05,
+      "oos_pnl": 677.2,
+      "oos_wr": 68.0,
+      "exits": {
+        "TP": 29,
+        "SL": 17
+      },
+      "fills": 46,
+      "signals": 93
+    },
+    {
+      "id": "pullback_go",
+      "label": "1m pullback, then next with-trend close",
+      "is_n": 41,
+      "is_pf": 1.74,
+      "is_pnl": 789.0,
+      "is_wr": 65.9,
+      "oos_n": 52,
+      "oos_pf": 1.42,
+      "oos_pnl": 721.6,
+      "oos_wr": 59.6,
+      "exits": {
+        "TP": 57,
+        "SL": 35,
+        "FLAT": 1
+      },
+      "fills": 93,
+      "signals": 93
+    },
+    {
+      "id": "ema20_reclaim",
+      "label": "1m touches EMA20 and closes back with trend",
+      "is_n": 22,
+      "is_pf": 1.37,
+      "is_pnl": 249.0,
+      "is_wr": 54.5,
+      "oos_n": 36,
+      "oos_pf": 1.1,
+      "oos_pnl": 135.2,
+      "oos_wr": 52.8,
+      "exits": {
+        "SL": 27,
+        "TP": 31
+      },
+      "fills": 58,
+      "signals": 93
+    },
+    {
+      "id": "no_chase",
+      "label": "Skip stretched 1m; wait for a small with-trend bar",
+      "is_n": 41,
+      "is_pf": 1.97,
+      "is_pnl": 949.0,
+      "is_wr": 68.3,
+      "oos_n": 51,
+      "oos_pf": 1.17,
+      "oos_pnl": 322.8,
+      "oos_wr": 54.9,
+      "exits": {
+        "TP": 55,
+        "SL": 36,
+        "FLAT": 1
+      },
+      "fills": 92,
+      "signals": 93
+    },
+    {
+      "id": "retest",
+      "label": "Come back to the signal price / break level, then hold",
+      "is_n": 33,
+      "is_pf": 3.16,
+      "is_pnl": 1200.3,
+      "is_wr": 75.8,
+      "oos_n": 38,
+      "oos_pf": 1.69,
+      "oos_pnl": 772.7,
+      "oos_wr": 63.2,
+      "exits": {
+        "SL": 22,
+        "TP": 48,
+        "FLAT": 1
+      },
+      "fills": 71,
+      "signals": 93
+    },
+    {
+      "id": "live_quiet",
+      "label": "LIVE day path: quiet 1m body <=4",
+      "is_n": 41,
+      "is_pf": 1.83,
+      "is_pnl": 853.0,
+      "is_wr": 65.9,
+      "oos_n": 51,
+      "oos_pf": 1.27,
+      "oos_pnl": 482.8,
+      "oos_wr": 56.9,
+      "exits": {
+        "SL": 36,
+        "TP": 55,
+        "FLAT": 1
+      },
+      "fills": 92,
+      "signals": 93
+    }
+  ]
+}

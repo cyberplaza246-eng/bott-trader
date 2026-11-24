@@ -1,0 +1,133 @@
+n_base,n_filt,removed,added,base_net,filt_net,delta,base_pf,filt_pf,base_dd,filt_dd,p_better,filter,slip,window
+2473,2441,49.0,17.0,29313.0,31298.0,1985,1.22,1.24,4449.0,4204.0,0.988,F1 off_18_0930_trend_short,1-tick (baseline cost),FULL Nov24-Sep26
+1487,1468,31.0,12.0,17361.0,18476.0,1115,1.23,1.24,4449.0,4204.0,0.928,F1 off_18_0930_trend_short,1-tick (baseline cost),train <2026
+986,973,18.0,5.0,11952.0,12822.0,870,1.22,1.24,3633.0,3552.0,0.969,F1 off_18_0930_trend_short,1-tick (baseline cost),2026 YTD
+625,617,12.0,4.0,8028.0,8630.0,603,1.23,1.25,3633.0,3552.0,0.923,F1 off_18_0930_trend_short,1-tick (baseline cost),last 6m (Apr-Sep26)
+421,415,7.0,1.0,4729.0,5442.0,714,1.2,1.24,3633.0,3552.0,0.995,F1 off_18_0930_trend_short,1-tick (baseline cost),LAST 4m (May22-Sep21)
+325,321,5.0,1.0,3763.0,4397.0,634,1.21,1.26,3633.0,3552.0,0.983,F1 off_18_0930_trend_short,1-tick (baseline cost),LAST 3m (Jun22-Sep21)
+207,206,1.0,0.0,1907.0,1988.0,81,1.17,1.18,3633.0,3552.0,0.638,F1 off_18_0930_trend_short,1-tick (baseline cost),last 2m (Jul22-Sep21)
+171,171,1.0,1.0,4517.0,4479.0,-38,1.47,1.46,1297.0,1297.0,0.0,F1 off_18_0930_trend_short,1-tick (baseline cost),Q4-24 (Nov-Dec)
+340,336,9.0,5.0,2044.0,2323.0,279,1.11,1.12,4449.0,4204.0,0.844,F1 off_18_0930_trend_short,1-tick (baseline cost),Q1-25
+324,321,4.0,1.0,1540.0,1331.0,-209,1.08,1.07,2957.0,3077.0,0.094,F1 off_18_0930_trend_short,1-tick (baseline cost),Q2-25
+322,314,11.0,3.0,6383.0,6618.0,235,1.51,1.54,1035.0,1035.0,0.801,F1 off_18_0930_trend_short,1-tick (baseline cost),Q3-25
+330,326,6.0,2.0,2877.0,3726.0,849,1.17,1.22,3108.0,3032.0,0.921,F1 off_18_0930_trend_short,1-tick (baseline cost),Q4-25
+361,356,6.0,1.0,3924.0,4191.0,267,1.2,1.22,3619.0,3401.0,0.883,F1 off_18_0930_trend_short,1-tick (baseline cost),Q1-26
+340,333,10.0,3.0,6261.0,6585.0,324,1.32,1.34,2145.0,2072.0,0.796,F1 off_18_0930_trend_short,1-tick (baseline cost),Q2-26
+285,284,2.0,1.0,1767.0,2046.0,279,1.11,1.13,3633.0,3552.0,0.866,F1 off_18_0930_trend_short,1-tick (baseline cost),Q3-26 (Jul-Sep21)
+365,362,,,,,383,,,,,,F1 off_18_0930_trend_short,1-tick (baseline cost),FOLD1 24-11-01..25-02-23
+426,422,,,,,-352,,,,,,F1 off_18_0930_trend_short,1-tick (baseline cost),FOLD2 25-02-23..25-06-18
+404,396,,,,,235,,,,,,F1 off_18_0930_trend_short,1-tick (baseline cost),FOLD3 25-06-18..25-10-11
+420,415,,,,,929,,,,,,F1 off_18_0930_trend_short,1-tick (baseline cost),FOLD4 25-10-11..26-02-03
+467,461,,,,,76,,,,,,F1 off_18_0930_trend_short,1-tick (baseline cost),FOLD5 26-02-03..26-05-29
+391,385,,,,,714,,,,,,F1 off_18_0930_trend_short,1-tick (baseline cost),FOLD6 26-05-29..26-09-21
+2473,2149,578.0,254.0,29313.0,33843.0,4529,1.22,1.31,4449.0,3816.0,0.807,F2 align_htf2880,1-tick (baseline cost),FULL Nov24-Sep26
+1487,1314,342.0,169.0,17361.0,19501.0,2140,1.23,1.3,4449.0,2820.0,0.698,F2 align_htf2880,1-tick (baseline cost),train <2026
+986,835,236.0,85.0,11952.0,14341.0,2389,1.22,1.33,3633.0,2080.0,0.791,F2 align_htf2880,1-tick (baseline cost),2026 YTD
+625,519,161.0,55.0,8028.0,9979.0,1951,1.23,1.35,3633.0,2080.0,0.822,F2 align_htf2880,1-tick (baseline cost),last 6m (Apr-Sep26)
+421,352,106.0,37.0,4729.0,6457.0,1728,1.2,1.33,3633.0,2080.0,0.883,F2 align_htf2880,1-tick (baseline cost),LAST 4m (May22-Sep21)
+325,274,83.0,32.0,3763.0,5550.0,1788,1.21,1.39,3633.0,1463.0,0.913,F2 align_htf2880,1-tick (baseline cost),LAST 3m (Jun22-Sep21)
+207,181,51.0,25.0,1907.0,3450.0,1543,1.17,1.4,3633.0,1463.0,0.919,F2 align_htf2880,1-tick (baseline cost),last 2m (Jul22-Sep21)
+171,154,37.0,20.0,4517.0,4472.0,-45,1.47,1.52,1297.0,1583.0,0.499,F2 align_htf2880,1-tick (baseline cost),Q4-24 (Nov-Dec)
+340,313,72.0,45.0,2044.0,4510.0,2466,1.11,1.28,4449.0,2127.0,0.899,F2 align_htf2880,1-tick (baseline cost),Q1-25
+324,288,65.0,29.0,1540.0,3600.0,2060,1.08,1.22,2957.0,1768.0,0.878,F2 align_htf2880,1-tick (baseline cost),Q2-25
+322,272,86.0,36.0,6383.0,6629.0,246,1.51,1.69,1035.0,1399.0,0.562,F2 align_htf2880,1-tick (baseline cost),Q3-25
+330,287,82.0,39.0,2877.0,291.0,-2586,1.17,1.02,3108.0,2820.0,0.132,F2 align_htf2880,1-tick (baseline cost),Q4-25
+361,316,75.0,30.0,3924.0,4363.0,438,1.2,1.27,3619.0,2041.0,0.593,F2 align_htf2880,1-tick (baseline cost),Q1-26
+340,279,84.0,23.0,6261.0,6511.0,251,1.32,1.42,2145.0,2080.0,0.568,F2 align_htf2880,1-tick (baseline cost),Q2-26
+285,240,77.0,32.0,1767.0,3467.0,1700,1.11,1.28,3633.0,1463.0,0.912,F2 align_htf2880,1-tick (baseline cost),Q3-26 (Jul-Sep21)
+365,328,,,,,-31,,,,,,F2 align_htf2880,1-tick (baseline cost),FOLD1 24-11-01..25-02-23
+426,386,,,,,4602,,,,,,F2 align_htf2880,1-tick (baseline cost),FOLD2 25-02-23..25-06-18
+404,347,,,,,-500,,,,,,F2 align_htf2880,1-tick (baseline cost),FOLD3 25-06-18..25-10-11
+420,368,,,,,-4010,,,,,,F2 align_htf2880,1-tick (baseline cost),FOLD4 25-10-11..26-02-03
+467,397,,,,,3260,,,,,,F2 align_htf2880,1-tick (baseline cost),FOLD5 26-02-03..26-05-29
+391,323,,,,,1208,,,,,,F2 align_htf2880,1-tick (baseline cost),FOLD6 26-05-29..26-09-21
+2473,2128,597.0,252.0,29313.0,34512.0,5199,1.22,1.32,4449.0,3816.0,0.84,F1+F2 together,1-tick (baseline cost),FULL Nov24-Sep26
+1487,1302,355.0,170.0,17361.0,19490.0,2129,1.23,1.3,4449.0,2820.0,0.7,F1+F2 together,1-tick (baseline cost),train <2026
+986,826,242.0,82.0,11952.0,15022.0,3070,1.22,1.35,3633.0,2080.0,0.847,F1+F2 together,1-tick (baseline cost),2026 YTD
+625,515,164.0,54.0,8028.0,10328.0,2301,1.23,1.37,3633.0,2080.0,0.862,F1+F2 together,1-tick (baseline cost),last 6m (Apr-Sep26)
+421,348,109.0,36.0,4729.0,6807.0,2078,1.2,1.36,3633.0,2080.0,0.927,F1+F2 together,1-tick (baseline cost),LAST 4m (May22-Sep21)
+325,270,86.0,31.0,3763.0,5900.0,2137,1.21,1.42,3633.0,1419.0,0.954,F1+F2 together,1-tick (baseline cost),LAST 3m (Jun22-Sep21)
+207,180,52.0,25.0,1907.0,3531.0,1624,1.17,1.41,3633.0,1406.0,0.932,F1+F2 together,1-tick (baseline cost),last 2m (Jul22-Sep21)
+171,154,38.0,21.0,4517.0,4433.0,-84,1.47,1.51,1297.0,1583.0,0.489,F1+F2 together,1-tick (baseline cost),Q4-24 (Nov-Dec)
+340,307,76.0,43.0,2044.0,3932.0,1888,1.11,1.24,4449.0,2394.0,0.862,F1+F2 together,1-tick (baseline cost),Q1-25
+324,287,67.0,30.0,1540.0,3589.0,2049,1.08,1.22,2957.0,1768.0,0.877,F1+F2 together,1-tick (baseline cost),Q2-25
+322,269,89.0,36.0,6383.0,6670.0,287,1.51,1.7,1035.0,1399.0,0.568,F1+F2 together,1-tick (baseline cost),Q3-25
+330,285,85.0,40.0,2877.0,866.0,-2011,1.17,1.06,3108.0,2820.0,0.217,F1+F2 together,1-tick (baseline cost),Q4-25
+361,311,78.0,28.0,3924.0,4694.0,769,1.2,1.3,3619.0,1954.0,0.644,F1+F2 together,1-tick (baseline cost),Q1-26
+340,277,86.0,23.0,6261.0,6882.0,622,1.32,1.45,2145.0,2080.0,0.647,F1+F2 together,1-tick (baseline cost),Q2-26
+285,238,78.0,31.0,1767.0,3446.0,1679,1.11,1.28,3633.0,1419.0,0.916,F1+F2 together,1-tick (baseline cost),Q3-26 (Jul-Sep21)
+365,325,,,,,150,,,,,,F1+F2 together,1-tick (baseline cost),FOLD1 24-11-01..25-02-23
+426,382,,,,,3794,,,,,,F1+F2 together,1-tick (baseline cost),FOLD2 25-02-23..25-06-18
+404,344,,,,,-459,,,,,,F1+F2 together,1-tick (baseline cost),FOLD3 25-06-18..25-10-11
+420,366,,,,,-3435,,,,,,F1+F2 together,1-tick (baseline cost),FOLD4 25-10-11..26-02-03
+467,392,,,,,3591,,,,,,F1+F2 together,1-tick (baseline cost),FOLD5 26-02-03..26-05-29
+391,319,,,,,1558,,,,,,F1+F2 together,1-tick (baseline cost),FOLD6 26-05-29..26-09-21
+106,106,0.0,0.0,1814.0,1814.0,0,1.31,1.31,1041.0,1041.0,0.0,F1 off_18_0930_trend_short,1-tick (baseline cost),UNUSED Oct-2024 (Sep30-Oct31)
+106,91,27.0,12.0,1814.0,1207.0,-608,1.31,1.23,1041.0,1117.0,0.313,F2 align_htf2880,1-tick (baseline cost),UNUSED Oct-2024 (Sep30-Oct31)
+106,91,27.0,12.0,1814.0,1207.0,-608,1.31,1.23,1041.0,1117.0,0.313,F1+F2 together,1-tick (baseline cost),UNUSED Oct-2024 (Sep30-Oct31)
+2456,2425,49.0,18.0,22954.0,25208.0,2254,1.17,1.19,4977.0,4728.0,0.994,F1 off_18_0930_trend_short,4-tick slippage stress,FULL Nov24-Sep26
+1476,1459,31.0,14.0,13332.0,14695.0,1364,1.17,1.19,4977.0,4728.0,0.96,F1 off_18_0930_trend_short,4-tick slippage stress,train <2026
+980,966,18.0,4.0,9623.0,10513.0,890,1.17,1.19,4155.0,4071.0,0.969,F1 off_18_0930_trend_short,4-tick slippage stress,2026 YTD
+620,611,12.0,3.0,5959.0,6568.0,610,1.17,1.19,4155.0,4071.0,0.923,F1 off_18_0930_trend_short,4-tick slippage stress,last 6m (Apr-Sep26)
+419,413,7.0,1.0,3020.0,3750.0,730,1.12,1.16,4155.0,4071.0,0.995,F1 off_18_0930_trend_short,4-tick slippage stress,LAST 4m (May22-Sep21)
+323,319,5.0,1.0,1860.0,2506.0,646,1.1,1.14,4155.0,4071.0,0.983,F1 off_18_0930_trend_short,4-tick slippage stress,LAST 3m (Jun22-Sep21)
+206,205,1.0,0.0,589.0,673.0,84,1.05,1.06,4155.0,4071.0,0.638,F1 off_18_0930_trend_short,4-tick slippage stress,last 2m (Jul22-Sep21)
+171,171,1.0,1.0,4106.0,4066.0,-40,1.4,1.4,1662.0,1662.0,0.0,F1 off_18_0930_trend_short,4-tick slippage stress,Q4-24 (Nov-Dec)
+336,332,9.0,5.0,1112.0,1402.0,291,1.06,1.07,4977.0,4728.0,0.851,F1 off_18_0930_trend_short,4-tick slippage stress,Q1-25
+320,317,4.0,1.0,659.0,454.0,-205,1.03,1.02,3423.0,3541.0,0.094,F1 off_18_0930_trend_short,4-tick slippage stress,Q2-25
+319,313,11.0,5.0,5156.0,5615.0,459,1.39,1.44,1214.0,1214.0,0.901,F1 off_18_0930_trend_short,4-tick slippage stress,Q3-25
+330,326,6.0,2.0,2298.0,3157.0,859,1.13,1.18,3310.0,3232.0,0.923,F1 off_18_0930_trend_short,4-tick slippage stress,Q4-25
+360,355,6.0,1.0,3664.0,3944.0,280,1.18,1.2,3813.0,3571.0,0.892,F1 off_18_0930_trend_short,4-tick slippage stress,Q1-26
+337,329,10.0,2.0,6021.0,6348.0,327,1.31,1.33,1921.0,1935.0,0.792,F1 off_18_0930_trend_short,4-tick slippage stress,Q2-26
+283,282,2.0,1.0,-62.0,221.0,283,1.0,1.01,4155.0,4071.0,0.866,F1 off_18_0930_trend_short,4-tick slippage stress,Q3-26 (Jul-Sep21)
+361,358,,,,,392,,,,,,F1 off_18_0930_trend_short,4-tick slippage stress,FOLD1 24-11-01..25-02-23
+422,418,,,,,-346,,,,,,F1 off_18_0930_trend_short,4-tick slippage stress,FOLD2 25-02-23..25-06-18
+401,395,,,,,459,,,,,,F1 off_18_0930_trend_short,4-tick slippage stress,FOLD3 25-06-18..25-10-11
+419,414,,,,,943,,,,,,F1 off_18_0930_trend_short,4-tick slippage stress,FOLD4 25-10-11..26-02-03
+464,457,,,,,77,,,,,,F1 off_18_0930_trend_short,4-tick slippage stress,FOLD5 26-02-03..26-05-29
+389,383,,,,,730,,,,,,F1 off_18_0930_trend_short,4-tick slippage stress,FOLD6 26-05-29..26-09-21
+2456,2142,578.0,264.0,22954.0,26585.0,3631,1.17,1.23,4977.0,4318.0,0.754,F2 align_htf2880,4-tick slippage stress,FULL Nov24-Sep26
+1476,1309,342.0,175.0,13332.0,14923.0,1591,1.17,1.22,4977.0,3246.0,0.645,F2 align_htf2880,4-tick slippage stress,train <2026
+980,833,236.0,89.0,9623.0,11662.0,2040,1.17,1.26,4155.0,2194.0,0.744,F2 align_htf2880,4-tick slippage stress,2026 YTD
+620,517,161.0,58.0,5959.0,7870.0,1911,1.17,1.27,4155.0,2098.0,0.806,F2 align_htf2880,4-tick slippage stress,last 6m (Apr-Sep26)
+419,350,107.0,38.0,3020.0,4765.0,1745,1.12,1.24,4155.0,2098.0,0.874,F2 align_htf2880,4-tick slippage stress,LAST 4m (May22-Sep21)
+323,272,83.0,32.0,1860.0,3973.0,2113,1.1,1.27,4155.0,1937.0,0.952,F2 align_htf2880,4-tick slippage stress,LAST 3m (Jun22-Sep21)
+206,180,51.0,25.0,589.0,2195.0,1605,1.05,1.25,4155.0,1937.0,0.928,F2 align_htf2880,4-tick slippage stress,last 2m (Jul22-Sep21)
+171,153,39.0,21.0,4106.0,3691.0,-415,1.4,1.4,1662.0,1959.0,0.394,F2 align_htf2880,4-tick slippage stress,Q4-24 (Nov-Dec)
+336,310,72.0,46.0,1112.0,3398.0,2286,1.06,1.2,4977.0,2395.0,0.877,F2 align_htf2880,4-tick slippage stress,Q1-25
+320,288,63.0,31.0,659.0,2683.0,2024,1.03,1.16,3423.0,2094.0,0.856,F2 align_htf2880,4-tick slippage stress,Q2-25
+319,271,86.0,38.0,5156.0,5576.0,420,1.39,1.55,1214.0,1529.0,0.595,F2 align_htf2880,4-tick slippage stress,Q3-25
+330,287,82.0,39.0,2298.0,-426.0,-2724,1.13,0.97,3310.0,3246.0,0.12,F2 align_htf2880,4-tick slippage stress,Q4-25
+360,316,75.0,31.0,3664.0,3792.0,128,1.18,1.23,3813.0,2194.0,0.534,F2 align_htf2880,4-tick slippage stress,Q1-26
+337,279,84.0,26.0,6021.0,5917.0,-103,1.31,1.37,1921.0,2098.0,0.489,F2 align_htf2880,4-tick slippage stress,Q2-26
+283,238,77.0,32.0,-62.0,1953.0,2015,1.0,1.15,4155.0,1937.0,0.95,F2 align_htf2880,4-tick slippage stress,Q3-26 (Jul-Sep21)
+361,324,,,,,-405,,,,,,F2 align_htf2880,4-tick slippage stress,FOLD1 24-11-01..25-02-23
+422,386,,,,,4383,,,,,,F2 align_htf2880,4-tick slippage stress,FOLD2 25-02-23..25-06-18
+401,346,,,,,-310,,,,,,F2 align_htf2880,4-tick slippage stress,FOLD3 25-06-18..25-10-11
+419,368,,,,,-4545,,,,,,F2 align_htf2880,4-tick slippage stress,FOLD4 25-10-11..26-02-03
+464,397,,,,,2875,,,,,,F2 align_htf2880,4-tick slippage stress,FOLD5 26-02-03..26-05-29
+389,321,,,,,1632,,,,,,F2 align_htf2880,4-tick slippage stress,FOLD6 26-05-29..26-09-21
+2456,2121,597.0,262.0,22954.0,27301.0,4347,1.17,1.24,4977.0,4318.0,0.792,F1+F2 together,4-tick slippage stress,FULL Nov24-Sep26
+1476,1297,355.0,176.0,13332.0,14934.0,1603,1.17,1.22,4977.0,3246.0,0.652,F1+F2 together,4-tick slippage stress,train <2026
+980,824,242.0,86.0,9623.0,12367.0,2745,1.17,1.28,4155.0,2104.0,0.805,F1+F2 together,4-tick slippage stress,2026 YTD
+620,513,164.0,57.0,5959.0,8231.0,2273,1.17,1.29,4155.0,2098.0,0.846,F1+F2 together,4-tick slippage stress,last 6m (Apr-Sep26)
+419,346,110.0,37.0,3020.0,5126.0,2106,1.12,1.26,4155.0,2098.0,0.92,F1+F2 together,4-tick slippage stress,LAST 4m (May22-Sep21)
+323,268,86.0,31.0,1860.0,4334.0,2474,1.1,1.3,4155.0,1854.0,0.976,F1+F2 together,4-tick slippage stress,LAST 3m (Jun22-Sep21)
+206,179,52.0,25.0,589.0,2278.0,1689,1.05,1.26,4155.0,1854.0,0.942,F1+F2 together,4-tick slippage stress,last 2m (Jul22-Sep21)
+171,153,40.0,22.0,4106.0,3651.0,-455,1.4,1.4,1662.0,1959.0,0.383,F1+F2 together,4-tick slippage stress,Q4-24 (Nov-Dec)
+336,304,76.0,44.0,1112.0,2833.0,1721,1.06,1.17,4977.0,2667.0,0.836,F1+F2 together,4-tick slippage stress,Q1-25
+320,287,65.0,32.0,659.0,2673.0,2014,1.03,1.16,3423.0,2094.0,0.856,F1+F2 together,4-tick slippage stress,Q2-25
+319,268,89.0,38.0,5156.0,5625.0,469,1.39,1.56,1214.0,1529.0,0.602,F1+F2 together,4-tick slippage stress,Q3-25
+330,285,85.0,40.0,2298.0,152.0,-2146,1.13,1.01,3310.0,3246.0,0.2,F1+F2 together,4-tick slippage stress,Q4-25
+360,311,78.0,29.0,3664.0,4136.0,472,1.18,1.26,3813.0,2104.0,0.595,F1+F2 together,4-tick slippage stress,Q1-26
+337,277,86.0,26.0,6021.0,6294.0,274,1.31,1.4,1921.0,2098.0,0.566,F1+F2 together,4-tick slippage stress,Q2-26
+283,236,78.0,31.0,-62.0,1937.0,1999,1.0,1.15,4155.0,1854.0,0.953,F1+F2 together,4-tick slippage stress,Q3-26 (Jul-Sep21)
+361,321,,,,,-217,,,,,,F1+F2 together,4-tick slippage stress,FOLD1 24-11-01..25-02-23
+422,382,,,,,3579,,,,,,F1+F2 together,4-tick slippage stress,FOLD2 25-02-23..25-06-18
+401,343,,,,,-261,,,,,,F1+F2 together,4-tick slippage stress,FOLD3 25-06-18..25-10-11
+419,366,,,,,-3967,,,,,,F1+F2 together,4-tick slippage stress,FOLD4 25-10-11..26-02-03
+464,392,,,,,3219,,,,,,F1+F2 together,4-tick slippage stress,FOLD5 26-02-03..26-05-29
+389,317,,,,,1993,,,,,,F1+F2 together,4-tick slippage stress,FOLD6 26-05-29..26-09-21
+105,105,0.0,0.0,1447.0,1447.0,0,1.24,1.24,1072.0,1072.0,0.0,F1 off_18_0930_trend_short,4-tick slippage stress,UNUSED Oct-2024 (Sep30-Oct31)
+105,91,26.0,12.0,1447.0,711.0,-736,1.24,1.13,1072.0,1177.0,0.265,F2 align_htf2880,4-tick slippage stress,UNUSED Oct-2024 (Sep30-Oct31)
+105,91,26.0,12.0,1447.0,711.0,-736,1.24,1.13,1072.0,1177.0,0.265,F1+F2 together,4-tick slippage stress,UNUSED Oct-2024 (Sep30-Oct31)

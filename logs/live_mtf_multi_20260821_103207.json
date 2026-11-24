@@ -1,0 +1,41 @@
+[
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_18f7916d4f",
+    "direction": "long",
+    "entry": 29286.0,
+    "exit": 29275.5,
+    "sl": 29275.5,
+    "tp": 29296.5,
+    "pnl": -21.0,
+    "reason": "BROKER_BRACKET",
+    "entry_time": "2026-08-21T14:35:07.914726+00:00",
+    "exit_time": "2026-08-21T14:35:58.992283+00:00"
+  },
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_bab896d682",
+    "direction": "long",
+    "entry": 29273.0,
+    "exit": 29283.5,
+    "sl": 29262.5,
+    "tp": 29283.5,
+    "pnl": 21.0,
+    "reason": "BROKER_BRACKET",
+    "entry_time": "2026-08-21T14:36:44.146174+00:00",
+    "exit_time": "2026-08-21T14:37:17.911240+00:00"
+  },
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_06fa470633",
+    "direction": "long",
+    "entry": 29281.25,
+    "exit": 29293.0,
+    "sl": 29269.75,
+    "tp": 29292.75,
+    "pnl": 23.5,
+    "reason": "BROKER_BRACKET",
+    "entry_time": "2026-08-21T14:39:15.468678+00:00",
+    "exit_time": "2026-08-21T14:39:51.464256+00:00"
+  }
+]

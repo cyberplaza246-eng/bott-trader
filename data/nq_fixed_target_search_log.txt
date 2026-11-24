@@ -1,0 +1,73 @@
+ORB {'rmin': 15, 'tp': 10, 'slmode': 'range', 'atrf': 0} DEV 0.531 -32782 306 VAL 0.344 -16388
+ORB {'rmin': 15, 'tp': 10, 'slmode': 'range', 'atrf': 1} DEV 0.324 -22864 112 VAL 0.338 -14927
+ORB {'rmin': 15, 'tp': 10, 'slmode': '12', 'atrf': 0} DEV 0.232 -45197 306 VAL 0.104 -16758
+ORB {'rmin': 15, 'tp': 10, 'slmode': '12', 'atrf': 1} DEV 0.131 -20824 112 VAL 0.119 -14512
+ORB {'rmin': 15, 'tp': 20, 'slmode': 'range', 'atrf': 0} DEV 0.72 -24642 306 VAL 0.454 -16632
+ORB {'rmin': 15, 'tp': 20, 'slmode': 'range', 'atrf': 1} DEV 0.473 -20709 112 VAL 0.472 -14162
+ORB {'rmin': 15, 'tp': 20, 'slmode': '12', 'atrf': 0} DEV 0.355 -40227 306 VAL 0.12 -17338
+ORB {'rmin': 15, 'tp': 20, 'slmode': '12', 'atrf': 1} DEV 0.245 -18269 112 VAL 0.136 -15092
+ORB {'rmin': 15, 'tp': 40, 'slmode': 'range', 'atrf': 0} DEV 0.882 -13067 306 VAL 0.608 -13872
+ORB {'rmin': 15, 'tp': 40, 'slmode': 'range', 'atrf': 1} DEV 0.623 -17364 112 VAL 0.602 -12602
+ORB {'rmin': 15, 'tp': 40, 'slmode': '12', 'atrf': 0} DEV 0.501 -32897 306 VAL 0.157 -17028
+ORB {'rmin': 15, 'tp': 40, 'slmode': '12', 'atrf': 1} DEV 0.313 -17494 112 VAL 0.177 -14782
+ORB {'rmin': 30, 'tp': 10, 'slmode': 'range', 'atrf': 0} DEV 0.581 -27538 304 VAL 0.437 -12362
+ORB {'rmin': 30, 'tp': 10, 'slmode': 'range', 'atrf': 1} DEV 0.402 -18034 112 VAL 0.418 -11707
+ORB {'rmin': 30, 'tp': 10, 'slmode': '12', 'atrf': 0} DEV 0.201 -48258 304 VAL 0.129 -15868
+ORB {'rmin': 30, 'tp': 10, 'slmode': '12', 'atrf': 1} DEV 0.103 -22159 112 VAL 0.119 -14512
+ORB {'rmin': 30, 'tp': 20, 'slmode': 'range', 'atrf': 0} DEV 0.717 -24773 304 VAL 0.454 -16632
+ORB {'rmin': 30, 'tp': 20, 'slmode': 'range', 'atrf': 1} DEV 0.491 -19704 112 VAL 0.447 -15167
+ORB {'rmin': 30, 'tp': 20, 'slmode': '12', 'atrf': 0} DEV 0.29 -45533 304 VAL 0.12 -17338
+ORB {'rmin': 30, 'tp': 20, 'slmode': '12', 'atrf': 1} DEV 0.155 -21494 112 VAL 0.112 -15737
+ORB {'rmin': 30, 'tp': 40, 'slmode': 'range', 'atrf': 0} DEV 0.829 -19178 304 VAL 0.544 -16682
+ORB {'rmin': 30, 'tp': 40, 'slmode': 'range', 'atrf': 1} DEV 0.597 -18769 112 VAL 0.566 -14007
+ORB {'rmin': 30, 'tp': 40, 'slmode': '12', 'atrf': 0} DEV 0.483 -34048 304 VAL 0.157 -17028
+ORB {'rmin': 30, 'tp': 40, 'slmode': '12', 'atrf': 1} DEV 0.245 -19584 112 VAL 0.131 -15827
+SWEEP {'tp': 10, 'sl_cap': 15, 'atrf': 0} DEV 0.64 -9876 188 VAL 0.694 -2763
+SWEEP {'tp': 10, 'sl_cap': 15, 'atrf': 1} DEV 0.431 -6458 65 VAL 0.727 -2206
+SWEEP {'tp': 10, 'sl_cap': 25, 'atrf': 0} DEV 0.694 -9491 188 VAL 0.636 -4138
+SWEEP {'tp': 10, 'sl_cap': 25, 'atrf': 1} DEV 0.529 -5928 65 VAL 0.67 -3371
+SWEEP {'tp': 20, 'sl_cap': 15, 'atrf': 0} DEV 0.843 -5141 188 VAL 1.011 112
+SWEEP {'tp': 20, 'sl_cap': 15, 'atrf': 1} DEV 0.497 -6792 65 VAL 1.028 269
+SWEEP {'tp': 20, 'sl_cap': 25, 'atrf': 0} DEV 0.87 -5221 188 VAL 0.861 -1983
+SWEEP {'tp': 20, 'sl_cap': 25, 'atrf': 1} DEV 0.652 -5482 65 VAL 0.877 -1616
+SWEEP {'tp': 40, 'sl_cap': 15, 'atrf': 0} DEV 0.95 -1966 188 VAL 1.169 2182
+SWEEP {'tp': 40, 'sl_cap': 15, 'atrf': 1} DEV 0.705 -4322 65 VAL 1.128 1539
+SWEEP {'tp': 40, 'sl_cap': 25, 'atrf': 0} DEV 1.051 2489 188 VAL 1.018 317
+SWEEP {'tp': 40, 'sl_cap': 25, 'atrf': 1} DEV 0.74 -5032 65 VAL 0.993 -116
+VWAP2 {'tp': 10, 'sl': 10, 'atrf': 0} DEV 0.238 -69642 547 VAL 0.172 -21691
+VWAP2 {'tp': 10, 'sl': 10, 'atrf': 1} DEV 0.146 -33088 214 VAL 0.146 -20574
+VWAP2 {'tp': 10, 'sl': 20, 'atrf': 0} DEV 0.329 -87620 539 VAL 0.251 -29128
+VWAP2 {'tp': 10, 'sl': 20, 'atrf': 1} DEV 0.279 -39838 214 VAL 0.244 -26615
+VWAP2 {'tp': 20, 'sl': 10, 'atrf': 0} DEV 0.343 -63776 547 VAL 0.312 -18301
+VWAP2 {'tp': 20, 'sl': 10, 'atrf': 1} DEV 0.227 -30918 214 VAL 0.258 -18184
+VWAP2 {'tp': 20, 'sl': 20, 'atrf': 0} DEV 0.456 -80938 537 VAL 0.394 -25568
+VWAP2 {'tp': 20, 'sl': 20, 'atrf': 1} DEV 0.398 -37057 213 VAL 0.37 -24255
+FIRSTPB {'thr': 20, 'tp': 10, 'sl': 8, 'atrf': 0} DEV 0.524 -13305 240 VAL 0.438 -4760
+FIRSTPB {'thr': 20, 'tp': 10, 'sl': 8, 'atrf': 1} DEV 0.441 -6443 94 VAL 0.401 -4669
+FIRSTPB {'thr': 20, 'tp': 10, 'sl': 15, 'atrf': 0} DEV 0.572 -16710 240 VAL 0.458 -6710
+FIRSTPB {'thr': 20, 'tp': 10, 'sl': 15, 'atrf': 1} DEV 0.489 -8388 94 VAL 0.427 -6564
+FIRSTPB {'thr': 20, 'tp': 20, 'sl': 8, 'atrf': 0} DEV 0.778 -6780 240 VAL 0.648 -3220
+FIRSTPB {'thr': 20, 'tp': 20, 'sl': 8, 'atrf': 1} DEV 0.631 -4633 94 VAL 0.56 -3729
+FIRSTPB {'thr': 20, 'tp': 20, 'sl': 15, 'atrf': 0} DEV 0.74 -12240 240 VAL 0.682 -4436
+FIRSTPB {'thr': 20, 'tp': 20, 'sl': 15, 'atrf': 1} DEV 0.629 -7238 94 VAL 0.655 -4384
+FIRSTPB {'thr': 40, 'tp': 10, 'sl': 8, 'atrf': 0} DEV 0.523 -10500 189 VAL 0.476 -4082
+FIRSTPB {'thr': 40, 'tp': 10, 'sl': 8, 'atrf': 1} DEV 0.486 -4970 81 VAL 0.439 -3991
+FIRSTPB {'thr': 40, 'tp': 10, 'sl': 15, 'atrf': 0} DEV 0.539 -14560 189 VAL 0.509 -5472
+FIRSTPB {'thr': 40, 'tp': 10, 'sl': 15, 'atrf': 1} DEV 0.481 -7394 81 VAL 0.479 -5326
+FIRSTPB {'thr': 40, 'tp': 20, 'sl': 8, 'atrf': 0} DEV 0.772 -5480 189 VAL 0.7 -2542
+FIRSTPB {'thr': 40, 'tp': 20, 'sl': 8, 'atrf': 1} DEV 0.765 -2430 81 VAL 0.609 -3051
+FIRSTPB {'thr': 40, 'tp': 20, 'sl': 15, 'atrf': 0} DEV 0.686 -11966 189 VAL 0.748 -3198
+FIRSTPB {'thr': 40, 'tp': 20, 'sl': 15, 'atrf': 1} DEV 0.713 -4624 81 VAL 0.725 -3146
+SIXPM {'tp': 10, 'sl': 20, 'hold': 3} DEV 0.639 -18325 290 VAL 0.563 -6978
+SIXPM {'tp': 10, 'sl': 20, 'hold': 15} DEV 0.639 -18325 290 VAL 0.563 -6978
+SIXPM {'tp': 10, 'sl': 40, 'hold': 3} DEV 0.693 -18275 290 VAL 0.548 -9348
+SIXPM {'tp': 10, 'sl': 40, 'hold': 15} DEV 0.705 -17675 290 VAL 0.519 -10518
+SIXPM {'tp': 20, 'sl': 20, 'hold': 3} DEV 0.849 -9405 290 VAL 0.592 -8732
+SIXPM {'tp': 20, 'sl': 20, 'hold': 15} DEV 0.889 -6860 290 VAL 0.583 -9048
+SIXPM {'tp': 20, 'sl': 40, 'hold': 3} DEV 0.931 -5230 290 VAL 0.633 -10562
+SIXPM {'tp': 20, 'sl': 40, 'hold': 15} DEV 0.943 -4600 290 VAL 0.597 -12408
+SIXPM {'tp': 40, 'sl': 20, 'hold': 3} DEV 0.969 -2250 290 VAL 0.662 -8608
+SIXPM {'tp': 40, 'sl': 20, 'hold': 15} DEV 1.07 5360 290 VAL 0.637 -9502
+SIXPM {'tp': 40, 'sl': 40, 'hold': 3} DEV 1.041 3865 290 VAL 0.715 -10508
+SIXPM {'tp': 40, 'sl': 40, 'hold': 15} DEV 1.143 15475 290 VAL 0.672 -13268
+variants 72 finalists 0

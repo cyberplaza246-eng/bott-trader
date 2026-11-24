@@ -1,0 +1,43 @@
+{
+  "status": "FROZEN_V2 — search winner 2026-08-22",
+  "stage": "2_forward_validation",
+  "long": {
+    "stack": "15_5_1_bullish",
+    "trigger": "1m_pullback (quiet bar after micro dip)",
+    "windows": "w4_no_noon — 9:35, 10:15, 11:00, 13:30 (skips 12:00 noon slot)",
+    "max_day": null,
+    "structure_filter": "none (pullback is the quality gate)"
+  },
+  "short": {
+    "stack": "15_5_1_bearish",
+    "structure": "15m LH_LL",
+    "trigger": "1m_pullback",
+    "windows": "w6_all — all six RTH slots",
+    "max_day": null,
+    "target": "1R"
+  },
+  "combined": "one_position unlimited re-entry when flat",
+  "research_oos_jun_aug": {
+    "trades": 144,
+    "pf": 1.33,
+    "net": 872,
+    "long_oos": 75,
+    "short_oos": 69,
+    "max_trades_per_day": 7,
+    "avg_active_day": 3.05
+  },
+  "forward_validation": {
+    "forward_start": "2026-09-01",
+    "min_trades_good": 30,
+    "max_trades_good": 50,
+    "extension_trades": 75,
+    "good": { "pf_min": 1.2, "net_positive": true },
+    "borderline": { "pf_min": 1.0, "pf_max": 1.19 },
+    "fail": { "pf_below": 1.0 }
+  },
+  "rejected": {
+    "long_w6_quiet": "OOS PF 0.95 -294",
+    "long_w6_all_windows": "adds low-quality longs",
+    "long_quiet_only_afternoon": "weak without pullback"
+  }
+}

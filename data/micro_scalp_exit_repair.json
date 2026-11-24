@@ -1,0 +1,117 @@
+{
+  "verdict": "FAIL",
+  "entry_invalid": true,
+  "baseline": {
+    "is": {
+      "n": 7425,
+      "pf": 0.686,
+      "net": -21700.97,
+      "wr": 44.9,
+      "dd": 21763.13,
+      "exp": -2.92,
+      "avg_win": 14.24,
+      "avg_loss": -16.93,
+      "med_hold": 2
+    },
+    "oos": {
+      "n": 1020,
+      "pf": 0.714,
+      "net": -3081.69,
+      "wr": 47.5,
+      "dd": 3278.41,
+      "exp": -3.02,
+      "avg_win": 15.91,
+      "avg_loss": -20.12,
+      "med_hold": 2
+    },
+    "jj": {
+      "n": 507,
+      "pf": 0.716,
+      "net": -1670.36,
+      "wr": 48.1,
+      "dd": 1804.5,
+      "exp": -3.29,
+      "avg_win": 17.26,
+      "avg_loss": -22.37,
+      "med_hold": 1
+    },
+    "aug": {
+      "n": 311,
+      "pf": 0.698,
+      "net": -938.27,
+      "wr": 46.0,
+      "dd": 1008.54,
+      "exp": -3.02,
+      "avg_win": 15.19,
+      "avg_loss": -18.51,
+      "med_hold": 2
+    },
+    "stress_oos_exp": {
+      "1x": -3.02,
+      "2x": -5.21,
+      "3x": -7.37
+    },
+    "years": {
+      "2024q4": -2228.11,
+      "2025h1": -6310.45,
+      "2025h2": -7909.79,
+      "2026pre": -5252.63,
+      "2026oos": -3081.69
+    }
+  },
+  "repaired": null,
+  "best_oos_any": {
+    "name": "be4_sl6_tp12_m7",
+    "oos": {
+      "n": 1068,
+      "pf": 0.887,
+      "net": -647.1,
+      "wr": 21.4,
+      "dd": 991.6,
+      "exp": -0.61,
+      "avg_win": 22.12,
+      "avg_loss": -6.81,
+      "med_hold": 1
+    },
+    "is": {
+      "n": 7416,
+      "pf": 0.823,
+      "net": -7855.16,
+      "wr": 23.6,
+      "dd": 8809.22,
+      "exp": -1.06,
+      "avg_win": 20.88,
+      "avg_loss": -7.84,
+      "med_hold": 2
+    },
+    "wf_t": -1.05
+  },
+  "mfe_mae": {
+    "mfe_median": 14.75,
+    "mae_median": 16.0,
+    "reach_pct": {
+      "4": 83.5,
+      "6": 76.6,
+      "8": 70.0,
+      "10": 63.7,
+      "12": 57.8,
+      "15": 50.0,
+      "20": 39.1
+    },
+    "loser_reach_before_stop": {
+      "4": 69.0,
+      "6": 59.0,
+      "8": 51.7,
+      "10": 45.5,
+      "12": 41.4,
+      "15": 36.0,
+      "20": 28.1
+    },
+    "winner_mfe_median": 29.38,
+    "loser_mfe_median": 8.5
+  },
+  "grid_size": 43,
+  "pass_hard": 0,
+  "plateau": 0,
+  "note": "Same-bar: stop before target. Sep report-only. Entry frozen."
+}

@@ -1,0 +1,197 @@
+{
+"og_sweeps_only": {
+"fb_mode": "off",
+"_save": 1
+},
+"og_fb_on": {
+"fb_mode": "on",
+"_save": 1
+},
+"fb_only": {
+"fb_mode": "only",
+"_save": 1
+},
+"sw_day": {
+"fb_mode": "off",
+"only_session": "day"
+},
+"sw_ovn": {
+"fb_mode": "off",
+"only_session": "overnight"
+},
+"sw_lock_off": {
+"fb_mode": "off",
+"lock": false
+},
+"sw_lock_tight": {
+"fb_mode": "off",
+"lock_act": 60.0,
+"lock_keep": 20.0,
+"lock_trail_start": 100.0
+},
+"sw_lock_wide": {
+"fb_mode": "off",
+"lock_act": 200.0,
+"lock_keep": 60.0,
+"lock_trail_start": 300.0
+},
+"sw_pos1": {
+"fb_mode": "off",
+"max_pos": 1
+},
+"sw_pos2": {
+"fb_mode": "off",
+"max_pos": 2
+},
+"sw_size1": {
+"fb_mode": "off",
+"size_mode": 1,
+"max_contracts": 1
+},
+"sw_tp_r1": {
+"fb_mode": "off",
+"tp_mode": "r",
+"tp_r": 1.0
+},
+"sw_tp_r15": {
+"fb_mode": "off",
+"tp_mode": "r",
+"tp_r": 1.5
+},
+"sw_tp_r2": {
+"fb_mode": "off",
+"tp_mode": "r",
+"tp_r": 2.0
+},
+"sw_long_only": {
+"fb_mode": "off",
+"long_only": true
+},
+"sw_short_only": {
+"fb_mode": "off",
+"short_only": true
+},
+"sw_no_sun": {
+"fb_mode": "off",
+"skip_sunday": true
+},
+"sw_sl08": {
+"fb_mode": "off",
+"sl_scale": 0.8
+},
+"sw_sl12": {
+"fb_mode": "off",
+"sl_scale": 1.25
+},
+"sw_nolimits": {
+"fb_mode": "off",
+"session_limits": false
+},
+"fb_day": {
+"fb_mode": "on",
+"only_session": "day"
+},
+"fb_ovn": {
+"fb_mode": "on",
+"only_session": "overnight"
+},
+"fb_lock_off": {
+"fb_mode": "on",
+"lock": false
+},
+"fb_lock_tight": {
+"fb_mode": "on",
+"lock_act": 60.0,
+"lock_keep": 20.0,
+"lock_trail_start": 100.0
+},
+"fb_lock_wide": {
+"fb_mode": "on",
+"lock_act": 200.0,
+"lock_keep": 60.0,
+"lock_trail_start": 300.0
+},
+"fb_pos1": {
+"fb_mode": "on",
+"max_pos": 1
+},
+"fb_pos2": {
+"fb_mode": "on",
+"max_pos": 2
+},
+"fb_size1": {
+"fb_mode": "on",
+"size_mode": 1,
+"max_contracts": 1
+},
+"fb_tp_r1": {
+"fb_mode": "on",
+"tp_mode": "r",
+"tp_r": 1.0
+},
+"fb_tp_r15": {
+"fb_mode": "on",
+"tp_mode": "r",
+"tp_r": 1.5
+},
+"fb_tp_r2": {
+"fb_mode": "on",
+"tp_mode": "r",
+"tp_r": 2.0
+},
+"fb_long_only": {
+"fb_mode": "on",
+"long_only": true
+},
+"fb_short_only": {
+"fb_mode": "on",
+"short_only": true
+},
+"fb_no_sun": {
+"fb_mode": "on",
+"skip_sunday": true
+},
+"fb_sl08": {
+"fb_mode": "on",
+"sl_scale": 0.8
+},
+"fb_sl12": {
+"fb_mode": "on",
+"sl_scale": 1.25
+},
+"fb_nolimits": {
+"fb_mode": "on",
+"session_limits": false
+},
+"fb_reg_trending": {
+"fb_mode": "on",
+"fb_regimes": [
+"trending"
+]
+},
+"fb_reg_ranging": {
+"fb_mode": "on",
+"fb_regimes": [
+"ranging"
+]
+},
+"fb_reg_trending_ranging": {
+"fb_mode": "on",
+"fb_regimes": [
+"trending",
+"ranging"
+]
+},
+"fb_conf_hi": {
+"fb_mode": "on",
+"fb_conf": 0.66
+},
+"fb_stress_slip2": {
+"fb_mode": "on",
+"slip_ticks": 2
+},
+"sw_stress_slip2": {
+"fb_mode": "off",
+"slip_ticks": 2
+}
+}

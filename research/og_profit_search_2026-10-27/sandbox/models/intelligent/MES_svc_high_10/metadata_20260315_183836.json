@@ -1,0 +1,49 @@
+{
+  "model_name": "MES_svc_high_10",
+  "model_type": "svc",
+  "timestamp": "20260315_183836",
+  "model_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/model_20260315_183836.pkl",
+  "scaler_path": "/workspaces/Ai-bot/src/ai/intelligent_trading/../../../models/intelligent/MES_svc_high_10/scaler_20260315_183836.pkl",
+  "config": {
+    "C": 1.0,
+    "kernel": "rbf",
+    "gamma": "scale",
+    "probability": true,
+    "is_scale": true,
+    "max_iter": 10000
+  },
+  "metrics": {
+    "accuracy": 0.9983753046303818,
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "auc": 1.0
+  },
+  "feature_names": [
+    "close_SMA_5",
+    "close_SMA_10",
+    "close_SMA_20",
+    "close_SMA_50",
+    "close_EMA_5",
+    "close_EMA_10",
+    "close_EMA_20",
+    "close_EMA_50",
+    "close_RSI_5",
+    "close_RSI_10",
+    "close_RSI_20",
+    "close_RSI_50",
+    "close_MACD_5",
+    "close_MACD_10",
+    "close_MACD_20",
+    "close_MACD_50",
+    "close_skew_10",
+    "close_kurtosis_10",
+    "close_slope_10",
+    "close_skew_20",
+    "close_kurtosis_20",
+    "close_slope_20",
+    "close_skew_50",
+    "close_kurtosis_50",
+    "close_slope_50"
+  ]
+}

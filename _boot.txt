@@ -1,0 +1,67 @@
+✅ Strategy Config Loaded - Mode: live, Scalping 1M+5M, Pairs: ['MNQ']
+2026-10-05 21:40:11 - TradingBot - WARNING - ⚠️  TensorFlow not installed — LSTM model disabled. Install with: pip install tensorflow>=2.13.0 (requires Python ≤3.12)
+2026-10-05 21:40:13 - TradingBot - WARNING - ⚠️ transformers not installed — falling back to keyword sentiment
+2026-10-05 21:40:15 - TradingBot - INFO - Rithmic Lucid plants: ticker + order + pnl + history (1m bars for day hybrid / paper seed)
+2026-10-05 21:40:18 - TradingBot - INFO - Rithmic accounts (1): ['LFE050-1LDH42L4-TEST013 (LT-Z8WS597N)']
+2026-10-05 21:40:18 - TradingBot - INFO - Rithmic trade routes (5): ['CDE: simulator default=True status=UP', 'NYMEX: simulator default=True status=UP', 'CBOT: simulator default=True status=UP', 'COMEX: simulator default=True status=UP', 'CME: simulator default=True status=UP']
+2026-10-05 21:40:18 - TradingBot - WARNING - RITHMIC_ACCOUNT_ID='LFE050-IBWS3708-TEST012' not in broker list ['LFE050-1LDH42L4-TEST013'] — using first matching demo/sim account instead
+2026-10-05 21:40:18 - TradingBot - INFO - Rithmic execution: account_id=LFE050-1LDH42L4-TEST013 trade_route(CME)=simulator live_mode=False
+2026-10-05 21:40:18 - TradingBot - INFO - Rithmic connector initialized — system=LucidTrading, gateway=wss://rprotocol.rithmic.com:443
+✅ Rithmic Connected!
+   System: LucidTrading
+   Balance: $48,452.00
+   Equity: $48,533.00
+   Mode: ⚠️  LIVE - Real money at risk!
+
+🧠 Initializing AI Ensemble (ML + Advanced Strategies)...
+2026-10-05 21:40:18 - TradingBot - WARNING - TA-Lib not available, using pandas_ta fallback
+2026-10-05 21:40:18 - TradingBot - WARNING - LightGBM not available for GradientBoostClassifier
+2026-10-05 21:40:18 - TradingBot - INFO - Initialized 2 classifiers: ['gb', 'svc']
+2026-10-05 21:40:18 - TradingBot - WARNING - TA-Lib not available, using pandas_ta fallback
+2026-10-05 21:40:18 - TradingBot - INFO - 🧠 Intelligent Trader initialized
+2026-10-05 21:40:18 - TradingBot - INFO - 📚 Found 12 pre-trained models
+2026-10-05 21:40:18 - TradingBot - INFO - 🧠 IntelligentTrader: ML classifiers active (GB, SVC, NN)
+2026-10-05 21:40:18 - TradingBot - INFO - 📈 AdvancedStrategies: 8 strategies active (FibMACD, StochRSI, HA, etc)
+2026-10-05 21:40:18 - TradingBot - INFO - 🎯 DynamicSLTP: Trailing stops + swing-based SL/TP active
+2026-10-05 21:40:18 - TradingBot - INFO - LSTM predictor running in stub mode (no TensorFlow)
+2026-10-05 21:40:18 - TradingBot - INFO - ⚠️ NLP sentiment: keyword fallback (context only)
+2026-10-05 21:40:18 - TradingBot - INFO - 🛠️ Applied risk overrides from data/risk_overrides.json: SL_ATR_MULT=1.200, SL_MIN_ATR_MULT=1.000, SL_MAX_ATR_MULT=2.000, TP_BASE_RATIO=2.500, TP_EXPANDING=2.500, TP_CONTRACTING=2.000, TP_ASIAN_SESSION=2.000, TP_LONDON_OPEN=2.500, TP_NY_OVERLAP=2.500, TP_QUIET_HOURS=2.000, ENTRY_THRESHOLD=0.640, PRICE_DRIFT_TOLERANCE_ATR=2.500, SL_MNQ=1.30, SL_NQ=1.20, SL_MES=1.20, AUTO_LEARNING=ON
+2026-10-05 21:40:18 - TradingBot - INFO - 🔪 Scalping Analyzer initialized (ATR-adaptive, 5m) [QUICK_WINS mode]
+2026-10-05 21:40:18 - TradingBot - INFO - 📚 Loaded learning data: 126 past trades | threshold=0.64 | regime=trending | drawdown_protection=ON
+2026-10-05 21:40:18 - TradingBot - INFO - 🧠 ML Trade Scorer: waiting (0/50 trades)
+2026-10-05 21:40:18 - TradingBot - INFO - 🤖 RL Agent: Q-table mode (no PyTorch)
+2026-10-05 21:40:18 - TradingBot - INFO - RL agent loaded: ε=0.050, steps=29896, trades=2711
+2026-10-05 21:40:18 - TradingBot - INFO - 🎯 Sweep-Gated Entry System (RayAlgo v3 + Intelligent ML)
+2026-10-05 21:40:18 - TradingBot - INFO -    Gate:    LiquiditySweep (4-layer: Bias → Sweep → MSS → Entry)
+2026-10-05 21:40:18 - TradingBot - INFO -    Confirm: EMA Crossover + Technical (boost/reduce only)
+2026-10-05 21:40:18 - TradingBot - INFO -    ML:      IntelligentTrader (active)
+2026-10-05 21:40:18 - TradingBot - INFO -    Strats:  AdvancedStrategies (active)
+2026-10-05 21:40:18 - TradingBot - INFO -    SL/TP:   DynamicSLTP (active)
+2026-10-05 21:40:18 - TradingBot - INFO -    Context: 8 models for learning (no entry influence)
+✅ AI Ensemble ready!
+
+======================================================================
+  LIVE TRADING - Rithmic + Full AI Ensemble
+======================================================================
+Symbols:    MNQ
+Contracts:  1
+Mode:       ⚠️ LIVE
+Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)
+Features:   Dynamic SL/TP, Trailing Stops, 8 Confirmation Models
+Risk:       Max $200.0 daily loss | Max concurrent 2
+======================================================================
+
+⚠️  LIVE MODE - Starting immediately (--yes flag)
+
+🚀 Starting trading loop...
+
+2026-10-05 21:40:18 - TradingBot - INFO - ♻️ Loss pattern decay: removed 3 stale patterns
+
+📅 New trading day: 2026-10-05
+2026-10-05 21:40:19 - TradingBot - INFO - 📊 MNQ reusing caller 5M frame: 100 rows
+2026-10-05 21:40:19 - TradingBot - INFO - 📊 MNQ detect_regime: df_5m=100, ADX=31.136010894938114, swings=17, bias=BUY
+2026-10-05 21:40:19 - TradingBot - INFO - 📊 MNQ regime=range, bias=BUY, ADX=31.1, swings=17
+2026-10-05 21:40:19 - TradingBot - INFO - ⏭️ MNQ NO SWEEP: No sweep of 1M swing levels in last 30 candles (checked 15 candidates, nearest_gap=15.00000)
+2026-10-05 21:40:19 - TradingBot - INFO - [EMA] get_signal called
+2026-10-05 21:40:19 - TradingBot - INFO - [EMA] Returning: {'signal': 'BUY', 'confidence': 0.42, 'reason': 'Bullish EMA alignment (spread 0.00038) | Price > EMA200 — with trend | ATR contracting (4 falls) — confidence penalised ×0.7'}
+2026-10-05 21:40:19 - TradingBot - WARNING - NewsAPI key not configured, skipping news sentiment

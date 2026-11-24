@@ -1,0 +1,281 @@
+{
+  "generated_at": "2026-08-18T23:19:16.369236+00:00",
+  "csv": "C:\\Users\\shawa\\Projects\\bott-trader\\data\\MNQ_1m.csv",
+  "data_note": "real 1m merged: MNQ_1m.csv, MNQ_1m_real_window.csv, MNQ_1m_august_databento.csv, MNQ_1m_august.csv",
+  "range": [
+    "2025-12-29 00:00:00+00:00",
+    "2026-08-18 15:17:00+00:00"
+  ],
+  "oos_start": "2026-06-01",
+  "live_note": "Research only. Does not change the live 1R bot.",
+  "day": [
+    {
+      "id": "live_1r",
+      "label": "Current live: take 1R",
+      "is_n": 83,
+      "is_pf": 1.22,
+      "is_pnl": 921.3,
+      "is_wr": 56.6,
+      "oos_n": 57,
+      "oos_pf": 0.95,
+      "oos_pnl": -174.7,
+      "oos_wr": 50.9,
+      "exits": {
+        "SL": 61,
+        "TP": 71,
+        "FLAT": 8
+      }
+    },
+    {
+      "id": "hold",
+      "label": "Hold to flatten (no TP)",
+      "is_n": 83,
+      "is_pf": 1.0,
+      "is_pnl": -24.4,
+      "is_wr": 38.6,
+      "oos_n": 57,
+      "oos_pf": 0.52,
+      "oos_pnl": -2692.2,
+      "oos_wr": 19.3,
+      "exits": {
+        "SL": 93,
+        "FLAT": 47
+      }
+    },
+    {
+      "id": "2r",
+      "label": "Take 2R",
+      "is_n": 83,
+      "is_pf": 1.04,
+      "is_pnl": 255.5,
+      "is_wr": 41.0,
+      "oos_n": 57,
+      "oos_pf": 0.68,
+      "oos_pnl": -1595.7,
+      "oos_wr": 28.1,
+      "exits": {
+        "SL": 86,
+        "TP": 36,
+        "FLAT": 18
+      }
+    },
+    {
+      "id": "resist_15m",
+      "label": "TP at last finished 15m high/low (min 1R)",
+      "is_n": 83,
+      "is_pf": 1.24,
+      "is_pnl": 1018.3,
+      "is_wr": 56.6,
+      "oos_n": 57,
+      "oos_pf": 0.87,
+      "oos_pnl": -493.2,
+      "oos_wr": 45.6,
+      "exits": {
+        "SL": 64,
+        "TP": 68,
+        "FLAT": 8
+      }
+    },
+    {
+      "id": "resist_rth",
+      "label": "TP at prior RTH high/low if in front, else 1R",
+      "is_n": 83,
+      "is_pf": 1.29,
+      "is_pnl": 1263.7,
+      "is_wr": 54.2,
+      "oos_n": 57,
+      "oos_pf": 0.62,
+      "oos_pnl": -1809.2,
+      "oos_wr": 33.3,
+      "exits": {
+        "SL": 73,
+        "TP": 56,
+        "FLAT": 11
+      }
+    },
+    {
+      "id": "trail_after_1r",
+      "label": "After 1R, trail 0.5R; flatten if still open",
+      "is_n": 83,
+      "is_pf": 0.94,
+      "is_pnl": -233.8,
+      "is_wr": 56.6,
+      "oos_n": 57,
+      "oos_pf": 0.8,
+      "oos_pnl": -673.7,
+      "oos_wr": 52.6,
+      "exits": {
+        "SL": 132,
+        "FLAT": 8
+      }
+    },
+    {
+      "id": "be_after_1r",
+      "label": "After 1R, stop to break-even; flatten if still open",
+      "is_n": 83,
+      "is_pf": 0.76,
+      "is_pnl": -1009.4,
+      "is_wr": 20.5,
+      "oos_n": 57,
+      "oos_pf": 0.74,
+      "oos_pnl": -880.7,
+      "oos_wr": 14.0,
+      "exits": {
+        "SL": 112,
+        "FLAT": 28
+      }
+    },
+    {
+      "id": "run_past_resist",
+      "label": "15m target; if price pushes 2pts past, trail 0.5R",
+      "is_n": 83,
+      "is_pf": 1.05,
+      "is_pnl": 222.6,
+      "is_wr": 56.6,
+      "oos_n": 57,
+      "oos_pf": 0.82,
+      "oos_pnl": -703.2,
+      "oos_wr": 45.6,
+      "exits": {
+        "SL": 115,
+        "TP": 17,
+        "FLAT": 8
+      }
+    }
+  ],
+  "overnight": [
+    {
+      "id": "live_1r",
+      "label": "Current live: take 1R",
+      "is_n": 41,
+      "is_pf": 2.13,
+      "is_pnl": 1042.3,
+      "is_wr": 68.3,
+      "oos_n": 52,
+      "oos_pf": 1.54,
+      "oos_pnl": 881.6,
+      "oos_wr": 61.5,
+      "exits": {
+        "SL": 33,
+        "TP": 59,
+        "FLAT": 1
+      }
+    },
+    {
+      "id": "hold",
+      "label": "Hold to flatten (no TP)",
+      "is_n": 41,
+      "is_pf": 0.83,
+      "is_pnl": -413.9,
+      "is_wr": 19.5,
+      "oos_n": 52,
+      "oos_pf": 1.7,
+      "oos_pnl": 2308.1,
+      "oos_wr": 21.2,
+      "exits": {
+        "SL": 74,
+        "FLAT": 19
+      }
+    },
+    {
+      "id": "2r",
+      "label": "Take 2R",
+      "is_n": 41,
+      "is_pf": 0.95,
+      "is_pnl": -104.1,
+      "is_wr": 34.1,
+      "oos_n": 52,
+      "oos_pf": 1.42,
+      "oos_pnl": 1028.9,
+      "oos_wr": 42.3,
+      "exits": {
+        "SL": 57,
+        "TP": 35,
+        "FLAT": 1
+      }
+    },
+    {
+      "id": "resist_15m",
+      "label": "TP at last finished 15m high/low (min 1R)",
+      "is_n": 41,
+      "is_pf": 2.13,
+      "is_pnl": 1042.3,
+      "is_wr": 68.3,
+      "oos_n": 52,
+      "oos_pf": 1.54,
+      "oos_pnl": 881.6,
+      "oos_wr": 61.5,
+      "exits": {
+        "SL": 33,
+        "TP": 59,
+        "FLAT": 1
+      }
+    },
+    {
+      "id": "resist_rth",
+      "label": "TP at prior RTH high/low if in front, else 1R",
+      "is_n": 41,
+      "is_pf": 1.64,
+      "is_pnl": 1005.9,
+      "is_wr": 46.3,
+      "oos_n": 52,
+      "oos_pf": 1.28,
+      "oos_pnl": 727.7,
+      "oos_wr": 38.5,
+      "exits": {
+        "SL": 54,
+        "FLAT": 9,
+        "TP": 30
+      }
+    },
+    {
+      "id": "trail_after_1r",
+      "label": "After 1R, trail 0.5R; flatten if still open",
+      "is_n": 41,
+      "is_pf": 1.85,
+      "is_pnl": 785.1,
+      "is_wr": 68.3,
+      "oos_n": 52,
+      "oos_pf": 1.2,
+      "oos_pnl": 324.6,
+      "oos_wr": 61.5,
+      "exits": {
+        "SL": 92,
+        "FLAT": 1
+      }
+    },
+    {
+      "id": "be_after_1r",
+      "label": "After 1R, stop to break-even; flatten if still open",
+      "is_n": 41,
+      "is_pf": 1.54,
+      "is_pnl": 513.9,
+      "is_wr": 14.6,
+      "oos_n": 52,
+      "oos_pf": 0.93,
+      "oos_pnl": -116.4,
+      "oos_wr": 5.8,
+      "exits": {
+        "SL": 84,
+        "FLAT": 9
+      }
+    },
+    {
+      "id": "run_past_resist",
+      "label": "15m target; if price pushes 2pts past, trail 0.5R",
+      "is_n": 41,
+      "is_pf": 2.01,
+      "is_pnl": 938.4,
+      "is_wr": 68.3,
+      "oos_n": 52,
+      "oos_pf": 1.36,
+      "oos_pnl": 576.7,
+      "oos_wr": 61.5,
+      "exits": {
+        "SL": 68,
+        "TP": 24,
+        "FLAT": 1
+      }
+    }
+  ]
+}

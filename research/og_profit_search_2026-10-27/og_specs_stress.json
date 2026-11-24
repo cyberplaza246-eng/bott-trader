@@ -1,0 +1,1 @@
+{"fb_zero_cost":{"fb_mode":"on","comm_rt":0.0,"slip_ticks":0},"sw_zero_cost":{"fb_mode":"off","comm_rt":0.0,"slip_ticks":0},"sw_sl12_pos1":{"fb_mode":"off","sl_scale":1.25,"max_pos":1},"fb_lockoff_long":{"fb_mode":"on","lock":false,"long_only":true}}

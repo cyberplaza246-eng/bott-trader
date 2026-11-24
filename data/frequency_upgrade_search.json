@@ -1,0 +1,674 @@
+{
+  "period": "2026-06-01 through 2026-08-21",
+  "candidates": 13,
+  "results": [
+    {
+      "name": "RTH pullback full | L+S pullback cd0 tp1R ml2",
+      "activity": {
+        "trades": 508,
+        "weekdays": 60,
+        "avg_per_weekday": 8.47,
+        "avg_active_day": 8.61,
+        "max_day": 23,
+        "days_ge6": 43,
+        "pct_weekdays_ge6": 71.7
+      },
+      "pnl": {
+        "trades": 508,
+        "pf": 0.96,
+        "net": -419.1,
+        "wr": 51.4,
+        "exp": -0.82,
+        "dd": 1321.7
+      },
+      "long": {
+        "trades": 301,
+        "pf": 0.92,
+        "net": -483.8,
+        "wr": 50.2,
+        "exp": -1.61,
+        "dd": 1040.2
+      },
+      "short": {
+        "trades": 207,
+        "pf": 1.01,
+        "net": 64.7,
+        "wr": 53.1,
+        "exp": 0.31,
+        "dd": 593.0
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "RTH pullback full | tp0.75R max_hold10",
+      "activity": {
+        "trades": 549,
+        "weekdays": 60,
+        "avg_per_weekday": 9.15,
+        "avg_active_day": 9.31,
+        "max_day": 25,
+        "days_ge6": 45,
+        "pct_weekdays_ge6": 75.0
+      },
+      "pnl": {
+        "trades": 549,
+        "pf": 0.94,
+        "net": -532.2,
+        "wr": 57.4,
+        "exp": -0.97,
+        "dd": 1205.0
+      },
+      "long": {
+        "trades": 339,
+        "pf": 0.91,
+        "net": -471.6,
+        "wr": 56.0,
+        "exp": -1.39,
+        "dd": 974.7
+      },
+      "short": {
+        "trades": 210,
+        "pf": 0.98,
+        "net": -60.5,
+        "wr": 59.5,
+        "exp": -0.29,
+        "dd": 666.3
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "RTH pullback full | tp0.5R max_hold8",
+      "activity": {
+        "trades": 574,
+        "weekdays": 60,
+        "avg_per_weekday": 9.57,
+        "avg_active_day": 9.73,
+        "max_day": 26,
+        "days_ge6": 45,
+        "pct_weekdays_ge6": 75.0
+      },
+      "pnl": {
+        "trades": 574,
+        "pf": 0.95,
+        "net": -338.7,
+        "wr": 66.4,
+        "exp": -0.59,
+        "dd": 998.4
+      },
+      "long": {
+        "trades": 363,
+        "pf": 0.89,
+        "net": -540.5,
+        "wr": 64.7,
+        "exp": -1.49,
+        "dd": 759.4
+      },
+      "short": {
+        "trades": 211,
+        "pf": 1.07,
+        "net": 201.8,
+        "wr": 69.2,
+        "exp": 0.96,
+        "dd": 488.4
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "RTH pullback | cd3 tp1R",
+      "activity": {
+        "trades": 503,
+        "weekdays": 60,
+        "avg_per_weekday": 8.38,
+        "avg_active_day": 8.53,
+        "max_day": 23,
+        "days_ge6": 43,
+        "pct_weekdays_ge6": 71.7
+      },
+      "pnl": {
+        "trades": 503,
+        "pf": 0.97,
+        "net": -345.1,
+        "wr": 51.5,
+        "exp": -0.69,
+        "dd": 1321.7
+      },
+      "long": {
+        "trades": 301,
+        "pf": 0.92,
+        "net": -483.8,
+        "wr": 50.2,
+        "exp": -1.61,
+        "dd": 1040.2
+      },
+      "short": {
+        "trades": 202,
+        "pf": 1.03,
+        "net": 138.6,
+        "wr": 53.5,
+        "exp": 0.69,
+        "dd": 570.5
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "HYBRID v4 long w4 pullback + short RTH quiet x2",
+      "activity": {
+        "trades": 447,
+        "weekdays": 60,
+        "avg_per_weekday": 7.45,
+        "avg_active_day": 7.58,
+        "max_day": 13,
+        "days_ge6": 31,
+        "pct_weekdays_ge6": 51.7
+      },
+      "pnl": {
+        "trades": 447,
+        "pf": 1.03,
+        "net": 302.3,
+        "wr": 52.8,
+        "exp": 0.68,
+        "dd": 924.5
+      },
+      "long": {
+        "trades": 75,
+        "pf": 1.42,
+        "net": 531.5,
+        "wr": 60.0,
+        "exp": 7.09,
+        "dd": 166.2
+      },
+      "short": {
+        "trades": 372,
+        "pf": 0.97,
+        "net": -229.1,
+        "wr": 51.3,
+        "exp": -0.62,
+        "dd": 915.0
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "HYBRID v4 long + short RTH quiet x2 tp0.75R hold10",
+      "activity": {
+        "trades": 447,
+        "weekdays": 60,
+        "avg_per_weekday": 7.45,
+        "avg_active_day": 7.58,
+        "max_day": 13,
+        "days_ge6": 31,
+        "pct_weekdays_ge6": 51.7
+      },
+      "pnl": {
+        "trades": 447,
+        "pf": 0.97,
+        "net": -229.2,
+        "wr": 56.8,
+        "exp": -0.51,
+        "dd": 1339.3
+      },
+      "long": {
+        "trades": 75,
+        "pf": 1.42,
+        "net": 531.5,
+        "wr": 60.0,
+        "exp": 7.09,
+        "dd": 166.2
+      },
+      "short": {
+        "trades": 372,
+        "pf": 0.9,
+        "net": -760.7,
+        "wr": 56.2,
+        "exp": -2.04,
+        "dd": 1262.6
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "HYBRID v4 long + short RTH pullback lh_ll x2",
+      "activity": {
+        "trades": 282,
+        "weekdays": 60,
+        "avg_per_weekday": 4.7,
+        "avg_active_day": 4.95,
+        "max_day": 16,
+        "days_ge6": 18,
+        "pct_weekdays_ge6": 30.0
+      },
+      "pnl": {
+        "trades": 282,
+        "pf": 1.1,
+        "net": 596.1,
+        "wr": 55.0,
+        "exp": 2.11,
+        "dd": 593.0
+      },
+      "long": {
+        "trades": 75,
+        "pf": 1.42,
+        "net": 531.5,
+        "wr": 60.0,
+        "exp": 7.09,
+        "dd": 166.2
+      },
+      "short": {
+        "trades": 207,
+        "pf": 1.01,
+        "net": 64.7,
+        "wr": 53.1,
+        "exp": 0.31,
+        "dd": 593.0
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "HYBRID v4 long + short w6 window pullback x2",
+      "activity": {
+        "trades": 144,
+        "weekdays": 60,
+        "avg_per_weekday": 2.4,
+        "avg_active_day": 2.77,
+        "max_day": 7,
+        "days_ge6": 2,
+        "pct_weekdays_ge6": 3.3
+      },
+      "pnl": {
+        "trades": 144,
+        "pf": 1.33,
+        "net": 871.6,
+        "wr": 58.3,
+        "exp": 6.05,
+        "dd": 245.5
+      },
+      "long": {
+        "trades": 75,
+        "pf": 1.42,
+        "net": 531.5,
+        "wr": 60.0,
+        "exp": 7.09,
+        "dd": 166.2
+      },
+      "short": {
+        "trades": 69,
+        "pf": 1.25,
+        "net": 340.1,
+        "wr": 56.5,
+        "exp": 4.93,
+        "dd": 245.5
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "w6 window pullback x2 tp0.75R hold10",
+      "activity": {
+        "trades": 224,
+        "weekdays": 60,
+        "avg_per_weekday": 3.73,
+        "avg_active_day": 4.15,
+        "max_day": 10,
+        "days_ge6": 12,
+        "pct_weekdays_ge6": 20.0
+      },
+      "pnl": {
+        "trades": 224,
+        "pf": 0.98,
+        "net": -82.5,
+        "wr": 58.5,
+        "exp": -0.37,
+        "dd": 541.2
+      },
+      "long": {
+        "trades": 147,
+        "pf": 0.88,
+        "net": -286.3,
+        "wr": 55.8,
+        "exp": -1.95,
+        "dd": 541.2
+      },
+      "short": {
+        "trades": 77,
+        "pf": 1.16,
+        "net": 203.8,
+        "wr": 63.6,
+        "exp": 2.65,
+        "dd": 320.3
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "w6 window pullback x2 tp0.5R hold8",
+      "activity": {
+        "trades": 235,
+        "weekdays": 60,
+        "avg_per_weekday": 3.92,
+        "avg_active_day": 4.35,
+        "max_day": 12,
+        "days_ge6": 13,
+        "pct_weekdays_ge6": 21.7
+      },
+      "pnl": {
+        "trades": 235,
+        "pf": 0.98,
+        "net": -53.0,
+        "wr": 66.0,
+        "exp": -0.23,
+        "dd": 548.9
+      },
+      "long": {
+        "trades": 156,
+        "pf": 0.81,
+        "net": -417.5,
+        "wr": 61.5,
+        "exp": -2.68,
+        "dd": 548.9
+      },
+      "short": {
+        "trades": 79,
+        "pf": 1.44,
+        "net": 364.5,
+        "wr": 74.7,
+        "exp": 4.61,
+        "dd": 183.6
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "HYBRID v4 long + short RTH quiet x2 + scalp C",
+      "activity": {
+        "trades": 1196,
+        "weekdays": 60,
+        "avg_per_weekday": 19.93,
+        "avg_active_day": 16.61,
+        "max_day": 29,
+        "days_ge6": 69,
+        "pct_weekdays_ge6": 115.0
+      },
+      "pnl": {
+        "trades": 1196,
+        "pf": 1.01,
+        "net": 109.1,
+        "wr": 48.9,
+        "exp": 0.09,
+        "dd": 924.5
+      },
+      "long": {
+        "trades": 498,
+        "pf": 1.0,
+        "net": 7.4,
+        "wr": 47.8,
+        "exp": 0.01,
+        "dd": 774.1
+      },
+      "short": {
+        "trades": 698,
+        "pf": 1.01,
+        "net": 101.6,
+        "wr": 49.7,
+        "exp": 0.15,
+        "dd": 915.0
+      },
+      "mode": "stacked_plus_scalp"
+    },
+    {
+      "name": "v4 long only + scalp C",
+      "activity": {
+        "trades": 824,
+        "weekdays": 60,
+        "avg_per_weekday": 13.73,
+        "avg_active_day": 11.44,
+        "max_day": 21,
+        "days_ge6": 67,
+        "pct_weekdays_ge6": 111.7
+      },
+      "pnl": {
+        "trades": 824,
+        "pf": 1.05,
+        "net": 338.2,
+        "wr": 47.8,
+        "exp": 0.41,
+        "dd": 519.3
+      },
+      "long": {
+        "trades": 498,
+        "pf": 1.0,
+        "net": 7.4,
+        "wr": 47.8,
+        "exp": 0.01,
+        "dd": 774.1
+      },
+      "short": {
+        "trades": 326,
+        "pf": 1.13,
+        "net": 330.8,
+        "wr": 47.9,
+        "exp": 1.01,
+        "dd": 292.9
+      },
+      "mode": "long_plus_scalp"
+    },
+    {
+      "name": "RTH pullback stacked + scalp C",
+      "activity": {
+        "trades": 1260,
+        "weekdays": 60,
+        "avg_per_weekday": 21.0,
+        "avg_active_day": 17.5,
+        "max_day": 35,
+        "days_ge6": 69,
+        "pct_weekdays_ge6": 115.0
+      },
+      "pnl": {
+        "trades": 1260,
+        "pf": 0.94,
+        "net": -792.1,
+        "wr": 49.8,
+        "exp": -0.63,
+        "dd": 1466.3
+      },
+      "long": {
+        "trades": 725,
+        "pf": 0.88,
+        "net": -1014.0,
+        "wr": 46.2,
+        "exp": -1.4,
+        "dd": 1660.6
+      },
+      "short": {
+        "trades": 535,
+        "pf": 1.04,
+        "net": 221.9,
+        "wr": 54.8,
+        "exp": 0.41,
+        "dd": 666.3
+      },
+      "mode": "stacked_plus_scalp"
+    }
+  ],
+  "best_frequency": {
+    "name": "RTH pullback stacked + scalp C",
+    "activity": {
+      "trades": 1260,
+      "weekdays": 60,
+      "avg_per_weekday": 21.0,
+      "avg_active_day": 17.5,
+      "max_day": 35,
+      "days_ge6": 69,
+      "pct_weekdays_ge6": 115.0
+    },
+    "pnl": {
+      "trades": 1260,
+      "pf": 0.94,
+      "net": -792.1,
+      "wr": 49.8,
+      "exp": -0.63,
+      "dd": 1466.3
+    },
+    "long": {
+      "trades": 725,
+      "pf": 0.88,
+      "net": -1014.0,
+      "wr": 46.2,
+      "exp": -1.4,
+      "dd": 1660.6
+    },
+    "short": {
+      "trades": 535,
+      "pf": 1.04,
+      "net": 221.9,
+      "wr": 54.8,
+      "exp": 0.41,
+      "dd": 666.3
+    },
+    "mode": "stacked_plus_scalp"
+  },
+  "best_profitable_frequency": {
+    "name": "HYBRID v4 long + short RTH quiet x2 + scalp C",
+    "activity": {
+      "trades": 1196,
+      "weekdays": 60,
+      "avg_per_weekday": 19.93,
+      "avg_active_day": 16.61,
+      "max_day": 29,
+      "days_ge6": 69,
+      "pct_weekdays_ge6": 115.0
+    },
+    "pnl": {
+      "trades": 1196,
+      "pf": 1.01,
+      "net": 109.1,
+      "wr": 48.9,
+      "exp": 0.09,
+      "dd": 924.5
+    },
+    "long": {
+      "trades": 498,
+      "pf": 1.0,
+      "net": 7.4,
+      "wr": 47.8,
+      "exp": 0.01,
+      "dd": 774.1
+    },
+    "short": {
+      "trades": 698,
+      "pf": 1.01,
+      "net": 101.6,
+      "wr": 49.7,
+      "exp": 0.15,
+      "dd": 915.0
+    },
+    "mode": "stacked_plus_scalp"
+  },
+  "hit6_profitable": [
+    {
+      "name": "HYBRID v4 long w4 pullback + short RTH quiet x2",
+      "activity": {
+        "trades": 447,
+        "weekdays": 60,
+        "avg_per_weekday": 7.45,
+        "avg_active_day": 7.58,
+        "max_day": 13,
+        "days_ge6": 31,
+        "pct_weekdays_ge6": 51.7
+      },
+      "pnl": {
+        "trades": 447,
+        "pf": 1.03,
+        "net": 302.3,
+        "wr": 52.8,
+        "exp": 0.68,
+        "dd": 924.5
+      },
+      "long": {
+        "trades": 75,
+        "pf": 1.42,
+        "net": 531.5,
+        "wr": 60.0,
+        "exp": 7.09,
+        "dd": 166.2
+      },
+      "short": {
+        "trades": 372,
+        "pf": 0.97,
+        "net": -229.1,
+        "wr": 51.3,
+        "exp": -0.62,
+        "dd": 915.0
+      },
+      "mode": "stacked"
+    },
+    {
+      "name": "HYBRID v4 long + short RTH quiet x2 + scalp C",
+      "activity": {
+        "trades": 1196,
+        "weekdays": 60,
+        "avg_per_weekday": 19.93,
+        "avg_active_day": 16.61,
+        "max_day": 29,
+        "days_ge6": 69,
+        "pct_weekdays_ge6": 115.0
+      },
+      "pnl": {
+        "trades": 1196,
+        "pf": 1.01,
+        "net": 109.1,
+        "wr": 48.9,
+        "exp": 0.09,
+        "dd": 924.5
+      },
+      "long": {
+        "trades": 498,
+        "pf": 1.0,
+        "net": 7.4,
+        "wr": 47.8,
+        "exp": 0.01,
+        "dd": 774.1
+      },
+      "short": {
+        "trades": 698,
+        "pf": 1.01,
+        "net": 101.6,
+        "wr": 49.7,
+        "exp": 0.15,
+        "dd": 915.0
+      },
+      "mode": "stacked_plus_scalp"
+    },
+    {
+      "name": "v4 long only + scalp C",
+      "activity": {
+        "trades": 824,
+        "weekdays": 60,
+        "avg_per_weekday": 13.73,
+        "avg_active_day": 11.44,
+        "max_day": 21,
+        "days_ge6": 67,
+        "pct_weekdays_ge6": 111.7
+      },
+      "pnl": {
+        "trades": 824,
+        "pf": 1.05,
+        "net": 338.2,
+        "wr": 47.8,
+        "exp": 0.41,
+        "dd": 519.3
+      },
+      "long": {
+        "trades": 498,
+        "pf": 1.0,
+        "net": 7.4,
+        "wr": 47.8,
+        "exp": 0.01,
+        "dd": 774.1
+      },
+      "short": {
+        "trades": 326,
+        "pf": 1.13,
+        "net": 330.8,
+        "wr": 47.9,
+        "exp": 1.01,
+        "dd": 292.9
+      },
+      "mode": "long_plus_scalp"
+    }
+  ]
+}

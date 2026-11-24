@@ -1,0 +1,2 @@
+name,n,net,pf,dd,t,train,y26,folds,boot_p,netA,netB,slip4,delay1,delay3,corr,port_net,port_dd,port_wf
+NY|30|fade|atr|R2,307,3722,1.2,2543,1.4,152,3571,4/6,0.92,-54,3777,1866,1757,-159,-0.045,33036,5402,25339

@@ -1,0 +1,1481 @@
+{
+  "status": "FAIL",
+  "note": "No variant cleared Aug+Sep gates after first screen; grid not expanded.",
+  "variants_tested": 27,
+  "variants_planned": 27,
+  "data_bars": 664264,
+  "data_end": "2026-09-21 03:58:00+00:00",
+  "selection_rule": "rank by Jun-Jul net/PF among gate_aug AND gate_sep; Sep never used to choose",
+  "gates": {
+    "aug": "PF>=1.0 and net>=0",
+    "sep": "PF>=1.2 and net>0 and n>=15",
+    "full": "net>=1600 and PF>=1.25 (~$100/wk over ~16w)"
+  },
+  "winner": null,
+  "best_near_miss": {
+    "spec": {
+      "name": "w3_morning|1m_pullback|1.5R|atr1.5|comb",
+      "long_win": "w3_morning",
+      "long_entry": "1m_pullback",
+      "long_structure": null,
+      "long_max_day": null,
+      "short_max_day": null,
+      "stop": "atr1_1.5_6_25",
+      "tp": "1.5R",
+      "legs": "combined"
+    },
+    "windows": {
+      "jun_jul": {
+        "trades": 77,
+        "win_rate": 57.1,
+        "profit_factor": 1.97,
+        "net_pnl": 1539.17,
+        "expectancy": 19.99,
+        "max_drawdown": 188.64
+      },
+      "aug": {
+        "trades": 40,
+        "win_rate": 35.0,
+        "profit_factor": 0.76,
+        "net_pnl": -269.36,
+        "expectancy": -6.73,
+        "max_drawdown": 383.68
+      },
+      "sep": {
+        "trades": 20,
+        "win_rate": 35.0,
+        "profit_factor": 0.86,
+        "net_pnl": -78.74,
+        "expectancy": -3.94,
+        "max_drawdown": 218.22
+      },
+      "jun_latest": {
+        "trades": 137,
+        "win_rate": 47.4,
+        "profit_factor": 1.37,
+        "net_pnl": 1191.08,
+        "expectancy": 8.69,
+        "max_drawdown": 577.32
+      }
+    },
+    "failed_gates": [
+      "Aug FAIL PF=0.76 net=-269.36 (need PF>=1 net>=0)",
+      "Sep FAIL n=20 PF=0.86 net=-78.74 (need n>=15 PF>=1.2 net>0)"
+    ],
+    "gate_aug": false,
+    "gate_sep": false,
+    "gate_full": false
+  },
+  "all_results": [
+    {
+      "name": "frozen_v2",
+      "spec": {
+        "name": "frozen_v2",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 100,
+          "win_rate": 64.0,
+          "profit_factor": 1.67,
+          "net_pnl": 1128.61,
+          "expectancy": 11.29,
+          "max_drawdown": 209.92
+        },
+        "aug": {
+          "trades": 56,
+          "win_rate": 46.4,
+          "profit_factor": 0.76,
+          "net_pnl": -284.24,
+          "expectancy": -5.08,
+          "max_drawdown": 342.19
+        },
+        "sep": {
+          "trades": 29,
+          "win_rate": 48.3,
+          "profit_factor": 0.83,
+          "net_pnl": -108.62,
+          "expectancy": -3.75,
+          "max_drawdown": 218.22
+        },
+        "jun_latest": {
+          "trades": 185,
+          "win_rate": 56.2,
+          "profit_factor": 1.21,
+          "net_pnl": 735.74,
+          "expectancy": 3.98,
+          "max_drawdown": 560.41
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "hybrid_rec_w2_hh_hl",
+      "spec": {
+        "name": "hybrid_rec_w2_hh_hl",
+        "long_win": "w2_open",
+        "long_entry": "quiet",
+        "long_structure": "hh_hl",
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 73,
+          "win_rate": 64.4,
+          "profit_factor": 1.71,
+          "net_pnl": 904.66,
+          "expectancy": 12.39,
+          "max_drawdown": 217.63
+        },
+        "aug": {
+          "trades": 41,
+          "win_rate": 41.5,
+          "profit_factor": 0.63,
+          "net_pnl": -376.07,
+          "expectancy": -9.17,
+          "max_drawdown": 376.07
+        },
+        "sep": {
+          "trades": 19,
+          "win_rate": 52.6,
+          "profit_factor": 1.12,
+          "net_pnl": 45.44,
+          "expectancy": 2.39,
+          "max_drawdown": 127.7
+        },
+        "jun_latest": {
+          "trades": 133,
+          "win_rate": 55.6,
+          "profit_factor": 1.21,
+          "net_pnl": 574.03,
+          "expectancy": 4.32,
+          "max_drawdown": 503.77
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w2_open|1m_pullback|1R|atr1.5|comb",
+      "spec": {
+        "name": "w2_open|1m_pullback|1R|atr1.5|comb",
+        "long_win": "w2_open",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 67,
+          "win_rate": 68.7,
+          "profit_factor": 2.03,
+          "net_pnl": 1077.99,
+          "expectancy": 16.09,
+          "max_drawdown": 156.2
+        },
+        "aug": {
+          "trades": 42,
+          "win_rate": 40.5,
+          "profit_factor": 0.59,
+          "net_pnl": -428.71,
+          "expectancy": -10.21,
+          "max_drawdown": 428.71
+        },
+        "sep": {
+          "trades": 17,
+          "win_rate": 47.1,
+          "profit_factor": 0.88,
+          "net_pnl": -46.47,
+          "expectancy": -2.73,
+          "max_drawdown": 166.98
+        },
+        "jun_latest": {
+          "trades": 126,
+          "win_rate": 56.3,
+          "profit_factor": 1.24,
+          "net_pnl": 602.81,
+          "expectancy": 4.78,
+          "max_drawdown": 600.64
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w2_open|1m_pullback|1.5R|atr1.5|comb",
+      "spec": {
+        "name": "w2_open|1m_pullback|1.5R|atr1.5|comb",
+        "long_win": "w2_open",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1.5R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 67,
+          "win_rate": 58.2,
+          "profit_factor": 2.09,
+          "net_pnl": 1460.99,
+          "expectancy": 21.81,
+          "max_drawdown": 171.82
+        },
+        "aug": {
+          "trades": 37,
+          "win_rate": 29.7,
+          "profit_factor": 0.56,
+          "net_pnl": -482.58,
+          "expectancy": -13.04,
+          "max_drawdown": 498.56
+        },
+        "sep": {
+          "trades": 16,
+          "win_rate": 37.5,
+          "profit_factor": 0.99,
+          "net_pnl": -2.49,
+          "expectancy": -0.16,
+          "max_drawdown": 166.98
+        },
+        "jun_latest": {
+          "trades": 120,
+          "win_rate": 46.7,
+          "profit_factor": 1.34,
+          "net_pnl": 975.92,
+          "expectancy": 8.13,
+          "max_drawdown": 665.54
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w2_open|1m_pullback|2R|atr1.5|comb",
+      "spec": {
+        "name": "w2_open|1m_pullback|2R|atr1.5|comb",
+        "long_win": "w2_open",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "2R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 62,
+          "win_rate": 43.5,
+          "profit_factor": 1.51,
+          "net_pnl": 871.82,
+          "expectancy": 14.06,
+          "max_drawdown": 403.02
+        },
+        "aug": {
+          "trades": 35,
+          "win_rate": 17.1,
+          "profit_factor": 0.39,
+          "net_pnl": -731.95,
+          "expectancy": -20.91,
+          "max_drawdown": 731.95
+        },
+        "sep": {
+          "trades": 15,
+          "win_rate": 26.7,
+          "profit_factor": 0.82,
+          "net_pnl": -83.03,
+          "expectancy": -5.54,
+          "max_drawdown": 224.7
+        },
+        "jun_latest": {
+          "trades": 112,
+          "win_rate": 33.0,
+          "profit_factor": 1.02,
+          "net_pnl": 56.83,
+          "expectancy": 0.51,
+          "max_drawdown": 1054.9
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w2_open|quiet|1R|atr1.5|comb",
+      "spec": {
+        "name": "w2_open|quiet|1R|atr1.5|comb",
+        "long_win": "w2_open",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 92,
+          "win_rate": 62.0,
+          "profit_factor": 1.55,
+          "net_pnl": 953.67,
+          "expectancy": 10.37,
+          "max_drawdown": 245.23
+        },
+        "aug": {
+          "trades": 50,
+          "win_rate": 40.0,
+          "profit_factor": 0.6,
+          "net_pnl": -518.86,
+          "expectancy": -10.38,
+          "max_drawdown": 518.86
+        },
+        "sep": {
+          "trades": 26,
+          "win_rate": 53.8,
+          "profit_factor": 1.15,
+          "net_pnl": 80.19,
+          "expectancy": 3.08,
+          "max_drawdown": 178.94
+        },
+        "jun_latest": {
+          "trades": 168,
+          "win_rate": 54.2,
+          "profit_factor": 1.14,
+          "net_pnl": 515.0,
+          "expectancy": 3.07,
+          "max_drawdown": 697.8
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w2_open|quiet|1.5R|atr1.5|comb",
+      "spec": {
+        "name": "w2_open|quiet|1.5R|atr1.5|comb",
+        "long_win": "w2_open",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1.5R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 88,
+          "win_rate": 53.4,
+          "profit_factor": 1.69,
+          "net_pnl": 1383.01,
+          "expectancy": 15.72,
+          "max_drawdown": 197.22
+        },
+        "aug": {
+          "trades": 44,
+          "win_rate": 27.3,
+          "profit_factor": 0.5,
+          "net_pnl": -699.95,
+          "expectancy": -15.91,
+          "max_drawdown": 715.94
+        },
+        "sep": {
+          "trades": 24,
+          "win_rate": 50.0,
+          "profit_factor": 1.58,
+          "net_pnl": 307.36,
+          "expectancy": 12.81,
+          "max_drawdown": 178.94
+        },
+        "jun_latest": {
+          "trades": 156,
+          "win_rate": 45.5,
+          "profit_factor": 1.25,
+          "net_pnl": 990.41,
+          "expectancy": 6.35,
+          "max_drawdown": 894.88
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": true,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w2_open|quiet|2R|atr1.5|comb",
+      "spec": {
+        "name": "w2_open|quiet|2R|atr1.5|comb",
+        "long_win": "w2_open",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "2R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 78,
+          "win_rate": 39.7,
+          "profit_factor": 1.28,
+          "net_pnl": 646.96,
+          "expectancy": 8.29,
+          "max_drawdown": 464.88
+        },
+        "aug": {
+          "trades": 42,
+          "win_rate": 16.7,
+          "profit_factor": 0.38,
+          "net_pnl": -924.33,
+          "expectancy": -22.01,
+          "max_drawdown": 924.33
+        },
+        "sep": {
+          "trades": 20,
+          "win_rate": 25.0,
+          "profit_factor": 0.71,
+          "net_pnl": -191.98,
+          "expectancy": -9.6,
+          "max_drawdown": 291.62
+        },
+        "jun_latest": {
+          "trades": 140,
+          "win_rate": 30.7,
+          "profit_factor": 0.9,
+          "net_pnl": -469.35,
+          "expectancy": -3.35,
+          "max_drawdown": 1215.95
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w3_morning|1m_pullback|1R|atr1.5|comb",
+      "spec": {
+        "name": "w3_morning|1m_pullback|1R|atr1.5|comb",
+        "long_win": "w3_morning",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 77,
+          "win_rate": 67.5,
+          "profit_factor": 1.91,
+          "net_pnl": 1142.64,
+          "expectancy": 14.84,
+          "max_drawdown": 158.68
+        },
+        "aug": {
+          "trades": 45,
+          "win_rate": 44.4,
+          "profit_factor": 0.73,
+          "net_pnl": -287.8,
+          "expectancy": -6.4,
+          "max_drawdown": 336.56
+        },
+        "sep": {
+          "trades": 21,
+          "win_rate": 42.9,
+          "profit_factor": 0.73,
+          "net_pnl": -147.72,
+          "expectancy": -7.03,
+          "max_drawdown": 218.22
+        },
+        "jun_latest": {
+          "trades": 143,
+          "win_rate": 56.6,
+          "profit_factor": 1.25,
+          "net_pnl": 707.13,
+          "expectancy": 4.94,
+          "max_drawdown": 554.78
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w3_morning|1m_pullback|1.5R|atr1.5|comb",
+      "spec": {
+        "name": "w3_morning|1m_pullback|1.5R|atr1.5|comb",
+        "long_win": "w3_morning",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1.5R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 77,
+          "win_rate": 57.1,
+          "profit_factor": 1.97,
+          "net_pnl": 1539.17,
+          "expectancy": 19.99,
+          "max_drawdown": 188.64
+        },
+        "aug": {
+          "trades": 40,
+          "win_rate": 35.0,
+          "profit_factor": 0.76,
+          "net_pnl": -269.36,
+          "expectancy": -6.73,
+          "max_drawdown": 383.68
+        },
+        "sep": {
+          "trades": 20,
+          "win_rate": 35.0,
+          "profit_factor": 0.86,
+          "net_pnl": -78.74,
+          "expectancy": -3.94,
+          "max_drawdown": 218.22
+        },
+        "jun_latest": {
+          "trades": 137,
+          "win_rate": 47.4,
+          "profit_factor": 1.37,
+          "net_pnl": 1191.08,
+          "expectancy": 8.69,
+          "max_drawdown": 577.32
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w3_morning|1m_pullback|2R|atr1.5|comb",
+      "spec": {
+        "name": "w3_morning|1m_pullback|2R|atr1.5|comb",
+        "long_win": "w3_morning",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "2R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 70,
+          "win_rate": 44.3,
+          "profit_factor": 1.55,
+          "net_pnl": 1061.9,
+          "expectancy": 15.17,
+          "max_drawdown": 300.54
+        },
+        "aug": {
+          "trades": 38,
+          "win_rate": 23.7,
+          "profit_factor": 0.63,
+          "net_pnl": -446.42,
+          "expectancy": -11.75,
+          "max_drawdown": 594.76
+        },
+        "sep": {
+          "trades": 19,
+          "win_rate": 21.1,
+          "profit_factor": 0.57,
+          "net_pnl": -284.27,
+          "expectancy": -14.96,
+          "max_drawdown": 327.18
+        },
+        "jun_latest": {
+          "trades": 127,
+          "win_rate": 34.6,
+          "profit_factor": 1.09,
+          "net_pnl": 331.2,
+          "expectancy": 2.61,
+          "max_drawdown": 872.36
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w3_morning|quiet|1R|atr1.5|comb",
+      "spec": {
+        "name": "w3_morning|quiet|1R|atr1.5|comb",
+        "long_win": "w3_morning",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 113,
+          "win_rate": 58.4,
+          "profit_factor": 1.32,
+          "net_pnl": 755.4,
+          "expectancy": 6.68,
+          "max_drawdown": 298.95
+        },
+        "aug": {
+          "trades": 58,
+          "win_rate": 46.6,
+          "profit_factor": 0.82,
+          "net_pnl": -239.69,
+          "expectancy": -4.13,
+          "max_drawdown": 351.88
+        },
+        "sep": {
+          "trades": 34,
+          "win_rate": 52.9,
+          "profit_factor": 1.14,
+          "net_pnl": 97.93,
+          "expectancy": 2.88,
+          "max_drawdown": 178.94
+        },
+        "jun_latest": {
+          "trades": 205,
+          "win_rate": 54.1,
+          "profit_factor": 1.14,
+          "net_pnl": 613.64,
+          "expectancy": 2.99,
+          "max_drawdown": 530.82
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w3_morning|quiet|1.5R|atr1.5|comb",
+      "spec": {
+        "name": "w3_morning|quiet|1.5R|atr1.5|comb",
+        "long_win": "w3_morning",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1.5R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 109,
+          "win_rate": 50.5,
+          "profit_factor": 1.48,
+          "net_pnl": 1273.26,
+          "expectancy": 11.68,
+          "max_drawdown": 254.66
+        },
+        "aug": {
+          "trades": 50,
+          "win_rate": 34.0,
+          "profit_factor": 0.73,
+          "net_pnl": -390.46,
+          "expectancy": -7.81,
+          "max_drawdown": 502.72
+        },
+        "sep": {
+          "trades": 31,
+          "win_rate": 45.2,
+          "profit_factor": 1.31,
+          "net_pnl": 233.28,
+          "expectancy": 7.53,
+          "max_drawdown": 178.94
+        },
+        "jun_latest": {
+          "trades": 190,
+          "win_rate": 45.3,
+          "profit_factor": 1.23,
+          "net_pnl": 1116.09,
+          "expectancy": 5.87,
+          "max_drawdown": 681.66
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": true,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w3_morning|quiet|2R|atr1.5|comb",
+      "spec": {
+        "name": "w3_morning|quiet|2R|atr1.5|comb",
+        "long_win": "w3_morning",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "2R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 97,
+          "win_rate": 39.2,
+          "profit_factor": 1.25,
+          "net_pnl": 724.11,
+          "expectancy": 7.47,
+          "max_drawdown": 337.58
+        },
+        "aug": {
+          "trades": 48,
+          "win_rate": 25.0,
+          "profit_factor": 0.68,
+          "net_pnl": -492.52,
+          "expectancy": -10.26,
+          "max_drawdown": 638.8
+        },
+        "sep": {
+          "trades": 26,
+          "win_rate": 23.1,
+          "profit_factor": 0.65,
+          "net_pnl": -315.74,
+          "expectancy": -12.14,
+          "max_drawdown": 316.19
+        },
+        "jun_latest": {
+          "trades": 171,
+          "win_rate": 32.7,
+          "profit_factor": 0.98,
+          "net_pnl": -84.15,
+          "expectancy": -0.49,
+          "max_drawdown": 954.99
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4_no_noon|1m_pullback|1R|atr1.5|comb",
+      "spec": {
+        "name": "w4_no_noon|1m_pullback|1R|atr1.5|comb",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 100,
+          "win_rate": 64.0,
+          "profit_factor": 1.67,
+          "net_pnl": 1128.61,
+          "expectancy": 11.29,
+          "max_drawdown": 209.92
+        },
+        "aug": {
+          "trades": 56,
+          "win_rate": 46.4,
+          "profit_factor": 0.76,
+          "net_pnl": -284.24,
+          "expectancy": -5.08,
+          "max_drawdown": 342.19
+        },
+        "sep": {
+          "trades": 29,
+          "win_rate": 48.3,
+          "profit_factor": 0.83,
+          "net_pnl": -108.62,
+          "expectancy": -3.75,
+          "max_drawdown": 218.22
+        },
+        "jun_latest": {
+          "trades": 185,
+          "win_rate": 56.2,
+          "profit_factor": 1.21,
+          "net_pnl": 735.74,
+          "expectancy": 3.98,
+          "max_drawdown": 560.41
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4_no_noon|1m_pullback|1.5R|atr1.5|comb",
+      "spec": {
+        "name": "w4_no_noon|1m_pullback|1.5R|atr1.5|comb",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1.5R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 94,
+          "win_rate": 53.2,
+          "profit_factor": 1.71,
+          "net_pnl": 1432.62,
+          "expectancy": 15.24,
+          "max_drawdown": 261.84
+        },
+        "aug": {
+          "trades": 49,
+          "win_rate": 36.7,
+          "profit_factor": 0.78,
+          "net_pnl": -266.56,
+          "expectancy": -5.44,
+          "max_drawdown": 398.76
+        },
+        "sep": {
+          "trades": 27,
+          "win_rate": 40.7,
+          "profit_factor": 1.0,
+          "net_pnl": 0.8,
+          "expectancy": 0.03,
+          "max_drawdown": 218.22
+        },
+        "jun_latest": {
+          "trades": 170,
+          "win_rate": 46.5,
+          "profit_factor": 1.3,
+          "net_pnl": 1166.85,
+          "expectancy": 6.86,
+          "max_drawdown": 592.4
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4_no_noon|1m_pullback|2R|atr1.5|comb",
+      "spec": {
+        "name": "w4_no_noon|1m_pullback|2R|atr1.5|comb",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "2R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 85,
+          "win_rate": 41.2,
+          "profit_factor": 1.41,
+          "net_pnl": 957.56,
+          "expectancy": 11.27,
+          "max_drawdown": 336.81
+        },
+        "aug": {
+          "trades": 45,
+          "win_rate": 26.7,
+          "profit_factor": 0.69,
+          "net_pnl": -415.57,
+          "expectancy": -9.23,
+          "max_drawdown": 563.9
+        },
+        "sep": {
+          "trades": 25,
+          "win_rate": 28.0,
+          "profit_factor": 0.76,
+          "net_pnl": -187.55,
+          "expectancy": -7.5,
+          "max_drawdown": 255.15
+        },
+        "jun_latest": {
+          "trades": 155,
+          "win_rate": 34.8,
+          "profit_factor": 1.08,
+          "net_pnl": 354.44,
+          "expectancy": 2.29,
+          "max_drawdown": 870.57
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4_no_noon|quiet|1R|atr1.5|comb",
+      "spec": {
+        "name": "w4_no_noon|quiet|1R|atr1.5|comb",
+        "long_win": "w4_no_noon",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 144,
+          "win_rate": 53.5,
+          "profit_factor": 1.11,
+          "net_pnl": 335.01,
+          "expectancy": 2.33,
+          "max_drawdown": 303.91
+        },
+        "aug": {
+          "trades": 73,
+          "win_rate": 46.6,
+          "profit_factor": 0.82,
+          "net_pnl": -281.38,
+          "expectancy": -3.85,
+          "max_drawdown": 385.28
+        },
+        "sep": {
+          "trades": 44,
+          "win_rate": 54.5,
+          "profit_factor": 1.15,
+          "net_pnl": 133.85,
+          "expectancy": 3.04,
+          "max_drawdown": 178.94
+        },
+        "jun_latest": {
+          "trades": 261,
+          "win_rate": 51.7,
+          "profit_factor": 1.03,
+          "net_pnl": 187.48,
+          "expectancy": 0.72,
+          "max_drawdown": 659.8
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4_no_noon|quiet|1.5R|atr1.5|comb",
+      "spec": {
+        "name": "w4_no_noon|quiet|1.5R|atr1.5|comb",
+        "long_win": "w4_no_noon",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1.5R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 134,
+          "win_rate": 46.3,
+          "profit_factor": 1.28,
+          "net_pnl": 937.82,
+          "expectancy": 7.0,
+          "max_drawdown": 372.51
+        },
+        "aug": {
+          "trades": 62,
+          "win_rate": 35.5,
+          "profit_factor": 0.76,
+          "net_pnl": -395.05,
+          "expectancy": -6.37,
+          "max_drawdown": 547.23
+        },
+        "sep": {
+          "trades": 40,
+          "win_rate": 47.5,
+          "profit_factor": 1.37,
+          "net_pnl": 333.01,
+          "expectancy": 8.33,
+          "max_drawdown": 178.94
+        },
+        "jun_latest": {
+          "trades": 236,
+          "win_rate": 43.6,
+          "profit_factor": 1.15,
+          "net_pnl": 875.78,
+          "expectancy": 3.71,
+          "max_drawdown": 773.47
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": true,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4_no_noon|quiet|2R|atr1.5|comb",
+      "spec": {
+        "name": "w4_no_noon|quiet|2R|atr1.5|comb",
+        "long_win": "w4_no_noon",
+        "long_entry": "quiet",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "2R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 120,
+          "win_rate": 35.8,
+          "profit_factor": 1.12,
+          "net_pnl": 426.66,
+          "expectancy": 3.56,
+          "max_drawdown": 478.52
+        },
+        "aug": {
+          "trades": 57,
+          "win_rate": 28.1,
+          "profit_factor": 0.75,
+          "net_pnl": -426.81,
+          "expectancy": -7.49,
+          "max_drawdown": 614.82
+        },
+        "sep": {
+          "trades": 34,
+          "win_rate": 29.4,
+          "profit_factor": 0.84,
+          "net_pnl": -171.5,
+          "expectancy": -5.04,
+          "max_drawdown": 306.01
+        },
+        "jun_latest": {
+          "trades": 211,
+          "win_rate": 32.7,
+          "profit_factor": 0.97,
+          "net_pnl": -171.64,
+          "expectancy": -0.81,
+          "max_drawdown": 870.44
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4|pb|1R|mdLNone_S2",
+      "spec": {
+        "name": "w4|pb|1R|mdLNone_S2",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": 2,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 87,
+          "win_rate": 64.4,
+          "profit_factor": 1.72,
+          "net_pnl": 1028.64,
+          "expectancy": 11.82,
+          "max_drawdown": 209.92
+        },
+        "aug": {
+          "trades": 46,
+          "win_rate": 45.7,
+          "profit_factor": 0.7,
+          "net_pnl": -312.02,
+          "expectancy": -6.78,
+          "max_drawdown": 369.97
+        },
+        "sep": {
+          "trades": 26,
+          "win_rate": 50.0,
+          "profit_factor": 0.87,
+          "net_pnl": -75.81,
+          "expectancy": -2.92,
+          "max_drawdown": 175.84
+        },
+        "jun_latest": {
+          "trades": 159,
+          "win_rate": 56.6,
+          "profit_factor": 1.21,
+          "net_pnl": 640.8,
+          "expectancy": 4.03,
+          "max_drawdown": 545.8
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4|pb|1R|mdL2_SNone",
+      "spec": {
+        "name": "w4|pb|1R|mdL2_SNone",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": 2,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 82,
+          "win_rate": 68.3,
+          "profit_factor": 1.95,
+          "net_pnl": 1237.75,
+          "expectancy": 15.09,
+          "max_drawdown": 156.2
+        },
+        "aug": {
+          "trades": 45,
+          "win_rate": 44.4,
+          "profit_factor": 0.72,
+          "net_pnl": -283.87,
+          "expectancy": -6.31,
+          "max_drawdown": 332.63
+        },
+        "sep": {
+          "trades": 24,
+          "win_rate": 37.5,
+          "profit_factor": 0.61,
+          "net_pnl": -247.99,
+          "expectancy": -10.33,
+          "max_drawdown": 247.99
+        },
+        "jun_latest": {
+          "trades": 151,
+          "win_rate": 56.3,
+          "profit_factor": 1.24,
+          "net_pnl": 705.89,
+          "expectancy": 4.67,
+          "max_drawdown": 588.06
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4|pb|1R|mdL2_S2",
+      "spec": {
+        "name": "w4|pb|1R|mdL2_S2",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": 2,
+        "short_max_day": 2,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 69,
+          "win_rate": 69.6,
+          "profit_factor": 2.08,
+          "net_pnl": 1137.78,
+          "expectancy": 16.49,
+          "max_drawdown": 156.2
+        },
+        "aug": {
+          "trades": 35,
+          "win_rate": 42.9,
+          "profit_factor": 0.64,
+          "net_pnl": -311.65,
+          "expectancy": -8.9,
+          "max_drawdown": 360.41
+        },
+        "sep": {
+          "trades": 21,
+          "win_rate": 38.1,
+          "profit_factor": 0.62,
+          "net_pnl": -215.18,
+          "expectancy": -10.25,
+          "max_drawdown": 215.18
+        },
+        "jun_latest": {
+          "trades": 125,
+          "win_rate": 56.8,
+          "profit_factor": 1.25,
+          "net_pnl": 610.95,
+          "expectancy": 4.89,
+          "max_drawdown": 583.03
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4|pb|1R|mdL3_SNone",
+      "spec": {
+        "name": "w4|pb|1R|mdL3_SNone",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": 3,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 96,
+          "win_rate": 64.6,
+          "profit_factor": 1.72,
+          "net_pnl": 1143.21,
+          "expectancy": 11.91,
+          "max_drawdown": 207.44
+        },
+        "aug": {
+          "trades": 48,
+          "win_rate": 43.8,
+          "profit_factor": 0.73,
+          "net_pnl": -299.32,
+          "expectancy": -6.24,
+          "max_drawdown": 348.08
+        },
+        "sep": {
+          "trades": 26,
+          "win_rate": 42.3,
+          "profit_factor": 0.73,
+          "net_pnl": -174.22,
+          "expectancy": -6.7,
+          "max_drawdown": 218.22
+        },
+        "jun_latest": {
+          "trades": 170,
+          "win_rate": 55.3,
+          "profit_factor": 1.2,
+          "net_pnl": 669.66,
+          "expectancy": 3.94,
+          "max_drawdown": 566.3
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "w4|pb|1R|mdL3_S2",
+      "spec": {
+        "name": "w4|pb|1R|mdL3_S2",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": 3,
+        "short_max_day": 2,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "combined"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 83,
+          "win_rate": 65.1,
+          "profit_factor": 1.78,
+          "net_pnl": 1043.24,
+          "expectancy": 12.57,
+          "max_drawdown": 207.44
+        },
+        "aug": {
+          "trades": 38,
+          "win_rate": 42.1,
+          "profit_factor": 0.65,
+          "net_pnl": -327.1,
+          "expectancy": -8.61,
+          "max_drawdown": 375.86
+        },
+        "sep": {
+          "trades": 23,
+          "win_rate": 43.5,
+          "profit_factor": 0.75,
+          "net_pnl": -141.41,
+          "expectancy": -6.15,
+          "max_drawdown": 175.84
+        },
+        "jun_latest": {
+          "trades": 144,
+          "win_rate": 55.6,
+          "profit_factor": 1.2,
+          "net_pnl": 574.73,
+          "expectancy": 3.99,
+          "max_drawdown": 551.7
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "frozen_long_only",
+      "spec": {
+        "name": "frozen_long_only",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "long_only"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 57,
+          "win_rate": 63.2,
+          "profit_factor": 1.62,
+          "net_pnl": 566.39,
+          "expectancy": 9.94,
+          "max_drawdown": 166.15
+        },
+        "aug": {
+          "trades": 29,
+          "win_rate": 48.3,
+          "profit_factor": 0.85,
+          "net_pnl": -86.94,
+          "expectancy": -3.0,
+          "max_drawdown": 207.48
+        },
+        "sep": {
+          "trades": 18,
+          "win_rate": 50.0,
+          "profit_factor": 0.84,
+          "net_pnl": -61.23,
+          "expectancy": -3.4,
+          "max_drawdown": 149.52
+        },
+        "jun_latest": {
+          "trades": 104,
+          "win_rate": 56.7,
+          "profit_factor": 1.22,
+          "net_pnl": 418.22,
+          "expectancy": 4.02,
+          "max_drawdown": 297.99
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    },
+    {
+      "name": "frozen_short_only",
+      "spec": {
+        "name": "frozen_short_only",
+        "long_win": "w4_no_noon",
+        "long_entry": "1m_pullback",
+        "long_structure": null,
+        "long_max_day": null,
+        "short_max_day": null,
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "legs": "short_only"
+      },
+      "windows": {
+        "jun_jul": {
+          "trades": 43,
+          "win_rate": 65.1,
+          "profit_factor": 1.74,
+          "net_pnl": 562.22,
+          "expectancy": 13.07,
+          "max_drawdown": 153.72
+        },
+        "aug": {
+          "trades": 27,
+          "win_rate": 44.4,
+          "profit_factor": 0.67,
+          "net_pnl": -197.3,
+          "expectancy": -7.31,
+          "max_drawdown": 197.3
+        },
+        "sep": {
+          "trades": 11,
+          "win_rate": 45.5,
+          "profit_factor": 0.81,
+          "net_pnl": -47.39,
+          "expectancy": -4.31,
+          "max_drawdown": 130.18
+        },
+        "jun_latest": {
+          "trades": 81,
+          "win_rate": 55.6,
+          "profit_factor": 1.2,
+          "net_pnl": 317.52,
+          "expectancy": 3.92,
+          "max_drawdown": 385.21
+        }
+      },
+      "gate_aug": false,
+      "gate_sep": false,
+      "gate_full": false,
+      "error": null
+    }
+  ],
+  "reminders": {
+    "size_2x": "2x size doubles dollars but not edge quality",
+    "production_paper": "S16 mid ORB remains locked production paper (~$80/wk at 1x)",
+    "economics": "At 1 MNQ lot and 1R, even a good edge is often hundreds\u2013low thousands per quarter; hitting ~$1600/16w may require size not DNA.",
+    "live_trading": "OFF"
+  }
+}

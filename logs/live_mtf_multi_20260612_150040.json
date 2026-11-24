@@ -1,0 +1,54 @@
+[
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_ad68fa3a9f",
+    "direction": "long",
+    "entry": 29681.0,
+    "exit": 29694.75,
+    "sl": 29654.25,
+    "tp": 29721.0,
+    "pnl": 27.5,
+    "reason": "UNKNOWN",
+    "entry_time": "2026-06-12T19:03:58.855118+00:00",
+    "exit_time": "2026-06-12T19:04:40.999650+00:00"
+  },
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_37bbfc0595",
+    "direction": "long",
+    "entry": 29694.5,
+    "exit": 29700.25,
+    "sl": 29667.25,
+    "tp": 29734.75,
+    "pnl": 11.5,
+    "reason": "UNKNOWN",
+    "entry_time": "2026-06-12T19:04:50.094198+00:00",
+    "exit_time": "2026-06-12T19:05:32.529662+00:00"
+  },
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_1cae90a6ac",
+    "direction": "long",
+    "entry": 29694.5,
+    "exit": 29695.5,
+    "sl": 29668.25,
+    "tp": 29733.75,
+    "pnl": 2.0,
+    "reason": "UNKNOWN",
+    "entry_time": "2026-06-12T19:05:42.003393+00:00",
+    "exit_time": "2026-06-12T19:06:24.538636+00:00"
+  },
+  {
+    "symbol": "MNQ",
+    "order_id": "bot_ccf65cf3f2",
+    "direction": "long",
+    "entry": 29705.25,
+    "exit": 29696.25,
+    "sl": 29677.75,
+    "tp": 29730.0,
+    "pnl": -18.0,
+    "reason": "UNKNOWN",
+    "entry_time": "2026-06-12T19:06:33.893220+00:00",
+    "exit_time": "2026-06-12T19:07:16.377258+00:00"
+  }
+]

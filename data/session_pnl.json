@@ -1,0 +1,88 @@
+{
+ "rows": [
+  {
+   "td": "2026-11-04",
+   "kind": "overnight",
+   "pnl": -87.0,
+   "order_id": "bot_bd77f82dc5",
+   "exit_time": "2026-11-03 23:35:34.964765+00:00"
+  },
+  {
+   "td": "2026-11-04",
+   "kind": "overnight",
+   "pnl": 103.5,
+   "order_id": "bot_adopt_a34573f22b",
+   "exit_time": "2026-11-04 00:08:49.109700+00:00"
+  },
+  {
+   "td": "2026-11-05",
+   "kind": "overnight",
+   "pnl": -151.5,
+   "order_id": "bot_adopt_3a5699fee0",
+   "exit_time": "2026-11-04 23:08:45.843326+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": 204.0,
+   "order_id": "bot_af853ccf1a",
+   "exit_time": "2026-11-09 00:06:42.085030+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": -680.5,
+   "order_id": "bot_adopt_e2da8fc853",
+   "exit_time": "2026-11-09 00:52:48.550617+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": 353.0,
+   "order_id": "bot_adopt_51420d1b1d",
+   "exit_time": "2026-11-09 01:29:49.034109+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": -101.5,
+   "order_id": "bot_adopt_b380c88f26",
+   "exit_time": "2026-11-09 02:22:58.444675+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": -321.5,
+   "order_id": "bot_adopt_e637580fdd",
+   "exit_time": "2026-11-09 02:33:12.888895+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": 207.5,
+   "order_id": "bot_adopt_eb5269f7ca",
+   "exit_time": "2026-11-09 02:40:48.421697+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": -66.0,
+   "order_id": "bot_adopt_87d1d05897",
+   "exit_time": "2026-11-09 02:51:36.391407+00:00"
+  },
+  {
+   "td": "2026-11-09",
+   "kind": "overnight",
+   "pnl": 495.5,
+   "order_id": "bot_adopt_600fe6b4d3",
+   "exit_time": "2026-11-09 02:56:21.667124+00:00"
+  },
+  {
+   "td": "2026-11-11",
+   "kind": "overnight",
+   "pnl": 229.5,
+   "order_id": "bot_fe8128bf2c",
+   "exit_time": "2026-11-11 01:01:05.910015+00:00"
+  }
+ ]
+}

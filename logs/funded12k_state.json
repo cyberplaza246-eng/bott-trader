@@ -1,0 +1,17 @@
+{
+ "eq": -440.9999999799984,
+ "hwm": 0.0,
+ "ghwm": 0.0,
+ "day_pnl": -440.9999999799984,
+ "day_key": "2026-10-27",
+ "half": false,
+ "pause_left": -1,
+ "unknown_exits": 2,
+ "og_today": 0,
+ "days": [
+  "2026-10-26"
+ ],
+ "eval_pnl": -440.9999999799984,
+ "eval_hwm": 0.0,
+ "best_day": 0.0
+}

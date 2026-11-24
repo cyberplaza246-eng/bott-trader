@@ -1,0 +1,22 @@
+@echo off
+cd /d C:\Users\shawa\Projects\bott-trader
+set PYTHONUTF8=1
+set PYTHONIOENCODING=utf-8
+set TRADING_MODE=live
+set FALLBACK_ENTRIES_ENABLED=true
+set DAILY_LOSS_LIMIT_PERCENT=1.0
+set TRAIL_ATR_MULT=0.35
+set TRAIL_ACTIVATION_R=0.25
+set NEAT_BAR_EXPORT=1
+set NEAT_BAR_EXPORT_PATH=C:\Users\shawa\neat-mnq-evolution\artifacts\live_bars\MNQ_1m_live.csv
+REM Confidence lot sizing (gated): base 1 until day green + win streak, max 4
+set BASE_CONTRACTS=1
+set MAX_CONTRACTS=4
+set SIZE_WIN_STREAK_MIN=2
+set SIZE_REQUIRE_DAY_GREEN=1
+set SIZE_CONF_2=0.72
+set SIZE_CONF_3=0.78
+set SIZE_CONF_4=0.85
+title bott-trader MNQ LIVE (Lucid sim)
+.\venv\Scripts\python.exe .\start_live_rithmic.py --symbols MNQ --yes
+pause

@@ -1,0 +1,22 @@
+{
+  "as_of_data_end": "2026-08-21 20:59:00+00:00",
+  "development": {
+    "trades": 232,
+    "win_rate": 54.7,
+    "profit_factor": 1.18,
+    "net_pnl": 837.91,
+    "max_drawdown": 618.82,
+    "expectancy": 3.61
+  },
+  "forward": {
+    "trades": 0,
+    "profit_factor": 0.0,
+    "net_pnl": 0.0,
+    "max_drawdown": 0.0,
+    "win_rate": 0.0
+  },
+  "verdict": "IN_PROGRESS \u2014 0/30 forward trades (need 30-50 before decision)",
+  "forward_trade_count": 0,
+  "target_min": 30,
+  "target_max": 50
+}

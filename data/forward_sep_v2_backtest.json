@@ -1,0 +1,137 @@
+{
+  "spec": "pullback_hybrid_v2",
+  "data_bars": 664264,
+  "data_end": "2026-09-21 03:58:00+00:00",
+  "long_recipe": {
+    "stack": "15_5_1",
+    "loop": "window_loop",
+    "entry": "1m_pullback",
+    "win": "w4_no_noon",
+    "stop": "atr1_1.5_6_25",
+    "tp": "1R",
+    "side": "long",
+    "sep": false,
+    "cooldown": 0,
+    "max_day": null,
+    "max_lots": 1,
+    "morning": false,
+    "vwap": "none",
+    "sep_short_min": null
+  },
+  "short_recipe": {
+    "stack": "15_5_1",
+    "loop": "window_loop",
+    "win": "w6_all",
+    "stop": "atr1_1.5_6_25",
+    "side": "short",
+    "max_day": null,
+    "max_lots": 1,
+    "sep_min": 0.45,
+    "entry": "1m_pullback",
+    "tp": "1R",
+    "vwap": "none",
+    "structure": "lh_ll",
+    "sep_mode": "none"
+  },
+  "june_through_latest": {
+    "period": "2026-06-01 through 2026-09-21 03:58:00+00:00",
+    "combined": {
+      "trades": 185,
+      "win_rate": 56.2,
+      "profit_factor": 1.21,
+      "net_pnl": 735.74,
+      "expectancy": 3.98,
+      "max_drawdown": 560.41
+    },
+    "long": {
+      "trades": 104,
+      "win_rate": 56.7,
+      "profit_factor": 1.22,
+      "net_pnl": 418.22,
+      "expectancy": 4.02,
+      "max_drawdown": 297.99
+    },
+    "short": {
+      "trades": 81,
+      "win_rate": 55.6,
+      "profit_factor": 1.2,
+      "net_pnl": 317.52,
+      "expectancy": 3.92,
+      "max_drawdown": 385.21
+    },
+    "activity": {
+      "max_day": 7,
+      "avg_active": 2.68,
+      "days_5plus": 6,
+      "active_days": 69
+    },
+    "monthly": {
+      "2026-06": {
+        "trades": 42,
+        "profit_factor": 1.9,
+        "net_pnl": 579.21
+      },
+      "2026-07": {
+        "trades": 58,
+        "profit_factor": 1.53,
+        "net_pnl": 549.4
+      },
+      "2026-08": {
+        "trades": 56,
+        "profit_factor": 0.76,
+        "net_pnl": -284.24
+      },
+      "2026-09": {
+        "trades": 29,
+        "profit_factor": 0.83,
+        "net_pnl": -108.62
+      }
+    }
+  },
+  "forward_sep_plus": {
+    "period": "2026-09-01 through 2026-09-21 03:58:00+00:00",
+    "combined": {
+      "trades": 29,
+      "win_rate": 48.3,
+      "profit_factor": 0.83,
+      "net_pnl": -108.62,
+      "expectancy": -3.75,
+      "max_drawdown": 218.22
+    },
+    "long": {
+      "trades": 18,
+      "win_rate": 50.0,
+      "profit_factor": 0.84,
+      "net_pnl": -61.23,
+      "expectancy": -3.4,
+      "max_drawdown": 149.52
+    },
+    "short": {
+      "trades": 11,
+      "win_rate": 45.5,
+      "profit_factor": 0.81,
+      "net_pnl": -47.39,
+      "expectancy": -4.31,
+      "max_drawdown": 130.18
+    },
+    "activity": {
+      "max_day": 6,
+      "avg_active": 2.23,
+      "days_5plus": 1,
+      "active_days": 13
+    },
+    "monthly": {
+      "2026-09": {
+        "trades": 29,
+        "profit_factor": 0.83,
+        "net_pnl": -108.62
+      }
+    },
+    "frozen_gate": "FAIL",
+    "gate_rules": {
+      "good": "PF>=1.2 and net>0",
+      "borderline": "PF 1.0-1.19",
+      "fail": "PF<1.0"
+    }
+  }
+}

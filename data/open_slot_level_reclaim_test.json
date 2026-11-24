@@ -1,0 +1,609 @@
+{
+  "hypothesis": "open_slot_level_reclaim",
+  "rows": [
+    {
+      "name": "sweep2",
+      "cfg": {
+        "name": "sweep2",
+        "sweep_min": 2.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": false,
+        "levels": [
+          "pdh",
+          "pdl",
+          "onh",
+          "onl",
+          "rth_open"
+        ],
+        "use_or": true,
+        "max_day": 2
+      },
+      "signals": 1004,
+      "is": {
+        "n": 578,
+        "wr": 34.3,
+        "pf": 0.65,
+        "net": -2365.72,
+        "exp": -4.09,
+        "dd": 2598.38,
+        "mfe": 42.62,
+        "mae": 39.75,
+        "edge": 2.88
+      },
+      "val": {
+        "n": 62,
+        "wr": 33.9,
+        "pf": 0.64,
+        "net": -259.88,
+        "exp": -4.19,
+        "dd": 314.46,
+        "mfe": 78.38,
+        "mae": 60.88,
+        "edge": 17.5
+      },
+      "oos": {
+        "n": 49,
+        "wr": 32.7,
+        "pf": 0.61,
+        "net": -229.26,
+        "exp": -4.68,
+        "dd": 296.04,
+        "mfe": 43.0,
+        "mae": 51.25,
+        "edge": -8.25
+      },
+      "pass": false,
+      "full": {
+        "n": 689,
+        "wr": 34.1,
+        "pf": 0.65,
+        "net": -2854.86,
+        "exp": -4.14,
+        "dd": 3132.04,
+        "mfe": 44.75,
+        "mae": 42.5,
+        "edge": 2.25
+      }
+    },
+    {
+      "name": "open_to_1030",
+      "cfg": {
+        "name": "open_to_1030",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": false,
+        "levels": [
+          "pdh",
+          "pdl",
+          "onh",
+          "onl",
+          "rth_open"
+        ],
+        "use_or": true,
+        "max_day": 2,
+        "open_end": 630
+      },
+      "signals": 1012,
+      "is": {
+        "n": 575,
+        "wr": 33.9,
+        "pf": 0.64,
+        "net": -2432.5,
+        "exp": -4.23,
+        "dd": 2656.8,
+        "mfe": 42.25,
+        "mae": 40.0,
+        "edge": 2.25
+      },
+      "val": {
+        "n": 61,
+        "wr": 32.8,
+        "pf": 0.61,
+        "net": -282.14,
+        "exp": -4.63,
+        "dd": 318.64,
+        "mfe": 79.25,
+        "mae": 60.0,
+        "edge": 19.25
+      },
+      "oos": {
+        "n": 51,
+        "wr": 35.3,
+        "pf": 0.68,
+        "net": -184.74,
+        "exp": -3.62,
+        "dd": 292.54,
+        "mfe": 38.0,
+        "mae": 51.25,
+        "edge": -13.25
+      },
+      "pass": false,
+      "full": {
+        "n": 687,
+        "wr": 33.9,
+        "pf": 0.64,
+        "net": -2899.38,
+        "exp": -4.22,
+        "dd": 3173.06,
+        "mfe": 44.5,
+        "mae": 42.5,
+        "edge": 2.0
+      }
+    },
+    {
+      "name": "raw_open_reclaim",
+      "cfg": {
+        "name": "raw_open_reclaim",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": false,
+        "levels": [
+          "pdh",
+          "pdl",
+          "onh",
+          "onl",
+          "rth_open"
+        ],
+        "use_or": true,
+        "max_day": 2
+      },
+      "signals": 1006,
+      "is": {
+        "n": 571,
+        "wr": 33.6,
+        "pf": 0.63,
+        "net": -2481.54,
+        "exp": -4.35,
+        "dd": 2701.32,
+        "mfe": 42.25,
+        "mae": 40.0,
+        "edge": 2.25
+      },
+      "val": {
+        "n": 61,
+        "wr": 32.8,
+        "pf": 0.61,
+        "net": -282.14,
+        "exp": -4.63,
+        "dd": 318.64,
+        "mfe": 79.25,
+        "mae": 60.0,
+        "edge": 19.25
+      },
+      "oos": {
+        "n": 49,
+        "wr": 34.7,
+        "pf": 0.67,
+        "net": -189.26,
+        "exp": -3.86,
+        "dd": 292.54,
+        "mfe": 39.75,
+        "mae": 59.25,
+        "edge": -19.5
+      },
+      "pass": false,
+      "full": {
+        "n": 681,
+        "wr": 33.6,
+        "pf": 0.63,
+        "net": -2952.94,
+        "exp": -4.34,
+        "dd": 3217.58,
+        "mfe": 44.5,
+        "mae": 42.75,
+        "edge": 1.75
+      }
+    },
+    {
+      "name": "t5_filter",
+      "cfg": {
+        "name": "t5_filter",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": true,
+        "levels": [
+          "pdh",
+          "pdl",
+          "onh",
+          "onl",
+          "rth_open"
+        ],
+        "use_or": true,
+        "max_day": 2
+      },
+      "signals": 971,
+      "is": {
+        "n": 673,
+        "wr": 33.9,
+        "pf": 0.64,
+        "net": -2834.52,
+        "exp": -4.21,
+        "dd": 3041.42,
+        "mfe": 42.5,
+        "mae": 36.75,
+        "edge": 5.75
+      },
+      "val": {
+        "n": 70,
+        "wr": 30.0,
+        "pf": 0.54,
+        "net": -401.8,
+        "exp": -5.74,
+        "dd": 491.18,
+        "mfe": 60.38,
+        "mae": 80.12,
+        "edge": -19.75
+      },
+      "oos": {
+        "n": 53,
+        "wr": 26.4,
+        "pf": 0.45,
+        "net": -380.22,
+        "exp": -7.17,
+        "dd": 424.74,
+        "mfe": 49.75,
+        "mae": 46.5,
+        "edge": 3.25
+      },
+      "pass": false,
+      "full": {
+        "n": 796,
+        "wr": 33.0,
+        "pf": 0.62,
+        "net": -3616.54,
+        "exp": -4.54,
+        "dd": 3867.96,
+        "mfe": 43.62,
+        "mae": 39.75,
+        "edge": 3.88
+      }
+    },
+    {
+      "name": "sl10_tp15",
+      "cfg": {
+        "name": "sl10_tp15",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 10.0,
+        "tp_pts": 15.0,
+        "max_bars": 20,
+        "require_t5": false,
+        "levels": [
+          "pdh",
+          "pdl",
+          "onh",
+          "onl",
+          "rth_open"
+        ],
+        "use_or": true,
+        "max_day": 2
+      },
+      "signals": 1006,
+      "is": {
+        "n": 553,
+        "wr": 35.4,
+        "pf": 0.71,
+        "net": -2239.72,
+        "exp": -4.05,
+        "dd": 2363.6,
+        "mfe": 42.75,
+        "mae": 41.0,
+        "edge": 1.75
+      },
+      "val": {
+        "n": 61,
+        "wr": 31.1,
+        "pf": 0.59,
+        "net": -376.14,
+        "exp": -6.17,
+        "dd": 404.4,
+        "mfe": 79.25,
+        "mae": 60.0,
+        "edge": 19.25
+      },
+      "oos": {
+        "n": 47,
+        "wr": 34.0,
+        "pf": 0.67,
+        "net": -221.78,
+        "exp": -4.72,
+        "dd": 310.9,
+        "mfe": 39.75,
+        "mae": 59.25,
+        "edge": -19.5
+      },
+      "pass": false,
+      "full": {
+        "n": 661,
+        "wr": 34.9,
+        "pf": 0.7,
+        "net": -2837.64,
+        "exp": -4.29,
+        "dd": 2994.12,
+        "mfe": 45.0,
+        "mae": 43.0,
+        "edge": 2.0
+      }
+    },
+    {
+      "name": "max1",
+      "cfg": {
+        "name": "max1",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": false,
+        "levels": [
+          "pdh",
+          "pdl",
+          "onh",
+          "onl",
+          "rth_open"
+        ],
+        "use_or": true,
+        "max_day": 1
+      },
+      "signals": 507,
+      "is": {
+        "n": 428,
+        "wr": 33.4,
+        "pf": 0.62,
+        "net": -1904.72,
+        "exp": -4.45,
+        "dd": 2083.48,
+        "mfe": 42.38,
+        "mae": 42.12,
+        "edge": 0.25
+      },
+      "val": {
+        "n": 45,
+        "wr": 26.7,
+        "pf": 0.46,
+        "net": -318.3,
+        "exp": -7.07,
+        "dd": 340.56,
+        "mfe": 80.75,
+        "mae": 54.75,
+        "edge": 26.0
+      },
+      "oos": {
+        "n": 34,
+        "wr": 38.2,
+        "pf": 0.78,
+        "net": -83.16,
+        "exp": -2.45,
+        "dd": 208.36,
+        "mfe": 44.75,
+        "mae": 59.75,
+        "edge": -15.0
+      },
+      "pass": false,
+      "full": {
+        "n": 507,
+        "wr": 33.1,
+        "pf": 0.62,
+        "net": -2306.18,
+        "exp": -4.55,
+        "dd": 2560.76,
+        "mfe": 44.75,
+        "mae": 43.25,
+        "edge": 1.5
+      }
+    },
+    {
+      "name": "confirm1",
+      "cfg": {
+        "name": "confirm1",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 1,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": false,
+        "levels": [
+          "pdh",
+          "pdl",
+          "onh",
+          "onl",
+          "rth_open"
+        ],
+        "use_or": true,
+        "max_day": 2
+      },
+      "signals": 877,
+      "is": {
+        "n": 720,
+        "wr": 34.6,
+        "pf": 0.66,
+        "net": -2814.3,
+        "exp": -3.91,
+        "dd": 3154.2,
+        "mfe": 37.5,
+        "mae": 40.62,
+        "edge": -3.12
+      },
+      "val": {
+        "n": 82,
+        "wr": 23.2,
+        "pf": 0.38,
+        "net": -694.68,
+        "exp": -8.47,
+        "dd": 695.02,
+        "mfe": 65.88,
+        "mae": 69.0,
+        "edge": -3.12
+      },
+      "oos": {
+        "n": 62,
+        "wr": 32.3,
+        "pf": 0.6,
+        "net": -299.88,
+        "exp": -4.84,
+        "dd": 304.74,
+        "mfe": 40.0,
+        "mae": 56.62,
+        "edge": -16.62
+      },
+      "pass": false,
+      "full": {
+        "n": 864,
+        "wr": 33.3,
+        "pf": 0.63,
+        "net": -3808.86,
+        "exp": -4.41,
+        "dd": 4131.36,
+        "mfe": 39.25,
+        "mae": 42.62,
+        "edge": -3.38
+      }
+    },
+    {
+      "name": "or_only",
+      "cfg": {
+        "name": "or_only",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": false,
+        "levels": [],
+        "use_or": true,
+        "max_day": 2
+      },
+      "signals": 926,
+      "is": {
+        "n": 546,
+        "wr": 35.9,
+        "pf": 0.7,
+        "net": -1859.04,
+        "exp": -3.4,
+        "dd": 2117.8,
+        "mfe": 39.38,
+        "mae": 39.38,
+        "edge": 0.0
+      },
+      "val": {
+        "n": 57,
+        "wr": 22.8,
+        "pf": 0.37,
+        "net": -491.18,
+        "exp": -8.62,
+        "dd": 504.74,
+        "mfe": 56.0,
+        "mae": 55.25,
+        "edge": 0.75
+      },
+      "oos": {
+        "n": 44,
+        "wr": 38.6,
+        "pf": 0.79,
+        "net": -100.56,
+        "exp": -2.29,
+        "dd": 172.2,
+        "mfe": 44.5,
+        "mae": 45.25,
+        "edge": -0.75
+      },
+      "pass": false,
+      "full": {
+        "n": 647,
+        "wr": 34.9,
+        "pf": 0.67,
+        "net": -2450.78,
+        "exp": -3.79,
+        "dd": 2781.18,
+        "mfe": 42.75,
+        "mae": 40.5,
+        "edge": 2.25
+      }
+    },
+    {
+      "name": "pd_only",
+      "cfg": {
+        "name": "pd_only",
+        "sweep_min": 1.0,
+        "touch_pts": 4.0,
+        "confirm": 0,
+        "sl_pts": 8.0,
+        "tp_pts": 12.0,
+        "max_bars": 15,
+        "require_t5": false,
+        "levels": [
+          "pdh",
+          "pdl"
+        ],
+        "use_or": false,
+        "max_day": 2
+      },
+      "signals": 386,
+      "is": {
+        "n": 218,
+        "wr": 37.6,
+        "pf": 0.76,
+        "net": -587.32,
+        "exp": -2.69,
+        "dd": 828.0,
+        "mfe": 43.25,
+        "mae": 40.75,
+        "edge": 2.5
+      },
+      "val": {
+        "n": 23,
+        "wr": 21.7,
+        "pf": 0.35,
+        "net": -208.02,
+        "exp": -9.04,
+        "dd": 212.54,
+        "mfe": 77.5,
+        "mae": 102.25,
+        "edge": -24.75
+      },
+      "oos": {
+        "n": 24,
+        "wr": 29.2,
+        "pf": 0.52,
+        "net": -145.76,
+        "exp": -6.07,
+        "dd": 145.76,
+        "mfe": 44.38,
+        "mae": 57.75,
+        "edge": -13.38
+      },
+      "pass": false,
+      "full": {
+        "n": 265,
+        "wr": 35.5,
+        "pf": 0.69,
+        "net": -941.1,
+        "exp": -3.55,
+        "dd": 1181.78,
+        "mfe": 44.5,
+        "mae": 46.5,
+        "edge": -2.0
+      }
+    }
+  ]
+}

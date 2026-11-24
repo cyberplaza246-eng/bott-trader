@@ -1,0 +1,1865 @@
+{
+  "spec": "short_only_w6_all_setup_hunt",
+  "tested": 48,
+  "elapsed_s": 60.7,
+  "pass": [
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=lh_ll|sep=none",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "win": "w6_all",
+        "stop": "atr1_1.5_6_25",
+        "side": "short",
+        "max_day": 4,
+        "max_lots": 1,
+        "sep_min": 0.45,
+        "entry": "1m_pullback",
+        "tp": "1R",
+        "vwap": "none",
+        "structure": "lh_ll",
+        "sep_mode": "none"
+      },
+      "is": {
+        "trades": 35,
+        "win_rate": 54.3,
+        "profit_factor": 1.14,
+        "expectancy": 2.56,
+        "total_pnl": 89.74,
+        "max_drawdown": 226.72,
+        "avg_winner": 39.61,
+        "avg_loser": -41.43,
+        "max_consec_losses": 5
+      },
+      "oos": {
+        "trades": 44,
+        "win_rate": 61.4,
+        "profit_factor": 1.56,
+        "expectancy": 10.05,
+        "total_pnl": 442.12,
+        "max_drawdown": 160.93,
+        "avg_winner": 45.62,
+        "avg_loser": -46.45,
+        "max_consec_losses": 4
+      },
+      "overall": {
+        "trades": 79,
+        "win_rate": 58.2,
+        "profit_factor": 1.37,
+        "expectancy": 6.73,
+        "total_pnl": 531.86,
+        "max_drawdown": 226.72,
+        "avg_winner": 43.14,
+        "avg_loser": -44.02,
+        "max_consec_losses": 5
+      },
+      "session_oos": {
+        "morning": {
+          "trades": 15,
+          "win_rate": 53.3,
+          "profit_factor": 1.09,
+          "expectancy": 2.09,
+          "total_pnl": 31.4,
+          "max_drawdown": 204.96,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 23,
+          "win_rate": 65.2,
+          "profit_factor": 1.85,
+          "expectancy": 13.65,
+          "total_pnl": 313.87,
+          "max_drawdown": 139.31,
+          "avg_winner": 45.64,
+          "avg_loser": -46.35,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 66.7,
+          "profit_factor": 2.61,
+          "expectancy": 16.14,
+          "total_pnl": 96.85,
+          "max_drawdown": 60.18,
+          "avg_winner": 39.26,
+          "avg_loser": -30.09,
+          "max_consec_losses": 2
+        }
+      },
+      "pass": true,
+      "time_dependency": "OOS profit concentrated in midday (314/442)",
+      "interesting": false
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=with_side|struct=lh_ll|sep=none",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "win": "w6_all",
+        "stop": "atr1_1.5_6_25",
+        "side": "short",
+        "max_day": 4,
+        "max_lots": 1,
+        "sep_min": 0.45,
+        "entry": "1m_pullback",
+        "tp": "1R",
+        "vwap": "with_side",
+        "structure": "lh_ll",
+        "sep_mode": "none"
+      },
+      "is": {
+        "trades": 34,
+        "win_rate": 52.9,
+        "profit_factor": 1.09,
+        "expectancy": 1.76,
+        "total_pnl": 59.91,
+        "max_drawdown": 256.55,
+        "avg_winner": 40.16,
+        "avg_loser": -41.43,
+        "max_consec_losses": 5
+      },
+      "oos": {
+        "trades": 42,
+        "win_rate": 59.5,
+        "profit_factor": 1.42,
+        "expectancy": 7.85,
+        "total_pnl": 329.69,
+        "max_drawdown": 160.93,
+        "avg_winner": 44.77,
+        "avg_loser": -46.45,
+        "max_consec_losses": 4
+      },
+      "overall": {
+        "trades": 76,
+        "win_rate": 56.6,
+        "profit_factor": 1.27,
+        "expectancy": 5.13,
+        "total_pnl": 389.6,
+        "max_drawdown": 256.55,
+        "avg_winner": 42.84,
+        "avg_loser": -44.02,
+        "max_consec_losses": 5
+      },
+      "session_oos": {
+        "morning": {
+          "trades": 12,
+          "win_rate": 41.7,
+          "profit_factor": 0.68,
+          "expectancy": -9.57,
+          "total_pnl": -114.88,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 23,
+          "win_rate": 65.2,
+          "profit_factor": 1.85,
+          "expectancy": 13.65,
+          "total_pnl": 313.87,
+          "max_drawdown": 139.31,
+          "avg_winner": 45.64,
+          "avg_loser": -46.35,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 71.4,
+          "profit_factor": 3.17,
+          "expectancy": 18.67,
+          "total_pnl": 130.69,
+          "max_drawdown": 60.18,
+          "avg_winner": 38.17,
+          "avg_loser": -30.09,
+          "max_consec_losses": 2
+        }
+      },
+      "pass": true,
+      "time_dependency": "OOS profit concentrated in midday (314/330)",
+      "interesting": false
+    }
+  ],
+  "interesting": [
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=lh_ll|sep=noon_windows",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "win": "w6_all",
+        "stop": "atr1_1.5_6_25",
+        "side": "short",
+        "max_day": 4,
+        "max_lots": 1,
+        "sep_min": 0.45,
+        "entry": "1m_pullback",
+        "tp": "1R",
+        "vwap": "none",
+        "structure": "lh_ll",
+        "sep_mode": "noon_windows"
+      },
+      "is": {
+        "trades": 28,
+        "win_rate": 50.0,
+        "profit_factor": 1.02,
+        "expectancy": 0.33,
+        "total_pnl": 9.23,
+        "max_drawdown": 286.35,
+        "avg_winner": 42.93,
+        "avg_loser": -42.28,
+        "max_consec_losses": 4
+      },
+      "oos": {
+        "trades": 37,
+        "win_rate": 56.8,
+        "profit_factor": 1.27,
+        "expectancy": 5.51,
+        "total_pnl": 203.71,
+        "max_drawdown": 204.96,
+        "avg_winner": 45.67,
+        "avg_loser": -47.21,
+        "max_consec_losses": 4
+      },
+      "overall": {
+        "trades": 65,
+        "win_rate": 53.8,
+        "profit_factor": 1.16,
+        "expectancy": 3.28,
+        "total_pnl": 212.94,
+        "max_drawdown": 286.35,
+        "avg_winner": 44.57,
+        "avg_loser": -44.9,
+        "max_consec_losses": 4
+      },
+      "session_oos": {
+        "morning": {
+          "trades": 15,
+          "win_rate": 53.3,
+          "profit_factor": 1.09,
+          "expectancy": 2.09,
+          "total_pnl": 31.4,
+          "max_drawdown": 204.96,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 15,
+          "win_rate": 60.0,
+          "profit_factor": 1.44,
+          "expectancy": 8.45,
+          "total_pnl": 126.7,
+          "max_drawdown": 153.72,
+          "avg_winner": 45.77,
+          "avg_loser": -47.53,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 57.1,
+          "profit_factor": 1.41,
+          "expectancy": 6.52,
+          "total_pnl": 45.61,
+          "max_drawdown": 60.18,
+          "avg_winner": 39.26,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "pass": false,
+      "time_dependency": null,
+      "interesting": true
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=with_side|struct=lh_ll|sep=noon_windows",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "win": "w6_all",
+        "stop": "atr1_1.5_6_25",
+        "side": "short",
+        "max_day": 4,
+        "max_lots": 1,
+        "sep_min": 0.45,
+        "entry": "1m_pullback",
+        "tp": "1R",
+        "vwap": "with_side",
+        "structure": "lh_ll",
+        "sep_mode": "noon_windows"
+      },
+      "is": {
+        "trades": 28,
+        "win_rate": 50.0,
+        "profit_factor": 1.02,
+        "expectancy": 0.33,
+        "total_pnl": 9.23,
+        "max_drawdown": 286.35,
+        "avg_winner": 42.93,
+        "avg_loser": -42.28,
+        "max_consec_losses": 4
+      },
+      "oos": {
+        "trades": 35,
+        "win_rate": 54.3,
+        "profit_factor": 1.12,
+        "expectancy": 2.61,
+        "total_pnl": 91.28,
+        "max_drawdown": 204.96,
+        "avg_winner": 44.56,
+        "avg_loser": -47.21,
+        "max_consec_losses": 4
+      },
+      "overall": {
+        "trades": 63,
+        "win_rate": 52.4,
+        "profit_factor": 1.07,
+        "expectancy": 1.6,
+        "total_pnl": 100.5,
+        "max_drawdown": 286.35,
+        "avg_winner": 43.87,
+        "avg_loser": -44.9,
+        "max_consec_losses": 4
+      },
+      "session_oos": {
+        "morning": {
+          "trades": 12,
+          "win_rate": 41.7,
+          "profit_factor": 0.68,
+          "expectancy": -9.57,
+          "total_pnl": -114.88,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 15,
+          "win_rate": 60.0,
+          "profit_factor": 1.44,
+          "expectancy": 8.45,
+          "total_pnl": 126.7,
+          "max_drawdown": 153.72,
+          "avg_winner": 45.77,
+          "avg_loser": -47.53,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 8,
+          "win_rate": 62.5,
+          "profit_factor": 1.71,
+          "expectancy": 9.93,
+          "total_pnl": 79.45,
+          "max_drawdown": 60.18,
+          "avg_winner": 38.17,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "pass": false,
+      "time_dependency": "OOS profit concentrated in midday (127/91)",
+      "interesting": true
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=none|struct=lh_ll|sep=none",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "win": "w6_all",
+        "stop": "atr1_1.5_6_25",
+        "side": "short",
+        "max_day": 4,
+        "max_lots": 1,
+        "sep_min": 0.45,
+        "entry": "1m_pullback",
+        "tp": "2R",
+        "vwap": "none",
+        "structure": "lh_ll",
+        "sep_mode": "none"
+      },
+      "is": {
+        "trades": 32,
+        "win_rate": 34.4,
+        "profit_factor": 1.04,
+        "expectancy": 1.15,
+        "total_pnl": 36.64,
+        "max_drawdown": 256.46,
+        "avg_winner": 84.11,
+        "avg_loser": -42.31,
+        "max_consec_losses": 5
+      },
+      "oos": {
+        "trades": 40,
+        "win_rate": 40.0,
+        "profit_factor": 1.31,
+        "expectancy": 8.86,
+        "total_pnl": 354.58,
+        "max_drawdown": 278.02,
+        "avg_winner": 93.49,
+        "avg_loser": -47.55,
+        "max_consec_losses": 5
+      },
+      "overall": {
+        "trades": 72,
+        "win_rate": 37.5,
+        "profit_factor": 1.19,
+        "expectancy": 5.43,
+        "total_pnl": 391.22,
+        "max_drawdown": 278.02,
+        "avg_winner": 89.67,
+        "avg_loser": -45.11,
+        "max_consec_losses": 5
+      },
+      "session_oos": {
+        "morning": {
+          "trades": 14,
+          "win_rate": 35.7,
+          "profit_factor": 1.07,
+          "expectancy": 2.33,
+          "total_pnl": 32.64,
+          "max_drawdown": 208.68,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 22,
+          "win_rate": 40.9,
+          "profit_factor": 1.36,
+          "expectancy": 10.1,
+          "total_pnl": 222.18,
+          "max_drawdown": 239.31,
+          "avg_winner": 93.11,
+          "avg_loser": -47.37,
+          "max_consec_losses": 5
+        },
+        "afternoon": {
+          "trades": 4,
+          "win_rate": 50.0,
+          "profit_factor": 2.55,
+          "expectancy": 24.94,
+          "total_pnl": 99.75,
+          "max_drawdown": 64.3,
+          "avg_winner": 82.03,
+          "avg_loser": -32.15,
+          "max_consec_losses": 2
+        }
+      },
+      "pass": false,
+      "time_dependency": null,
+      "interesting": true
+    }
+  ],
+  "best_fail": {
+    "label": "entry=1m_pullback|tp=1R|vwap=none|struct=none|sep=none",
+    "config": {
+      "stack": "15_5_1",
+      "loop": "window_loop",
+      "win": "w6_all",
+      "stop": "atr1_1.5_6_25",
+      "side": "short",
+      "max_day": 4,
+      "max_lots": 1,
+      "sep_min": 0.45,
+      "entry": "1m_pullback",
+      "tp": "1R",
+      "vwap": "none",
+      "structure": "none",
+      "sep_mode": "none"
+    },
+    "is": {
+      "trades": 60,
+      "win_rate": 46.7,
+      "profit_factor": 0.78,
+      "expectancy": -4.92,
+      "total_pnl": -295.2,
+      "max_drawdown": 581.57,
+      "avg_winner": 37.28,
+      "avg_loser": -41.84,
+      "max_consec_losses": 5
+    },
+    "oos": {
+      "trades": 57,
+      "win_rate": 61.4,
+      "profit_factor": 1.6,
+      "expectancy": 10.8,
+      "total_pnl": 615.46,
+      "max_drawdown": 204.96,
+      "avg_winner": 46.84,
+      "avg_loser": -46.55,
+      "max_consec_losses": 5
+    },
+    "overall": {
+      "trades": 117,
+      "win_rate": 53.8,
+      "profit_factor": 1.14,
+      "expectancy": 2.74,
+      "total_pnl": 320.26,
+      "max_drawdown": 581.57,
+      "avg_winner": 42.59,
+      "avg_loser": -43.76,
+      "max_consec_losses": 5
+    },
+    "session_oos": {
+      "morning": {
+        "trades": 24,
+        "win_rate": 58.3,
+        "profit_factor": 1.33,
+        "expectancy": 7.11,
+        "total_pnl": 170.63,
+        "max_drawdown": 309.53,
+        "avg_winner": 48.76,
+        "avg_loser": -51.2,
+        "max_consec_losses": 4
+      },
+      "midday": {
+        "trades": 25,
+        "win_rate": 60.0,
+        "profit_factor": 1.52,
+        "expectancy": 9.35,
+        "total_pnl": 233.73,
+        "max_drawdown": 186.4,
+        "avg_winner": 45.71,
+        "avg_loser": -45.18,
+        "max_consec_losses": 4
+      },
+      "afternoon": {
+        "trades": 8,
+        "win_rate": 75.0,
+        "profit_factor": 4.51,
+        "expectancy": 26.39,
+        "total_pnl": 211.1,
+        "max_drawdown": 60.18,
+        "avg_winner": 45.21,
+        "avg_loser": -30.09,
+        "max_consec_losses": 2
+      }
+    },
+    "pass": false,
+    "time_dependency": null,
+    "interesting": false
+  },
+  "all_results_summary": [
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=none|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.6,
+      "oos_net": 615.46,
+      "oos_n": 57,
+      "session_oos": {
+        "morning": {
+          "trades": 24,
+          "win_rate": 58.3,
+          "profit_factor": 1.33,
+          "expectancy": 7.11,
+          "total_pnl": 170.63,
+          "max_drawdown": 309.53,
+          "avg_winner": 48.76,
+          "avg_loser": -51.2,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 25,
+          "win_rate": 60.0,
+          "profit_factor": 1.52,
+          "expectancy": 9.35,
+          "total_pnl": 233.73,
+          "max_drawdown": 186.4,
+          "avg_winner": 45.71,
+          "avg_loser": -45.18,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 8,
+          "win_rate": 75.0,
+          "profit_factor": 4.51,
+          "expectancy": 26.39,
+          "total_pnl": 211.1,
+          "max_drawdown": 60.18,
+          "avg_winner": 45.21,
+          "avg_loser": -30.09,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=lh_ll|sep=none",
+      "pass": true,
+      "interesting": false,
+      "oos_pf": 1.56,
+      "oos_net": 442.12,
+      "oos_n": 44,
+      "session_oos": {
+        "morning": {
+          "trades": 15,
+          "win_rate": 53.3,
+          "profit_factor": 1.09,
+          "expectancy": 2.09,
+          "total_pnl": 31.4,
+          "max_drawdown": 204.96,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 23,
+          "win_rate": 65.2,
+          "profit_factor": 1.85,
+          "expectancy": 13.65,
+          "total_pnl": 313.87,
+          "max_drawdown": 139.31,
+          "avg_winner": 45.64,
+          "avg_loser": -46.35,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 66.7,
+          "profit_factor": 2.61,
+          "expectancy": 16.14,
+          "total_pnl": 96.85,
+          "max_drawdown": 60.18,
+          "avg_winner": 39.26,
+          "avg_loser": -30.09,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (314/442)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=none|struct=none|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.49,
+      "oos_net": 724.16,
+      "oos_n": 54,
+      "session_oos": {
+        "morning": {
+          "trades": 23,
+          "win_rate": 43.5,
+          "profit_factor": 1.48,
+          "expectancy": 13.99,
+          "total_pnl": 321.87,
+          "max_drawdown": 310.77,
+          "avg_winner": 98.76,
+          "avg_loser": -51.21,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 25,
+          "win_rate": 36.0,
+          "profit_factor": 1.1,
+          "expectancy": 2.86,
+          "total_pnl": 71.55,
+          "max_drawdown": 392.6,
+          "avg_winner": 91.07,
+          "avg_loser": -46.75,
+          "max_consec_losses": 8
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 66.7,
+          "profit_factor": 6.14,
+          "expectancy": 55.12,
+          "total_pnl": 330.74,
+          "max_drawdown": 64.3,
+          "avg_winner": 98.76,
+          "avg_loser": -32.15,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=with_side|struct=none|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.46,
+      "oos_net": 474.26,
+      "oos_n": 55,
+      "session_oos": {
+        "morning": {
+          "trades": 19,
+          "win_rate": 47.4,
+          "profit_factor": 0.86,
+          "expectancy": -3.85,
+          "total_pnl": -73.17,
+          "max_drawdown": 312.01,
+          "avg_winner": 48.76,
+          "avg_loser": -51.2,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 25,
+          "win_rate": 60.0,
+          "profit_factor": 1.5,
+          "expectancy": 9.12,
+          "total_pnl": 228.09,
+          "max_drawdown": 186.4,
+          "avg_winner": 45.33,
+          "avg_loser": -45.18,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 11,
+          "win_rate": 81.8,
+          "profit_factor": 6.31,
+          "expectancy": 29.03,
+          "total_pnl": 319.34,
+          "max_drawdown": 60.18,
+          "avg_winner": 42.17,
+          "avg_loser": -30.09,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=with_side|struct=none|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.45,
+      "oos_net": 634.02,
+      "oos_n": 52,
+      "session_oos": {
+        "morning": {
+          "trades": 18,
+          "win_rate": 33.3,
+          "profit_factor": 0.96,
+          "expectancy": -1.22,
+          "total_pnl": -21.93,
+          "max_drawdown": 310.77,
+          "avg_winner": 98.76,
+          "avg_loser": -51.21,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 25,
+          "win_rate": 40.0,
+          "profit_factor": 1.3,
+          "expectancy": 8.41,
+          "total_pnl": 210.27,
+          "max_drawdown": 286.4,
+          "avg_winner": 90.71,
+          "avg_loser": -46.46,
+          "max_consec_losses": 6
+        },
+        "afternoon": {
+          "trades": 9,
+          "win_rate": 66.7,
+          "profit_factor": 5.43,
+          "expectancy": 49.52,
+          "total_pnl": 445.68,
+          "max_drawdown": 64.3,
+          "avg_winner": 91.05,
+          "avg_loser": -33.54,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in afternoon (446/634)"
+    },
+    {
+      "label": "entry=quiet|tp=1R|vwap=none|struct=lh_ll|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.42,
+      "oos_net": 569.81,
+      "oos_n": 70,
+      "session_oos": {
+        "morning": {
+          "trades": 32,
+          "win_rate": 53.1,
+          "profit_factor": 1.08,
+          "expectancy": 1.88,
+          "total_pnl": 60.32,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 3
+        },
+        "midday": {
+          "trades": 33,
+          "win_rate": 63.6,
+          "profit_factor": 1.67,
+          "expectancy": 11.5,
+          "total_pnl": 379.42,
+          "max_drawdown": 198.74,
+          "avg_winner": 44.96,
+          "avg_loser": -47.07,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 5,
+          "win_rate": 80.0,
+          "profit_factor": 4.79,
+          "expectancy": 26.01,
+          "total_pnl": 130.07,
+          "max_drawdown": 34.35,
+          "avg_winner": 41.1,
+          "avg_loser": -34.35,
+          "max_consec_losses": 1
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=with_side|struct=lh_ll|sep=none",
+      "pass": true,
+      "interesting": false,
+      "oos_pf": 1.42,
+      "oos_net": 329.69,
+      "oos_n": 42,
+      "session_oos": {
+        "morning": {
+          "trades": 12,
+          "win_rate": 41.7,
+          "profit_factor": 0.68,
+          "expectancy": -9.57,
+          "total_pnl": -114.88,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 23,
+          "win_rate": 65.2,
+          "profit_factor": 1.85,
+          "expectancy": 13.65,
+          "total_pnl": 313.87,
+          "max_drawdown": 139.31,
+          "avg_winner": 45.64,
+          "avg_loser": -46.35,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 71.4,
+          "profit_factor": 3.17,
+          "expectancy": 18.67,
+          "total_pnl": 130.69,
+          "max_drawdown": 60.18,
+          "avg_winner": 38.17,
+          "avg_loser": -30.09,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (314/330)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=none|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.36,
+      "oos_net": 273.34,
+      "oos_n": 38,
+      "session_oos": {
+        "morning": {
+          "trades": 15,
+          "win_rate": 60.0,
+          "profit_factor": 1.43,
+          "expectancy": 8.76,
+          "total_pnl": 131.4,
+          "max_drawdown": 156.2,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 2
+        },
+        "midday": {
+          "trades": 17,
+          "win_rate": 58.8,
+          "profit_factor": 1.39,
+          "expectancy": 7.55,
+          "total_pnl": 128.37,
+          "max_drawdown": 200.82,
+          "avg_winner": 46.07,
+          "avg_loser": -47.47,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 50.0,
+          "profit_factor": 1.12,
+          "expectancy": 2.26,
+          "total_pnl": 13.58,
+          "max_drawdown": 60.18,
+          "avg_winner": 41.66,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=quiet|tp=1R|vwap=with_side|struct=lh_ll|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.34,
+      "oos_net": 458.61,
+      "oos_n": 68,
+      "session_oos": {
+        "morning": {
+          "trades": 29,
+          "win_rate": 48.3,
+          "profit_factor": 0.89,
+          "expectancy": -2.96,
+          "total_pnl": -85.96,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 3
+        },
+        "midday": {
+          "trades": 33,
+          "win_rate": 63.6,
+          "profit_factor": 1.67,
+          "expectancy": 11.5,
+          "total_pnl": 379.42,
+          "max_drawdown": 198.74,
+          "avg_winner": 44.96,
+          "avg_loser": -47.07,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 83.3,
+          "profit_factor": 5.81,
+          "expectancy": 27.52,
+          "total_pnl": 165.15,
+          "max_drawdown": 34.35,
+          "avg_winner": 39.9,
+          "avg_loser": -34.35,
+          "max_consec_losses": 1
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (379/459)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=none|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.33,
+      "oos_net": 312.58,
+      "oos_n": 47,
+      "session_oos": {
+        "morning": {
+          "trades": 24,
+          "win_rate": 58.3,
+          "profit_factor": 1.33,
+          "expectancy": 7.11,
+          "total_pnl": 170.63,
+          "max_drawdown": 309.53,
+          "avg_winner": 48.76,
+          "avg_loser": -51.2,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 17,
+          "win_rate": 58.8,
+          "profit_factor": 1.39,
+          "expectancy": 7.55,
+          "total_pnl": 128.37,
+          "max_drawdown": 200.82,
+          "avg_winner": 46.07,
+          "avg_loser": -47.47,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 50.0,
+          "profit_factor": 1.12,
+          "expectancy": 2.26,
+          "total_pnl": 13.58,
+          "max_drawdown": 60.18,
+          "avg_winner": 41.66,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=none|struct=lh_ll|sep=none",
+      "pass": false,
+      "interesting": true,
+      "oos_pf": 1.31,
+      "oos_net": 354.58,
+      "oos_n": 40,
+      "session_oos": {
+        "morning": {
+          "trades": 14,
+          "win_rate": 35.7,
+          "profit_factor": 1.07,
+          "expectancy": 2.33,
+          "total_pnl": 32.64,
+          "max_drawdown": 208.68,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 22,
+          "win_rate": 40.9,
+          "profit_factor": 1.36,
+          "expectancy": 10.1,
+          "total_pnl": 222.18,
+          "max_drawdown": 239.31,
+          "avg_winner": 93.11,
+          "avg_loser": -47.37,
+          "max_consec_losses": 5
+        },
+        "afternoon": {
+          "trades": 4,
+          "win_rate": 50.0,
+          "profit_factor": 2.55,
+          "expectancy": 24.94,
+          "total_pnl": 99.75,
+          "max_drawdown": 64.3,
+          "avg_winner": 82.03,
+          "avg_loser": -32.15,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=quiet|tp=1R|vwap=none|struct=lh_ll|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.31,
+      "oos_net": 343.77,
+      "oos_n": 54,
+      "session_oos": {
+        "morning": {
+          "trades": 32,
+          "win_rate": 53.1,
+          "profit_factor": 1.08,
+          "expectancy": 1.88,
+          "total_pnl": 60.32,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 3
+        },
+        "midday": {
+          "trades": 16,
+          "win_rate": 68.8,
+          "profit_factor": 2.15,
+          "expectancy": 16.87,
+          "total_pnl": 269.87,
+          "max_drawdown": 80.23,
+          "avg_winner": 45.8,
+          "avg_loser": -46.79,
+          "max_consec_losses": 2
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 50.0,
+          "profit_factor": 1.12,
+          "expectancy": 2.26,
+          "total_pnl": 13.58,
+          "max_drawdown": 60.18,
+          "avg_winner": 41.66,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (270/344)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=with_side|struct=none|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.31,
+      "oos_net": 235.31,
+      "oos_n": 38,
+      "session_oos": {
+        "morning": {
+          "trades": 12,
+          "win_rate": 50.0,
+          "profit_factor": 0.95,
+          "expectancy": -1.24,
+          "total_pnl": -14.88,
+          "max_drawdown": 158.68,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 2
+        },
+        "midday": {
+          "trades": 17,
+          "win_rate": 58.8,
+          "profit_factor": 1.39,
+          "expectancy": 7.55,
+          "total_pnl": 128.37,
+          "max_drawdown": 200.82,
+          "avg_winner": 46.07,
+          "avg_loser": -47.47,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 9,
+          "win_rate": 66.7,
+          "profit_factor": 2.09,
+          "expectancy": 13.54,
+          "total_pnl": 121.82,
+          "max_drawdown": 60.18,
+          "avg_winner": 38.87,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=quiet|tp=2R|vwap=none|struct=lh_ll|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.28,
+      "oos_net": 520.49,
+      "oos_n": 63,
+      "session_oos": {
+        "morning": {
+          "trades": 29,
+          "win_rate": 34.5,
+          "profit_factor": 1.01,
+          "expectancy": 0.48,
+          "total_pnl": 14.04,
+          "max_drawdown": 307.44,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 6
+        },
+        "midday": {
+          "trades": 29,
+          "win_rate": 41.4,
+          "profit_factor": 1.4,
+          "expectancy": 11.05,
+          "total_pnl": 320.5,
+          "max_drawdown": 350.79,
+          "avg_winner": 94.19,
+          "avg_loser": -47.64,
+          "max_consec_losses": 7
+        },
+        "afternoon": {
+          "trades": 5,
+          "win_rate": 60.0,
+          "profit_factor": 3.89,
+          "expectancy": 37.19,
+          "total_pnl": 185.94,
+          "max_drawdown": 64.3,
+          "avg_winner": 83.41,
+          "avg_loser": -32.15,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=lh_ll|sep=noon_windows",
+      "pass": false,
+      "interesting": true,
+      "oos_pf": 1.27,
+      "oos_net": 203.71,
+      "oos_n": 37,
+      "session_oos": {
+        "morning": {
+          "trades": 15,
+          "win_rate": 53.3,
+          "profit_factor": 1.09,
+          "expectancy": 2.09,
+          "total_pnl": 31.4,
+          "max_drawdown": 204.96,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 15,
+          "win_rate": 60.0,
+          "profit_factor": 1.44,
+          "expectancy": 8.45,
+          "total_pnl": 126.7,
+          "max_drawdown": 153.72,
+          "avg_winner": 45.77,
+          "avg_loser": -47.53,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 57.1,
+          "profit_factor": 1.41,
+          "expectancy": 6.52,
+          "total_pnl": 45.61,
+          "max_drawdown": 60.18,
+          "avg_winner": 39.26,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=quiet|tp=1R|vwap=with_side|struct=lh_ll|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.21,
+      "oos_net": 232.57,
+      "oos_n": 52,
+      "session_oos": {
+        "morning": {
+          "trades": 29,
+          "win_rate": 48.3,
+          "profit_factor": 0.89,
+          "expectancy": -2.96,
+          "total_pnl": -85.96,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 3
+        },
+        "midday": {
+          "trades": 16,
+          "win_rate": 68.8,
+          "profit_factor": 2.15,
+          "expectancy": 16.87,
+          "total_pnl": 269.87,
+          "max_drawdown": 80.23,
+          "avg_winner": 45.8,
+          "avg_loser": -46.79,
+          "max_consec_losses": 2
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 57.1,
+          "profit_factor": 1.44,
+          "expectancy": 6.95,
+          "total_pnl": 48.66,
+          "max_drawdown": 60.18,
+          "avg_winner": 40.02,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (270/233)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=none|struct=none|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.21,
+      "oos_net": 221.1,
+      "oos_n": 35,
+      "session_oos": {
+        "morning": {
+          "trades": 15,
+          "win_rate": 46.7,
+          "profit_factor": 1.69,
+          "expectancy": 18.76,
+          "total_pnl": 281.4,
+          "max_drawdown": 157.44,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 3
+        },
+        "midday": {
+          "trades": 16,
+          "win_rate": 31.2,
+          "profit_factor": 0.92,
+          "expectancy": -2.72,
+          "total_pnl": -43.52,
+          "max_drawdown": 241.04,
+          "avg_winner": 96.5,
+          "avg_loser": -47.82,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 4,
+          "win_rate": 25.0,
+          "profit_factor": 0.85,
+          "expectancy": -4.2,
+          "total_pnl": -16.78,
+          "max_drawdown": 64.3,
+          "avg_winner": 98.76,
+          "avg_loser": -38.51,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in morning (281/221)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=none|struct=none|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.2,
+      "oos_net": 261.57,
+      "oos_n": 43,
+      "session_oos": {
+        "morning": {
+          "trades": 23,
+          "win_rate": 43.5,
+          "profit_factor": 1.48,
+          "expectancy": 13.99,
+          "total_pnl": 321.87,
+          "max_drawdown": 310.77,
+          "avg_winner": 98.76,
+          "avg_loser": -51.21,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 16,
+          "win_rate": 31.2,
+          "profit_factor": 0.92,
+          "expectancy": -2.72,
+          "total_pnl": -43.52,
+          "max_drawdown": 241.04,
+          "avg_winner": 96.5,
+          "avg_loser": -47.82,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 4,
+          "win_rate": 25.0,
+          "profit_factor": 0.85,
+          "expectancy": -4.2,
+          "total_pnl": -16.78,
+          "max_drawdown": 64.3,
+          "avg_winner": 98.76,
+          "avg_loser": -38.51,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in morning (322/262)"
+    },
+    {
+      "label": "entry=quiet|tp=2R|vwap=none|struct=lh_ll|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.19,
+      "oos_net": 273.69,
+      "oos_n": 48,
+      "session_oos": {
+        "morning": {
+          "trades": 29,
+          "win_rate": 34.5,
+          "profit_factor": 1.01,
+          "expectancy": 0.48,
+          "total_pnl": 14.04,
+          "max_drawdown": 307.44,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 6
+        },
+        "midday": {
+          "trades": 14,
+          "win_rate": 42.9,
+          "profit_factor": 1.54,
+          "expectancy": 14.65,
+          "total_pnl": 205.03,
+          "max_drawdown": 171.5,
+          "avg_winner": 96.91,
+          "avg_loser": -47.06,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 5,
+          "win_rate": 40.0,
+          "profit_factor": 1.47,
+          "expectancy": 10.92,
+          "total_pnl": 54.62,
+          "max_drawdown": 64.3,
+          "avg_winner": 85.08,
+          "avg_loser": -38.51,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (205/274)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=with_side|struct=none|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.19,
+      "oos_net": 177.02,
+      "oos_n": 45,
+      "session_oos": {
+        "morning": {
+          "trades": 19,
+          "win_rate": 47.4,
+          "profit_factor": 0.86,
+          "expectancy": -3.85,
+          "total_pnl": -73.17,
+          "max_drawdown": 312.01,
+          "avg_winner": 48.76,
+          "avg_loser": -51.2,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 17,
+          "win_rate": 58.8,
+          "profit_factor": 1.39,
+          "expectancy": 7.55,
+          "total_pnl": 128.37,
+          "max_drawdown": 200.82,
+          "avg_winner": 46.07,
+          "avg_loser": -47.47,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 9,
+          "win_rate": 66.7,
+          "profit_factor": 2.09,
+          "expectancy": 13.54,
+          "total_pnl": 121.82,
+          "max_drawdown": 60.18,
+          "avg_winner": 38.87,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (128/177)"
+    },
+    {
+      "label": "entry=quiet|tp=2R|vwap=with_side|struct=lh_ll|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.18,
+      "oos_net": 337.88,
+      "oos_n": 61,
+      "session_oos": {
+        "morning": {
+          "trades": 26,
+          "win_rate": 30.8,
+          "profit_factor": 0.86,
+          "expectancy": -5.09,
+          "total_pnl": -132.24,
+          "max_drawdown": 329.76,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 6
+        },
+        "midday": {
+          "trades": 29,
+          "win_rate": 41.4,
+          "profit_factor": 1.4,
+          "expectancy": 11.05,
+          "total_pnl": 320.5,
+          "max_drawdown": 350.79,
+          "avg_winner": 94.19,
+          "avg_loser": -47.64,
+          "max_consec_losses": 7
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 50.0,
+          "profit_factor": 2.49,
+          "expectancy": 24.94,
+          "total_pnl": 149.61,
+          "max_drawdown": 64.3,
+          "avg_winner": 83.41,
+          "avg_loser": -33.54,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (320/338)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=with_side|struct=none|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.18,
+      "oos_net": 189.76,
+      "oos_n": 35,
+      "session_oos": {
+        "morning": {
+          "trades": 12,
+          "win_rate": 41.7,
+          "profit_factor": 1.38,
+          "expectancy": 11.26,
+          "total_pnl": 135.12,
+          "max_drawdown": 157.44,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 3
+        },
+        "midday": {
+          "trades": 16,
+          "win_rate": 31.2,
+          "profit_factor": 0.92,
+          "expectancy": -2.72,
+          "total_pnl": -43.52,
+          "max_drawdown": 241.04,
+          "avg_winner": 96.5,
+          "avg_loser": -47.82,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 42.9,
+          "profit_factor": 1.65,
+          "expectancy": 14.02,
+          "total_pnl": 98.16,
+          "max_drawdown": 87.57,
+          "avg_winner": 83.34,
+          "avg_loser": -37.97,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in morning (135/190)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=with_side|struct=lh_ll|sep=none",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.15,
+      "oos_net": 171.97,
+      "oos_n": 38,
+      "session_oos": {
+        "morning": {
+          "trades": 11,
+          "win_rate": 27.3,
+          "profit_factor": 0.72,
+          "expectancy": -10.33,
+          "total_pnl": -113.64,
+          "max_drawdown": 204.96,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 22,
+          "win_rate": 40.9,
+          "profit_factor": 1.36,
+          "expectancy": 10.1,
+          "total_pnl": 222.18,
+          "max_drawdown": 239.31,
+          "avg_winner": 93.11,
+          "avg_loser": -47.37,
+          "max_consec_losses": 5
+        },
+        "afternoon": {
+          "trades": 5,
+          "win_rate": 40.0,
+          "profit_factor": 1.63,
+          "expectancy": 12.69,
+          "total_pnl": 63.43,
+          "max_drawdown": 64.3,
+          "avg_winner": 82.03,
+          "avg_loser": -33.54,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (222/172)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=2R|vwap=none|struct=lh_ll|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.14,
+      "oos_net": 135.97,
+      "oos_n": 33,
+      "session_oos": {
+        "morning": {
+          "trades": 14,
+          "win_rate": 35.7,
+          "profit_factor": 1.07,
+          "expectancy": 2.33,
+          "total_pnl": 32.64,
+          "max_drawdown": 208.68,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 14,
+          "win_rate": 35.7,
+          "profit_factor": 1.13,
+          "expectancy": 3.92,
+          "total_pnl": 54.82,
+          "max_drawdown": 171.5,
+          "avg_winner": 96.5,
+          "avg_loser": -47.52,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 5,
+          "win_rate": 40.0,
+          "profit_factor": 1.42,
+          "expectancy": 9.7,
+          "total_pnl": 48.51,
+          "max_drawdown": 64.3,
+          "avg_winner": 82.03,
+          "avg_loser": -38.51,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": null
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=with_side|struct=lh_ll|sep=noon_windows",
+      "pass": false,
+      "interesting": true,
+      "oos_pf": 1.12,
+      "oos_net": 91.28,
+      "oos_n": 35,
+      "session_oos": {
+        "morning": {
+          "trades": 12,
+          "win_rate": 41.7,
+          "profit_factor": 0.68,
+          "expectancy": -9.57,
+          "total_pnl": -114.88,
+          "max_drawdown": 207.44,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 15,
+          "win_rate": 60.0,
+          "profit_factor": 1.44,
+          "expectancy": 8.45,
+          "total_pnl": 126.7,
+          "max_drawdown": 153.72,
+          "avg_winner": 45.77,
+          "avg_loser": -47.53,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 8,
+          "win_rate": 62.5,
+          "profit_factor": 1.71,
+          "expectancy": 9.93,
+          "total_pnl": 79.45,
+          "max_drawdown": 60.18,
+          "avg_winner": 38.17,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (127/91)"
+    },
+    {
+      "label": "entry=1m_pullback|tp=1R|vwap=none|struct=lh_ll|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.09,
+      "oos_net": 59.91,
+      "oos_n": 32,
+      "session_oos": {
+        "morning": {
+          "trades": 10,
+          "win_rate": 40.0,
+          "profit_factor": 0.63,
+          "expectancy": -11.24,
+          "total_pnl": -112.4,
+          "max_drawdown": 204.96,
+          "avg_winner": 48.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 4
+        },
+        "midday": {
+          "trades": 15,
+          "win_rate": 60.0,
+          "profit_factor": 1.44,
+          "expectancy": 8.45,
+          "total_pnl": 126.7,
+          "max_drawdown": 153.72,
+          "avg_winner": 45.77,
+          "avg_loser": -47.53,
+          "max_consec_losses": 3
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 57.1,
+          "profit_factor": 1.41,
+          "expectancy": 6.52,
+          "total_pnl": 45.61,
+          "max_drawdown": 60.18,
+          "avg_winner": 39.26,
+          "avg_loser": -37.14,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (127/60)"
+    },
+    {
+      "label": "entry=quiet|tp=2R|vwap=none|struct=lh_ll|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.07,
+      "oos_net": 83.61,
+      "oos_n": 40,
+      "session_oos": {
+        "morning": {
+          "trades": 21,
+          "win_rate": 28.6,
+          "profit_factor": 0.77,
+          "expectancy": -8.38,
+          "total_pnl": -176.04,
+          "max_drawdown": 274.8,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 5
+        },
+        "midday": {
+          "trades": 14,
+          "win_rate": 42.9,
+          "profit_factor": 1.54,
+          "expectancy": 14.65,
+          "total_pnl": 205.03,
+          "max_drawdown": 171.5,
+          "avg_winner": 96.91,
+          "avg_loser": -47.06,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 5,
+          "win_rate": 40.0,
+          "profit_factor": 1.47,
+          "expectancy": 10.92,
+          "total_pnl": 54.62,
+          "max_drawdown": 64.3,
+          "avg_winner": 85.08,
+          "avg_loser": -38.51,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (205/84)"
+    },
+    {
+      "label": "entry=quiet|tp=2R|vwap=with_side|struct=lh_ll|sep=noon_windows",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.06,
+      "oos_net": 91.09,
+      "oos_n": 46,
+      "session_oos": {
+        "morning": {
+          "trades": 26,
+          "win_rate": 30.8,
+          "profit_factor": 0.86,
+          "expectancy": -5.09,
+          "total_pnl": -132.24,
+          "max_drawdown": 329.76,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 6
+        },
+        "midday": {
+          "trades": 14,
+          "win_rate": 42.9,
+          "profit_factor": 1.54,
+          "expectancy": 14.65,
+          "total_pnl": 205.03,
+          "max_drawdown": 171.5,
+          "avg_winner": 96.91,
+          "avg_loser": -47.06,
+          "max_consec_losses": 4
+        },
+        "afternoon": {
+          "trades": 6,
+          "win_rate": 33.3,
+          "profit_factor": 1.12,
+          "expectancy": 3.05,
+          "total_pnl": 18.29,
+          "max_drawdown": 87.57,
+          "avg_winner": 85.08,
+          "avg_loser": -37.97,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (205/91)"
+    },
+    {
+      "label": "entry=quiet|tp=2R|vwap=none|struct=none|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.05,
+      "oos_net": 92.16,
+      "oos_n": 55,
+      "session_oos": {
+        "morning": {
+          "trades": 33,
+          "win_rate": 30.3,
+          "profit_factor": 0.84,
+          "expectancy": -5.79,
+          "total_pnl": -190.92,
+          "max_drawdown": 362.4,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 5
+        },
+        "midday": {
+          "trades": 17,
+          "win_rate": 41.2,
+          "profit_factor": 1.42,
+          "expectancy": 11.83,
+          "total_pnl": 201.1,
+          "max_drawdown": 222.74,
+          "avg_winner": 96.39,
+          "avg_loser": -47.37,
+          "max_consec_losses": 5
+        },
+        "afternoon": {
+          "trades": 5,
+          "win_rate": 40.0,
+          "profit_factor": 1.71,
+          "expectancy": 16.4,
+          "total_pnl": 81.98,
+          "max_drawdown": 64.3,
+          "avg_winner": 98.76,
+          "avg_loser": -38.51,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (201/92)"
+    },
+    {
+      "label": "entry=quiet|tp=2R|vwap=with_side|struct=none|sep=always",
+      "pass": false,
+      "interesting": false,
+      "oos_pf": 1.05,
+      "oos_net": 79.71,
+      "oos_n": 55,
+      "session_oos": {
+        "morning": {
+          "trades": 31,
+          "win_rate": 29.0,
+          "profit_factor": 0.79,
+          "expectancy": -7.69,
+          "total_pnl": -238.44,
+          "max_drawdown": 362.4,
+          "avg_winner": 98.76,
+          "avg_loser": -51.24,
+          "max_consec_losses": 5
+        },
+        "midday": {
+          "trades": 17,
+          "win_rate": 41.2,
+          "profit_factor": 1.42,
+          "expectancy": 11.83,
+          "total_pnl": 201.1,
+          "max_drawdown": 222.74,
+          "avg_winner": 96.39,
+          "avg_loser": -47.37,
+          "max_consec_losses": 5
+        },
+        "afternoon": {
+          "trades": 7,
+          "win_rate": 42.9,
+          "profit_factor": 1.77,
+          "expectancy": 16.72,
+          "total_pnl": 117.05,
+          "max_drawdown": 87.57,
+          "avg_winner": 89.64,
+          "avg_loser": -37.97,
+          "max_consec_losses": 2
+        }
+      },
+      "time_dependency": "OOS profit concentrated in midday (201/80)"
+    }
+  ]
+}

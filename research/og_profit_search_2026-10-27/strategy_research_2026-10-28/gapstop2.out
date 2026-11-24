@@ -1,0 +1,19 @@
+stop225 d0 {'net': 5159, 'pf': np.float64(1.32), 'dd': 2696, 'train': 1696, 'y26': 3464, 'folds': '6/6', 'boot_p': 0.91, 'worst': -454}
+stop225 d1 {'net': 2322, 'pf': np.float64(1.13), 'dd': 3308, 'train': 1140, 'y26': 1182, 'folds': '5/6', 'boot_p': 0.72, 'worst': -454}
+stop240 d0 {'net': 4991, 'pf': np.float64(1.31), 'dd': 2726, 'train': 1637, 'y26': 3354, 'folds': '5/6', 'boot_p': 0.91, 'worst': -484}
+stop240 d1 {'net': 4767, 'pf': np.float64(1.29), 'dd': 2874, 'train': 2870, 'y26': 1896, 'folds': '5/6', 'boot_p': 0.88, 'worst': -484}
+stop250 d0 {'net': 4771, 'pf': np.float64(1.29), 'dd': 2746, 'train': 1537, 'y26': 3234, 'folds': '5/6', 'boot_p': 0.88, 'worst': -504}
+stop250 d1 {'net': 5412, 'pf': np.float64(1.34), 'dd': 2631, 'train': 3053, 'y26': 2359, 'folds': '5/6', 'boot_p': 0.9, 'worst': -504}
+stop300 d0 {'net': 7143, 'pf': np.float64(1.46), 'dd': 2612, 'train': 3466, 'y26': 3676, 'folds': '6/6', 'boot_p': 0.96, 'worst': -604}
+stop300 d1 {'net': 6101, 'pf': np.float64(1.39), 'dd': 2466, 'train': 2946, 'y26': 3156, 'folds': '6/6', 'boot_p': 0.93, 'worst': -604}
+stop350 d0 {'net': 7016, 'pf': np.float64(1.45), 'dd': 2612, 'train': 3266, 'y26': 3750, 'folds': '6/6', 'boot_p': 0.95, 'worst': -704}
+stop350 d1 {'net': 6016, 'pf': np.float64(1.39), 'dd': 2466, 'train': 2746, 'y26': 3271, 'folds': '6/6', 'boot_p': 0.93, 'worst': -704}
+stop400 d0 {'net': 7391, 'pf': np.float64(1.48), 'dd': 2612, 'train': 3212, 'y26': 4180, 'folds': '6/6', 'boot_p': 0.97, 'worst': -804}
+stop400 d1 {'net': 6144, 'pf': np.float64(1.4), 'dd': 2466, 'train': 2696, 'y26': 3448, 'folds': '6/6', 'boot_p': 0.93, 'worst': -804}
+stop500 d0 {'net': 7594, 'pf': np.float64(1.5), 'dd': 2612, 'train': 3414, 'y26': 4180, 'folds': '6/6', 'boot_p': 0.96, 'worst': -660}
+stop500 d1 {'net': 6078, 'pf': np.float64(1.39), 'dd': 2466, 'train': 2496, 'y26': 3583, 'folds': '6/6', 'boot_p': 0.94, 'worst': -1004}
+POLICY stopNone d0: gap trades 134 skipped(opp/cap) 49 taken 85 gap pnl 7292 | baseline trades blocked by open gap pos 50 lost baseline pnl -83 | NET effect 7375
+POLICY stopNone d1: gap trades 134 skipped(opp/cap) 42 taken 92 gap pnl 6481 | baseline trades blocked by open gap pos 49 lost baseline pnl -397 | NET effect 6878
+POLICY stop240 d0: gap trades 134 skipped(opp/cap) 49 taken 85 gap pnl 4592 | baseline trades blocked by open gap pos 47 lost baseline pnl -349 | NET effect 4941
+POLICY stop240 d1: gap trades 134 skipped(opp/cap) 42 taken 92 gap pnl 4708 | baseline trades blocked by open gap pos 43 lost baseline pnl -1000 | NET effect 5709
+POLICY stop250 d1: gap trades 134 skipped(opp/cap) 42 taken 92 gap pnl 5367 | baseline trades blocked by open gap pos 44 lost baseline pnl -1123 | NET effect 6490

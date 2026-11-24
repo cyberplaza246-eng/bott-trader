@@ -1,0 +1,72 @@
+✅ Strategy Config Loaded - Mode: paper, Scalping 1M+5M, Pairs: ['MNQ']
+Profit mode defaults applied: SCALP_MODE, STRATEGY_MODE, SCALP_SESSIONS, MAX_HOLD_SECONDS, USE_30S_BARS, SCALP_SL_PTS, SCALP_TP_PTS, EMA15_MAX_TRADES_DAY, EMA15_MAX_OPEN_LOTS, EMA15_REQUIRE_DAILY, EMA15_REQUIRE_60M, EMA15_REQUIRE_5M, EMA15_SL_TF, EMA15_SL_ATR_MULT, EMA15_SL_MIN, EMA15_SL_MAX, EMA15_TP_R, EMA15_LEVEL_MODE, SCALP_BREAKEVEN_ENABLED, SCALP_TRAIL_AFTER_BE
+EMA15 L6 / non-level: stack 15m+5m, quiet 1m, stop 1m ATR×1.5 clip 6–25, TP 1.0R (chart levels map-only)
+Profit config: ATRx1.2 TPx1.5 ADX>=17 vol>=0.4 TP buffer=0.5xATR max_tr=20 MNQ_pos=2 mode=ema15_eod 15M=off 15m_gate=off (direction only) 15m_rule=price_ema50 soft15=on strong_adx=35 vwap@35 entry_quality=off di_relax@20.0 flow_relax@20.0 diag=off (D_full_adaptive_rithmic, backtest WR=47%)
+Trading session: RTH — RTH — Mon–Fri 9:30 AM – 4:30 PM ET
+Scalp windows: rth 09:30-16:00
+
+======================================================================
+  PROFIT MODE: 15m+5m + quiet 1m + slotted windows
+  Windows 9:35 / 10:15 / 11:00 / 12:00 / 13:30 / 14:30 ET | 15m+5m must agree | EMA15_LEVEL_MODE=0
+  SL=clip(1m ATR×1.5, 6–25) | TP=1R | flatten 15:50 | no 30s
+  1m data: CSV + Databento + ticker last — never wait on Rithmic history/SECOND_BAR
+======================================================================
+
+  Contract sizing: MNQ: $2/pt ($0.50/tick), qty=1, max $250/trade (~125.0 pt SL), daily $300
+
+>>> DAY HYBRID RTH + LUCID SIM (stacked long pullback + short RTH quiet — not overnight bot) <<<
+
+DAY HYBRID (separate from overnight bot)
+Stacked books - long selective + short aggressive
+RTH Mon-Fri: LONG pullback w4 windows | SHORT quiet continuous | flatten 15:50
+Globex (Sun 6 PM+): LONG pullback + SHORT quiet continuous scan (DAY_HYBRID_GLOBEX=true)
+RSI gate ON (1m): short>=40 long<=65 (DAY_HYBRID_RSI_GATE=true)
+Stop: 1m ATR x1.5 clip 6-25 | TP 1R
+INVERT off
+Do not run with start_mnq_overnight_paper.bat at the same time (one Lucid login)
+Desk: http://127.0.0.1:5055
+Leave this window open. Ctrl+C to stop.
+
+MNQ 1m refresh failed: Databento 402 unpaid invoice
+MNQ 1m Databento unpaid (402) — skipping refresh 6h; using CSV seed + Rithmic history. Pay invoice at databento.com/portal/billing
+2026-10-01 10:49:05 - TradingBot - INFO - Rithmic Lucid plants: ticker + order + pnl + history (1m bars for day hybrid / paper seed)
+2026-10-01 10:49:07 - TradingBot - INFO - Rithmic accounts (1): ['LFE050-1LDH42L4-TEST013 (LT-Z8WS597N)']
+2026-10-01 10:49:07 - TradingBot - INFO - Rithmic trade routes (5): ['CDE: simulator default=True status=UP', 'NYMEX: simulator default=True status=UP', 'CBOT: simulator default=True status=UP', 'COMEX: simulator default=True status=UP', 'CME: simulator default=True status=UP']
+2026-10-01 10:49:07 - TradingBot - WARNING - RITHMIC_ACCOUNT_ID='LFE050-IBWS3708-TEST012' not in broker list ['LFE050-1LDH42L4-TEST013'] — using first matching demo/sim account instead
+2026-10-01 10:49:07 - TradingBot - INFO - Rithmic execution: account_id=LFE050-1LDH42L4-TEST013 trade_route(CME)=simulator live_mode=False
+2026-10-01 10:49:07 - TradingBot - INFO - Rithmic connector initialized — system=LucidTrading, gateway=wss://rprotocol.rithmic.com:443
+🔗 Lucid sim connected (TEST + history 1m). Close R|Trader if logged in elsewhere.
+2026-10-01 10:49:07 - TradingBot - INFO - clear_chart_stops skip MNQ — not flat (net=-1)
+📊 Rithmic 1m merged (+600 bars) → 664864 total, last 2026-10-01 06:49 ET
+2026-10-01 10:49:18 - TradingBot - INFO - leaving 1 tagged/non-stop manual order(s) alone (MNQ): BUY STOP MARKET tag=e0f37911-8a45-4e8f-8817-8e410488625f basket=239304269 px=30715.5
+2026-10-01 10:49:18 - TradingBot - INFO - leaving 1 manual working orders alone (MNQ): BUY STOP MARKET tag=e0f37911-8a45-4e8f-8817-8e410488625f basket=239304269 px=30715.5
+🧹 CHART CLEARED (flat_sweep): cancelled 0 bot stop/limit(s) (kept 0 live ticket(s))
+2026-10-01 10:49:21,746 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-10-01 10:49:21,754 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-10-01 10:49:21,755 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-10-01 10:49:21,757 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-10-01 10:49:21,758 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-10-01 10:49:21,759 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-10-01 10:49:21,759 - rithmic.plant.history - INFO - Waiting 12.1s before reconnect attempt #1
+2026-10-01 10:49:21,760 - rithmic.plant.ticker - INFO - Waiting 11.5s before reconnect attempt #1
+2026-10-01 10:49:33,253 - rithmic.plant.ticker - INFO - Reconnection attempt #1
+2026-10-01 10:49:36,116 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-10-01 10:49:37,953 - rithmic.plant.history - INFO - Reconnection successful.
+2026-10-01 10:49:41,030 - rithmic.plant.ticker - WARNING - Reconnect attempt #1 timed out
+2026-10-01 10:49:41,051 - rithmic.plant.ticker - INFO - Waiting 21.8s before reconnect attempt #2
+2026-10-01 10:49:50,763 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-10-01 10:49:50,765 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-10-01 10:49:50,766 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-10-01 10:49:50,767 - rithmic.plant.history - INFO - Waiting 11.2s before reconnect attempt #1
+2026-10-01 10:50:03,963 - rithmic.plant.history - INFO - Reconnection attempt #1
+2026-10-01 10:50:03,964 - rithmic.plant.ticker - INFO - Reconnection attempt #2
+2026-10-01 10:50:05,562 - rithmic.plant.history - INFO - Reconnection successful.
+2026-10-01 10:50:06,234 - rithmic.plant.ticker - INFO - Reconnection successful.
+2026-10-01 10:50:18,819 - rithmic.plant.history - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-10-01 10:50:18,855 - rithmic.plant.ticker - WARNING - Received a ForcedLogout message from Rithmic - did you reach the maximum number of concurrent sessions ?
+2026-10-01 10:50:18,857 - rithmic.plant.history - WARNING - WebSocket connection closed — signalling reconnect
+2026-10-01 10:50:18,857 - rithmic.plant.history - WARNING - Connection lost - attempting to reconnect
+2026-10-01 10:50:18,859 - rithmic.plant.ticker - WARNING - WebSocket connection closed — signalling reconnect
+2026-10-01 10:50:18,859 - rithmic.plant.ticker - WARNING - Connection lost - attempting to reconnect
+2026-10-01 10:50:18,859 - rithmic.plant.history - INFO - Waiting 12.4s before reconnect attempt #1
+2026-10-01 10:50:18,860 - rithmic.plant.ticker - INFO - Waiting 11.6s before reconnect attempt #1

@@ -1,0 +1,535 @@
+{
+  "spec": "dynamic_15_5_1_rth",
+  "csv": "data\\MNQ_1m.csv",
+  "costs": "$2.0/pt + $1.24 RT",
+  "oos_split": "2026-06-01",
+  "execution": {
+    "stop": "1m ATR x1.5 clip [6,25]",
+    "tp": "1R long / 2R short",
+    "session": "9:35-15:50 ET",
+    "one_position": true,
+    "reversal": "close on opposite full trigger then enter",
+    "no_time_direction_lock": true
+  },
+  "dynamic_pattern_A": {
+    "label": "DYNAMIC Pattern A (quiet 1m only)",
+    "overall": {
+      "trades": 611,
+      "win_rate": 43.7,
+      "profit_factor": 0.94,
+      "net_pnl": -911.12,
+      "expectancy": -1.49,
+      "max_drawdown": 1116.78,
+      "avg_winner": 49.54,
+      "avg_loser": -41.1,
+      "max_consec_losses": 10
+    },
+    "is": {
+      "trades": 340,
+      "win_rate": 44.1,
+      "profit_factor": 0.88,
+      "net_pnl": -881.12,
+      "expectancy": -2.59,
+      "max_drawdown": 1096.74,
+      "avg_winner": 42.04,
+      "avg_loser": -37.83,
+      "max_consec_losses": 10
+    },
+    "oos": {
+      "trades": 271,
+      "win_rate": 43.2,
+      "profit_factor": 1.0,
+      "net_pnl": -30.0,
+      "expectancy": -0.11,
+      "max_drawdown": 804.91,
+      "avg_winner": 59.15,
+      "avg_loser": -45.14,
+      "max_consec_losses": 6
+    },
+    "long": {
+      "trades": 422,
+      "win_rate": 48.6,
+      "profit_factor": 0.92,
+      "net_pnl": -618.49,
+      "expectancy": -1.47,
+      "max_drawdown": 832.14,
+      "avg_winner": 36.09,
+      "avg_loser": -36.94,
+      "max_consec_losses": 8
+    },
+    "short": {
+      "trades": 189,
+      "win_rate": 32.8,
+      "profit_factor": 0.95,
+      "net_pnl": -292.63,
+      "expectancy": -1.55,
+      "max_drawdown": 781.39,
+      "avg_winner": 94.01,
+      "avg_loser": -48.2,
+      "max_consec_losses": 14
+    },
+    "morning": {
+      "trades": 269,
+      "win_rate": 45.7,
+      "profit_factor": 1.05,
+      "net_pnl": 357.53,
+      "expectancy": 1.33,
+      "max_drawdown": 609.28,
+      "avg_winner": 58.21,
+      "avg_loser": -46.59,
+      "max_consec_losses": 9
+    },
+    "afternoon": {
+      "trades": 342,
+      "win_rate": 42.1,
+      "profit_factor": 0.83,
+      "net_pnl": -1268.65,
+      "expectancy": -3.71,
+      "max_drawdown": 1390.01,
+      "avg_winner": 42.13,
+      "avg_loser": -37.05,
+      "max_consec_losses": 14
+    },
+    "by_hour": {
+      "09": {
+        "trades": 40,
+        "win_rate": 50.0,
+        "profit_factor": 1.06,
+        "net_pnl": 58.08,
+        "expectancy": 1.45,
+        "max_drawdown": 355.96,
+        "avg_winner": 53.58,
+        "avg_loser": -50.67,
+        "max_consec_losses": 5
+      },
+      "10": {
+        "trades": 93,
+        "win_rate": 40.9,
+        "profit_factor": 0.91,
+        "net_pnl": -242.86,
+        "expectancy": -2.61,
+        "max_drawdown": 733.74,
+        "avg_winner": 64.84,
+        "avg_loser": -49.22,
+        "max_consec_losses": 6
+      },
+      "11": {
+        "trades": 136,
+        "win_rate": 47.8,
+        "profit_factor": 1.18,
+        "net_pnl": 542.31,
+        "expectancy": 3.99,
+        "max_drawdown": 334.91,
+        "avg_winner": 55.76,
+        "avg_loser": -43.41,
+        "max_consec_losses": 4
+      },
+      "12": {
+        "trades": 99,
+        "win_rate": 42.4,
+        "profit_factor": 0.86,
+        "net_pnl": -295.12,
+        "expectancy": -2.98,
+        "max_drawdown": 602.04,
+        "avg_winner": 44.43,
+        "avg_loser": -37.91,
+        "max_consec_losses": 7
+      },
+      "13": {
+        "trades": 91,
+        "win_rate": 44.0,
+        "profit_factor": 0.8,
+        "net_pnl": -391.16,
+        "expectancy": -4.3,
+        "max_drawdown": 521.19,
+        "avg_winner": 39.77,
+        "avg_loser": -38.87,
+        "max_consec_losses": 5
+      },
+      "14": {
+        "trades": 82,
+        "win_rate": 37.8,
+        "profit_factor": 0.79,
+        "net_pnl": -352.95,
+        "expectancy": -4.3,
+        "max_drawdown": 362.44,
+        "avg_winner": 43.16,
+        "avg_loser": -33.15,
+        "max_consec_losses": 6
+      },
+      "15": {
+        "trades": 70,
+        "win_rate": 44.3,
+        "profit_factor": 0.85,
+        "net_pnl": -229.43,
+        "expectancy": -3.28,
+        "max_drawdown": 486.68,
+        "avg_winner": 41.03,
+        "avg_loser": -38.5,
+        "max_consec_losses": 8
+      }
+    },
+    "r_multiples": {
+      "mean": -0.03,
+      "median": -1.0,
+      "buckets": {
+        "lt_0": 344,
+        "0_0.5": 1,
+        "0.5_1": 1,
+        "1_2": 203,
+        "ge_2": 62
+      }
+    },
+    "pass": false,
+    "sim_stats": {
+      "signals_stack": 9937,
+      "signals_pattern": 1392,
+      "filtered_sep": 1561,
+      "filtered_max_day": 3,
+      "entries": 611,
+      "reversals": 0,
+      "exits_sl": 341,
+      "exits_tp": 265,
+      "exits_eod": 5,
+      "exits_reversal": 0
+    }
+  },
+  "dynamic_pattern_AB": {
+    "label": "DYNAMIC Pattern A+B (quiet + pullback)",
+    "overall": {
+      "trades": 611,
+      "win_rate": 43.7,
+      "profit_factor": 0.94,
+      "net_pnl": -911.12,
+      "expectancy": -1.49,
+      "max_drawdown": 1116.78,
+      "avg_winner": 49.54,
+      "avg_loser": -41.1,
+      "max_consec_losses": 10
+    },
+    "is": {
+      "trades": 340,
+      "win_rate": 44.1,
+      "profit_factor": 0.88,
+      "net_pnl": -881.12,
+      "expectancy": -2.59,
+      "max_drawdown": 1096.74,
+      "avg_winner": 42.04,
+      "avg_loser": -37.83,
+      "max_consec_losses": 10
+    },
+    "oos": {
+      "trades": 271,
+      "win_rate": 43.2,
+      "profit_factor": 1.0,
+      "net_pnl": -30.0,
+      "expectancy": -0.11,
+      "max_drawdown": 804.91,
+      "avg_winner": 59.15,
+      "avg_loser": -45.14,
+      "max_consec_losses": 6
+    },
+    "long": {
+      "trades": 422,
+      "win_rate": 48.6,
+      "profit_factor": 0.92,
+      "net_pnl": -618.49,
+      "expectancy": -1.47,
+      "max_drawdown": 832.14,
+      "avg_winner": 36.09,
+      "avg_loser": -36.94,
+      "max_consec_losses": 8
+    },
+    "short": {
+      "trades": 189,
+      "win_rate": 32.8,
+      "profit_factor": 0.95,
+      "net_pnl": -292.63,
+      "expectancy": -1.55,
+      "max_drawdown": 781.39,
+      "avg_winner": 94.01,
+      "avg_loser": -48.2,
+      "max_consec_losses": 14
+    },
+    "morning": {
+      "trades": 269,
+      "win_rate": 45.7,
+      "profit_factor": 1.05,
+      "net_pnl": 357.53,
+      "expectancy": 1.33,
+      "max_drawdown": 609.28,
+      "avg_winner": 58.21,
+      "avg_loser": -46.59,
+      "max_consec_losses": 9
+    },
+    "afternoon": {
+      "trades": 342,
+      "win_rate": 42.1,
+      "profit_factor": 0.83,
+      "net_pnl": -1268.65,
+      "expectancy": -3.71,
+      "max_drawdown": 1390.01,
+      "avg_winner": 42.13,
+      "avg_loser": -37.05,
+      "max_consec_losses": 14
+    },
+    "by_hour": {
+      "09": {
+        "trades": 40,
+        "win_rate": 50.0,
+        "profit_factor": 1.06,
+        "net_pnl": 58.08,
+        "expectancy": 1.45,
+        "max_drawdown": 355.96,
+        "avg_winner": 53.58,
+        "avg_loser": -50.67,
+        "max_consec_losses": 5
+      },
+      "10": {
+        "trades": 93,
+        "win_rate": 40.9,
+        "profit_factor": 0.91,
+        "net_pnl": -242.86,
+        "expectancy": -2.61,
+        "max_drawdown": 733.74,
+        "avg_winner": 64.84,
+        "avg_loser": -49.22,
+        "max_consec_losses": 6
+      },
+      "11": {
+        "trades": 136,
+        "win_rate": 47.8,
+        "profit_factor": 1.18,
+        "net_pnl": 542.31,
+        "expectancy": 3.99,
+        "max_drawdown": 334.91,
+        "avg_winner": 55.76,
+        "avg_loser": -43.41,
+        "max_consec_losses": 4
+      },
+      "12": {
+        "trades": 99,
+        "win_rate": 42.4,
+        "profit_factor": 0.86,
+        "net_pnl": -295.12,
+        "expectancy": -2.98,
+        "max_drawdown": 602.04,
+        "avg_winner": 44.43,
+        "avg_loser": -37.91,
+        "max_consec_losses": 7
+      },
+      "13": {
+        "trades": 91,
+        "win_rate": 44.0,
+        "profit_factor": 0.8,
+        "net_pnl": -391.16,
+        "expectancy": -4.3,
+        "max_drawdown": 521.19,
+        "avg_winner": 39.77,
+        "avg_loser": -38.87,
+        "max_consec_losses": 5
+      },
+      "14": {
+        "trades": 82,
+        "win_rate": 37.8,
+        "profit_factor": 0.79,
+        "net_pnl": -352.95,
+        "expectancy": -4.3,
+        "max_drawdown": 362.44,
+        "avg_winner": 43.16,
+        "avg_loser": -33.15,
+        "max_consec_losses": 6
+      },
+      "15": {
+        "trades": 70,
+        "win_rate": 44.3,
+        "profit_factor": 0.85,
+        "net_pnl": -229.43,
+        "expectancy": -3.28,
+        "max_drawdown": 486.68,
+        "avg_winner": 41.03,
+        "avg_loser": -38.5,
+        "max_consec_losses": 8
+      }
+    },
+    "r_multiples": {
+      "mean": -0.03,
+      "median": -1.0,
+      "buckets": {
+        "lt_0": 344,
+        "0_0.5": 1,
+        "0.5_1": 1,
+        "1_2": 203,
+        "ge_2": 62
+      }
+    },
+    "pass": false,
+    "sim_stats": {
+      "signals_stack": 9937,
+      "signals_pattern": 1392,
+      "filtered_sep": 1561,
+      "filtered_max_day": 3,
+      "entries": 611,
+      "reversals": 0,
+      "exits_sl": 341,
+      "exits_tp": 265,
+      "exits_eod": 5,
+      "exits_reversal": 0
+    }
+  },
+  "locked_asymmetric": {
+    "label": "LOCKED asymmetric (AM long / PM short)",
+    "overall": {
+      "trades": 250,
+      "win_rate": 45.6,
+      "profit_factor": 1.16,
+      "net_pnl": 977.89,
+      "expectancy": 3.91,
+      "max_drawdown": 565.56,
+      "avg_winner": 61.76,
+      "avg_loser": -44.58,
+      "max_consec_losses": 11
+    },
+    "is": {
+      "trades": 132,
+      "win_rate": 45.5,
+      "profit_factor": 1.09,
+      "net_pnl": 264.43,
+      "expectancy": 2.0,
+      "max_drawdown": 565.56,
+      "avg_winner": 55.49,
+      "avg_loser": -42.57,
+      "max_consec_losses": 11
+    },
+    "oos": {
+      "trades": 118,
+      "win_rate": 45.8,
+      "profit_factor": 1.24,
+      "net_pnl": 713.47,
+      "expectancy": 6.05,
+      "max_drawdown": 444.62,
+      "avg_winner": 68.73,
+      "avg_loser": -46.85,
+      "max_consec_losses": 8
+    },
+    "long": {
+      "trades": 117,
+      "win_rate": 53.8,
+      "profit_factor": 1.14,
+      "net_pnl": 340.92,
+      "expectancy": 2.91,
+      "max_drawdown": 565.56,
+      "avg_winner": 45.18,
+      "avg_loser": -46.4,
+      "max_consec_losses": 6
+    },
+    "short": {
+      "trades": 133,
+      "win_rate": 38.3,
+      "profit_factor": 1.18,
+      "net_pnl": 636.97,
+      "expectancy": 4.79,
+      "max_drawdown": 521.81,
+      "avg_winner": 82.24,
+      "avg_loser": -43.38,
+      "max_consec_losses": 11
+    },
+    "morning": {
+      "trades": 117,
+      "win_rate": 53.8,
+      "profit_factor": 1.14,
+      "net_pnl": 340.92,
+      "expectancy": 2.91,
+      "max_drawdown": 565.56,
+      "avg_winner": 45.18,
+      "avg_loser": -46.4,
+      "max_consec_losses": 6
+    },
+    "afternoon": {
+      "trades": 133,
+      "win_rate": 38.3,
+      "profit_factor": 1.18,
+      "net_pnl": 636.97,
+      "expectancy": 4.79,
+      "max_drawdown": 521.81,
+      "avg_winner": 82.24,
+      "avg_loser": -43.38,
+      "max_consec_losses": 11
+    },
+    "by_hour": {
+      "09": {
+        "trades": 48,
+        "win_rate": 50.0,
+        "profit_factor": 0.95,
+        "net_pnl": -58.23,
+        "expectancy": -1.21,
+        "max_drawdown": 339.38,
+        "avg_winner": 48.05,
+        "avg_loser": -50.47,
+        "max_consec_losses": 4
+      },
+      "11": {
+        "trades": 69,
+        "win_rate": 56.5,
+        "profit_factor": 1.31,
+        "net_pnl": 399.15,
+        "expectancy": 5.78,
+        "max_drawdown": 468.43,
+        "avg_winner": 43.42,
+        "avg_loser": -43.14,
+        "max_consec_losses": 6
+      },
+      "12": {
+        "trades": 52,
+        "win_rate": 40.4,
+        "profit_factor": 1.23,
+        "net_pnl": 328.2,
+        "expectancy": 6.31,
+        "max_drawdown": 366.12,
+        "avg_winner": 83.53,
+        "avg_loser": -46.0,
+        "max_consec_losses": 5
+      },
+      "13": {
+        "trades": 46,
+        "win_rate": 30.4,
+        "profit_factor": 0.89,
+        "net_pnl": -161.83,
+        "expectancy": -3.52,
+        "max_drawdown": 360.85,
+        "avg_winner": 89.08,
+        "avg_loser": -44.03,
+        "max_consec_losses": 6
+      },
+      "14": {
+        "trades": 35,
+        "win_rate": 45.7,
+        "profit_factor": 1.65,
+        "net_pnl": 470.6,
+        "expectancy": 13.45,
+        "max_drawdown": 204.22,
+        "avg_winner": 74.56,
+        "avg_loser": -38.02,
+        "max_consec_losses": 5
+      }
+    },
+    "r_multiples": {
+      "mean": 0.12,
+      "median": -1.0,
+      "buckets": {
+        "lt_0": 136,
+        "0_0.5": 0,
+        "0.5_1": 0,
+        "1_2": 63,
+        "ge_2": 51
+      }
+    },
+    "pass": true
+  },
+  "verdict": {
+    "dynamic_A_pass": false,
+    "dynamic_AB_pass": false,
+    "locked_pass": true,
+    "best_oos_pf": 1.24
+  }
+}

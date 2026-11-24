@@ -1,0 +1,12 @@
+11 to run
+swing100 {'bo_signals': 3233, 'bo_with_level': 552} {'n': 2474, 'net': 27994.1, 'wr': 60.9, 'pf': 1.21, 'dd': 4448.6, 'avg': 11.32} 
+swing20 {'bo_signals': 3233, 'bo_with_level': 0} {'n': 2473, 'net': 29313.3, 'wr': 61.0, 'pf': 1.22, 'dd': 4448.6, 'avg': 11.85} 
+day {'bo_signals': 3233, 'bo_with_level': 1278} {'n': 2486, 'net': 29547.7, 'wr': 61.1, 'pf': 1.22, 'dd': 4472.1, 'avg': 11.89} 
+round50 {'bo_signals': 3233, 'bo_with_level': 3221} {'n': 2548, 'net': 19068.2, 'wr': 60.6, 'pf': 1.14, 'dd': 4241.4, 'avg': 7.48} 
+round100 {'bo_signals': 3233, 'bo_with_level': 3041} {'n': 2532, 'net': 24226.9, 'wr': 60.7, 'pf': 1.18, 'dd': 4468.2, 'avg': 9.57} 
+part_swing20 {'bo_signals': 3233, 'bo_with_level': 0} {'n': 2473, 'net': 29313.3, 'wr': 61.0, 'pf': 1.22, 'dd': 4448.6, 'avg': 11.85} 
+part_swing50 {'bo_signals': 3233, 'bo_with_level': 166} {'n': 2473, 'net': 29192.1, 'wr': 61.0, 'pf': 1.22, 'dd': 4448.6, 'avg': 11.8} 
+part_swing100 {'bo_signals': 3233, 'bo_with_level': 552} {'n': 2473, 'net': 28759.8, 'wr': 61.0, 'pf': 1.22, 'dd': 4448.6, 'avg': 11.63} 
+part_day {'bo_signals': 3233, 'bo_with_level': 1278} {'n': 2473, 'net': 29083.6, 'wr': 61.0, 'pf': 1.22, 'dd': 4397.6, 'avg': 11.76} 
+part_round50 {'bo_signals': 3233, 'bo_with_level': 3221} {'n': 2475, 'net': 25265.8, 'wr': 61.1, 'pf': 1.19, 'dd': 4301.2, 'avg': 10.21} 
+part_round100 {'bo_signals': 3233, 'bo_with_level': 3041} {'n': 2473, 'net': 26743.6, 'wr': 61.0, 'pf': 1.2, 'dd': 4340.1, 'avg': 10.81} 

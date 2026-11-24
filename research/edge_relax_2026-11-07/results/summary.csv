@@ -1,0 +1,6 @@
+family,picked,train,validate,test,wf,folds_pos,holdout,dd_validate_test,val_test_net,rth_control_val_test,beats_rth_control,candidate,pf_train,t_train,t_validate
+ON_STOP,ON_s80,11397.0,-81.5,2599.5,15230.0,5/6,-219.5,5750.5,2518.0,3040.1,False,False,1.544,2.48,-0.02
+ON_FILTER,ON_s150_up,9280.5,-1450.5,2913.0,7556.0,5/6,-1575.5,4447.5,1462.5,3040.1,False,False,1.764,2.5,-0.42
+ON18,ON18_s150,466.0,-2074.0,3940.0,3596.5,4/6,-3320.5,6117.0,1866.0,3040.1,False,False,1.024,0.13,-0.64
+MOM,MOM20,8336.5,2373.1,-3384.5,3146.3,4/6,677.0,7773.0,-1011.4,3040.1,False,False,1.288,1.54,0.57
+MOML,MOML20,3084.0,2316.1,-1876.5,1833.7,4/6,-774.5,5708.5,439.6,3040.1,False,False,1.168,0.89,0.77

@@ -1,0 +1,616 @@
+diff --git a/src/research_ensemble/live_display.py b/src/research_ensemble/live_display.py
+new file mode 100644
+index 0000000..e1f58d7
+--- /dev/null
++++ b/src/research_ensemble/live_display.py
+@@ -0,0 +1,345 @@
++"""DISPLAY-ONLY per-bar readout for the REVAMP research ensemble (live console).
++
++Prints the market bias and the decision reasoning on every new 5m bar, in the
++spirit of the original bot's skip-reason / gate output. Nothing in here feeds
++back into trading: it only reads the same 5m dataframe the strategy uses and a
++read-only snapshot of the trader's gate state, and returns text lines.
++
++Numbers come from the same indicator functions the strategy uses
++(src/research_ensemble/indicators.py) and from the same EnsembleStrategy /
++sleeve strategies, so the readout matches what the router sees.
++
++Toggle: env REVAMP_VERBOSE (default ON). Set REVAMP_VERBOSE=0 to silence.
++"""
++from __future__ import annotations
++
++import os
++from typing import Any, Dict, List, Optional
++
++import numpy as np
++import pandas as pd
++
++from src.research_ensemble.ensemble import ADX_PERIOD, EnsembleStrategy
++from src.research_ensemble.indicators import adx, bollinger_bands, ema, rsi
++from src.research_ensemble.live_signals import dataframe_for_research
++from src.research_ensemble.session import SESSION_TZ, rth_mask
++
++SLEEVE_LABEL = {"trend": "trend", "breakout": "breakout", "mean_reversion": "mean reversion"}
++INDENT = "   "
++
++
++def revamp_verbose_enabled() -> bool:
++    """REVAMP_VERBOSE env toggle; default ON."""
++    raw = os.getenv("REVAMP_VERBOSE")
++    if raw is None or str(raw).strip() == "":
++        return True
++    return str(raw).strip().lower() in ("1", "true", "yes", "on")
++
++
++def _f(v: Any) -> float:
++    try:
++        x = float(v)
++    except (TypeError, ValueError):
++        return float("nan")
++    return x
++
++
++def _side(v: int) -> str:
++    return "BUY" if v > 0 else ("SELL" if v < 0 else "")
++
++
++def compute_revamp_snapshot(df: pd.DataFrame, strategy: Optional[EnsembleStrategy] = None) -> Dict[str, Any]:
++    """Read-only indicator snapshot of the last bar. Never mutates `df`."""
++    strat = strategy or EnsembleStrategy()
++    rdf = dataframe_for_research(df)  # makes its own copy
++    if len(rdf) < 2:
++        raise ValueError("not enough bars for display")
++    close, high, low, vol = rdf["close"], rdf["high"], rdf["low"], rdf["volume"]
++
++    tr_ = strat._trend
++    bo_ = strat._breakout
++    mr_ = strat._mean_reversion
++
++    ema_f = ema(close, tr_.fast)
++    ema_s = ema(close, tr_.slow)
++    ema_t = ema(close, tr_.trend)
++    adx_s = adx(high, low, close, ADX_PERIOD)
++    up, mid, lo = bollinger_bands(close, mr_.bb_period, mr_.bb_std)
++    rsi_s = rsi(close, mr_.rsi_period)
++    don_hi = high.rolling(bo_.donchian_period).max().shift(1)  # prior channel, as strategy
++    don_lo = low.rolling(bo_.donchian_period).min().shift(1)
++    avg_vol = vol.rolling(bo_.volume_lookback).mean()
++
++    # Sleeve raw entries on the last bar (before ADX routing / RTH gate)
++    t_sig = tr_.generate_signals(rdf)
++    m_sig = mr_.generate_signals(rdf)
++    b_sig = bo_.generate_signals(rdf)
++    final = strat.generate_signals(rdf)  # authoritative router output
++
++    i = -1
++    c = _f(close.iloc[i])
++    adx_v = _f(adx_s.iloc[i])
++    trending = adx_v >= strat.adx_trend_min
++    ranging = adx_v < strat.adx_range_max
++
++    # EMA20/50 state + bars since last cross
++    diff = (ema_f - ema_s)
++    sign = np.sign(diff.values)
++    cur_sign = sign[-1]
++    bars_since = 0
++    for k in range(len(sign) - 1, 0, -1):
++        if sign[k - 1] != cur_sign:
++            break
++        bars_since += 1
++
++    t_e = int(t_sig.entries.iloc[i])
++    m_e = int(m_sig.entries.iloc[i])
++    b_e = int(b_sig.entries.iloc[i])
++    bo_allowed = strat.breakout_in_range or not ranging
++    routed = 0
++    routed_sleeve = ""
++    if b_e != 0 and bo_allowed:
++        routed, routed_sleeve = b_e, "breakout"
++    elif trending and t_e != 0:
++        routed, routed_sleeve = t_e, "trend"
++    elif ranging and m_e != 0:
++        routed, routed_sleeve = m_e, "mean_reversion"
++
++    ts = rdf.index[i]
++    in_rth = bool(rth_mask(rdf.index).iloc[i])
++    ts_et = ts.tz_convert(SESSION_TZ)
++
++    vol_v = _f(vol.iloc[i])
++    avg_v = _f(avg_vol.iloc[i])
++    vol_ratio = vol_v / avg_v if np.isfinite(avg_v) and avg_v > 0 else float("nan")
++
++    prev_c = _f(close.iloc[i - 1])
++    return {
++        "time": ts,
++        "time_et": ts_et.strftime("%H:%M ET"),
++        "in_rth": in_rth,
++        "close": c,
++        "ema_fast": _f(ema_f.iloc[i]), "ema_slow": _f(ema_s.iloc[i]), "ema_trend": _f(ema_t.iloc[i]),
++        "fast_n": tr_.fast, "slow_n": tr_.slow, "trend_n": tr_.trend,
++        "ema_bars_since_cross": bars_since,
++        "ema_cross_up": bool(diff.iloc[i] > 0 and diff.iloc[i - 1] <= 0),
++        "ema_cross_down": bool(diff.iloc[i] < 0 and diff.iloc[i - 1] >= 0),
++        "adx": adx_v,
++        "adx_trend_min": float(strat.adx_trend_min),
++        "adx_range_max": float(strat.adx_range_max),
++        "trending": bool(trending), "ranging": bool(ranging),
++        "breakout_allowed": bool(bo_allowed),
++        "don_hi": _f(don_hi.iloc[i]), "don_lo": _f(don_lo.iloc[i]),
++        "prev_beyond_hi": bool(prev_c > _f(don_hi.iloc[i - 1])),
++        "prev_beyond_lo": bool(prev_c < _f(don_lo.iloc[i - 1])),
++        "don_n": bo_.donchian_period,
++        "vol_ratio": vol_ratio, "vol_mult": float(bo_.volume_mult),
++        "bb_up": _f(up.iloc[i]), "bb_mid": _f(mid.iloc[i]), "bb_lo": _f(lo.iloc[i]),
++        "rsi": _f(rsi_s.iloc[i]),
++        "rsi_os": float(mr_.rsi_oversold), "rsi_ob": float(mr_.rsi_overbought),
++        "trend_entry": t_e, "mr_entry": m_e, "bo_entry": b_e,
++        "routed_entry": routed, "routed_sleeve": routed_sleeve,
++        "final_entry": int(final.entries.iloc[i]),
++    }
++
++
++# ---------------------------------------------------------------- formatting
++
++def _bias(s: Dict[str, Any]) -> str:
++    c, f, sl, t = s["close"], s["ema_fast"], s["ema_slow"], s["ema_trend"]
++    above = c > t
++    fast_up = f > sl
++    px = f"price {c:.2f} {'above' if above else 'below'} EMA{s['trend_n']} {t:.2f} ({c - t:+.1f})"
++    cross = f"EMA{s['fast_n']} {'>' if fast_up else '<'} EMA{s['slow_n']}"
++    if above and fast_up:
++        return f"Bias    : BUY ({px}, {cross})"
++    if (not above) and (not fast_up):
++        return f"Bias    : SELL ({px}, {cross})"
++    return f"Bias    : NEUTRAL (mixed: {px}, but {cross})"
++
++
++def _regime(s: Dict[str, Any]) -> str:
++    a, lo, hi = s["adx"], s["adx_range_max"], s["adx_trend_min"]
++    if s["trending"]:
++        r = f"TREND (ADX>={hi:.0f}): trend + breakout sleeves active"
++    elif s["ranging"]:
++        r = f"RANGE (ADX<{lo:.0f}): mean reversion active, breakout off"
++    else:
++        r = f"TRANSITION ({lo:.0f}-{hi:.0f}): trend + MR off, breakout only"
++    sess = f"RTH {s['time_et']}" if s["in_rth"] else f"outside RTH ({s['time_et']})"
++    return f"Regime  : ADX {a:.1f} -> {r} | {sess}"
++
++
++def _trend_line(s: Dict[str, Any]) -> str:
++    f, sl = s["ema_fast"], s["ema_slow"]
++    fn, sn, tn = s["fast_n"], s["slow_n"], s["trend_n"]
++    rel = "above" if f > sl else "below"
++    head = f"Trend   : EMA{fn} {f:.2f} {rel} EMA{sn} {sl:.2f} ({f - sl:+.1f})"
++    if s["ema_cross_up"]:
++        tail = "CROSS UP this bar" + (f", close > EMA{tn} -> BUY setup" if s["trend_entry"] > 0
++                                      else f", but close < EMA{tn} -> filtered")
++    elif s["ema_cross_down"]:
++        tail = "CROSS DOWN this bar" + (f", close < EMA{tn} -> SELL setup" if s["trend_entry"] < 0
++                                        else f", but close > EMA{tn} -> filtered")
++    else:
++        tail = f"no fresh cross ({s['ema_bars_since_cross']} bars since last)"
++    off = "" if s["trending"] else " [off: ADX<%.0f]" % s["adx_trend_min"]
++    return f"{head}, {tail}{off}"
++
++
++def _vol_txt(s: Dict[str, Any]) -> str:
++    vr, vm = s["vol_ratio"], s["vol_mult"]
++    return f"vol {vr:.2f}x avg (need >{vm:.2f}x)" if np.isfinite(vr) else "vol n/a"
++
++
++def _vol_ok(s: Dict[str, Any]) -> bool:
++    return bool(np.isfinite(s["vol_ratio"]) and s["vol_ratio"] > s["vol_mult"])
++
++
++def _breakout_detail(s: Dict[str, Any]) -> str:
++    c, hi, lo = s["close"], s["don_hi"], s["don_lo"]
++    if s["bo_entry"] > 0:
++        return f"BREAK above high {hi:.2f}, {_vol_txt(s)} -> BUY setup"
++    if s["bo_entry"] < 0:
++        return f"BREAK below low {lo:.2f}, {_vol_txt(s)} -> SELL setup"
++    if np.isfinite(hi) and c > hi:
++        why = "already above high (not a fresh break)" if s["prev_beyond_hi"] else "close above high, volume too low"
++        return f"{why} {hi:.2f}, {_vol_txt(s)}"
++    if np.isfinite(lo) and c < lo:
++        why = "already below low (not a fresh break)" if s["prev_beyond_lo"] else "close below low, volume too low"
++        return f"{why} {lo:.2f}, {_vol_txt(s)}"
++    return f"high {hi:.2f} (+{hi - c:.2f}) / low {lo:.2f} (-{c - lo:.2f}), {_vol_txt(s)}"
++
++
++def _breakout_short(s: Dict[str, Any]) -> str:
++    """Compact 'why no breakout' for the Decision line."""
++    c, hi, lo = s["close"], s["don_hi"], s["don_lo"]
++    vr, vm = s["vol_ratio"], s["vol_mult"]
++    if np.isfinite(hi) and c > hi:
++        if s["prev_beyond_hi"]:
++            return f"no breakout: already above high {hi:.2f} (not fresh)"
++        return f"no breakout: above high {hi:.2f} but vol {vr:.2f}x <= {vm:.2f}x"
++    if np.isfinite(lo) and c < lo:
++        if s["prev_beyond_lo"]:
++            return f"no breakout: already below low {lo:.2f} (not fresh)"
++        return f"no breakout: below low {lo:.2f} but vol {vr:.2f}x <= {vm:.2f}x"
++    if (hi - c) <= (c - lo):
++        txt = f"no breakout: high {hi:.2f} is {hi - c:.2f} pts away"
++    else:
++        txt = f"no breakout: low {lo:.2f} is {c - lo:.2f} pts away"
++    if not _vol_ok(s) and np.isfinite(vr):
++        txt += f", vol {vr:.2f}x <= {vm:.2f}x"
++    return txt
++
++
++def _breakout_line(s: Dict[str, Any]) -> str:
++    off = "" if s["breakout_allowed"] else " [off: ADX<%.0f]" % s["adx_range_max"]
++    return f"Breakout: Donchian{s['don_n']} {_breakout_detail(s)}{off}"
++
++
++def _mr_detail(s: Dict[str, Any]) -> str:
++    c, up, lo, r = s["close"], s["bb_up"], s["bb_lo"], s["rsi"]
++    os_, ob = s["rsi_os"], s["rsi_ob"]
++    if s["mr_entry"] > 0:
++        return f"close {c:.2f} <= lower {lo:.2f}, RSI {r:.1f} < {os_:.0f} -> BUY setup"
++    if s["mr_entry"] < 0:
++        return f"close {c:.2f} >= upper {up:.2f}, RSI {r:.1f} > {ob:.0f} -> SELL setup"
++    if c <= lo:
++        return f"close at/below lower {lo:.2f}, RSI {r:.1f} (need <{os_:.0f} on a fresh touch)"
++    if c >= up:
++        return f"close at/above upper {up:.2f}, RSI {r:.1f} (need >{ob:.0f} on a fresh touch)"
++    if (up - c) <= (c - lo):
++        near = f"upper {up:.2f} is {up - c:.2f} pts away"
++    else:
++        near = f"lower {lo:.2f} is {c - lo:.2f} pts away"
++    return f"inside bands, {near}, RSI {r:.1f} (need <{os_:.0f} / >{ob:.0f})"
++
++
++def _mr_line(s: Dict[str, Any]) -> str:
++    off = "" if s["ranging"] else " [off: ADX>=%.0f]" % s["adx_range_max"]
++    return f"MeanRev : BB(20,2) {_mr_detail(s)}{off}"
++
++
++def gate_block_reason(gates: Optional[Dict[str, Any]]) -> Optional[str]:
++    """First account/risk gate that blocks a new entry this bar (same order as live)."""
++    if not gates:
++        return None
++    dll = _f(gates.get("daily_loss_limit"))
++    pnl = _f(gates.get("daily_pnl"))
++    if np.isfinite(dll) and np.isfinite(pnl) and pnl <= -dll:
++        return f"daily loss limit hit (${pnl:.2f} / -${dll:.0f})"
++    mt = gates.get("max_trades")
++    if mt is not None and int(gates.get("daily_trades") or 0) >= int(mt):
++        return f"max trades/day {int(gates.get('daily_trades') or 0)}/{int(mt)}"
++    open_n, max_n = gates.get("open_count"), gates.get("max_positions")
++    if open_n is not None and max_n is not None and int(open_n) >= int(max_n):
++        return f"max concurrent reached ({int(open_n)}/{int(max_n)} open)"
++    cd = int(gates.get("cooldown") or 0)
++    if cd > 0:
++        return f"cooldown ({cd} bar{'s' if cd != 1 else ''} left)"
++    lc = int(gates.get("loss_cooldown_min") or 0)
++    if lc > 0:
++        return f"loss cooldown ({lc} min left)"
++    cp = int(gates.get("consec_pause_min") or 0)
++    if cp > 0:
++        return f"consecutive-loss pause ({cp} min left, {int(gates.get('consec_losses') or 0)} in a row)"
++    sb = gates.get("session_block")
++    if sb:
++        return str(sb)
++    return None
++
++
++def _no_setup_reason(s: Dict[str, Any]) -> str:
++    a = s["adx"]
++    if not s["in_rth"]:
++        base = f"outside RTH ({s['time_et']}, entries only 09:30-16:00 ET)"
++        if s["routed_entry"] != 0:
++            base += f"; {_side(s['routed_entry'])} {SLEEVE_LABEL[s['routed_sleeve']]} setup ignored"
++        return base
++    bo_short = _breakout_short(s)
++    if s["ranging"]:
++        return f"ADX {a:.1f} ranging, no MR fade: {_mr_detail(s)}"
++    if not s["trending"]:
++        return f"ADX {a:.1f} in transition (trend/MR off); {bo_short}"
++    if s["ema_cross_up"] or s["ema_cross_down"]:
++        trend_txt = f"EMA cross filtered by EMA{s['trend_n']}"
++    else:
++        trend_txt = f"no EMA{s['fast_n']}/{s['slow_n']} cross ({s['ema_bars_since_cross']} bars)"
++    return f"{trend_txt}; {bo_short}"
++
++
++def _decision(s: Dict[str, Any], gates: Optional[Dict[str, Any]], signal: Optional[Dict[str, Any]],
++              checked: bool) -> str:
++    if signal:
++        side = str(signal.get("ensemble_signal") or "").upper() or (
++            "BUY" if signal.get("direction") == "long" else "SELL")
++        sleeve = SLEEVE_LABEL.get(str(signal.get("exit_sleeve") or ""), str(signal.get("exit_sleeve") or "?"))
++        tp = _f(signal.get("tp"))
++        tp_txt = f"{tp:.2f}" if np.isfinite(tp) and tp > 0 else "ATR trail"
++        return (f"Decision: {side} ({sleeve}) @ {_f(signal.get('entry')):.2f} | "
++                f"SL {_f(signal.get('sl')):.2f} | TP {tp_txt}")
++    setup = s["final_entry"]
++    gate = gate_block_reason(gates)
++    if setup != 0:
++        lbl = f"{_side(setup)} setup ({SLEEVE_LABEL.get(s['routed_sleeve'], s['routed_sleeve'] or '?')})"
++        if gate:
++            return f"Decision: NO TRADE: {lbl} blocked by {gate}"
++        return f"Decision: NO TRADE: {lbl} rejected by live checks (see log)"
++    if gate:
++        return f"Decision: NO TRADE: {gate}"
++    return f"Decision: NO TRADE: {_no_setup_reason(s)}"
++
++
++def format_revamp_block(snapshot: Dict[str, Any], gates: Optional[Dict[str, Any]] = None,
++                        signal: Optional[Dict[str, Any]] = None, checked: bool = True) -> List[str]:
++    """Return 6 console lines (indented, plain ASCII)."""
++    s = snapshot
++    lines = [_bias(s), _regime(s), _trend_line(s), _breakout_line(s), _mr_line(s),
++             _decision(s, gates, signal, checked)]
++    return [INDENT + ln for ln in lines]
++
++
++def render_revamp_block(df: pd.DataFrame, gates: Optional[Dict[str, Any]] = None,
++                        signal: Optional[Dict[str, Any]] = None, checked: bool = True,
++                        strategy: Optional[EnsembleStrategy] = None) -> List[str]:
++    return format_revamp_block(compute_revamp_snapshot(df, strategy), gates, signal, checked)
+diff --git a/start_live_rithmic.py b/start_live_rithmic.py
+index f8fb394..6ff061f 100644
+--- a/start_live_rithmic.py
++++ b/start_live_rithmic.py
+@@ -90,11 +90,17 @@ PROFIT_LOCK_LEVEL_2_USD = float(os.getenv('PROFIT_LOCK_LEVEL_2_USD', '50'))
+ # ---------------------------------------------------------------------------
+ from src.research_ensemble import revamp_exits as _revamp_exits
+ from src.research_ensemble.live_signals import classify_last_sleeve
++try:  # display-only readout; a failure here must never stop the bot
++    from src.research_ensemble import live_display as _revamp_display
++except Exception as _revamp_display_import_err:  # pragma: no cover
++    _revamp_display = None
+ 
+ REVAMP_EXITS_ON = _revamp_exits.revamp_enabled()
+ if REVAMP_EXITS_ON:
+     TRAIL_SETTINGS['atr_mult'] = float(_revamp_exits.revamp_trail_mult())
+ REVAMP_CANDLE_COUNT = int(os.getenv('REVAMP_CANDLE_COUNT', '320'))
++# DISPLAY-ONLY: per-bar bias + decision reasoning in revamp mode (REVAMP_VERBOSE=0 to hide).
++REVAMP_VERBOSE = bool(_revamp_display is not None and _revamp_display.revamp_verbose_enabled())
+ 
+ def _env_int(name: str, default: int) -> int:
+     raw = os.getenv(name)
+@@ -804,6 +810,65 @@ class LiveRithmicTrader:
+             bot_logger.warning(f"REVAMP signal error for {symbol}: {e}")
+             return None
+ 
++    # ── DISPLAY-ONLY revamp readout (never changes state or orders) ─────────
++
++    def _revamp_session_block_reason(self, symbol: str) -> Optional[str]:
++        """Same rule as _is_trading_session_allowed, but silent and read-only."""
++        now = datetime.now(timezone.utc)
++        pair_cfg = SCALPING_PAIRS.get(symbol, {})
++        skip_friday = pair_cfg.get('skip_friday', self.skip_friday)
++        bad_hours = pair_cfg.get('bad_hours_utc', self.bad_hours.get(symbol, []))
++        if skip_friday and now.weekday() == 4:
++            return "Friday filter"
++        if now.hour in bad_hours:
++            return f"bad hour filter ({now.hour}:00 UTC)"
++        return None
++
++    def _revamp_gate_state(self, symbol: str, open_count: int) -> Dict[str, Any]:
++        """Read-only snapshot of the entry gates (does not clear expired timers)."""
++        now = datetime.now(timezone.utc)
++
++        def _mins_left(until: Optional[datetime]) -> int:
++            if until is None or now >= until:
++                return 0
++            return int((until - now).total_seconds() // 60) + 1
++
++        return {
++            'daily_pnl': self.daily_pnl,
++            'daily_loss_limit': self.daily_loss_limit,
++            'daily_trades': self.daily_trades,
++            'max_trades': self.max_trades_per_day,
++            'open_count': open_count,
++            'max_positions': self.max_positions,
++            'cooldown': self.cooldown,
++            'loss_cooldown_min': _mins_left(self.loss_cooldown_until.get(symbol)),
++            'consec_pause_min': _mins_left(self._consec_loss_pause_until.get(symbol)),
++            'consec_losses': self._symbol_consec_losses.get(symbol, 0),
++            'session_block': self._revamp_session_block_reason(symbol),
++        }
++
++    def _print_revamp_reasoning(
++        self,
++        symbol: str,
++        df: pd.DataFrame,
++        open_count: int,
++        checked: bool,
++        signal: Optional[Dict],
++    ) -> None:
++        """Print bias / regime / sleeves / decision. Errors never reach trading."""
++        try:
++            gates = self._revamp_gate_state(symbol, open_count)
++            for line in _revamp_display.render_revamp_block(df, gates=gates, signal=signal, checked=checked):
++                print(line)
++        except Exception as e:
++            if not getattr(self, '_revamp_display_err_shown', False):
++                self._revamp_display_err_shown = True
++                print(f"   (revamp readout unavailable: {e})")
++            try:
++                bot_logger.debug(f"REVAMP display error for {symbol}: {e}")
++            except Exception:
++                pass
++
+     def _check_simple_breakout(self, symbol: str, df: pd.DataFrame) -> Optional[Dict]:
+         """Fallback simple breakout strategy."""
+         row = df.iloc[-1]
+@@ -1604,6 +1669,7 @@ class LiveRithmicTrader:
+             print(f"Strategy:   Research 5m ADX ensemble (trend/MR/breakout)")
+             print(f"REVAMP:     {_revamp_exits.describe()}")
+             print(f"Trail ATR:  {TRAIL_SETTINGS['atr_mult']} (live default without revamp bat: 0.6)")
++            print(f"Readout:    {'ON - bias + decision every 5m bar (REVAMP_VERBOSE=0 to hide)' if REVAMP_VERBOSE else 'OFF (set REVAMP_VERBOSE=1)'}")
+         else:
+             print(f"Strategy:   Sweep-Gate + ML (IntelligentTrader, AdvancedStrategies)")
+             print(f"Features:   Dynamic SL/TP, Trailing Stops, 8 Confirmation Models")
+@@ -1696,8 +1762,13 @@ class LiveRithmicTrader:
+                         self.update_dollar_profit_locks(symbol, df)
+                         self.update_trailing_stops(symbol, df)
+ 
+-                    if self._effective_open_count() < self.max_positions and self.cooldown == 0:
++                    _rv_open_n = self._effective_open_count()
++                    _rv_checked = False
++                    _rv_signal = None
++                    if _rv_open_n < self.max_positions and self.cooldown == 0:
++                        _rv_checked = True
+                         signal = self.check_entry_signal(symbol, df)
++                        _rv_signal = signal
+                         if signal:
+                             cycle_candidates.append(signal)
+ 
+@@ -1706,6 +1777,8 @@ class LiveRithmicTrader:
+                     pos_str = f"{len(self.positions)}/{self.max_positions} {pos_syms}" if self.positions else "None"
+                     cooldown_str = f"(CD:{self.cooldown})" if self.cooldown > 0 else ""
+                     print(f"[{current_bar}] {symbol} {row['close']:.2f} | Pos: {pos_str} {cooldown_str} | Daily: ${self.daily_pnl:.2f}")
++                    if REVAMP_EXITS_ON and REVAMP_VERBOSE:
++                        self._print_revamp_reasoning(symbol, df, _rv_open_n, _rv_checked, _rv_signal)
+ 
+                 if not any_new_bar:
+                     time.sleep(5)
+diff --git a/tests/test_revamp_live_display.py b/tests/test_revamp_live_display.py
+new file mode 100644
+index 0000000..96c98d6
+--- /dev/null
++++ b/tests/test_revamp_live_display.py
+@@ -0,0 +1,139 @@
++"""REVAMP per-bar readout (display only): formatter + no-side-effect checks."""
++import numpy as np
++import pandas as pd
++import pytest
++
++from src.research_ensemble import live_display as ld
++from src.research_ensemble.live_signals import classify_last_sleeve
++
++
++def _snap(**over):
++    s = {
++        "time": pd.Timestamp("2026-10-06 14:00", tz="UTC"), "time_et": "10:00 ET", "in_rth": True,
++        "close": 31548.5, "ema_fast": 31540.0, "ema_slow": 31520.0, "ema_trend": 31210.25,
++        "fast_n": 20, "slow_n": 50, "trend_n": 200, "ema_bars_since_cross": 14,
++        "ema_cross_up": False, "ema_cross_down": False,
++        "adx": 22.4, "adx_trend_min": 25.0, "adx_range_max": 20.0,
++        "trending": False, "ranging": False, "breakout_allowed": True,
++        "don_hi": 31560.5, "don_lo": 31480.0, "prev_beyond_hi": False, "prev_beyond_lo": False,
++        "don_n": 20, "vol_ratio": 1.12, "vol_mult": 1.5,
++        "bb_up": 31570.0, "bb_mid": 31525.0, "bb_lo": 31480.0, "rsi": 58.3,
++        "rsi_os": 30.0, "rsi_ob": 70.0,
++        "trend_entry": 0, "mr_entry": 0, "bo_entry": 0,
++        "routed_entry": 0, "routed_sleeve": "", "final_entry": 0,
++    }
++    s.update(over)
++    return s
++
++
++def _gates(**over):
++    g = dict(daily_pnl=0.0, daily_loss_limit=1500.0, daily_trades=0, max_trades=20, open_count=0,
++             max_positions=2, cooldown=0, loss_cooldown_min=0, consec_pause_min=0, consec_losses=0,
++             session_block=None)
++    g.update(over)
++    return g
++
++
++def test_block_shape_and_ascii():
++    lines = ld.format_revamp_block(_snap(), _gates())
++    assert len(lines) == 6
++    heads = ["Bias", "Regime", "Trend", "Breakout", "MeanRev", "Decision"]
++    for ln, h in zip(lines, heads):
++        assert ln.startswith("   " + h)
++        ln.encode("ascii")  # safe for any Windows console code page
++
++
++def test_bias_uses_buy_sell_neutral_wording():
++    assert "Bias    : BUY (price 31548.50 above EMA200" in ld.format_revamp_block(_snap())[0]
++    sell = ld.format_revamp_block(_snap(close=31000.0, ema_fast=31010.0, ema_slow=31050.0))[0]
++    assert sell.strip().startswith("Bias    : SELL (price 31000.00 below EMA200")
++    assert "EMA20 < EMA50" in sell
++    neu = ld.format_revamp_block(_snap(close=31000.0))[0]
++    assert "Bias    : NEUTRAL" in neu
++    for ln in (ld.format_revamp_block(_snap())[0], sell, neu):
++        assert "bullish" not in ln.lower() and "bearish" not in ln.lower()
++
++
++def test_transition_reason_and_breakout_distance():
++    lines = ld.format_revamp_block(_snap(), _gates())
++    assert "TRANSITION (20-25)" in lines[1]
++    assert lines[-1] == ("   Decision: NO TRADE: ADX 22.4 in transition (trend/MR off); "
++                         "no breakout: high 31560.50 is 12.00 pts away, vol 1.12x <= 1.50x")
++
++
++def test_outside_rth_reason():
++    d = ld.format_revamp_block(_snap(in_rth=False, time_et="18:05 ET"), _gates())[-1]
++    assert "NO TRADE: outside RTH (18:05 ET" in d
++
++
++@pytest.mark.parametrize("over,needle", [
++    ({"cooldown": 3}, "cooldown (3 bars left)"),
++    ({"open_count": 2}, "max concurrent reached (2/2 open)"),
++    ({"daily_pnl": -1600.0}, "daily loss limit hit"),
++    ({"loss_cooldown_min": 7}, "loss cooldown (7 min left)"),
++    ({"session_block": "bad hour filter (21:00 UTC)"}, "bad hour filter"),
++])
++def test_gate_reasons(over, needle):
++    d = ld.format_revamp_block(_snap(), _gates(**over))[-1]
++    assert d.startswith("   Decision: NO TRADE: ") and needle in d
++
++
++def test_setup_blocked_by_gate_and_signal_decision():
++    s = _snap(adx=30.0, trending=True, bo_entry=1, routed_entry=1, routed_sleeve="breakout", final_entry=1,
++              close=31570.0)
++    d = ld.format_revamp_block(s, _gates(cooldown=2), signal=None, checked=False)[-1]
++    assert d == "   Decision: NO TRADE: BUY setup (breakout) blocked by cooldown (2 bars left)"
++    sig = {"ensemble_signal": "SELL", "direction": "short", "entry": 31570.0, "sl": 31650.0, "tp": 0.0,
++           "exit_sleeve": "trend"}
++    d2 = ld.format_revamp_block(s, _gates(), signal=sig)[-1]
++    assert d2 == "   Decision: SELL (trend) @ 31570.00 | SL 31650.00 | TP ATR trail"
++
++
++def test_verbose_toggle(monkeypatch):
++    monkeypatch.delenv("REVAMP_VERBOSE", raising=False)
++    assert ld.revamp_verbose_enabled() is True
++    for v in ("0", "false", "off", "no"):
++        monkeypatch.setenv("REVAMP_VERBOSE", v)
++        assert ld.revamp_verbose_enabled() is False
++    monkeypatch.setenv("REVAMP_VERBOSE", "1")
++    assert ld.revamp_verbose_enabled() is True
++
++
++def _synthetic_5m(n=420, seed=7):
++    rng = np.random.default_rng(seed)
++    # RTH-only 5m bars (09:30-16:00 ET = 13:30-20:00 UTC in Sept/Oct) over consecutive weekdays
++    days = pd.bdate_range("2026-09-01", periods=n // 78 + 2)
++    idx = pd.DatetimeIndex([d + pd.Timedelta(hours=13, minutes=30) + pd.Timedelta(minutes=5 * k)
++                            for d in days for k in range(78)]).tz_localize("UTC")[:n]
++    steps = rng.normal(0, 6, n) + np.sin(np.arange(n) / 25.0) * 4
++    close = 31000 + np.cumsum(steps)
++    open_ = np.r_[close[0], close[:-1]]
++    high = np.maximum(open_, close) + rng.uniform(0, 5, n)
++    low = np.minimum(open_, close) - rng.uniform(0, 5, n)
++    vol = rng.integers(200, 900, n).astype(float)
++    vol[rng.integers(0, n, 25)] *= 4  # some volume spikes so breakouts can confirm
++    return pd.DataFrame({"datetime": idx, "open": open_, "high": high, "low": low, "close": close, "volume": vol})
++
++
++def test_display_has_no_effect_on_strategy(monkeypatch):
++    monkeypatch.setenv("REVAMP_EXITS", "1")
++    full = _synthetic_5m()
++    seen = 0
++    hits = 0
++    for end in range(240, len(full)):
++        w = full.iloc[max(0, end - 320):end].reset_index(drop=True)
++        before = w.copy(deep=True)
++        off = classify_last_sleeve(w)
++        snap = ld.compute_revamp_snapshot(w)
++        lines = ld.format_revamp_block(snap, _gates())
++        on = classify_last_sleeve(w)
++        pd.testing.assert_frame_equal(w, before)
++        assert off == on
++        assert (snap["final_entry"] != 0) == bool(on)
++        assert len(lines) == 6
++        if on:
++            hits += 1
++            assert lines[-1].startswith("   Decision: NO TRADE: " + on["ensemble_signal"] + " setup")
++        seen += 1
++    assert seen > 150
++    assert hits > 0  # the fixture really exercises signal bars

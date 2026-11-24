@@ -1,0 +1,61 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Bot Live Chart (read-only)</title>
+<script src="lightweight-charts.js"></script>
+<style>
+body{margin:0;background:#0b0e14;color:#d8dee9;font:14px Segoe UI,Arial,sans-serif;display:flex;height:100vh}
+#chart{flex:1;position:relative}#side{width:330px;background:#121722;padding:14px;overflow:auto;border-left:1px solid #222a38}
+h2{margin:4px 0 10px;font-size:18px}.k{color:#8892a6}.v{float:right;font-weight:600}.row{padding:5px 0;border-bottom:1px solid #1d2432}
+.g{color:#26de81}.r{color:#fc5c65}.y{color:#feca57}button,select{background:#1f2738;color:#ddd;border:1px solid #334;padding:5px 9px;border-radius:5px;cursor:pointer;margin:2px}
+button.on{background:#2d6cdf}.box{background:#0e131c;border:1px solid #263043;border-radius:8px;padding:9px;margin:10px 0}
+#tl div{font-size:12.5px;padding:3px 0;border-bottom:1px dashed #222}#badge{font-size:12px;padding:2px 7px;border-radius:9px;background:#333;margin-left:6px}
+</style></head><body><div id="chart"></div><div id="side">
+<h2>Bot chart <span id="badge"></span></h2><div class="k" id="clock"></div>
+<div style="margin:8px 0"><button id="b1">1m</button><button id="b5" class="on">5m</button>
+<span id="rp" style="display:none"><br>Replay: <button onclick="rp('restart=1')">⟲ Restart</button><button id="pp" onclick="togglePause()">❚❚</button>
+<select id="spd" onchange="rp('speed='+this.value)"><option>10</option><option>30</option><option selected>60</option><option>120</option><option>300</option><option>600</option></select>x</span></div>
+<div class="box"><b>Open position</b><div id="pos" class="k">flat</div></div>
+<div class="box" id="stats"></div><div class="box"><b>Trades (last 24h)</b><div id="tl"></div></div>
+<div class="k" style="font-size:11px">Read-only viewer. No orders, no broker connection. Levels: PDH/PDL prior RTH day, ONH/ONL overnight (from 9:30), ORH/ORL 9:30–9:45 (from 9:45), PWH/PWL prior week.</div>
+</div><script>
+const LC=LightweightCharts, el=document.getElementById('chart');
+const chart=LC.createChart(el,{layout:{background:{color:'#0b0e14'},textColor:'#c9d1d9'},grid:{vertLines:{color:'#161b26'},horzLines:{color:'#161b26'}},
+ timeScale:{timeVisible:true,secondsVisible:false,rightOffset:12},rightPriceScale:{borderColor:'#333'},crosshair:{mode:0}});
+const cs=chart.addCandlestickSeries({upColor:'#26de81',downColor:'#fc5c65',wickUpColor:'#26de81',wickDownColor:'#fc5c65',borderVisible:false});
+new ResizeObserver(()=>chart.resize(el.clientWidth,el.clientHeight)).observe(el);
+const LVC={PDH:'#ff9f43',PDL:'#ff9f43',ONH:'#48dbfb',ONL:'#48dbfb',ORH:'#feca57',ORL:'#feca57',PWH:'#ff6bcb',PWL:'#ff6bcb'};
+let tf=5,first=true,lvLines=[],segs=[],live=[],paused=false;
+document.getElementById('b1').onclick=()=>{tf=1;first=true;sel()};document.getElementById('b5').onclick=()=>{tf=5;first=true;sel()};
+function sel(){b1.className=tf==1?'on':'';b5.className=tf==5?'on':'';tick()}
+function rp(q){fetch('/api/replay?'+q).then(()=>{first=q.includes('restart');tick()})}
+function togglePause(){paused=!paused;pp.textContent=paused?'▶':'❚❚';rp('pause='+(paused?1:0))}
+const $=(n,d=0)=>n==null?'–':(n>=0?'+$':'-$')+Math.abs(Number(n)).toFixed(d);const cls=n=>n>0?'g':(n<0?'r':'');
+function snap(t){return tf==5?t-(t%300):t-(t%60)}
+function line(pts,color,style,w){const s=chart.addLineSeries({color,lineWidth:w||2,lineStyle:style||0,priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+ s.setData(pts);segs.push(s);return s}
+async function tick(){let d;try{d=await (await fetch('/api/data?tf='+tf)).json()}catch(e){return}
+ cs.setData(d.candles);lvLines.forEach(l=>cs.removePriceLine(l));lvLines=[];
+ for(const[k,v]of Object.entries(d.levels))lvLines.push(cs.createPriceLine({price:v,color:LVC[k],lineWidth:1,lineStyle:2,axisLabelVisible:true,title:k}));
+ segs.forEach(s=>chart.removeSeries(s));segs=[];const mk=[];const lastT=d.candles.length?d.candles[d.candles.length-1].time:d.now;
+ for(const t of d.trades){const L=t.dir=='long',ti=snap(t.t_in),to=t.open?lastT:snap(t.t_out);
+  mk.push({time:ti,position:L?'belowBar':'aboveBar',color:L?'#26de81':'#fc5c65',shape:L?'arrowUp':'arrowDown',text:(L?'LONG ':'SHORT ')+t.setup+' @'+t.entry});
+  const p=t.sl_path;for(let i=0;i<p.length;i++){const a=snap(p[i][0]),b=i+1<p.length?snap(p[i+1][0]):to;if(p[i][1])line(a==b?[{time:a,value:p[i][1]}]:[{time:a,value:p[i][1]},{time:Math.max(b,a+60),value:p[i][1]}],'#ff4757',0,2)}
+  if(t.tp)line([{time:ti,value:t.tp},{time:Math.max(to,ti+60),value:t.tp}],'#2ed573',0,2);
+  if(!t.open){line([{time:ti,value:t.entry},{time:Math.max(to,ti+60),value:t.exit}],'#9aa4b8',1,1);
+   mk.push({time:to,position:L?'aboveBar':'belowBar',color:t.pnl>0?'#2ed573':'#ff4757',shape:'circle',text:'EXIT '+t.reason+' '+$(t.pnl)})}}
+ mk.sort((a,b)=>a.time-b.time);cs.setMarkers(mk);
+ if(first&&d.candles.length){chart.timeScale().setVisibleLogicalRange({from:d.candles.length-(tf==5?150:240),to:d.candles.length+10});first=false}
+ const P=d.panel;clock.textContent=P.now_et+'  · trading day '+P.trading_day;
+ badge.textContent=(P.replay?'REPLAY '+P.replay:'LIVE')+' · '+(P.mode=='eval'?'EVAL PASSER':'FUNDED 12K');badge.style.background=P.replay?'#6c4bd8':'#1e8e3e';
+ if(P.replay){rp_.style.display='inline'}
+ pos.innerHTML=P.open.length?P.open.map(o=>`<div class="row"><b class="${o.dir=='long'?'g':'r'}">${o.dir.toUpperCase()} ${o.size} ${o.setup}</b> @ ${o.entry}<br>
+  <span class="r">SL ${o.sl}</span> · <span class="g">TP ${o.tp||'none'}</span><br>Open P&L <b class="${cls(o.upnl)}">${$(o.upnl,2)}</b></div>`).join(''):'flat';
+ const R=(k,v,c)=>`<div class="row"><span class="k">${k}</span><span class="v ${c||''}">${v}</span></div>`;
+ let h=R('Last price',P.last)+R('Day P&L (closed)',$(P.day_pnl,2),cls(P.day_pnl))+R('Open P&L',$(P.open_pnl,2),cls(P.open_pnl))+R('Trades today',P.trades_today+' ('+P.wins_today+' W)')+
+  R('Room to daily stop ($'+P.daily_stop+')','$'+P.to_daily_stop.toFixed(0),P.to_daily_stop<300?'r':'');
+ if(P.mode=='eval')h+=R('Eval P&L',$(P.eval_pnl,2),cls(P.eval_pnl))+R('To $3k target','$'+P.to_target.toFixed(0),'y')+R('DD floor (eval P&L)',$(P.dd_floor))+R('Room to drawdown','$'+P.to_drawdown.toFixed(0),P.to_drawdown<500?'r':'');
+ else h+=R('Balance','$'+P.balance.toFixed(2))+R('Drawdown floor','$'+P.dd_floor)+R('Room to drawdown','$'+P.to_drawdown.toFixed(0),P.to_drawdown<500?'r':'');
+ stats.innerHTML=h;
+ tl.innerHTML=d.trades.slice().reverse().map(t=>{const dt=new Date(t.t_in*1000).toISOString().substr(11,5);
+  return `<div>${dt} <b class="${t.dir=='long'?'g':'r'}">${t.dir=='long'?'L':'S'}</b> ${t.setup} @${t.entry} → ${t.open?'<span class=y>open</span>':t.exit+' '+t.reason+' <b class="'+cls(t.pnl)+'">'+$(t.pnl)+'</b>'}</div>`}).join('')||'<span class=k>none yet</span>';
+}
+const rp_=document.getElementById('rp');tick();setInterval(tick,2000);
+</script></body></html>

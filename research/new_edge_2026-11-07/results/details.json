@@ -1,0 +1,2274 @@
+{
+ "meta": {
+  "data": {
+   "main_raw_rows": 664264,
+   "main_rows_from_2025": 607113,
+   "main_clean_dropped": 2551,
+   "main_first": "2025-01-01 23:00:00+00:00",
+   "main_last": "2026-09-21 03:58:00+00:00",
+   "hold5_rows": 13588,
+   "hold5_dropped": 12,
+   "hold1_rows": 27301,
+   "hold1_dropped": 2,
+   "hold5_first": "2026-08-28 04:05:00+00:00",
+   "hold5_last": "2026-11-06 21:55:00+00:00",
+   "hold1_first": "2026-10-11 22:10:00+00:00",
+   "hold1_last": "2026-11-06 21:59:00+00:00",
+   "rth_1m_bars_insample": 168659,
+   "rth_5m_bars_all": 36484,
+   "rth_1m_bars_holdout": 7791,
+   "insample_days": 442,
+   "holdout_days_5m": 34,
+   "holdout_days_1m": 20
+  },
+  "n_strategies": 7,
+  "n_cells": 16,
+  "n_simulations": 32,
+  "p_pass_by_luck_per_strategy": 0.0859375,
+  "expected_lucky_candidates": 0.6015625,
+  "bonferroni_t_5pct_two_sided_over_cells": 2.96,
+  "holdout_note": "S1_ORB holdout uses 1m bars from 2026-10-12; S2-S4 use 5m bars for all splits, holdout 2026-09-22..2026-11-06",
+  "folds_note": "fold 1 has only a 3-month train window (no data before 2025)",
+  "runtime_s": 47.5
+ },
+ "strategies": {
+  "S1_ORB": {
+   "selected_cell": "S1_ORB_r15_t2.0",
+   "criteria": {
+    "validate_net>0": false,
+    "test_net>0": true,
+    "wf_total>0": false,
+    "wf_folds_pos>=4": false,
+    "3tick_validate&test>0": false,
+    "no_2k_breach_insample": false
+   },
+   "candidate": false,
+   "splits": {
+    "TRAIN": {
+     "trades": 250,
+     "session_days": 257,
+     "net": 1617.0,
+     "pf": 1.1004940803579752,
+     "win_rate": 0.436,
+     "avg_trade": 6.468,
+     "avg_win": 162.454128440367,
+     "avg_loss": -114.11702127659575,
+     "longest_losing_streak": 7,
+     "worst_day": -124.5,
+     "trades_per_day": 0.9727626459143969,
+     "t_stat_daily": 0.6830472438297659,
+     "pnl_by_entry_hour": {
+      "9": 2000.0,
+      "10": -360.5,
+      "11": -22.5
+     },
+     "mdd_mtm": 1588.5,
+     "mdd_eod": 1544.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 126,
+     "session_days": 127,
+     "net": -4017.5,
+     "pf": 0.6374424690912373,
+     "win_rate": 0.2777777777777778,
+     "avg_trade": -31.884920634920636,
+     "avg_win": 201.81428571428572,
+     "avg_loss": -121.76923076923077,
+     "longest_losing_streak": 9,
+     "worst_day": -124.5,
+     "trades_per_day": 0.9921259842519685,
+     "t_stat_daily": -2.3812545295261276,
+     "pnl_by_entry_hour": {
+      "9": -2682.0,
+      "10": -1335.5
+     },
+     "mdd_mtm": 5067.5,
+     "mdd_eod": 4910.5,
+     "breaches": [
+      {
+       "date": "2026-03-19",
+       "dd": 5067.5
+      }
+     ],
+     "breach_count": 1
+    },
+    "TEST": {
+     "trades": 58,
+     "session_days": 58,
+     "net": 628.0,
+     "pf": 1.1501135412931756,
+     "win_rate": 0.3793103448275862,
+     "avg_trade": 10.827586206896552,
+     "avg_win": 218.70454545454547,
+     "avg_loss": -116.20833333333333,
+     "longest_losing_streak": 8,
+     "worst_day": -124.5,
+     "trades_per_day": 1.0,
+     "t_stat_daily": 0.4896875116132874,
+     "pnl_by_entry_hour": {
+      "9": 1098.5,
+      "10": -480.5,
+      "11": 10.0
+     },
+     "mdd_mtm": 1990.0,
+     "mdd_eod": 1827.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 19,
+     "session_days": 20,
+     "net": -1099.5,
+     "pf": 0.3963766126818556,
+     "win_rate": 0.21052631578947367,
+     "avg_trade": -57.86842105263158,
+     "avg_win": 180.5,
+     "avg_loss": -121.43333333333334,
+     "longest_losing_streak": 6,
+     "worst_day": -124.5,
+     "trades_per_day": 0.95,
+     "t_stat_daily": -1.8655072837131879,
+     "pnl_by_entry_hour": {
+      "9": -1244.0,
+      "10": 144.5
+     },
+     "mdd_mtm": 1216.0,
+     "mdd_eod": 1099.5,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "splits_3tick": {
+    "TRAIN": {
+     "trades": 250,
+     "session_days": 257,
+     "net": 1103.5,
+     "pf": 1.0678388098238711,
+     "win_rate": 0.428,
+     "avg_trade": 4.414,
+     "avg_win": 162.33644859813083,
+     "avg_loss": -113.75174825174825,
+     "longest_losing_streak": 7,
+     "worst_day": -125.5,
+     "trades_per_day": 0.9727626459143969,
+     "t_stat_daily": 0.4674570001544053,
+     "pnl_by_entry_hour": {
+      "9": 1561.5,
+      "10": -431.5,
+      "11": -26.5
+     },
+     "mdd_mtm": 1673.5,
+     "mdd_eod": 1629.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 126,
+     "session_days": 127,
+     "net": -4130.5,
+     "pf": 0.6304133858267716,
+     "win_rate": 0.2777777777777778,
+     "avg_trade": -32.78174603174603,
+     "avg_win": 201.3,
+     "avg_loss": -122.81318681318682,
+     "longest_losing_streak": 9,
+     "worst_day": -125.5,
+     "trades_per_day": 0.9921259842519685,
+     "t_stat_daily": -2.443115693397126,
+     "pnl_by_entry_hour": {
+      "9": -2772.0,
+      "10": -1358.5
+     },
+     "mdd_mtm": 5153.5,
+     "mdd_eod": 4996.5,
+     "breaches": [
+      {
+       "date": "2026-03-19",
+       "dd": 5153.5
+      }
+     ],
+     "breach_count": 1
+    },
+    "TEST": {
+     "trades": 58,
+     "session_days": 58,
+     "net": 587.0,
+     "pf": 1.1390171699230314,
+     "win_rate": 0.3793103448275862,
+     "avg_trade": 10.120689655172415,
+     "avg_win": 218.61363636363637,
+     "avg_loss": -117.29166666666667,
+     "longest_losing_streak": 8,
+     "worst_day": -125.5,
+     "trades_per_day": 1.0,
+     "t_stat_daily": 0.45636492557029207,
+     "pnl_by_entry_hour": {
+      "9": 1074.5,
+      "10": -493.5,
+      "11": 6.0
+     },
+     "mdd_mtm": 2040.0,
+     "mdd_eod": 1853.0,
+     "breaches": [
+      {
+       "date": "2026-09-11",
+       "dd": 2040.0
+      }
+     ],
+     "breach_count": 1
+    },
+    "HOLDOUT": {
+     "trades": 19,
+     "session_days": 20,
+     "net": -1117.5,
+     "pf": 0.39183673469387753,
+     "win_rate": 0.21052631578947367,
+     "avg_trade": -58.81578947368421,
+     "avg_win": 180.0,
+     "avg_loss": -122.5,
+     "longest_losing_streak": 6,
+     "worst_day": -125.5,
+     "trades_per_day": 0.95,
+     "t_stat_daily": -1.8909812350060315,
+     "pnl_by_entry_hour": {
+      "9": -1258.0,
+      "10": 140.5
+     },
+     "mdd_mtm": 1232.0,
+     "mdd_eod": 1117.5,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "insample_all": {
+    "trades": 434,
+    "session_days": 442,
+    "net": -1772.5,
+    "pf": 0.9434699409982459,
+    "win_rate": 0.3824884792626728,
+    "avg_trade": -4.0841013824884795,
+    "avg_win": 178.2078313253012,
+    "avg_loss": -116.99626865671642,
+    "longest_losing_streak": 9,
+    "worst_day": -124.5,
+    "trades_per_day": 0.9819004524886877,
+    "t_stat_daily": -0.555460153970982,
+    "pnl_by_entry_hour": {
+     "9": 416.5,
+     "10": -2176.5,
+     "11": -12.5
+    },
+    "mdd_mtm": 6152.0,
+    "mdd_eod": 6079.0,
+    "breaches": [
+     {
+      "date": "2026-01-12",
+      "dd": 6152.0
+     }
+    ],
+    "breach_count": 1
+   },
+   "walk_forward": [
+    {
+     "strategy": "S1_ORB",
+     "fold": 1,
+     "train": "2025-01-02..2025-03-31",
+     "test": "2025-04-01..2025-06-30",
+     "picked": "S1_ORB_r15_t2.0",
+     "train_net": 2092.0,
+     "test_net": -28.0,
+     "test_net_3tick": -90.0,
+     "test_trades": 63,
+     "test_mdd_mtm": 1228.5
+    },
+    {
+     "strategy": "S1_ORB",
+     "fold": 2,
+     "train": "2025-01-02..2025-06-30",
+     "test": "2025-07-01..2025-09-30",
+     "picked": "S1_ORB_r15_t2.0",
+     "train_net": 2064.0,
+     "test_net": 68.5,
+     "test_net_3tick": -258.0,
+     "test_trades": 65,
+     "test_mdd_mtm": 1282.5
+    },
+    {
+     "strategy": "S1_ORB",
+     "fold": 3,
+     "train": "2025-04-01..2025-09-30",
+     "test": "2025-10-01..2025-12-31",
+     "picked": "S1_ORB_r15_t1.5",
+     "train_net": 639.0,
+     "test_net": -808.5,
+     "test_net_3tick": -861.0,
+     "test_trades": 61,
+     "test_mdd_mtm": 1151.0
+    },
+    {
+     "strategy": "S1_ORB",
+     "fold": 4,
+     "train": "2025-07-01..2025-12-31",
+     "test": "2026-01-01..2026-03-31",
+     "picked": "S1_ORB_r15_t2.0",
+     "train_net": -447.0,
+     "test_net": -2338.5,
+     "test_net_3tick": -2397.5,
+     "test_trades": 62,
+     "test_mdd_mtm": 2650.5
+    },
+    {
+     "strategy": "S1_ORB",
+     "fold": 5,
+     "train": "2025-10-01..2026-03-31",
+     "test": "2026-04-01..2026-06-30",
+     "picked": "S1_ORB_r15_t1.5",
+     "train_net": -1987.0,
+     "test_net": -1649.0,
+     "test_net_3tick": -1696.0,
+     "test_trades": 64,
+     "test_mdd_mtm": 2531.5
+    },
+    {
+     "strategy": "S1_ORB",
+     "fold": 6,
+     "train": "2026-01-01..2026-06-30",
+     "test": "2026-07-01..2026-09-21",
+     "picked": "S1_ORB_r30_t2.0",
+     "train_net": -505.0,
+     "test_net": -135.5,
+     "test_net_3tick": -182.5,
+     "test_trades": 54,
+     "test_mdd_mtm": 1031.0
+    }
+   ]
+  },
+  "S2_VWAP_MR": {
+   "selected_cell": "S2_VWAP_k1.5",
+   "criteria": {
+    "validate_net>0": false,
+    "test_net>0": true,
+    "wf_total>0": false,
+    "wf_folds_pos>=4": false,
+    "3tick_validate&test>0": false,
+    "no_2k_breach_insample": false
+   },
+   "candidate": false,
+   "splits": {
+    "TRAIN": {
+     "trades": 233,
+     "session_days": 257,
+     "net": 1010.2782800041314,
+     "pf": 1.104531693017616,
+     "win_rate": 0.5107296137339056,
+     "avg_trade": 4.335958283279534,
+     "avg_win": 89.70657018010688,
+     "avg_loss": -84.77897869674199,
+     "longest_losing_streak": 7,
+     "worst_day": -249.0,
+     "trades_per_day": 0.9066147859922179,
+     "t_stat_daily": 0.7040847651444796,
+     "pnl_by_entry_hour": {
+      "10": 174.81,
+      "11": -89.04,
+      "12": 1375.69,
+      "13": -495.56,
+      "14": 96.47,
+      "15": -52.09
+     },
+     "mdd_mtm": 1145.7803513945837,
+     "mdd_eod": 1104.7803513945837,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 111,
+     "session_days": 127,
+     "net": -2268.6495230741493,
+     "pf": 0.6670614062603293,
+     "win_rate": 0.40540540540540543,
+     "avg_trade": -20.438283991659002,
+     "avg_win": 101.00818520152696,
+     "avg_loss": -103.24269480519489,
+     "longest_losing_streak": 7,
+     "worst_day": -249.0,
+     "trades_per_day": 0.8740157480314961,
+     "t_stat_daily": -1.7752145369525245,
+     "pnl_by_entry_hour": {
+      "10": -202.92,
+      "11": -1868.25,
+      "12": -421.41,
+      "13": -139.3,
+      "14": 180.72,
+      "15": 182.5
+     },
+     "mdd_mtm": 2625.4832653462945,
+     "mdd_eod": 2589.450659090304,
+     "breaches": [
+      {
+       "date": "2026-04-17",
+       "dd": 2625.4832653462945
+      }
+     ],
+     "breach_count": 1
+    },
+    "TEST": {
+     "trades": 73,
+     "session_days": 58,
+     "net": 679.1971973119144,
+     "pf": 1.1905334180733145,
+     "win_rate": 0.4794520547945205,
+     "avg_trade": 9.304071196053622,
+     "avg_win": 121.25461380074827,
+     "avg_loss": -93.80827067669145,
+     "longest_losing_streak": 6,
+     "worst_day": -249.0,
+     "trades_per_day": 1.2586206896551724,
+     "t_stat_daily": 0.6335833328818622,
+     "pnl_by_entry_hour": {
+      "10": -594.11,
+      "11": 1777.2,
+      "12": -246.54,
+      "13": -151.23,
+      "14": -63.12,
+      "15": -43.0
+     },
+     "mdd_mtm": 961.9704102796532,
+     "mdd_eod": 822.4255871098285,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 24,
+     "session_days": 34,
+     "net": 27.93114814200817,
+     "pf": 1.0190008964577342,
+     "win_rate": 0.4583333333333333,
+     "avg_trade": 1.1637978392503403,
+     "avg_win": 136.17474723368915,
+     "avg_loss": -113.07623626373635,
+     "longest_losing_streak": 5,
+     "worst_day": -249.0,
+     "trades_per_day": 0.7058823529411765,
+     "t_stat_daily": 0.046306692643819904,
+     "pnl_by_entry_hour": {
+      "10": 371.19,
+      "11": -366.64,
+      "12": -177.39,
+      "13": 200.78
+     },
+     "mdd_mtm": 669.3214285714275,
+     "mdd_eod": 530.3214285714275,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "splits_3tick": {
+    "TRAIN": {
+     "trades": 233,
+     "session_days": 257,
+     "net": 645.8856519245965,
+     "pf": 1.0652057492530231,
+     "win_rate": 0.5107296137339056,
+     "avg_trade": 2.7720414245690836,
+     "avg_win": 88.66583080849016,
+     "avg_loss": -86.88901942355905,
+     "longest_losing_streak": 7,
+     "worst_day": -251.0,
+     "trades_per_day": 0.9066147859922179,
+     "t_stat_daily": 0.44937994869643655,
+     "pnl_by_entry_hour": {
+      "10": 96.81,
+      "11": -329.69,
+      "12": 1305.69,
+      "13": -454.3,
+      "14": 83.47,
+      "15": -56.09
+     },
+     "mdd_mtm": 1286.8694080455462,
+     "mdd_eod": 1244.8694080455462,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 111,
+     "session_days": 127,
+     "net": -2426.6495230741493,
+     "pf": 0.6492276294764647,
+     "win_rate": 0.40540540540540543,
+     "avg_trade": -21.861707415082428,
+     "avg_win": 99.80818520152695,
+     "avg_loss": -104.81845238095246,
+     "longest_losing_streak": 7,
+     "worst_day": -251.0,
+     "trades_per_day": 0.8740157480314961,
+     "t_stat_daily": -1.8925783588018534,
+     "pnl_by_entry_hour": {
+      "10": -240.92,
+      "11": -1922.25,
+      "12": -455.41,
+      "13": -156.3,
+      "14": 171.72,
+      "15": 176.5
+     },
+     "mdd_mtm": 2771.4832653462945,
+     "mdd_eod": 2736.450659090304,
+     "breaches": [
+      {
+       "date": "2026-04-15",
+       "dd": 2771.4832653462945
+      }
+     ],
+     "breach_count": 1
+    },
+    "TEST": {
+     "trades": 73,
+     "session_days": 58,
+     "net": 582.1971973119144,
+     "pf": 1.1605744831041533,
+     "win_rate": 0.4794520547945205,
+     "avg_trade": 7.97530407276595,
+     "avg_win": 120.22604237217685,
+     "avg_loss": -95.41353383458619,
+     "longest_losing_streak": 6,
+     "worst_day": -251.0,
+     "trades_per_day": 1.2586206896551724,
+     "t_stat_daily": 0.542607444915013,
+     "pnl_by_entry_hour": {
+      "10": -614.11,
+      "11": 1740.2,
+      "12": -263.54,
+      "13": -163.23,
+      "14": -72.12,
+      "15": -45.0
+     },
+     "mdd_mtm": 984.9704102796532,
+     "mdd_eod": 848.4255871098285,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 24,
+     "session_days": 34,
+     "net": -4.068851857991831,
+     "pf": 0.9972673765907218,
+     "win_rate": 0.4583333333333333,
+     "avg_trade": -0.16953549408299295,
+     "avg_win": 134.99292905187096,
+     "avg_loss": -114.5377747252748,
+     "longest_losing_streak": 5,
+     "worst_day": -251.0,
+     "trades_per_day": 0.7058823529411765,
+     "t_stat_daily": -0.00673211308990509,
+     "pnl_by_entry_hour": {
+      "10": 367.19,
+      "11": -383.64,
+      "12": -182.39,
+      "13": 194.78
+     },
+     "mdd_mtm": 678.3214285714275,
+     "mdd_eod": 539.3214285714275,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "insample_all": {
+    "trades": 417,
+    "session_days": 442,
+    "net": -579.1740457581036,
+    "pf": 0.9711041976817839,
+    "win_rate": 0.47721822541966424,
+    "avg_trade": -1.3889065845518072,
+    "avg_win": 97.81086265591769,
+    "avg_loss": -91.94282437745746,
+    "longest_losing_streak": 7,
+    "worst_day": -249.0,
+    "trades_per_day": 0.9434389140271493,
+    "t_stat_daily": -0.2626310916280619,
+    "pnl_by_entry_hour": {
+     "10": -622.22,
+     "11": -180.09,
+     "12": 707.75,
+     "13": -786.09,
+     "14": 214.07,
+     "15": 87.41
+    },
+    "mdd_mtm": 3735.3747343146606,
+    "mdd_eod": 3642.1004470542684,
+    "breaches": [
+     {
+      "date": "2026-04-14",
+      "dd": 3735.3747343146606
+     }
+    ],
+    "breach_count": 1
+   },
+   "walk_forward": [
+    {
+     "strategy": "S2_VWAP_MR",
+     "fold": 1,
+     "train": "2025-01-02..2025-03-31",
+     "test": "2025-04-01..2025-06-30",
+     "picked": "S2_VWAP_k1.5",
+     "train_net": 346.8102116617374,
+     "test_net": 1000.397692900995,
+     "test_net_3tick": 895.397692900995,
+     "test_trades": 72,
+     "test_mdd_mtm": 525.0
+    },
+    {
+     "strategy": "S2_VWAP_MR",
+     "fold": 2,
+     "train": "2025-01-02..2025-06-30",
+     "test": "2025-07-01..2025-09-30",
+     "picked": "S2_VWAP_k1.5",
+     "train_net": 1347.2079045627324,
+     "test_net": -222.87130475494632,
+     "test_net_3tick": -322.8713047549463,
+     "test_trades": 63,
+     "test_mdd_mtm": 702.5811325337709
+    },
+    {
+     "strategy": "S2_VWAP_MR",
+     "fold": 3,
+     "train": "2025-04-01..2025-09-30",
+     "test": "2025-10-01..2025-12-31",
+     "picked": "S2_VWAP_k2.0",
+     "train_net": 785.6886595770193,
+     "test_net": -757.4184931699929,
+     "test_net_3tick": -862.5075498209553,
+     "test_trades": 52,
+     "test_mdd_mtm": 1070.4852681290795
+    },
+    {
+     "strategy": "S2_VWAP_MR",
+     "fold": 4,
+     "train": "2025-07-01..2025-12-31",
+     "test": "2026-01-01..2026-03-31",
+     "picked": "S2_VWAP_k1.5",
+     "train_net": -336.92962455860106,
+     "test_net": -886.3249926165445,
+     "test_net_3tick": -964.3249926165445,
+     "test_trades": 54,
+     "test_mdd_mtm": 1533.4919790095882
+    },
+    {
+     "strategy": "S2_VWAP_MR",
+     "fold": 5,
+     "train": "2025-10-01..2026-03-31",
+     "test": "2026-04-01..2026-06-30",
+     "picked": "S2_VWAP_k1.5",
+     "train_net": -1000.3833124201992,
+     "test_net": -1382.3245304576049,
+     "test_net_3tick": -1462.3245304576049,
+     "test_trades": 57,
+     "test_mdd_mtm": 1434.7230184141445
+    },
+    {
+     "strategy": "S2_VWAP_MR",
+     "fold": 6,
+     "train": "2026-01-01..2026-06-30",
+     "test": "2026-07-01..2026-09-21",
+     "picked": "S2_VWAP_k1.5",
+     "train_net": -2268.6495230741493,
+     "test_net": 679.1971973119144,
+     "test_net_3tick": 582.1971973119144,
+     "test_trades": 73,
+     "test_mdd_mtm": 961.9704102796532
+    }
+   ]
+  },
+  "S3_PULLBACK": {
+   "selected_cell": "S3_PB_t1.5",
+   "criteria": {
+    "validate_net>0": true,
+    "test_net>0": false,
+    "wf_total>0": false,
+    "wf_folds_pos>=4": false,
+    "3tick_validate&test>0": false,
+    "no_2k_breach_insample": false
+   },
+   "candidate": false,
+   "splits": {
+    "TRAIN": {
+     "trades": 491,
+     "session_days": 257,
+     "net": -4170.0,
+     "pf": 0.8243322942118123,
+     "win_rate": 0.35845213849287166,
+     "avg_trade": -8.492871690427698,
+     "avg_win": 111.18181818181819,
+     "avg_loss": -75.35873015873015,
+     "longest_losing_streak": 13,
+     "worst_day": -249.0,
+     "trades_per_day": 1.9105058365758756,
+     "t_stat_daily": -1.9520745970944218,
+     "pnl_by_entry_hour": {
+      "9": 80.5,
+      "10": 602.5,
+      "11": -1696.25,
+      "12": -1456.75,
+      "13": -1449.25,
+      "14": -104.5,
+      "15": -146.25
+     },
+     "mdd_mtm": 5206.25,
+     "mdd_eod": 5206.25,
+     "breaches": [
+      {
+       "date": "2025-05-19",
+       "dd": 5206.25
+      }
+     ],
+     "breach_count": 1
+    },
+    "VALIDATE": {
+     "trades": 235,
+     "session_days": 127,
+     "net": 1104.75,
+     "pf": 1.086555411916794,
+     "win_rate": 0.43829787234042555,
+     "avg_trade": 4.701063829787234,
+     "avg_win": 134.64320388349515,
+     "avg_loss": -96.69318181818181,
+     "longest_losing_streak": 10,
+     "worst_day": -249.0,
+     "trades_per_day": 1.8503937007874016,
+     "t_stat_daily": 0.6121621857851407,
+     "pnl_by_entry_hour": {
+      "9": 661.0,
+      "10": 824.5,
+      "11": -25.25,
+      "12": -620.25,
+      "13": 267.25,
+      "14": -71.75,
+      "15": 69.25
+     },
+     "mdd_mtm": 1841.25,
+     "mdd_eod": 1679.25,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 106,
+     "session_days": 58,
+     "net": -189.25,
+     "pf": 0.9692451450394085,
+     "win_rate": 0.39622641509433965,
+     "avg_trade": -1.7853773584905661,
+     "avg_win": 142.00595238095238,
+     "avg_loss": -96.1484375,
+     "longest_losing_streak": 7,
+     "worst_day": -249.0,
+     "trades_per_day": 1.8275862068965518,
+     "t_stat_daily": -0.1478700707621218,
+     "pnl_by_entry_hour": {
+      "9": -125.75,
+      "10": -1411.0,
+      "11": 908.5,
+      "12": 42.0,
+      "13": 153.5,
+      "14": 112.5,
+      "15": 131.0
+     },
+     "mdd_mtm": 1404.25,
+     "mdd_eod": 1283.75,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 62,
+     "session_days": 34,
+     "net": -915.5,
+     "pf": 0.7617126496616345,
+     "win_rate": 0.3387096774193548,
+     "avg_trade": -14.766129032258064,
+     "avg_win": 139.35714285714286,
+     "avg_loss": -93.70731707317073,
+     "longest_losing_streak": 8,
+     "worst_day": -249.0,
+     "trades_per_day": 1.8235294117647058,
+     "t_stat_daily": -0.891791094131101,
+     "pnl_by_entry_hour": {
+      "9": -73.0,
+      "10": 40.0,
+      "11": -1057.75,
+      "12": 323.5,
+      "13": 79.25,
+      "14": -113.5,
+      "15": -114.0
+     },
+     "mdd_mtm": 1232.0,
+     "mdd_eod": 1087.5,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "splits_3tick": {
+    "TRAIN": {
+     "trades": 491,
+     "session_days": 257,
+     "net": -5092.75,
+     "pf": 0.7919713247007883,
+     "win_rate": 0.35030549898167007,
+     "avg_trade": -10.372199592668025,
+     "avg_win": 112.72238372093024,
+     "avg_loss": -76.74294670846395,
+     "longest_losing_streak": 13,
+     "worst_day": -251.0,
+     "trades_per_day": 1.9105058365758756,
+     "t_stat_daily": -2.377134721358746,
+     "pnl_by_entry_hour": {
+      "9": 59.0,
+      "10": 32.0,
+      "11": -1855.5,
+      "12": -1527.25,
+      "13": -1512.25,
+      "14": -130.5,
+      "15": -158.25
+     },
+     "mdd_mtm": 6083.0,
+     "mdd_eod": 6083.0,
+     "breaches": [
+      {
+       "date": "2025-05-13",
+       "dd": 6083.0
+      }
+     ],
+     "breach_count": 1
+    },
+    "VALIDATE": {
+     "trades": 235,
+     "session_days": 127,
+     "net": 77.25,
+     "pf": 1.0057895525743836,
+     "win_rate": 0.425531914893617,
+     "avg_trade": 0.32872340425531915,
+     "avg_win": 134.2025,
+     "avg_loss": -98.83703703703704,
+     "longest_losing_streak": 12,
+     "worst_day": -251.0,
+     "trades_per_day": 1.8503937007874016,
+     "t_stat_daily": 0.043165967734559774,
+     "pnl_by_entry_hour": {
+      "9": 353.0,
+      "10": 787.5,
+      "11": -361.75,
+      "12": -947.75,
+      "13": 261.75,
+      "14": -79.75,
+      "15": 64.25
+     },
+     "mdd_mtm": 1888.25,
+     "mdd_eod": 1727.75,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 105,
+     "session_days": 58,
+     "net": -217.25,
+     "pf": 0.9650132860938884,
+     "win_rate": 0.4,
+     "avg_trade": -2.0690476190476192,
+     "avg_win": 142.67261904761904,
+     "avg_loss": -98.56349206349206,
+     "longest_losing_streak": 7,
+     "worst_day": -251.0,
+     "trades_per_day": 1.8103448275862069,
+     "t_stat_daily": -0.16856764583319278,
+     "pnl_by_entry_hour": {
+      "9": -132.25,
+      "10": -1445.5,
+      "11": 901.5,
+      "12": 67.0,
+      "13": 150.0,
+      "14": 109.5,
+      "15": 132.5
+     },
+     "mdd_mtm": 1435.75,
+     "mdd_eod": 1300.25,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 62,
+     "session_days": 34,
+     "net": -967.0,
+     "pf": 0.7528750319447994,
+     "win_rate": 0.3387096774193548,
+     "avg_trade": -15.596774193548388,
+     "avg_win": 140.28571428571428,
+     "avg_loss": -95.4390243902439,
+     "longest_losing_streak": 8,
+     "worst_day": -251.0,
+     "trades_per_day": 1.8235294117647058,
+     "t_stat_daily": -0.9325938108642708,
+     "pnl_by_entry_hour": {
+      "9": -75.0,
+      "10": 32.0,
+      "11": -1081.25,
+      "12": 321.0,
+      "13": 72.25,
+      "14": -120.0,
+      "15": -116.0
+     },
+     "mdd_mtm": 1259.75,
+     "mdd_eod": 1112.5,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "insample_all": {
+    "trades": 832,
+    "session_days": 442,
+    "net": -3254.5,
+    "pf": 0.9237017934591489,
+    "win_rate": 0.3858173076923077,
+    "avg_trade": -3.9116586538461537,
+    "avg_win": 122.74299065420561,
+    "avg_loss": -83.47358121330724,
+    "longest_losing_streak": 13,
+    "worst_day": -249.0,
+    "trades_per_day": 1.8823529411764706,
+    "t_stat_daily": -1.058027852293657,
+    "pnl_by_entry_hour": {
+     "9": 615.75,
+     "10": 16.0,
+     "11": -813.0,
+     "12": -2035.0,
+     "13": -1028.5,
+     "14": -63.75,
+     "15": 54.0
+    },
+    "mdd_mtm": 5737.25,
+    "mdd_eod": 5552.75,
+    "breaches": [
+     {
+      "date": "2025-05-19",
+      "dd": 5737.25
+     }
+    ],
+    "breach_count": 1
+   },
+   "walk_forward": [
+    {
+     "strategy": "S3_PULLBACK",
+     "fold": 1,
+     "train": "2025-01-02..2025-03-31",
+     "test": "2025-04-01..2025-06-30",
+     "picked": "S3_PB_t1.5",
+     "train_net": 632.75,
+     "test_net": -2145.0,
+     "test_net_3tick": -2546.5,
+     "test_trades": 121,
+     "test_mdd_mtm": 3021.0
+    },
+    {
+     "strategy": "S3_PULLBACK",
+     "fold": 2,
+     "train": "2025-01-02..2025-06-30",
+     "test": "2025-07-01..2025-09-30",
+     "picked": "S3_PB_t1.5",
+     "train_net": -1512.25,
+     "test_net": -1670.0,
+     "test_net_3tick": -1957.0,
+     "test_trades": 124,
+     "test_mdd_mtm": 1716.0
+    },
+    {
+     "strategy": "S3_PULLBACK",
+     "fold": 3,
+     "train": "2025-04-01..2025-09-30",
+     "test": "2025-10-01..2025-12-31",
+     "picked": "S3_PB_t1.5",
+     "train_net": -3815.0,
+     "test_net": -987.75,
+     "test_net_3tick": -1252.25,
+     "test_trades": 126,
+     "test_mdd_mtm": 1339.25
+    },
+    {
+     "strategy": "S3_PULLBACK",
+     "fold": 4,
+     "train": "2025-07-01..2025-12-31",
+     "test": "2026-01-01..2026-03-31",
+     "picked": "S3_PB_t2.0",
+     "train_net": -2511.5,
+     "test_net": 1378.0,
+     "test_net_3tick": 938.5,
+     "test_trades": 114,
+     "test_mdd_mtm": 1594.5
+    },
+    {
+     "strategy": "S3_PULLBACK",
+     "fold": 5,
+     "train": "2025-10-01..2026-03-31",
+     "test": "2026-04-01..2026-06-30",
+     "picked": "S3_PB_t1.5",
+     "train_net": 691.25,
+     "test_net": -574.25,
+     "test_net_3tick": -935.75,
+     "test_trades": 119,
+     "test_mdd_mtm": 1841.25
+    },
+    {
+     "strategy": "S3_PULLBACK",
+     "fold": 6,
+     "train": "2026-01-01..2026-06-30",
+     "test": "2026-07-01..2026-09-21",
+     "picked": "S3_PB_t2.0",
+     "train_net": 1502.0,
+     "test_net": 435.0,
+     "test_net_3tick": 356.0,
+     "test_trades": 101,
+     "test_mdd_mtm": 1424.5
+    }
+   ]
+  },
+  "S4_MOMENTUM": {
+   "selected_cell": "S4_MOM_m0.25",
+   "criteria": {
+    "validate_net>0": true,
+    "test_net>0": false,
+    "wf_total>0": false,
+    "wf_folds_pos>=4": false,
+    "3tick_validate&test>0": false,
+    "no_2k_breach_insample": false
+   },
+   "candidate": false,
+   "splits": {
+    "TRAIN": {
+     "trades": 119,
+     "session_days": 257,
+     "net": 3415.75,
+     "pf": 1.4064070912281745,
+     "win_rate": 0.31932773109243695,
+     "avg_trade": 28.70378151260504,
+     "avg_win": 311.0657894736842,
+     "avg_loss": -103.76234567901234,
+     "longest_losing_streak": 6,
+     "worst_day": -124.5,
+     "trades_per_day": 0.46303501945525294,
+     "t_stat_daily": 1.3015731791896117,
+     "pnl_by_entry_hour": {
+      "10": 3415.75
+     },
+     "mdd_mtm": 1397.75,
+     "mdd_eod": 935.75,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 71,
+     "session_days": 127,
+     "net": 708.5,
+     "pf": 1.1184881679070156,
+     "win_rate": 0.29577464788732394,
+     "avg_trade": 9.97887323943662,
+     "avg_win": 318.4761904761905,
+     "avg_loss": -119.59,
+     "longest_losing_streak": 9,
+     "worst_day": -124.5,
+     "trades_per_day": 0.5590551181102362,
+     "t_stat_daily": 0.34996405519830615,
+     "pnl_by_entry_hour": {
+      "10": 708.5
+     },
+     "mdd_mtm": 1757.0,
+     "mdd_eod": 1415.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 27,
+     "session_days": 58,
+     "net": -1311.25,
+     "pf": 0.500047659898961,
+     "win_rate": 0.14814814814814814,
+     "avg_trade": -48.56481481481482,
+     "avg_win": 327.875,
+     "avg_loss": -114.03260869565217,
+     "longest_losing_streak": 11,
+     "worst_day": -124.5,
+     "trades_per_day": 0.46551724137931033,
+     "t_stat_daily": -1.3766013485865825,
+     "pnl_by_entry_hour": {
+      "10": -1311.25
+     },
+     "mdd_mtm": 1648.75,
+     "mdd_eod": 1393.25,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 22,
+     "session_days": 34,
+     "net": -1495.75,
+     "pf": 0.3330732359826106,
+     "win_rate": 0.13636363636363635,
+     "avg_trade": -67.98863636363636,
+     "avg_win": 249.0,
+     "avg_loss": -118.03947368421052,
+     "longest_losing_streak": 8,
+     "worst_day": -124.5,
+     "trades_per_day": 0.6470588235294118,
+     "t_stat_daily": -2.2465811432650304,
+     "pnl_by_entry_hour": {
+      "10": -1495.75
+     },
+     "mdd_mtm": 1636.25,
+     "mdd_eod": 1541.75,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "splits_3tick": {
+    "TRAIN": {
+     "trades": 119,
+     "session_days": 257,
+     "net": 3251.75,
+     "pf": 1.3828854022548644,
+     "win_rate": 0.31932773109243695,
+     "avg_trade": 27.32563025210084,
+     "avg_win": 309.0657894736842,
+     "avg_loss": -104.84876543209876,
+     "longest_losing_streak": 6,
+     "worst_day": -125.5,
+     "trades_per_day": 0.46303501945525294,
+     "t_stat_daily": 1.2413964466317926,
+     "pnl_by_entry_hour": {
+      "10": 3251.75
+     },
+     "mdd_mtm": 1495.75,
+     "mdd_eod": 1033.75,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 71,
+     "session_days": 127,
+     "net": 615.5,
+     "pf": 1.1020645054307272,
+     "win_rate": 0.29577464788732394,
+     "avg_trade": 8.669014084507042,
+     "avg_win": 316.4761904761905,
+     "avg_loss": -120.61,
+     "longest_losing_streak": 9,
+     "worst_day": -125.5,
+     "trades_per_day": 0.5590551181102362,
+     "t_stat_daily": 0.3045392117121737,
+     "pnl_by_entry_hour": {
+      "10": 615.5
+     },
+     "mdd_mtm": 1757.0,
+     "mdd_eod": 1436.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 27,
+     "session_days": 58,
+     "net": -1343.25,
+     "pf": 0.49249079059223577,
+     "win_rate": 0.14814814814814814,
+     "avg_trade": -49.75,
+     "avg_win": 325.875,
+     "avg_loss": -115.07608695652173,
+     "longest_losing_streak": 11,
+     "worst_day": -125.5,
+     "trades_per_day": 0.46551724137931033,
+     "t_stat_daily": -1.4112626069220413,
+     "pnl_by_entry_hour": {
+      "10": -1343.25
+     },
+     "mdd_mtm": 1674.75,
+     "mdd_eod": 1422.25,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 22,
+     "session_days": 34,
+     "net": -1521.75,
+     "pf": 0.3274776267815711,
+     "win_rate": 0.13636363636363635,
+     "avg_trade": -69.17045454545455,
+     "avg_win": 247.0,
+     "avg_loss": -119.09210526315789,
+     "longest_losing_streak": 8,
+     "worst_day": -125.5,
+     "trades_per_day": 0.6470588235294118,
+     "t_stat_daily": -2.287400979710383,
+     "pnl_by_entry_hour": {
+      "10": -1521.75
+     },
+     "mdd_mtm": 1652.25,
+     "mdd_eod": 1557.75,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "insample_all": {
+    "trades": 217,
+    "session_days": 442,
+    "net": 2813.0,
+    "pf": 1.1654024813312165,
+    "win_rate": 0.2903225806451613,
+    "avg_trade": 12.963133640552995,
+    "avg_win": 314.6031746031746,
+    "avg_loss": -110.43506493506493,
+    "longest_losing_streak": 11,
+    "worst_day": -124.5,
+    "trades_per_day": 0.49095022624434387,
+    "t_stat_daily": 0.8152330105883757,
+    "pnl_by_entry_hour": {
+     "10": 2813.0
+    },
+    "mdd_mtm": 2989.75,
+    "mdd_eod": 1891.25,
+    "breaches": [
+     {
+      "date": "2026-07-22",
+      "dd": 2989.75
+     }
+    ],
+    "breach_count": 1
+   },
+   "walk_forward": [
+    {
+     "strategy": "S4_MOMENTUM",
+     "fold": 1,
+     "train": "2025-01-02..2025-03-31",
+     "test": "2025-04-01..2025-06-30",
+     "picked": "S4_MOM_m0.25",
+     "train_net": 2120.25,
+     "test_net": -30.0,
+     "test_net_3tick": -63.0,
+     "test_trades": 24,
+     "test_mdd_mtm": 1251.0
+    },
+    {
+     "strategy": "S4_MOMENTUM",
+     "fold": 2,
+     "train": "2025-01-02..2025-06-30",
+     "test": "2025-07-01..2025-09-30",
+     "picked": "S4_MOM_m0.25",
+     "train_net": 2090.25,
+     "test_net": -134.5,
+     "test_net_3tick": -180.5,
+     "test_trades": 34,
+     "test_mdd_mtm": 756.0
+    },
+    {
+     "strategy": "S4_MOMENTUM",
+     "fold": 3,
+     "train": "2025-04-01..2025-09-30",
+     "test": "2025-10-01..2025-12-31",
+     "picked": "S4_MOM_m0.35",
+     "train_net": 162.25,
+     "test_net": 486.0,
+     "test_net_3tick": 450.0,
+     "test_trades": 25,
+     "test_mdd_mtm": 1030.5
+    },
+    {
+     "strategy": "S4_MOMENTUM",
+     "fold": 4,
+     "train": "2025-07-01..2025-12-31",
+     "test": "2026-01-01..2026-03-31",
+     "picked": "S4_MOM_m0.25",
+     "train_net": 1325.5,
+     "test_net": -1347.0,
+     "test_net_3tick": -1399.0,
+     "test_trades": 42,
+     "test_mdd_mtm": 1465.5
+    },
+    {
+     "strategy": "S4_MOMENTUM",
+     "fold": 5,
+     "train": "2025-10-01..2026-03-31",
+     "test": "2026-04-01..2026-06-30",
+     "picked": "S4_MOM_m0.25",
+     "train_net": 113.0,
+     "test_net": 2055.5,
+     "test_net_3tick": 2014.5,
+     "test_trades": 29,
+     "test_mdd_mtm": 1757.0
+    },
+    {
+     "strategy": "S4_MOMENTUM",
+     "fold": 6,
+     "train": "2026-01-01..2026-06-30",
+     "test": "2026-07-01..2026-09-21",
+     "picked": "S4_MOM_m0.25",
+     "train_net": 708.5,
+     "test_net": -1311.25,
+     "test_net_3tick": -1343.25,
+     "test_trades": 27,
+     "test_mdd_mtm": 1648.75
+    }
+   ]
+  },
+  "S2_VWAP_MR+RANGE": {
+   "selected_cell": "S2R_VWAP_k1.5",
+   "criteria": {
+    "validate_net>0": false,
+    "test_net>0": true,
+    "wf_total>0": false,
+    "wf_folds_pos>=4": false,
+    "3tick_validate&test>0": false,
+    "no_2k_breach_insample": true
+   },
+   "candidate": false,
+   "splits": {
+    "TRAIN": {
+     "trades": 149,
+     "session_days": 257,
+     "net": 692.4988518389291,
+     "pf": 1.110593165065791,
+     "win_rate": 0.5033557046979866,
+     "avg_trade": 4.64764330093241,
+     "avg_win": 92.72236564356697,
+     "avg_loss": -84.6172779922783,
+     "longest_losing_streak": 7,
+     "worst_day": -249.0,
+     "trades_per_day": 0.5797665369649806,
+     "t_stat_daily": 0.6062422571957609,
+     "pnl_by_entry_hour": {
+      "10": 89.65,
+      "11": -58.15,
+      "12": 583.72,
+      "13": -454.26,
+      "14": 513.16,
+      "15": 18.37
+     },
+     "mdd_mtm": 977.6214921373394,
+     "mdd_eod": 952.6214921373394,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 59,
+     "session_days": 127,
+     "net": -397.2301897005964,
+     "pf": 0.8814734206463001,
+     "win_rate": 0.423728813559322,
+     "avg_trade": -6.7327150796711255,
+     "avg_win": 118.16686384054773,
+     "avg_loss": -98.57064075630264,
+     "longest_losing_streak": 6,
+     "worst_day": -249.0,
+     "trades_per_day": 0.4645669291338583,
+     "t_stat_daily": -0.38030171816436686,
+     "pnl_by_entry_hour": {
+      "10": 235.85,
+      "11": -1262.59,
+      "12": 30.23,
+      "13": 536.41,
+      "14": 182.72,
+      "15": -119.85
+     },
+     "mdd_mtm": 1025.5983536123895,
+     "mdd_eod": 751.2956036241885,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 38,
+     "session_days": 58,
+     "net": 451.3684455927505,
+     "pf": 1.285732744984533,
+     "win_rate": 0.5263157894736842,
+     "avg_trade": 11.878116989282908,
+     "avg_win": 101.55279727963679,
+     "avg_loss": -87.76041666666586,
+     "longest_losing_streak": 6,
+     "worst_day": -249.0,
+     "trades_per_day": 0.6551724137931034,
+     "t_stat_daily": 0.6384348121916498,
+     "pnl_by_entry_hour": {
+      "10": 78.19,
+      "11": 293.73,
+      "12": 59.99,
+      "13": 2.49,
+      "14": -85.51,
+      "15": 102.48
+     },
+     "mdd_mtm": 688.0267857142826,
+     "mdd_eod": 605.5267857142826,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 14,
+     "session_days": 34,
+     "net": -500.0540049464835,
+     "pf": 0.4628850645043142,
+     "win_rate": 0.35714285714285715,
+     "avg_trade": -35.718143210463104,
+     "avg_win": 86.1891990107033,
+     "avg_loss": -103.44444444444444,
+     "longest_losing_streak": 6,
+     "worst_day": -249.0,
+     "trades_per_day": 0.4117647058823529,
+     "t_stat_daily": -1.350358196961999,
+     "pnl_by_entry_hour": {
+      "10": 190.95,
+      "11": -688.78,
+      "12": 64.5,
+      "13": -13.72,
+      "15": -53.0
+     },
+     "mdd_mtm": 964.5540049464835,
+     "mdd_eod": 530.3214285714275,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "splits_3tick": {
+    "TRAIN": {
+     "trades": 149,
+     "session_days": 257,
+     "net": 475.19528041035665,
+     "pf": 1.0743423979901714,
+     "win_rate": 0.5033557046979866,
+     "avg_trade": 3.1892300698681653,
+     "avg_win": 91.56236564356698,
+     "avg_loss": -86.37813706563739,
+     "longest_losing_streak": 7,
+     "worst_day": -251.0,
+     "trades_per_day": 0.5797665369649806,
+     "t_stat_daily": 0.41495487048554464,
+     "pnl_by_entry_hour": {
+      "10": 42.65,
+      "11": -125.45,
+      "12": 542.72,
+      "13": -496.26,
+      "14": 498.16,
+      "15": 13.37
+     },
+     "mdd_mtm": 1038.6214921373394,
+     "mdd_eod": 1013.6214921373394,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 59,
+     "session_days": 127,
+     "net": -480.2301897005964,
+     "pf": 0.8588970036637011,
+     "win_rate": 0.423728813559322,
+     "avg_trade": -8.139494740688074,
+     "avg_win": 116.92686384054774,
+     "avg_loss": -100.10005252100852,
+     "longest_losing_streak": 6,
+     "worst_day": -251.0,
+     "trades_per_day": 0.4645669291338583,
+     "t_stat_daily": -0.4588307002500123,
+     "pnl_by_entry_hour": {
+      "10": 223.85,
+      "11": -1286.59,
+      "12": 16.23,
+      "13": 519.41,
+      "14": 175.72,
+      "15": -128.85
+     },
+     "mdd_mtm": 1040.5983536123895,
+     "mdd_eod": 784.6390015081852,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 38,
+     "session_days": 58,
+     "net": 395.3684455927505,
+     "pf": 1.2453133411984358,
+     "win_rate": 0.5263157894736842,
+     "avg_trade": 10.404432778756592,
+     "avg_win": 100.3527972796368,
+     "avg_loss": -89.53819444444363,
+     "longest_losing_streak": 6,
+     "worst_day": -251.0,
+     "trades_per_day": 0.6551724137931034,
+     "t_stat_daily": 0.5580788453384512,
+     "pnl_by_entry_hour": {
+      "10": 70.19,
+      "11": 279.73,
+      "12": 52.99,
+      "13": -12.51,
+      "14": -94.51,
+      "15": 99.48
+     },
+     "mdd_mtm": 697.0267857142826,
+     "mdd_eod": 617.7946428571377,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 14,
+     "session_days": 34,
+     "net": -522.0540049464835,
+     "pf": 0.4475618995275307,
+     "win_rate": 0.35714285714285715,
+     "avg_trade": -37.289571781891674,
+     "avg_win": 84.58919901070331,
+     "avg_loss": -105.0,
+     "longest_losing_streak": 6,
+     "worst_day": -251.0,
+     "trades_per_day": 0.4117647058823529,
+     "t_stat_daily": -1.3995386240689927,
+     "pnl_by_entry_hour": {
+      "10": 187.95,
+      "11": -697.78,
+      "12": 62.5,
+      "13": -19.72,
+      "15": -55.0
+     },
+     "mdd_mtm": 984.5540049464835,
+     "mdd_eod": 541.0540049464835,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "insample_all": {
+    "trades": 246,
+    "session_days": 442,
+    "net": 746.6371077310832,
+    "pf": 1.0667071020556014,
+    "win_rate": 0.4878048780487805,
+    "avg_trade": 3.0351101940287935,
+    "avg_win": 99.4950413739496,
+    "avg_loss": -88.83149092970531,
+    "longest_losing_streak": 7,
+    "worst_day": -249.0,
+    "trades_per_day": 0.5565610859728507,
+    "t_stat_daily": 0.4395594312552525,
+    "pnl_by_entry_hour": {
+     "10": 403.7,
+     "11": -1027.01,
+     "12": 673.94,
+     "13": 84.64,
+     "14": 610.37,
+     "15": 1.0
+    },
+    "mdd_mtm": 1509.9997694806298,
+    "mdd_eod": 1438.9997694806298,
+    "breaches": [],
+    "breach_count": 0
+   },
+   "walk_forward": [
+    {
+     "strategy": "S2_VWAP_MR+RANGE",
+     "fold": 1,
+     "train": "2025-01-02..2025-03-31",
+     "test": "2025-04-01..2025-06-30",
+     "picked": "S2R_VWAP_k1.5",
+     "train_net": 548.6985756903669,
+     "test_net": 646.9285940210029,
+     "test_net_3tick": 574.9285940210029,
+     "test_trades": 48,
+     "test_mdd_mtm": 453.1867761937392
+    },
+    {
+     "strategy": "S2_VWAP_MR+RANGE",
+     "fold": 2,
+     "train": "2025-01-02..2025-06-30",
+     "test": "2025-07-01..2025-09-30",
+     "picked": "S2R_VWAP_k1.5",
+     "train_net": 1195.6271697113698,
+     "test_net": -395.4938554499604,
+     "test_net_3tick": -460.4938554499604,
+     "test_trades": 40,
+     "test_mdd_mtm": 846.1224595686726
+    },
+    {
+     "strategy": "S2_VWAP_MR+RANGE",
+     "fold": 3,
+     "train": "2025-04-01..2025-09-30",
+     "test": "2025-10-01..2025-12-31",
+     "picked": "S2R_VWAP_k1.5",
+     "train_net": 251.43473857104254,
+     "test_net": -107.63446242248028,
+     "test_net_3tick": -145.63446242248028,
+     "test_trades": 29,
+     "test_mdd_mtm": 443.42403868588735
+    },
+    {
+     "strategy": "S2_VWAP_MR+RANGE",
+     "fold": 4,
+     "train": "2025-07-01..2025-12-31",
+     "test": "2026-01-01..2026-03-31",
+     "picked": "S2R_VWAP_k1.5",
+     "train_net": -503.1283178724407,
+     "test_net": -85.17465426232957,
+     "test_net_3tick": -125.17465426232957,
+     "test_trades": 27,
+     "test_mdd_mtm": 1025.5983536123895
+    },
+    {
+     "strategy": "S2_VWAP_MR+RANGE",
+     "fold": 5,
+     "train": "2025-10-01..2026-03-31",
+     "test": "2026-04-01..2026-06-30",
+     "picked": "S2R_VWAP_k2.0",
+     "train_net": -6.138600649261207,
+     "test_net": -1029.5105549890359,
+     "test_net_3tick": -1069.5105549890359,
+     "test_trades": 27,
+     "test_mdd_mtm": 1225.4646332874108
+    },
+    {
+     "strategy": "S2_VWAP_MR+RANGE",
+     "fold": 6,
+     "train": "2026-01-01..2026-06-30",
+     "test": "2026-07-01..2026-09-21",
+     "picked": "S2R_VWAP_k1.5",
+     "train_net": -397.2301897005964,
+     "test_net": 451.3684455927505,
+     "test_net_3tick": 395.3684455927505,
+     "test_trades": 38,
+     "test_mdd_mtm": 688.0267857142826
+    }
+   ]
+  },
+  "S3_PULLBACK+TREND": {
+   "selected_cell": "S3T_PB_t1.5",
+   "criteria": {
+    "validate_net>0": false,
+    "test_net>0": true,
+    "wf_total>0": false,
+    "wf_folds_pos>=4": false,
+    "3tick_validate&test>0": false,
+    "no_2k_breach_insample": false
+   },
+   "candidate": false,
+   "splits": {
+    "TRAIN": {
+     "trades": 287,
+     "session_days": 257,
+     "net": -3316.25,
+     "pf": 0.7619603057818612,
+     "win_rate": 0.3554006968641115,
+     "avg_trade": -11.554878048780488,
+     "avg_win": 104.07107843137256,
+     "avg_loss": -75.30540540540541,
+     "longest_losing_streak": 11,
+     "worst_day": -249.0,
+     "trades_per_day": 1.1167315175097277,
+     "t_stat_daily": -2.193380018283548,
+     "pnl_by_entry_hour": {
+      "9": 19.0,
+      "10": -513.75,
+      "11": -169.5,
+      "12": -1480.25,
+      "13": -671.75,
+      "14": -384.0,
+      "15": -116.0
+     },
+     "mdd_mtm": 3728.25,
+     "mdd_eod": 3670.5,
+     "breaches": [
+      {
+       "date": "2025-05-26",
+       "dd": 3728.25
+      }
+     ],
+     "breach_count": 1
+    },
+    "VALIDATE": {
+     "trades": 153,
+     "session_days": 127,
+     "net": -607.5,
+     "pf": 0.9316878443719779,
+     "win_rate": 0.4117647058823529,
+     "avg_trade": -3.9705882352941178,
+     "avg_win": 131.515873015873,
+     "avg_loss": -98.81111111111112,
+     "longest_losing_streak": 8,
+     "worst_day": -249.0,
+     "trades_per_day": 1.204724409448819,
+     "t_stat_daily": -0.4344138421683589,
+     "pnl_by_entry_hour": {
+      "9": 439.75,
+      "10": 657.75,
+      "11": 14.75,
+      "12": -963.0,
+      "13": -485.25,
+      "14": -261.75,
+      "15": -9.75
+     },
+     "mdd_mtm": 1484.5,
+     "mdd_eod": 1429.25,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 81,
+     "session_days": 58,
+     "net": 1056.0,
+     "pf": 1.2581275971645074,
+     "win_rate": 0.4567901234567901,
+     "avg_trade": 13.037037037037036,
+     "avg_win": 139.1081081081081,
+     "avg_loss": -92.97727272727273,
+     "longest_losing_streak": 6,
+     "worst_day": -249.0,
+     "trades_per_day": 1.396551724137931,
+     "t_stat_daily": 0.998816388678477,
+     "pnl_by_entry_hour": {
+      "9": -43.0,
+      "10": -57.5,
+      "11": 254.25,
+      "12": 286.0,
+      "13": 271.75,
+      "14": 253.0,
+      "15": 91.5
+     },
+     "mdd_mtm": 846.5,
+     "mdd_eod": 644.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 38,
+     "session_days": 34,
+     "net": -587.75,
+     "pf": 0.7454525768731053,
+     "win_rate": 0.34210526315789475,
+     "avg_trade": -15.467105263157896,
+     "avg_win": 132.40384615384616,
+     "avg_loss": -92.36,
+     "longest_losing_streak": 6,
+     "worst_day": -249.0,
+     "trades_per_day": 1.1176470588235294,
+     "t_stat_daily": -0.7110979569136642,
+     "pnl_by_entry_hour": {
+      "9": -124.5,
+      "10": -287.0,
+      "11": -479.25,
+      "12": 192.25,
+      "13": 302.75,
+      "14": -78.0,
+      "15": -114.0
+     },
+     "mdd_mtm": 892.75,
+     "mdd_eod": 843.25,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "splits_3tick": {
+    "TRAIN": {
+     "trades": 287,
+     "session_days": 257,
+     "net": -3694.75,
+     "pf": 0.7421307928531546,
+     "win_rate": 0.3519163763066202,
+     "avg_trade": -12.873693379790941,
+     "avg_win": 105.27970297029702,
+     "avg_loss": -77.03225806451613,
+     "longest_losing_streak": 11,
+     "worst_day": -251.0,
+     "trades_per_day": 1.1167315175097277,
+     "t_stat_daily": -2.4022645046734215,
+     "pnl_by_entry_hour": {
+      "9": 10.5,
+      "10": -715.75,
+      "11": -205.5,
+      "12": -1542.75,
+      "13": -701.75,
+      "14": -416.0,
+      "15": -123.5
+     },
+     "mdd_mtm": 4073.25,
+     "mdd_eod": 4012.0,
+     "breaches": [
+      {
+       "date": "2025-05-23",
+       "dd": 4073.25
+      }
+     ],
+     "breach_count": 1
+    },
+    "VALIDATE": {
+     "trades": 153,
+     "session_days": 127,
+     "net": -660.5,
+     "pf": 0.9265907196443457,
+     "win_rate": 0.4117647058823529,
+     "avg_trade": -4.316993464052287,
+     "avg_win": 132.33333333333334,
+     "avg_loss": -99.97222222222223,
+     "longest_losing_streak": 8,
+     "worst_day": -251.0,
+     "trades_per_day": 1.204724409448819,
+     "t_stat_daily": -0.4683888318131664,
+     "pnl_by_entry_hour": {
+      "9": 432.25,
+      "10": 644.25,
+      "11": 0.75,
+      "12": -984.5,
+      "13": -502.75,
+      "14": -143.25,
+      "15": -107.25
+     },
+     "mdd_mtm": 1508.5,
+     "mdd_eod": 1454.75,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 80,
+     "session_days": 58,
+     "net": 1057.0,
+     "pf": 1.2565533980582524,
+     "win_rate": 0.4625,
+     "avg_trade": 13.2125,
+     "avg_win": 139.9189189189189,
+     "avg_loss": -95.81395348837209,
+     "longest_losing_streak": 6,
+     "worst_day": -251.0,
+     "trades_per_day": 1.3793103448275863,
+     "t_stat_daily": 0.9932182665235504,
+     "pnl_by_entry_hour": {
+      "9": -49.0,
+      "10": -77.0,
+      "11": 248.75,
+      "12": 321.0,
+      "13": 273.75,
+      "14": 248.5,
+      "15": 91.0
+     },
+     "mdd_mtm": 856.5,
+     "mdd_eod": 652.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 38,
+     "session_days": 34,
+     "net": -622.75,
+     "pf": 0.7351127179923437,
+     "win_rate": 0.34210526315789475,
+     "avg_trade": -16.388157894736842,
+     "avg_win": 132.94230769230768,
+     "avg_loss": -94.04,
+     "longest_losing_streak": 6,
+     "worst_day": -251.0,
+     "trades_per_day": 1.1176470588235294,
+     "t_stat_daily": -0.7468750678305092,
+     "pnl_by_entry_hour": {
+      "9": -125.5,
+      "10": -296.0,
+      "11": -491.75,
+      "12": 189.25,
+      "13": 301.75,
+      "14": -84.5,
+      "15": -116.0
+     },
+     "mdd_mtm": 915.5,
+     "mdd_eod": 860.25,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "insample_all": {
+    "trades": 521,
+    "session_days": 442,
+    "net": -2867.75,
+    "pf": 0.8934535862235515,
+    "win_rate": 0.3877159309021113,
+    "avg_trade": -5.504318618042227,
+    "avg_win": 119.04826732673267,
+    "avg_loss": -84.37460815047022,
+    "longest_losing_streak": 11,
+    "worst_day": -249.0,
+    "trades_per_day": 1.1787330316742082,
+    "t_stat_daily": -1.2370342397981318,
+    "pnl_by_entry_hour": {
+     "9": 415.75,
+     "10": 86.5,
+     "11": 99.5,
+     "12": -2157.25,
+     "13": -885.25,
+     "14": -392.75,
+     "15": -34.25
+    },
+    "mdd_mtm": 4793.25,
+    "mdd_eod": 4551.0,
+    "breaches": [
+     {
+      "date": "2025-05-26",
+      "dd": 4793.25
+     }
+    ],
+    "breach_count": 1
+   },
+   "walk_forward": [
+    {
+     "strategy": "S3_PULLBACK+TREND",
+     "fold": 1,
+     "train": "2025-01-02..2025-03-31",
+     "test": "2025-04-01..2025-06-30",
+     "picked": "S3T_PB_t1.5",
+     "train_net": 35.5,
+     "test_net": -1246.5,
+     "test_net_3tick": -1280.5,
+     "test_trades": 63,
+     "test_mdd_mtm": 1781.0
+    },
+    {
+     "strategy": "S3_PULLBACK+TREND",
+     "fold": 2,
+     "train": "2025-01-02..2025-06-30",
+     "test": "2025-07-01..2025-09-30",
+     "picked": "S3T_PB_t1.5",
+     "train_net": -1211.0,
+     "test_net": -1312.5,
+     "test_net_3tick": -1374.5,
+     "test_trades": 65,
+     "test_mdd_mtm": 1391.75
+    },
+    {
+     "strategy": "S3_PULLBACK+TREND",
+     "fold": 3,
+     "train": "2025-04-01..2025-09-30",
+     "test": "2025-10-01..2025-12-31",
+     "picked": "S3T_PB_t2.0",
+     "train_net": -2474.5,
+     "test_net": -794.0,
+     "test_net_3tick": -873.0,
+     "test_trades": 87,
+     "test_mdd_mtm": 1292.0
+    },
+    {
+     "strategy": "S3_PULLBACK+TREND",
+     "fold": 4,
+     "train": "2025-07-01..2025-12-31",
+     "test": "2026-01-01..2026-03-31",
+     "picked": "S3T_PB_t2.0",
+     "train_net": -2019.5,
+     "test_net": -284.0,
+     "test_net_3tick": -343.0,
+     "test_trades": 77,
+     "test_mdd_mtm": 1282.5
+    },
+    {
+     "strategy": "S3_PULLBACK+TREND",
+     "fold": 5,
+     "train": "2025-10-01..2026-03-31",
+     "test": "2026-04-01..2026-06-30",
+     "picked": "S3T_PB_t1.5",
+     "train_net": -898.25,
+     "test_net": -502.0,
+     "test_net_3tick": -537.5,
+     "test_trades": 75,
+     "test_mdd_mtm": 1484.5
+    },
+    {
+     "strategy": "S3_PULLBACK+TREND",
+     "fold": 6,
+     "train": "2026-01-01..2026-06-30",
+     "test": "2026-07-01..2026-09-21",
+     "picked": "S3T_PB_t2.0",
+     "train_net": -549.5,
+     "test_net": 1532.0,
+     "test_net_3tick": 1484.0,
+     "test_trades": 77,
+     "test_mdd_mtm": 955.5
+    }
+   ]
+  },
+  "S4_MOMENTUM+TREND": {
+   "selected_cell": "S4T_MOM_m0.25",
+   "criteria": {
+    "validate_net>0": true,
+    "test_net>0": false,
+    "wf_total>0": false,
+    "wf_folds_pos>=4": false,
+    "3tick_validate&test>0": false,
+    "no_2k_breach_insample": false
+   },
+   "candidate": false,
+   "splits": {
+    "TRAIN": {
+     "trades": 55,
+     "session_days": 257,
+     "net": 1431.25,
+     "pf": 1.357254290171607,
+     "win_rate": 0.32727272727272727,
+     "avg_trade": 26.022727272727273,
+     "avg_win": 302.0833333333333,
+     "avg_loss": -108.27702702702703,
+     "longest_losing_streak": 6,
+     "worst_day": -124.5,
+     "trades_per_day": 0.2140077821011673,
+     "t_stat_daily": 0.7688204653688293,
+     "pnl_by_entry_hour": {
+      "10": 1431.25
+     },
+     "mdd_mtm": 1257.25,
+     "mdd_eod": 725.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 46,
+     "session_days": 127,
+     "net": 740.75,
+     "pf": 1.1882823918154668,
+     "win_rate": 0.30434782608695654,
+     "avg_trade": 16.10326086956522,
+     "avg_win": 333.92857142857144,
+     "avg_loss": -122.9453125,
+     "longest_losing_streak": 7,
+     "worst_day": -124.5,
+     "trades_per_day": 0.36220472440944884,
+     "t_stat_daily": 0.44705024063892596,
+     "pnl_by_entry_hour": {
+      "10": 740.75
+     },
+     "mdd_mtm": 1757.0,
+     "mdd_eod": 1385.25,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 19,
+     "session_days": 58,
+     "net": -1004.75,
+     "pf": 0.5129075263604411,
+     "win_rate": 0.10526315789473684,
+     "avg_trade": -52.88157894736842,
+     "avg_win": 529.0,
+     "avg_loss": -121.33823529411765,
+     "longest_losing_streak": 9,
+     "worst_day": -124.5,
+     "trades_per_day": 0.3275862068965517,
+     "t_stat_daily": -1.1065201581181598,
+     "pnl_by_entry_hour": {
+      "10": -1004.75
+     },
+     "mdd_mtm": 1229.75,
+     "mdd_eod": 1066.75,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 10,
+     "session_days": 34,
+     "net": -854.25,
+     "pf": 0.18077199712299208,
+     "win_rate": 0.1,
+     "avg_trade": -85.425,
+     "avg_win": 188.5,
+     "avg_loss": -115.86111111111111,
+     "longest_losing_streak": 6,
+     "worst_day": -124.5,
+     "trades_per_day": 0.29411764705882354,
+     "t_stat_daily": -2.2569301836349043,
+     "pnl_by_entry_hour": {
+      "10": -854.25
+     },
+     "mdd_mtm": 902.25,
+     "mdd_eod": 854.25,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "splits_3tick": {
+    "TRAIN": {
+     "trades": 55,
+     "session_days": 257,
+     "net": 1356.25,
+     "pf": 1.335269760830604,
+     "win_rate": 0.32727272727272727,
+     "avg_trade": 24.65909090909091,
+     "avg_win": 300.0833333333333,
+     "avg_loss": -109.33108108108108,
+     "longest_losing_streak": 6,
+     "worst_day": -125.5,
+     "trades_per_day": 0.2140077821011673,
+     "t_stat_daily": 0.7298693076944915,
+     "pnl_by_entry_hour": {
+      "10": 1356.25
+     },
+     "mdd_mtm": 1266.25,
+     "mdd_eod": 784.0,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "VALIDATE": {
+     "trades": 46,
+     "session_days": 127,
+     "net": 680.75,
+     "pf": 1.1716356760163882,
+     "win_rate": 0.30434782608695654,
+     "avg_trade": 14.798913043478262,
+     "avg_win": 331.92857142857144,
+     "avg_loss": -123.9453125,
+     "longest_losing_streak": 7,
+     "worst_day": -125.5,
+     "trades_per_day": 0.36220472440944884,
+     "t_stat_daily": 0.41160128835667203,
+     "pnl_by_entry_hour": {
+      "10": 680.75
+     },
+     "mdd_mtm": 1757.0,
+     "mdd_eod": 1419.25,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "TEST": {
+     "trades": 19,
+     "session_days": 58,
+     "net": -1025.75,
+     "pf": 0.5067916816925111,
+     "win_rate": 0.10526315789473684,
+     "avg_trade": -53.98684210526316,
+     "avg_win": 527.0,
+     "avg_loss": -122.33823529411765,
+     "longest_losing_streak": 9,
+     "worst_day": -125.5,
+     "trades_per_day": 0.3275862068965517,
+     "t_stat_daily": -1.130216932190576,
+     "pnl_by_entry_hour": {
+      "10": -1025.75
+     },
+     "mdd_mtm": 1236.75,
+     "mdd_eod": 1075.75,
+     "breaches": [],
+     "breach_count": 0
+    },
+    "HOLDOUT": {
+     "trades": 10,
+     "session_days": 34,
+     "net": -866.25,
+     "pf": 0.17715507005461886,
+     "win_rate": 0.1,
+     "avg_trade": -86.625,
+     "avg_win": 186.5,
+     "avg_loss": -116.97222222222223,
+     "longest_losing_streak": 6,
+     "worst_day": -125.5,
+     "trades_per_day": 0.29411764705882354,
+     "t_stat_daily": -2.2816606597257523,
+     "pnl_by_entry_hour": {
+      "10": -866.25
+     },
+     "mdd_mtm": 912.25,
+     "mdd_eod": 866.25,
+     "breaches": [],
+     "breach_count": 0
+    }
+   },
+   "insample_all": {
+    "trades": 120,
+    "session_days": 442,
+    "net": 1167.25,
+    "pf": 1.1166870767000725,
+    "win_rate": 0.2833333333333333,
+    "avg_trade": 9.727083333333333,
+    "avg_win": 328.54411764705884,
+    "avg_loss": -116.31686046511628,
+    "longest_losing_streak": 10,
+    "worst_day": -124.5,
+    "trades_per_day": 0.27149321266968324,
+    "t_stat_daily": 0.4402714346867586,
+    "pnl_by_entry_hour": {
+     "10": 1167.25
+    },
+    "mdd_mtm": 2361.0,
+    "mdd_eod": 1870.75,
+    "breaches": [
+     {
+      "date": "2026-03-27",
+      "dd": 2358.0
+     },
+     {
+      "date": "2026-07-27",
+      "dd": 2361.0
+     }
+    ],
+    "breach_count": 2
+   },
+   "walk_forward": [
+    {
+     "strategy": "S4_MOMENTUM+TREND",
+     "fold": 1,
+     "train": "2025-01-02..2025-03-31",
+     "test": "2025-04-01..2025-06-30",
+     "picked": "S4T_MOM_m0.25",
+     "train_net": 1805.25,
+     "test_net": -65.0,
+     "test_net_3tick": -77.0,
+     "test_trades": 9,
+     "test_mdd_mtm": 821.5
+    },
+    {
+     "strategy": "S4_MOMENTUM+TREND",
+     "fold": 2,
+     "train": "2025-01-02..2025-06-30",
+     "test": "2025-07-01..2025-09-30",
+     "picked": "S4T_MOM_m0.25",
+     "train_net": 1740.25,
+     "test_net": -91.25,
+     "test_net_3tick": -114.25,
+     "test_trades": 16,
+     "test_mdd_mtm": 538.75
+    },
+    {
+     "strategy": "S4_MOMENTUM+TREND",
+     "fold": 3,
+     "train": "2025-04-01..2025-09-30",
+     "test": "2025-10-01..2025-12-31",
+     "picked": "S4T_MOM_m0.25",
+     "train_net": -156.25,
+     "test_net": -217.75,
+     "test_net_3tick": -242.75,
+     "test_trades": 19,
+     "test_mdd_mtm": 1257.25
+    },
+    {
+     "strategy": "S4_MOMENTUM+TREND",
+     "fold": 4,
+     "train": "2025-07-01..2025-12-31",
+     "test": "2026-01-01..2026-03-31",
+     "picked": "S4T_MOM_m0.35",
+     "train_net": -130.5,
+     "test_net": -1382.75,
+     "test_net_3tick": -1409.75,
+     "test_trades": 23,
+     "test_mdd_mtm": 1483.0
+    },
+    {
+     "strategy": "S4_MOMENTUM+TREND",
+     "fold": 5,
+     "train": "2025-10-01..2026-03-31",
+     "test": "2026-04-01..2026-06-30",
+     "picked": "S4T_MOM_m0.35",
+     "train_net": -1352.0,
+     "test_net": 1216.0,
+     "test_net_3tick": 1195.0,
+     "test_trades": 15,
+     "test_mdd_mtm": 1903.0
+    },
+    {
+     "strategy": "S4_MOMENTUM+TREND",
+     "fold": 6,
+     "train": "2026-01-01..2026-06-30",
+     "test": "2026-07-01..2026-09-21",
+     "picked": "S4T_MOM_m0.25",
+     "train_net": 740.75,
+     "test_net": -1004.75,
+     "test_net_3tick": -1025.75,
+     "test_trades": 19,
+     "test_mdd_mtm": 1229.75
+    }
+   ]
+  }
+ }
+}

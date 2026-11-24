@@ -5,7 +5,7 @@ REM  Places REAL Rithmic/Lucid orders via start_live_rithmic.py
 REM
 REM  Exits (forced ON by this bat):
 REM    REVAMP_TRAIL_ATR_MULT=4.0 (was 0.6)
-REM    REVAMP_BREAKOUT_TARGET_R=2.0 fixed 2R
+REM    REVAMP_BREAKOUT_TARGET_R=3.0 fixed 3R
 REM    REVAMP_MR_TARGET=bb_far
 REM  $ lock (bt 2026-10-08): +$100 -> SL +$20, from +$150 keep 50%% of peak
 REM  Overnight/Globex entries ON (OVERNIGHT_TRADING + SESSION_MODE=extended).
@@ -24,7 +24,7 @@ echo ============================================
 echo   BottTrader - MNQ LIVE REVAMP EXITS
 echo   Path: start_live_rithmic.py (Rithmic orders)
 echo   Research 5m ADX ensemble: trend, MR, breakout
-echo   Trail 4.0 ATR / Breakout 2R fixed / MR bb_far
+echo   Trail 4.0 ATR / Breakout 3R fixed / MR bb_far
 echo   $ lock: +$100 locks +$20, +$150 keeps half
 echo   REAL orders ? use with care
 echo ============================================
@@ -43,6 +43,9 @@ set "LOCK_KEEP_USD=20"
 set "LOCK_TRAIL_START_USD=150"
 set "LOCK_TRAIL_KEEP_PCT=0.5"
 set "SL_MOVE_MIN_BUFFER_TICKS=4"
+REM Stops as plain STOP_MARKET. STOP_LIMIT with a 2-tick limit can be skipped in a fast move,
+REM and the retry can leave two stops on one contract.
+set "RITHMIC_LUCID_SL_STOP_LIMIT=false"
 set "PYTHONIOENCODING=utf-8"
 set "PYTHONUTF8=1"
 set "PYTHONUNBUFFERED=1"
@@ -50,7 +53,7 @@ set "PYTHONUNBUFFERED=1"
 REM --- REVAMP exits (master + three winner knobs) ---
 set "REVAMP_EXITS=1"
 set "REVAMP_TRAIL_ATR_MULT=4.0"
-set "REVAMP_BREAKOUT_TARGET_R=2.0"
+set "REVAMP_BREAKOUT_TARGET_R=3.0"
 set "REVAMP_MR_TARGET=bb_far"
 
 REM --- Overnight / Globex hunting (widen past RTH-only 09:30-16:00 ET) ---
@@ -65,14 +68,15 @@ REM (scripts/backtest_revamp_live_stack.py): ~2x trades, +$6.9k over Nov24-Sep26
 REM Set to trend to restore the old rule.
 set "REVAMP_OVERNIGHT_SLEEVES=all"
 
-REM --- FIXED 1 lot, conf sizing off (10-08); max 3 trades --------------
+REM --- Confidence sizing, base 1, up to 3 (revamp code clamps to REVAMP_MAX_CONTRACTS) ---
 set "BASE_CONTRACTS=1"
-set "MAX_CONTRACTS=1"
+set "MAX_CONTRACTS=3"
+set "REVAMP_MAX_CONTRACTS=3"
 set "SIZE_WIN_STREAK_MIN=0"
 set "SIZE_REQUIRE_DAY_GREEN=0"
-set "SIZE_CONF_2=9.99"
-set "SIZE_CONF_3=9.99"
-set "SIZE_CONF_4=9.99"
+set "SIZE_CONF_2=0.72"
+set "SIZE_CONF_3=0.78"
+set "SIZE_CONF_4=0.85"
 set "MAX_CONCURRENT_TRADES=3"
 set "EXTRA_TRADE_MIN_CONF=0.70"
 set "MAX_TRADES_PER_DAY=0"
@@ -81,6 +85,13 @@ set "MAX_RISK_PER_TRADE_USD=500"
 set "REENTRY_ENABLED=1"
 set "REENTRY_WINDOW_BARS=12"
 set "REENTRY_MAX=1"
+
+REM Daily dip, saved rule DOWN_RSI. One MNQ, separate from the 5-minute entries.
+REM Three lower daily closes and RSI(2) under 15: buy the next 6pm open.
+REM Sell when RSI(2) closes above 65, or on the 6th session close.
+REM Disaster stop 2500 points ($5,000). The $500 cap stays on the other trades.
+set "DIP_DOWN_RSI=1"
+set "DIP_DOWN_RSI_STOP_PTS=2500"
 
 REM Live mode (do not inherit paper)
 set "TRADING_MODE=live"
@@ -91,6 +102,9 @@ title bott-trader MNQ LIVE REVAMP (Lucid)
 echo REVAMP_EXITS=%REVAMP_EXITS%
 echo REVAMP_TRAIL_ATR_MULT=%REVAMP_TRAIL_ATR_MULT%
 echo REVAMP_BREAKOUT_TARGET_R=%REVAMP_BREAKOUT_TARGET_R%
+echo RITHMIC_LUCID_SL_STOP_LIMIT=%RITHMIC_LUCID_SL_STOP_LIMIT%
+echo CONTRACTS base=%BASE_CONTRACTS% max=%MAX_CONTRACTS% revamp_max=%REVAMP_MAX_CONTRACTS% concurrent=%MAX_CONCURRENT_TRADES%
+echo Daily dip DIP_DOWN_RSI=%DIP_DOWN_RSI% stop=%DIP_DOWN_RSI_STOP_PTS% pts
 echo REVAMP_MR_TARGET=%REVAMP_MR_TARGET%
 echo OVERNIGHT_TRADING=%OVERNIGHT_TRADING% SESSION_MODE=%SESSION_MODE% SCALP_SESSIONS=%SCALP_SESSIONS%
 echo REVAMP_OVERNIGHT_SLEEVES=%REVAMP_OVERNIGHT_SLEEVES% (overnight: trend + breakout + mean-reversion)

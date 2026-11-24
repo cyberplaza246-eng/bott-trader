@@ -1,0 +1,229 @@
+{
+  "results": [
+    {
+      "label": "All 6 windows | 15/5/1 | quiet 1m | 1R both | no VWAP",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "entry": "quiet",
+        "win": "w6_all",
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "side": "both",
+        "sep": false,
+        "cooldown": 0,
+        "max_day": 6,
+        "max_lots": 1,
+        "morning": false,
+        "vwap": "none",
+        "sep_short_min": null
+      },
+      "overall": {
+        "trades": 446,
+        "win_rate": 49.1,
+        "profit_factor": 0.92,
+        "expectancy": -1.73,
+        "total_pnl": -771.61,
+        "max_drawdown": 1467.56,
+        "avg_winner": 43.16,
+        "avg_loser": -45.04,
+        "max_consec_losses": 9
+      },
+      "is": {
+        "trades": 239,
+        "win_rate": 48.1,
+        "profit_factor": 0.88,
+        "expectancy": -2.68,
+        "total_pnl": -640.59,
+        "max_drawdown": 1467.56,
+        "avg_winner": 41.08,
+        "avg_loser": -43.27,
+        "max_consec_losses": 9
+      },
+      "oos": {
+        "trades": 207,
+        "win_rate": 50.2,
+        "profit_factor": 0.97,
+        "expectancy": -0.63,
+        "total_pnl": -131.02,
+        "max_drawdown": 552.05,
+        "avg_winner": 45.46,
+        "avg_loser": -47.17,
+        "max_consec_losses": 5
+      },
+      "long": {
+        "trades": 262,
+        "win_rate": 50.4,
+        "profit_factor": 0.99,
+        "expectancy": -0.18,
+        "total_pnl": -48.09,
+        "max_drawdown": 700.37,
+        "avg_winner": 42.91,
+        "avg_loser": -43.94,
+        "max_consec_losses": 7
+      },
+      "short": {
+        "trades": 184,
+        "win_rate": 47.3,
+        "profit_factor": 0.84,
+        "expectancy": -3.93,
+        "total_pnl": -723.52,
+        "max_drawdown": 1157.82,
+        "avg_winner": 43.54,
+        "avg_loser": -46.51,
+        "max_consec_losses": 9
+      },
+      "pass": false
+    },
+    {
+      "label": "All 6 windows | 15/5/1 | quiet 1m | 1R | VWAP with side",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "entry": "quiet",
+        "win": "w6_all",
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "side": "both",
+        "sep": false,
+        "cooldown": 0,
+        "max_day": 6,
+        "max_lots": 1,
+        "morning": false,
+        "vwap": "with_side",
+        "sep_short_min": null
+      },
+      "overall": {
+        "trades": 435,
+        "win_rate": 48.0,
+        "profit_factor": 0.89,
+        "expectancy": -2.66,
+        "total_pnl": -1158.63,
+        "max_drawdown": 1517.6,
+        "avg_winner": 42.98,
+        "avg_loser": -44.87,
+        "max_consec_losses": 8
+      },
+      "is": {
+        "trades": 232,
+        "win_rate": 46.1,
+        "profit_factor": 0.81,
+        "expectancy": -4.29,
+        "total_pnl": -995.07,
+        "max_drawdown": 1517.6,
+        "avg_winner": 40.93,
+        "avg_loser": -42.99,
+        "max_consec_losses": 8
+      },
+      "oos": {
+        "trades": 203,
+        "win_rate": 50.2,
+        "profit_factor": 0.97,
+        "expectancy": -0.81,
+        "total_pnl": -163.56,
+        "max_drawdown": 600.81,
+        "avg_winner": 45.12,
+        "avg_loser": -47.19,
+        "max_consec_losses": 5
+      },
+      "long": {
+        "trades": 257,
+        "win_rate": 48.6,
+        "profit_factor": 0.92,
+        "expectancy": -1.73,
+        "total_pnl": -444.72,
+        "max_drawdown": 758.28,
+        "avg_winner": 42.72,
+        "avg_loser": -43.82,
+        "max_consec_losses": 7
+      },
+      "short": {
+        "trades": 178,
+        "win_rate": 47.2,
+        "profit_factor": 0.84,
+        "expectancy": -4.01,
+        "total_pnl": -713.92,
+        "max_drawdown": 1173.26,
+        "avg_winner": 43.36,
+        "avg_loser": -46.34,
+        "max_consec_losses": 8
+      },
+      "pass": false
+    },
+    {
+      "label": "Morning windows only (9:35+11:00) | both directions",
+      "config": {
+        "stack": "15_5_1",
+        "loop": "window_loop",
+        "entry": "quiet",
+        "win": "w2_open",
+        "stop": "atr1_1.5_6_25",
+        "tp": "1R",
+        "side": "both",
+        "sep": false,
+        "cooldown": 0,
+        "max_day": 4,
+        "max_lots": 1,
+        "morning": false,
+        "vwap": "none",
+        "sep_short_min": null
+      },
+      "overall": {
+        "trades": 179,
+        "win_rate": 50.3,
+        "profit_factor": 0.97,
+        "expectancy": -0.63,
+        "total_pnl": -112.87,
+        "max_drawdown": 928.81,
+        "avg_winner": 46.07,
+        "avg_loser": -47.85,
+        "max_consec_losses": 12
+      },
+      "is": {
+        "trades": 97,
+        "win_rate": 48.5,
+        "profit_factor": 0.91,
+        "expectancy": -2.19,
+        "total_pnl": -212.39,
+        "max_drawdown": 928.81,
+        "avg_winner": 44.98,
+        "avg_loser": -46.53,
+        "max_consec_losses": 12
+      },
+      "oos": {
+        "trades": 82,
+        "win_rate": 52.4,
+        "profit_factor": 1.05,
+        "expectancy": 1.21,
+        "total_pnl": 99.52,
+        "max_drawdown": 312.88,
+        "avg_winner": 47.25,
+        "avg_loser": -49.55,
+        "max_consec_losses": 4
+      },
+      "long": {
+        "trades": 117,
+        "win_rate": 53.8,
+        "profit_factor": 1.14,
+        "expectancy": 2.91,
+        "total_pnl": 340.92,
+        "max_drawdown": 565.56,
+        "avg_winner": 45.18,
+        "avg_loser": -46.4,
+        "max_consec_losses": 6
+      },
+      "short": {
+        "trades": 62,
+        "win_rate": 43.5,
+        "profit_factor": 0.74,
+        "expectancy": -7.32,
+        "total_pnl": -453.79,
+        "max_drawdown": 579.64,
+        "avg_winner": 48.13,
+        "avg_loser": -50.09,
+        "max_consec_losses": 7
+      },
+      "pass": false
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+
+C:\Users\shawa\Projects\bott-trader>cd /d "C:\Users\shawa\Projects\bott-trader" 
+
+C:\Users\shawa\Projects\bott-trader>call venv\Scripts\activate.bat 
+  Contract sizing: MNQ: $2/pt ($0.50/tick), qty=1, max $250/trade (~125.0 pt SL), daily $300
+
+>>> DAY HYBRID RTH + LUCID SIM (stacked long pullback + short RTH quiet — not overnight bot) <<<
+
+DAY HYBRID (separate from overnight bot)
+Stacked books - long selective + short aggressive
+RTH Mon-Fri: LONG pullback w4 windows | SHORT quiet continuous | flatten 15:50
+Globex (Sun 6 PM+): LONG pullback + SHORT quiet continuous scan (DAY_HYBRID_GLOBEX=true)
+RSI gate ON (1m): short>=40 long<=65 (DAY_HYBRID_RSI_GATE=true)
+Stop: 1m ATR x1.5 clip 6-25 | TP 1R
+Do not run with start_mnq_overnight_paper.bat at the same time (one Lucid login)
+Desk: http://127.0.0.1:5055
+Leave this window open. Ctrl+C to stop.
+
+MNQ 1m Databento unpaid (402) — skipping refresh 6h; using CSV seed + Rithmic history. Pay invoice at databento.com/portal/billing
+2026-09-24 13:15:41 - TradingBot - INFO - Rithmic Lucid plants: ticker + order + pnl + history (1m bars for day hybrid / paper seed)
+2026-09-24 13:15:43 - TradingBot - INFO - Rithmic accounts (1): ['LFE050-IBWS3708-TEST012 (LT-Z8WS597N)']
+2026-09-24 13:15:43 - TradingBot - INFO - Rithmic trade routes (5): ['CDE: simulator default=True status=UP', 'NYMEX: simulator default=True status=UP', 'CBOT: simulator default=True status=UP', 'COMEX: simulator default=True status=UP', 'CME: simulator default=True status=UP']
+2026-09-24 13:15:43 - TradingBot - INFO - Rithmic execution: account_id=LFE050-IBWS3708-TEST012 trade_route(CME)=simulator live_mode=False
+2026-09-24 13:15:43 - TradingBot - INFO - Rithmic connector initialized — system=LucidTrading, gateway=wss://rprotocol.rithmic.com:443
+🔗 Lucid sim connected (TEST + history 1m). Close R|Trader if logged in elsewhere.
+📊 Rithmic 1m merged (+600 bars) → 664864 total, last 2026-09-24 09:15 ET

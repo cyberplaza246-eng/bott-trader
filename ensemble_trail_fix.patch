@@ -1,0 +1,181 @@
+# Ensemble trailing stop fix (Lucid STOP-LIMIT / protective SL)
+# Apply from C:\Users\shawa\Projects\bott-trader on Paragan:
+#   git apply --whitespace=nowarn --binary ensemble_trail_fix.patch
+# Or: patch -p1 --binary < ensemble_trail_fix.patch
+#
+# Files changed:
+#   start_live_rithmic.py
+#   src/broker/rithmic_connector.py
+# Also add (new): tests/test_ensemble_trailing_stop.py
+#
+--- a/start_live_rithmic.py
++++ b/start_live_rithmic.py
+@@ -276,11 +276,31 @@
+             return new_sl > old_sl + 1e-9
+         return new_sl < old_sl - 1e-9
+ 
++    @staticmethod
++    def _broker_can_update_stop(info: Optional[Dict[str, Any]]) -> bool:
++        """True when SL can be tightened: native bracket modify OR protective cancel/replace.
++
++        Lucid sim often rests protective SL as STOP-LIMIT (not native template-330).
++        That path sets supports_stop_modify=False but still updates via update_stop_loss.
++        """
++        if not info:
++            return False
++        if info.get('can_update_stop'):
++            return True
++        if info.get('supports_stop_modify'):
++            return True
++        if info.get('native_stop_attached'):
++            return True
++        if info.get('protective_sl_order_id'):
++            return True
++        if str(info.get('bracket_mode') or '') == 'protective_fallback':
++            return True
++        return False
++
+     def _apply_stop_update(self, pos: Position, new_sl: float) -> bool:
+         """Tighten SL locally and on broker via update_stop_loss / modify_position."""
+         if not self._is_tighter_sl(pos, new_sl, pos.sl):
+             return False
+-        old_sl = pos.sl
+         if self.paper_mode or self.paper_orders:
+             pos.sl = new_sl
+             return True
+@@ -303,10 +323,8 @@
+             ok = bool(self.broker.modify_position(ticket=pos.order_id, sl=new_sl, tp=pos.tp))
+         if ok:
+             pos.sl = new_sl
+-            if hasattr(self.broker, 'get_order_info'):
+-                info = self.broker.get_order_info(pos.order_id) or {}
+-                if info and not info.get('supports_stop_modify', True):
+-                    pos.trailing_enabled = False
++            # Do NOT clear trailing_enabled here: protective STOP/STOP-LIMIT legs
++            # report supports_stop_modify=False but remain trailable via cancel/replace.
+             return True
+         return False
+ 
+@@ -419,27 +437,27 @@
+                     continue
+ 
+             old_sl = pos.sl
+-            if self.paper_mode:
++            if self.paper_mode or self.paper_orders:
+                 pos.sl = candidate_sl
+                 print(f"   🔒 {symbol} trail: SL {old_sl:.2f} → {candidate_sl:.2f}")
+                 continue
+ 
+-            if self.broker and self.broker.modify_position(ticket=order_id, sl=candidate_sl, tp=pos.tp):
+-                pos.sl = candidate_sl
+-                print(f"   🔒 {symbol} trail: SL {old_sl:.2f} → {candidate_sl:.2f}")
++            # Prefer update_stop_loss (native modify OR protective STOP/STOP-LIMIT replace).
++            if self._apply_stop_update(pos, candidate_sl):
++                print(f"   🔒 {symbol} trail: SL {old_sl:.2f} → {pos.sl:.2f}")
+                 bot_logger.info(
+-                    f"Trailing stop updated {symbol} {order_id}: {old_sl:.2f} -> {candidate_sl:.2f}"
++                    f"Trailing stop updated {symbol} {order_id}: {old_sl:.2f} -> {pos.sl:.2f}"
+                 )
+                 continue
+ 
+             if self.broker and hasattr(self.broker, 'get_order_info'):
+-                order_info = self.broker.get_order_info(order_id)
+-                if order_info and not order_info.get('supports_stop_modify', True):
++                order_info = self.broker.get_order_info(order_id) or {}
++                if order_info and not self._broker_can_update_stop(order_info):
+                     pos.trailing_enabled = False
+                     bot_logger.error(
+-                        f"Trailing disabled for {symbol} {order_id}: native stop was not attached at entry"
++                        f"Trailing disabled for {symbol} {order_id}: no broker stop available to trail"
+                     )
+-                    print(f"   ⚠️ {symbol} trail disabled for {order_id}: no native stop from entry")
++                    print(f"   ⚠️ {symbol} trail disabled for {order_id}: no broker stop to update")
+         
+     def connect(self) -> bool:
+         """Initialize Rithmic connection (skipped in paper mode)."""
+@@ -1030,7 +1048,8 @@
+         if result:
+             order_id = result.get('ticket', str(int(time.time())))
+             want_trail = bool(signal.get('trailing_enabled', True))
+-            native_ok = bool(result.get('supports_stop_modify', True))
++            # Lucid protective STOP-LIMIT sets supports_stop_modify=False but is still trailable.
++            stop_updatable = self._broker_can_update_stop(result)
+             pos = Position(
+                 order_id=order_id,
+                 symbol=symbol,
+@@ -1040,7 +1059,7 @@
+                 sl=sl,
+                 tp=tp,
+                 entry_time=datetime.now(timezone.utc),
+-                trailing_enabled=want_trail and native_ok,
++                trailing_enabled=want_trail and stop_updatable,
+                 ensemble_signal=str(signal.get('ensemble_signal', '')).upper() or (
+                     'BUY' if direction == 'long' else 'SELL'
+                 ),
+@@ -1056,10 +1075,10 @@
+             print(f"   Active positions: {len(self.positions)}/{self.max_positions}")
+             if REVAMP_EXITS_ON:
+                 print(f"   REVAMP sleeve={pos.exit_sleeve or '?'} trail={'ON' if pos.trailing_enabled else 'OFF (fixed TP)'}")
+-            if want_trail and not native_ok:
+-                print(f"   WARNING: Native stop missing on entry - trailing disabled for {order_id}")
++            if want_trail and not stop_updatable:
++                print(f"   WARNING: Broker stop missing on entry - trailing disabled for {order_id}")
+                 bot_logger.error(
+-                    f"Order {order_id} for {symbol} filled without native stop support; trailing is disabled"
++                    f"Order {order_id} for {symbol} filled without broker stop support; trailing is disabled"
+                 )
+             trades_logger.info(f"ENTRY {direction} {symbol} @ {entry:.2f} SL={sl:.2f} TP={tp:.2f}")
+             return True
+@@ -1394,6 +1413,13 @@
+             side = str(raw.get('type', 'BUY')).upper()
+             direction = 'long' if side in ('BUY', 'LONG', '0') else 'short'
+             entry = float(raw.get('open_price') or raw.get('entry_price') or 0) or 0.0
++            # After restart, allow trail if a broker stop (native or protective STOP-LIMIT) exists.
++            adopt_info = {}
++            if self.broker and hasattr(self.broker, 'get_order_info'):
++                adopt_info = self.broker.get_order_info(ticket) or {}
++            trail_ok = self._broker_can_update_stop(adopt_info) or (
++                float(raw.get('sl') or 0) > 0 and bool(adopt_info.get('protective_sl_order_id'))
++            )
+             pos = Position(
+                 order_id=ticket,
+                 symbol=symbol,
+@@ -1403,7 +1429,7 @@
+                 sl=float(raw.get('sl') or 0) or 0.0,
+                 tp=float(raw.get('tp') or 0) or 0.0,
+                 entry_time=datetime.now(timezone.utc),
+-                trailing_enabled=False,
++                trailing_enabled=bool(trail_ok),
+                 ensemble_signal='BUY' if direction == 'long' else 'SELL',
+                 model_signals=None,
+                 regime='broker_adopt',
+--- a/src/broker/rithmic_connector.py
++++ b/src/broker/rithmic_connector.py
+@@ -1224,6 +1224,10 @@
+                     "native_stop_attached": native_stop_attached,
+                     "native_target_attached": native_target_attached,
+                     "supports_stop_modify": native_stop_attached and not result.get("protective_sl_order_id"),
++                    # Protective STOP/STOP-LIMIT can still be trailed via update_stop_loss cancel/replace.
++                    "can_update_stop": bool(
++                        native_stop_attached or result.get("protective_sl_order_id")
++                    ),
+                     "bracket_mode": result.get("bracket_mode", "unknown") if isinstance(result, dict) else "unknown",
+                     "time": datetime.now(timezone.utc).isoformat(),
+                 }
+@@ -1559,7 +1563,15 @@
+                     result.get("native_target_attached")
+                     or result.get("protective_tp_order_id")
+                 )
+-                order["supports_stop_modify"] = bool(result.get("native_stop_attached"))
++                order["supports_stop_modify"] = bool(result.get("native_stop_attached")) and not bool(
++                    result.get("protective_sl_order_id") or order.get("protective_sl_order_id")
++                )
++                order["can_update_stop"] = bool(
++                    order.get("native_stop_attached")
++                    or result.get("native_stop_attached")
++                    or result.get("protective_sl_order_id")
++                    or order.get("protective_sl_order_id")
++                )
+             if str(result.get("bracket_mode") or "") == "position_flat":
+                 bot_logger.warning(
+                     f"Rithmic protective ensure skipped for {order_id} {symbol}: "

@@ -1,0 +1,330 @@
+{
+  "name": "A_d15_60|w2_open|fix25|eod500|long|q0|sep1",
+  "config": {
+    "stack": "A_d15_60",
+    "win": "w2_open",
+    "stop": "fix25",
+    "tp": "eod500",
+    "side": "long",
+    "quiet": false,
+    "sep": true
+  },
+  "rules": {
+    "stack": "daily + completed 15m EMA8/21 + completed 60m EMA8/21",
+    "windows": [
+      "09:35",
+      "11:00"
+    ],
+    "side": "long_only",
+    "stop_pts": 25,
+    "tp": "cap_500_or_eod",
+    "quiet_1m": false,
+    "completed_bars_only": true
+  },
+  "overall": {
+    "trades": 574,
+    "win_rate": 19.0,
+    "profit_factor": 1.27,
+    "expectancy": 11.2,
+    "total_pnl": 6429.24,
+    "max_drawdown": 3193.08,
+    "avg_winner": 276.97,
+    "avg_loser": -51.1,
+    "max_consec_losses": 22
+  },
+  "is": {
+    "trades": 509,
+    "win_rate": 19.1,
+    "profit_factor": 1.2,
+    "expectancy": 8.08,
+    "total_pnl": 4112.84,
+    "max_drawdown": 3193.08,
+    "avg_winner": 259.36,
+    "avg_loser": -51.08,
+    "max_consec_losses": 22
+  },
+  "oos": {
+    "trades": 65,
+    "win_rate": 18.5,
+    "profit_factor": 1.85,
+    "expectancy": 35.64,
+    "total_pnl": 2316.4,
+    "max_drawdown": 1017.04,
+    "avg_winner": 419.34,
+    "avg_loser": -51.24,
+    "max_consec_losses": 18
+  },
+  "by_month": {
+    "2024-09": {
+      "trades": 7,
+      "win_rate": 14.3,
+      "profit_factor": 0.19,
+      "expectancy": -35.45,
+      "total_pnl": -248.18,
+      "max_drawdown": 248.18,
+      "avg_winner": 59.26,
+      "avg_loser": -51.24,
+      "max_consec_losses": 3
+    },
+    "2024-10": {
+      "trades": 13,
+      "win_rate": 38.5,
+      "profit_factor": 7.97,
+      "expectancy": 219.68,
+      "total_pnl": 2855.88,
+      "max_drawdown": 404.16,
+      "avg_winner": 653.16,
+      "avg_loser": -51.24,
+      "max_consec_losses": 6
+    },
+    "2024-11": {
+      "trades": 29,
+      "win_rate": 20.7,
+      "profit_factor": 1.24,
+      "expectancy": 9.28,
+      "total_pnl": 269.04,
+      "max_drawdown": 743.8,
+      "avg_winner": 233.51,
+      "avg_loser": -49.22,
+      "max_consec_losses": 10
+    },
+    "2024-12": {
+      "trades": 17,
+      "win_rate": 58.8,
+      "profit_factor": 6.61,
+      "expectancy": 118.47,
+      "total_pnl": 2013.92,
+      "max_drawdown": 256.2,
+      "avg_winner": 237.26,
+      "avg_loser": -51.24,
+      "max_consec_losses": 5
+    },
+    "2025-01": {
+      "trades": 16,
+      "win_rate": 12.5,
+      "profit_factor": 0.14,
+      "expectancy": -38.49,
+      "total_pnl": -615.84,
+      "max_drawdown": 615.84,
+      "avg_winner": 50.76,
+      "avg_loser": -51.24,
+      "max_consec_losses": 9
+    },
+    "2025-02": {
+      "trades": 21,
+      "win_rate": 14.3,
+      "profit_factor": 1.01,
+      "expectancy": 0.59,
+      "total_pnl": 12.46,
+      "max_drawdown": 461.16,
+      "avg_winner": 311.59,
+      "avg_loser": -51.24,
+      "max_consec_losses": 9
+    },
+    "2025-03": {
+      "trades": 3,
+      "win_rate": 33.3,
+      "profit_factor": 1.97,
+      "expectancy": 33.26,
+      "total_pnl": 99.78,
+      "max_drawdown": 102.48,
+      "avg_winner": 202.26,
+      "avg_loser": -51.24,
+      "max_consec_losses": 2
+    },
+    "2025-04": {
+      "trades": 10,
+      "win_rate": 10.0,
+      "profit_factor": 0.85,
+      "expectancy": -6.84,
+      "total_pnl": -68.4,
+      "max_drawdown": 461.16,
+      "avg_winner": 392.76,
+      "avg_loser": -51.24,
+      "max_consec_losses": 9
+    },
+    "2025-05": {
+      "trades": 26,
+      "win_rate": 19.2,
+      "profit_factor": 1.15,
+      "expectancy": 6.28,
+      "total_pnl": 163.26,
+      "max_drawdown": 307.44,
+      "avg_winner": 247.86,
+      "avg_loser": -51.24,
+      "max_consec_losses": 6
+    },
+    "2025-06": {
+      "trades": 47,
+      "win_rate": 12.8,
+      "profit_factor": 0.54,
+      "expectancy": -20.39,
+      "total_pnl": -958.28,
+      "max_drawdown": 1459.32,
+      "avg_winner": 190.43,
+      "avg_loser": -51.24,
+      "max_consec_losses": 13
+    },
+    "2025-07": {
+      "trades": 27,
+      "win_rate": 22.2,
+      "profit_factor": 0.89,
+      "expectancy": -4.41,
+      "total_pnl": -118.98,
+      "max_drawdown": 379.1,
+      "avg_winner": 156.26,
+      "avg_loser": -50.31,
+      "max_consec_losses": 6
+    },
+    "2025-08": {
+      "trades": 27,
+      "win_rate": 14.8,
+      "profit_factor": 0.89,
+      "expectancy": -4.8,
+      "total_pnl": -129.48,
+      "max_drawdown": 734.5,
+      "avg_winner": 262.26,
+      "avg_loser": -51.24,
+      "max_consec_losses": 12
+    },
+    "2025-09": {
+      "trades": 37,
+      "win_rate": 16.2,
+      "profit_factor": 0.86,
+      "expectancy": -6.16,
+      "total_pnl": -227.88,
+      "max_drawdown": 674.32,
+      "avg_winner": 226.76,
+      "avg_loser": -51.24,
+      "max_consec_losses": 12
+    },
+    "2025-10": {
+      "trades": 42,
+      "win_rate": 19.0,
+      "profit_factor": 0.9,
+      "expectancy": -4.22,
+      "total_pnl": -177.08,
+      "max_drawdown": 705.02,
+      "avg_winner": 195.63,
+      "avg_loser": -51.24,
+      "max_consec_losses": 10
+    },
+    "2025-11": {
+      "trades": 19,
+      "win_rate": 21.1,
+      "profit_factor": 1.25,
+      "expectancy": 10.08,
+      "total_pnl": 191.44,
+      "max_drawdown": 404.08,
+      "avg_winner": 240.01,
+      "avg_loser": -51.24,
+      "max_consec_losses": 7
+    },
+    "2025-12": {
+      "trades": 35,
+      "win_rate": 11.4,
+      "profit_factor": 0.3,
+      "expectancy": -31.57,
+      "total_pnl": -1104.9,
+      "max_drawdown": 1144.74,
+      "avg_winner": 120.88,
+      "avg_loser": -51.24,
+      "max_consec_losses": 22
+    },
+    "2026-01": {
+      "trades": 28,
+      "win_rate": 25.0,
+      "profit_factor": 1.27,
+      "expectancy": 10.51,
+      "total_pnl": 294.28,
+      "max_drawdown": 666.12,
+      "avg_winner": 195.76,
+      "avg_loser": -51.24,
+      "max_consec_losses": 13
+    },
+    "2026-02": {
+      "trades": 2,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "expectancy": -51.24,
+      "total_pnl": -102.48,
+      "max_drawdown": 102.48,
+      "avg_winner": 0.0,
+      "avg_loser": -51.24,
+      "max_consec_losses": 2
+    },
+    "2026-04": {
+      "trades": 44,
+      "win_rate": 20.5,
+      "profit_factor": 2.14,
+      "expectancy": 46.29,
+      "total_pnl": 2036.94,
+      "max_drawdown": 512.4,
+      "avg_winner": 425.59,
+      "avg_loser": -51.24,
+      "max_consec_losses": 10
+    },
+    "2026-05": {
+      "trades": 59,
+      "win_rate": 15.3,
+      "profit_factor": 0.97,
+      "expectancy": -1.23,
+      "total_pnl": -72.66,
+      "max_drawdown": 1258.48,
+      "avg_winner": 276.59,
+      "avg_loser": -51.24,
+      "max_consec_losses": 22
+    },
+    "2026-06": {
+      "trades": 21,
+      "win_rate": 23.8,
+      "profit_factor": 2.37,
+      "expectancy": 53.36,
+      "total_pnl": 1120.46,
+      "max_drawdown": 256.2,
+      "avg_winner": 388.06,
+      "avg_loser": -51.24,
+      "max_consec_losses": 5
+    },
+    "2026-07": {
+      "trades": 9,
+      "win_rate": 22.2,
+      "profit_factor": 2.43,
+      "expectancy": 57.09,
+      "total_pnl": 513.84,
+      "max_drawdown": 256.2,
+      "avg_winner": 436.26,
+      "avg_loser": -51.24,
+      "max_consec_losses": 5
+    },
+    "2026-08": {
+      "trades": 32,
+      "win_rate": 12.5,
+      "profit_factor": 1.49,
+      "expectancy": 22.13,
+      "total_pnl": 708.32,
+      "max_drawdown": 1017.04,
+      "avg_winner": 535.76,
+      "avg_loser": -51.24,
+      "max_consec_losses": 18
+    },
+    "2026-09": {
+      "trades": 3,
+      "win_rate": 33.3,
+      "profit_factor": 0.74,
+      "expectancy": -8.74,
+      "total_pnl": -26.22,
+      "max_drawdown": 51.24,
+      "avg_winner": 76.26,
+      "avg_loser": -51.24,
+      "max_consec_losses": 1
+    }
+  },
+  "pass": true,
+  "gates": "OOS n>=30 PF>=1.15 $>0 | IS PF>=1.05 $>0",
+  "csv": "data\\MNQ_1m.csv",
+  "range": [
+    "2024-09-22 22:00:00+00:00",
+    "2026-09-21 03:58:00+00:00"
+  ]
+}

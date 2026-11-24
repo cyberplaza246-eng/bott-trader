@@ -24,10 +24,17 @@ def test_upgrades_leftover_hybrid():
     assert env["SCALP_MODE"] == "ema15_eod"
     assert env["STRATEGY_MODE"] == "ema15_eod"
     assert env["USE_30S_BARS"] == "false"
-    assert env["MAX_TRADES_PER_DAY"] == "6"
+    assert env["MAX_TRADES_PER_DAY"] == "20"
     assert env["SCALP_BREAKEVEN_ENABLED"] == "false"
     assert env["SCALP_TRAIL_AFTER_BE"] == "false"
-    assert env["EMA15_REQUIRE_60M"] == "true"
+    assert env["EMA15_REQUIRE_60M"] == "false"
+    assert env["EMA15_REQUIRE_DAILY"] == "false"
+    assert env["EMA15_REQUIRE_5M"] == "true"
+    assert env["EMA15_SL_TF"] == "1m"
+    assert env["EMA15_SL_ATR_MULT"] == "1.5"
+    assert env["EMA15_SL_MIN"] == "6"
+    assert env["EMA15_SL_MAX"] == "25"
+    assert env["EMA15_LEVEL_MODE"] == "0"
     assert "SCALP_MODE" in applied
 
 

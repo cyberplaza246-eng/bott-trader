@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "min_hold_sec": 10.0,
+  "tp_usd": 20.0,
+  "early_tp_blocked": true,
+  "tp_after_min_hold": true,
+  "sl_before_min_hold": true
+}

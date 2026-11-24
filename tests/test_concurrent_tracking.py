@@ -1,0 +1,166 @@
+﻿"""Dry checks for concurrent open-trade tracking (no live orders)."""
+from __future__ import annotations
+
+from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock
+
+import start_live_rithmic as slr
+
+
+class FakeBroker:
+    def __init__(self):
+        self._orders: Dict[str, Dict[str, Any]] = {}
+        self._positions: Dict[str, Dict[str, Any]] = {}
+        self._order_lock = __import__("threading").RLock()
+        self._state_lock = __import__("threading").RLock()
+        self._grace = set()
+
+    def get_open_positions(self, symbol: Optional[str] = None) -> List[Dict[str, Any]]:
+        out = []
+        for oid, info in self._orders.items():
+            sym = info.get("symbol")
+            if symbol and sym != symbol:
+                continue
+            in_open = abs(int(self._positions.get(sym, {}).get("size", 0) or 0)) > 0
+            in_grace = oid in self._grace
+            if not in_open and not in_grace:
+                continue
+            out.append({
+                "ticket": oid,
+                "symbol": sym,
+                "pair": sym,
+                "type": info.get("type", "BUY"),
+                "size": info.get("size", 1),
+                "open_price": info.get("entry_price", 0),
+                "sl": info.get("stop_loss", 0),
+                "tp": info.get("take_profit", 0),
+                "broker_net_known": in_open,
+                "in_entry_grace": in_grace,
+            })
+        return out
+
+    def entry_protection_grace_active(self, order_id: str) -> bool:
+        return order_id in self._grace
+
+    def get_order_info(self, ticket):
+        return self._orders.get(str(ticket))
+
+
+def _trader(max_positions: int = 2) -> slr.LiveRithmicTrader:
+    t = slr.LiveRithmicTrader(symbol="MNQ", symbols=["MNQ"], paper_mode=False, skip_confirm=True)
+    t.max_positions = max_positions
+    t.broker = FakeBroker()
+    t.paper_orders = False
+    return t
+
+
+def test_keeps_fill_when_list_positions_flat_during_grace():
+    t = _trader()
+    oid = "bot_testfill1"
+    t.positions[oid] = slr.Position(
+        order_id=oid,
+        symbol="MNQ",
+        direction="long",
+        entry_price=100.0,
+        size=1,
+        sl=99.0,
+        tp=101.0,
+        entry_time=datetime.now(timezone.utc),
+    )
+    t.broker._orders[oid] = {"symbol": "MNQ", "type": "BUY", "size": 1, "entry_price": 100.0}
+    t.broker._grace.add(oid)
+    # Broker PnL plant still flat (the bug case)
+    t.broker._positions = {}
+    t.sync_broker_position()
+    assert oid in t.positions, "must keep local fill during grace when list_positions flat"
+    assert t._effective_open_count() >= 1
+
+
+def test_blocks_third_entry_when_two_open():
+    t = _trader(max_positions=2)
+    for i in range(2):
+        oid = f"bot_{i}"
+        t.positions[oid] = slr.Position(
+            order_id=oid,
+            symbol="MNQ",
+            direction="long",
+            entry_price=100.0 + i,
+            size=1,
+            sl=99.0,
+            tp=101.0,
+            entry_time=datetime.now(timezone.utc),
+        )
+        t.broker._orders[oid] = {"symbol": "MNQ", "type": "BUY", "size": 1, "entry_price": 100.0}
+        t.broker._grace.add(oid)
+    assert t._effective_open_count() >= 2
+    assert t.check_entry_signal("MNQ", MagicMock()) is None
+
+
+def test_adopts_untracked_broker_ticket():
+    t = _trader()
+    t.broker._orders["bot_orphan"] = {
+        "symbol": "MNQ", "type": "BUY", "size": 1, "entry_price": 200.0,
+        "stop_loss": 190.0, "take_profit": 210.0,
+    }
+    t.broker._positions["MNQ"] = {"size": 1, "avg_price": 200.0}
+    t.sync_broker_position()
+    assert "bot_orphan" in t.positions
+    assert t.positions["bot_orphan"].entry_price == 200.0
+
+
+def test_does_not_wipe_while_connector_still_has_order_past_age():
+    t = _trader()
+    oid = "bot_oldfill"
+    t.positions[oid] = slr.Position(
+        order_id=oid,
+        symbol="MNQ",
+        direction="long",
+        entry_price=100.0,
+        size=1,
+        sl=99.0,
+        tp=101.0,
+        entry_time=datetime.now(timezone.utc) - timedelta(seconds=120),
+    )
+    t.broker._orders[oid] = {"symbol": "MNQ", "type": "BUY", "size": 1, "entry_price": 100.0}
+    # Past grace, list_positions still empty, but connector keeps order
+    t.broker._positions = {}
+    t.sync_broker_position()
+    assert oid in t.positions
+
+
+if __name__ == "__main__":
+    test_keeps_fill_when_list_positions_flat_during_grace()
+    print("PASS keep during grace")
+    test_blocks_third_entry_when_two_open()
+    print("PASS block 3rd")
+    test_adopts_untracked_broker_ticket()
+    print("PASS adopt")
+    test_does_not_wipe_while_connector_still_has_order_past_age()
+    print("PASS keep while connector tracks")
+    print("ALL DRY CHECKS PASSED")
+
+
+def test_multi_contract_trade_counts_as_one_slot():
+    """4-lot trade: broker net=4 contracts must count as 1 open trade, not 4."""
+    t = _trader(max_positions=3)
+    oid = "bot_big4"
+    t.positions[oid] = slr.Position(
+        order_id=oid, symbol="MNQ", direction="long", entry_price=100.0,
+        size=4, sl=99.0, tp=0.0, entry_time=datetime.now(timezone.utc),
+    )
+    t.broker._orders[oid] = {"symbol": "MNQ", "type": "BUY", "size": 4, "entry_price": 100.0}
+    t.broker._positions = {"MNQ": {"size": 4}}
+    assert t._effective_open_count() == 1
+    # Untracked extra contracts still count as extra slots (safety)
+    t.broker._positions = {"MNQ": {"size": 6}}
+    assert t._effective_open_count() == 3
+
+
+def test_no_daily_trade_cap_by_default(monkeypatch):
+    t = _trader()
+    t.max_trades_per_day = 0
+    t.daily_trades = 500
+    t.daily_pnl = 0.0
+    assert t.check_daily_limits() is True

@@ -1,0 +1,61 @@
+{
+  "generated_at": "2026-08-24T02:12:14.222311+00:00",
+  "generated_at_et": "2026-08-23T22:12:14.222311-04:00",
+  "session": "overnight_research",
+  "n_closes": 71,
+  "overall_pf": 0.628,
+  "overall_pnl_usd": -1322.32,
+  "min_trades_required": 20,
+  "advisory_only": true,
+  "auto_apply": false,
+  "writes_live_config": false,
+  "writes_mnq_profit_config": false,
+  "suggestions": [
+    {
+      "cluster": "cue_zone",
+      "cue": "break_onl",
+      "zone_name": "overnight_low",
+      "n": 32,
+      "pf": 0.478,
+      "pnl_usd": -1204.1,
+      "tweak": "break_onl at overnight_low: 32 paper trades, PF 0.48 \u2014 review by hand; do not change live windows/stops",
+      "user_applies": true,
+      "rank": 1
+    },
+    {
+      "cluster": "cue_zone",
+      "cue": "break_onh",
+      "zone_name": "overnight_high",
+      "n": 23,
+      "pf": 0.732,
+      "pnl_usd": -276.52,
+      "tweak": "break_onh at overnight_high: 23 paper trades, PF 0.73 \u2014 review by hand; do not change live windows/stops",
+      "user_applies": true,
+      "rank": 2
+    },
+    {
+      "cluster": "cue_zone",
+      "cue": "test_fill",
+      "zone_name": "test_fill",
+      "n": 3,
+      "pf": 2.906,
+      "pnl_usd": 247.78,
+      "tweak": "test_fill at test_fill: 3 paper trades, PF 2.91 \u2014 review by hand; do not change live windows/stops",
+      "user_applies": true,
+      "rank": 3
+    },
+    {
+      "cluster": "cue_zone",
+      "cue": "test_fill",
+      "zone_name": "unknown",
+      "n": 11,
+      "pf": 0.0,
+      "pnl_usd": -89.48,
+      "tweak": "test_fill at unknown: 11 paper trades, PF 0.00 \u2014 review by hand; do not change live windows/stops",
+      "user_applies": true,
+      "rank": 4
+    }
+  ],
+  "ready": true,
+  "note": "Advisory only \u2014 apply any tweak yourself. Bot will not write mnq_profit_config or change locked RTH ENTRY_WINDOWS / stops."
+}

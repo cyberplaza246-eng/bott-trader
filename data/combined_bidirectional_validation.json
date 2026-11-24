@@ -1,0 +1,594 @@
+{
+  "spec": {
+    "long_w2": {
+      "stack": "15_5_1",
+      "loop": "window_loop",
+      "entry": "quiet",
+      "win": "w2_open",
+      "stop": "atr1_1.5_6_25",
+      "tp": "1R",
+      "side": "long",
+      "sep": false,
+      "cooldown": 0,
+      "max_day": 4,
+      "max_lots": 1,
+      "morning": false,
+      "vwap": "none",
+      "sep_short_min": null
+    },
+    "long_w6": {
+      "stack": "15_5_1",
+      "loop": "window_loop",
+      "entry": "quiet",
+      "win": "w6_all",
+      "stop": "atr1_1.5_6_25",
+      "tp": "1R",
+      "side": "long",
+      "sep": false,
+      "cooldown": 0,
+      "max_day": 4,
+      "max_lots": 1,
+      "morning": false,
+      "vwap": "none",
+      "sep_short_min": null
+    },
+    "short": {
+      "stack": "15_5_1",
+      "loop": "window_loop",
+      "win": "w6_all",
+      "stop": "atr1_1.5_6_25",
+      "side": "short",
+      "max_day": 4,
+      "max_lots": 1,
+      "sep_min": 0.45,
+      "entry": "1m_pullback",
+      "tp": "1R",
+      "vwap": "none",
+      "structure": "lh_ll",
+      "sep_mode": "none"
+    },
+    "combined_w6_long": "one_position long+short w6_all",
+    "combined_w2_long": "one_position long w2_open short w6_all"
+  },
+  "oos_start": "2026-06-01 00:00:00+00:00",
+  "fresh_start": "2026-08-01 00:00:00+00:00",
+  "short_standalone": {
+    "label": "SHORT standalone (locked recipe)",
+    "overall": {
+      "trades": 79,
+      "win_rate": 58.2,
+      "profit_factor": 1.37,
+      "net_pnl": 531.86,
+      "expectancy": 6.73,
+      "max_drawdown": 226.72,
+      "max_consec_losses": 5,
+      "total_pnl": 531.86
+    },
+    "is": {
+      "trades": 35,
+      "win_rate": 54.3,
+      "profit_factor": 1.14,
+      "net_pnl": 89.74,
+      "expectancy": 2.56,
+      "max_drawdown": 226.72,
+      "max_consec_losses": 5,
+      "total_pnl": 89.74
+    },
+    "oos": {
+      "trades": 44,
+      "win_rate": 61.4,
+      "profit_factor": 1.56,
+      "net_pnl": 442.12,
+      "expectancy": 10.05,
+      "max_drawdown": 160.93,
+      "max_consec_losses": 4,
+      "total_pnl": 442.12
+    },
+    "fresh": {
+      "trades": 9,
+      "win_rate": 44.4,
+      "profit_factor": 0.7,
+      "net_pnl": -58.45,
+      "expectancy": -6.49,
+      "max_drawdown": 140.41,
+      "max_consec_losses": 4,
+      "total_pnl": -58.45
+    },
+    "long": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl": 0.0,
+      "expectancy": 0.0,
+      "max_drawdown": 0.0,
+      "max_consec_losses": 0,
+      "total_pnl": 0.0
+    },
+    "short": {
+      "trades": 79,
+      "win_rate": 58.2,
+      "profit_factor": 1.37,
+      "net_pnl": 531.86,
+      "expectancy": 6.73,
+      "max_drawdown": 226.72,
+      "max_consec_losses": 5,
+      "total_pnl": 531.86
+    },
+    "oos_long": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl": 0.0,
+      "expectancy": 0.0,
+      "max_drawdown": 0.0,
+      "max_consec_losses": 0,
+      "total_pnl": 0.0
+    },
+    "oos_short": {
+      "trades": 44,
+      "win_rate": 61.4,
+      "profit_factor": 1.56,
+      "net_pnl": 442.12,
+      "expectancy": 10.05,
+      "max_drawdown": 160.93,
+      "max_consec_losses": 4,
+      "total_pnl": 442.12
+    },
+    "session_oos": {
+      "morning": {
+        "trades": 15,
+        "win_rate": 53.3,
+        "profit_factor": 1.09,
+        "net_pnl": 31.4,
+        "expectancy": 2.09,
+        "max_drawdown": 204.96,
+        "max_consec_losses": 4,
+        "total_pnl": 31.4
+      },
+      "midday": {
+        "trades": 23,
+        "win_rate": 65.2,
+        "profit_factor": 1.85,
+        "net_pnl": 313.87,
+        "expectancy": 13.65,
+        "max_drawdown": 139.31,
+        "max_consec_losses": 3,
+        "total_pnl": 313.87
+      },
+      "afternoon": {
+        "trades": 6,
+        "win_rate": 66.7,
+        "profit_factor": 2.61,
+        "net_pnl": 96.85,
+        "expectancy": 16.14,
+        "max_drawdown": 60.18,
+        "max_consec_losses": 2,
+        "total_pnl": 96.85
+      }
+    },
+    "monthly_all": {
+      "2025-12": -10.837142857144933,
+      "2026-01": -180.84214285714498,
+      "2026-02": 63.080000000000005,
+      "2026-04": 48.76,
+      "2026-05": 169.5821428571449,
+      "2026-06": 148.29285714285498,
+      "2026-07": 352.2714285714274,
+      "2026-08": -58.445714285710125
+    },
+    "monthly_oos": {
+      "2026-06": 148.29285714285498,
+      "2026-07": 352.2714285714274,
+      "2026-08": -58.445714285710125
+    },
+    "pass_oos": true,
+    "pass_fresh": false
+  },
+  "long_standalone_w6": {
+    "label": "LONG standalone (quiet 1m, w6_all windows)",
+    "overall": {
+      "trades": 200,
+      "win_rate": 52.0,
+      "profit_factor": 1.05,
+      "net_pnl": 217.66,
+      "expectancy": 1.09,
+      "max_drawdown": 625.56,
+      "max_consec_losses": 7,
+      "total_pnl": 217.66
+    },
+    "is": {
+      "trades": 114,
+      "win_rate": 52.6,
+      "profit_factor": 1.11,
+      "net_pnl": 262.3,
+      "expectancy": 2.3,
+      "max_drawdown": 625.56,
+      "max_consec_losses": 7,
+      "total_pnl": 262.3
+    },
+    "oos": {
+      "trades": 86,
+      "win_rate": 51.2,
+      "profit_factor": 0.98,
+      "net_pnl": -44.64,
+      "expectancy": -0.52,
+      "max_drawdown": 388.55,
+      "max_consec_losses": 4,
+      "total_pnl": -44.64
+    },
+    "fresh": {
+      "trades": 4,
+      "win_rate": 25.0,
+      "profit_factor": 0.22,
+      "net_pnl": -112.14,
+      "expectancy": -28.03,
+      "max_drawdown": 144.17,
+      "max_consec_losses": 3,
+      "total_pnl": -112.14
+    },
+    "long": {
+      "trades": 200,
+      "win_rate": 52.0,
+      "profit_factor": 1.05,
+      "net_pnl": 217.66,
+      "expectancy": 1.09,
+      "max_drawdown": 625.56,
+      "max_consec_losses": 7,
+      "total_pnl": 217.66
+    },
+    "short": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl": 0.0,
+      "expectancy": 0.0,
+      "max_drawdown": 0.0,
+      "max_consec_losses": 0,
+      "total_pnl": 0.0
+    },
+    "oos_long": {
+      "trades": 86,
+      "win_rate": 51.2,
+      "profit_factor": 0.98,
+      "net_pnl": -44.64,
+      "expectancy": -0.52,
+      "max_drawdown": 388.55,
+      "max_consec_losses": 4,
+      "total_pnl": -44.64
+    },
+    "oos_short": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl": 0.0,
+      "expectancy": 0.0,
+      "max_drawdown": 0.0,
+      "max_consec_losses": 0,
+      "total_pnl": 0.0
+    },
+    "session_oos": {
+      "morning": {
+        "trades": 57,
+        "win_rate": 52.6,
+        "profit_factor": 1.02,
+        "net_pnl": 32.68,
+        "expectancy": 0.57,
+        "max_drawdown": 289.08,
+        "max_consec_losses": 4,
+        "total_pnl": 32.68
+      },
+      "midday": {
+        "trades": 27,
+        "win_rate": 48.1,
+        "profit_factor": 0.88,
+        "net_pnl": -74.84,
+        "expectancy": -2.77,
+        "max_drawdown": 235.78,
+        "max_consec_losses": 2,
+        "total_pnl": -74.84
+      },
+      "afternoon": {
+        "trades": 2,
+        "win_rate": 50.0,
+        "profit_factor": 0.95,
+        "net_pnl": -2.48,
+        "expectancy": -1.24,
+        "max_drawdown": 51.24,
+        "max_consec_losses": 1,
+        "total_pnl": -2.48
+      }
+    },
+    "monthly_all": {
+      "2025-12": -37.531428571427526,
+      "2026-01": -118.45071428571015,
+      "2026-02": -268.4214285714276,
+      "2026-04": 0.8064285714275279,
+      "2026-05": 685.8978571428621,
+      "2026-06": -57.460714285710274,
+      "2026-07": 124.95928571428973,
+      "2026-08": -112.13857142857248
+    },
+    "monthly_oos": {
+      "2026-06": -57.460714285710274,
+      "2026-07": 124.95928571428973,
+      "2026-08": -112.13857142857248
+    },
+    "pass_oos": false,
+    "pass_fresh": false
+  },
+  "combined_w6_long": {
+    "label": "COMBINED (one pos, long w6_all + short w6_all)",
+    "overall": {
+      "trades": 279,
+      "win_rate": 53.8,
+      "profit_factor": 1.13,
+      "net_pnl": 749.52,
+      "expectancy": 2.69,
+      "max_drawdown": 701.34,
+      "max_consec_losses": 7,
+      "total_pnl": 749.52
+    },
+    "is": {
+      "trades": 149,
+      "win_rate": 53.0,
+      "profit_factor": 1.11,
+      "net_pnl": 352.04,
+      "expectancy": 2.36,
+      "max_drawdown": 701.34,
+      "max_consec_losses": 7,
+      "total_pnl": 352.04
+    },
+    "oos": {
+      "trades": 130,
+      "win_rate": 54.6,
+      "profit_factor": 1.14,
+      "net_pnl": 397.48,
+      "expectancy": 3.06,
+      "max_drawdown": 347.71,
+      "max_consec_losses": 5,
+      "total_pnl": 397.48
+    },
+    "fresh": {
+      "trades": 13,
+      "win_rate": 38.5,
+      "profit_factor": 0.49,
+      "net_pnl": -170.58,
+      "expectancy": -13.12,
+      "max_drawdown": 252.55,
+      "max_consec_losses": 4,
+      "total_pnl": -170.58
+    },
+    "long": {
+      "trades": 200,
+      "win_rate": 52.0,
+      "profit_factor": 1.05,
+      "net_pnl": 217.66,
+      "expectancy": 1.09,
+      "max_drawdown": 625.56,
+      "max_consec_losses": 7,
+      "total_pnl": 217.66
+    },
+    "short": {
+      "trades": 79,
+      "win_rate": 58.2,
+      "profit_factor": 1.37,
+      "net_pnl": 531.86,
+      "expectancy": 6.73,
+      "max_drawdown": 226.72,
+      "max_consec_losses": 5,
+      "total_pnl": 531.86
+    },
+    "oos_long": {
+      "trades": 86,
+      "win_rate": 51.2,
+      "profit_factor": 0.98,
+      "net_pnl": -44.64,
+      "expectancy": -0.52,
+      "max_drawdown": 388.55,
+      "max_consec_losses": 4,
+      "total_pnl": -44.64
+    },
+    "oos_short": {
+      "trades": 44,
+      "win_rate": 61.4,
+      "profit_factor": 1.56,
+      "net_pnl": 442.12,
+      "expectancy": 10.05,
+      "max_drawdown": 160.93,
+      "max_consec_losses": 4,
+      "total_pnl": 442.12
+    },
+    "session_oos": {
+      "morning": {
+        "trades": 72,
+        "win_rate": 52.8,
+        "profit_factor": 1.04,
+        "net_pnl": 64.08,
+        "expectancy": 0.89,
+        "max_drawdown": 332.89,
+        "max_consec_losses": 5,
+        "total_pnl": 64.08
+      },
+      "midday": {
+        "trades": 50,
+        "win_rate": 56.0,
+        "profit_factor": 1.24,
+        "net_pnl": 239.04,
+        "expectancy": 4.78,
+        "max_drawdown": 293.03,
+        "max_consec_losses": 5,
+        "total_pnl": 239.04
+      },
+      "afternoon": {
+        "trades": 8,
+        "win_rate": 62.5,
+        "profit_factor": 1.85,
+        "net_pnl": 94.37,
+        "expectancy": 11.8,
+        "max_drawdown": 60.18,
+        "max_consec_losses": 2,
+        "total_pnl": 94.37
+      }
+    },
+    "monthly_all": {
+      "2025-12": -48.36857142857246,
+      "2026-01": -299.29285714285527,
+      "2026-02": -205.34142857142768,
+      "2026-04": 49.56642857142754,
+      "2026-05": 855.4800000000068,
+      "2026-06": 90.83214285714482,
+      "2026-07": 477.230714285717,
+      "2026-08": -170.5842857142826
+    },
+    "monthly_oos": {
+      "2026-06": 90.83214285714482,
+      "2026-07": 477.230714285717,
+      "2026-08": -170.5842857142826
+    },
+    "pass_oos": false,
+    "pass_fresh": false
+  },
+  "combined_w2_long": {
+    "label": "COMBINED (one pos, long w2_open + short w6_all \u2014 locked recipes)",
+    "overall": {
+      "trades": 196,
+      "win_rate": 55.6,
+      "profit_factor": 1.22,
+      "net_pnl": 872.78,
+      "expectancy": 4.45,
+      "max_drawdown": 618.82,
+      "max_consec_losses": 6,
+      "total_pnl": 872.78
+    },
+    "is": {
+      "trades": 105,
+      "win_rate": 53.3,
+      "profit_factor": 1.11,
+      "net_pnl": 237.75,
+      "expectancy": 2.26,
+      "max_drawdown": 618.82,
+      "max_consec_losses": 5,
+      "total_pnl": 237.75
+    },
+    "oos": {
+      "trades": 91,
+      "win_rate": 58.2,
+      "profit_factor": 1.35,
+      "net_pnl": 635.03,
+      "expectancy": 6.98,
+      "max_drawdown": 245.23,
+      "max_consec_losses": 6,
+      "total_pnl": 635.03
+    },
+    "fresh": {
+      "trades": 11,
+      "win_rate": 36.4,
+      "profit_factor": 0.45,
+      "net_pnl": -160.93,
+      "expectancy": -14.63,
+      "max_drawdown": 242.89,
+      "max_consec_losses": 6,
+      "total_pnl": -160.93
+    },
+    "long": {
+      "trades": 117,
+      "win_rate": 53.8,
+      "profit_factor": 1.14,
+      "net_pnl": 340.92,
+      "expectancy": 2.91,
+      "max_drawdown": 565.56,
+      "max_consec_losses": 6,
+      "total_pnl": 340.92
+    },
+    "short": {
+      "trades": 79,
+      "win_rate": 58.2,
+      "profit_factor": 1.37,
+      "net_pnl": 531.86,
+      "expectancy": 6.73,
+      "max_drawdown": 226.72,
+      "max_consec_losses": 5,
+      "total_pnl": 531.86
+    },
+    "oos_long": {
+      "trades": 47,
+      "win_rate": 55.3,
+      "profit_factor": 1.19,
+      "net_pnl": 192.92,
+      "expectancy": 4.1,
+      "max_drawdown": 179.17,
+      "max_consec_losses": 3,
+      "total_pnl": 192.92
+    },
+    "oos_short": {
+      "trades": 44,
+      "win_rate": 61.4,
+      "profit_factor": 1.56,
+      "net_pnl": 442.12,
+      "expectancy": 10.05,
+      "max_drawdown": 160.93,
+      "max_consec_losses": 4,
+      "total_pnl": 442.12
+    },
+    "session_oos": {
+      "morning": {
+        "trades": 62,
+        "win_rate": 54.8,
+        "profit_factor": 1.16,
+        "net_pnl": 224.32,
+        "expectancy": 3.62,
+        "max_drawdown": 230.41,
+        "max_consec_losses": 4,
+        "total_pnl": 224.32
+      },
+      "midday": {
+        "trades": 23,
+        "win_rate": 65.2,
+        "profit_factor": 1.85,
+        "net_pnl": 313.87,
+        "expectancy": 13.65,
+        "max_drawdown": 139.31,
+        "max_consec_losses": 3,
+        "total_pnl": 313.87
+      },
+      "afternoon": {
+        "trades": 6,
+        "win_rate": 66.7,
+        "profit_factor": 2.61,
+        "net_pnl": 96.85,
+        "expectancy": 16.14,
+        "max_drawdown": 60.18,
+        "max_consec_losses": 2,
+        "total_pnl": 96.85
+      }
+    },
+    "monthly_all": {
+      "2025-12": -13.69214285714493,
+      "2026-01": -230.4442857142754,
+      "2026-02": -109.07785714286244,
+      "2026-04": 5.167142857144924,
+      "2026-05": 585.7935714285722,
+      "2026-06": 159.71928571428242,
+      "2026-07": 636.2414285714273,
+      "2026-08": -160.92571428571011
+    },
+    "monthly_oos": {
+      "2026-06": 159.71928571428242,
+      "2026-07": 636.2414285714273,
+      "2026-08": -160.92571428571011
+    },
+    "pass_oos": true,
+    "pass_fresh": false
+  },
+  "stacked_oos_diagnostic": {
+    "trades": 91,
+    "win_rate": 58.2,
+    "profit_factor": 1.35,
+    "net_pnl": 635.03,
+    "expectancy": 6.98,
+    "max_drawdown": 179.17,
+    "max_consec_losses": 4,
+    "total_pnl": 635.03
+  },
+  "verdict": "Short recipe PASSes standard OOS gates. Combined system PASSes OOS \u2014 candidate for implementation path."
+}

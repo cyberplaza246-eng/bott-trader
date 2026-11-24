@@ -1,0 +1,261 @@
+{
+  "test": "morning_dynamic_vs_locked",
+  "morning_window": "9:35\u201312:00 ET",
+  "csv": "data\\MNQ_1m.csv",
+  "dynamic_morning": {
+    "label": "A) Dynamic morning (strict 15m/5m/1m, long+short, 9:35\u201312:00 scan)",
+    "overall": {
+      "trades": 269,
+      "win_rate": 45.7,
+      "profit_factor": 1.05,
+      "net_pnl": 357.53,
+      "expectancy": 1.33,
+      "max_drawdown": 609.28,
+      "avg_winner": 58.21,
+      "avg_loser": -46.59,
+      "max_consec_losses": 9
+    },
+    "is": {
+      "trades": 158,
+      "win_rate": 48.1,
+      "profit_factor": 1.11,
+      "net_pnl": 404.28,
+      "expectancy": 2.56,
+      "max_drawdown": 609.28,
+      "avg_winner": 53.97,
+      "avg_loser": -45.09,
+      "max_consec_losses": 9
+    },
+    "oos": {
+      "trades": 111,
+      "win_rate": 42.3,
+      "profit_factor": 0.98,
+      "net_pnl": -46.75,
+      "expectancy": -0.42,
+      "max_drawdown": 468.26,
+      "avg_winner": 65.07,
+      "avg_loser": -48.52,
+      "max_consec_losses": 6
+    },
+    "long": {
+      "trades": 183,
+      "win_rate": 49.7,
+      "profit_factor": 0.98,
+      "net_pnl": -73.06,
+      "expectancy": -0.4,
+      "max_drawdown": 634.62,
+      "avg_winner": 44.46,
+      "avg_loser": -44.77,
+      "max_consec_losses": 7
+    },
+    "short": {
+      "trades": 86,
+      "win_rate": 37.2,
+      "profit_factor": 1.16,
+      "net_pnl": 430.59,
+      "expectancy": 5.01,
+      "max_drawdown": 483.96,
+      "avg_winner": 97.31,
+      "avg_loser": -49.69,
+      "max_consec_losses": 9
+    },
+    "morning": {
+      "trades": 269,
+      "win_rate": 45.7,
+      "profit_factor": 1.05,
+      "net_pnl": 357.53,
+      "expectancy": 1.33,
+      "max_drawdown": 609.28,
+      "avg_winner": 58.21,
+      "avg_loser": -46.59,
+      "max_consec_losses": 9
+    },
+    "afternoon": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl": 0.0,
+      "expectancy": 0.0,
+      "max_drawdown": 0.0,
+      "avg_winner": 0.0,
+      "avg_loser": 0.0,
+      "max_consec_losses": 0
+    },
+    "by_hour": {
+      "09": {
+        "trades": 40,
+        "win_rate": 50.0,
+        "profit_factor": 1.06,
+        "net_pnl": 58.08,
+        "expectancy": 1.45,
+        "max_drawdown": 355.96,
+        "avg_winner": 53.58,
+        "avg_loser": -50.67,
+        "max_consec_losses": 5
+      },
+      "10": {
+        "trades": 93,
+        "win_rate": 40.9,
+        "profit_factor": 0.91,
+        "net_pnl": -242.86,
+        "expectancy": -2.61,
+        "max_drawdown": 733.74,
+        "avg_winner": 64.84,
+        "avg_loser": -49.22,
+        "max_consec_losses": 6
+      },
+      "11": {
+        "trades": 136,
+        "win_rate": 47.8,
+        "profit_factor": 1.18,
+        "net_pnl": 542.31,
+        "expectancy": 3.99,
+        "max_drawdown": 334.91,
+        "avg_winner": 55.76,
+        "avg_loser": -43.41,
+        "max_consec_losses": 4
+      }
+    },
+    "r_multiples": {
+      "mean": 0.03,
+      "median": -1.0,
+      "buckets": {
+        "lt_0": 146,
+        "0_0.5": 0,
+        "0.5_1": 0,
+        "1_2": 91,
+        "ge_2": 32
+      }
+    },
+    "pass": false,
+    "sim_stats": {
+      "signals_stack": 3676,
+      "signals_pattern": 500,
+      "filtered_sep": 0,
+      "filtered_max_day": 0,
+      "entries": 269,
+      "reversals": 0,
+      "exits_sl": 146,
+      "exits_tp": 123,
+      "exits_eod": 0,
+      "exits_reversal": 0
+    }
+  },
+  "locked_morning_long": {
+    "label": "B) Locked morning long (15/5/1 EMA, quiet 1m, 9:35+11:00 windows)",
+    "overall": {
+      "trades": 117,
+      "win_rate": 53.8,
+      "profit_factor": 1.14,
+      "net_pnl": 340.92,
+      "expectancy": 2.91,
+      "max_drawdown": 565.56,
+      "avg_winner": 45.18,
+      "avg_loser": -46.4,
+      "max_consec_losses": 6
+    },
+    "is": {
+      "trades": 70,
+      "win_rate": 52.9,
+      "profit_factor": 1.1,
+      "net_pnl": 148.0,
+      "expectancy": 2.11,
+      "max_drawdown": 565.56,
+      "avg_winner": 44.42,
+      "avg_loser": -45.32,
+      "max_consec_losses": 6
+    },
+    "oos": {
+      "trades": 47,
+      "win_rate": 55.3,
+      "profit_factor": 1.19,
+      "net_pnl": 192.92,
+      "expectancy": 4.1,
+      "max_drawdown": 179.17,
+      "avg_winner": 46.27,
+      "avg_loser": -48.1,
+      "max_consec_losses": 3
+    },
+    "long": {
+      "trades": 117,
+      "win_rate": 53.8,
+      "profit_factor": 1.14,
+      "net_pnl": 340.92,
+      "expectancy": 2.91,
+      "max_drawdown": 565.56,
+      "avg_winner": 45.18,
+      "avg_loser": -46.4,
+      "max_consec_losses": 6
+    },
+    "short": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl": 0.0,
+      "expectancy": 0.0,
+      "max_drawdown": 0.0,
+      "avg_winner": 0.0,
+      "avg_loser": 0.0,
+      "max_consec_losses": 0
+    },
+    "morning": {
+      "trades": 117,
+      "win_rate": 53.8,
+      "profit_factor": 1.14,
+      "net_pnl": 340.92,
+      "expectancy": 2.91,
+      "max_drawdown": 565.56,
+      "avg_winner": 45.18,
+      "avg_loser": -46.4,
+      "max_consec_losses": 6
+    },
+    "afternoon": {
+      "trades": 0,
+      "win_rate": 0.0,
+      "profit_factor": 0.0,
+      "net_pnl": 0.0,
+      "expectancy": 0.0,
+      "max_drawdown": 0.0,
+      "avg_winner": 0.0,
+      "avg_loser": 0.0,
+      "max_consec_losses": 0
+    },
+    "by_hour": {
+      "09": {
+        "trades": 48,
+        "win_rate": 50.0,
+        "profit_factor": 0.95,
+        "net_pnl": -58.23,
+        "expectancy": -1.21,
+        "max_drawdown": 339.38,
+        "avg_winner": 48.05,
+        "avg_loser": -50.47,
+        "max_consec_losses": 4
+      },
+      "11": {
+        "trades": 69,
+        "win_rate": 56.5,
+        "profit_factor": 1.31,
+        "net_pnl": 399.15,
+        "expectancy": 5.78,
+        "max_drawdown": 468.43,
+        "avg_winner": 43.42,
+        "avg_loser": -43.14,
+        "max_consec_losses": 6
+      }
+    },
+    "r_multiples": {
+      "mean": 0.08,
+      "median": 1.0,
+      "buckets": {
+        "lt_0": 54,
+        "0_0.5": 0,
+        "0.5_1": 0,
+        "1_2": 63,
+        "ge_2": 0
+      }
+    },
+    "pass": true
+  },
+  "verdict": "Locked morning long recipe outperforms dynamic morning engine on OOS. The edge likely comes from the locked EMA stack + discrete windows + long-only filter, not from strict 15m structure logic."
+}
